@@ -162,118 +162,51 @@ abstract class StatementDao : BaseDao<StatementEntity> {
 
 
     @Query("""
-        SELECT COUNT(DISTINCT personUid) 
-          FROM Person 
-                LEFT JOIN StatementEntity 
-                ON Person.personUid = StatementEntity.statementPersonUid
-        WHERE Person.username IS NOT NULL 
-          AND Person.active
-          AND (StatementEntity.timestamp >= :startDateTime 
-                AND StatementEntity.timestamp <= :endDateTime)
-    """)
-    abstract fun getActiveUsersUsedContent(startDateTime: Long, endDateTime: Long): Int
-
-
-    @Query("""
-        SELECT COUNT(DISTINCT personUid) AS count, gender
-          FROM Person 
-                LEFT JOIN StatementEntity 
-                ON Person.personUid = StatementEntity.statementPersonUid
-        WHERE Person.username IS NOT NULL 
-          AND Person.active
-          AND (StatementEntity.timestamp >= :startDateTime 
-                AND StatementEntity.timestamp <= :endDateTime)
-        GROUP BY Person.gender
-    """)
-    abstract fun getActiveUsersUsedContentByGender(startDateTime: Long, endDateTime: Long): List<ActiveUsageByGender>
-
-
-    @Query("""
-        SELECT COUNT(DISTINCT personUid) AS count, personCountry AS country
-          FROM Person 
-                LEFT JOIN StatementEntity 
-                ON Person.personUid = StatementEntity.statementPersonUid
-        WHERE Person.username IS NOT NULL 
-          AND Person.active
-          AND (StatementEntity.timestamp >= :startDateTime 
-                AND StatementEntity.timestamp <= :endDateTime)
-        GROUP BY Person.personCountry
-    """)
-    abstract fun getActiveUsersUsedContentByCountry(startDateTime: Long, endDateTime: Long): List<ActiveUsageByCountry>
-
-
-  /*  @Query("""
-        SELECT COUNT(DISTINCT personUid) AS count, personConnectivityStatus AS status
+        SELECT ${UstadCentralReportRow.ACTIVE_USERS_INDICATOR} AS indicatorId,
+                :disaggregationKey AS disaggregationKey,
+                 (SELECT nodeClientId FROM SyncNode LIMIT 1) AS instanceId,
+                (CASE 
+                WHEN ${UstadCentralReportRow.TOTAL_KEY} THEN ${UstadCentralReportRow.TOTAL_KEY}
+                WHEN ${UstadCentralReportRow.GENDER_KEY} THEN Person.gender
+                WHEN ${UstadCentralReportRow.COUNTRY_KEY} THEN Person.personCountry
+                WHEN ${UstadCentralReportRow.CONNECTIVITY_KEY} THEN Connectivity
+                END AS disaggregationValue, 
+                COUNT(DISTINCT personUid) AS value, :timestamp AS timestamp 
           FROM Person
-                LEFT JOIN StatementEntity
+                LEFT JOIN StatementEntity 
                 ON Person.personUid = StatementEntity.statementPersonUid
-        WHERE Person.username IS NOT NULL
-          AND Person.active
-          AND (StatementEntity.timestamp >= :startDateTime
+         WHERE username IS NOT NULL 
+           AND active
+           AND (StatementEntity.timestamp >= :startDateTime 
                 AND StatementEntity.timestamp <= :endDateTime)
-        GROUP BY Person.personConnectivityStatus
+      GROUP BY disaggregationValue
     """)
-    abstract fun getActiveUsersUsedContentByConnectivity(startDateTime: Long, endDateTime: Long): List<ActiveUsageByConnectivity>*/
+    abstract fun getActiveUsers(disaggregationKey: Int, timestamp: Long,
+                                    startDateTime: Long, endDateTime: Long): List<UstadCentralReportRow>
+
 
     @Query("""
-        SELECT SUM(resultDuration) 
-          FROM StatementEntity 
-         WHERE (StatementEntity.timestamp >= :startDateTime 
-                AND StatementEntity.timestamp <= :endDateTime)
-    """)
-    abstract fun getDurationUsageOverPastDay(startDateTime: Long, endDateTime: Long): Long
-
-    @Query("""
-        SELECT SUM(resultDuration) AS duration, gender
-          FROM StatementEntity 
+        SELECT ${UstadCentralReportRow.ACTIVE_USER_DURATION_INDICATOR} AS indicatorId,
+                :disaggregationKey AS disaggregationKey,
+                 (SELECT nodeClientId FROM SyncNode LIMIT 1) AS instanceId,
+                (CASE 
+                WHEN ${UstadCentralReportRow.TOTAL_KEY} THEN ${UstadCentralReportRow.TOTAL_KEY}
+                WHEN ${UstadCentralReportRow.GENDER_KEY} THEN Person.gender
+                WHEN ${UstadCentralReportRow.COUNTRY_KEY} THEN Person.personCountry
+                WHEN ${UstadCentralReportRow.CONNECTIVITY_KEY} THEN Connectivity
+                END AS disaggregationValue, 
+                SUM(StatementEntity.resultDuration) AS value, :timestamp AS timestamp 
+         FROM StatementEntity 
                LEFT JOIN Person 
                ON Person.personUid = StatementEntity.statementPersonUid
-         WHERE (StatementEntity.timestamp >= :startDateTime 
+         WHERE Person.username IS NOT NULL 
+           AND Person.active
+           AND (StatementEntity.timestamp >= :startDateTime 
                 AND StatementEntity.timestamp <= :endDateTime)
-         GROUP BY Person.gender
+      GROUP BY disaggregationValue
     """)
-    abstract fun getDurationUsageOverPastDayByGender(startDateTime: Long, endDateTime: Long): List<DurationByGender>
-
-    @Query("""
-        SELECT SUM(resultDuration) AS duration, personCountry AS country
-          FROM StatementEntity 
-               LEFT JOIN Person 
-               ON Person.personUid = StatementEntity.statementPersonUid
-         WHERE (StatementEntity.timestamp >= :startDateTime 
-                AND StatementEntity.timestamp <= :endDateTime)
-         GROUP BY Person.personCountry
-    """)
-    abstract fun getDurationUsageOverPastDayByCountry(startDateTime: Long, endDateTime: Long): List<DurationByCountry>
-
-  /*  @Query("""
-        SELECT SUM(resultDuration) AS duration, personConnectivityStatus AS status
-          FROM StatementEntity
-               LEFT JOIN Person
-               ON Person.personUid = StatementEntity.statementPersonUid
-         WHERE (StatementEntity.timestamp >= :startDateTime
-                AND StatementEntity.timestamp <= :endDateTime)
-         GROUP BY Person.personConnectivityStatus
-    """)
-    abstract fun getDurationUsageOverPastDayByConnectivity(startDateTime: Long, endDateTime: Long): List<DurationByConnectivity>*/
-
-    @Serializable
-    data class DurationByGender(var duration: Long = 0L, var gender: Int = 0)
-
-    @Serializable
-    data class DurationByCountry(var duration: Long = 0L, var country: String = "")
-
-    @Serializable
-    data class DurationByConnectivity(var duration: Long = 0L,  var status: Int = 0)
-
-    @Serializable
-    data class ActiveUsageByGender(var count: Int = 0, var gender: Int = 0)
-
-    @Serializable
-    data class ActiveUsageByCountry(var count: Int = 0, var country: String = "")
-
-    @Serializable
-    data class ActiveUsageByConnectivity(var count: Int = 0, var status: Int = 0)
-
+    abstract fun getDurationUsage(disaggregationKey: Int, timestamp: Long,
+                                startDateTime: Long, endDateTime: Long): List<UstadCentralReportRow>
 
     @Serializable
     data class ReportData(var yAxis: Float = 0f, var xAxis: String? = "", var subgroup: String? = "")

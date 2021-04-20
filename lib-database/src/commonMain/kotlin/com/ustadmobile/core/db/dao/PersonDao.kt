@@ -270,51 +270,24 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT * FROM Person")
     abstract fun getAllPerson(): List<Person>
 
-    @Query("""
-        SELECT COUNT(personUid) 
-          FROM Person 
-        WHERE username IS NOT NULL 
-          AND active
-    """)
-    abstract fun getTotalActiveCountUsers(): Int
 
     @Query("""
-        SELECT COUNT(personUid) AS count, gender
-          FROM Person 
-         WHERE username IS NOT NULL 
-          AND active 
-        GROUP BY gender
-    """)
-    abstract fun getActiveCountUsersByGender(): List<ActiveUserGenderCount>
-
-    @Query("""
-        SELECT COUNT(personUid) AS count, personCountry AS country
-          FROM Person 
-         WHERE username IS NOT NULL 
-          AND active 
-        GROUP BY personCountry
-    """)
-    abstract fun getActiveCountUsersByCountry(): List<ActiveUserCountryCount>
-
-   /* @Query("""
-        SELECT COUNT(personUid) AS count, personConnectivityStatus AS status
+        SELECT ${UstadCentralReportRow.REGISTERED_USERS_INDICATOR} AS indicatorId,
+                :disaggregationKey AS disaggregationKey, 
+                (SELECT nodeClientId FROM SyncNode LIMIT 1) AS instanceId,
+                (CASE 
+                WHEN ${UstadCentralReportRow.TOTAL_KEY} THEN ${UstadCentralReportRow.TOTAL_KEY}
+                WHEN ${UstadCentralReportRow.GENDER_KEY} THEN Person.gender
+                WHEN ${UstadCentralReportRow.COUNTRY_KEY} THEN Person.personCountry
+                WHEN ${UstadCentralReportRow.CONNECTIVITY_KEY} THEN Connectivity
+                END AS disaggregationValue, 
+                COUNT(Person.personUid) AS value, :timestamp AS timestamp 
           FROM Person
-                 LEFT JOIN PersonConnectivity
-                  ON Person.personUid = PersonConnectivity.pcPersonUid
          WHERE username IS NOT NULL 
-          AND active
-        GROUP BY personConnectivityStatus
+           AND active
+           GROUP BY disaggregationValue
     """)
-    abstract fun getActiveCountUsersByConnectivity(): List<ActiveUserConnectivityCount>*/
-
-    @Serializable
-    data class ActiveUserGenderCount(var count: Int = 0, var gender: Int = 0)
-
-    @Serializable
-    data class ActiveUserCountryCount(var count: Int = 0, var country: String = "")
-
-    @Serializable
-    data class ActiveUserConnectivityCount(var count: Int = 0, var status: String = "")
+    abstract fun getRegisteredUsers(disaggregationKey: Int, timestamp: Long): List<UstadCentralReportRow>
 
     companion object {
 

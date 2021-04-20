@@ -9,7 +9,9 @@ import kotlinx.serialization.Serializable
 class UstadCentralReportRow {
 
     @PrimaryKey(autoGenerate = true)
-    var instanceUid: Long = 0L
+    var rowUid: Long = 0L
+
+    var instanceId: Int = 0
 
     var indicatorId: Int = 0
 

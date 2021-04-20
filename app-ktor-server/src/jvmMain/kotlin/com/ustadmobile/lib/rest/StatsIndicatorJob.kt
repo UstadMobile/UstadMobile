@@ -2,6 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.days
+import com.ustadmobile.core.account.EndpointSet
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -12,6 +13,7 @@ import io.ktor.client.statement.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import org.quartz.Job
@@ -23,129 +25,61 @@ class StatsIndicatorJob : Job {
 
         val di = context.scheduler.context.get("di") as DI
         val jobDataMap = context.jobDetail.jobDataMap
-        val endpoint = jobDataMap.getString(INDICATOR_ENDPOINT)
+        val endpointSet = di.direct.instance<EndpointSet>()
         val statsEndpoint = jobDataMap.getString(INDICATOR_STATS_ENDPOINT)
-
-        val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
         val now = DateTime.now()
         val monthOffset = now - 30.days
         val dayOffset = now - 1.days
 
-        // REGISTERED_USERS_INDICATOR
-        val totalUserCount = db.personDao.getTotalActiveCountUsers()
-        val genderUserCount = db.personDao.getActiveCountUsersByGender()
-        val countryUserCount = db.personDao.getActiveCountUsersByCountry()
-
-        // ACTIVE_USERS_INDICATOR
-        val totalUsedContentCount = db.statementDao.getActiveUsersUsedContent(
-                monthOffset.unixMillisLong, now.unixMillisLong)
-        val genderUsedContentCount = db.statementDao.getActiveUsersUsedContentByGender(
-                monthOffset.unixMillisLong, now.unixMillisLong)
-        val countryUsedContentCount = db.statementDao.getActiveUsersUsedContentByCountry(
-                monthOffset.unixMillisLong, now.unixMillisLong)
-
-        // ACTIVE_USER_DURATION_INDICATOR
-        val totalDurationUsed = db.statementDao.getDurationUsageOverPastDay(
-                dayOffset.unixMillisLong, now.unixMillisLong)
-        val totalDurationUsedByGender = db.statementDao.getDurationUsageOverPastDayByGender(
-                dayOffset.unixMillisLong, now.unixMillisLong)
-        val totalDurationUsedByCountry = db.statementDao.getDurationUsageOverPastDayByCountry(
-                dayOffset.unixMillisLong, now.unixMillisLong)
-
         val rowReportList = mutableListOf<UstadCentralReportRow>()
+        endpointSet.endpointUrls.forEach { endpoint ->
 
-        // REGISTERED_USERS_INDICATOR
-        rowReportList.add(UstadCentralReportRow().apply {
-            indicatorId = UstadCentralReportRow.REGISTERED_USERS_INDICATOR
-            disaggregationKey = UstadCentralReportRow.TOTAL_KEY
-            disaggregationValue = UstadCentralReportRow.TOTAL_KEY
-            value = totalUserCount.toDouble()
-            timestamp = systemTimeInMillis()
-        })
+            val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-        genderUserCount.forEach{
+            // REGISTERED_USERS_INDICATOR
+            rowReportList.addAll(
+                    db.personDao.getRegisteredUsers(UstadCentralReportRow.TOTAL_KEY,
+                    systemTimeInMillis()))
+            rowReportList.addAll(
+                    db.personDao.getRegisteredUsers(UstadCentralReportRow.GENDER_KEY,
+                    systemTimeInMillis()))
+            rowReportList.addAll(
+                    db.personDao.getRegisteredUsers(UstadCentralReportRow.COUNTRY_KEY,
+                    systemTimeInMillis()))
+            rowReportList.addAll(
+                    db.personDao.getRegisteredUsers(UstadCentralReportRow.CONNECTIVITY_KEY,
+                    systemTimeInMillis()))
 
-            rowReportList.add(UstadCentralReportRow().apply {
-                indicatorId = UstadCentralReportRow.REGISTERED_USERS_INDICATOR
-                disaggregationKey = UstadCentralReportRow.GENDER_KEY
-                disaggregationValue = it.gender
-                value = it.count.toDouble()
-                timestamp = systemTimeInMillis()
-            })
 
-        }
+            // ACTIVE_USERS_INDICATOR
+            rowReportList.addAll(
+            db.statementDao.getActiveUsers(UstadCentralReportRow.TOTAL_KEY, systemTimeInMillis(),
+                    monthOffset.unixMillisLong, now.unixMillisLong))
+            rowReportList.addAll(
+            db.statementDao.getActiveUsers(UstadCentralReportRow.GENDER_KEY, systemTimeInMillis(),
+                    monthOffset.unixMillisLong, now.unixMillisLong))
+            rowReportList.addAll(
+            db.statementDao.getActiveUsers(UstadCentralReportRow.COUNTRY_KEY, systemTimeInMillis(),
+                    monthOffset.unixMillisLong, now.unixMillisLong))
+            rowReportList.addAll(
+            db.statementDao.getActiveUsers(UstadCentralReportRow.CONNECTIVITY_KEY, systemTimeInMillis(),
+                    monthOffset.unixMillisLong, now.unixMillisLong))
 
-        countryUserCount.forEach{
-            rowReportList.add(UstadCentralReportRow().apply {
-                indicatorId = UstadCentralReportRow.REGISTERED_USERS_INDICATOR
-                disaggregationKey = UstadCentralReportRow.COUNTRY_KEY
-                disaggregationValue = it.country.hashCode()
-                value = it.count.toDouble()
-                timestamp = systemTimeInMillis()
-            })
-        }
+            // ACTIVE_USER_DURATION_INDICATOR
+            rowReportList.addAll(
+            db.statementDao.getDurationUsage(UstadCentralReportRow.TOTAL_KEY,
+                    systemTimeInMillis(), dayOffset.unixMillisLong, now.unixMillisLong))
+            rowReportList.addAll(
+            db.statementDao.getDurationUsage(UstadCentralReportRow.GENDER_KEY,
+                    systemTimeInMillis(), dayOffset.unixMillisLong, now.unixMillisLong))
+            rowReportList.addAll(
+            db.statementDao.getDurationUsage(UstadCentralReportRow.COUNTRY_KEY,
+                    systemTimeInMillis(), dayOffset.unixMillisLong, now.unixMillisLong))
+            rowReportList.addAll(
+            db.statementDao.getDurationUsage(UstadCentralReportRow.CONNECTIVITY_KEY,
+                    systemTimeInMillis(), dayOffset.unixMillisLong, now.unixMillisLong))
 
-        // ACTIVE_USERS_INDICATOR
-        rowReportList.add(UstadCentralReportRow().apply {
-            indicatorId = UstadCentralReportRow.ACTIVE_USERS_INDICATOR
-            disaggregationKey = UstadCentralReportRow.TOTAL_KEY
-            disaggregationValue = UstadCentralReportRow.TOTAL_KEY
-            value = totalUsedContentCount.toDouble()
-            timestamp = systemTimeInMillis()
-        })
-
-        genderUsedContentCount.forEach{
-
-            rowReportList.add(UstadCentralReportRow().apply {
-                indicatorId = UstadCentralReportRow.ACTIVE_USERS_INDICATOR
-                disaggregationKey = UstadCentralReportRow.GENDER_KEY
-                disaggregationValue = it.gender
-                value = it.count.toDouble()
-                timestamp = systemTimeInMillis()
-            })
-
-        }
-
-        countryUsedContentCount.forEach{
-            rowReportList.add(UstadCentralReportRow().apply {
-                indicatorId = UstadCentralReportRow.ACTIVE_USERS_INDICATOR
-                disaggregationKey = UstadCentralReportRow.COUNTRY_KEY
-                disaggregationValue = it.country.hashCode()
-                value = it.count.toDouble()
-                timestamp = systemTimeInMillis()
-            })
-        }
-
-        // ACTIVE_USER_DURATION_INDICATOR
-        rowReportList.add(UstadCentralReportRow().apply {
-            indicatorId = UstadCentralReportRow.ACTIVE_USER_DURATION_INDICATOR
-            disaggregationKey = UstadCentralReportRow.TOTAL_KEY
-            disaggregationValue = UstadCentralReportRow.TOTAL_KEY
-            value = totalDurationUsed.toDouble()
-            timestamp = systemTimeInMillis()
-        })
-
-        totalDurationUsedByGender.forEach{
-
-            rowReportList.add(UstadCentralReportRow().apply {
-                indicatorId = UstadCentralReportRow.ACTIVE_USER_DURATION_INDICATOR
-                disaggregationKey = UstadCentralReportRow.GENDER_KEY
-                disaggregationValue = it.gender
-                value = it.duration.toDouble()
-                timestamp = systemTimeInMillis()
-            })
-
-        }
-
-        totalDurationUsedByCountry.forEach{
-            rowReportList.add(UstadCentralReportRow().apply {
-                indicatorId = UstadCentralReportRow.ACTIVE_USER_DURATION_INDICATOR
-                disaggregationKey = UstadCentralReportRow.COUNTRY_KEY
-                disaggregationValue = it.country.hashCode()
-                value = it.duration.toDouble()
-                timestamp = systemTimeInMillis()
-            })
         }
 
         val client: HttpClient by di.instance()
