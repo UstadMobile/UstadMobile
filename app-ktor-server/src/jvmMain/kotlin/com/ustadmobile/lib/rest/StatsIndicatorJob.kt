@@ -32,10 +32,12 @@ class StatsIndicatorJob : Job {
         val monthOffset = now - 30.days
         val dayOffset = now - 1.days
 
+        // REGISTERED_USERS_INDICATOR
         val totalUserCount = db.personDao.getTotalActiveCountUsers()
         val genderUserCount = db.personDao.getActiveCountUsersByGender()
         val countryUserCount = db.personDao.getActiveCountUsersByCountry()
 
+        // ACTIVE_USERS_INDICATOR
         val totalUsedContentCount = db.statementDao.getActiveUsersUsedContent(
                 monthOffset.unixMillisLong, now.unixMillisLong)
         val genderUsedContentCount = db.statementDao.getActiveUsersUsedContentByGender(
@@ -43,6 +45,7 @@ class StatsIndicatorJob : Job {
         val countryUsedContentCount = db.statementDao.getActiveUsersUsedContentByCountry(
                 monthOffset.unixMillisLong, now.unixMillisLong)
 
+        // ACTIVE_USER_DURATION_INDICATOR
         val totalDurationUsed = db.statementDao.getDurationUsageOverPastDay(
                 dayOffset.unixMillisLong, now.unixMillisLong)
         val totalDurationUsedByGender = db.statementDao.getDurationUsageOverPastDayByGender(
@@ -52,6 +55,7 @@ class StatsIndicatorJob : Job {
 
         val rowReportList = mutableListOf<UstadCentralReportRow>()
 
+        // REGISTERED_USERS_INDICATOR
         rowReportList.add(UstadCentralReportRow().apply {
             indicatorId = UstadCentralReportRow.REGISTERED_USERS_INDICATOR
             disaggregationKey = UstadCentralReportRow.TOTAL_KEY
@@ -72,8 +76,77 @@ class StatsIndicatorJob : Job {
 
         }
 
-        // TODO other reports
+        countryUserCount.forEach{
+            rowReportList.add(UstadCentralReportRow().apply {
+                indicatorId = UstadCentralReportRow.REGISTERED_USERS_INDICATOR
+                disaggregationKey = UstadCentralReportRow.COUNTRY_KEY
+                disaggregationValue = it.country.hashCode()
+                value = it.count.toDouble()
+                timestamp = systemTimeInMillis()
+            })
+        }
 
+        // ACTIVE_USERS_INDICATOR
+        rowReportList.add(UstadCentralReportRow().apply {
+            indicatorId = UstadCentralReportRow.ACTIVE_USERS_INDICATOR
+            disaggregationKey = UstadCentralReportRow.TOTAL_KEY
+            disaggregationValue = UstadCentralReportRow.TOTAL_KEY
+            value = totalUsedContentCount.toDouble()
+            timestamp = systemTimeInMillis()
+        })
+
+        genderUsedContentCount.forEach{
+
+            rowReportList.add(UstadCentralReportRow().apply {
+                indicatorId = UstadCentralReportRow.ACTIVE_USERS_INDICATOR
+                disaggregationKey = UstadCentralReportRow.GENDER_KEY
+                disaggregationValue = it.gender
+                value = it.count.toDouble()
+                timestamp = systemTimeInMillis()
+            })
+
+        }
+
+        countryUsedContentCount.forEach{
+            rowReportList.add(UstadCentralReportRow().apply {
+                indicatorId = UstadCentralReportRow.ACTIVE_USERS_INDICATOR
+                disaggregationKey = UstadCentralReportRow.COUNTRY_KEY
+                disaggregationValue = it.country.hashCode()
+                value = it.count.toDouble()
+                timestamp = systemTimeInMillis()
+            })
+        }
+
+        // ACTIVE_USER_DURATION_INDICATOR
+        rowReportList.add(UstadCentralReportRow().apply {
+            indicatorId = UstadCentralReportRow.ACTIVE_USER_DURATION_INDICATOR
+            disaggregationKey = UstadCentralReportRow.TOTAL_KEY
+            disaggregationValue = UstadCentralReportRow.TOTAL_KEY
+            value = totalDurationUsed.toDouble()
+            timestamp = systemTimeInMillis()
+        })
+
+        totalDurationUsedByGender.forEach{
+
+            rowReportList.add(UstadCentralReportRow().apply {
+                indicatorId = UstadCentralReportRow.ACTIVE_USER_DURATION_INDICATOR
+                disaggregationKey = UstadCentralReportRow.GENDER_KEY
+                disaggregationValue = it.gender
+                value = it.duration.toDouble()
+                timestamp = systemTimeInMillis()
+            })
+
+        }
+
+        totalDurationUsedByCountry.forEach{
+            rowReportList.add(UstadCentralReportRow().apply {
+                indicatorId = UstadCentralReportRow.ACTIVE_USER_DURATION_INDICATOR
+                disaggregationKey = UstadCentralReportRow.COUNTRY_KEY
+                disaggregationValue = it.country.hashCode()
+                value = it.duration.toDouble()
+                timestamp = systemTimeInMillis()
+            })
+        }
 
         val client: HttpClient by di.instance()
 
