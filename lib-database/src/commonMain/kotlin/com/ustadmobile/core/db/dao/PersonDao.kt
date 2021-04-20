@@ -274,7 +274,7 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("""
         SELECT ${UstadCentralReportRow.REGISTERED_USERS_INDICATOR} AS indicatorId,
                 :disaggregationKey AS disaggregationKey, 
-                (SELECT nodeClientId FROM SyncNode LIMIT 1) AS instanceId,
+                (SELECT nodeClientId FROM SyncNode LIMIT 1) AS instanceId, 0 AS rowUid, '' AS valueStr,
                 (CASE 
                 WHEN ${UstadCentralReportRow.TOTAL_KEY} THEN ${UstadCentralReportRow.TOTAL_KEY}
                 WHEN ${UstadCentralReportRow.GENDER_KEY} THEN Person.gender
@@ -284,7 +284,7 @@ abstract class PersonDao : BaseDao<Person> {
                          (SELECT MAX(pcConStatus) 
                             FROM PersonConnectivity 
                            WHERE pcPersonUid = Person.personUid)
-                END AS disaggregationValue, 
+                END) AS disaggregationValue, 
                 COUNT(Person.personUid) AS value, :timestamp AS timestamp 
           FROM Person
          WHERE username IS NOT NULL 

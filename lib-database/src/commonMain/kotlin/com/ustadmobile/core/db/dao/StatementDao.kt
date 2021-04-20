@@ -164,7 +164,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     @Query("""
         SELECT ${UstadCentralReportRow.ACTIVE_USERS_INDICATOR} AS indicatorId,
                 :disaggregationKey AS disaggregationKey,
-                 (SELECT nodeClientId FROM SyncNode LIMIT 1) AS instanceId,
+                 (SELECT nodeClientId FROM SyncNode LIMIT 1) AS instanceId, 0 AS rowUid, '' AS valueStr,
                 (CASE 
                 WHEN ${UstadCentralReportRow.TOTAL_KEY} THEN ${UstadCentralReportRow.TOTAL_KEY}
                 WHEN ${UstadCentralReportRow.GENDER_KEY} THEN Person.gender
@@ -174,10 +174,10 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                          (SELECT MAX(pcConStatus) 
                             FROM PersonConnectivity 
                            WHERE pcPersonUid = Person.personUid)
-                END AS disaggregationValue, 
+                END) AS disaggregationValue, 
                 COUNT(DISTINCT personUid) AS value, :timestamp AS timestamp 
-          FROM Person
-                LEFT JOIN StatementEntity 
+          FROM StatementEntity
+                LEFT JOIN Person 
                 ON Person.personUid = StatementEntity.statementPersonUid
          WHERE username IS NOT NULL 
            AND active
@@ -192,16 +192,20 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     @Query("""
         SELECT ${UstadCentralReportRow.ACTIVE_USER_DURATION_INDICATOR} AS indicatorId,
                 :disaggregationKey AS disaggregationKey,
-                 (SELECT nodeClientId FROM SyncNode LIMIT 1) AS instanceId,
+                 (SELECT nodeClientId FROM SyncNode LIMIT 1) AS instanceId, 0 AS rowUid, '' AS valueStr,
                 (CASE 
                 WHEN ${UstadCentralReportRow.TOTAL_KEY} THEN ${UstadCentralReportRow.TOTAL_KEY}
                 WHEN ${UstadCentralReportRow.GENDER_KEY} THEN Person.gender
                 WHEN ${UstadCentralReportRow.COUNTRY_KEY} THEN Person.personCountry
-                WHEN ${UstadCentralReportRow.CONNECTIVITY_KEY} THEN Connectivity
-                END AS disaggregationValue, 
+                WHEN ${UstadCentralReportRow.CONNECTIVITY_KEY} 
+                    THEN 
+                         (SELECT MAX(pcConStatus) 
+                            FROM PersonConnectivity 
+                           WHERE pcPersonUid = Person.personUid)
+                END) AS disaggregationValue, 
                 SUM(StatementEntity.resultDuration) AS value, :timestamp AS timestamp 
-         FROM Person 
-               LEFT JOIN StatementEntity 
+         FROM StatementEntity 
+               LEFT JOIN Person 
                ON Person.personUid = StatementEntity.statementPersonUid
          WHERE Person.username IS NOT NULL 
            AND Person.active
