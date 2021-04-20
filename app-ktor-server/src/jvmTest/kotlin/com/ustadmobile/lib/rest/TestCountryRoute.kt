@@ -33,11 +33,13 @@ class TestCountryRoute {
 
     lateinit var httpClient: HttpClient
 
+    lateinit var countryDbFile: File
+
     @Before
     fun setup() {
         db = DatabaseBuilder.databaseBuilder(Any() ,UmAppDatabase::class, "UmAppDatabase").build()
         db.clearAllTables()
-        val countryDbFile = File("country.mmdb")
+        countryDbFile = File("country.mmdb")
         FileUtils.copyToFile(javaClass.getResourceAsStream("/country.mmdb"),
                 countryDbFile)
 
@@ -64,6 +66,7 @@ class TestCountryRoute {
     fun tearDown() {
         server.stop(0, 5000)
         httpClient.close()
+        countryDbFile.delete()
     }
 
     @Test
