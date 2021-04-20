@@ -22,7 +22,8 @@ import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
-import com.ustadmobile.lib.rest.ext.bindHostDatabase
+import com.ustadmobile.lib.rest.ext.bindDataSourceIfNotExisting
+import com.ustadmobile.lib.rest.ext.databasePropertiesFromSection
 import com.ustadmobile.lib.rest.ext.ktorInitDbWithRepo
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.application.Application
@@ -31,7 +32,6 @@ import io.ktor.application.install
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
-import io.ktor.client.*
 import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
 import io.ktor.http.ContentType
@@ -44,14 +44,12 @@ import okhttp3.OkHttpClient
 import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
 import org.quartz.*
-import org.quartz.impl.StdScheduler
 import org.quartz.impl.StdSchedulerFactory
 import java.io.File
 import java.nio.file.Files
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.naming.InitialContext
-import javax.sql.DataSource
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.features.*
 import org.apache.commons.io.FileUtils
@@ -69,6 +67,8 @@ const val CONF_STATS_SERVER = "statsServer"
 const val INDICATOR_ENDPOINT = "endpoint"
 
 const val INDICATOR_STATS_ENDPOINT = "statsEndpoint"
+
+const val CONF_QUARTZ_DS_DEFAULT_URI = "jdbc:sqlite:data/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000"
 
 /**
  * Returns an identifier that is used as a subdirectory for data storage (e.g. attachments,
@@ -161,18 +161,9 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
             val dbHostName = context.identifier(dbMode, singletonDbName)
             val appConfig = environment.config
-            InitialContext().bindHostDatabase(dbHostName, Properties().apply {
-                setProperty("driver",
-                    appConfig.propertyOrNull("ktor.database.driver")?.getString() ?: "org.sqlite.JDBC")
-                setProperty("url",
-                    appConfig.propertyOrNull("ktor.database.url")?.getString()
-                        ?: "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
-                setProperty("user",
-                    appConfig.propertyOrNull("ktor.database.user")?.getString() ?: "")
-                setProperty("password",
-                    appConfig.propertyOrNull("ktor.database.password")?.getString() ?: "")
-            })
-
+            val dbProperties = appConfig.databasePropertiesFromSection("ktor.database",
+                defaultUrl = "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
+            InitialContext().bindDataSourceIfNotExisting(dbHostName, dbProperties)
             UmAppDatabase.getInstance(Any(), dbHostName)
         }
 
@@ -240,6 +231,11 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         }
 
         bind<Scheduler>() with singleton {
+            val dbProperties = environment.config.databasePropertiesFromSection("quartz",
+                "jdbc:sqlite:data/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
+            InitialContext().apply {
+                bindDataSourceIfNotExisting("quartzds", dbProperties)
+            }
             InitialContext().initQuartzDb("java:/comp/env/jdbc/quartzds")
             StdSchedulerFactory.getDefaultScheduler().also {
                 it.context.put("di", di)
