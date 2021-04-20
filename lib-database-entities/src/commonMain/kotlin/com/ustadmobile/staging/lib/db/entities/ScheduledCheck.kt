@@ -2,10 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 
 
 //@SyncableEntity(indices = [UmIndex(name = "clazzUid_type_index", value = ["scClazzLogUid", " +""checkType"])])
@@ -34,6 +31,9 @@ class ScheduledCheck() {
 
     @LastChangedBy
     var scheduledCheckLastChangedBy: Int = 0
+
+    @LastChangedTime
+    var scheduledCheckLct: Long = 0
 
     constructor(checkTime: Long, checkType: Int, checkParameters: String): this() {
         this.checkTime = checkTime

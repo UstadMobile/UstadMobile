@@ -2,10 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ContentEntryProgress.Companion.CONTENT_ENTRY_PROGRESS_TABLE_ID
 import kotlinx.serialization.Serializable
 
@@ -55,6 +52,9 @@ open class ContentEntryProgress {
 
     @LastChangedBy
     var contentEntryProgressLastChangedBy: Int = 0
+
+    @LastChangedTime
+    var contentEntryProgressLct: Long = 0
 
     companion object {
         const val CONTENT_ENTRY_PROGRESS_TABLE_ID = 210
