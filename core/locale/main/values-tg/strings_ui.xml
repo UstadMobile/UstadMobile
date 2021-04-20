@@ -139,7 +139,7 @@
     <string name="content_direction_ltr">Аз чап ба рост</string>
     <string name="content_direction_rtl">Аз рост ба чап</string>
     <string name="content_font_8">8pt</string>
-    <string name="percentage_complete">%1$s% анҷом</string>
+    <string name="percentage_complete">%1$s% анҷом доданд</string>
     <string name="content_font_10">10pt</string>
     <string name="store_title">Устод Мобайл - захираҳои таълимии кушодаи офлайн</string>
     <string name="content_font_14">14pt</string>
@@ -1020,4 +1020,32 @@
     <string name="connect_to_site">Ба сомона пайваст шавед</string>
     <string name="terms_and_policies_text">Матни шартҳо ва қоидаҳо</string>
     <string name="edit_terms_and_policies">Шартҳо ва қоидаҳоро таҳрир намоед</string>
+    <string name="add_new_language">Забони навро илова намоед</string>
+    <string name="languages">Забонҳо</string>
+    <string name="three_letter_code">Коди сеҳарфа (ISO 639–2)</string>
+    <string name="languages_description">Забонҳоеро, ки барои гурӯҳбандии мундариҷаи таълимӣ ва афзалиятҳои корбар истифода мешаванд, илова кунед, нест кунед ва тағйир диҳед</string>
+    <string name="attempts">Кӯшишҳо</string>
+    <string name="last_active">Вуруди охирин</string>
+    <plurals name="number_of_attempts">
+        <item quantity="one">%d кӯшишҳо</item>
+        <item quantity="other"></item>
+    </plurals>
+    <string name="incomplete">Нотамом</string>
+    <string name="edit_language">Таҳрири забон</string>
+    <string name="two_letter_code">Коди дуҳарфа (ISO 639–1)</string>
+    <string name="percentage_score" formatted="false">Хол %1$s%%</string>
+    <plurals name="duration_hours">
+        <item quantity="one">%d соатҳо</item>
+        <item quantity="other"></item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">%d дақиқаҳо</item>
+        <item quantity="other"></item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">%d сонияҳо</item>
+        <item quantity="other"></item>
+    </plurals>
+    <string name="undo">Бекор кунед</string>
+    <string name="manage_download">Боркуниро идора кунед</string>
 </resources>
