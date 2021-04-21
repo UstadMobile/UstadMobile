@@ -7,6 +7,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
+import com.ustadmobile.core.account.ClientId
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
@@ -36,6 +37,7 @@ import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.NanoHttpdCall
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
@@ -75,6 +77,7 @@ import java.io.File
 open class UstadApp : BaseUstadApp(), DIAware {
 
     val diModule = DI.Module("UstadApp-Android") {
+
         bind<UstadMobileSystemImpl>() with singleton {
             UstadMobileSystemImpl.instance
         }
@@ -101,6 +104,13 @@ open class UstadApp : BaseUstadApp(), DIAware {
             }).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
             }
+        }
+
+        bind<ClientId>(tag = UstadMobileSystemCommon.TAG_CLIENT_ID) with scoped(EndpointScope.Default).singleton {
+            val repo: UmAppDatabase by di.on(Endpoint(context.url)).instance(tag = TAG_REPO)
+            val nodeId = (repo as? DoorDatabaseSyncRepository)?.clientId
+                ?: throw IllegalStateException("Could not open repo for endpoint ${context.url}")
+            ClientId(nodeId)
         }
 
         bind<EmbeddedHTTPD>() with singleton {

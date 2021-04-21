@@ -1,6 +1,8 @@
 package com.ustadmobile.util
 
 import com.ccfraser.muirwik.components.styles.Theme
+import com.ustadmobile.ReactDatabase
+import com.ustadmobile.core.account.ClientId
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
@@ -8,8 +10,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ContentEntryOpener
-import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.model.statemanager.*
@@ -61,15 +62,18 @@ object StateManager{
 
         bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(EndpointScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
-            UmAppDatabase.getInstance(this, dbName)
+            ReactDatabase.getInstance(this, dbName)
         }
 
         bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(EndpointScope.Default).singleton {
-            instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository(repositoryConfig(this, context.url,
-                instance(), instance()))
+            instance(tag = UmAppDatabase.TAG_DB)
         }
 
         constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with true
+
+        bind<ClientId>(tag = UstadMobileSystemCommon.TAG_CLIENT_ID) with scoped(EndpointScope.Default).singleton {
+            ClientId(9090)
+        }
 
         bind<UmTheme>() with singleton{
             UmTheme(getCurrentState().theme!!)

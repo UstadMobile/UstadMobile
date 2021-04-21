@@ -2,6 +2,8 @@ package com.ustadmobile.core.account
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_CLIENT_ID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.userAtServer
 import com.ustadmobile.core.util.safeParse
@@ -160,15 +162,12 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
 
     suspend fun login(username: String, password: String, endpointUrl: String, replaceActiveAccount: Boolean = false): UmAccount = withContext(Dispatchers.Default){
-        val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_REPO)
-        val nodeId = (repo as? DoorDatabaseSyncRepository)?.clientId
-                ?: throw IllegalStateException("Could not open repo for endpoint $endpointUrl")
-
+        val nodeId: ClientId by di.on(Endpoint(endpointUrl)).instance(tag = TAG_CLIENT_ID)
         val loginResponse = httpClient.post<HttpResponse> {
             url("${endpointUrl.removeSuffix("/")}/auth/login")
             parameter("username", username)
             parameter("password", password)
-            header("X-nid", nodeId)
+            header("X-nid", nodeId.id)
             expectSuccess = false
         }
 
