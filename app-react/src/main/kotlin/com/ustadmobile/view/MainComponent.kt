@@ -82,23 +82,22 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
     private val altBuilder = RBuilder()
 
     private var stateChangeListener : (GlobalStateSlice) -> Unit = {
-       setState {
-            when (it.state.type) {
-                is FabState -> {
-                    showFab = it.state.showFab
-                    fabLabel = it.state.fabLabel
-                    fabIcon = it.state.fabIcon
-                    onFabClicked = it.state.onFabClicked
-                }
-                is AppBarState -> {
-                    loading = it.state.loading
-                }
-                is SnackBarState -> {
-                    snackBarOpen = true
-                    snackBarMessage = it.state.snackBarMessage
-                    snackBarActionLabel = it.state.snackBarActionLabel
-                    onSnackActionClicked = it.state.onSnackActionClicked
-                }
+        when (it.state.type) {
+            is FabState -> {
+                showFab = it.state.showFab
+                fabLabel = it.state.fabLabel
+                fabIcon = it.state.fabIcon
+                onFabClicked = it.state.onFabClicked
+            }
+            is AppBarState -> {
+                console.log(loading)
+                loading = it.state.loading
+            }
+            is SnackBarState -> {
+                snackBarOpen = true
+                snackBarMessage = it.state.snackBarMessage
+                snackBarActionLabel = it.state.snackBarActionLabel
+                onSnackActionClicked = it.state.onSnackActionClicked
             }
         }
     }
@@ -131,16 +130,17 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
 
 
                     //Loading indicator
-                    if(loading){
-                        mLinearProgress {
-                            css(progressIndicator)
-                            attrs {
-                                color = if(isDarkModeEnabled()) MLinearProgressColor.secondary
-                                else MLinearProgressColor.primary
-                            }
+                    mLinearProgress {
+                        css{
+                            +progressIndicator
+                            display = Display.none
+                        }
+                        attrs.asDynamic().id = "um-progress"
+                        attrs {
+                            color = if(isDarkModeEnabled()) MLinearProgressColor.secondary
+                            else MLinearProgressColor.primary
                         }
                     }
-
                     styledDiv {
                         css { +mainComponentContainer }
                         mAppBar(position = MAppBarPosition.absolute) {

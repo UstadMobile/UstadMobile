@@ -230,13 +230,18 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         float = Float.left
         display = Display.flex
         flexDirection = FlexDirection.column
-        width = 300.px
+        width = 390.px
+        marginTop = LinearDimension("30%")
     }
 
-    val loginComponentFormElements by css {
+    val loginComponentFormElementsMargin by css {
         marginLeft = 1.spacingUnits
         marginRight = 1.spacingUnits
         width = LinearDimension("100%")
+    }
+
+    val errorTextMessage by css {
+        color = Color.red
     }
 
 }

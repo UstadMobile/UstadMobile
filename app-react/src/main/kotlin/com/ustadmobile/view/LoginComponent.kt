@@ -8,16 +8,14 @@ import com.ccfraser.muirwik.components.form.MFormControlVariant
 import com.ustadmobile.core.controller.Login2Presenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.model.statemanager.AppBarState
+import com.ustadmobile.util.CssStyleManager
 import com.ustadmobile.util.CssStyleManager.defaultMarginTop
-import com.ustadmobile.util.CssStyleManager.loginComponentFormElements
+import com.ustadmobile.util.CssStyleManager.errorTextMessage
 import com.ustadmobile.util.CssStyleManager.loginComponentContainer
 import com.ustadmobile.util.CssStyleManager.loginComponentForm
+import com.ustadmobile.util.CssStyleManager.loginComponentFormElementsMargin
 import com.ustadmobile.util.RouteManager.getArgs
-import com.ustadmobile.util.StateManager
-import kotlinx.css.Color
-import kotlinx.css.Display
-import kotlinx.css.display
+import kotlinx.css.*
 import kotlinx.html.InputType
 import react.RBuilder
 import react.RProps
@@ -30,9 +28,9 @@ class LoginComponent(props: RProps): UmBaseComponent<RProps,RState>(props), Logi
 
     private lateinit var mPresenter: Login2Presenter
 
-    private var username: String? = null
+    private var username: String = ""
 
-    private var password: String? = null
+    private var password: String = ""
 
     override var errorMessage: String = ""
         get() = field
@@ -49,19 +47,18 @@ class LoginComponent(props: RProps): UmBaseComponent<RProps,RState>(props), Logi
     override var isEmptyPassword: Boolean = false
         get() = field
         set(value) {
-            field = value
+            setState { field = value }
         }
 
     override var isEmptyUsername: Boolean = false
         get() = field
         set(value) {
-            field = value
+            setState { field = value }
         }
 
     override var inProgress: Boolean = false
         get() = field
         set(value) {
-            StateManager.dispatch(AppBarState(loading = value))
             field = value
         }
 
@@ -80,6 +77,7 @@ class LoginComponent(props: RProps): UmBaseComponent<RProps,RState>(props), Logi
     override fun componentDidMount() {
         super.componentDidMount()
         mPresenter = Login2Presenter(this, getArgs(),this, di)
+        mPresenter.onCreate(mapOf())
     }
 
     override fun RBuilder.render() {
@@ -87,40 +85,77 @@ class LoginComponent(props: RProps): UmBaseComponent<RProps,RState>(props), Logi
             css(loginComponentContainer)
             styledDiv {
                 css{ +loginComponentForm}
-                val userNameLabel = if(isEmptyPassword) errorMessage
-                else systemImpl.getString(MessageID.username, this)
-
-                val passwordLabel = if(isEmptyUsername) errorMessage
-                else systemImpl.getString(MessageID.password, this)
-
-                mTextField(label = userNameLabel, value = username,
-                    error = isEmptyUsername,
+                mTextField(label = systemImpl.getString(if(isEmptyUsername)
+                    MessageID.field_required_prompt else MessageID.username, this),
+                    value = username, error = isEmptyUsername, disabled = inProgress,
                     variant = MFormControlVariant.outlined, onChange = {
-                            event -> event.persist()
-                        setState {  username = event.targetInputValue  }
-                    }) {css(loginComponentFormElements)}
+                            it.persist()
+                        setState {
+                            username = it.targetInputValue
+                            isEmptyUsername = false
+                        }
+                    }) {css(loginComponentFormElementsMargin)}
 
-                mTextField(label = passwordLabel, value = username,
-                    error = isEmptyPassword,type = InputType.password,
-                    variant = MFormControlVariant.outlined, onChange = {
-                            event -> event.persist()
-                        setState {  password = event.targetInputValue  }
-                    }) {css(loginComponentFormElements)}
+                mTextField(label = systemImpl.getString(if(isEmptyPassword)
+                    MessageID.field_required_prompt else MessageID.password, this),
+                    value = password, disabled = inProgress, error = isEmptyPassword,
+                    type = InputType.password, variant = MFormControlVariant.outlined, onChange = {
+                        it.persist()
+                        setState {
+                            password = it.targetInputValue
+                            isEmptyPassword = false
+                        }
+                    }) {css(loginComponentFormElementsMargin)}
 
-                mTypography(errorMessage, variant = MTypographyVariant.subtitle2){
+                styledDiv {
                     css{
                         +defaultMarginTop
+                        +loginComponentFormElementsMargin
+                        +errorTextMessage
                         display = if(errorMessage.isEmpty()) Display.none else Display.block
                     }
+                    mTypography(errorMessage, variant = MTypographyVariant.subtitle2,
+                        className = "${CssStyleManager.name}-errorOnInput",
+                        align = MTypographyAlign.center)
                 }
 
-                mButton(systemImpl.getString(MessageID.login, this), size = MButtonSize.large
+                mButton(systemImpl.getString(MessageID.login, this),
+                    size = MButtonSize.large, disabled = inProgress
                     ,color = MColor.secondary,variant = MButtonVariant.contained, onClick = {
                         mPresenter.handleLogin(username, password) }){
                     css {
-                        +loginComponentFormElements
+                        +loginComponentFormElementsMargin
                         +defaultMarginTop
+                        height = 50.px
                     }}
+
+                mGridContainer(spacing= MGridSpacing.spacing6){
+                    css{
+                        +defaultMarginTop
+                    }
+                    mGridItem {
+                        css{
+                            marginLeft = 16.px
+                        }
+                        mButton(systemImpl.getString(MessageID.create_account,this),
+                            variant = MButtonVariant.text, color = MColor.primary, disabled = inProgress,
+                            size = MButtonSize.large, onClick = {mPresenter.handleCreateAccount()}){
+                            css{
+                                display = if(createAccountVisible) Display.block else Display.none
+                            }
+                        }
+                    }
+
+                    mGridItem {
+                        mButton(systemImpl.getString(MessageID.connect_as_guest,this),
+                            variant = MButtonVariant.text, color = MColor.primary,disabled = inProgress,
+                            size = MButtonSize.large, onClick = { mPresenter.handleConnectAsGuest() }){
+                            css{
+                                display = if(connectAsGuestVisible) Display.block else Display.none
+                            }
+                        }
+                    }
+                }
 
             }
         }
@@ -128,8 +163,13 @@ class LoginComponent(props: RProps): UmBaseComponent<RProps,RState>(props), Logi
 
     override fun clearFields() {
         setState {
-            username = null
-            password = null
+            username = ""
+            password = ""
         }
+    }
+
+    override fun componentWillUnmount() {
+        super.componentWillUnmount()
+        mPresenter.onDestroy()
     }
 }

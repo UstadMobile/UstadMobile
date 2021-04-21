@@ -3,14 +3,11 @@ package com.ustadmobile.view
 import com.ccfraser.muirwik.components.mCssBaseline
 import com.ccfraser.muirwik.components.themeContext
 import com.ustadmobile.core.controller.RedirectPresenter
-import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.view.ContentEntryList2View
-import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.RedirectView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_WEB_PLATFORM
-import com.ustadmobile.util.RouteManager
 import com.ustadmobile.util.RouteManager.findDestination
 import com.ustadmobile.util.RouteManager.getArgs
 import com.ustadmobile.util.StateManager
@@ -40,7 +37,6 @@ class RedirectComponent (props: RProps): UmBaseComponent<RProps, RState>(props),
         themeContext.Consumer { theme ->
             StateManager.dispatch(StateManager.UmTheme(theme))
             if(nextDestination != null){
-                console.log(arguments.toQueryString(), nextDestination)
                 findDestination(nextDestination)?.let { splashScreen(it, arguments) }
             }
         }

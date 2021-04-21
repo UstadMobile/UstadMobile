@@ -33,7 +33,6 @@ class SplashComponent (props: SplashProps): UmBaseComponent<SplashProps, RState>
     private var showMainComponent: Boolean = false
 
     override fun componentDidMount() {
-        console.log("hit here")
         mPresenter = SplashPresenter(this)
         GlobalScope.launch(Dispatchers.Main) {
             mPresenter.handleResourceLoading()

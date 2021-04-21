@@ -88,7 +88,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @return String with version number
      */
     actual fun getVersion(context: Any): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return ""
     }
 
     /**
