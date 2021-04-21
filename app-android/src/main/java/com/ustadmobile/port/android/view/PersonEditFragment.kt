@@ -307,15 +307,17 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         }
 
     override var homeConnectivityStatus: PersonConnectivity? = null
-        get() = field
+        get() = mBinding?.homeConnectivity
         set(value) {
             field = value
+            mBinding?.homeConnectivity = value
         }
 
     override var mobileConnectivityStatus: PersonConnectivity? = null
-        get() = field
+        get() = mBinding?.mobileConnectivity
         set(value) {
             field = value
+            mBinding?.mobileConnectivity = value
         }
 
     override var firstNameError: String? = null

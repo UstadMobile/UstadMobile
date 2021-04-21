@@ -147,6 +147,7 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
             rootView = it.root
             it.createAccountVisibility = View.GONE
             it.changePasswordVisibility = View.GONE
+            it.connectivityVisible = false
             it.classesRecyclerview.layoutManager = LinearLayoutManager(requireContext())
             it.classesRecyclerview.adapter = clazzEnrolmentWithClazzRecyclerAdapter
             it.rolesAndPermissionsRecyclerview.layoutManager = LinearLayoutManager(requireContext())

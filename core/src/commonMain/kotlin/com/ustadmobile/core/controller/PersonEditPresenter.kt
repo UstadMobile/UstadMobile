@@ -266,11 +266,11 @@ class PersonEditPresenter(context: Any,
             view.takeIf { entity.personCountry.isNullOrEmpty() }?.countryError = requiredFieldMessage
             if(view.viewConnectivityPermission){
                 view.takeIf { homeConnectivityStatus == null
-                        || view.homeConnectivityStatus?.pcConType == 0 }
+                        || view.homeConnectivityStatus?.pcConStatus == 0 }
                         ?.homeConnectivityStatusError = requiredFieldMessage
 
                 view.takeIf { mobileConnectivityStatus == null
-                        || view.mobileConnectivityStatus?.pcConType == 0 }
+                        || view.mobileConnectivityStatus?.pcConStatus == 0 }
                         ?.mobileConnectivityStatusError = requiredFieldMessage
             }
 

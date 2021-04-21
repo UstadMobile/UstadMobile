@@ -341,7 +341,7 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/home_connectivity_status"
                     app:messageIdOptions="@{connectivityStatusOptions}"
-                    app:selectedMessageIdOption="@={homeConnectivity.pcConType}" />
+                    app:selectedMessageIdOption="@={homeConnectivity.pcConStatus}" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
