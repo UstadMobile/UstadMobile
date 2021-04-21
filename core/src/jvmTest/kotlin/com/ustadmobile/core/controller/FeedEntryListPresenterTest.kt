@@ -17,6 +17,7 @@ import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.lib.db.entities.FeedEntry
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -88,8 +89,10 @@ class FeedEntryListPresenterTest {
         verify(repoFeedEntryDaoSpy, timeout(5000)).findByPersonUidAsDataSource(
             accountManager.activeAccount.personUid)
         verify(mockView, timeout(5000)).list = any()
-        verify(repoFeedEntryDaoSpy, timeout(5000)).getFeedSummary(
-            accountManager.activeAccount.personUid)
+        runBlocking {
+            verify(repoFeedEntryDaoSpy, timeout(5000)).getFeedSummary(
+                    accountManager.activeAccount.personUid)
+        }
         //TODO: verify any other properties that the presenter should set on the view
     }
 
