@@ -104,4 +104,7 @@
     <string name="number_of_sales">Number of sales</string>
     <string name="average_sale_total">Average sale total</string>
 
+    <string name="image">Image</string>
+    <string name="csv">CSV</string>
+
 </resources>
