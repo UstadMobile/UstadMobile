@@ -1,7 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.github.aakira.napier.LogLevel
-import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
@@ -84,7 +82,6 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         view.createAccountVisible = workSpace.registrationAllowed
         view.connectAsGuestVisible = workSpace.guestLogin
         view.versionInfo = impl.getVersion(context)
-        Napier.log(LogLevel.DEBUG,message = serverUrl)
     }
 
     /**
