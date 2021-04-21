@@ -5,8 +5,8 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.concurrentSafeListOf
-import com.ustadmobile.model.statemanager.AppBarState
 import com.ustadmobile.model.statemanager.SnackBarState
+import com.ustadmobile.util.ProgressBarManager
 import com.ustadmobile.util.SearchManager
 import com.ustadmobile.util.StateManager
 import com.ustadmobile.util.StateManager.getCurrentState
@@ -30,12 +30,15 @@ open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(pro
 
     protected var searchManager: SearchManager? = null
 
+    private var progressBarManager: ProgressBarManager? = null
+
     override fun componentDidMount() {
         for(observer in lifecycleObservers){
             observer.onStart(this)
         }
         lifecycleStatus.value = DoorLifecycleObserver.STARTED
         searchManager = SearchManager("um-search")
+        progressBarManager = ProgressBarManager()
     }
 
     override fun RBuilder.render() {
@@ -45,8 +48,8 @@ open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(pro
     override var loading: Boolean = false
         get() = field
         set(value) {
-            StateManager.dispatch(AppBarState(loading = value))
-            setState { field = value }
+            progressBarManager?.progressBarVisibility = value
+            field = value
         }
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
@@ -78,5 +81,6 @@ open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(pro
         }
         lifecycleStatus.value = DoorLifecycleObserver.STOPPED
         searchManager?.onDestroy()
+        progressBarManager?.onDestroy()
     }
 }
