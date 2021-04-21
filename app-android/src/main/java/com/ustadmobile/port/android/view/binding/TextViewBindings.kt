@@ -20,6 +20,11 @@ import java.util.*
 import com.soywiz.klock.DateFormat as KlockDateFormat
 import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.core.util.ext.outcomeToString
+import com.ustadmobile.port.android.view.CountryListFragment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -367,16 +372,20 @@ fun TextView.setDurationMinutesAndSeconds(duration: Long){
 
 @BindingAdapter("countryName")
 fun TextView.setCountryName(code: String?){
-    val locale = UstadMobileSystemImpl.instance.getDisplayedLocale(context)
-    var json = ""
-    try {
-        json = context.assets.open("countrynames/${locale}.json")
-                .bufferedReader().use { it.readText() }
-    }catch (io: IOException){
+    GlobalScope.launch {
+        val locale = UstadMobileSystemImpl.instance.getDisplayedLocale(context)
+        var json = ""
+        try {
+            json = context.assets.open("countrynames/${locale}.json")
+                    .bufferedReader().use { it.readText() }
+        }catch (io: IOException){
 
+        }
+        val countryMap = Json.decodeFromString(MapSerializer(String.serializer(), String.serializer()), json)
+        withContext(Dispatchers.Main){
+            text = countryMap[code?.toUpperCase()] ?: ""
+        }
     }
-    val countryMap = Json.decodeFromString(MapSerializer(String.serializer(), String.serializer()), json)
-    text = countryMap[code?.toUpperCase()] ?: ""
 }
 
 @BindingAdapter("isContentComplete")

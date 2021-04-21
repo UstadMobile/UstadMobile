@@ -299,17 +299,19 @@
                 app:errorTextColor="?colorError"
                 app:errorText="@{countryFieldError}"
                 app:errorEnabled="@{countryFieldError != null}"
-                android:enabled="@{fieldsEnabled}"
-                android:onClick="@{() -> activityEventHandler.onClickCountry()}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/address_textinputlayout">
 
-                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/country_value"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:countryName="@{person.personCountry}"
+                    android:onClick="@{() -> activityEventHandler.onClickCountry()}"
+                    app:runOnClickWhenFocused="@{true}"
+                    android:inputType="@{InputType.TYPE_NULL}"
+                    android:cursorVisible="false"
                     android:hint="@string/country" />
 
             </com.google.android.material.textfield.TextInputLayout>

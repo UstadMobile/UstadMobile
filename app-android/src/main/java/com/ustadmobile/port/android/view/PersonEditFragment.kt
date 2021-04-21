@@ -157,7 +157,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
     override fun onClickCountry() {
         onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(String::class.java, R.id.country_list_dest)
+        navigateToPickEntityFromList(Country::class.java, R.id.country_list_dest)
     }
 
 
@@ -369,8 +369,10 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             it.imageViewLifecycleObserver = imageViewLifecycleObserver
             it.clazzlistRecyclerview.layoutManager = LinearLayoutManager(requireContext())
             it.rolesAndPermissionsRv.layoutManager = LinearLayoutManager(requireContext())
-            it.isAdmin = canDelegatePermissions?:false
+            it.isAdmin = canDelegatePermissions
+            it.viewConnectivity = viewConnectivityPermission
             it.hideClazzes =  arguments?.getString(ARG_HIDE_CLAZZES)?.toBoolean() ?: false
+            it.activityEventHandler = this
         }
 
         mPresenter = PersonEditPresenter(requireContext(), arguments.toStringMap(), this,

@@ -455,7 +455,7 @@
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/fragment_person_detail_country_imageview"
-                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.username)}"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.personCountry)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/dimen_16dp"
@@ -494,7 +494,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
-                app:constraint_referenced_ids="fragment_person_detail_country_fieldnametext,fragment_person_detail_username_barrier"
+                app:constraint_referenced_ids="fragment_person_detail_country_fieldnametext,fragment_person_detail_country_imageview"
                 tools:layout_editor_absoluteY="528dp" />
 
 

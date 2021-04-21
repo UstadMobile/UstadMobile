@@ -10,8 +10,11 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ReportListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.generateChartData
+import com.ustadmobile.core.util.ext.setCountryMap
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.ReportListView
 import com.ustadmobile.lib.db.entities.Report
@@ -21,14 +24,16 @@ import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
+import kotlinx.android.synthetic.main.fragment_person_edit.*
+import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
+import java.io.IOException
 
 class ReportListFragment() : UstadListViewFragment<Report, Report>(),
         ReportListView, View.OnClickListener {
@@ -38,11 +43,34 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
     override val listPresenter: UstadListPresenter<*, in Report>?
         get() = mPresenter
 
+    private val mapDeferred = CompletableDeferred<Map<String,String>>()
+
+    fun allCountries() {
+        GlobalScope.launch {
+            val systemImpl: UstadMobileSystemImpl = di.direct.instance()
+            val locale = systemImpl.getDisplayedLocale(requireContext())
+            var json = ""
+            try {
+                json = requireContext().assets.open("countrynames/${locale}.json")
+                        .bufferedReader().use { it.readText() }
+            } catch (io: IOException) {
+                showSnackBar(systemImpl.getString(MessageID.error,
+                        requireContext()), {})
+            }
+            val countryMap = Json.decodeFromString(MapSerializer(String.serializer(), String.serializer()), json)
+            (mDataRecyclerViewAdapter as ReportListRecyclerAdapter).countryMap = countryMap
+            mapDeferred.complete(countryMap)
+        }
+    }
+
     class ReportListViewHolder(val itemBinding: ItemReportListBinding) : RecyclerView.ViewHolder(itemBinding.root)
 
     class ReportListRecyclerAdapter(var presenter: ReportListPresenter?, val dbRepo: UmAppDatabase?,
-                                    val di: DI)
+                                    val di: DI,
+                                    val mapDeferred: CompletableDeferred<Map<String, String>>)
         : SelectablePagedListAdapter<Report, ReportListViewHolder>(DIFF_CALLBACK) {
+
+        var countryMap = mapOf<String, String>()
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReportListViewHolder {
             val itemBinding = ItemReportListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -70,6 +98,8 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
 
                     val chartData = dbRepo?.generateChartData(reportWithSeriesWithFilters,
                             holder.itemView.context, di.direct.instance(), accountManager.activeAccount.personUid)
+                    mapDeferred.await()
+                    chartData?.setCountryMap(countryMap)
                     holder.itemBinding.listReportChart.setChartData(chartData)
                 } catch (e: Exception) {
                     return@async
@@ -93,7 +123,8 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
                 requireContext().getString(R.string.create_a_new_report),
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
-        mDataRecyclerViewAdapter = ReportListRecyclerAdapter(mPresenter, dbRepo, di)
+        mDataRecyclerViewAdapter = ReportListRecyclerAdapter(mPresenter, dbRepo, di, mapDeferred)
+        allCountries()
 
         return view
     }

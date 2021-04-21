@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Context
 import android.os.Bundle
 import android.view.*
 import androidx.recyclerview.widget.DiffUtil
@@ -18,9 +19,14 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.CountryListView
 import com.ustadmobile.lib.db.entities.Country
 import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import okhttp3.Dispatcher
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.IOException
@@ -50,24 +56,27 @@ class CountryListFragment : UstadBaseFragment(), CountryListView, OnSearchSubmit
 
     private var mPresenter: CountryListPresenter? = null
 
-    fun allCountries(): List<Country> {
-        val systemImpl: UstadMobileSystemImpl = di.direct.instance()
-        val locale = systemImpl.getDisplayedLocale(requireContext())
-        var json = ""
-        try {
-            json = requireContext().assets.open("countrynames/${locale}.json")
-                    .bufferedReader().use { it.readText() }
-        }catch (io: IOException){
-            showSnackBar(systemImpl.getString(MessageID.error,
-                    requireContext()), {})
-        }
-        return Json.decodeFromString(MapSerializer(String.serializer(), String.serializer()), json).map {
-            Country(it.key, it.value)
-        }
-    }
+    private var countryMap = listOf<Country>()
 
-    private val originalListOfCountries: List<Country> by lazy {
-        allCountries()
+    fun allCountries() {
+        GlobalScope.launch {
+            val systemImpl: UstadMobileSystemImpl = di.direct.instance()
+            val locale = systemImpl.getDisplayedLocale(requireContext())
+            var json = ""
+            try {
+                json = requireContext().assets.open("countrynames/${locale}.json")
+                        .bufferedReader().use { it.readText() }
+            } catch (io: IOException) {
+                showSnackBar(systemImpl.getString(MessageID.error,
+                        requireContext()), {})
+            }
+            countryMap = (Json.decodeFromString(MapSerializer(String.serializer(), String.serializer()), json).map {
+                Country(it.key, it.value)
+            })
+            withContext(Dispatchers.Main){
+                mRecyclerAdapter?.submitList(countryMap)
+            }
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -75,7 +84,7 @@ class CountryListFragment : UstadBaseFragment(), CountryListView, OnSearchSubmit
         mRecyclerAdapter = CountryRecyclerViewAdapter()
         mDataBinding?.fragmentListRecyclerview?.layoutManager = LinearLayoutManager(requireContext())
         mDataBinding?.fragmentListRecyclerview?.adapter = mRecyclerAdapter
-        mRecyclerAdapter?.submitList(originalListOfCountries)
+        allCountries()
 
         mPresenter = CountryListPresenter(requireContext(), arguments.toStringMap(),
                 this, di)
@@ -89,13 +98,16 @@ class CountryListFragment : UstadBaseFragment(), CountryListView, OnSearchSubmit
     }
 
     override fun onSearchSubmitted(text: String?) {
+        if(countryMap.isEmpty()){
+            return
+        }
         if (text == null) {
-            mRecyclerAdapter?.submitList(originalListOfCountries)
+            mRecyclerAdapter?.submitList(countryMap)
             return
         }
 
         val searchWords = text.split(Regex("\\s+"))
-        val filteredItems = originalListOfCountries.filter { country ->
+        val filteredItems = countryMap.filter { country ->
             searchWords.any { country.code.contains(it, ignoreCase = true) }
                     || searchWords.any { country.name.contains(it, ignoreCase = true) }
         }
@@ -122,6 +134,7 @@ class CountryListFragment : UstadBaseFragment(), CountryListView, OnSearchSubmit
     }
 
     companion object {
+
         val DIFFUTIL_COUNTRY = object : DiffUtil.ItemCallback<Country>() {
             override fun areItemsTheSame(oldItem: Country, newItem: Country): Boolean {
                 return oldItem.code == newItem.code

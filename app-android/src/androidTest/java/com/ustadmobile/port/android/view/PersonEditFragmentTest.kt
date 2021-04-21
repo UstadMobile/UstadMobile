@@ -7,6 +7,7 @@ import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.lib.db.entities.EntityRoleWithNameAndRole
@@ -14,6 +15,8 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.port.android.generated.MessageIDMap
+import com.ustadmobile.port.android.impl.BaseUstadApp
+import com.ustadmobile.port.android.impl.UstadApp
 import com.ustadmobile.port.android.screen.PersonEditScreen
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
@@ -26,6 +29,7 @@ import kotlinx.coroutines.launch
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.*
+import org.kodein.di.instance
 
 
 @AdbScreenRecord("PersonEdit screen Test")
@@ -66,14 +70,18 @@ class PersonEditFragmentTest : TestCase() {
         mockWebServer.start()
         serverUrl = mockWebServer.url("/").toString()
 
+        val di = (ApplicationProvider.getApplicationContext<BaseUstadApp>() as UstadApp).di
+
         mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody("AE"))
         mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody("AE"))
-       dbRule.insertPersonForActiveUser(Person().apply {
-            firstNames = "Bob"
-            lastName = "Jones"
-            admin = true
-            personUid = 42
-        })
+
+        dbRule.insertPersonForActiveUser(Person().apply {
+                firstNames = "Bob"
+                lastName = "Jones"
+                admin = true
+                personUid = 42
+            })
+
 
     }
 
