@@ -71,6 +71,8 @@ const val INDICATOR_ENDPOINT = "endpoint"
 
 const val INDICATOR_STATS_ENDPOINT = "statsEndpoint"
 
+const val TRIGGER_KEY = "stats-server"
+
 const val CONF_QUARTZ_DS_DEFAULT_URI = "jdbc:sqlite:data/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000"
 
 /**
@@ -271,7 +273,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                         .usingJobData(INDICATOR_STATS_ENDPOINT, ustadStatsEndpoint)
                         .build()
 
-                val triggerKey = TriggerKey("stats-server")
+                val triggerKey = TriggerKey(TRIGGER_KEY)
 
                 //unschedule any existing instance of the trigger
                 scheduler.unscheduleJob(triggerKey)
@@ -298,6 +300,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         UmAppDatabase_KtorRoute(true)
         SiteRoute()
         CountryRoute()
+        TriggerRoute(ustadStatsEndpoint)
         ContentEntryLinkImporter()
         if (devMode) {
             DevModeRoute()

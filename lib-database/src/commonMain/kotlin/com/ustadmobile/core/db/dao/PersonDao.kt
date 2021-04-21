@@ -276,14 +276,14 @@ abstract class PersonDao : BaseDao<Person> {
                 :disaggregationKey AS disaggregationKey, 
                 (SELECT nodeClientId FROM SyncNode LIMIT 1) AS instanceId, 0 AS rowUid, '' AS valueStr,
                 (CASE 
-                WHEN ${UstadCentralReportRow.TOTAL_KEY} THEN ${UstadCentralReportRow.TOTAL_KEY}
-                WHEN ${UstadCentralReportRow.GENDER_KEY} THEN Person.gender
+                WHEN ${UstadCentralReportRow.TOTAL_KEY} THEN CAST(${UstadCentralReportRow.TOTAL_KEY} AS TEXT) 
+                WHEN ${UstadCentralReportRow.GENDER_KEY} THEN CAST(Person.gender AS TEXT)
                 WHEN ${UstadCentralReportRow.COUNTRY_KEY} THEN Person.personCountry
                 WHEN ${UstadCentralReportRow.CONNECTIVITY_KEY} 
                     THEN 
-                         (SELECT MAX(pcConStatus) 
+                         CAST((SELECT MAX(pcConStatus) 
                             FROM PersonConnectivity 
-                           WHERE pcPersonUid = Person.personUid)
+                           WHERE pcPersonUid = Person.personUid) AS TEXT)
                 END) AS disaggregationValue, 
                 COUNT(Person.personUid) AS value, :timestamp AS timestamp 
           FROM Person

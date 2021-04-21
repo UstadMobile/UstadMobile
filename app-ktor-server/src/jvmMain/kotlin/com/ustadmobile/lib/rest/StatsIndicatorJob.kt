@@ -33,52 +33,31 @@ class StatsIndicatorJob : Job {
         val dayOffset = now - 1.days
 
         val rowReportList = mutableListOf<UstadCentralReportRow>()
+        val listOfDisaggregation = listOf<Int>(UstadCentralReportRow.TOTAL_KEY,
+                UstadCentralReportRow.GENDER_KEY, UstadCentralReportRow.COUNTRY_KEY,
+                UstadCentralReportRow.CONNECTIVITY_KEY)
         endpointSet.endpointUrls.forEach { endpoint ->
 
             val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-            // REGISTERED_USERS_INDICATOR
-            rowReportList.addAll(
-                    db.personDao.getRegisteredUsers(UstadCentralReportRow.TOTAL_KEY,
-                    systemTimeInMillis()))
-            rowReportList.addAll(
-                    db.personDao.getRegisteredUsers(UstadCentralReportRow.GENDER_KEY,
-                    systemTimeInMillis()))
-            rowReportList.addAll(
-                    db.personDao.getRegisteredUsers(UstadCentralReportRow.COUNTRY_KEY,
-                    systemTimeInMillis()))
-            rowReportList.addAll(
-                    db.personDao.getRegisteredUsers(UstadCentralReportRow.CONNECTIVITY_KEY,
-                    systemTimeInMillis()))
 
+            listOfDisaggregation.forEach{
+                // REGISTERED_USERS_INDICATOR
+                rowReportList.addAll(
+                        db.personDao.getRegisteredUsers(it,
+                                systemTimeInMillis()))
 
-            // ACTIVE_USERS_INDICATOR
-            rowReportList.addAll(
-            db.statementDao.getActiveUsers(UstadCentralReportRow.TOTAL_KEY, systemTimeInMillis(),
-                    monthOffset.unixMillisLong, now.unixMillisLong))
-            rowReportList.addAll(
-            db.statementDao.getActiveUsers(UstadCentralReportRow.GENDER_KEY, systemTimeInMillis(),
-                    monthOffset.unixMillisLong, now.unixMillisLong))
-            rowReportList.addAll(
-            db.statementDao.getActiveUsers(UstadCentralReportRow.COUNTRY_KEY, systemTimeInMillis(),
-                    monthOffset.unixMillisLong, now.unixMillisLong))
-            rowReportList.addAll(
-            db.statementDao.getActiveUsers(UstadCentralReportRow.CONNECTIVITY_KEY, systemTimeInMillis(),
-                    monthOffset.unixMillisLong, now.unixMillisLong))
+                // ACTIVE_USERS_INDICATOR
+                rowReportList.addAll(
+                        db.statementDao.getActiveUsers(it, systemTimeInMillis(),
+                                monthOffset.unixMillisLong, now.unixMillisLong))
 
-            // ACTIVE_USER_DURATION_INDICATOR
-            rowReportList.addAll(
-            db.statementDao.getDurationUsage(UstadCentralReportRow.TOTAL_KEY,
-                    systemTimeInMillis(), dayOffset.unixMillisLong, now.unixMillisLong))
-            rowReportList.addAll(
-            db.statementDao.getDurationUsage(UstadCentralReportRow.GENDER_KEY,
-                    systemTimeInMillis(), dayOffset.unixMillisLong, now.unixMillisLong))
-            rowReportList.addAll(
-            db.statementDao.getDurationUsage(UstadCentralReportRow.COUNTRY_KEY,
-                    systemTimeInMillis(), dayOffset.unixMillisLong, now.unixMillisLong))
-            rowReportList.addAll(
-            db.statementDao.getDurationUsage(UstadCentralReportRow.CONNECTIVITY_KEY,
-                    systemTimeInMillis(), dayOffset.unixMillisLong, now.unixMillisLong))
+                // ACTIVE_USER_DURATION_INDICATOR
+                rowReportList.addAll(
+                        db.statementDao.getDurationUsage(it,
+                                systemTimeInMillis(), dayOffset.unixMillisLong, now.unixMillisLong))
+
+            }
 
         }
 

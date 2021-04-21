@@ -17,7 +17,7 @@ class UstadCentralReportRow {
 
     var disaggregationKey: Int = 0
 
-    var disaggregationValue: Int = 0
+    var disaggregationValue: String? = null
 
     var value: Double = 0.0
 
