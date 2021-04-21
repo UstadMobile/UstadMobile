@@ -93,6 +93,11 @@ class CountryListFragment : UstadBaseFragment(), CountryListView, OnSearchSubmit
         return mDataBinding?.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        ustadFragmentTitle = requireContext().getString(R.string.select_country)
+    }
+
     fun handleClickCountry(country: Country) {
         mPresenter?.handleClickCountry(country)
     }
