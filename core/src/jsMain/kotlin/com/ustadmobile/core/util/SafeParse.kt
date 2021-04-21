@@ -11,13 +11,13 @@ import kotlin.reflect.KClass
  * error would disappear after a clean and rebuild with no other changes.
  */
 actual inline fun <reified T> safeParse(di: DI, strategy: DeserializationStrategy<T>, str: String): T {
-    TODO("Not yet implemented")
+    return JSON.parse(str) as T
 }
 
 actual inline fun <reified T> safeStringify(di: DI, strategy: SerializationStrategy<T>, entity: T): String {
-    TODO("Not yet implemented")
+    return JSON.stringify(entity)
 }
 
 actual fun <T : Any> safeParseList(di: DI, strategy: DeserializationStrategy<List<T>>, klass: KClass<T>, str: String): List<T> {
-    TODO("Not yet implemented")
+    return JSON.parse(str)
 }

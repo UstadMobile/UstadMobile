@@ -1,12 +1,22 @@
 package com.ustadmobile.util
 
 import com.ccfraser.muirwik.components.styles.Theme
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ContentEntryOpener
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
+import com.ustadmobile.door.asRepository
+import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.model.statemanager.*
+import io.ktor.client.*
+import io.ktor.client.engine.js.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import org.kodein.di.*
@@ -49,6 +59,16 @@ object StateManager{
             UstadAccountManager(instance(), this, di)
         }
 
+        bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(EndpointScope.Default).singleton {
+            val dbName = sanitizeDbNameFromUrl(context.url)
+            UmAppDatabase.getInstance(this, dbName)
+        }
+
+        bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(EndpointScope.Default).singleton {
+            instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository(repositoryConfig(this, context.url,
+                instance(), instance()))
+        }
+
         constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with true
 
         bind<UmTheme>() with singleton{
@@ -60,6 +80,15 @@ object StateManager{
         bind<ContentEntryOpener>() with scoped(EndpointScope.Default).singleton {
             ContentEntryOpener(di, context)
         }
+
+        bind<HttpClient>() with singleton {
+            HttpClient(Js) {
+                install(JsonFeature)
+                install(HttpTimeout)
+            }
+        }
+
+        registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }
 
     /**

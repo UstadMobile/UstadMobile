@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.impl
 
 import android.content.Context
-import android.os.Build
 import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.google.gson.Gson
@@ -22,20 +21,29 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance
+import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
+import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
+import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
+import com.ustadmobile.core.io.ext.siteDataSubDir
+import com.ustadmobile.core.networkmanager.*
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
 import com.ustadmobile.core.util.ContentEntryOpener
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.NanoHttpdCall
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.android.generated.MessageIDMap
+import com.ustadmobile.port.android.network.downloadmanager.ContainerDownloadNotificationListener
+import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
 import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
@@ -46,32 +54,19 @@ import com.ustadmobile.sharedse.network.*
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploadManagerCommonJvm
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.newSingleThreadContext
-import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
-import com.ustadmobile.core.impl.*
-import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
-import com.ustadmobile.core.io.ext.siteDataSubDir
-import com.ustadmobile.core.networkmanager.*
-import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.port.android.network.downloadmanager.ContainerDownloadNotificationListener
-import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.newSingleThreadContext
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
-
 import org.kodein.di.*
-import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
-
-import java.util.concurrent.TimeUnit
 
 /**
  * Note: BaseUstadApp extends MultidexApplication on the multidex variant, but extends the

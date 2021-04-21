@@ -1,7 +1,7 @@
 {
     "first_dest": "ContentEntryListTabsView",
     "app.guest_allowed": "true",
-    "apiUrl": "https://app.ustadmobile.com/main2/",
+    "apiUrl": "http://192.168.31.22:8087/",
     "app.login_before_open": "false",
     "first_dest_login_required": "false",
     "doordb.endpoint.url": "http://localhost:8087/",
