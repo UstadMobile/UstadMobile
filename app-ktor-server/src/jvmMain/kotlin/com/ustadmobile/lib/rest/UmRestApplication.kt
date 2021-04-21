@@ -7,7 +7,10 @@ import com.maxmind.geoip2.DatabaseReader
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.EndpointSet
-import com.ustadmobile.core.catalog.contenttype.*
+import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
+import com.ustadmobile.core.catalog.contenttype.H5PTypePluginCommonJvm
+import com.ustadmobile.core.catalog.contenttype.VideoTypePluginJvm
+import com.ustadmobile.core.catalog.contenttype.XapiTypePluginCommonJvm
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
@@ -18,30 +21,25 @@ import com.ustadmobile.core.notification.setupNotificationCheckerSyncListener
 import com.ustadmobile.core.schedule.setupScheduleSyncListener
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
-import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
-import com.ustadmobile.lib.rest.ext.bindDataSourceIfNotExisting
 import com.ustadmobile.lib.rest.ext.databasePropertiesFromSection
 import com.ustadmobile.lib.rest.ext.ktorInitDbWithRepo
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import io.ktor.application.Application
-import io.ktor.application.ApplicationCall
-import io.ktor.application.install
+import io.ktor.application.*
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
-import io.ktor.gson.GsonConverter
-import io.ktor.gson.gson
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
-import io.ktor.request.header
-import io.ktor.routing.Routing
+import io.ktor.client.features.json.*
+import io.ktor.features.*
+import io.ktor.gson.*
+import io.ktor.http.*
+import io.ktor.request.*
+import io.ktor.routing.*
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import org.kodein.di.*
@@ -50,12 +48,8 @@ import org.quartz.*
 import org.quartz.impl.StdSchedulerFactory
 import java.io.File
 import java.nio.file.Files
-import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.naming.InitialContext
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.features.*
-import org.apache.commons.io.FileUtils
 
 const val TAG_UPLOAD_DIR = 10
 

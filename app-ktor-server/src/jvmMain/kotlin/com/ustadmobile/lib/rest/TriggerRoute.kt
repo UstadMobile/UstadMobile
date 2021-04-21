@@ -1,5 +1,8 @@
 package com.ustadmobile.lib.rest
 
+import io.ktor.application.*
+import io.ktor.http.*
+import io.ktor.response.*
 import io.ktor.routing.*
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -10,7 +13,7 @@ import org.quartz.TriggerBuilder
 
 fun Route.TriggerRoute(statsEndpoint: String){
 
-    post("trigger-stats"){
+    get("trigger-stats"){
 
         if(statsEndpoint != CONF_STATS_SERVER){
 
@@ -25,6 +28,8 @@ fun Route.TriggerRoute(statsEndpoint: String){
 
             scheduler.scheduleJob(job, jobTrigger)
         }
+
+        call.respond(HttpStatusCode.NoContent, "")
 
     }
 

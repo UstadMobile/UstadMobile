@@ -2,6 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.days
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointSet
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.DoorTag
@@ -33,13 +34,12 @@ class StatsIndicatorJob : Job {
         val dayOffset = now - 1.days
 
         val rowReportList = mutableListOf<UstadCentralReportRow>()
-        val listOfDisaggregation = listOf<Int>(UstadCentralReportRow.TOTAL_KEY,
+        val listOfDisaggregation = listOf(UstadCentralReportRow.TOTAL_KEY,
                 UstadCentralReportRow.GENDER_KEY, UstadCentralReportRow.COUNTRY_KEY,
                 UstadCentralReportRow.CONNECTIVITY_KEY)
         endpointSet.endpointUrls.forEach { endpoint ->
 
-            val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
-
+            val db: UmAppDatabase by di.on(Endpoint(endpoint)).instance(tag = DoorTag.TAG_DB)
 
             listOfDisaggregation.forEach{
                 // REGISTERED_USERS_INDICATOR
