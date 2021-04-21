@@ -67,7 +67,7 @@ class StatsIndicatorJob : Job {
             client.post<HttpStatement>(statsEndpoint){
                 header("content-type", "application/json")
                 body = listOf(rowReportList)
-            }
+            }.execute()
         }
 
 
