@@ -26,6 +26,8 @@ import com.ustadmobile.util.CssStyleManager.mainComponentSearch
 import com.ustadmobile.util.CssStyleManager.mainComponentSearchIcon
 import com.ustadmobile.util.CssStyleManager.progressIndicator
 import com.ustadmobile.util.RouteManager.destinationList
+import com.ustadmobile.util.RouteManager.findDestination
+import com.ustadmobile.util.RouteManager.getPathName
 import com.ustadmobile.util.RouteManager.renderRoutes
 import com.ustadmobile.util.StateManager
 import com.ustadmobile.util.UmReactUtil.drawerWidth
@@ -61,8 +63,6 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
 
     private var showFab: Boolean = false
 
-    private var showNavigation: Boolean = false
-
     private var fabIcon: String = ""
 
     private var fabLabel: String = ""
@@ -71,8 +71,6 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
 
     private var onSnackActionClicked:(Event)-> Unit = {}
 
-    private lateinit var currentDestination: UmReactDestination
-
     private var snackBarOpen = false
 
     private var snackBarActionLabel:String? = null
@@ -80,6 +78,8 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
     private var snackBarMessage:String? = null
 
     private val altBuilder = RBuilder()
+
+    private lateinit var currentDestination: UmReactDestination
 
     private var stateChangeListener : (GlobalStateSlice) -> Unit = {
         when (it.state.type) {
@@ -104,7 +104,6 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
 
     override fun RState.init(props: MainProps) {
         currentDestination = props.currentDestination
-        showNavigation = props.currentDestination.showNavigation
     }
 
     override fun componentDidMount() {
@@ -145,7 +144,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                         css { +mainComponentContainer }
                         mAppBar(position = MAppBarPosition.absolute) {
                             css {
-                                val removeLeftMargin = isRTLSupport or !showNavigation
+                                val removeLeftMargin = isRTLSupport or !currentDestination.showNavigation
                                 position = Position.absolute
                                 marginLeft = if(removeLeftMargin) zeroPx else drawerWidth
                                 media(theme.breakpoints.up(Breakpoint.md)) {
@@ -180,7 +179,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
 
                                 mAvatar {
                                     css {
-                                        display = if(showNavigation) Display.block else Display.none
+                                        display = if(currentDestination.showNavigation) Display.block else Display.none
                                     }
                                     attrs{
                                         src = placeHolderImage
@@ -191,7 +190,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                             }
                         }
 
-                        if(showNavigation){
+                        if(currentDestination.showNavigation){
                             mHidden(mdUp = true) {
                                 //render on small display (Bottom nav)
                                 console.log("Moja")
@@ -300,8 +299,8 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                             divider = destination.divider , onClick = {
                             setState {
                                 showSearch = destination.showSearch
-                                showNavigation = destination.showNavigation
                                 currentTile = systemImpl.getString(destination.labelId, this)
+                                currentDestination = destination
                             }
                             systemImpl.go(destination.view, destination.args,this)
                         })

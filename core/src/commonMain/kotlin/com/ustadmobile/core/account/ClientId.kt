@@ -1,3 +1,3 @@
 package com.ustadmobile.core.account
 
-data class Endpoint(val url: String)
+data class ClientId(val id: Int)

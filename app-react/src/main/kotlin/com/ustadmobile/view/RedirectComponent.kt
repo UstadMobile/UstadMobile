@@ -4,10 +4,12 @@ import com.ccfraser.muirwik.components.mCssBaseline
 import com.ccfraser.muirwik.components.themeContext
 import com.ustadmobile.core.controller.RedirectPresenter
 import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.RedirectView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_WEB_PLATFORM
+import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.util.RouteManager.findDestination
 import com.ustadmobile.util.RouteManager.getArgs
 import com.ustadmobile.util.StateManager
@@ -45,11 +47,21 @@ class RedirectComponent (props: RProps): UmBaseComponent<RProps, RState>(props),
     override fun showNextScreen(viewName: String, args: Map<String, String>) {
         arguments.putAll(args)
         setState {
-            arguments = if(viewName == ContentEntryList2View.VIEW_NAME){
-                if(arguments.isEmpty())
-                    arguments[ARG_PARENT_ENTRY_UID] = UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString()
-                arguments
-            }else arguments
+            arguments = when (viewName) {
+                ContentEntryList2View.VIEW_NAME -> {
+                    if(arguments.isEmpty() && !arguments.containsKey(ARG_PARENT_ENTRY_UID))
+                        arguments[ARG_PARENT_ENTRY_UID] = MASTER_SERVER_ROOT_ENTRY_UID.toString()
+                    arguments
+                }
+
+                Login2View.VIEW_NAME -> {
+                    if(!arguments.containsKey(ARG_NEXT)){
+                        arguments[ARG_NEXT] = ContentEntryList2View.VIEW_NAME
+                    }
+                    arguments
+                }
+                else -> arguments
+            }
 
             nextDestination = viewName
         }

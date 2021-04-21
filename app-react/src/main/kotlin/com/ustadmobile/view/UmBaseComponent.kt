@@ -15,7 +15,10 @@ import kotlinx.coroutines.Runnable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import react.*
+import react.RBuilder
+import react.RComponent
+import react.RProps
+import react.RState
 
 open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(props),
     UstadView, DIAware, DoorLifecycleOwner {

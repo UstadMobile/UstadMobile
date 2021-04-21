@@ -15,7 +15,6 @@ import com.ustadmobile.util.CssStyleManager.loginComponentContainer
 import com.ustadmobile.util.CssStyleManager.loginComponentForm
 import com.ustadmobile.util.CssStyleManager.loginComponentFormElementsMargin
 import com.ustadmobile.util.RouteManager.getArgs
-import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.InputType
 import react.RBuilder
@@ -123,10 +122,7 @@ class LoginComponent(props: RProps): UmBaseComponent<RProps,RState>(props), Logi
                 mButton(systemImpl.getString(MessageID.login, this),
                     size = MButtonSize.large, disabled = inProgress
                     ,color = MColor.secondary,variant = MButtonVariant.contained, onClick = {
-                        //remove once db is ready and let login be handled by server
-                        systemImpl.setAppPref(Login2Presenter.PREFKEY_USER_LOGGED_IN,"true", this)
-                        window.location.reload()
-                        //mPresenter.handleLogin(username, password)
+                        mPresenter.handleLogin(username, password)
                     }){
                     css {
                         +loginComponentFormElementsMargin
