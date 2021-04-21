@@ -67,7 +67,7 @@ class TestStats {
         println("Hi")
         val rowsToInsert = listOf(UstadCentralReportRow().apply {
             this.disaggregationKey = 42
-            this.disaggregationValue = 200
+            this.disaggregationValue = "200"
         })
 
         runBlocking {
@@ -77,7 +77,7 @@ class TestStats {
         }
 
         val listInDb = statsDatabase.ustadCentralReportRowDao.findByDisaggregationKey(42)
-        Assert.assertEquals(200, listInDb.first().disaggregationValue)
+        Assert.assertEquals("200", listInDb.first().disaggregationValue)
     }
 
 
