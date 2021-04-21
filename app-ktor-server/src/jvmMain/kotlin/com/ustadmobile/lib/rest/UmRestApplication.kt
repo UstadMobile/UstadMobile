@@ -27,6 +27,7 @@ import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
 import com.ustadmobile.lib.rest.ext.bindDataSourceIfNotExisting
 import com.ustadmobile.lib.rest.ext.databasePropertiesFromSection
 import com.ustadmobile.lib.rest.ext.ktorInitDbWithRepo
+import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall

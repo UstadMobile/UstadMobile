@@ -1,10 +1,11 @@
-package com.ustadmobile.lib.rest.ext
+package com.ustadmobile.lib.util.ext
 
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import org.osjava.sj.loader.convert.SJDataSourceConverter
 import java.util.*
 import javax.naming.InitialContext
 import javax.naming.NamingException
+
 
 /**
  * Binds a datasource to java:/comp/env/jdbc/dbName if it has not already been bound
@@ -33,7 +34,7 @@ fun InitialContext.bindIfNotExisting(path: String, bindProducer: () -> Any) {
     }
 }
 
-fun InitialContext.createSubcontextIfNotExisting(subcontext: String) : InitialContext{
+fun InitialContext.createSubcontextIfNotExisting(subcontext: String) : InitialContext {
     try {
         lookup(subcontext)
     }catch(e: NamingException) {

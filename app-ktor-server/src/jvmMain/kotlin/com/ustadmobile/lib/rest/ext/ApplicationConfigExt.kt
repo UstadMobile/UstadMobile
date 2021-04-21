@@ -15,8 +15,8 @@ fun ApplicationConfig.databasePropertiesFromSection(section: String,
         setProperty("url",
             propertyOrNull("$section.url")?.getString() ?: defaultUrl)
         setProperty("user",
-            propertyOrNull("ktor.database.user")?.getString() ?: "")
+            propertyOrNull("$section.user")?.getString() ?: "")
         setProperty("password",
-            propertyOrNull("ktor.database.password")?.getString() ?: "")
+            propertyOrNull("$section.password")?.getString() ?: "")
     }
 }

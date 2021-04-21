@@ -30,6 +30,7 @@ kotlin {
 
             dependencies {
                 implementation project(":lib-database-entities")
+                implementation project(":lib-util")
 
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
@@ -87,7 +88,7 @@ afterEvaluate {
     }
 }
 
-mainClassName = 'com.ustadmobile.lib.rest.Application'
+mainClassName = 'com.ustadmobile.stats.rest.ApplicationKt'
 
 // This task will generate your fat JAR and put it in the ./build/libs/ directory
 shadowJar {
