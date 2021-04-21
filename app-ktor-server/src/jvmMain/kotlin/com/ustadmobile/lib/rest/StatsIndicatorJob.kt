@@ -6,11 +6,14 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointSet
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.withUtf8Charset
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.UstadCentralReportRow
 import io.ktor.client.*
+import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -65,8 +68,7 @@ class StatsIndicatorJob : Job {
 
         GlobalScope.launch {
             client.post<HttpStatement>(statsEndpoint){
-                header("content-type", "application/json")
-                body = listOf(rowReportList)
+                body = defaultSerializer().write(rowReportList, ContentType.Application.Json.withUtf8Charset())
             }.execute()
         }
 

@@ -275,8 +275,8 @@ abstract class PersonDao : BaseDao<Person> {
         SELECT ${UstadCentralReportRow.REGISTERED_USERS_INDICATOR} AS indicatorId,
                 :disaggregationKey AS disaggregationKey, 
                 (SELECT nodeClientId FROM SyncNode LIMIT 1) AS instanceId, 0 AS rowUid, '' AS valueStr,
-                (CASE 
-                WHEN ${UstadCentralReportRow.TOTAL_KEY} THEN CAST(${UstadCentralReportRow.TOTAL_KEY} AS TEXT) 
+                (CASE :disaggregationKey
+                WHEN ${UstadCentralReportRow.TOTAL_KEY}  THEN CAST(${UstadCentralReportRow.TOTAL_KEY} AS TEXT) 
                 WHEN ${UstadCentralReportRow.GENDER_KEY} THEN CAST(Person.gender AS TEXT)
                 WHEN ${UstadCentralReportRow.COUNTRY_KEY} THEN Person.personCountry
                 WHEN ${UstadCentralReportRow.CONNECTIVITY_KEY} 
