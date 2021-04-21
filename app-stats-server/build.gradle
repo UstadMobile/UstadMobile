@@ -29,9 +29,21 @@ kotlin {
             kotlin.srcDir("build/generated/source/door")
 
             dependencies {
+                implementation project(":lib-database-entities")
+
+                implementation "io.ktor:ktor-client-json:$version_ktor"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "io.ktor:ktor-gson:$version_ktor"
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+
                 implementation "com.ustadmobile.door:room-annotations:$version_door"
                 implementation "com.ustadmobile.door:door-runtime:$version_door"
-                implementation project(":lib-database-entities")
+                implementation "junit:junit:$version_junit"
+
+                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                implementation "org.postgresql:postgresql:$version_postgres_jdbc"
 
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
                 implementation "io.ktor:ktor-gson:$version_ktor"
@@ -55,12 +67,6 @@ kapt {
     arguments {
         arg("doordb_android_out", project.file("build/android/"))
         arg("doordb_source_path", project.file("src/jvmMain/kotlin"))
-      /*  arg("doordb_jvm_out", rootProject.file("lib-database-mpp/build/generated/source/door").absolutePath)
-        arg("doordb_js_out", rootProject.file("lib-database-mpp/build/generated/source/door-js").absolutePath)
-        arg("doordb_ktor_out", rootProject.file("app-ktor-server/build/generated/source/door").absolutePath)
-
-        arg("doordb_template_fixupdatetrigger_sqlite", project.file("build/migrationtemplates"))
-        arg("doordb_migrations_out", "$buildDir/generated/source/door-migrations")*/
     }
 }
 

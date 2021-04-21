@@ -1,5 +1,6 @@
 package com.ustadmobile.stats.rest
 
+import com.google.gson.Gson
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.stats.db.StatsDatabase
 import io.ktor.application.*
@@ -13,6 +14,7 @@ fun main(args: Array<String>): Unit = EngineMain.main(args)
 
 fun Application.statsModule(){
 
+    val gson = Gson()
     install(ContentNegotiation) {
         gson {
             register(ContentType.Application.Json, GsonConverter())
@@ -24,7 +26,7 @@ fun Application.statsModule(){
             StatsDatabase::class, "StatsDatabase").build()
 
     install(Routing) {
-        StatsRoute(db)
+        StatsRoute(db, gson)
     }
 
 
