@@ -363,6 +363,8 @@ abstract class UstadMobileSystemCommon {
 
         const val SUBDIR_ATTACHMENTS_NAME = "attachments"
 
+        const val TAG_CLIENT_ID = "client_id"
+
 
     }
 }

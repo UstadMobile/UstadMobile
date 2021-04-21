@@ -67,8 +67,10 @@ private fun Endpoint.identifier(dbMode: String, singletonName: String = CONF_DBM
     sanitizeDbNameFromUrl(url)
 }
 
-fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: String? = null,
+fun Application.umRestApplication(dbModeOverride: String? = null,
                                   singletonDbName: String = "UmAppDatabase") {
+
+    val devMode = environment.config.propertyOrNull("ktor.ustad.devmode")?.getString().toBoolean()
 
     if (devMode) {
         install(CORS) {
@@ -77,6 +79,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             method(HttpMethod.Put)
             method(HttpMethod.Options)
             header(HttpHeaders.ContentType)
+            header(HttpHeaders.AccessControlAllowOrigin)
+            header("X-nid")
             anyHost()
         }
     }

@@ -8,7 +8,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 
 fun Application.umRestApplicationDevMode() {
-    umRestApplication(devMode = true)
+    umRestApplication()
     install(StatusPages) {
         exception<Exception> {cause ->
             call.respond(HttpStatusCode.InternalServerError, "Internal Server Error")

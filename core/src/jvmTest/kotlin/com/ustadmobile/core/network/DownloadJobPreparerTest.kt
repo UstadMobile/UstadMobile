@@ -71,7 +71,7 @@ class DownloadJobPreparerTest {
             "http://localhost:8089/", "Guest", "User")
 
         server = embeddedServer(Netty, 8089) {
-            umRestApplication(devMode = false)
+            umRestApplication()
         }
         server.start()
 
