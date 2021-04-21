@@ -45,7 +45,7 @@ abstract class FeedEntryDao {
 			   FROM StatementEntity
 			  WHERE StatementEntity.statementPersonUid = :personUid) AS contentUsageMillis
     """)
-    abstract fun getFeedSummary(personUid: Long): FeedSummary?
+    abstract suspend fun getFeedSummary(personUid: Long): FeedSummary?
 
 
 }

@@ -73,6 +73,10 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
          */
         const val REGISTER_VIA_LINK = "RegViaLink"
 
+        const val ARG_HOME_ACCESS = "homeAccess"
+
+        const val ARG_MOBILE_ACCESS = "mobileAccess"
+
     }
 
 }

@@ -32,6 +32,6 @@ abstract class PersonConnectivityDao : BaseDao<PersonConnectivity> {
             pcLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
             WHERE pcUid = :uid
     """)
-    abstract fun updateConnectivity(status: Int, uid: Long)
+    abstract suspend fun updateConnectivity(status: Int, uid: Long)
 
 }

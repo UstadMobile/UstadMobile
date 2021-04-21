@@ -324,6 +324,9 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
                 MessageIdFormatter(
                         OUTCOME_TO_MESSAGE_ID_MAP.mapKeys { it.key.toString() }, impl, context)
             }
+            Report.COUNTRY -> {
+                CodeLabelFormatter()
+            }
             else ->{
                 null
             }
@@ -357,6 +360,9 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
                     .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
                     .plus(0L to impl.getString(MessageID.unset, context))
             UidAndLabelFormatter(reasonLabelList)
+        }
+        Report.COUNTRY -> {
+            CodeLabelFormatter()
         }
         else ->{
             null

@@ -427,6 +427,7 @@ private fun groupBy(value: Int, queryType: Int, dbType: Int): String {
         Report.CLASS -> "ResultSource.clazzUid "
         Report.ENROLMENT_OUTCOME -> "ResultSource.clazzEnrolmentOutcome "
         Report.ENROLMENT_LEAVING_REASON -> "ResultSource.clazzEnrolmentLeavingReasonUid "
+        Report.COUNTRY -> "ResultSource.personCountry "
         else -> ""
     }
 }

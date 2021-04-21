@@ -63,7 +63,9 @@ class ReportEditPresenter(context: Any,
         ENROLMENT_OUTCOME(Report.ENROLMENT_OUTCOME,
                 MessageID.class_enrolment_outcome),
         ENROLMENT_LEAVING(Report.ENROLMENT_LEAVING_REASON,
-                MessageID.class_enrolment_leaving)
+                MessageID.class_enrolment_leaving),
+        COUNTRY(Report.COUNTRY,
+                MessageID.country)
     }
 
     class XAxisMessageIdOption(day: XAxisOptions, context: Any)
@@ -422,13 +424,14 @@ class ReportEditPresenter(context: Any,
                                 it.code == Report.CONTENT_ENTRY ||
                                 it.code == Report.CLASS || it.code == ReportSeries.NONE ||
                                 it.code == Report.ENROLMENT_LEAVING_REASON ||
-                                it.code == Report.ENROLMENT_OUTCOME
+                                it.code == Report.ENROLMENT_OUTCOME || it.code == Report.COUNTRY
                     }
         } else if (selectedOption.optionId == Report.CLASS ||
                 selectedOption.optionId == Report.CONTENT_ENTRY ||
                 selectedOption.optionId == Report.GENDER ||
                 selectedOption.optionId == Report.ENROLMENT_LEAVING_REASON ||
-                selectedOption.optionId == Report.ENROLMENT_OUTCOME) {
+                selectedOption.optionId == Report.ENROLMENT_OUTCOME ||
+                selectedOption.optionId == Report.COUNTRY) {
             view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context) }
         }
     }

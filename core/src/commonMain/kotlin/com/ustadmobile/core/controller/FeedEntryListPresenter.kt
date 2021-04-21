@@ -2,8 +2,11 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.FeedEntry
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 class FeedEntryListPresenter(context: Any, arguments: Map<String, String>, view: FeedEntryListView,
@@ -16,7 +19,9 @@ class FeedEntryListPresenter(context: Any, arguments: Map<String, String>, view:
         super.onCreate(savedState)
         updateListOnView()
         feedEntryItemListener.listViewMode = mListMode
-        view.summaryStats = db.feedEntryDao.getFeedSummary(accountManager.activeAccount.personUid)
+        GlobalScope.launch(doorMainDispatcher()){
+            view.summaryStats = db.feedEntryDao.getFeedSummary(accountManager.activeAccount.personUid)
+        }
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {

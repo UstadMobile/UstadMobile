@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
+import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
@@ -14,11 +15,10 @@ import com.ustadmobile.core.util.ext.createPersonGroupAndMemberWithEnrolment
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.view.ContentEntryListTabsView
-import com.ustadmobile.core.view.PersonDetailView
-import com.ustadmobile.core.view.PersonEditView
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.PersonEditView.Companion.ARG_HOME_ACCESS
+import com.ustadmobile.core.view.PersonEditView.Companion.ARG_MOBILE_ACCESS
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -179,9 +179,13 @@ class PersonEditPresenter(context: Any,
         }
 
         if(person.personCountry.isNullOrEmpty()){
-            person.personCountry = httpClient.get<String>{
-                url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
-                        "country/code"))
+            try {
+                person.personCountry = httpClient.get<String> {
+                    url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
+                            "country/code"))
+                }
+            }catch (ie: Exception){
+
             }
         }
 
@@ -200,6 +204,15 @@ class PersonEditPresenter(context: Any,
         } else {
             PersonWithAccount()
         }
+        val homeStr = bundle[ARG_HOME_ACCESS]
+        if (homeStr != null) {
+            view.homeConnectivityStatus = safeParse(di, PersonConnectivity.serializer(), homeStr)
+        }
+
+        val mobileStr = bundle[ARG_MOBILE_ACCESS]
+        if (mobileStr != null) {
+            view.mobileConnectivityStatus = safeParse(di, PersonConnectivity.serializer(), mobileStr)
+        }
 
         return editEntity
     }
@@ -209,6 +222,10 @@ class PersonEditPresenter(context: Any,
         val entityVal = entity
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
                 entityVal)
+        savedState.putEntityAsJson(ARG_HOME_ACCESS, PersonConnectivity.serializer(),
+                view.homeConnectivityStatus)
+        savedState.putEntityAsJson(ARG_MOBILE_ACCESS, PersonConnectivity.serializer(),
+                view.mobileConnectivityStatus)
     }
 
 
