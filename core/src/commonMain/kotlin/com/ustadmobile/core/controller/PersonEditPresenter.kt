@@ -170,12 +170,13 @@ class PersonEditPresenter(context: Any,
             false
         }
 
-        val canViewConnectivityStatus = if(loggedInPersonUid != 0L){
+        //If the user is being created, then allow visibility for connectivity status
+        val canViewConnectivityStatus = if(entityUid == 0L) {
+            true
+        }else {
             repo.personDao.personHasPermissionAsync(loggedInPersonUid,
-                    arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
-                    Role.PERMISSION_PERSON_CONNECTIVITY_SELECT)
-        }else{
-            false
+                arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
+                Role.PERMISSION_PERSON_CONNECTIVITY_SELECT)
         }
 
         if(person.personCountry.isNullOrEmpty()){
