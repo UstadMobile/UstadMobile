@@ -92,6 +92,8 @@ open class Report {
 
         const val ENROLMENT_LEAVING_REASON = 309
 
+        const val COUNTRY = 310
+
         const val EVERYTHING = 0
 
         const val LAST_WEEK_DATE = 800

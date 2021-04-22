@@ -5,6 +5,7 @@ import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.lib.db.entities.ScheduleAndTimezone
 
 
 @Repository
@@ -45,5 +46,18 @@ abstract class ScheduleDao : BaseDao<Schedule>, OneToManyJoinDao<Schedule> {
 
     @Query("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND CAST(scheduleActive AS INTEGER) = 1 ")
     abstract suspend fun findAllSchedulesByClazzUidAsync(clazzUid: Long): List<Schedule>
+
+    @Query("""
+        SELECT Schedule.*, 
+               COALESCE(Clazz.clazzTimeZone, School.schoolTimeZone, 'UTC') AS scheduleTimeZone
+          FROM Schedule
+          JOIN Clazz ON Schedule.scheduleClazzUid = Clazz.clazzUid
+     LEFT JOIN School ON Clazz.clazzSchoolUid = School.schoolUid   
+          JOIN ClazzEnrolment ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
+               AND ClazzEnrolment.clazzEnrolmentPersonUid = :personUid
+               AND :time BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft
+               AND ClazzEnrolment.clazzEnrolmentRole = :roleFilter
+    """)
+    abstract suspend fun findAllScheduleByPerson(personUid: Long, time: Long, roleFilter: Int): List<ScheduleAndTimezone>
 
 }

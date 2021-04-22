@@ -57,23 +57,26 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
      * @param date If this is not 0, then the query will ensure that the registration is current at
      * the given
      */
-    @Query("""SELECT ClazzEnrolment.*, Clazz.*, (SELECT ((CAST(COUNT(DISTINCT CASE WHEN 
-        ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN 
-        ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) AS REAL) / 
-        MAX(COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid),1)) * 100) 
-        FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLog ON 
-        ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid WHERE 
-        ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = :personUid 
-        AND ClazzLog.clazzLogClazzUid = Clazz.clazzUid AND ClazzLog.logDate 
-        BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft) 
-        as attendance
-        FROM ClazzEnrolment
-        LEFT JOIN Clazz ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
-        WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :personUid
-        AND ClazzEnrolment.clazzEnrolmentActive
-        ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
+    @Query("""
+        SELECT ClazzEnrolment.*, Clazz.*, 
+                (SELECT ((CAST(COUNT(DISTINCT CASE WHEN 
+                        ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN 
+                        ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) AS REAL) / 
+                        MAX(COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid),1)) * 100) 
+                   FROM ClazzLogAttendanceRecord 
+              LEFT JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid 
+                  WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = :personUid 
+                    AND ClazzLog.clazzLogClazzUid = Clazz.clazzUid 
+                    AND ClazzLog.logDate BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft) 
+                     AS attendance
+          FROM ClazzEnrolment
+     LEFT JOIN Clazz ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
+         WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :personUid
+           AND ClazzEnrolment.clazzEnrolmentActive
+      ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
     """)
     abstract fun findAllClazzesByPersonWithClazz(personUid: Long): DataSource.Factory<Int, ClazzEnrolmentWithClazzAndAttendance>
+
 
     @Query("""SELECT COALESCE(MAX(clazzEnrolmentDateLeft),0) FROM ClazzEnrolment WHERE 
         ClazzEnrolment.clazzEnrolmentPersonUid = :selectedPerson 
@@ -100,6 +103,18 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         AND (:roleFilter = 0 OR ClazzEnrolment.clazzEnrolmentRole = :roleFilter)
     """)
     abstract suspend fun getAllClazzEnrolledAtTimeAsync(clazzUid: Long, date: Long, roleFilter: Int): List<ClazzEnrolmentWithPerson>
+
+    //Temporary until ClazzLogCreator is made async etc
+    @Query("""SELECT ClazzEnrolment.*, Person.*
+        FROM ClazzEnrolment
+        LEFT JOIN Person ON ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
+        WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+        AND :date BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft
+        AND (:roleFilter = 0 OR ClazzEnrolment.clazzEnrolmentRole = :roleFilter)
+    """)
+    abstract fun getAllClazzEnrolledAtTime(clazzUid: Long, date: Long, roleFilter: Int): List<ClazzEnrolmentWithPerson>
+
+
 
     @Query("SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentUid = :uid")
     abstract suspend fun findByUid(uid: Long): ClazzEnrolment?

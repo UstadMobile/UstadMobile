@@ -32,6 +32,7 @@ import org.junit.Test
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
+import kotlin.math.exp
 
 
 class PersonEditPresenterTest  {
@@ -82,6 +83,8 @@ class PersonEditPresenterTest  {
 
         serverUrl = mockWebServer.url("/").toString()
 
+        mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody("AE"))
+
         accountManager = mock{
             on{activeAccount}.thenReturn(UmAccount(0L,"","",serverUrl))
         }
@@ -115,6 +118,7 @@ class PersonEditPresenterTest  {
             fatherName = "Doe"
             firstNames = "Jane"
             lastName = "Doe"
+            personCountry = "AE"
             if(!leftOutPassword){
                 newPassword = password
                 confirmedPassword = confirmPassword
@@ -133,6 +137,7 @@ class PersonEditPresenterTest  {
             fatherName = "Doe"
             firstNames = "Jane"
             lastName = "Doe"
+            personCountry = "AE"
             if(!leftOutPassword){
                 newPassword = password
                 confirmedPassword = confirmPassword
@@ -173,6 +178,7 @@ class PersonEditPresenterTest  {
 
         verify(mockView, timeout(timeoutInMill)).passwordError = eq(expectedMessage)
         verify(mockView, timeout(timeoutInMill)).usernameError = eq(expectedMessage)
+
 
     }
 

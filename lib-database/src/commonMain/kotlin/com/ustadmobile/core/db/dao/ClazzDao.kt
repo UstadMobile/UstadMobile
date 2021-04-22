@@ -173,18 +173,31 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
      * specified for the associated school.
      */
     @Query("""
-        SELECT Clazz.*, HolidayCalendar.*, School.*
-        FROM Clazz 
-        LEFT JOIN HolidayCalendar ON ((clazz.clazzHolidayUMCalendarUid != 0 AND HolidayCalendar.umCalendarUid = clazz.clazzHolidayUMCalendarUid)
-         OR clazz.clazzHolidayUMCalendarUid = 0 AND clazz.clazzSchoolUid = 0 AND HolidayCalendar.umCalendarUid = 
-            (SELECT schoolHolidayCalendarUid FROM School WHERE schoolUid = clazz.clazzSchoolUid))
-        LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
-        WHERE :filterUid = 0 OR Clazz.clazzUid = :filterUid
+             SELECT Clazz.*, HolidayCalendar.*, School.*
+               FROM Clazz 
+          LEFT JOIN HolidayCalendar ON ((clazz.clazzHolidayUMCalendarUid != 0 
+                    AND HolidayCalendar.umCalendarUid = clazz.clazzHolidayUMCalendarUid)
+                    OR clazz.clazzHolidayUMCalendarUid = 0 
+                    AND clazz.clazzSchoolUid != 0 
+                    AND HolidayCalendar.umCalendarUid = 
+                    (SELECT schoolHolidayCalendarUid 
+                       FROM School 
+                      WHERE schoolUid = clazz.clazzSchoolUid))
+         LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
+             WHERE :filterUid = 0 OR Clazz.clazzUid = :filterUid
     """)
-    abstract fun findClazzesWithEffectiveHolidayCalendarAndFilter(filterUid: Long): List<ClazzWithHolidayCalendarAndSchool>
+    abstract fun findClazzWithEffectiveHolidayCalendarAndFilter(filterUid: Long): ClazzWithHolidayCalendarAndSchool?
 
     @Query("SELECT Clazz.*, School.* FROM Clazz LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid WHERE clazz.clazzUid = :clazzUid")
     abstract suspend fun getClazzWithSchool(clazzUid: Long): ClazzWithSchool?
+
+    @Query("""
+        SELECT Clazz.*, School.*
+          FROM Clazz
+     LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
+         WHERE Clazz.clazzUid IN (:clazzUidList)
+    """)
+    abstract suspend fun getClazzesWithSchool(clazzUidList: List<Long>): List<ClazzWithSchool>
 
     companion object {
 

@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.notification.NotificationCheckersManager
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.MessageIdOption
@@ -24,6 +25,9 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SAVE_TO_DB
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 
 class ClazzEnrolmentEditPresenter(context: Any,
@@ -77,7 +81,7 @@ class ClazzEnrolmentEditPresenter(context: Any,
         val clazzEnrolment = db.onRepoWithFallbackToDb(2000) {
             it.takeIf { entityUid != 0L }?.clazzEnrolmentDao?.findEnrolmentWithLeavingReason(entityUid)
         } ?: ClazzEnrolmentWithLeavingReason().apply {
-            val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
+            val clazzTimeZone = clazzWithSchoolVal?.effectiveTimeZone ?: "UTC"
             val joinTime = DateTime.now().toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
             clazzEnrolmentDateJoined = joinTime
             clazzEnrolmentPersonUid = selectedPerson
@@ -180,6 +184,9 @@ class ClazzEnrolmentEditPresenter(context: Any,
             val saveToDb = arguments[ARG_SAVE_TO_DB]?.toBoolean() ?: false
             if(saveToDb){
                 repo.createPersonGroupAndMemberWithEnrolment(entity)
+                val notificationCheckersManager : NotificationCheckersManager = di.on(accountManager.activeAccount)
+                    .direct.instance()
+                notificationCheckersManager.invalidateClazzScheduleRelatedCheckers(entity.clazzEnrolmentClazzUid)
             }
 
             view.finishWithResult(listOf(entity))

@@ -9,6 +9,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
@@ -47,6 +48,26 @@ class PersonDetailPresenter(context: Any,
                     && (activePersonUid == entityUid || hasAuthPermission)
 
             view.showCreateAccountVisible =  person.username == null && hasAuthPermission
+
+            val showConnectivityStatus =  repo.personDao.personHasPermissionAsync(activePersonUid,
+                    person.personUid, Role.PERMISSION_PERSON_CONNECTIVITY_SELECT)
+
+            if(showConnectivityStatus){
+                val connectivityList = db.onDbThenRepoWithTimeout(2000) { dbToUse, _ ->
+                    dbToUse.takeIf { entityUid != 0L }?.personConnectivityDao
+                            ?.getConnectivityStatusForPerson(activePersonUid, entityUid)
+                } ?: listOf<PersonConnectivity>()
+
+                view.homeConnectivityStatus = connectivityList.find {
+                    it.pcConType == PersonConnectivity.CONNECTIVITY_TYPE_HOME
+                }
+
+                view.mobileConnectivityStatus = connectivityList.find {
+                    it.pcConType == PersonConnectivity.CONNECTIVITY_TYPE_MOBILE
+                }
+            }
+
+            view.showConnectivityVisible = showConnectivityStatus
 
             view.rolesAndPermissions = repo.entityRoleDao.filterByPersonWithExtra(
                     person.personGroupUid?:0L)

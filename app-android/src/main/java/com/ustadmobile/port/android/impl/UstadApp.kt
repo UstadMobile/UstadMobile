@@ -54,6 +54,9 @@ import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.networkmanager.*
+import com.ustadmobile.core.notification.NotificationCheckersManager
+import com.ustadmobile.core.notification.setupNotificationCheckerSyncListener
+import com.ustadmobile.core.schedule.setupScheduleSyncListener
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.port.android.network.downloadmanager.ContainerDownloadNotificationListener
@@ -66,7 +69,6 @@ import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 
 import org.kodein.di.*
-import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
@@ -105,6 +107,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
                 attachmentFilters += ImageResizeAttachmentFilter("PersonPicture", 1280, 1280)
             }).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
+                it.setupScheduleSyncListener(context, di)
+                it.setupNotificationCheckerSyncListener(context, di)
             }
         }
 
@@ -243,6 +247,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<DestinationProvider>() with singleton {
             ViewNameToDestMap()
+        }
+
+        bind<NotificationCheckersManager>() with scoped(EndpointScope.Default).singleton {
+            NotificationCheckersManager(context, di, applicationContext)
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

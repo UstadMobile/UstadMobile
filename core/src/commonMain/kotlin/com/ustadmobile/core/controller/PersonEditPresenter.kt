@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
+import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
@@ -9,21 +10,25 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.age
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.createPersonGroupAndMemberWithEnrolment
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.view.ContentEntryListTabsView
-import com.ustadmobile.core.view.PersonDetailView
-import com.ustadmobile.core.view.PersonEditView
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.PersonEditView.Companion.ARG_HOME_ACCESS
+import com.ustadmobile.core.view.PersonEditView.Companion.ARG_MOBILE_ACCESS
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.lib.db.entities.*
+import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.features.json.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -51,6 +56,8 @@ class PersonEditPresenter(context: Any,
     private var loggedInPerson: Person? = null
 
     private var regViaLink: Boolean = false
+
+    private val httpClient: HttpClient by instance()
 
     private val clazzEnrolmentWithClazzJoinEditHelper =
             DefaultOneToManyJoinEditHelper(ClazzEnrolmentWithClazz::clazzEnrolmentUid,
@@ -82,9 +89,10 @@ class PersonEditPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.genderOptions = listOf(MessageIdOption(MessageID.female, context, Person.GENDER_FEMALE),
-                MessageIdOption(MessageID.male, context, Person.GENDER_MALE),
-                MessageIdOption(MessageID.other, context, Person.GENDER_OTHER))
+        view.genderOptions = PersonConstants.GENDER_MESSAGE_ID_MAP.map {
+            MessageIdOption(it.value, context, it.key) }
+        view.connectivityStatusOptions = PersonConstants.CONNECTIVITY_STATUS_MAP.map {
+            MessageIdOption(it.value, context, it.key) }
         view.clazzList = clazzEnrolmentWithClazzJoinEditHelper.liveList
 
         view.rolesAndPermissionsList = rolesAndPermissionEditHelper.liveList
@@ -122,6 +130,30 @@ class PersonEditPresenter(context: Any,
         } ?: listOf()
         clazzEnrolmentWithClazzJoinEditHelper.liveList.sendValue(clazzMemberWithClazzList)
 
+        val loggedInPersonUid = accountManager.activeAccount.personUid
+        loggedInPerson = withTimeoutOrNull(2000){
+            db.personDao.findByUidAsync(loggedInPersonUid)
+        }
+
+        val connectivityList = db.onDbThenRepoWithTimeout(2000) { dbToUse, _ ->
+            dbToUse.takeIf { entityUid != 0L }?.personConnectivityDao
+                    ?.getConnectivityStatusForPerson(loggedInPersonUid, entityUid)
+        } ?: listOf<PersonConnectivity>()
+
+        view.homeConnectivityStatus = connectivityList.find {
+            it.pcConType == PersonConnectivity.CONNECTIVITY_TYPE_HOME
+        } ?: PersonConnectivity().apply {
+            pcPersonUid = entityUid
+            pcConType = PersonConnectivity.CONNECTIVITY_TYPE_HOME
+        }
+
+        view.mobileConnectivityStatus = connectivityList.find {
+            it.pcConType == PersonConnectivity.CONNECTIVITY_TYPE_MOBILE
+        } ?: PersonConnectivity().apply {
+            pcPersonUid = entityUid
+            pcConType = PersonConnectivity.CONNECTIVITY_TYPE_MOBILE
+        }
+
 
         val rolesAndPermissionList = withTimeoutOrNull(2000){
             db.takeIf{entityUid != 0L}?.entityRoleDao?.filterByPersonWithExtraAsList(
@@ -129,10 +161,6 @@ class PersonEditPresenter(context: Any,
         }?:listOf()
         rolesAndPermissionEditHelper.liveList.sendValue(rolesAndPermissionList)
 
-        val loggedInPersonUid = accountManager.activeAccount.personUid
-        loggedInPerson = withTimeoutOrNull(2000){
-            db.personDao.findByUidAsync(loggedInPersonUid)
-        }
 
         val canDelegate = if(loggedInPersonUid != 0L) {
             repo.personDao.personHasPermissionAsync(loggedInPersonUid?: 0,
@@ -142,11 +170,28 @@ class PersonEditPresenter(context: Any,
             false
         }
 
-        if(loggedInPerson != null && loggedInPerson?.admin == false){
-            view.canDelegatePermissions = canDelegate
+        //If the user is being created, then allow visibility for connectivity status
+        val canViewConnectivityStatus = if(entityUid == 0L) {
+            true
         }else {
-            view.canDelegatePermissions = loggedInPerson != null && loggedInPerson?.admin == true
+            repo.personDao.personHasPermissionAsync(loggedInPersonUid,
+                arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
+                Role.PERMISSION_PERSON_CONNECTIVITY_SELECT)
         }
+
+        if(person.personCountry.isNullOrEmpty()){
+            try {
+                person.personCountry = httpClient.get<String> {
+                    url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
+                            "country/code"))
+                }
+            }catch (ie: Exception){
+
+            }
+        }
+
+        view.canDelegatePermissions = canDelegate
+        view.viewConnectivityPermission = canViewConnectivityStatus
 
         return person
     }
@@ -160,6 +205,15 @@ class PersonEditPresenter(context: Any,
         } else {
             PersonWithAccount()
         }
+        val homeStr = bundle[ARG_HOME_ACCESS]
+        if (homeStr != null) {
+            view.homeConnectivityStatus = safeParse(di, PersonConnectivity.serializer(), homeStr)
+        }
+
+        val mobileStr = bundle[ARG_MOBILE_ACCESS]
+        if (mobileStr != null) {
+            view.mobileConnectivityStatus = safeParse(di, PersonConnectivity.serializer(), mobileStr)
+        }
 
         return editEntity
     }
@@ -169,6 +223,10 @@ class PersonEditPresenter(context: Any,
         val entityVal = entity
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
                 entityVal)
+        savedState.putEntityAsJson(ARG_HOME_ACCESS, PersonConnectivity.serializer(),
+                view.homeConnectivityStatus)
+        savedState.putEntityAsJson(ARG_MOBILE_ACCESS, PersonConnectivity.serializer(),
+                view.mobileConnectivityStatus)
     }
 
 
@@ -179,7 +237,11 @@ class PersonEditPresenter(context: Any,
             dateOfBirthError != null ||
             noMatchPasswordError != null ||
                     firstNameError != null ||
-                    lastNameError != null
+                    lastNameError != null ||
+                    countryError != null ||
+                    (viewConnectivityPermission &&
+                            (homeConnectivityStatusError != null ||
+                            mobileConnectivityStatusError != null))
 
     override fun handleClickSave(entity: PersonWithAccount) {
         view.loading = true
@@ -193,10 +255,25 @@ class PersonEditPresenter(context: Any,
             view.noMatchPasswordError = null
             view.firstNameError = null
             view.lastNameError = null
+            view.countryError = null
+            view.homeConnectivityStatusError = null
+            view.mobileConnectivityStatusError = null
 
             val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
+            val homeConnectivityStatus = view.homeConnectivityStatus
+            val mobileConnectivityStatus = view.mobileConnectivityStatus
             view.takeIf { entity.firstNames.isNullOrEmpty() }?.firstNameError = requiredFieldMessage
             view.takeIf { entity.lastName.isNullOrEmpty() }?.lastNameError = requiredFieldMessage
+            view.takeIf { entity.personCountry.isNullOrEmpty() }?.countryError = requiredFieldMessage
+            if(view.viewConnectivityPermission){
+                view.takeIf { homeConnectivityStatus == null
+                        || view.homeConnectivityStatus?.pcConStatus == 0 }
+                        ?.homeConnectivityStatusError = requiredFieldMessage
+
+                view.takeIf { mobileConnectivityStatus == null
+                        || view.mobileConnectivityStatus?.pcConStatus == 0 }
+                        ?.mobileConnectivityStatusError = requiredFieldMessage
+            }
 
             if(view.hasErrors()) {
                 view.loading = false
@@ -225,10 +302,7 @@ class PersonEditPresenter(context: Any,
                 try {
                     val umAccount = accountManager.register(entity, serverUrl)
                     accountManager.activeAccount = umAccount
-                    val goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                            arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.CURRENT_DEST,
-                            true)
-                    impl.go(nextDestination, mapOf(), context, goOptions)
+                    entity.personUid = umAccount.personUid
                 } catch (e: Exception) {
                     if (e is IllegalStateException) {
                         view.usernameError = impl.getString(MessageID.person_exists, context)
@@ -244,7 +318,7 @@ class PersonEditPresenter(context: Any,
             } else {
                 //Create/Update person group
                 if(entity.personUid == 0L) {
-                    val personWithGroup = repo.insertPersonAndGroup(entity, loggedInPerson)
+                    val personWithGroup = repo.insertPersonAndGroup(entity)
                     entity.personGroupUid = personWithGroup.personGroupUid
                     entity.personUid = personWithGroup.personUid
                 }else {
@@ -282,28 +356,58 @@ class PersonEditPresenter(context: Any,
                     it.clazzEnrolmentUid = 0
                     repo.createPersonGroupAndMemberWithEnrolment(it)
                 }
+            }
 
-                val personPictureVal = view.personPicture
-                if(personPictureVal != null) {
-                    personPictureVal.personPicturePersonUid = entity.personUid
+            val personPictureVal = view.personPicture
+            if(personPictureVal != null) {
+                personPictureVal.personPicturePersonUid = entity.personUid
 
-                    if(personPictureVal.personPictureUid == 0L) {
-                        repo.personPictureDao.insertAsync(personPictureVal)
-                    }else {
-                        repo.personPictureDao.updateAsync(personPictureVal)
+                if(personPictureVal.personPictureUid == 0L) {
+                    repo.personPictureDao.insertAsync(personPictureVal)
+                }else {
+                    repo.personPictureDao.updateAsync(personPictureVal)
+                }
+            }
+
+            if(view.viewConnectivityPermission) {
+                if (homeConnectivityStatus != null) {
+                    homeConnectivityStatus.pcPersonUid = entity.personUid
+                    if (homeConnectivityStatus.pcUid == 0L) {
+                        repo.personConnectivityDao.insertAsync(homeConnectivityStatus)
+                    } else {
+                        repo.personConnectivityDao.updateConnectivity(
+                                homeConnectivityStatus.pcConStatus, homeConnectivityStatus.pcUid)
                     }
                 }
+                if (mobileConnectivityStatus != null) {
+                    mobileConnectivityStatus.pcPersonUid = entity.personUid
+                    if (mobileConnectivityStatus.pcUid == 0L) {
+                        repo.personConnectivityDao.insertAsync(mobileConnectivityStatus)
+                    } else {
+                        repo.personConnectivityDao.updateConnectivity(
+                                mobileConnectivityStatus.pcConStatus, mobileConnectivityStatus.pcUid)
+                    }
+                }
+            }
 
+
+            if(registrationMode){
+                val goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                        arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.CURRENT_DEST,
+                        true)
+                impl.go(nextDestination, mapOf(), context, goOptions)
+            }else {
                 //Handle the following scenario: ClazzMemberList (user selects to add a student to enrol),
                 // PersonList, PersonEdit, EnrolmentEdit
-                if(arguments.containsKey(UstadView.ARG_GO_TO_COMPLETE)) {
+                if (arguments.containsKey(UstadView.ARG_GO_TO_COMPLETE)) {
                     systemImpl.go(arguments[UstadView.ARG_GO_TO_COMPLETE].toString(),
                             arguments.plus(UstadView.ARG_PERSON_UID to entity.personUid.toString()),
                             context)
-                }else{
+                } else {
                     onFinish(PersonDetailView.VIEW_NAME, entity.personUid, entity)
                 }
             }
+
         }
     }
 }

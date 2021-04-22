@@ -25,7 +25,6 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
-import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.core.view.ClazzList2View.Companion.ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST
 import com.ustadmobile.core.view.ClazzMemberListView.Companion.ARG_HIDE_CLAZZES
 import com.ustadmobile.core.view.PersonEditView
@@ -40,7 +39,6 @@ import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
-import kotlinx.coroutines.runBlocking
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.File
@@ -50,6 +48,8 @@ interface PersonEditFragmentEventHandler {
     fun onClickNewClazzMemberWithClazz()
 
     fun onClickNewRoleAndAssignment()
+
+    fun onClickCountry()
     
 }
 
@@ -64,6 +64,12 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         get() = mPresenter
 
     override var genderOptions: List<MessageIdOption>? = null
+        get() = field
+        set(value) {
+            field = value
+        }
+
+    override var connectivityStatusOptions: List<MessageIdOption>? = null
         get() = field
         set(value) {
             field = value
@@ -149,6 +155,11 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
                 EntityRoleWithNameAndRole::class.java)
     }
 
+    override fun onClickCountry() {
+        onSaveStateToBackStackStateHandle()
+        navigateToPickEntityFromList(Country::class.java, R.id.country_list_dest)
+    }
+
 
     override fun handleRemoveEntityRole(entityRole: EntityRoleWithNameAndRole) {
         mPresenter?.handleRemoveRoleAndPermission(entityRole)
@@ -163,6 +174,8 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             //for some reason setting the options before (and indepently from) the value causes
             // a databinding problem
             mBinding?.genderOptions = genderOptions
+            mBinding?.connectivityStatusOptions = connectivityStatusOptions
+
             loading = false
         }
 
@@ -252,9 +265,17 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             field = value
             handleInputError(mBinding?.birthdayTextinputlayout, value != null, value)
         }
-    override var canDelegatePermissions: Boolean? = false
+    override var canDelegatePermissions: Boolean = false
+        get() = field
         set(value) {
-            mBinding?.isAdmin = value?:false
+            mBinding?.isAdmin = value
+            field = value
+        }
+
+    override var viewConnectivityPermission: Boolean = false
+        get() = field
+        set(value) {
+            mBinding?.viewConnectivity = value
             field = value
         }
 
@@ -263,6 +284,40 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         set(value) {
             field = value
             handleInputError(mBinding?.lastnameTextInputLayout, value != null, value)
+        }
+    override var countryError: String? = null
+        get() = field
+        set(value) {
+            field = value
+            handleInputError(mBinding?.countryTextinputlayout, value != null, value)
+        }
+
+    override var homeConnectivityStatusError: String? = null
+        get() = field
+        set(value) {
+            field = value
+            handleInputError(mBinding?.homeConnectivityStatusTextinputlayout, value != null, value)
+        }
+
+    override var mobileConnectivityStatusError: String? = null
+        get() = field
+        set(value) {
+            field = value
+            handleInputError(mBinding?.mobileConnectivityStatusTextinputlayout, value != null, value)
+        }
+
+    override var homeConnectivityStatus: PersonConnectivity? = null
+        get() = mBinding?.homeConnectivity
+        set(value) {
+            field = value
+            mBinding?.homeConnectivity = value
+        }
+
+    override var mobileConnectivityStatus: PersonConnectivity? = null
+        get() = mBinding?.mobileConnectivity
+        set(value) {
+            field = value
+            mBinding?.mobileConnectivity = value
         }
 
     override var firstNameError: String? = null
@@ -316,8 +371,10 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             it.imageViewLifecycleObserver = imageViewLifecycleObserver
             it.clazzlistRecyclerview.layoutManager = LinearLayoutManager(requireContext())
             it.rolesAndPermissionsRv.layoutManager = LinearLayoutManager(requireContext())
-            it.isAdmin = canDelegatePermissions?:false
+            it.isAdmin = canDelegatePermissions
+            it.viewConnectivity = viewConnectivityPermission
             it.hideClazzes =  arguments?.getString(ARG_HIDE_CLAZZES)?.toBoolean() ?: false
+            it.activityEventHandler = this
         }
 
         mPresenter = PersonEditPresenter(requireContext(), arguments.toStringMap(), this,
@@ -400,6 +457,13 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
                 EntityRoleWithNameAndRole::class.java ) {
             val entityRole = it.firstOrNull() ?: return@observeResult
             mPresenter?.handleAddOrEditRoleAndPermission(entityRole)
+        }
+
+        findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
+                Country::class.java){
+            val country = it.firstOrNull() ?: return@observeResult
+            entity?.personCountry = country.code
+            entity = entity
         }
 
         if(registrationMode == true) {

@@ -116,7 +116,7 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
         GlobalScope.launch {
             clazzWithSchool = repo.clazzDao.getClazzWithSchool(clazzUidFilter)
             withContext((doorMainDispatcher())) {
-                clazzTimeZone = clazzWithSchool?.effectiveTimeZone() ?: "UTC"
+                clazzTimeZone = clazzWithSchool?.effectiveTimeZone ?: "UTC"
                 if(view.clazzTimeZone == null) {
                     handleClickGraphDuration(7)
                 }

@@ -26,17 +26,23 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.ChartData
+import com.ustadmobile.core.util.ext.setCountryMap
 import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.util.graph.CodeLabelFormatter
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.door.ext.asRepositoryLiveData
+import com.ustadmobile.door.ext.doorIdentityHashCode
+import com.ustadmobile.lib.db.entities.Country
+import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.lib.db.entities.StatementEntityWithDisplayDetails
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -68,6 +74,26 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
     private var reportRecyclerView: RecyclerView? = null
 
     var dbRepo: UmAppDatabase? = null
+
+    private var countryMap = mapOf<String, String>()
+
+    fun allCountries() {
+        GlobalScope.launch {
+            val systemImpl: UstadMobileSystemImpl = di.direct.instance()
+            val locale = systemImpl.getDisplayedLocale(requireContext())
+            var json = ""
+            try {
+                json = requireContext().assets.open("countrynames/${locale}.json")
+                        .bufferedReader().use { it.readText() }
+            } catch (io: IOException) {
+                showSnackBar(systemImpl.getString(MessageID.error,
+                        requireContext()), {})
+            }
+            countryMap = Json.decodeFromString(MapSerializer(String.serializer(), String.serializer()), json)
+        }
+    }
+
+
 
     class ChartViewHolder(val itemBinding: ItemReportChartHeaderBinding) : RecyclerView.ViewHolder(itemBinding.root)
 
@@ -208,6 +234,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
         get() = field
         set(value) {
             field = value
+            value?.setCountryMap(countryMap)
             chartAdapter?.submitList(listOf(value))
         }
 

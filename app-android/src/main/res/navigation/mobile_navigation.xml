@@ -5,6 +5,11 @@
     app:startDestination="@id/redirect_dest">
 
     <fragment
+        android:id="@+id/home_feedentrylist_dest"
+        android:name="com.ustadmobile.port.android.view.FeedEntryListFragment"
+        android:label="@string/feed"/>
+
+    <fragment
         android:id="@+id/home_clazzlist_dest"
         android:name="com.ustadmobile.port.android.view.ClazzListFragment"
         android:label="@string/classes" />
@@ -319,6 +324,10 @@
         android:id="@+id/time_zone_list_dest"
         android:name="com.ustadmobile.port.android.view.TimeZoneListFragment"
         android:label="@string/timezone"/>
+
+    <fragment
+        android:id="@+id/country_list_dest"
+        android:name="com.ustadmobile.port.android.view.CountryListFragment" />
 
     <fragment
         android:id="@+id/clazz_log_edit_dest"

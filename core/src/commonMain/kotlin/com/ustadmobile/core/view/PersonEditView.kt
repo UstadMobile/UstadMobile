@@ -1,5 +1,6 @@
 package com.ustadmobile.core.view
 
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
@@ -7,6 +8,8 @@ import com.ustadmobile.lib.db.entities.*
 interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var genderOptions: List<MessageIdOption>?
+
+    var connectivityStatusOptions: List<MessageIdOption>?
 
     var personPicturePath: String?
 
@@ -28,11 +31,23 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var dateOfBirthError: String?
 
-    var canDelegatePermissions: Boolean?
+    var canDelegatePermissions: Boolean
+
+    var viewConnectivityPermission: Boolean
 
     var firstNameError: String?
 
     var lastNameError: String?
+
+    var countryError: String?
+
+    var homeConnectivityStatusError: String?
+
+    var mobileConnectivityStatusError: String?
+
+    var homeConnectivityStatus: PersonConnectivity?
+
+    var mobileConnectivityStatus: PersonConnectivity?
 
     fun navigateToNextDestination(account: UmAccount?, nextDestination: String)
 
@@ -57,6 +72,10 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
          * we use this flag to remove the age restrictions of being under 13 to sign up.
          */
         const val REGISTER_VIA_LINK = "RegViaLink"
+
+        const val ARG_HOME_ACCESS = "homeAccess"
+
+        const val ARG_MOBILE_ACCESS = "mobileAccess"
 
     }
 

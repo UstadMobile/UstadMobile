@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/home_feedentrylist_dest"
+        android:icon="@drawable/ic_baseline_rss_feed_24"
+        android:title="@string/feed"/>
+
+    <item
         android:id="@+id/home_content_dest"
         android:icon="@drawable/library_books_24px"
         android:title="@string/content" />
@@ -20,11 +25,5 @@
         android:id="@+id/home_personlist_dest"
         android:icon="@drawable/ic_person_black_24dp"
         android:title="@string/people" />
-
-    <item
-        android:id="@+id/report_list_dest"
-        android:icon="@drawable/ic_report_24dp"
-        android:title="@string/reports" />
-
 
 </menu>

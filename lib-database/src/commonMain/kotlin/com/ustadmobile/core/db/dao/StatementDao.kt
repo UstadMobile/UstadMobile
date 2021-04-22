@@ -160,6 +160,62 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                                             personUid: Long, contextRegistration: String)
             : DataSource.Factory<Int, StatementWithSessionDetailDisplay>
 
+
+    @Query("""
+        SELECT ${UstadCentralReportRow.ACTIVE_USERS_INDICATOR} AS indicatorId,
+                :disaggregationKey AS disaggregationKey,
+                 (SELECT nodeClientId FROM SyncNode LIMIT 1) AS instanceId, 0 AS rowUid, '' AS valueStr,
+                (CASE :disaggregationKey
+                WHEN ${UstadCentralReportRow.TOTAL_KEY} THEN CAST(${UstadCentralReportRow.TOTAL_KEY} AS TEXT) 
+                WHEN ${UstadCentralReportRow.GENDER_KEY} THEN CAST(Person.gender AS TEXT)
+                WHEN ${UstadCentralReportRow.COUNTRY_KEY} THEN Person.personCountry
+                WHEN ${UstadCentralReportRow.CONNECTIVITY_KEY} 
+                    THEN 
+                         CAST((SELECT MAX(pcConStatus) 
+                            FROM PersonConnectivity 
+                           WHERE pcPersonUid = Person.personUid) AS TEXT)
+                END) AS disaggregationValue, 
+                COUNT(DISTINCT personUid) AS value, :timestamp AS timestamp 
+          FROM StatementEntity
+                LEFT JOIN Person 
+                ON Person.personUid = StatementEntity.statementPersonUid
+         WHERE username IS NOT NULL 
+           AND active
+           AND (StatementEntity.timestamp >= :startDateTime 
+                AND StatementEntity.timestamp <= :endDateTime)
+      GROUP BY disaggregationValue
+    """)
+    abstract fun getActiveUsers(disaggregationKey: Int, timestamp: Long,
+                                    startDateTime: Long, endDateTime: Long): List<UstadCentralReportRow>
+
+
+    @Query("""
+        SELECT ${UstadCentralReportRow.ACTIVE_USER_DURATION_INDICATOR} AS indicatorId,
+                :disaggregationKey AS disaggregationKey,
+                 (SELECT nodeClientId FROM SyncNode LIMIT 1) AS instanceId, 0 AS rowUid, '' AS valueStr,
+                (CASE :disaggregationKey
+                WHEN ${UstadCentralReportRow.TOTAL_KEY} THEN CAST(${UstadCentralReportRow.TOTAL_KEY} AS TEXT) 
+                WHEN ${UstadCentralReportRow.GENDER_KEY} THEN CAST(Person.gender AS TEXT)
+                WHEN ${UstadCentralReportRow.COUNTRY_KEY} THEN Person.personCountry
+                WHEN ${UstadCentralReportRow.CONNECTIVITY_KEY} 
+                    THEN 
+                         CAST((SELECT MAX(pcConStatus) 
+                            FROM PersonConnectivity 
+                           WHERE pcPersonUid = Person.personUid) AS TEXT)
+                END) AS disaggregationValue, 
+                SUM(StatementEntity.resultDuration) AS value, :timestamp AS timestamp 
+         FROM StatementEntity 
+               LEFT JOIN Person 
+               ON Person.personUid = StatementEntity.statementPersonUid
+         WHERE Person.username IS NOT NULL 
+           AND Person.active
+           AND (StatementEntity.timestamp >= :startDateTime 
+                AND StatementEntity.timestamp <= :endDateTime)
+      GROUP BY disaggregationValue
+    """)
+    abstract fun getDurationUsage(disaggregationKey: Int, timestamp: Long,
+                                startDateTime: Long, endDateTime: Long): List<UstadCentralReportRow>
+
     @Serializable
     data class ReportData(var yAxis: Float = 0f, var xAxis: String? = "", var subgroup: String? = "")
 

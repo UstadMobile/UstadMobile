@@ -2,6 +2,33 @@ package com.ustadmobile.core.schedule
 
 interface ClazzLogCreatorManager {
 
-    fun requestClazzLogCreation(clazzUidFilter: Long, endpointUrl: String, fromTime: Long, toTime: Long)
+    /**
+     * Request running the ClazzLogCreator. On Android this will use WorkManager to run at the
+     * specified time. On JVM this will use Quartz.
+     *
+     * @param endpointUrl the site endpoint url
+     * @param clazzUid the clazzUid for the Clazz for which ClazzLogs will be created
+     * @param fromTime the start time of the range for which clazzlogs will be created (inclusive).
+     * This will be the time that the task will start running.
+     * @param endTime the end time of the range for which clazzlogs will be created (inclusive)
+     */
+    fun requestClazzLogCreation(clazzUid: Long, endpointUrl: String, fromTime: Long, toTime: Long)
+
+
+    companion object {
+
+
+        const val DAY_IN_MS = (1000 * 60 * 60 * 24)
+
+        const val INPUT_ENDPOINTURL = "dbName"
+
+        const val INPUT_FROMTIME = "fromTime"
+
+        const val INPUT_TOTIME = "toTime"
+
+        const val INPUT_CLAZZUID = "clazzUidFilter"
+
+
+    }
 
 }

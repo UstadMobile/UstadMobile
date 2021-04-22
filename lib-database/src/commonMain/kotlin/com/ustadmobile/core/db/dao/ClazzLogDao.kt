@@ -61,7 +61,6 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
     """)
     abstract fun findByClazzUidWithinTimeRange(clazzUid: Long, fromTime: Long, toTime: Long, excludeStatusFilter: Int = 0, limit: Int = Int.MAX_VALUE): List<ClazzLog>
 
-
     @Query("""SELECT ClazzLog.* FROM ClazzLog 
         WHERE 
         ClazzLog.clazzLogClazzUid = :clazzUid 

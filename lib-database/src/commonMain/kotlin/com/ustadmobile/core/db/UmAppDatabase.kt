@@ -16,7 +16,6 @@ import kotlin.jvm.Volatile
 @Database(entities = [NetworkNode::class, DownloadJobItemHistory::class,
     ClazzLog::class, ClazzLogAttendanceRecord::class,
     Schedule::class, DateRange::class, HolidayCalendar::class, Holiday::class,
-    ScheduledCheck::class,
     AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
     Person::class, DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class,
     Clazz::class, ClazzEnrolment::class, LeavingReason::class, PersonCustomFieldValue::class,
@@ -40,6 +39,9 @@ import kotlin.jvm.Volatile
     LearnerGroup::class, LearnerGroupMember::class,
     GroupLearningSession::class,
     SiteTerms::class,
+    NotificationSetting::class,
+    NotificationSettingLastChecked::class,
+    FeedEntry::class, PersonConnectivity::class,
 
     //Door Helper entities
     SqliteChangeSeqNums::class,
@@ -51,7 +53,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 64)
+], version = 66)
 @MinSyncVersion(58)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -166,6 +168,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("personPictureDao")
     abstract val personPictureDao: PersonPictureDao
 
+    @JsName("personConnectivityDao")
+    abstract val personConnectivityDao: PersonConnectivityDao
+
     @JsName("scrapeRunDao")
     abstract val scrapeRunDao: ScrapeRunDao
 
@@ -228,7 +233,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     abstract val syncresultDao: SyncResultDao
 
-
     abstract val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
     abstract val clazzLogDao: ClazzLogDao
     abstract val customFieldDao: CustomFieldDao
@@ -236,8 +240,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val customFieldValueOptionDao: CustomFieldValueOptionDao
 
     abstract val scheduleDao: ScheduleDao
-
-    abstract val scheduledCheckDao: ScheduledCheckDao
 
     abstract val holidayCalendarDao: HolidayCalendarDao
     abstract val holidayDao: HolidayDao
@@ -281,6 +283,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val siteDao: SiteDao
 
     abstract val siteTermsDao: SiteTermsDao
+
+    abstract val notificationSettingDao: NotificationSettingDao
+
+    abstract val notificationSettingLastCheckedDao: NotificationSettingLastCheckedDao
+
+    abstract val feedEntryDao: FeedEntryDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO
@@ -4227,70 +4235,71 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             //Adds LastChangedTime field to all syncable entities so the field will be ready to use
             //for the new p2p enabled sync systme
             override fun migrate(database: DoorSqlDatabase) {
-                val fieldType = if(database.dbType() == DoorDbType.SQLITE) {
+                val fieldType = if (database.dbType() == DoorDbType.SQLITE) {
                     "INTEGER"
-                }else {
+                } else {
                     "BIGINT"
                 }
-
                 val lastModTimeFields = listOf("ClazzLog" to "clazzLogLastChangedTime",
-                    "ClazzLogAttendanceRecord" to "clazzLogAttendanceRecordLastChangedTime",
-                    "Schedule" to "scheduleLastChangedTime",
-                    "DateRange" to "dateRangeLct",
-                    "HolidayCalendar" to "umCalendarLct",
-                    "Holiday" to "holLct",
-                    "CustomField" to "customFieldLct",
-                    "CustomFieldValue" to "customFieldLct",
-                    "Person" to "personLct",
-                    "Clazz" to "clazzLct",
-                    "ClazzEnrolment" to "clazzEnrolmentLct",
-                    "LeavingReason" to "leavingReasonLct",
-                    "PersonCustomFieldValue" to "personCustomFieldValueLct",
-                    "ContentEntry" to "contentEntryLct",
-                    "ContentEntryContentCategoryJoin" to "ceccjLct",
-                    "ContentCategorySchema" to "contentCategorySchemaLct",
-                    "ContentEntryParentChildJoin" to "cepcjLct",
-                    "ContentEntryRelatedEntryJoin" to "cerejLct",
-                    "ContentCategory" to "contentCategoryLct",
-                    "Language" to "langLct",
-                    "LanguageVariant" to "langVariantLct",
-                    "Role" to "roleLct",
-                    "EntityRole" to "erLct",
-                    "PersonGroup" to "groupLct",
-                    "PersonGroupMember" to "groupMemberLct",
-                    "PersonPicture" to "personPictureLct",
-                    "Container" to "cntLct",
-                    "VerbEntity" to "verbLct",
-                    "XObjectEntity" to "xObjectLct",
-                    "StatementEntity" to "statementLct",
-                    "ContextXObjectStatementJoin" to "contextXObjectLct",
-                    "AgentEntity" to "agentLct",
-                    "StateEntity" to "stateLct",
-                    "StateContentEntity" to "stateContentLct",
-                    "XLangMapEntry" to "statementLangMapLct",
-                    "School" to "schoolLct",
-                    "SchoolMember" to "schoolMemberLct",
-                    "ClazzWork" to "clazzWorkLct",
-                    "ClazzWorkContentJoin" to "clazzWorkContentJoinLct",
-                    "Comments" to "commentsLct",
-                    "ClazzWorkQuestion" to "clazzWorkQuestionLct",
-                    "ClazzWorkQuestionOption" to "clazzWorkQuestionOptionLct",
-                    "ClazzWorkSubmission" to "clazzWorkSubmissionLct",
-                    "ClazzWorkQuestionResponse" to "clazzWorkQuestionResponseLct",
-                    "ContentEntryProgress" to "contentEntryProgressLct",
-                    "Report" to "reportLct",
-                    "Site" to "siteLct",
-                    "LearnerGroup" to "learnerGroupLct",
-                    "LearnerGroupMember" to "learnerGroupMemberLct",
-                    "GroupLearningSession" to "groupLearningSessionLct",
-                    "SiteTerms" to "sTermsLct",
-                    "ScheduledCheck" to "scheduledCheckLct",
-                    "CustomFieldValueOption" to "customFieldValueLct",
-                    "AuditLog" to "auditLogLct")
+                        "ClazzLogAttendanceRecord" to "clazzLogAttendanceRecordLastChangedTime",
+                        "Schedule" to "scheduleLastChangedTime",
+                        "DateRange" to "dateRangeLct",
+                        "HolidayCalendar" to "umCalendarLct",
+                        "Holiday" to "holLct",
+                        "CustomField" to "customFieldLct",
+                        "CustomFieldValue" to "customFieldLct",
+                        "Person" to "personLct",
+                        "Clazz" to "clazzLct",
+                        "ClazzEnrolment" to "clazzEnrolmentLct",
+                        "LeavingReason" to "leavingReasonLct",
+                        "PersonCustomFieldValue" to "personCustomFieldValueLct",
+                        "ContentEntry" to "contentEntryLct",
+                        "ContentEntryContentCategoryJoin" to "ceccjLct",
+                        "ContentCategorySchema" to "contentCategorySchemaLct",
+                        "ContentEntryParentChildJoin" to "cepcjLct",
+                        "ContentEntryRelatedEntryJoin" to "cerejLct",
+                        "ContentCategory" to "contentCategoryLct",
+                        "Language" to "langLct",
+                        "LanguageVariant" to "langVariantLct",
+                        "Role" to "roleLct",
+                        "EntityRole" to "erLct",
+                        "PersonGroup" to "groupLct",
+                        "PersonGroupMember" to "groupMemberLct",
+                        "PersonPicture" to "personPictureLct",
+                        "Container" to "cntLct",
+                        "VerbEntity" to "verbLct",
+                        "XObjectEntity" to "xObjectLct",
+                        "StatementEntity" to "statementLct",
+                        "ContextXObjectStatementJoin" to "contextXObjectLct",
+                        "AgentEntity" to "agentLct",
+                        "StateEntity" to "stateLct",
+                        "StateContentEntity" to "stateContentLct",
+                        "XLangMapEntry" to "statementLangMapLct",
+                        "School" to "schoolLct",
+                        "SchoolMember" to "schoolMemberLct",
+                        "ClazzWork" to "clazzWorkLct",
+                        "ClazzWorkContentJoin" to "clazzWorkContentJoinLct",
+                        "Comments" to "commentsLct",
+                        "ClazzWorkQuestion" to "clazzWorkQuestionLct",
+                        "ClazzWorkQuestionOption" to "clazzWorkQuestionOptionLct",
+                        "ClazzWorkSubmission" to "clazzWorkSubmissionLct",
+                        "ClazzWorkQuestionResponse" to "clazzWorkQuestionResponseLct",
+                        "ContentEntryProgress" to "contentEntryProgressLct",
+                        "Report" to "reportLct",
+                        "Site" to "siteLct",
+                        "LearnerGroup" to "learnerGroupLct",
+                        "LearnerGroupMember" to "learnerGroupMemberLct",
+                        "GroupLearningSession" to "groupLearningSessionLct",
+                        "SiteTerms" to "sTermsLct",
+                        "ScheduledCheck" to "scheduledCheckLct",
+                        "CustomFieldValueOption" to "customFieldValueLct",
+                        "AuditLog" to "auditLogLct")
 
                 lastModTimeFields.forEach {
                     database.execSQL("ALTER TABLE ${it.first} ADD COLUMN ${it.second} $fieldType NOT NULL DEFAULT 0")
                 }
+
+
             }
         }
 
@@ -4299,6 +4308,300 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 database.execSQL("ALTER TABLE Person ADD COLUMN personCountry TEXT")
             }
         }
+
+
+        val MIGRATION_64_65 = object : DoorMigration(64, 65) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                database.execSQL("""
+                    DROP TABLE IF EXISTS ScheduledCheck
+                """.trimIndent())
+                database.execSQL("""
+                    DROP TABLE IF EXISTS ScheduledCheck_trk
+                """.trimIndent())
+
+                database.execSQL("""
+                    ALTER TABLE ClazzLog 
+                     ADD COLUMN logDuration INTEGER NOT NULL DEFAULT 0""")
+                database.execSQL("""
+                        INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced)
+                               VALUES (${NotificationSetting.TABLE_ID}, 0, 0) 
+                    """.trimIndent())
+
+                if (database.dbType() == DoorDbType.POSTGRES) {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS NotificationSetting (  nsLcb  INTEGER  NOT NULL , nsPcsn  BIGINT  NOT NULL , nsLcsn  BIGINT  NOT NULL , nsPersonUid  BIGINT  NOT NULL , nsType  INTEGER  NOT NULL , nsEntityFilterScope  INTEGER  NOT NULL , nsEntityFilterUid  BIGINT  NOT NULL , nsChannel  INTEGER  NOT NULL , nsParams  TEXT , nsThreshold  FLOAT  NOT NULL , nsUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS NotificationSetting_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS NotificationSetting_lcsn_seq")
+                    database.execSQL("""
+                      |CREATE OR REPLACE FUNCTION 
+                      | inccsn_271_fn() RETURNS trigger AS ${'$'}${'$'}
+                      | BEGIN  
+                      | UPDATE NotificationSetting SET nsLcsn =
+                      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.nsLcsn 
+                      | ELSE NEXTVAL('NotificationSetting_lcsn_seq') END),
+                      | nsPcsn = 
+                      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                      | THEN NEXTVAL('NotificationSetting_mcsn_seq') 
+                      | ELSE NEW.nsPcsn END)
+                      | WHERE nsUid = NEW.nsUid;
+                      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                      | SELECT 271, NEW.nsUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+                      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+                      | RETURN null;
+                      | END ${'$'}${'$'}
+                      | LANGUAGE plpgsql
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE TRIGGER inccsn_271_trig 
+                      |AFTER UPDATE OR INSERT ON NotificationSetting 
+                      |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                      |EXECUTE PROCEDURE inccsn_271_fn()
+                      """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS NotificationSetting_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                      |CREATE 
+                      | INDEX index_NotificationSetting_trk_clientId_epk_csn 
+                      |ON NotificationSetting_trk (clientId, epk, csn)
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE 
+                      |UNIQUE INDEX index_NotificationSetting_trk_epk_clientId 
+                      |ON NotificationSetting_trk (epk, clientId)
+                      """.trimMargin())
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS NotificationSettingLastChecked (  nslcNsUid  BIGINT  PRIMARY KEY  NOT NULL , lastCheckTime  BIGINT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS FeedEntry (  fePersonUid  BIGINT  NOT NULL , feTimestamp  BIGINT  NOT NULL , feTitle  TEXT , feDescription  TEXT , feViewDest  TEXT , feEntityUid  BIGINT  NOT NULL , feNsUid  BIGINT  NOT NULL , feUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE INDEX index_FeedEntry_fePersonUid ON FeedEntry (fePersonUid)")
+                } else {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS NotificationSetting (  nsLcb  INTEGER  NOT NULL , nsPcsn  INTEGER  NOT NULL , nsLcsn  INTEGER  NOT NULL , nsPersonUid  INTEGER  NOT NULL , nsType  INTEGER  NOT NULL , nsEntityFilterScope  INTEGER  NOT NULL , nsEntityFilterUid  INTEGER  NOT NULL , nsChannel  INTEGER  NOT NULL , nsParams  TEXT , nsThreshold  REAL  NOT NULL , nsUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+
+                    database.execSQL("""
+                          |CREATE TRIGGER INS_LOC_1077
+                          |AFTER INSERT ON NotificationSetting
+                          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
+                          |    NEW.nsLcsn = 0)
+                          |BEGIN
+                          |    UPDATE NotificationSetting
+                          |    SET nsPcsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 1077)
+                          |    WHERE nsUid = NEW.nsUid;
+                          |    
+                          |    UPDATE SqliteChangeSeqNums
+                          |    SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |    WHERE sCsnTableId = 1077;
+                          |END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |            CREATE TRIGGER INS_PRI_1077
+                          |            AFTER INSERT ON NotificationSetting
+                          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
+                          |                NEW.nsPcsn = 0)
+                          |            BEGIN
+                          |                UPDATE NotificationSetting
+                          |                SET nsPcsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 1077)
+                          |                WHERE nsUid = NEW.nsUid;
+                          |                
+                          |                UPDATE SqliteChangeSeqNums
+                          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |                WHERE sCsnTableId = 1077;
+                          |                
+                          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                          |SELECT 1077, NEW.nsUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                          |            END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |CREATE TRIGGER UPD_LOC_1077
+                          |AFTER UPDATE ON NotificationSetting
+                          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
+                          |    AND (NEW.nsLcsn == OLD.nsLcsn OR
+                          |        NEW.nsLcsn == 0))
+                          |BEGIN
+                          |    UPDATE NotificationSetting
+                          |    SET nsLcsn = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = 1077) 
+                          |    WHERE nsUid = NEW.nsUid;
+                          |    
+                          |    UPDATE SqliteChangeSeqNums 
+                          |    SET sCsnNextLocal = sCsnNextLocal + 1
+                          |    WHERE sCsnTableId = 1077;
+                          |END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |            CREATE TRIGGER UPD_PRI_1077
+                          |            AFTER UPDATE ON NotificationSetting
+                          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
+                          |                AND (NEW.nsPcsn == OLD.nsPcsn OR
+                          |                    NEW.nsPcsn == 0))
+                          |            BEGIN
+                          |                UPDATE NotificationSetting
+                          |                SET nsPcsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 1077)
+                          |                WHERE nsUid = NEW.nsUid;
+                          |                
+                          |                UPDATE SqliteChangeSeqNums
+                          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |                WHERE sCsnTableId = 1077;
+                          |                
+                          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                          |SELECT 1077, NEW.nsUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                          |            END
+                          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS NotificationSetting_trk (  epk  INTEGER NOT NULL, clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL, reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL, pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                          |CREATE 
+                          | INDEX index_NotificationSetting_trk_clientId_epk_csn 
+                          |ON NotificationSetting_trk (clientId, epk, csn)
+                          """.trimMargin())
+                    database.execSQL("""
+                          |CREATE 
+                          |UNIQUE INDEX index_NotificationSetting_trk_epk_clientId 
+                          |ON NotificationSetting_trk (epk, clientId)
+                          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS NotificationSettingLastChecked (  nslcNsUid  INTEGER  PRIMARY KEY  NOT NULL , lastCheckTime  INTEGER  NOT NULL )")
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS FeedEntry (  fePersonUid  INTEGER  NOT NULL , feTimestamp  INTEGER  NOT NULL , feTitle  TEXT , feDescription  TEXT , feViewDest  TEXT , feEntityUid  INTEGER  NOT NULL , feNsUid  INTEGER  NOT NULL , feUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE INDEX index_FeedEntry_fePersonUid ON FeedEntry (fePersonUid)")
+                }
+            }
+
+        }
+
+        val MIGRATION_65_66 = object: DoorMigration(65, 66) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+
+                if (database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("""
+                        UPDATE Role 
+                        SET rolePermissions = ${Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT} 
+                        WHERE roleUid = ${Role.ROLE_CLAZZ_TEACHER_UID} """.trimMargin())
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonConnectivity (  pcPersonUid  BIGINT  NOT NULL , pcConType  INTEGER  NOT NULL , pcConStatus  INTEGER  NOT NULL , pcMasterChangeSeqNum  BIGINT  NOT NULL , pcLocalChangeSeqNum  BIGINT  NOT NULL , pcLastChangedBy  INTEGER  NOT NULL , pcLct  BIGINT  NOT NULL , pcUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonConnectivity_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonConnectivity_lcsn_seq")
+                    database.execSQL("""
+          |CREATE OR REPLACE FUNCTION 
+          | inccsn_153_fn() RETURNS trigger AS ${'$'}${'$'}
+          | BEGIN  
+          | UPDATE PersonConnectivity SET pcLocalChangeSeqNum =
+          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.pcLocalChangeSeqNum 
+          | ELSE NEXTVAL('PersonConnectivity_lcsn_seq') END),
+          | pcMasterChangeSeqNum = 
+          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+          | THEN NEXTVAL('PersonConnectivity_mcsn_seq') 
+          | ELSE NEW.pcMasterChangeSeqNum END)
+          | WHERE pcUid = NEW.pcUid;
+          | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+          | SELECT 153, NEW.pcUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+          | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+          | RETURN null;
+          | END ${'$'}${'$'}
+          | LANGUAGE plpgsql
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER inccsn_153_trig 
+          |AFTER UPDATE OR INSERT ON PersonConnectivity 
+          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+          |EXECUTE PROCEDURE inccsn_153_fn()
+          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonConnectivity_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+          |CREATE 
+          | INDEX index_PersonConnectivity_trk_clientId_epk_csn 
+          |ON PersonConnectivity_trk (clientId, epk, csn)
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE 
+          |UNIQUE INDEX index_PersonConnectivity_trk_epk_clientId 
+          |ON PersonConnectivity_trk (epk, clientId)
+          """.trimMargin())
+
+
+
+                }else if(database.dbType() == DoorDbType.SQLITE){
+
+                    database.execSQL("""
+                        CREATE TABLE IF NOT EXISTS PersonConnectivity (`pcUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `pcPersonUid` INTEGER NOT NULL, `pcConType` INTEGER NOT NULL, `pcConStatus` INTEGER NOT NULL, `pcMasterChangeSeqNum` INTEGER NOT NULL, `pcLocalChangeSeqNum` INTEGER NOT NULL, `pcLastChangedBy` INTEGER NOT NULL, `pcLct` INTEGER NOT NULL)
+                    """.trimIndent())
+
+                    database.execSQL("""
+          |CREATE TRIGGER INS_LOC_153
+          |AFTER INSERT ON PersonConnectivity
+          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
+          |    NEW.pcLocalChangeSeqNum = 0)
+          |BEGIN
+          |    UPDATE PersonConnectivity
+          |    SET pcMasterChangeSeqNum = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 153)
+          |    WHERE pcUid = NEW.pcUid;
+          |    
+          |    UPDATE SqliteChangeSeqNums
+          |    SET sCsnNextPrimary = sCsnNextPrimary + 1
+          |    WHERE sCsnTableId = 153;
+          |END
+          """.trimMargin())
+                    database.execSQL("""
+          |            CREATE TRIGGER INS_PRI_153
+          |            AFTER INSERT ON PersonConnectivity
+          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
+          |                NEW.pcMasterChangeSeqNum = 0)
+          |            BEGIN
+          |                UPDATE PersonConnectivity
+          |                SET pcMasterChangeSeqNum = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 153)
+          |                WHERE pcUid = NEW.pcUid;
+          |                
+          |                UPDATE SqliteChangeSeqNums
+          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+          |                WHERE sCsnTableId = 153;
+          |                
+          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+          |SELECT 153, NEW.pcUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+          |            END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_LOC_153
+          |AFTER UPDATE ON PersonConnectivity
+          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
+          |    AND (NEW.pcLocalChangeSeqNum == OLD.pcLocalChangeSeqNum OR
+          |        NEW.pcLocalChangeSeqNum == 0))
+          |BEGIN
+          |    UPDATE PersonConnectivity
+          |    SET pcLocalChangeSeqNum = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = 153) 
+          |    WHERE pcUid = NEW.pcUid;
+          |    
+          |    UPDATE SqliteChangeSeqNums 
+          |    SET sCsnNextLocal = sCsnNextLocal + 1
+          |    WHERE sCsnTableId = 153;
+          |END
+          """.trimMargin())
+                    database.execSQL("""
+          |            CREATE TRIGGER UPD_PRI_153
+          |            AFTER UPDATE ON PersonConnectivity
+          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
+          |                AND (NEW.pcMasterChangeSeqNum == OLD.pcMasterChangeSeqNum OR
+          |                    NEW.pcMasterChangeSeqNum == 0))
+          |            BEGIN
+          |                UPDATE PersonConnectivity
+          |                SET pcMasterChangeSeqNum = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 153)
+          |                WHERE pcUid = NEW.pcUid;
+          |                
+          |                UPDATE SqliteChangeSeqNums
+          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+          |                WHERE sCsnTableId = 153;
+          |                
+          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+          |SELECT 153, NEW.pcUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+          |            END
+          """.trimMargin())
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonConnectivity_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_PersonConnectivity_trk_clientId_epk_csn` ON PersonConnectivity_trk (`clientId`, `epk`, `csn`)")
+                    database.execSQL( "CREATE UNIQUE INDEX IF NOT EXISTS `index_PersonConnectivity_trk_epk_clientId` ON PersonConnectivity_trk (`epk`, `clientId`)")
+
+
+                }
+
+            }
+        }
+
+
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
@@ -4310,7 +4613,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
                     MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
                     MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
-                    MIGRATION_63_64)
+                    MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66)
 
 
 

@@ -271,6 +271,28 @@ abstract class PersonDao : BaseDao<Person> {
     abstract fun getAllPerson(): List<Person>
 
 
+    @Query("""
+        SELECT ${UstadCentralReportRow.REGISTERED_USERS_INDICATOR} AS indicatorId,
+                :disaggregationKey AS disaggregationKey, 
+                (SELECT nodeClientId FROM SyncNode LIMIT 1) AS instanceId, 0 AS rowUid, '' AS valueStr,
+                (CASE :disaggregationKey
+                WHEN ${UstadCentralReportRow.TOTAL_KEY}  THEN CAST(${UstadCentralReportRow.TOTAL_KEY} AS TEXT) 
+                WHEN ${UstadCentralReportRow.GENDER_KEY} THEN CAST(Person.gender AS TEXT)
+                WHEN ${UstadCentralReportRow.COUNTRY_KEY} THEN Person.personCountry
+                WHEN ${UstadCentralReportRow.CONNECTIVITY_KEY} 
+                    THEN 
+                         CAST((SELECT MAX(pcConStatus) 
+                            FROM PersonConnectivity 
+                           WHERE pcPersonUid = Person.personUid) AS TEXT)
+                END) AS disaggregationValue, 
+                COUNT(Person.personUid) AS value, :timestamp AS timestamp 
+          FROM Person
+         WHERE username IS NOT NULL 
+           AND active
+           GROUP BY disaggregationValue
+    """)
+    abstract fun getRegisteredUsers(disaggregationKey: Int, timestamp: Long): List<UstadCentralReportRow>
+
     companion object {
 
         const val SORT_FIRST_NAME_ASC = 1
@@ -309,11 +331,16 @@ abstract class PersonDao : BaseDao<Person> {
 
         const val ENTITY_PERSONS_WITH_SELECT_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 0 ${ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT4"
 
+        //checkPermissionForSelf = 0 means that there is no need to check permissions if the
+        // accountUid is equal to the personUid. E.g. users have access to their own learning records.
+        // This is not always ths case - e.g. checking for delegation permission (which is restricted)
         const val ENTITY_PERSONS_WITH_PERMISSION_PARAM = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 :checkPermissionForSelf $ENTITY_PERSONS_WITH_PERMISSION_PT2  :permission $ENTITY_PERSONS_WITH_PERMISSION_PT4"
 
         const val SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L// 28 days
 
         const val ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 0 ${ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT4"
+
+        const val ENTITY_PERSONS_WITH_CONNECTIVITY_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 0 ${ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_CONNECTIVITY_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT4"
 
 
     }

@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.*
 class ViewNameToDestMap: DestinationProvider {
 
     val destinationMap = mapOf(
+            FeedEntryListView.VIEW_NAME to UstadDestination(R.id.home_feedentrylist_dest),
             ClazzEdit2View.VIEW_NAME to UstadDestination(R.id.clazz_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             ClazzList2View.VIEW_NAME to UstadDestination(R.id.home_clazzlist_dest),
@@ -88,6 +89,7 @@ class ViewNameToDestMap: DestinationProvider {
             JoinWithCodeView.VIEW_NAME to UstadDestination(R.id.join_with_code_dest),
             LearnerGroupMemberListView.VIEW_NAME to UstadDestination(R.id.learner_group_member_list_dest),
             TimeZoneListView.VIEW_NAME to UstadDestination(R.id.time_zone_list_dest),
+            CountryListView.VIEW_NAME to UstadDestination(R.id.country_list_dest),
             ClazzLogEditView.VIEW_NAME to UstadDestination(R.id.clazz_log_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             SiteDetailView.VIEW_NAME to UstadDestination(R.id.site_detail_dest),

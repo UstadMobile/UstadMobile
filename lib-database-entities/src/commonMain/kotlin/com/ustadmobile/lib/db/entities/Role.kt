@@ -179,6 +179,12 @@ open class Role() {
 
         const val PERMISSION_PERSON_LEARNINGRECORD_UPDATE: Long = 2199023255552L
 
+        const val PERMISSION_PERSON_CONNECTIVITY_SELECT: Long = 4398046511104L
+
+        const val PERMISSION_PERSON_CONNECTIVITY_UPDATE: Long = 8796093022208L
+
+
+
         //Predefined roles that are added by the system
         const val ROLE_CLAZZ_TEACHER_NAME = "Teacher"
 
@@ -202,7 +208,9 @@ open class Role() {
                 PERMISSION_CLAZZWORK_UPDATE or
                         PERMISSION_PERSON_LEARNINGRECORD_SELECT or
                         PERMISSION_PERSON_LEARNINGRECORD_INSERT or
-                        PERMISSION_PERSON_LEARNINGRECORD_UPDATE
+                        PERMISSION_PERSON_LEARNINGRECORD_UPDATE or
+                        PERMISSION_PERSON_CONNECTIVITY_SELECT or
+                        PERMISSION_PERSON_CONNECTIVITY_UPDATE
 
 
         const val ROLE_CLAZZ_STUDENT_NAME = "Class Student"

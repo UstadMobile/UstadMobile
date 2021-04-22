@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="feedSummary"
+            type="com.ustadmobile.lib.db.entities.FeedSummary" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/feedSummaryHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/last_week"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/num_clazzes_icon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/complete_icon"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/feedSummaryHeader"
+            app:srcCompat="@drawable/ic_group_black_24dp"
+            tools:ignore="ContentDescription"
+            app:tint="?attr/colorPrimary" />
+
+        <TextView
+            android:id="@+id/num_clazzes_numtext"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            tools:text="5"
+            android:text="@{feedSummary.numClazzes}"
+            app:layout_constraintEnd_toEndOf="@+id/num_clazzes_icon"
+            app:layout_constraintStart_toStartOf="@+id/num_clazzes_icon"
+            app:layout_constraintTop_toBottomOf="@+id/num_clazzes_icon" />
+
+        <TextView
+            android:id="@+id/num_clazzes_label_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/classes"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+            app:layout_constraintEnd_toEndOf="@+id/num_clazzes_numtext"
+            app:layout_constraintStart_toStartOf="@+id/num_clazzes_numtext"
+            app:layout_constraintTop_toBottomOf="@+id/num_clazzes_numtext" />
+
+        <ImageView
+            android:id="@+id/complete_icon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/content_time_icon"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/num_clazzes_icon"
+            app:layout_constraintTop_toBottomOf="@+id/feedSummaryHeader"
+            app:srcCompat="@drawable/ic_complete"
+            app:tint="?attr/colorPrimary"
+            tools:ignore="ContentDescription" />
+
+
+        <TextView
+            android:id="@+id/complete_numtext"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@{feedSummary.numContentEntriesCompleted}"
+            tools:text="3"
+            app:layout_constraintEnd_toEndOf="@+id/complete_icon"
+            app:layout_constraintStart_toStartOf="@+id/complete_icon"
+            app:layout_constraintTop_toBottomOf="@+id/complete_icon" />
+
+        <TextView
+            android:id="@+id/complete_label_text"
+            android:layout_width="wrap_content"
+            android:maxWidth="@dimen/dimen_100dp"
+            android:gravity="center"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:text="@string/content_pieces_completed"
+            app:layout_constraintEnd_toEndOf="@+id/complete_numtext"
+            app:layout_constraintStart_toStartOf="@+id/complete_numtext"
+            app:layout_constraintTop_toBottomOf="@+id/complete_numtext" />
+
+
+        <ImageView
+            android:id="@+id/content_time_icon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/complete_icon"
+            app:layout_constraintTop_toBottomOf="@+id/feedSummaryHeader"
+            app:srcCompat="@drawable/ic_baseline_timer_24"
+            tools:ignore="ContentDescription"
+            app:tint="?attr/colorPrimary" />
+
+        <TextView
+            android:id="@+id/content_duration_numtext"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            tools:text="1hr:23m"
+            app:elapsedMillis="@{feedSummary.contentUsageMillis}"
+            app:layout_constraintEnd_toEndOf="@+id/content_time_icon"
+            app:layout_constraintStart_toStartOf="@+id/content_time_icon"
+            app:layout_constraintTop_toBottomOf="@+id/content_time_icon" />
+
+        <TextView
+            android:id="@+id/content_duration_label_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/content_usage_duration"
+            android:maxWidth="@dimen/dimen_100dp"
+            android:gravity="center"
+            app:layout_constraintEnd_toEndOf="@+id/content_duration_numtext"
+            app:layout_constraintStart_toStartOf="@+id/content_duration_numtext"
+            app:layout_constraintTop_toBottomOf="@+id/content_duration_numtext" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="content_duration_label_text,complete_label_text,num_clazzes_label_text"
+            />
+
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
+            app:iconGravity="end"
+            app:icon="@drawable/ic_arrow_forward_black_24dp"
+            android:text="@string/reports"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/complete_label_text" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
