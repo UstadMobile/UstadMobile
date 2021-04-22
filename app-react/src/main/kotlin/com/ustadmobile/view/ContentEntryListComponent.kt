@@ -15,22 +15,20 @@ import com.ccfraser.muirwik.components.menu.mMenuItem
 import com.ustadmobile.core.controller.ContentEntryList2Presenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FILTER
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_WEB_PLATFORM
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.model.statemanager.AppBarState
 import com.ustadmobile.util.CssStyleManager
 import com.ustadmobile.util.CssStyleManager.entryListItemContainer
 import com.ustadmobile.util.CssStyleManager.entryListItemImage
 import com.ustadmobile.util.CssStyleManager.entryListItemInfo
 import com.ustadmobile.util.RouteManager.getArgs
-import com.ustadmobile.util.StateManager
-import kotlinx.browser.window
 import kotlinx.css.*
 import org.w3c.dom.Node
 import react.RBuilder
@@ -63,7 +61,7 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
     override var title: String? = null
         get() = field
         set(value) {
-            StateManager.dispatch(AppBarState(title = value))
+            //title manager
             setState { field = value }
         }
 
@@ -75,9 +73,10 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
         }
 
     override fun componentDidMount() {
-        mPresenter = ContentEntryList2Presenter(this,
-            getArgs(), this,di,this)
-        //mPresenter.onCreate(mapOf())
+        val args = getArgs(mapOf(ARG_WEB_PLATFORM to true.toString(),
+            ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT))
+        mPresenter = ContentEntryList2Presenter(this, args, this,di,this)
+        mPresenter.onCreate(mapOf())
         super.componentDidMount()
     }
 
@@ -130,11 +129,6 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
 
     override fun styleList(): RuleSet? {
         return null
-    }
-
-    override fun getData(offset: Int, limit: Int): List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
-        return (window.asDynamic().entries as List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>)
-            .filter {it.entryId.toString() == getArgs()[ARG_PARENT_ENTRY_UID] }
     }
 
 

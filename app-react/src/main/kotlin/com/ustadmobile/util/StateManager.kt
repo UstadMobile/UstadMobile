@@ -1,7 +1,7 @@
 package com.ustadmobile.util
 
 import com.ccfraser.muirwik.components.styles.Theme
-import com.ustadmobile.ReactDatabase
+import com.ustadmobile.db.ReactDatabase
 import com.ustadmobile.core.account.ClientId
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
@@ -10,7 +10,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ContentEntryOpener
-import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.model.statemanager.*
@@ -101,8 +100,6 @@ object StateManager{
     private fun reducer(state: GlobalState = GlobalState(), action: RAction): GlobalState {
         state.type = action
         return when (action) {
-            is AppBarState -> state.copy(title = if(action.title.isNullOrBlank()) state.title
-                else action.title, loading = action.loading)
             is FabState -> state.copy(showFab = action.visible, onFabClicked = action.onClick,
                 fabLabel = action.label, fabIcon = action.icon)
             is UmDi -> state.copy(di = action.di)

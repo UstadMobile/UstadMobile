@@ -5,6 +5,8 @@ import kotlinx.browser.window
 import kotlinx.coroutines.await
 import kotlinx.css.pct
 import kotlinx.css.px
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.json.Json
 import react.RErrorInfo
 import kotlin.js.Promise
 
@@ -40,5 +42,11 @@ object UmReactUtil {
         return (js("Object.entries") as (dynamic) -> Array<Array<T?>>)
             .invoke(data)
             .map { entry -> entry[1] }.toList() as T
+    }
+
+    suspend fun <T> loadList(sourcePath: String,strategy: DeserializationStrategy<List<T>>): List<T> {
+        val res = (window.fetch(sourcePath) as Promise<dynamic>).await()
+        val data = (res.text() as Promise<String>).await()
+        return Json.decodeFromString(strategy,data).toMutableList()
     }
 }

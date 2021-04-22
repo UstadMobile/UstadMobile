@@ -122,7 +122,7 @@ interface UstadView {
 
         const val CURRENT_DEST = ""
 
-        const val ARG_WEB_PLATFORM = "platform"
+        const val ARG_WEB_PLATFORM = "webPlatform"
 
         /**
          * if after selecting from a list, need to open an edit page

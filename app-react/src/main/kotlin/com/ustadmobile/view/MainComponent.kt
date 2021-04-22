@@ -12,7 +12,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.model.UmReactDestination
-import com.ustadmobile.model.statemanager.AppBarState
 import com.ustadmobile.model.statemanager.FabState
 import com.ustadmobile.model.statemanager.GlobalStateSlice
 import com.ustadmobile.model.statemanager.SnackBarState
@@ -88,10 +87,6 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                 fabLabel = it.state.fabLabel
                 fabIcon = it.state.fabIcon
                 onFabClicked = it.state.onFabClicked
-            }
-            is AppBarState -> {
-                console.log(loading)
-                loading = it.state.loading
             }
             is SnackBarState -> {
                 snackBarOpen = true

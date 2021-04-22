@@ -25,6 +25,9 @@ import com.ustadmobile.util.CssStyleManager.ustadListViewComponentContainer
 import com.ustadmobile.util.StateManager
 import com.ustadmobile.util.ext.format
 import kotlinx.browser.window
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.css.*
 import org.w3c.dom.events.Event
 import react.RBuilder
@@ -49,6 +52,8 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
 
     private var selectedEntries: MutableList<DT> = concurrentSafeListOf()
 
+    private var listItems: List<DT> = concurrentSafeListOf()
+
     protected var showEditOptionsMenu:Boolean = false
 
     private var listItemPressTimer = -1
@@ -65,7 +70,13 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
     override var list: DataSource.Factory<Int, DT>? = null
         get() = field
         set(value) {
-            setState { field = value }
+            GlobalScope.launch(Dispatchers.Main) {
+                val items = value?.getData(0,0)
+                setState {
+                    listItems = items?: concurrentSafeListOf()
+                }
+            }
+            field = value
         }
 
 
@@ -132,8 +143,7 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
                     }
                 }
 
-
-                getData(0,9).forEach { entry ->
+                listItems.forEach {entry->
                     mListItem {
                         css{
                             backgroundColor = Color(if(selectedEntries.indexOf(entry) != -1)
@@ -263,8 +273,6 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
     abstract fun handleClickEntry(entry: DT)
 
     abstract fun styleList(): RuleSet?
-
-    abstract fun getData(offset: Int, limit: Int): List<DT>
 
     override fun onClickSort(sortOption: SortOrderOption) {
         //activate selected sort option

@@ -18,10 +18,6 @@ class SplashPresenter(private val view: SplashView){
     suspend fun handleResourceLoading() {
         val appConfigs = loadMapFromLocalFile<HashMap<String, String>>("appconfig.json")
         val localization = loadMapFromLocalFile<HashMap<String, HashMap<Int, String>>>("localization.json")
-        val entries = UmReactUtil.loadListFromFiles<List<Any>>("entries.json")
-        val languages = UmReactUtil.loadListFromFiles<List<Language>>("languages.json")
-        js("window.entries = entries")
-        js("window.languages = languages")
         appConfigs.forEach {
             impl.setAppPref(it.key, it.value, this)
         }

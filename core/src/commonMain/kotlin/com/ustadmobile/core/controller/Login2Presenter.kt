@@ -110,7 +110,6 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                             password.trim() ,serverUrl)
                     view.inProgress = false
                     view.loading = false
-
                     val accountRepo: UmAppDatabase =  di.on(umAccount).direct.instance(tag = DoorTag.TAG_REPO)
                     (accountRepo as DoorDatabaseSyncRepository).invalidateAllTables()
                     goToNextDestAfterLoginOrGuestSelected()
@@ -118,7 +117,6 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                     view.errorMessage = impl.getString(if(e is UnauthorizedException)
                         MessageID.wrong_user_pass_combo else
                         MessageID.login_network_error , context)
-                    view.errorMessage = e.message.toString()
                     view.inProgress = false
                     view.loading = false
                     view.clearFields()

@@ -9,6 +9,8 @@ import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DOWNLOADED_
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_FOLDER_FILTER
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_WEB_PLATFORM
+import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -60,7 +62,9 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         view.sortOptions = SortOrder.values().toList().map { ContentEntryListSortOption(it, context) }
         contentFilter = arguments[ARG_CONTENT_FILTER].toString()
         onlyFolderFilter = arguments[ARG_FOLDER_FILTER]?.toBoolean()?: false
-        parentEntryUidStack += arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0L
+        val parentUid = if(arguments.containsKey(ARG_WEB_PLATFORM))
+            MASTER_SERVER_ROOT_ENTRY_UID else 0L
+        parentEntryUidStack += arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: parentUid
         loggedPersonUid = accountManager.activeAccount.personUid
         showHiddenEntries = false
         getAndSetList()

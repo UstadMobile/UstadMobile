@@ -60,11 +60,13 @@ object RouteManager {
     /**
      * Parse query params into map of arguments
      */
-    fun getArgs(): MutableMap<String, String> {
+    fun getArgs(args: Map<String,String> = mapOf()): MutableMap<String, String> {
         val href = window.location.href
-        return if(href.indexOf("?") != -1)
+        val arguments = if(href.indexOf("?") != -1)
             UMFileUtil.parseURLQueryString(href.substringAfter("?"))
                 .toMutableMap() else mutableMapOf()
+        arguments.putAll(args)
+        return arguments
     }
 
     /**

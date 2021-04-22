@@ -159,13 +159,13 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param context System context object
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any,
-        flags: Int,
-        ustadGoOptions: UstadGoOptions) {
+                           flags: Int,
+                           ustadGoOptions: UstadGoOptions) {
         val params = if(args.isEmpty())  "" else "?${UMFileUtil.mapToQueryString(args)}"
         if(ustadGoOptions.popUpToViewName?.isNotEmpty() == true){
-            window.history.replaceState(args,"","$hashType$viewName$params")
+            window.location.replace("$hashType$viewName$params")
         }else{
-            window.history.pushState(args,"","$hashType$viewName$params")
+            window.location.assign("$hashType$viewName$params")
         }
     }
 

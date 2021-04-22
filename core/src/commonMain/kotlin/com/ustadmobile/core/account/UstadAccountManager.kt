@@ -1,14 +1,11 @@
 package com.ustadmobile.core.account
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.AppConfig
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_CLIENT_ID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.userAtServer
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
-import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.PersonWithAccount

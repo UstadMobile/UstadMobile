@@ -1,12 +1,13 @@
-package com.ustadmobile
+package com.ustadmobile.db
 
 import com.ustadmobile.core.db.SiteTermsDao
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
-import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.door.DoorDatabaseSyncRepository
+import com.ustadmobile.door.*
+import com.ustadmobile.door.daos.ISyncHelperEntitiesDao
+import kotlin.reflect.KClass
 
-class ReactDatabase: UmAppDatabase() {
+class ReactDatabase: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val networkNodeDao: NetworkNodeDao
         get() = TODO("Not yet implemented")
     override val downloadJobDao: DownloadJobDao
@@ -26,7 +27,7 @@ class ReactDatabase: UmAppDatabase() {
     override val leavingReasonDao: LeavingReasonDao
         get() = TODO("Not yet implemented")
     override val contentEntryDao: ContentEntryDao
-        get() = TODO("Not yet implemented")
+        get() = ReactContentEntryDao()
     override val contentEntryContentCategoryJoinDao: ContentEntryContentCategoryJoinDao
         get() = TODO("Not yet implemented")
     override val contentEntryParentChildJoinDao: ContentEntryParentChildJoinDao
@@ -54,7 +55,7 @@ class ReactDatabase: UmAppDatabase() {
     override val personGroupMemberDao: PersonGroupMemberDao
         get() = TODO("Not yet implemented")
     override val entityRoleDao: EntityRoleDao
-        get() = TODO("Not yet implemented")
+        get() = ReactEntityRoleDao()
     override val personPictureDao: PersonPictureDao
         get() = TODO("Not yet implemented")
     override val scrapeRunDao: ScrapeRunDao
@@ -153,6 +154,95 @@ class ReactDatabase: UmAppDatabase() {
     override fun clearAllTables() {
 
     }
+
+    override val clientId: Int
+        get() = TODO("Not yet implemented")
+    override val config: RepositoryConfig
+        get() = TODO("Not yet implemented")
+    override var connectivityStatus: Int
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override val db: DoorDatabase
+        get() = TODO("Not yet implemented")
+    override val dbPath: String
+        get() = TODO("Not yet implemented")
+    override val syncHelperEntitiesDao: ISyncHelperEntitiesDao
+        get() = TODO("Not yet implemented")
+    override val tableIdMap: Map<String, Int>
+        get() = TODO("Not yet implemented")
+
+    override suspend fun activeMirrors(): List<MirrorEndpoint> {
+        TODO("Not yet implemented:activeMirrors")
+    }
+
+    override suspend fun addMirror(mirrorEndpoint: String, initialPriority: Int): Int {
+        TODO("Not yet implemented:addMirror")
+    }
+
+    override fun <T : Any> addSyncListener(entityClass: KClass<T>, syncListener: SyncListener<T>) {
+        TODO("Not yet implemented:addSyncListener")
+    }
+
+    override fun addTableChangeListener(listener: TableChangeListener) {
+        TODO("Not yet implemented:addTableChangeListener")
+    }
+
+    override fun addWeakConnectivityListener(listener: RepositoryConnectivityListener) {
+        TODO("Not yet implemented:addWeakConnectivityListener")
+    }
+
+    override suspend fun dispatchUpdateNotifications(tableId: Int) {
+        TODO("Not yet implemented:dispatchUpdateNotifications")
+    }
+
+    override fun <T : Any> handleSyncEntitiesReceived(
+        entityClass: KClass<T>,
+        entitiesIncoming: List<T>
+    ) {
+        TODO("Not yet implemented:handleSyncEntitiesReceived")
+    }
+
+    override fun handleTableChanged(tableName: String) {
+        TODO("Not yet implemented:handleTableChanged")
+    }
+
+    override suspend fun invalidateAllTables() {}
+
+    override fun nextId(tableId: Int): Long {
+        TODO("Not yet implemented:Not yet implemented")
+    }
+
+    override suspend fun nextIdAsync(tableId: Int): Long {
+        TODO("Not yet implemented:Not yet implemented")
+    }
+
+    override suspend fun removeMirror(mirrorId: Int) {
+        TODO("Not yet implemented:removeMirror")
+    }
+
+    override fun <T : Any> removeSyncListener(
+        entityClass: KClass<T>,
+        syncListener: SyncListener<T>
+    ) {
+        TODO("Not yet implemented:Not yet implemented")
+    }
+
+    override fun removeTableChangeListener(listener: TableChangeListener) {
+        TODO("Not yet implemented:Not yet implemented")
+    }
+
+    override fun removeWeakConnectivityListener(listener: RepositoryConnectivityListener) {
+        TODO("Not yet implemented:removeWeakConnectivityListener")
+    }
+
+    override suspend fun sync(tablesToSync: List<Int>?): List<SyncResult> {
+        TODO("Not yet implemented:sync")
+    }
+
+    override suspend fun updateMirrorPriorities(newPriorities: Map<Int, Int>) {
+        TODO("Not yet implemented:updateMirrorPriorities")
+    }
+
 
     companion object {
         fun getInstance(context: Any, dbName: String): ReactDatabase {
