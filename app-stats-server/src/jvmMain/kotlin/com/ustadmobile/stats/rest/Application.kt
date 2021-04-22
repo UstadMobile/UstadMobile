@@ -38,6 +38,9 @@ fun Application.statsModule(){
     }
 
     initialContext.bindDataSourceIfNotExisting("StatsDatabase", dbProperties)
+
+    install(CallLogging)
+
     install(ContentNegotiation) {
         gson {
             register(ContentType.Application.Json, GsonConverter())
