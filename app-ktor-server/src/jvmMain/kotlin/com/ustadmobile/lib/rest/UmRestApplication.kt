@@ -115,7 +115,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
     val ustadStatsEndpoint = environment.config
-            .propertyOrNull("ktor.ustad.usageStatsDest")?.getString() ?: CONF_STATS_SERVER
+            .propertyOrNull("ktor.ustad.usagestatsdest")?.getString() ?: CONF_STATS_SERVER
 
     val countryDbFile = File(dataDirPath,"country.mmdb")
 
