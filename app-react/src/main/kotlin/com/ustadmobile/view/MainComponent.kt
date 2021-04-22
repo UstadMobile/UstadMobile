@@ -1,15 +1,20 @@
 package com.ustadmobile.view
 
 import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.button.*
+import com.ccfraser.muirwik.components.button.MButtonSize
+import com.ccfraser.muirwik.components.button.MButtonVariant
+import com.ccfraser.muirwik.components.button.mButton
+import com.ccfraser.muirwik.components.button.mFab
 import com.ccfraser.muirwik.components.input.mInput
 import com.ccfraser.muirwik.components.list.mList
 import com.ccfraser.muirwik.components.list.mListItemWithIcon
 import com.ccfraser.muirwik.components.styles.Breakpoint
 import com.ccfraser.muirwik.components.styles.down
 import com.ccfraser.muirwik.components.styles.up
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.model.UmReactDestination
 import com.ustadmobile.model.statemanager.FabState
@@ -18,6 +23,8 @@ import com.ustadmobile.model.statemanager.SnackBarState
 import com.ustadmobile.util.CssStyleManager
 import com.ustadmobile.util.CssStyleManager.appContainer
 import com.ustadmobile.util.CssStyleManager.fab
+import com.ustadmobile.util.CssStyleManager.mainComponentAvatarInner
+import com.ustadmobile.util.CssStyleManager.mainComponentAvatarOuter
 import com.ustadmobile.util.CssStyleManager.mainComponentContainer
 import com.ustadmobile.util.CssStyleManager.mainComponentContentArea
 import com.ustadmobile.util.CssStyleManager.mainComponentErrorPaper
@@ -25,17 +32,19 @@ import com.ustadmobile.util.CssStyleManager.mainComponentSearch
 import com.ustadmobile.util.CssStyleManager.mainComponentSearchIcon
 import com.ustadmobile.util.CssStyleManager.progressIndicator
 import com.ustadmobile.util.RouteManager.destinationList
-import com.ustadmobile.util.RouteManager.findDestination
-import com.ustadmobile.util.RouteManager.getPathName
 import com.ustadmobile.util.RouteManager.renderRoutes
 import com.ustadmobile.util.StateManager
 import com.ustadmobile.util.UmReactUtil.drawerWidth
 import com.ustadmobile.util.UmReactUtil.fullWidth
 import com.ustadmobile.util.UmReactUtil.isDarkModeEnabled
-import com.ustadmobile.util.UmReactUtil.placeHolderImage
 import com.ustadmobile.util.UmReactUtil.zeroPx
 import kotlinext.js.jsObject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.css.*
+import kotlinx.html.onClick
+import org.kodein.di.instance
 import org.w3c.dom.events.Event
 import react.*
 import react.dom.div
@@ -80,6 +89,8 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
 
     private lateinit var currentDestination: UmReactDestination
 
+    private val accountManager: UstadAccountManager by instance()
+
     private var stateChangeListener : (GlobalStateSlice) -> Unit = {
         when (it.state.type) {
             is FabState -> {
@@ -97,6 +108,12 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
         }
     }
 
+    private val mActiveUserObserver:(UmAccount?) -> Unit = {
+        GlobalScope.launch(Dispatchers.Main) {
+            setState { activeAccount = it }
+        }
+    }
+
     override fun RState.init(props: MainProps) {
         currentDestination = props.currentDestination
     }
@@ -109,6 +126,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
             showSearch = currentDestination.showSearch
         }
         StateManager.subscribe(stateChangeListener)
+        accountManager.activeAccountLive.observeWithLifecycleOwner(this,mActiveUserObserver)
     }
 
 
@@ -121,7 +139,6 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                         +appContainer
                         backgroundColor = Color(theme.palette.background.paper)
                     }
-
 
                     //Loading indicator
                     mLinearProgress {
@@ -148,8 +165,9 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                             }
 
                             mToolbar {
-
-                                mToolbarTitle(currentTile)
+                                mHidden(xsDown = true){
+                                    mToolbarTitle(currentTile)
+                                }
 
                                 styledDiv {
                                     css{
@@ -164,7 +182,8 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                                         val className = "${CssStyleManager.name}-mainComponentInputSearch"
                                         val id = "um-search"
                                     }
-                                    mInput(placeholder = "Search...", disableUnderline = true) {
+                                    mInput(placeholder = "${systemImpl.getString(MessageID.search,this)}...",
+                                        disableUnderline = true) {
                                         attrs.inputProps = inputProps
                                         css {
                                             color = Color.inherit
@@ -175,27 +194,31 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                                 mAvatar {
                                     css {
                                         display = if(currentDestination.showNavigation) Display.block else Display.none
+                                        +mainComponentAvatarOuter
                                     }
-                                    attrs{
-                                        src = placeHolderImage
-                                        sizes = "large"
+
+                                    attrs {
+                                        onClick = {}
                                     }
-                                    +"${activeAccount?.firstName?.first()}"
+
+                                    mLink {
+                                        mAvatar{
+                                            css {
+                                                +mainComponentAvatarInner
+                                            }
+                                            mTypography("${activeAccount?.firstName?.first()}",
+                                                align = MTypographyAlign.center,
+                                                variant = MTypographyVariant.h6){
+                                                css{ marginTop = (1.5).px }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
 
                         if(currentDestination.showNavigation){
-                            mHidden(mdUp = true) {
-                                //render on small display (Bottom nav)
-                                console.log("Moja")
-                                styledDiv {  }
-
-                            }
-                            mHidden(smDown = true, implementation = MHiddenImplementation.css) {
-                                //render on larger display (Bottom nav)
-                                renderSideNavigation()
-                            }
+                            renderSideNavigation()
                         }
 
                         // Main content area, this div holds the contents
@@ -265,10 +288,32 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
             position = "relative"; width = drawerWidth.value; display = "block"; height =
             "100%"; minHeight = "100vh"
         }
-        mDrawer(responsiveDrawerOpen, MDrawerAnchor.left, MDrawerVariant.temporary, paperProps = p,
-            onClose = { setState { responsiveDrawerOpen = !responsiveDrawerOpen }}) {
-            appBarSpacer()
-            renderDrawerItems()
+
+        mHidden(smDown = true, implementation = MHiddenImplementation.css) {
+            mDrawer(true, MDrawerAnchor.left, MDrawerVariant.permanent, paperProps = p) {
+                appBarSpacer()
+                themeContext.Consumer { theme ->
+                    mList {
+                        css {
+                            backgroundColor = Color(theme.palette.background.paper)
+                            width = drawerWidth
+                        }
+                        destinationList.filter { it.icon != null }.forEach { destination ->
+                            destination.icon?.let {
+                                mListItemWithIcon(it, systemImpl.getString(destination.labelId, this),
+                                    divider = destination.divider , onClick = {
+                                        setState {
+                                            showSearch = destination.showSearch
+                                            currentTile = systemImpl.getString(destination.labelId, this)
+                                            currentDestination = destination
+                                        }
+                                        systemImpl.go(destination.view, destination.args,this)
+                                    })
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -277,31 +322,6 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
         return RBuilder().mPaper {
             css(mainComponentErrorPaper)
             mTypography(text)
-        }
-    }
-
-
-    private fun RBuilder.renderDrawerItems(fullWidth: Boolean = false) {
-        themeContext.Consumer { theme ->
-            mList {
-                css {
-                    backgroundColor = Color(theme.palette.background.paper)
-                    width = if (fullWidth) LinearDimension.auto else drawerWidth
-                }
-                destinationList.filter { it.icon != null }.forEach { destination ->
-                    destination.icon?.let {
-                        mListItemWithIcon(it, systemImpl.getString(destination.labelId, this),
-                            divider = destination.divider , onClick = {
-                            setState {
-                                showSearch = destination.showSearch
-                                currentTile = systemImpl.getString(destination.labelId, this)
-                                currentDestination = destination
-                            }
-                            systemImpl.go(destination.view, destination.args,this)
-                        })
-                    }
-                }
-            }
         }
     }
 

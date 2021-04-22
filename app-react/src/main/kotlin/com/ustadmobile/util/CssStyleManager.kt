@@ -1,5 +1,6 @@
 package com.ustadmobile.util
 
+import com.ccfraser.muirwik.components.Colors
 import com.ccfraser.muirwik.components.spacingUnits
 import com.ccfraser.muirwik.components.styles.Breakpoint
 import com.ccfraser.muirwik.components.styles.Theme
@@ -43,6 +44,20 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
 
     val progressIndicator by css {
         width = 100.pc
+    }
+
+    val mainComponentAvatarOuter by css {
+        width = 40.px
+        height = 40.px
+        backgroundColor = Color(theme.palette.primary.light)
+    }
+
+    val mainComponentAvatarInner by css {
+        width = 36.px
+        height = 36.px
+        margin = "2px 0 0 2.4px"
+        color = Color.white
+        backgroundColor = Color(theme.palette.primary.dark)
     }
 
     val splashComponentPreloadDiv by css{

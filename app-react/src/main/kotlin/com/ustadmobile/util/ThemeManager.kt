@@ -17,6 +17,10 @@ object ThemeManager {
 
     private const val primaryColor = "#00796b"
 
+    private const val primaryLightColor = "#48a999"
+
+    private const val primaryDarkColor = "#005E55"
+
     private const val secondaryColor = "#ff9800"
 
     /**
@@ -24,7 +28,9 @@ object ThemeManager {
      */
     fun createAppTheme(): Theme {
         themeOptions.palette?.type = if (isDarkModeEnabled()) "dark" else "light"
+        themeOptions.palette?.primary.light = if(isDarkModeEnabled()) primaryLightColor else primaryLightColor
         themeOptions.palette?.primary.main = if(isDarkModeEnabled()) primaryColor else primaryColor
+        themeOptions.palette?.primary.dark = if(isDarkModeEnabled()) primaryDarkColor else primaryDarkColor
         themeOptions.palette?.secondary.main = secondaryColor
         return createMuiTheme(themeOptions)
     }
