@@ -9,7 +9,10 @@ import javax.sql.DataSource
  */
 fun InitialContext.initQuartzDb(jndiName: String) {
     val quartzDs = lookup(jndiName) as DataSource
-    val sqlStr = javaClass.getResourceAsStream("/quartz-init.sql").readBytes().decodeToString()
+
+    // Note: the class file used for the getResource call MUST be from the same module, otherwise the
+    // resource will not be found by JDK9+ (due to the modular system changes)
+    val sqlStr = ServerAppMain::class.java.getResourceAsStream("/quartz-init.sql").readBytes().decodeToString()
     quartzDs.connection.use { connection ->
         connection.metaData.getTables(null, null, "%", arrayOf("TABLE")).use { result ->
             if(!result.next()) {

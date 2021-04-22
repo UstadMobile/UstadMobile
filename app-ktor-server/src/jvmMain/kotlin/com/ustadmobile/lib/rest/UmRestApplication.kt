@@ -118,7 +118,11 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             .propertyOrNull("ktor.ustad.usageStatsDest")?.getString() ?: CONF_STATS_SERVER
 
     val countryDbFile = File(dataDirPath,"country.mmdb")
-    javaClass.takeIf { !countryDbFile.exists() }?.getResourceAsStream("/country.mmdb")?.writeToFile(countryDbFile)
+
+    // Note: the class file used for the getResource call MUST be from the same module, otherwise the
+    // resource will not be found by JDK9+ (due to the modular system changes)
+    ServerAppMain::class.java.takeIf { !countryDbFile.exists() }
+        ?.getResourceAsStream("/country.mmdb")?.writeToFile(countryDbFile)
 
     install(DIFeature) {
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {

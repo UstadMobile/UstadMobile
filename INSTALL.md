@@ -3,7 +3,7 @@
 The Ustad Mobile server runs as a standalone Java JAR file (powered by KTOR and Netty) It. can be
 connected to an SQLite or PostgreSQL database. It is recommended to use Apache or Nginx as a proxy.
 The server should run fine on any JVM platform, but has been tested most extensively on Linux
-(Ubuntu 20.04).
+(Ubuntu 20.04). It should work with any JDK 8+ JVM.
 
 ## Create a user, directory, and copy files
 
