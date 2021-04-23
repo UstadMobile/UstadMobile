@@ -58,13 +58,6 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
         get() = mPresenter
 
 
-    override var title: String? = null
-        get() = field
-        set(value) {
-            //title manager
-            setState { field = value }
-        }
-
     override var editOptionVisible: Boolean = false
         get() = field
         set(value) {
@@ -73,11 +66,22 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
         }
 
     override fun componentDidMount() {
+        initPresenter()
+        super.componentDidMount()
+    }
+
+    override fun onComponentRefreshed(viewName: String) {
+        super.onComponentRefreshed(viewName)
+        if(viewName == ContentEntryList2View.VIEW_NAME){
+            initPresenter()
+        }
+    }
+
+    private fun initPresenter(){
         val args = getArgs(mapOf(ARG_WEB_PLATFORM to true.toString(),
             ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT))
         mPresenter = ContentEntryList2Presenter(this, args, this,di,this)
         mPresenter.onCreate(mapOf())
-        super.componentDidMount()
     }
 
     override fun RBuilder.renderListItem(item: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {

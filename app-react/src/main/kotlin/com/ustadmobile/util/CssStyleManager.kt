@@ -49,6 +49,7 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
     val mainComponentAvatarOuter by css {
         width = 40.px
         height = 40.px
+        cursor = Cursor.pointer
         backgroundColor = Color(theme.palette.primary.light)
     }
 

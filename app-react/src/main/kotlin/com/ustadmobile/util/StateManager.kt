@@ -103,6 +103,7 @@ object StateManager{
             is FabState -> state.copy(showFab = action.visible, onFabClicked = action.onClick,
                 fabLabel = action.label, fabIcon = action.icon)
             is UmDi -> state.copy(di = action.di)
+            is ToolbarTitle -> state.copy(title = action.title)
             is UmTheme -> state.copy(theme = action.theme)
             is SnackBarState -> state.copy(snackBarActionLabel = action.actionLabel,
                 snackBarMessage = action.message, onFabClicked = action.onClick)

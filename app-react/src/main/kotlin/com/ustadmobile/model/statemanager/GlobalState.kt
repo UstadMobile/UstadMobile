@@ -12,6 +12,6 @@ data class GlobalState(var showFab: Boolean = false, var fabLabel: String = "",
                        var fabIcon: String = "", var onFabClicked:(Event) -> Unit = {},
                        var di: DI = DI.lazy {}, var theme: Theme? = null,
                        var snackBarMessage: String ? = null, var type: RAction? = null,
-                       var snackBarActionLabel: String? = null,
+                       var snackBarActionLabel: String? = null, var title:String? = null,
                        var onSnackActionClicked:(Event) -> Unit = {}
 )

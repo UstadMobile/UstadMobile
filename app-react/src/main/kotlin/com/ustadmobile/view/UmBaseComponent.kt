@@ -6,19 +6,21 @@ import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.model.statemanager.SnackBarState
+import com.ustadmobile.model.statemanager.ToolbarTitle
 import com.ustadmobile.util.ProgressBarManager
+import com.ustadmobile.util.RouteManager.getPathName
 import com.ustadmobile.util.SearchManager
 import com.ustadmobile.util.StateManager
 import com.ustadmobile.util.StateManager.getCurrentState
 import kotlinx.atomicfu.atomic
+import kotlinx.browser.window
 import kotlinx.coroutines.Runnable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import react.RBuilder
-import react.RComponent
-import react.RProps
-import react.RState
+import org.w3c.dom.HashChangeEvent
+import org.w3c.dom.events.Event
+import react.*
 
 open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(props),
     UstadView, DIAware, DoorLifecycleOwner {
@@ -35,18 +37,16 @@ open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(pro
 
     private var progressBarManager: ProgressBarManager? = null
 
-    override fun componentDidMount() {
-        for(observer in lifecycleObservers){
-            observer.onStart(this)
-        }
-        lifecycleStatus.value = DoorLifecycleObserver.STARTED
-        searchManager = SearchManager("um-search")
-        progressBarManager = ProgressBarManager()
+    private var hashChangeListener:(Event) -> Unit = { (it as HashChangeEvent)
+        onComponentRefreshed(getPathName(it.newURL))
     }
 
-    override fun RBuilder.render() {
-        lifecycleStatus.value = DoorLifecycleObserver.CREATED
-    }
+    var title: String? = null
+        get() = field
+        set(value) {
+            field = value
+            value?.let { StateManager.dispatch(ToolbarTitle(it)) }
+        }
 
     override var loading: Boolean = false
         get() = field
@@ -54,6 +54,20 @@ open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(pro
             progressBarManager?.progressBarVisibility = value
             field = value
         }
+
+    override fun componentDidMount() {
+        for(observer in lifecycleObservers){
+            observer.onStart(this)
+        }
+        lifecycleStatus.value = DoorLifecycleObserver.STARTED
+        searchManager = SearchManager("um-search")
+        progressBarManager = ProgressBarManager()
+        window.addEventListener("hashchange",hashChangeListener)
+    }
+
+    override fun RBuilder.render() {
+        lifecycleStatus.value = DoorLifecycleObserver.CREATED
+    }
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
         StateManager.dispatch(SnackBarState(message,
@@ -78,6 +92,8 @@ open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(pro
         lifecycleObservers.remove(observer)
     }
 
+    open fun onComponentRefreshed(viewName:String){}
+
     override fun componentWillUnmount() {
         for(observer in lifecycleObservers){
             observer.onStop(this)
@@ -85,5 +101,6 @@ open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(pro
         lifecycleStatus.value = DoorLifecycleObserver.STOPPED
         searchManager?.onDestroy()
         progressBarManager?.onDestroy()
+        window.removeEventListener("hashchange",hashChangeListener)
     }
 }

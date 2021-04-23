@@ -20,6 +20,7 @@ import com.ustadmobile.model.UmReactDestination
 import com.ustadmobile.model.statemanager.FabState
 import com.ustadmobile.model.statemanager.GlobalStateSlice
 import com.ustadmobile.model.statemanager.SnackBarState
+import com.ustadmobile.model.statemanager.ToolbarTitle
 import com.ustadmobile.util.CssStyleManager
 import com.ustadmobile.util.CssStyleManager.appContainer
 import com.ustadmobile.util.CssStyleManager.fab
@@ -32,6 +33,7 @@ import com.ustadmobile.util.CssStyleManager.mainComponentSearch
 import com.ustadmobile.util.CssStyleManager.mainComponentSearchIcon
 import com.ustadmobile.util.CssStyleManager.progressIndicator
 import com.ustadmobile.util.RouteManager.destinationList
+import com.ustadmobile.util.RouteManager.findDestination
 import com.ustadmobile.util.RouteManager.renderRoutes
 import com.ustadmobile.util.StateManager
 import com.ustadmobile.util.UmReactUtil.drawerWidth
@@ -43,7 +45,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.css.*
-import kotlinx.html.onClick
 import org.kodein.di.instance
 import org.w3c.dom.events.Event
 import react.*
@@ -61,13 +62,9 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
 
     private var activeAccount: UmAccount? = null
 
-    private var currentTile: String = ""
-
-    private var responsiveDrawerOpen: Boolean = false
+    private var toolbarTitle: String = ""
 
     private var isRTLSupport: Boolean = false
-
-    private var showSearch: Boolean = false
 
     private var showFab: Boolean = false
 
@@ -92,18 +89,23 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
     private val accountManager: UstadAccountManager by instance()
 
     private var stateChangeListener : (GlobalStateSlice) -> Unit = {
-        when (it.state.type) {
-            is FabState -> {
-                showFab = it.state.showFab
-                fabLabel = it.state.fabLabel
-                fabIcon = it.state.fabIcon
-                onFabClicked = it.state.onFabClicked
-            }
-            is SnackBarState -> {
-                snackBarOpen = true
-                snackBarMessage = it.state.snackBarMessage
-                snackBarActionLabel = it.state.snackBarActionLabel
-                onSnackActionClicked = it.state.onSnackActionClicked
+        setState {
+            when (it.state.type) {
+                is FabState -> {
+                    showFab = it.state.showFab
+                    fabLabel = it.state.fabLabel
+                    fabIcon = it.state.fabIcon
+                    onFabClicked = it.state.onFabClicked
+                }
+                is SnackBarState -> {
+                    snackBarOpen = true
+                    snackBarMessage = it.state.snackBarMessage
+                    snackBarActionLabel = it.state.snackBarActionLabel
+                    onSnackActionClicked = it.state.onSnackActionClicked
+                }
+                is ToolbarTitle -> {
+                    toolbarTitle = it.state.title?:""
+                }
             }
         }
     }
@@ -120,13 +122,20 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
 
     override fun componentDidMount() {
         super.componentDidMount()
-        setState {
-            currentTile = systemImpl.getString(currentDestination.labelId, this)
-            responsiveDrawerOpen = true
-            showSearch = currentDestination.showSearch
-        }
         StateManager.subscribe(stateChangeListener)
-        accountManager.activeAccountLive.observeWithLifecycleOwner(this,mActiveUserObserver)
+        accountManager.activeAccountLive.observeWithLifecycleOwner(this,
+            mActiveUserObserver)
+    }
+
+    override fun onComponentRefreshed(viewName: String) {
+        super.onComponentRefreshed(viewName)
+        val destination = findDestination(viewName)
+        if(destination != null){
+            title = systemImpl.getString(destination.labelId, this)
+            setState {
+                currentDestination = destination
+            }
+        }
     }
 
 
@@ -165,14 +174,16 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                             }
 
                             mToolbar {
+                                attrs.asDynamic().id = "um-toolbar"
                                 mHidden(xsDown = true){
-                                    mToolbarTitle(currentTile)
+                                    mToolbarTitle(toolbarTitle)
                                 }
 
                                 styledDiv {
                                     css{
                                         +mainComponentSearch
-                                        display = if(showSearch) Display.block else Display.none
+                                        display = if(currentDestination.showSearch)
+                                            Display.block else Display.none
                                     }
                                     styledDiv {
                                         css(mainComponentSearchIcon)
@@ -201,16 +212,14 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                                         onClick = {}
                                     }
 
-                                    mLink {
-                                        mAvatar{
-                                            css {
-                                                +mainComponentAvatarInner
-                                            }
-                                            mTypography("${activeAccount?.firstName?.first()}",
-                                                align = MTypographyAlign.center,
-                                                variant = MTypographyVariant.h6){
-                                                css{ marginTop = (1.5).px }
-                                            }
+                                    mAvatar{
+                                        css {
+                                            +mainComponentAvatarInner
+                                        }
+                                        mTypography("${activeAccount?.firstName?.first()}",
+                                            align = MTypographyAlign.center,
+                                            variant = MTypographyVariant.h5){
+                                            css{ marginTop = (1.5).px }
                                         }
                                     }
                                 }
@@ -302,11 +311,6 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                             destination.icon?.let {
                                 mListItemWithIcon(it, systemImpl.getString(destination.labelId, this),
                                     divider = destination.divider , onClick = {
-                                        setState {
-                                            showSearch = destination.showSearch
-                                            currentTile = systemImpl.getString(destination.labelId, this)
-                                            currentDestination = destination
-                                        }
                                         systemImpl.go(destination.view, destination.args,this)
                                     })
                             }
