@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <item name="activity_splash_screen" type="layout" tools:override="true">@layout/activity_splash_screen_rebranded</item>
+
+</resources>
