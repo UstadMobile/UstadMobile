@@ -986,4 +986,10 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="manage_download">Manage download</string>
 
+    <!--
+    Powered by credit is used on rebranded copies of the app to credit Ustad Mobile e.g.
+    "School Name app powered by Ustad Mobile"
+    -->
+    <string name="powered_by">Powered by</string>
+
 </resources>
