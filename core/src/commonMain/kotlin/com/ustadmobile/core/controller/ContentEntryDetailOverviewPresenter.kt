@@ -114,7 +114,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
         val canOpen = !isDownloadEnabled || downloadJobItemLiveData?.getValue()?.djiStatus == JobStatus.COMPLETE
         if (canOpen) {
             val loginFirst = systemImpl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
-                    "false", context)!!.toBoolean()
+                    "false", context)?.toBoolean() == true
             val account = accountManager.activeAccount
             if (loginFirst && account.personUid == 0L) {
                 systemImpl.go(Login2View.VIEW_NAME, arguments, context)

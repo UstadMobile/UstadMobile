@@ -38,7 +38,9 @@ object RouteManager {
         UmReactDestination( labelId= MessageID.accounts, view = AccountListView.VIEW_NAME,
              component = PlaceHolderComponent::class),
         UmReactDestination(view = ContentEntryDetailView.VIEW_NAME,
-            component = ContentEntryDetailComponent::class)
+            component = ContentEntryDetailComponent::class),
+        UmReactDestination(view = XapiPackageContentView.VIEW_NAME,
+            component = XapiPackageContentComponent::class)
     )
 
     /**

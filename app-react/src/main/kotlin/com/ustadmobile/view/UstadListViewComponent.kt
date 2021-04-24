@@ -37,7 +37,7 @@ import react.setState
 import styled.css
 import styled.styledDiv
 
-abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<RProps,RState>(mProps),
+abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<RProps,RState>(mProps),
     UstadListView<RT, DT>, OnSortOptionSelected {
 
     protected abstract val displayTypeRepo: Any?

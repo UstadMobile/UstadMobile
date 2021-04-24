@@ -10,7 +10,7 @@ import org.w3c.dom.events.Event
 import react.RProps
 import react.RState
 
-abstract class UstadDetailComponent<T: Any>(mProps: RProps) : UmBaseComponent<RProps,RState>(mProps),
+abstract class UstadDetailComponent<T: Any>(mProps: RProps) : UstadBaseComponent<RProps,RState>(mProps),
     UstadDetailView<T> {
 
     abstract val detailPresenter: UstadDetailPresenter<*, *>?

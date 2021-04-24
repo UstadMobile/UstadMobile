@@ -1,5 +1,6 @@
 package com.ustadmobile.core.util
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
@@ -12,6 +13,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
+import com.ustadmobile.lib.db.entities.ContainerUidAndMimeType
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -60,6 +62,10 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware 
             UstadMobileSystemCommon.UstadGoOptions("", true)
         }else{
             UstadMobileSystemCommon.UstadGoOptions("", false)
+        }
+
+        if(containerToOpen != null){
+            Napier.d(safeStringify(di,ContainerUidAndMimeType.serializer(),containerToOpen), tag = "Kileha-Container")
         }
 
         when {

@@ -1,4 +1,4 @@
-package com.ustadmobile.db
+package com.ustadmobile.mocks.db
 
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.dao.ContentEntryDao

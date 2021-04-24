@@ -1,10 +1,8 @@
-package com.ustadmobile.db
+package com.ustadmobile.mocks.db
 
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.util.UmReactUtil
-import com.ustadmobile.util.UmReactUtil.loadList
 import kotlinx.serialization.builtins.ListSerializer
 
 class ReactContentEntryRelatedEntryJoinDao: ContentEntryRelatedEntryJoinDao() {

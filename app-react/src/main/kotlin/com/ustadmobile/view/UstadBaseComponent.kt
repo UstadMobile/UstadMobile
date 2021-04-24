@@ -22,7 +22,7 @@ import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.events.Event
 import react.*
 
-open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(props),
+open class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(props),
     UstadView, DIAware, DoorLifecycleOwner {
 
     private val lifecycleObservers: MutableList<DoorLifecycleObserver> = concurrentSafeListOf()

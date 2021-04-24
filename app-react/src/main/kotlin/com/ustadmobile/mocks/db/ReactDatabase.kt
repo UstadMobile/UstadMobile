@@ -1,4 +1,4 @@
-package com.ustadmobile.db
+package com.ustadmobile.mocks.db
 
 import com.ustadmobile.core.db.SiteTermsDao
 import com.ustadmobile.core.db.UmAppDatabase

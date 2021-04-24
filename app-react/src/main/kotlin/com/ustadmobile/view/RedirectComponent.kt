@@ -18,7 +18,7 @@ import react.RProps
 import react.RState
 import react.setState
 
-class RedirectComponent (props: RProps): UmBaseComponent<RProps, RState>(props), RedirectView {
+class RedirectComponent (props: RProps): UstadBaseComponent<RProps, RState>(props), RedirectView {
 
     private lateinit var mPresenter: RedirectPresenter
 

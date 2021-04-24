@@ -1,4 +1,4 @@
-package com.ustadmobile.db
+package com.ustadmobile.mocks.db
 
 import com.ustadmobile.core.db.dao.ContentEntryProgressDao
 import com.ustadmobile.lib.db.entities.ContentEntryProgress

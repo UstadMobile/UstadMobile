@@ -26,7 +26,7 @@ interface SplashProps: RProps {
     var nextArgs: MutableMap<String,String>
 }
 
-class SplashComponent (props: SplashProps): UmBaseComponent<SplashProps, RState>(props), SplashView {
+class SplashComponent (props: SplashProps): UstadBaseComponent<SplashProps, RState>(props), SplashView {
 
     private lateinit var mPresenter: SplashPresenter
 

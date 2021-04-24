@@ -24,7 +24,7 @@ import react.setState
 import styled.css
 import styled.styledDiv
 
-class LoginComponent(props: RProps): UmBaseComponent<RProps,RState>(props), Login2View {
+class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), Login2View {
 
     private lateinit var mPresenter: Login2Presenter
 

@@ -59,7 +59,7 @@ interface MainProps: RProps {
 }
 
 
-class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props){
+class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(props){
 
     private var activeAccount: UmAccount? = null
 
