@@ -1,7 +1,7 @@
 package com.ustadmobile.util
 
 import com.ccfraser.muirwik.components.styles.Theme
-import com.ustadmobile.db.ReactDatabase
+import com.ustadmobile.mocks.db.ReactDatabase
 import com.ustadmobile.core.account.ClientId
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
@@ -10,9 +10,14 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ContentEntryOpener
+import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
+import com.ustadmobile.mocks.container.ContainerMounterJs
 import com.ustadmobile.model.statemanager.*
+import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
+import com.ustadmobile.xmlpullparserkmp.XmlSerializer
 import io.ktor.client.*
 import io.ktor.client.engine.js.*
 import io.ktor.client.features.*
@@ -78,6 +83,23 @@ object StateManager{
             UmTheme(getCurrentState().theme!!)
         }
 
+        bind<ContainerMounter>() with singleton {
+            ContainerMounterJs()
+        }
+
+        bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
+            XmlPullParserFactory.newInstance().also {
+                it.setNamespaceAware(true)
+            }
+        }
+
+        bind<XmlPullParserFactory>(tag = DiTag.XPP_FACTORY_NSUNAWARE) with singleton {
+            XmlPullParserFactory.newInstance()
+        }
+
+        bind<XmlSerializer>() with provider {
+            instance<XmlPullParserFactory>().newSerializer()
+        }
         bind<CoroutineDispatcher>(tag = UstadMobileSystemCommon.TAG_MAIN_COROUTINE_CONTEXT) with singleton { Dispatchers.Main }
 
         bind<ContentEntryOpener>() with scoped(EndpointScope.Default).singleton {
