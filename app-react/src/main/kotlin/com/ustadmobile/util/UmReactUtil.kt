@@ -1,13 +1,11 @@
 package com.ustadmobile.util
 
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import kotlinx.browser.window
 import kotlinx.coroutines.await
 import kotlinx.css.pct
 import kotlinx.css.px
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
-import react.RErrorInfo
 import kotlin.js.Promise
 
 object UmReactUtil {

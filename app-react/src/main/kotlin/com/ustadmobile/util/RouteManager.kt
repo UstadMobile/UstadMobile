@@ -33,12 +33,12 @@ object RouteManager {
             PlaceHolderComponent::class, divider = true),
         UmReactDestination("settings", MessageID.settings, SettingsView.VIEW_NAME,
             PlaceHolderComponent::class),
+        UmReactDestination(view = Login2View.VIEW_NAME, labelId = MessageID.login,
+            component = LoginComponent::class, showNavigation = false),
         UmReactDestination( labelId= MessageID.accounts, view = AccountListView.VIEW_NAME,
              component = PlaceHolderComponent::class),
-        UmReactDestination(view = ContentEntryDetailOverviewView.VIEW_NAME,
-            component = ContentEntryDetailOverviewComponent::class),
-        UmReactDestination(view = Login2View.VIEW_NAME, labelId = MessageID.login,
-            component = LoginComponent::class, showNavigation = false)
+        UmReactDestination(view = ContentEntryDetailView.VIEW_NAME,
+            component = ContentEntryDetailComponent::class)
     )
 
     /**

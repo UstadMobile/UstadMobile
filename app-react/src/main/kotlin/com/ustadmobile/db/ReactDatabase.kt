@@ -33,7 +33,7 @@ class ReactDatabase: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val contentEntryParentChildJoinDao: ContentEntryParentChildJoinDao
         get() = TODO("Not yet implemented")
     override val contentEntryRelatedEntryJoinDao: ContentEntryRelatedEntryJoinDao
-        get() = TODO("Not yet implemented")
+        get() = ReactContentEntryRelatedEntryJoinDao()
     override val contentCategorySchemaDao: ContentCategorySchemaDao
         get() = TODO("Not yet implemented")
     override val contentCategoryDao: ContentCategoryDao
@@ -97,7 +97,7 @@ class ReactDatabase: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val groupLearningSessionDao: GroupLearningSessionDao
         get() = TODO("Not yet implemented")
     override val contentEntryProgressDao: ContentEntryProgressDao
-        get() = TODO("Not yet implemented")
+        get() = ReactContentEntryProgressDao()
     override val syncresultDao: SyncResultDao
         get() = TODO("Not yet implemented")
     override val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao

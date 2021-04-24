@@ -1,6 +1,5 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.controller.OnSortOptionSelected
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.EditButtonMode
@@ -12,7 +11,7 @@ import react.RProps
 import react.RState
 
 abstract class UstadDetailComponent<T: Any>(mProps: RProps) : UmBaseComponent<RProps,RState>(mProps),
-    UstadDetailView<T>, OnSortOptionSelected {
+    UstadDetailView<T> {
 
     abstract val detailPresenter: UstadDetailPresenter<*, *>?
 

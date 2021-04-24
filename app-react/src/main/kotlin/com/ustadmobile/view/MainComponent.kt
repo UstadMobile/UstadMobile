@@ -17,10 +17,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.model.UmReactDestination
-import com.ustadmobile.model.statemanager.FabState
+import com.ustadmobile.model.statemanager.GlobalState
 import com.ustadmobile.model.statemanager.GlobalStateSlice
 import com.ustadmobile.model.statemanager.SnackBarState
-import com.ustadmobile.model.statemanager.ToolbarTitle
+import com.ustadmobile.model.statemanager.ToolbarTabs
 import com.ustadmobile.util.CssStyleManager
 import com.ustadmobile.util.CssStyleManager.appContainer
 import com.ustadmobile.util.CssStyleManager.fab
@@ -41,12 +41,13 @@ import com.ustadmobile.util.UmReactUtil.fullWidth
 import com.ustadmobile.util.UmReactUtil.isDarkModeEnabled
 import com.ustadmobile.util.UmReactUtil.zeroPx
 import kotlinext.js.jsObject
+import kotlinx.browser.document
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.css.*
+import kotlinx.dom.addClass
 import org.kodein.di.instance
-import org.w3c.dom.events.Event
 import react.*
 import react.dom.div
 import react.dom.span
@@ -62,52 +63,24 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
 
     private var activeAccount: UmAccount? = null
 
-    private var toolbarTitle: String = ""
-
     private var isRTLSupport: Boolean = false
 
-    private var showFab: Boolean = false
-
-    private var fabIcon: String = ""
-
-    private var fabLabel: String = ""
-
-    private var onFabClicked:(Event)-> Unit = {}
-
-    private var onSnackActionClicked:(Event)-> Unit = {}
-
-    private var snackBarOpen = false
-
-    private var snackBarActionLabel:String? = null
-
-    private var snackBarMessage:String? = null
-
     private val altBuilder = RBuilder()
+
+    private  var globalState: GlobalState = GlobalState()
 
     private lateinit var currentDestination: UmReactDestination
 
     private val accountManager: UstadAccountManager by instance()
 
-    private var stateChangeListener : (GlobalStateSlice) -> Unit = {
-        setState {
-            when (it.state.type) {
-                is FabState -> {
-                    showFab = it.state.showFab
-                    fabLabel = it.state.fabLabel
-                    fabIcon = it.state.fabIcon
-                    onFabClicked = it.state.onFabClicked
-                }
-                is SnackBarState -> {
-                    snackBarOpen = true
-                    snackBarMessage = it.state.snackBarMessage
-                    snackBarActionLabel = it.state.snackBarActionLabel
-                    onSnackActionClicked = it.state.onSnackActionClicked
-                }
-                is ToolbarTitle -> {
-                    toolbarTitle = it.state.title?:""
-                }
-            }
+    private var stateChangeListener : (GlobalStateSlice) -> Unit = { slice ->
+        if(currentDestination.hasTabs && slice.state.type is ToolbarTabs){
+            //remove padding below scroller
+            document.getElementById("um-tabs")
+                ?.querySelector("div.MuiTabs-scroller")
+                ?.addClass("${CssStyleManager.name}-mainComponentTabsScroller")
         }
+        setState { globalState = slice.state }
     }
 
     private val mActiveUserObserver:(UmAccount?) -> Unit = {
@@ -163,7 +136,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                     }
                     styledDiv {
                         css { +mainComponentContainer }
-                        mAppBar(position = MAppBarPosition.absolute) {
+                        mAppBar(position = MAppBarPosition.fixed) {
                             css {
                                 val removeLeftMargin = isRTLSupport or !currentDestination.showNavigation
                                 position = Position.absolute
@@ -171,12 +144,16 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                                 media(theme.breakpoints.up(Breakpoint.md)) {
                                     width = fullWidth - if(removeLeftMargin) zeroPx else drawerWidth
                                 }
+                                if(currentDestination.hasTabs){
+                                    paddingBottom = 0.px
+                                    marginBottom = 0.px
+                                }
                             }
 
                             mToolbar {
                                 attrs.asDynamic().id = "um-toolbar"
                                 mHidden(xsDown = true){
-                                    mToolbarTitle(toolbarTitle)
+                                    mToolbarTitle(globalState.title?:"")
                                 }
 
                                 styledDiv {
@@ -224,6 +201,20 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                                     }
                                 }
                             }
+
+                            mTabs(globalState.selectedTab?:Any(), onChange = { _, value ->
+                                StateManager.dispatch(ToolbarTabs(selected = value))
+                                globalState.onTabChanged(value)}){
+                                css{
+                                    display = if(currentDestination.hasTabs) Display.block else Display.none
+                                }
+                                attrs.asDynamic().id = "um-tabs"
+                                globalState.tabLabels.forEachIndexed{index,it ->
+                                    mTab(it,globalState.tabKeys[index]){
+                                        css{display = Display.block}
+                                    }
+                                }
+                            }
                         }
 
                         if(currentDestination.showNavigation){
@@ -234,7 +225,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                         styledDiv {
                             css {
                                 +mainComponentContentArea
-                                backgroundColor = Color(theme.palette.background.default)
+                                marginTop = LinearDimension(if(currentDestination.hasTabs) "56px" else "0px")
                             }
                             appBarSpacer()
                             styledDiv {
@@ -254,24 +245,25 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                             }
                         }
 
-                        if(showFab){
-                            mFab(fabIcon, fabLabel.toUpperCase(), color = MColor.secondary) {
+                        if(globalState.showFab){
+                            mFab(globalState.fabIcon, globalState.fabLabel.toUpperCase(), color = MColor.secondary) {
                                 css(fab)
                                 attrs {
-                                    onClick = onFabClicked
+                                    onClick = globalState.onFabClicked
                                 }
                             }
                         }
                     }
 
-                    mSnackbar(altBuilder.span { +"$snackBarMessage"}, open = snackBarOpen,
+                    mSnackbar(altBuilder.span { +"${globalState.snackBarMessage}"},
+                        open = globalState.snackBarMessage != null,
                         horizAnchor = MSnackbarHorizAnchor.center, autoHideDuration = 5000,
                         onClose = { _, _ -> handleSnackBarClosing()}) {
                         attrs.action = altBuilder.div {
-                            mButton("$snackBarActionLabel", color = MColor.secondary,
+                            mButton("${globalState.snackBarActionLabel}", color = MColor.secondary,
                                 variant = MButtonVariant.text, size = MButtonSize.small,
                                 onClick = {
-                                    onSnackActionClicked(it)
+                                    globalState.onSnackActionClicked(it)
                                     handleSnackBarClosing()
                                 })
                         }
@@ -283,12 +275,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
     }
 
     private fun handleSnackBarClosing(){
-        setState {
-            onFabClicked = {  }
-            snackBarOpen = false
-            snackBarMessage = null
-            snackBarActionLabel = null
-        }
+        StateManager.dispatch(SnackBarState())
     }
 
     private fun RBuilder.renderSideNavigation(){

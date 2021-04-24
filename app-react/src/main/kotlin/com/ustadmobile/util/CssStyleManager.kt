@@ -91,10 +91,15 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         width = 100.pct
     }
 
+    val mainComponentTabsScroller by css{
+        display = Display.block
+    }
+
     val mainComponentContentArea by css {
-        height = LinearDimension.fillAvailable
+        height = LinearDimension("100vh")
         flexGrow = 1.0
         minWidth = 0.px
+        backgroundColor = Color(theme.palette.background.default)
     }
 
     val mainComponentSearchIcon by css {
@@ -207,8 +212,9 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
 
     val entryDetailComponentContainer by css {
         width = LinearDimension.auto
-        display = Display.flex
+        height = LinearDimension("100vh")
         flexDirection = FlexDirection.row
+        padding(1.spacingUnits)
     }
 
     val entryDetailComponentEntryImage by css {
@@ -258,6 +264,11 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
 
     val errorTextMessage by css {
         color = Color.red
+    }
+
+    val entryDetailsTabsContainer by css {
+        flexGrow = 1.0
+        backgroundColor = Color(theme.palette.background.paper)
     }
 
 }

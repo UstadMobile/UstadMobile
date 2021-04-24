@@ -107,6 +107,10 @@ object StateManager{
             is UmTheme -> state.copy(theme = action.theme)
             is SnackBarState -> state.copy(snackBarActionLabel = action.actionLabel,
                 snackBarMessage = action.message, onFabClicked = action.onClick)
+            is ToolbarTabs -> state.copy(tabLabels = if(action.labels.isEmpty()) state.tabLabels else action.labels,
+                tabKeys = if(action.keys.isEmpty()) state.tabKeys else action.keys,
+                onTabChanged = if(action.labels.isEmpty()) state.onTabChanged else action.onTabChange,
+                selectedTab = if(action.selected == null) state.selectedTab else action.selected)
             else -> state
         }
     }

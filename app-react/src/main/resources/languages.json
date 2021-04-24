@@ -1,7 +1,7 @@
 [
   {
     "langUid": 15630071,
-    "name": "Sahili"
+    "name": "German"
   },
   {
     "langUid": 15630907,
@@ -13,7 +13,7 @@
   },
   {
     "langUid": 1563004,
-    "name": "Sahili"
+    "name": "Swahili"
   },
   {
     "langUid": 15630054,
@@ -24,10 +24,6 @@
     "name": "Korean"
   },
   {
-    "langUid": 15632004,
-    "name": "German"
-  },
-  {
     "langUid": 15633004,
     "name": "Polish"
   },
@@ -36,7 +32,7 @@
     "name": "Kinyawranda"
   },
   {
-    "langUid": 1563004,
+    "langUid": 15630047,
     "name": "Isizulu"
   }
 ]

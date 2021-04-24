@@ -28,7 +28,11 @@ class ReactContentEntryDao: ContentEntryDao() {
     }
 
     override suspend fun findEntryWithContainerByEntryId(entryUuid: Long): ContentEntryWithMostRecentContainer? {
-        TODO("Not yet implemented")
+        val data = loadList(sourcePath,
+            ListSerializer(ContentEntryWithMostRecentContainer.serializer()))
+        return (data.firstOrNull { it.contentEntryUid == entryUuid } as ContentEntryWithMostRecentContainer).apply {
+            container = Container()
+        }
     }
 
     override fun findBySourceUrl(sourceUrl: String): ContentEntry? {
@@ -37,7 +41,7 @@ class ReactContentEntryDao: ContentEntryDao() {
 
     override suspend fun findTitleByUidAsync(contentEntryUid: Long): String? {
         val data = loadList(sourcePath,
-            ListSerializer(ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer()))
+            ListSerializer(ContentEntry.serializer()))
         return data.firstOrNull { it.contentEntryUid == contentEntryUid }?.title
     }
 
@@ -78,7 +82,8 @@ class ReactContentEntryDao: ContentEntryDao() {
     }
 
     override suspend fun findByUidAsync(entryUid: Long): ContentEntry? {
-        TODO("Not yet implemented")
+        val data = loadList(sourcePath, ListSerializer(ContentEntry.serializer()))
+        return data.firstOrNull { it.contentEntryUid == entryUid }
     }
 
     override fun findByUid(entryUid: Long): ContentEntry? {
@@ -101,7 +106,7 @@ class ReactContentEntryDao: ContentEntryDao() {
         showHidden: Boolean,
         onlyFolder: Boolean
     ): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
-        return DataSourceFactoryJs("entryId",parentUid,sourcePath,
+        return DataSourceFactoryJs<Int,ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, Any>("entryId",parentUid,sourcePath,
             ListSerializer(ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer()))
     }
 
