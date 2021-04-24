@@ -25,6 +25,7 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="@dimen/dimen_16dp"
+        android:visibility="invisible"
         app:srcCompat="@drawable/expo2020_logo"/>
 
     <androidx.constraintlayout.widget.Barrier
@@ -101,6 +102,7 @@
         />
 
     <TextView
+        android:visibility="invisible"
         android:paddingTop="@dimen/dimen_10dp"
         android:id="@+id/in_partnership_with_text"
         android:layout_width="0dp"
@@ -115,6 +117,7 @@
         />
 
     <androidx.appcompat.widget.AppCompatImageView
+        android:visibility="invisible"
         android:id="@id/irc_logo"
         android:layout_marginBottom="@dimen/dimen_16dp"
         android:layout_width="53dp"
