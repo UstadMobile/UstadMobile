@@ -65,7 +65,7 @@ class ReactDatabase: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val connectivityStatusDao: ConnectivityStatusDao
         get() = TODO("Not yet implemented")
     override val containerDao: ContainerDao
-        get() = TODO("Not yet implemented")
+        get() = ReactContainerDao()
     override val containerEntryDao: ContainerEntryDao
         get() = TODO("Not yet implemented")
     override val containerEntryFileDao: ContainerEntryFileDao

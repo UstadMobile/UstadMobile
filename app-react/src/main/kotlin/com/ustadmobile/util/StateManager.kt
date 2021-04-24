@@ -68,7 +68,7 @@ object StateManager{
             instance(tag = UmAppDatabase.TAG_DB)
         }
 
-        constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with true
+        constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with false
 
         bind<ClientId>(tag = UstadMobileSystemCommon.TAG_CLIENT_ID) with scoped(EndpointScope.Default).singleton {
             ClientId(9090)

@@ -35,7 +35,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
     : UstadDetailPresenter<ContentEntryDetailOverviewView, ContentEntryWithMostRecentContainer>(context,
         arguments, view, di, lifecycleOwner) {
 
-    private val isDownloadEnabled: Boolean by di.instance<Boolean>(tag = TAG_DOWNLOAD_ENABLED)
+    private val isDownloadEnabled: Boolean by di.instance(tag = TAG_DOWNLOAD_ENABLED)
 
     private val containerDownloadManager: ContainerDownloadManager? by di.on(accountManager.activeAccount).instanceOrNull()
 
