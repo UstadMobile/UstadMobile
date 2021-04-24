@@ -29,4 +29,6 @@ object AppConfig {
 
     const val KEY_NO_IFRAME = "app.no_iframe_domans"
 
+    const val KEY_CONTENT_ONLY_MODE = "app.contentonlymode"
+
 }

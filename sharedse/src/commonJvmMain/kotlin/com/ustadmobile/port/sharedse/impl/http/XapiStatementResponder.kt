@@ -22,6 +22,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.*
 import java.util.*
+import com.github.aakira.napier.Napier
 
 class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
 
@@ -81,13 +82,19 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
                 throw StatementRequestException("no content found", 204)
             }
         } catch (e: StatementRequestException) {
+            Napier.e("StatementException", e)
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.lookup(e.errorCode),
                     "application/octet", e.message)
         } catch (e: IOException) {
+            Napier.e("IOException", e)
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
                     "application/octet", e.message)
         } catch (e: NanoHTTPD.ResponseException) {
+            Napier.e("ResponseException", e)
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/octet", e.message)
+        } catch(e: Exception) {
+            Napier.e("Other Exception", e)
+            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "text/plain", e.message)
         }
         return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NO_CONTENT,
                 "application/octet", null)

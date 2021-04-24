@@ -298,6 +298,7 @@ class DownloadNotificationService : Service(), DIAware {
 
                 if(t.cijJobStatus >= JobStatus.COMPLETE_MIN) {
                     activeImportJobNotifications.remove(this)
+                    importJobLiveData.removeObserver(this)
                     mNotificationManager.cancel(notificationId)
                     cancel()
                 }

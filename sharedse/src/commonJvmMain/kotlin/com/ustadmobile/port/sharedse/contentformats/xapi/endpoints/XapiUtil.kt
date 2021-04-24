@@ -51,21 +51,24 @@ object XapiUtil {
     fun insertOrUpdateVerbLangMap(dao: XLangMapEntryDao, verb: Verb, verbEntity: VerbEntity, languageDao: LanguageDao, languageVariantDao: LanguageVariantDao) {
         val verbDisplay = verb.display
         if (verbDisplay != null) {
-            val listToInsert = verbDisplay.map {
-                val split = it.key.split("-")
-                val lang = insertOrUpdateLanguageByTwoCode(languageDao, split[0])
-                val variant = insertOrUpdateLanguageVariant(languageVariantDao, split[1], lang)
+            val listToInsert = verbDisplay.mapNotNull {
+                val lang = insertOrUpdateLanguageByTwoCode(languageDao, it.key.substringBefore('-'))
+                val variant = it.key.substringAfter("-", "").let {
+                    if(it != "")
+                        insertOrUpdateLanguageVariant(languageVariantDao, it, lang)
+                    else
+                        null
+                }
 
                 val existingMap = dao.getXLangMapFromVerb(verbEntity.verbUid, lang.langUid)
 
                 if(existingMap == null){
-                    XLangMapEntry(verbEntity.verbUid, 0, lang.langUid, variant?.langVariantUid
-                            ?: 0, it.value)
+                    XLangMapEntry(verbEntity.verbUid, 0, lang.langUid,
+                        variant?.langVariantUid ?: 0, it.value)
                 }else{
                     null
                 }
-
-            }?.filterNotNull()
+            }
 
             if (listToInsert != null && listToInsert.isNotEmpty()) {
                 dao.insertList(listToInsert)
