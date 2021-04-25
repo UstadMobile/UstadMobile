@@ -12,17 +12,17 @@ import kotlinx.serialization.Serializable
             """
         SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, $TABLE_ID AS tableId FROM 
         ChangeLog
-        JOIN ClazzAssignmentContentJoin ON ChangeLog.chTableId = $TABLE_ID AND ClazzAssignmentContentJoin.assignmentContentJoinUid = ChangeLog.chEntityPk
-        JOIN ClazzAssignment ON ClazzAssignment.assignmentUid = ClazzAssignmentContentJoin.assignmentContentJoinAssignmentUid
-        JOIN Clazz ON Clazz.clazzUid = ClazzAssignment.assignmentClazzUid 
+        JOIN ClazzAssignmentContentJoin ON ChangeLog.chTableId = $TABLE_ID AND ClazzAssignmentContentJoin.clazzAssignmentContentJoinUid = ChangeLog.chEntityPk
+        JOIN ClazzAssignment ON ClazzAssignment.clazzAssignmentUid = ClazzAssignmentContentJoin.clazzAssignmentContentJoinAssignmentUid
+        JOIN Clazz ON Clazz.clazzUid = ClazzAssignment.clazzAssignmentClazzUid 
         JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_ASSIGNMENT_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid"""
         ],
         syncFindAllQuery = """
         SELECT ClazzAssignmentContentJoin.* FROM
         ClazzAssignmentContentJoin
-        JOIN ClazzWork ON Assignment.assignmentUid = ClazzAssignmentContentJoin.assignmentContentJoinAssignmentUid
-        JOIN Clazz ON Clazz.clazzUid = ClazzAssignment.assignmentClazzUid
+        JOIN ClazzAssignment ON ClazzAssignment.clazzAssignmentUid = ClazzAssignmentContentJoin.clazzAssignmentContentJoinAssignmentUid
+        JOIN Clazz ON Clazz.clazzUid = ClazzAssignment.clazzAssignmentClazzUid
         JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_ASSIGNMENT_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
         WHERE DeviceSession.dsDeviceId = :clientId""")
@@ -30,25 +30,25 @@ import kotlinx.serialization.Serializable
 class ClazzAssignmentContentJoin {
 
     @PrimaryKey(autoGenerate = true)
-    var assignmentContentJoinUid: Long = 0
+    var clazzAssignmentContentJoinUid: Long = 0
 
-    var assignmentContentJoinContentUid : Long = 0
+    var clazzAssignmentContentJoinContentUid : Long = 0
 
-    var assignmentContentJoinAssignmentUid : Long = 0
+    var clazzAssignmentContentJoinAssignmentUid : Long = 0
 
-    var assignmentContentJoinActive : Boolean = true
+    var clazzAssignmentContentJoinActive : Boolean = true
 
     @MasterChangeSeqNum
-    var assignmentContentJoinMCSN: Long = 0
+    var clazzAssignmentContentJoinMCSN: Long = 0
 
     @LocalChangeSeqNum
-    var assignmentContentJoinLCSN: Long = 0
+    var clazzAssignmentContentJoinLCSN: Long = 0
 
     @LastChangedBy
-    var assignmentContentJoinLCB: Int = 0
+    var clazzAssignmentContentJoinLCB: Int = 0
 
     @LastChangedTime
-    var assignmentContentJoinLct: Long = 0
+    var clazzAssignmentContentJoinLct: Long = 0
 
     companion object {
 

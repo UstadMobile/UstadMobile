@@ -12,8 +12,8 @@ import kotlinx.serialization.Serializable
             """
         SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, $TABLE_ID AS tableId FROM 
         ChangeLog
-        JOIN ClazzAssignment ON ChangeLog.chTableId = $TABLE_ID AND ClazzAssignment.assignmentUid = ChangeLog.chEntityPk
-        JOIN Clazz ON Clazz.clazzUid = ClazzAssignment.assignmentClazzUid 
+        JOIN ClazzAssignment ON ChangeLog.chTableId = $TABLE_ID AND ClazzAssignment.clazzAssignmentUid = ChangeLog.chEntityPk
+        JOIN Clazz ON Clazz.clazzUid = ClazzAssignment.clazzAssignmentClazzUid 
         JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_ASSIGNMENT_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
         """
@@ -21,7 +21,7 @@ import kotlinx.serialization.Serializable
         syncFindAllQuery = """
         SELECT Assignment.* FROM
         Assignment
-        JOIN Clazz ON Clazz.clazzUid = ClazzAssignment.assignmentClazzUid
+        JOIN Clazz ON Clazz.clazzUid = ClazzAssignment.clazzAssignmentClazzUid
         JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_ASSIGNMENT_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
         WHERE DeviceSession.dsDeviceId = :clientId  
@@ -30,47 +30,47 @@ import kotlinx.serialization.Serializable
 class ClazzAssignment {
 
     @PrimaryKey(autoGenerate = true)
-    var assignmentUid: Long = 0
+    var clazzAssignmentUid: Long = 0
 
-    var assignmentTitle: String? = null
+    var clazzAssignmentTitle: String? = null
 
-    var assignmentDescription: String? = null
+    var clazzAssignmentDescription: String? = null
 
-    var assignmentDeadlineDate: Long = 0
+    var clazzAssignmentDeadlineDate: Long = 0
 
-    var assignmentDeadlineDateTime: Long = 0
+    var clazzAssignmentDeadlineDateTime: Long = 0
 
-    var assignmentStartDate: Long = 0
+    var clazzAssignmentStartDate: Long = 0
 
-    var assignmentStartDateTime: Long = 0
+    var clazzAssignmentStartDateTime: Long = 0
 
-    var assignmentLateSubmissionType: Int = 0
+    var clazzAssignmentLateSubmissionType: Int = 0
 
-    var assignmentLateSubmissionPenalty: Int = 0
+    var clazzAssignmentLateSubmissionPenalty: Int = 0
 
-    var assignmentGracePeriodDate: Long = 0
+    var clazzAssignmentGracePeriodDate: Long = 0
 
-    var assignmentGracePeriodDateTime: Long = 0
+    var clazzAssignmentGracePeriodDateTime: Long = 0
 
-    var assignmentActive: Boolean = true
+    var clazzAssignmentActive: Boolean = true
 
-    var assignmentClassCommentEnabled: Boolean = true
+    var clazzAssignmentClassCommentEnabled: Boolean = true
 
-    var assignmentPrivateCommentsEnabled: Boolean = false
+    var clazzAssignmentPrivateCommentsEnabled: Boolean = false
 
-    var assignmentClazzUid: Long = 0
+    var clazzAssignmentClazzUid: Long = 0
 
     @LocalChangeSeqNum
-    var assignmentLocalChangeSeqNum: Long = 0
+    var clazzAssignmentLocalChangeSeqNum: Long = 0
 
     @MasterChangeSeqNum
-    var assignmentMasterChangeSeqNum: Long = 0
+    var clazzAssignmentMasterChangeSeqNum: Long = 0
 
     @LastChangedBy
-    var assignmentLastChangedBy: Int = 0
+    var clazzAssignmentLastChangedBy: Int = 0
 
     @LastChangedTime
-    var assignmentLct: Long = 0
+    var clazzAssignmentLct: Long = 0
 
     companion object {
 
