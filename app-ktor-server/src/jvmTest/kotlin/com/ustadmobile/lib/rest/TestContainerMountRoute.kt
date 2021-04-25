@@ -3,6 +3,7 @@ package com.ustadmobile.lib.rest
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
@@ -26,6 +27,7 @@ import io.ktor.client.statement.HttpStatement
 import io.ktor.http.HttpHeaders
 import io.netty.handler.codec.http.HttpResponseStatus
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
 import org.junit.Assert
 
 /**
@@ -53,17 +55,23 @@ class TestContainerMountRoute {
 
     private lateinit var httpClient: HttpClient
 
+    private lateinit var okHttpClient: OkHttpClient
+
     //@Before
     fun setup() {
+        okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp){
             install(JsonFeature)
+            engine {
+                preconfigured = okHttpClient
+            }
         }
 
         db = UmAppDatabase.getInstance(Any(), "UmAppDatabase")
         db.clearAllTables()
 
-        repo = db.asRepository(Any(), "http://localhost/dummy", "", httpClient,
-            null, null, false)
+        repo = db.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
+            httpClient, okHttpClient))
         server = embeddedServer(Netty, port = defaultPort) {
             install(ContentNegotiation) {
                 gson {

@@ -1,20 +1,12 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.LocationEditView
-import com.ustadmobile.core.view.ProductEditView
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
-import io.ktor.client.features.json.defaultSerializer
-import io.ktor.http.content.TextContent
 import kotlinx.coroutines.*
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.list
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import org.kodein.di.DI
@@ -49,7 +41,7 @@ class LocationEditPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: Location? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(Location.serializer(), entityJsonStr)
+            editEntity = safeParse(di, Location.serializer(), entityJsonStr)
         }else {
             editEntity = Location()
         }

@@ -4,22 +4,20 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.InventoryItemEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PRODUCT_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.InventoryItem
 import com.ustadmobile.lib.db.entities.PersonWithInventoryItemAndStock
-import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
-import kotlinx.serialization.builtins.list
 
 
 class InventoryItemEditPresenter(context: Any,
@@ -34,8 +32,8 @@ class InventoryItemEditPresenter(context: Any,
 
     val producerSelectionEditHelper = DefaultOneToManyJoinEditHelper<PersonWithInventoryItemAndStock>(
             PersonWithInventoryItemAndStock::personUid,
-            "PersonWithInventoryItemAndStockKey", PersonWithInventoryItemAndStock.serializer().list,
-            PersonWithInventoryItemAndStock.serializer().list, this,
+            "PersonWithInventoryItemAndStockKey", ListSerializer(PersonWithInventoryItemAndStock.serializer()),
+        ListSerializer(PersonWithInventoryItemAndStock.serializer()), this,
                 PersonWithInventoryItemAndStock::class) { personUid = it }
 
     fun handleAddOrEditPersonWithInventory(personWithInventory: PersonWithInventoryItemAndStock) {
@@ -83,7 +81,7 @@ class InventoryItemEditPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: InventoryItem? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(InventoryItem.serializer(), entityJsonStr)
+            editEntity = safeParse(di, InventoryItem.serializer(), entityJsonStr)
         }else {
             editEntity = InventoryItem()
         }

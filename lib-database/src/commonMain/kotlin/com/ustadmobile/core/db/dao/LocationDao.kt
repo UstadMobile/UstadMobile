@@ -2,9 +2,6 @@ package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
 import androidx.room.*
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.Location
 import com.ustadmobile.lib.db.entities.UidAndLabel
 import com.ustadmobile.door.annotation.Repository

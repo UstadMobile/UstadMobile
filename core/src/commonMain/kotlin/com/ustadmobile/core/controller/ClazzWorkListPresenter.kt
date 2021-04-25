@@ -68,7 +68,7 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
         val clazzWork: ClazzWork = ClazzWork().apply {
             clazzWorkClazzUid = clazzUid
         }
-        val clazzWorkJson = Json.stringify(ClazzWork.serializer(), clazzWork)
+        val clazzWorkJson = Json.encodeToString(ClazzWork.serializer(), clazzWork)
         systemImpl.go(ClazzWorkEditView.VIEW_NAME,
                 mapOf(UstadEditView.ARG_ENTITY_JSON to clazzWorkJson), context)
     }

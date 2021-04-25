@@ -3,10 +3,10 @@ package com.ustadmobile.sharedse.xapi
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.spy
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
@@ -29,6 +29,12 @@ import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
+import okhttp3.OkHttpClient
+import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -55,12 +61,27 @@ class TestXapiStateResponder {
 
     }.type
 
+    private lateinit var httpClient: HttpClient
+
+    private lateinit var okHttpClient: OkHttpClient
+
     @Before
     @Throws(IOException::class)
     fun setup() {
         checkJndiSetup()
         val endpointScope = EndpointScope()
         val systemImplSpy = spy(UstadMobileSystemImpl.instance)
+
+        okHttpClient = OkHttpClient()
+        httpClient = HttpClient(OkHttp){
+            install(JsonFeature)
+            install(HttpTimeout)
+
+            engine {
+                preconfigured = okHttpClient
+            }
+        }
+
         di = DI {
             bind<UstadMobileSystemImpl>() with singleton { systemImplSpy!! }
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
@@ -79,6 +100,14 @@ class TestXapiStateResponder {
             bind<XapiStateEndpoint>() with scoped(endpointScope).singleton {
                 XapiStateEndpointImpl(context, di)
             }
+
+            bind<HttpClient>() with singleton {
+                httpClient
+            }
+
+            bind<OkHttpClient>() with singleton {
+                okHttpClient
+            }
         }
 
         accountManager = di.direct.instance()
@@ -87,6 +116,11 @@ class TestXapiStateResponder {
         mockUriResource = mock<RouterNanoHTTPD.UriResource> {
             on { initParameter(0, DI::class.java) }.thenReturn(di)
         }
+    }
+
+    @After
+    fun tearDown() {
+        httpClient.close()
     }
 
     @Test

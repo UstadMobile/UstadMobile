@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.apache
 
-import com.nhaarman.mockitokotlin2.spy
+import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
@@ -65,7 +65,7 @@ class TestApacheIndexer {
 
 
         mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(globalDisptacher)
+        mockWebServer.dispatcher = globalDisptacher
 
     }
 

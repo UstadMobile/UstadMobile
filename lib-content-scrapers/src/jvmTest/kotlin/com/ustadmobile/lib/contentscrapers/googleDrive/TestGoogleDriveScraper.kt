@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.googleDrive
 
-import com.nhaarman.mockitokotlin2.spy
+import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
@@ -14,7 +14,8 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okio.Buffer
-import okio.Okio
+import okio.buffer
+import okio.source
 import org.apache.commons.io.IOUtils
 import org.junit.Assert
 import org.junit.Before
@@ -81,12 +82,12 @@ class TestGoogleDriveScraper {
         mockWebServer.enqueue(response)
 
         val videoIn = javaClass.getResourceAsStream(File("/com/ustadmobile/lib/contentscrapers/folder/314-my-very-own-scooter-EN.epub").toString())
-        val source = Okio.buffer(Okio.source(videoIn))
+        val source = videoIn.source().buffer()
         val buffer = Buffer()
         source.readAll(buffer)
 
         response = MockResponse().setResponseCode(200).setHeader("Content-Type", "application/epub+zip")
-        response.body = buffer
+        response.setBody(buffer)
 
         mockWebServer.enqueue(response)
 

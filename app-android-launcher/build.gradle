@@ -41,8 +41,7 @@ android {
     }
 
     kotlinOptions {
-        // Setup the Kotlin compiler options for the 'main' compilation:
-        jvmTarget = "$version_kotlin_jvmTarget"
+        jvmTarget = "1.8"
     }
 
     packagingOptions {
@@ -54,13 +53,14 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-        coreLibraryDesugaringEnabled true
+        //coreLibraryDesugaringEnabled true
     }
 
     defaultConfig {
         applicationId "${baseAppId}.launcher"
+        resConfigs "en","fa","ps","ar","tg","bn","ne","my"
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.ext.ustadVersion
         multiDexEnabled true //required for all variants to use java library desugaring
@@ -127,17 +127,15 @@ configurations.all {
 
 
 dependencies {
-    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
+    //coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
 
     api project(':core')
     api project(':sharedse')
 
     api project(":app-android")
 
-    implementation project(":lib-door-runtime")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
-    implementation "com.github.aakira:napier-android:$version_napier"
     implementation "com.github.aakira:napier:$version_napier"
     implementation "com.google.android.material:material:$version_android_material"
 
@@ -152,9 +150,6 @@ dependencies {
     //dependency injection
     implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
 
-    api fileTree(dir: 'libs', include: ['*.jar'])
-//    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-//    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.2.0'
     androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
 
     testImplementation "junit:junit:$version_junit"

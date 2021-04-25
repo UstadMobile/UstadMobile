@@ -42,6 +42,13 @@ if (keyStorePropertiesExists) {
 configurations.all {
     exclude group: "net.sf.kxml", module: "kxml2"
     exclude group: "org.json", module: "json"
+
+    /*
+     * mockito-android's transient dependency objensis v2.7+ causes R8 to fail.
+     * See
+     * https://stackoverflow.com/questions/63612606/com-android-tools-r8-errors-a-methodhandle-invoke-and-methodhandle-invokeexact
+     */
+    resolutionStrategy.force 'org.objenesis:objenesis:2.6'
 }
 
 kapt {
@@ -122,7 +129,7 @@ android {
         //When using variables the build analyzer reports that major tasks reran because of a
         // 'chnage' in the value of minSdkVersion, hence hardcoding them here.
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 30
 
         multiDexEnabled true //required for all variants to use java library desugaring
         vectorDrawables.useSupportLibrary = true
@@ -282,27 +289,18 @@ dependencies {
     implementation project(':core')
     implementation project(':sharedse')
 
-    /*
-     * This is a hack: Intellisense does not seem to recognize classes that are outside the common
-     * sourceset (e.g. android/jvm sourcesets) in Kotlin multiplatform project dependencies. Adding
-     * this will allow autocomplete etc. to work.
-     */
-    //compileOnly files("../sharedse/build/libs/sharedse-jvm.jar")
-
-    implementation project(':lib-door-runtime')
+    implementation "com.ustadmobile.door:door-runtime:$version_door"
     implementation project(':lib-database-android')
     implementation project(":lib-database-entities")
-    implementation project(":lib-database-annotations")
     implementation project(':lib-util')
 
-    implementation "com.github.aakira:napier-android:$version_napier"
+    implementation "com.github.aakira:napier:$version_napier"
     implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
     implementation "androidx.activity:activity:$version_androidx_activity"
     implementation "androidx.activity:activity-ktx:$version_androidx_activity"
     implementation "androidx.fragment:fragment:$version_androidx_fragment"
     implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy_support"
-    //vanillamultidexApi "androidx.multidex:multidex:$version_android_multidex"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
 
     //ViewModel and LiveData
@@ -403,6 +401,7 @@ dependencies {
     //Android play core for update support within the application
     implementation "com.google.android.play:core:$version_play_core"
     implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"
+    implementation "androidx.navigation:navigation-ui:$version_android_navigation"
     implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
 
     //dependency injection
@@ -422,7 +421,7 @@ dependencies {
     testImplementation "org.robolectric:robolectric:$version_android_roboelectric"
     testImplementation "junit:junit:$version_junit"
     testImplementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
     testImplementation "androidx.test.espresso:espresso-core:$version_android_espresso"
     testImplementation "androidx.test.espresso:espresso-contrib:$version_android_espresso"
 
@@ -456,15 +455,10 @@ dependencies {
     androidTestImplementation "androidx.test.uiautomator:uiautomator:$version_android_uiautomator"
 
     androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
-    androidTestImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+    androidTestImplementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
     androidTestImplementation "commons-io:commons-io:$version_commons_io"
-    androidTestImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
     androidTestImplementation "com.ustadmobile.adbscreenrecorder:lib-client:$version_android_adbscreenrecorder"
-
-
-    //TODO: this and core should be modified so that Android uses only Android kotlin multiplatform variants
-    androidTestImplementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
 
     kaptAndroidTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"
 }

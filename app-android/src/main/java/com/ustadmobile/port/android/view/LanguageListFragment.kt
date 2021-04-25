@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
@@ -13,6 +11,7 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.LanguageListView
 import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -56,22 +55,36 @@ class LanguageListFragment(): UstadListViewFragment<Language, Language>(),
 
         mDataRecyclerViewAdapter = LanguageListRecyclerAdapter(mPresenter)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
-            requireContext().getString(R.string.add_a_new_language))
+            requireContext().getString(R.string.add_a_new_language),
+                onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         return view
     }
 
-    override fun onResume() {
-        super.onResume()
-        mActivityWithFab?.activityFloatingActionButton?.text =
-                requireContext().getString(R.string.language)
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        fabManager?.text = requireContext().getText(R.string.language)
+        ustadFragmentTitle = requireContext().getString(R.string.languages)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.findItem(R.id.menu_search).isVisible = true
     }
 
     /**
      * OnClick function that will handle when the user clicks to create a new item
      */
     override fun onClick(view: View?) {
-    /*    if(view?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.language_edit_dest, Language::class.java)*/
+        if(view?.id == R.id.item_createnew_layout)
+            navigateToEditEntity(null, R.id.language_edit_dest, Language::class.java)
+        else
+            super.onClick(view)
     }
 
     override fun onDestroyView() {

@@ -5,14 +5,11 @@ import com.ustadmobile.port.sharedse.util.UmZipUtils
 
 import org.apache.commons.io.FileUtils
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
 import org.junit.Assert
 import org.junit.Test
 
 import java.io.File
 import java.io.IOException
-import java.io.InputStream
 import java.nio.file.Files
 import java.time.format.DateTimeParseException
 import java.util.ArrayList
@@ -22,11 +19,9 @@ import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
-import okio.Buffer
-import okio.BufferedSource
-import okio.Okio
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
+import okio.*
 import org.junit.Before
 
 
@@ -44,22 +39,22 @@ class TestContentScraperUtil {
         override fun dispatch(request: RecordedRequest): MockResponse {
 
             try {
+                val requestPath = request.path ?: ""
 
-
-                if (request.path.contains("picture")) {
+                if (requestPath.contains("picture")) {
 
                     val length = "/media/".length
-                    val fileName = request.path.substring(length,
-                            request.path.indexOf(".png", length))
+                    val fileName = requestPath.substring(length,
+                        requestPath.indexOf(".png", length))
                     val pictureIn = javaClass.getResourceAsStream("$RESOURCE_PATH$fileName.png")
 
-                    val source = Okio.buffer(Okio.source(pictureIn))
+                    val source = pictureIn.source().buffer()
                     val buffer = Buffer()
                     source.readAll(buffer)
                     val response = MockResponse().setResponseCode(200)
-                    response.setHeader("ETag", (buffer.size().toString() + RESOURCE_PATH).hashCode())
+                    response.setHeader("ETag", (buffer.size.toString() + RESOURCE_PATH).hashCode())
                     if (!request.method.equals("HEAD", ignoreCase = true))
-                        response.body = buffer
+                        response.setBody(buffer)
 
                     return response
                 }
@@ -81,13 +76,15 @@ class TestContentScraperUtil {
         val htmlWithImage = "<p class=\"MsoNormal\" dir=\"RTL\" style=\"text-align: right; line-height: normal; mso-pagination: none; direction: rtl; unicode-bidi: embed;\"><span style=\"color: #000000;\"><span lang=\"AR-SA\">في</span> <span lang=\"AR-SA\">الشكل</span> <span lang=\"AR-SA\">المقابل</span> <span lang=\"AR-SA\">قياس</span> <img src=\"/media/test1picture.png\" alt=\"\" width=\"30\" height=\"20\" /><span lang=\"AR-SA\">&nbsp;</span><span lang=\"AR-SA\">ب</span><span lang=\"AR-SA\" style=\"font-family: 'Open Sans',sans-serif; mso-fareast-font-family: 'Open Sans';\"> =</span></span></p>\n<p class=\"MsoNormal\" dir=\"RTL\" style=\"text-align: right; line-height: normal; mso-pagination: none; direction: rtl; unicode-bidi: embed;\">&nbsp;</p>\n<p class=\"MsoNormal\" dir=\"RTL\" style=\"text-align: right; line-height: normal; mso-pagination: none; direction: rtl; unicode-bidi: embed;\"><span lang=\"AR-SA\" style=\"font-family: 'Open Sans',sans-serif; mso-fareast-font-family: 'Open Sans';\"><img style=\"display: block; margin-left: auto; margin-right: auto;\" src=\"/media/test2picture.png\" width=\"250\" height=\"269\" /></span></p>"
 
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         val tmpDir = Files.createTempDirectory("exercisecontentscraper").toFile()
         val resourceLocation = File(tmpDir, "resource")
         resourceLocation.mkdirs()
 
-        val convertedHtml = ContentScraperUtil.downloadAllResources(htmlWithImage, resourceLocation, mockWebServer.url("/api").url())
+        val convertedHtml = ContentScraperUtil.downloadAllResources(htmlWithImage, resourceLocation,
+            mockWebServer.url("/api").toUrl()
+        )
 
         val imageFile = File(resourceLocation, "media_test1picture.webp")
         //Assert that the image file is downloaded

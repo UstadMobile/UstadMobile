@@ -1,19 +1,16 @@
 import java.util.concurrent.atomic.AtomicInteger
 
-/**
- * Core module build script : see buildconfig.core.default.gradle for configuration
- */
-
+plugins {
+    id 'org.jetbrains.kotlin.multiplatform'
+    id 'kotlinx-atomicfu'
+    id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'com.android.library'
+    id 'kotlin-android-extensions'
+    id 'maven-publish'
+}
 
 group rootProject.group
 version rootProject.version
-
-apply plugin: "kotlin-multiplatform"
-apply plugin: 'kotlinx-serialization'
-apply plugin: 'com.android.library'
-apply plugin: "maven-publish"
-apply plugin: "jacoco"
-apply plugin: 'com.github.johnrengelman.shadow'
 
 
 android {
@@ -26,20 +23,22 @@ android {
         }
     }
 
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 30
+        missingDimensionStrategy 'api', 'api18'
+    }
+
     packagingOptions {
         excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module", "licenses/**.TXT"]
     }
 
-    defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 29
-        missingDimensionStrategy 'api', 'api18'
-        multiDexEnabled true
-    }
     compileOptions {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
-        coreLibraryDesugaringEnabled true
+
+        //This will apparently prevent Android Studio from recognizing the project
+        //coreLibraryDesugaringEnabled true
     }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
@@ -49,32 +48,157 @@ android {
     }
 }
 
-dependencies {
-    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
-}
-
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
-/*
- * This might be required to be able to run unit tests via the IDE.
- */
-task copyTestResources(type: Copy) {
-    outputs.upToDateWhen {
-        project.file("build/local.env.properties").exists()
+group rootProject.group
+version rootProject.version
+
+// workaround for https://youtrack.jetbrains.com/issue/KT-27170
+configurations {
+    compileClasspath
+}
+
+
+kotlin {
+    jvm {
+        compilations.main.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
+
+        compilations.test.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
     }
 
-    from project.file("src/commonTest/resources")
-    into rootProject.file("build/classes/test/core_jvmTest")
+    android()
 
-    doFirst {
-        if(!project.file("build").exists())
-            project.file("build").mkdir()
+    sourceSets {
 
-        def outWriter = new FileWriter(project.file("build/local.env.properties"))
-        System.getProperties().store(outWriter, "System properties for use with running unit tests in IDE")
-        outWriter.flush()
-        outWriter.close()
+        commonMain {
+            kotlin.srcDirs += "build/generated/source/umlocale/"
+            dependencies {
+                implementation kotlin('stdlib-common')
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
+                implementation "io.ktor:ktor-client-core:$version_ktor"
+                implementation "io.ktor:ktor-client-json:$version_ktor"
+                implementation "io.ktor:ktor-io:$version_ktor"
+                implementation "com.soywiz.korlibs.klock:klock:$version_klock"
+                implementation "com.github.aakira:napier:$version_napier"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+                implementation "com.ustadmobile.door:door-runtime:$version_door"
+                implementation "org.kodein.di:kodein-di:$version_kodein_di"
+                implementation "com.ustadmobile.door:door-runtime:$version_door"
+                compileOnly project(':lib-database')
+                compileOnly project(':lib-database-entities')
+                compileOnly "com.ustadmobile.door:room-annotations:$version_door"
+                implementation project(":lib-util")
+                implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
+                implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
+            }
+        }
+
+        commonJvmMain {
+            dependencies {
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "io.ktor:ktor-client-cio:$version_ktor"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                compileOnly "net.sf.kxml:kxml2:$version_kxml"
+                compileOnly project(':lib-database')
+                compileOnly project(':lib-database-entities')
+            }
+        }
+
+        commonTest {
+            dependencies {
+                implementation kotlin('test-common')
+                implementation kotlin('test-annotations-common')
+            }
+        }
+
+        jvmMain {
+            dependsOn commonJvmMain
+
+            dependencies {
+                implementation "com.google.code.gson:gson:$version_gson"
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+            }
+        }
+
+        jvmTest {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-test:$version_kotlin"
+                implementation "org.jetbrains.kotlin:kotlin-test-junit:$version_kotlin"
+                implementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
+                implementation "junit:junit:$version_junit"
+
+                implementation project(":sharedse")
+                implementation project(":lib-database-mpp")
+                implementation project(":lib-database-entities")
+                implementation project(":lib-database")
+                implementation project(":lib-test-common")
+                implementation project(":app-ktor-server")
+
+                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+
+                implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+                implementation "io.ktor:ktor-server-netty:$version_ktor"
+                implementation "io.ktor:ktor-gson:$version_ktor"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
+
+                implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
+            }
+        }
+
+        androidMain {
+            dependsOn commonJvmMain
+
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
+                implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
+                implementation "androidx.room:room-runtime:$version_android_room"
+                implementation "com.google.code.gson:gson:$version_gson"
+
+                implementation "androidx.appcompat:appcompat:$version_androidx_appcompat"
+                implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy"
+
+                //Seems to fix things when we put a specific dependency here
+                implementation "androidx.coordinatorlayout:coordinatorlayout:$version_androidx_coordinatorlayout"
+                implementation "androidx.recyclerview:recyclerview:$version_androidx_recyclerview"
+                implementation "androidx.room:room-runtime:$version_android_room"
+                implementation "androidx.paging:paging-runtime:$version_androidx_paging"
+                implementation "androidx.work:work-runtime:$version_android_workmanager"
+                implementation project(":lib-database-android")
+                implementation "org.jsoup:jsoup:$version_jsoup"
+                //Image loading library
+                implementation "com.squareup.picasso:picasso:$version_android_picasso"
+                implementation "io.ktor:ktor-client-android:$version_ktor"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
+
+                implementation 'com.linkedin.android.litr:litr:1.4.3'
+
+                //dependency injection
+                implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
+
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+
+                implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"
+                implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
+
+            }
+        }
+
     }
 }
 /*
@@ -127,7 +251,6 @@ task prepareLocale {
     }
 }
 
-
 tasks.whenTaskAdded { task ->
     if (task.name == "compileTestKotlinJvm") {
         task.dependsOn(copyTestResources)
@@ -141,254 +264,6 @@ tasks.whenTaskAdded { task ->
 gradle.projectsEvaluated {
     preBuild.dependsOn(prepareLocale)
 }
-
-
-
-kotlin {
-
-    jvm {
-        compilations.main.kotlinOptions {
-            // Setup the Kotlin compiler options for the 'main' compilation:
-            jvmTarget = "$version_kotlin_jvmTarget"
-        }
-
-        compilations.test.kotlinOptions {
-            // Setup the Kotlin compiler options for the 'main' compilation:
-            jvmTarget = "$version_kotlin_jvmTarget"
-        }
-    }
-
-    android {
-
-    }
-
-    /* JS is disabled until upgrade to Kotlin1.4
-    js("js") {
-        nodejs()
-
-
-        compilations.main.kotlinOptions {
-            metaInfo = true
-            sourceMap = true
-            moduleKind = "commonjs"
-        }
-    }
-    */
-
-
-
-    sourceSets {
-
-        all {
-            languageSettings {
-                useExperimentalAnnotation('kotlinx.serialization.InternalSerializationApi')
-            }
-        }
-
-        commonMain {
-            kotlin.srcDirs += "build/generated/source/umlocale/"
-            dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
-                implementation "com.soywiz.korlibs.klock:klock:$version_klock"
-                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
-                implementation "io.ktor:ktor-client-core:$version_ktor"
-                implementation "io.ktor:ktor-client-json:$version_ktor"
-                implementation "io.ktor:ktor-io:$version_ktor"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
-                implementation "com.github.aakira:napier:$version_napier"
-                implementation "io.ktor:ktor-gson:$version_ktor"
-                implementation "org.jetbrains.kotlinx:atomicfu-common:$version_atomicfu"
-                implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                implementation project(':lib-door-runtime')
-                compileOnly project(':lib-database')
-                compileOnly project(':lib-database-entities')
-                compileOnly project(":lib-room-annotations")
-                implementation project(":lib-util")
-            }
-        }
-
-        commonJvmMain {
-            dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
-                implementation "io.ktor:ktor-client-cio:$version_ktor"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
-                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
-                implementation "net.sf.kxml:kxml2:$version_kxml"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
-                implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
-                implementation "io.ktor:ktor-client-gson:$version_ktor"
-                implementation "io.ktor:ktor-io-jvm:$version_ktor"
-                implementation project(':lib-door-runtime')
-                compileOnly project(':lib-database')
-                compileOnly project(':lib-database-entities')
-
-            }
-        }
-
-        jvmMain {
-            dependencies {
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
-                implementation "com.github.aakira:napier-jvm:$version_napier"
-                implementation "com.soywiz.korlibs.klock:klock-jvm:$version_klock"
-            }
-            dependsOn commonJvmMain
-        }
-
-        commonTest {
-            dependencies {
-
-            }
-        }
-
-        jvmTest {
-            dependencies {
-                implementation "junit:junit:$version_junit"
-                implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
-                implementation project(":lib-database-mpp")
-                implementation project(":lib-database-entities")
-                implementation project(":lib-database")
-                implementation project(":lib-test-common")
-
-                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
-
-                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
-
-                implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
-                implementation "io.ktor:ktor-server-netty:$version_ktor"
-
-                implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
-
-                /*
-                  For this to work in the IDE, these need to be API instead of implementation
-                 */
-                api project(":sharedse")
-                api project(":lib-room-annotations")
-                api project(":lib-database-annotations")
-                api project(":lib-database-mpp")
-                api project(":lib-test-common")
-                api project(":app-ktor-server")
-
-                // 5/June/2019 - Unfortunately, Android Studio won't load these depnendencies
-                // of sharedse when running tests in the IDE, which is why we have them here too.
-
-                //Begin SharedSE Android and JVM dependencies
-                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
-                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "net.sf.kxml:kxml2:$version_kxml"
-                implementation "com.google.code.gson:gson:$version_gson"
-                implementation "io.ktor:ktor-client-gson:$version_ktor"
-                //end SharedSE Android and JVM dependencies
-            }
-        }
-        androidMain {
-            dependencies {
-                implementation "com.github.aakira:napier-android:$version_napier"
-                implementation "androidx.appcompat:appcompat:$version_androidx_appcompat"
-                implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy"
-
-                //Seems to fix things when we put a specific dependency here
-                implementation "androidx.coordinatorlayout:coordinatorlayout:$version_androidx_coordinatorlayout"
-                implementation "androidx.recyclerview:recyclerview:$version_androidx_recyclerview"
-                implementation "com.soywiz.korlibs.klock:klock-android:$version_klock"
-                implementation "androidx.room:room-runtime:$version_android_room"
-                implementation "androidx.paging:paging-runtime:$version_androidx_paging"
-                implementation "androidx.work:work-runtime:$version_android_workmanager"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
-                implementation project(":lib-database-android")
-                implementation "org.jsoup:jsoup:$version_jsoup"
-                //Image loading library
-                implementation "com.squareup.picasso:picasso:$version_android_picasso"
-                implementation "io.ktor:ktor-client-android:$version_ktor"
-
-                implementation 'com.linkedin.android.litr:litr:1.4.3'
-
-                //dependency injection
-                implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
-
-                implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"
-                implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
-            }
-            dependsOn commonJvmMain
-        }
-
-        /*jsMain {
-            dependencies {
-                implementation project(":lib-database-mpp")
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
-                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-js:$version_kmp"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
-                implementation "com.soywiz.korlibs.klock:klock-js:$version_klock"
-                implementation "com.github.aakira:napier-js:$version_napier"
-                implementation "io.ktor:ktor-client-js:$version_ktor"
-                implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
-                implementation "io.ktor:ktor-io-js:$version_ktor"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
-            }
-        }*/
-
-    }
-}
-
-jacoco {
-    toolVersion = "$version_jacoco_tool"
-}
-
-/**
- * Create a Jacocco task for reporting test coverage - as per:
- * https://medium.com/@aldychris/kotlin-multiplatform-for-ios-and-android-mobile-application-96a753e175f7
- */
-//TODO: this needs to be fixed for creating a coverage report of jvmTest
-//project.afterEvaluate {
-//    def testTaskName = "jvmTest"
-//
-//    // Create gradle task
-//    task "jvmJacocoTestReport" (type:JacocoReport, dependsOn: "$testTaskName") {
-//        group = "Reporting"
-//        description = "Generate Jacoco coverage reports on the common module build."
-//
-//        def excludes = [
-//                '**/*Test*.*'
-//        ]
-//
-//        classDirectories = fileTree(
-//                dir: "${project.buildDir}/classes/kotlin/jvm/",
-//                excludes: excludes
-//        )
-//
-//        def coverageSourceDirs = [
-//                "src/commonMain/kotlin"
-//        ]
-//
-//        additionalSourceDirs = files(coverageSourceDirs)
-//        sourceDirectories = files(coverageSourceDirs)
-//        executionData = files("${project.buildDir}/jacoco/jvmTest.exec")
-//
-//        reports {
-//            xml.enabled = true
-//            html.enabled = true
-//        }
-//    }
-//}
-
-// workaround for https://youtrack.jetbrains.com/issue/KT-27170
-configurations {
-    compileClasspath
-}
-
-ext.buildConfigProperties = new Properties()
-ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.default.properties")))
-if (rootProject.file("buildconfig.local.properties").exists()) {
-    ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.local.properties")))
-}
-
 
 publishing {
     publications {
@@ -405,4 +280,3 @@ publishing {
         }
     }
 }
-

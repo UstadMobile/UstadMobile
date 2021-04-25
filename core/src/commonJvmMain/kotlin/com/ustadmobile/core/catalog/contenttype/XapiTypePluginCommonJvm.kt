@@ -8,7 +8,6 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParserException
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import java.io.File
 import java.io.FileInputStream
@@ -17,6 +16,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.door.ext.toDoorUri
+import org.xmlpull.v1.XmlPullParserFactory
 
 
 class XapiTypePluginCommonJvm : XapiPackageTypePlugin() {
@@ -32,7 +32,9 @@ class XapiTypePluginCommonJvm : XapiPackageTypePlugin() {
 
                         val fileName = zipEntry?.name
                         if (fileName?.toLowerCase() == "tincan.xml") {
-                            val xpp = UstadMobileSystemImpl.instance.newPullParser(it)
+                            val xppFactory = XmlPullParserFactory.newInstance()
+                            val xpp = xppFactory.newPullParser()//UstadMobileSystemImpl.instance.newPullParser(it)
+                            xpp.setInput(it, "UTF-8")
                             val activity = TinCanXML.loadFromXML(xpp).launchActivity
                                     ?: throw IOException("TinCanXml from ${file.name} has no launchActivity!")
 

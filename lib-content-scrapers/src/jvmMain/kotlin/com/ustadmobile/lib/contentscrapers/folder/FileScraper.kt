@@ -62,7 +62,8 @@ class FileScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Lon
                 val params = scrapeQueueItem?.scrapeRun?.conversionParams
                 var conversionParams = mapOf<String, String>()
                 if(params != null){
-                    conversionParams = Json.parse(MapSerializer(String.serializer(), String.serializer()), params)
+                    conversionParams = Json.decodeFromString(
+                        MapSerializer(String.serializer(), String.serializer()), params)
                 }
                 contentImportManager.importFileToContainer(file.path, metadata.mimeType,
                         fileEntry.contentEntryUid, containerFolder.path, conversionParams){

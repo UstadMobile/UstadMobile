@@ -31,6 +31,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.DbPreloadWorker
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AccountListView
@@ -79,6 +80,12 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
 
+    //Check contentonly mode. See appconfig.properties for details. When enabled, the bottom nav
+    // is only visible as admin (e.g. normal users only see content)
+    private val contentOnlyForNonAdmin: Boolean by lazy {
+        impl.getAppConfigBoolean(AppConfig.KEY_CONTENT_ONLY_MODE, this)
+    }
+
     //This is actually managed by the underlying fragments.
     override var loading: Boolean
         get() = false
@@ -106,7 +113,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private fun loadFromUriString(uri: String?){
 
-        UstadMobileSystemImpl.instance.go(uri, getActivityContext())
+        impl.go(uri, getActivityContext())
 
     }
 
@@ -148,7 +155,8 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
             (AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL)
         (mBinding.root.collapsing_toolbar.layoutParams as? AppBarLayout.LayoutParams)?.scrollFlags = scrollFlags
 
-        mBinding.bottomNavView.visibility = if(ustadDestination?.hideBottomNavigation == true) {
+        val userHasBottomNav = !contentOnlyForNonAdmin || accountManager.activeAccount.admin
+        mBinding.bottomNavView.visibility = if(!userHasBottomNav || ustadDestination?.hideBottomNavigation == true) {
             View.GONE
         } else {
             slideBottomNavigation(true)

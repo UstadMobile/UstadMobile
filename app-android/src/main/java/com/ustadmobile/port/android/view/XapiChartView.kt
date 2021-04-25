@@ -57,6 +57,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                 labelRotationAngle = -45f
                 isGranularityEnabled = true
                 setAxisMinimum(0f)
+                this.setAvoidFirstLastClipping(true)
             }
             axisLeft.apply {
                 isEnabled = true

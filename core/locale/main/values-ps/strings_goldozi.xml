@@ -46,7 +46,6 @@
     <string name="sale_item_edit">د پلور توکو سمون</string>
     <string name="price_each">د هریو بیه (افغانۍ)</string>
     <string name="delivery_deadline">د تحویلۍ نیټه</string>
-    <string name="x_product_pieces_y">%1$s : برخي %1$s</string>
     <string name="x_total_sales">%1$s د ټولو پلورونو ټولټال</string>
     <string name="create_product">نوی محصول</string>
     <string name="create_category">نوې برخې</string>
@@ -73,7 +72,6 @@
     <string name="save_sale_before_delivery">مهرباني وکړئ د نوې تحویلۍ د اضافه کولو مخکښې دا پلور ثبت کړئ</string>
     <string name="selected_more_than_required">مهرباني وکړئ له مطلوب مقدار څخه ډیر مه غوره کوئ</string>
     <string name="selected_payment_higher">مهرباني وکړئ د ټول پلور په نسبت کمه تادیه وټاکئ</string>
-    <string name="end_is_before_start_error">ختم د پیل څخه مخکښې دی</string>
     <string name="signature">لاسلیک</string>
     <string name="clear">پاکول</string>
     <string name="welcome_goldozi">ګلدوزۍ ته ښه راغلاست</string>

@@ -55,8 +55,8 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 161)
-@MinSyncVersion(28)
+], version = 164)
+@MinSyncVersion(158)
 
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -91,6 +91,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         verbDao.initPreloadedVerbs()
         reportDao.initPreloadedTemplates()
         leavingReasonDao.initPreloadedLeavingReasons()
+        languageDao.initPreloadedLanguages()
     }
 
     @JsName("networkNodeDao")
@@ -4403,7 +4404,95 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         }
 
+        val MIGRATION_161_162 = object : DoorMigration(161, 162) {
+            override fun migrate(database: DoorSqlDatabase) {
+                if (database.dbType() == DoorDbType.POSTGRES) {
+                    database.execSQL("""ALTER TABLE Language 
+                        ADD COLUMN languageActive BOOL DEFAULT FALSE NOT NULL""")
+                    database.execSQL("""UPDATE Language SET languageActive = true""")
+                }else {
+                    database.execSQL("""ALTER TABLE Language 
+                        ADD COLUMN languageActive INTEGER DEFAULT 0 NOT NULL""")
+                }
+            }
+        }
 
+        val MIGRATION_162_163 = object: DoorMigration(162, 163) {
+            //Adds LastChangedTime field to all syncable entities so the field will be ready to use
+            //for the new p2p enabled sync systme
+            override fun migrate(database: DoorSqlDatabase) {
+                val fieldType = if(database.dbType() == DoorDbType.SQLITE) {
+                    "INTEGER"
+                }else {
+                    "BIGINT"
+                }
+
+                val lastModTimeFields = listOf("ClazzLog" to "clazzLogLastChangedTime",
+                    "ClazzLogAttendanceRecord" to "clazzLogAttendanceRecordLastChangedTime",
+                    "Schedule" to "scheduleLastChangedTime",
+                    "DateRange" to "dateRangeLct",
+                    "HolidayCalendar" to "umCalendarLct",
+                    "Holiday" to "holLct",
+                    "CustomField" to "customFieldLct",
+                    "CustomFieldValue" to "customFieldLct",
+                    "Person" to "personLct",
+                    "Clazz" to "clazzLct",
+                    "ClazzEnrolment" to "clazzEnrolmentLct",
+                    "LeavingReason" to "leavingReasonLct",
+                    "PersonCustomFieldValue" to "personCustomFieldValueLct",
+                    "ContentEntry" to "contentEntryLct",
+                    "ContentEntryContentCategoryJoin" to "ceccjLct",
+                    "ContentCategorySchema" to "contentCategorySchemaLct",
+                    "ContentEntryParentChildJoin" to "cepcjLct",
+                    "ContentEntryRelatedEntryJoin" to "cerejLct",
+                    "ContentCategory" to "contentCategoryLct",
+                    "Language" to "langLct",
+                    "LanguageVariant" to "langVariantLct",
+                    "Role" to "roleLct",
+                    "EntityRole" to "erLct",
+                    "PersonGroup" to "groupLct",
+                    "PersonGroupMember" to "groupMemberLct",
+                    "PersonPicture" to "personPictureLct",
+                    "Container" to "cntLct",
+                    "VerbEntity" to "verbLct",
+                    "XObjectEntity" to "xObjectLct",
+                    "StatementEntity" to "statementLct",
+                    "ContextXObjectStatementJoin" to "contextXObjectLct",
+                    "AgentEntity" to "agentLct",
+                    "StateEntity" to "stateLct",
+                    "StateContentEntity" to "stateContentLct",
+                    "XLangMapEntry" to "statementLangMapLct",
+                    "School" to "schoolLct",
+                    "SchoolMember" to "schoolMemberLct",
+                    "ClazzWork" to "clazzWorkLct",
+                    "ClazzWorkContentJoin" to "clazzWorkContentJoinLct",
+                    "Comments" to "commentsLct",
+                    "ClazzWorkQuestion" to "clazzWorkQuestionLct",
+                    "ClazzWorkQuestionOption" to "clazzWorkQuestionOptionLct",
+                    "ClazzWorkSubmission" to "clazzWorkSubmissionLct",
+                    "ClazzWorkQuestionResponse" to "clazzWorkQuestionResponseLct",
+                    "ContentEntryProgress" to "contentEntryProgressLct",
+                    "Report" to "reportLct",
+                    "Site" to "siteLct",
+                    "LearnerGroup" to "learnerGroupLct",
+                    "LearnerGroupMember" to "learnerGroupMemberLct",
+                    "GroupLearningSession" to "groupLearningSessionLct",
+                    "SiteTerms" to "sTermsLct",
+                    "ScheduledCheck" to "scheduledCheckLct",
+                    "CustomFieldValueOption" to "customFieldValueLct",
+                    "AuditLog" to "auditLogLct")
+
+                lastModTimeFields.forEach {
+                    database.execSQL("ALTER TABLE ${it.first} ADD COLUMN ${it.second} $fieldType NOT NULL DEFAULT 0")
+                }
+            }
+        }
+
+        val MIGRATION_163_164 = object: DoorMigration(163, 164) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("ALTER TABLE Person ADD COLUMN personCountry TEXT")
+            }
+        }
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
@@ -4412,9 +4501,11 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
                     MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
                     MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
+
                     MIGRATION_51_52, MIGRATION_152_153, MIGRATION_153_154, MIGRATION_154_155,
                     MIGRATION_155_156, MIGRATION_156_157, MIGRATION_157_158,
-                    MIGRATION_158_159,MIGRATION_159_160, MIGRATION_160_161)
+                    MIGRATION_158_159,MIGRATION_159_160, MIGRATION_160_161,
+                    MIGRATION_161_162, MIGRATION_162_163, MIGRATION_163_164)
 
             return builder
         }

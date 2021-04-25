@@ -31,7 +31,7 @@ import io.ktor.client.features.json.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -58,8 +58,9 @@ class PersonEditPresenter(context: Any,
 
     private val clazzEnrolmentWithClazzJoinEditHelper =
             DefaultOneToManyJoinEditHelper(ClazzEnrolmentWithClazz::clazzEnrolmentUid,
-            "state_ClazzMemberWithClazz_list", ClazzEnrolmentWithClazz.serializer().list,
-            ClazzEnrolmentWithClazz.serializer().list, this, ClazzEnrolmentWithClazz::class) { clazzEnrolmentUid = it }
+            "state_ClazzMemberWithClazz_list",
+                ListSerializer(ClazzEnrolmentWithClazz.serializer()),
+            ListSerializer(ClazzEnrolmentWithClazz.serializer()), this, ClazzEnrolmentWithClazz::class) { clazzEnrolmentUid = it }
 
     fun handleAddOrEditClazzMemberWithClazz(clazzEnrolmentWithClazz: ClazzEnrolmentWithClazz) {
         GlobalScope.launch(doorMainDispatcher()) {
@@ -70,8 +71,9 @@ class PersonEditPresenter(context: Any,
 
     private val rolesAndPermissionEditHelper = DefaultOneToManyJoinEditHelper<EntityRoleWithNameAndRole>(
             EntityRoleWithNameAndRole::erUid,
-            "state_EntityRoleWithNameAndRole_list", EntityRoleWithNameAndRole.serializer().list,
-            EntityRoleWithNameAndRole.serializer().list, this, EntityRoleWithNameAndRole::class) { erUid = it }
+            "state_EntityRoleWithNameAndRole_list",
+            ListSerializer(EntityRoleWithNameAndRole.serializer()),
+        ListSerializer(EntityRoleWithNameAndRole.serializer()), this, EntityRoleWithNameAndRole::class) { erUid = it }
 
     fun handleAddOrEditRoleAndPermission(entityRoleWithNameAndRole: EntityRoleWithNameAndRole) {
         rolesAndPermissionEditHelper.onEditResult(entityRoleWithNameAndRole)

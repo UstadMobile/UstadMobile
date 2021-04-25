@@ -30,7 +30,8 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_CSS
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JPG
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.PNG_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
-import org.kmp.io.KMPPullParserException
+import org.xmlpull.v1.XmlPullParserException
+import org.xmlpull.v1.XmlPullParserFactory
 import java.io.*
 
 
@@ -134,12 +135,13 @@ object ShrinkerUtil {
         var opfFileInputStream: FileInputStream? = null
         var ocfFileInputStream: FileInputStream? = null
         var opfFileOutputStream: FileOutputStream? = null
+        val xppFactory = XmlPullParserFactory.newInstance()
+
         try {
             val ocfDoc = OcfDocument()
             val ocfFile = File(directory, Paths.get("META-INF", "container.xml").toString())
             ocfFileInputStream = FileInputStream(ocfFile)
-            val ocfParser = UstadMobileSystemImpl.instance
-                    .newPullParser(ocfFileInputStream)
+            val ocfParser = xppFactory.newPullParser()
             ocfDoc.loadFromParser(ocfParser)
 
             val opfFile = File(directory, ocfDoc.getRootFiles()[0].fullPath!!)
@@ -148,8 +150,7 @@ object ShrinkerUtil {
             cleanXml(opfFile)
             val document = OpfDocument()
             opfFileInputStream = FileInputStream(opfFile)
-            val xmlPullParser = UstadMobileSystemImpl.instance
-                    .newPullParser(opfFileInputStream)
+            val xmlPullParser = xppFactory.newPullParser()
             document.loadFromOPF(xmlPullParser)
 
             val manifestList = document.getManifestItems()
@@ -283,7 +284,7 @@ object ShrinkerUtil {
                 return false
             }
 
-            val xmlSerializer = UstadMobileSystemImpl.instance.newXMLSerializer()
+            val xmlSerializer = xppFactory.newSerializer()
             opfFileOutputStream = FileOutputStream(opfFile)
             xmlSerializer.setOutput(opfFileOutputStream, UTF_ENCODING)
             document.serialize(xmlSerializer)
@@ -295,7 +296,7 @@ object ShrinkerUtil {
                 }
             }
             return true
-        } catch (e: KMPPullParserException) {
+        } catch (e: XmlPullParserException) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
             UMLogUtil.logError("Failed to xmlpullparse for directory " + directory.path)
         } catch (e: IOException) {

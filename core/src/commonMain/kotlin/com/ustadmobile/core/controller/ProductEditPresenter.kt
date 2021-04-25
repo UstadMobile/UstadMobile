@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ProductDetailView
 import com.ustadmobile.core.view.ProductEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -20,8 +21,7 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
-import kotlinx.serialization.builtins.list
-
+import kotlinx.serialization.builtins.ListSerializer
 
 
 class ProductEditPresenter(context: Any,
@@ -34,8 +34,8 @@ class ProductEditPresenter(context: Any,
 
     private val categoryEditHelper =
             DefaultOneToManyJoinEditHelper(Category::categoryUid,
-            "state_Category_list", Category.serializer().list,
-            Category.serializer().list, this, Category::class) { categoryUid = it }
+            "state_Category_list", ListSerializer(Category.serializer()),
+                ListSerializer(Category.serializer()), this, Category::class) { categoryUid = it }
 
     fun handleAddOrEditCategory(categogy: Category) {
         categoryEditHelper.onEditResult(categogy)
@@ -79,7 +79,7 @@ class ProductEditPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: Product? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(Product.serializer(), entityJsonStr)
+            editEntity = safeParse(di, Product.serializer(), entityJsonStr)
         }else {
             editEntity = Product()
         }

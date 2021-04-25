@@ -2,10 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @SyncableEntity(tableId = ClazzWorkQuestionOption.TABLE_ID,
@@ -47,6 +44,9 @@ open class ClazzWorkQuestionOption {
 
     @LastChangedBy
     var clazzWorkQuestionOptionLastChangedBy: Int = 0
+
+    @LastChangedTime
+    var clazzWorkQuestionOptionLct: Long = 0
 
     var clazzWorkQuestionOptionActive: Boolean = false
     override fun equals(other: Any?): Boolean {

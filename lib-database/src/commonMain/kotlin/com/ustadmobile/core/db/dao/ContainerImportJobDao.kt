@@ -5,12 +5,10 @@ import androidx.room.Query
 import com.ustadmobile.core.db.JobStatus.NOT_QUEUED
 import com.ustadmobile.core.db.JobStatus.QUEUED
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_METERED
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_UNMETERED
 import com.ustadmobile.lib.db.entities.ContainerImportJob
 
-@UmDao
 @Dao
 abstract class ContainerImportJobDao : BaseDao<ContainerImportJob> {
 
@@ -20,9 +18,14 @@ abstract class ContainerImportJobDao : BaseDao<ContainerImportJob> {
     @Query("SELECT * FROM ContainerImportJob where cijUid = :uploadId")
     abstract fun findByUid(uploadId: Long): ContainerImportJob?
 
-    @Query("""SELECT * FROM ContainerImportJob WHERE cijJobStatus = $QUEUED
-           AND (NOT cijImportCompleted OR (SELECT connectivityState from ConnectivityStatus WHERE connectivityState IN
-            ($STATE_METERED, $STATE_UNMETERED)))
+    @Query("""
+            SELECT * 
+              FROM ContainerImportJob 
+             WHERE cijJobStatus = $QUEUED
+                   AND (NOT cijImportCompleted OR 
+                   (SELECT connectivityState 
+                      FROM ConnectivityStatus)
+                   IN ($STATE_METERED, $STATE_UNMETERED))
              LIMIT 10""")
     abstract fun findJobs(): DoorLiveData<List<ContainerImportJob>>
 

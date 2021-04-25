@@ -4,7 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ConcatenatedDataIntegrityException
 import com.ustadmobile.core.io.ConcatenatedInputStream2
 import com.ustadmobile.core.io.RangeOutputStream
-import com.ustadmobile.core.network.containerfetcher.ContainerFetcherJobHttpUrlConnection2
+import com.ustadmobile.core.network.containerfetcher.ContainerFetcherJobOkHttp
 import kotlinx.coroutines.isActive
 import java.io.File
 import kotlin.coroutines.coroutineContext
@@ -53,8 +53,8 @@ suspend fun ConcatenatedInputStream2.readAndSaveToDir(destDirFile: File,
 
     val firstMd5 = md5ExpectedList.first().base64EncodedToHexString()
 
-    val firstFile = File(tmpDirFile, "$firstMd5${ContainerFetcherJobHttpUrlConnection2.SUFFIX_PART}")
-    val firstFileHeader = File(tmpDirFile, "$firstMd5${ContainerFetcherJobHttpUrlConnection2.SUFFIX_HEADER}")
+    val firstFile = File(tmpDirFile, "$firstMd5${ContainerFetcherJobOkHttp.SUFFIX_PART}")
+    val firstFileHeader = File(tmpDirFile, "$firstMd5${ContainerFetcherJobOkHttp.SUFFIX_HEADER}")
     val firstFilePartPresent = firstFile.exists() && firstFileHeader.exists()
 
     var bytesToSkipWriting = firstFile.length() + firstFileHeader.length()
@@ -66,8 +66,8 @@ suspend fun ConcatenatedInputStream2.readAndSaveToDir(destDirFile: File,
             throw IOException("Server gave us the wrong md5: wanted: $nextMd5Expected / actually got $entryMd5")
 
 
-        val destFile = File(tmpDirFile, entryMd5 + ContainerFetcherJobHttpUrlConnection2.SUFFIX_PART)
-        val headerFile = File(tmpDirFile, entryMd5 + ContainerFetcherJobHttpUrlConnection2.SUFFIX_HEADER)
+        val destFile = File(tmpDirFile, entryMd5 + ContainerFetcherJobOkHttp.SUFFIX_PART)
+        val headerFile = File(tmpDirFile, entryMd5 + ContainerFetcherJobOkHttp.SUFFIX_HEADER)
         headerFile.writeBytes(concatenatedEntry.toBytes())
 
         val destFileOut = if(bytesToSkipWriting > 0) {

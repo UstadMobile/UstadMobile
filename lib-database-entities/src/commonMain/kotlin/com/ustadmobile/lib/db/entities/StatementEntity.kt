@@ -3,10 +3,7 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
@@ -96,6 +93,9 @@ open class StatementEntity {
 
     @LastChangedBy
     var statementLastChangedBy: Int = 0
+
+    @LastChangedTime
+    var statementLct: Long = 0
 
     var extensionProgress: Int = 0
 

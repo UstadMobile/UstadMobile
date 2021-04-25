@@ -7,7 +7,6 @@ import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Schedule
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
 class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: ScheduleEditView,

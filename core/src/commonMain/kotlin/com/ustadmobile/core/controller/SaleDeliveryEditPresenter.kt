@@ -1,25 +1,14 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.SaleDeliveryEditView
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.SaleDelivery
-import com.ustadmobile.lib.db.entities.SaleItemWithProduct
 import com.ustadmobile.lib.db.entities.SaleDeliveryAndItems
 import com.ustadmobile.lib.db.entities.ProductDeliveryWithProductAndTransactions
-import kotlinx.serialization.builtins.list
-import com.ustadmobile.door.DoorMutableLiveData
 import kotlinx.coroutines.*
-import kotlinx.serialization.json.Json
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import org.kodein.di.DI
 

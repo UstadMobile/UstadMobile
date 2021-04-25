@@ -2,18 +2,14 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ProductCategoryJoin.Companion.PRODUCT_CATEGORY_JOIN_TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
 @SyncableEntity(tableId = PRODUCT_CATEGORY_JOIN_TABLE_ID)
 @Serializable
-open class
-ProductCategoryJoin() {
+open class ProductCategoryJoin() {
 
     @PrimaryKey(autoGenerate = true)
     var productCategoryJoinUid: Long = 0

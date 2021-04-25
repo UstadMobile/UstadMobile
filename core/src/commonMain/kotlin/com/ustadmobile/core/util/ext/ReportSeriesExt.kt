@@ -123,19 +123,19 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                 it == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON } ?: false
 
     if(report.xAxis == Report.ENROLMENT_OUTCOME || reportSeriesSubGroup == Report.ENROLMENT_OUTCOME
-            || report.xAxis == Report.ENROLMENT_LEAVING_REASON || reportSeriesSubGroup == Report.ENROLMENT_LEAVING_REASON
-            || report.xAxis == Report.CLASS || reportSeriesSubGroup == Report.CLASS || hasFilterEnrolment) {
+        || report.xAxis == Report.ENROLMENT_LEAVING_REASON || reportSeriesSubGroup == Report.ENROLMENT_LEAVING_REASON
+        || report.xAxis == Report.CLASS || reportSeriesSubGroup == Report.CLASS || hasFilterEnrolment) {
 
-                val joinEnrolment = """LEFT JOIN ClazzEnrolment ON 
+        val joinEnrolment = """LEFT JOIN ClazzEnrolment ON 
                     StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid """.trimMargin()
-                sql += joinEnrolment
-                if(hasFilterEnrolment){
-                    sqlList += joinEnrolment
-                }
+        sql += joinEnrolment
+        if(hasFilterEnrolment){
+            sqlList += joinEnrolment
+        }
 
-                if(report.xAxis == Report.CLASS || reportSeriesSubGroup == Report.CLASS){
-                    sql += "LEFT JOIN Clazz ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid "
-                }
+        if(report.xAxis == Report.CLASS || reportSeriesSubGroup == Report.CLASS){
+            sql += "LEFT JOIN Clazz ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid "
+        }
     }
 
     when(reportSeriesYAxis){

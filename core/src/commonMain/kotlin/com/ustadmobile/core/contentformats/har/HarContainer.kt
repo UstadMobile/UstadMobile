@@ -9,17 +9,19 @@ import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.parseRangeRequestHeader
+import io.ktor.client.*
 import io.ktor.utils.io.errors.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 
 
 class HarContainer(val containerUid: Long, val entry: ContentEntry,
                    val umAccount: UmAccount?, val db: UmAppDatabase,
-                   val context: Any, val localHttp: String, var block: (sourceUrl: String) -> Unit) {
+                   val context: Any, val localHttp: String,
+                   val httpClient: HttpClient,
+                   var block: (sourceUrl: String) -> Unit) {
 
     lateinit var startingUrl: String
     private val linkPatterns = mutableMapOf<Regex, String>()
@@ -28,7 +30,7 @@ class HarContainer(val containerUid: Long, val entry: ContentEntry,
     var interceptors: MutableMap<HarInterceptor, String?> = mutableMapOf()
     val startingUrlDeferred = CompletableDeferred<String>()
 
-    val json = Json(JsonConfiguration(ignoreUnknownKeys = true))
+    val json = Json { ignoreUnknownKeys = true }
 
     init {
 
@@ -46,7 +48,7 @@ class HarContainer(val containerUid: Long, val entry: ContentEntry,
             var harExtra = HarExtra()
             if(harExtraEntry != null){
                 val data = harExtraEntry.containerEntryFile?.getStringFromContainerEntry() ?: throw Exception()
-                harExtra = json.parse(HarExtra.serializer(), data)
+                harExtra = json.decodeFromString(HarExtra.serializer(), data)
             }
 
             regexList = harExtra.regexes
@@ -55,14 +57,14 @@ class HarContainer(val containerUid: Long, val entry: ContentEntry,
             }
 
             interceptors[RecorderInterceptor()] = null
-            interceptors[KhanProgressTracker()] = null
+            interceptors[KhanProgressTracker(httpClient)] = null
             harExtra.interceptors?.forEach {
                 val key = interceptorMap[it.name] ?: return@forEach
                 interceptors[key] = it.jsonArgs
             }
 
 
-            val harContent = json.parse(Har.serializer(), harContentData)
+            val harContent = json.decodeFromString(Har.serializer(), harContentData)
 
             val entries = harContent.log.entries
 

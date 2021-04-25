@@ -80,9 +80,6 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
                 XapiStatementResponder::class.java, di)
         addRoute("/:${XapiStateResponder.URI_PARAM_ENDPOINT}/xapi/activities/state",
                 XapiStateResponder::class.java, di)
-
-        //TODO: This should provide NetworkManager to the responder, or BleProxyResponder could use DI itself
-        addRoute("/bleproxy/:bleaddr/.*", BleProxyResponder::class.java, networkManager)
     }
 
 

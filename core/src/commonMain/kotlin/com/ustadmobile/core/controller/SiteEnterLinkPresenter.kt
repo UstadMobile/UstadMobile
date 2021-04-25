@@ -39,7 +39,7 @@ class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view:
                 if(siteLink != null)
                     it[ARG_SERVER_URL] = siteLink
 
-                it[ARG_SITE] = Json.stringify(Site.serializer(), mSite)
+                it[ARG_SITE] = Json.encodeToString(Site.serializer(), mSite)
             }
 
             args.putIfNotAlreadySet(ARG_POPUPTO_ON_FINISH, SiteEnterLinkView.VIEW_NAME)

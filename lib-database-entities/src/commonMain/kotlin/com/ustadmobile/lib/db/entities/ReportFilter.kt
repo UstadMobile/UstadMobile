@@ -5,9 +5,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 open class ReportFilter {
 
-    var reportFilterUid: Long = 0
+    var reportFilterUid: Int = 0
 
-    var reportFilterSeriesUid: Long = 0
+    var reportFilterSeriesUid: Int = 0
 
     var reportFilterField: Int = FIELD_LE_GENDER
 

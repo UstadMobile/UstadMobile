@@ -7,11 +7,8 @@ import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.SaleEditView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.Sale
 import com.ustadmobile.lib.db.entities.SaleWithCustomerAndLocation
-import com.ustadmobile.lib.db.entities.SaleItem
 import com.ustadmobile.lib.db.entities.SaleItemWithProduct
 import com.ustadmobile.lib.db.entities.SaleDelivery
 import com.ustadmobile.lib.db.entities.SaleDeliveryAndItems
@@ -22,8 +19,8 @@ import com.ustadmobile.lib.db.entities.InventoryItem
 import kotlinx.coroutines.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
-import kotlinx.serialization.builtins.list
 
 class SaleEditPresenter(context: Any,
                         arguments: Map<String, String>, view: SaleEditView, di: DI,
@@ -37,8 +34,8 @@ class SaleEditPresenter(context: Any,
     //Sale Item edit helper
     private val saleItemEditHelper = DefaultOneToManyJoinEditHelper<SaleItemWithProduct>(
             SaleItemWithProduct::saleItemUid,
-            "SaleItem", SaleItemWithProduct.serializer().list,
-            SaleItemWithProduct.serializer().list, this, SaleItemWithProduct::class) {
+            "SaleItem", ListSerializer(SaleItemWithProduct.serializer()),
+        ListSerializer(SaleItemWithProduct.serializer()), this, SaleItemWithProduct::class) {
                 saleItemUid = it }
 
     fun handleAddOrEditSaleItem(saleItem: SaleItemWithProduct) {
@@ -52,8 +49,8 @@ class SaleEditPresenter(context: Any,
     //Sale Delivery edit helper
     private val saleDeliveryEditHelper = DefaultOneToManyJoinEditHelper<SaleDeliveryAndItems>(
             SaleDeliveryAndItems::saleDeliveryUid,
-            "SaleDeliveryAndItemsKey", SaleDeliveryAndItems.serializer().list,
-            SaleDeliveryAndItems.serializer().list, this, SaleDeliveryAndItems::class) {
+            "SaleDeliveryAndItemsKey", ListSerializer(SaleDeliveryAndItems.serializer()),
+        ListSerializer(SaleDeliveryAndItems.serializer()), this, SaleDeliveryAndItems::class) {
                 saleDeliveryUid = it }
 
     fun handleAddOrEditSaleDelivery(saleDelivery: SaleDeliveryAndItems) {
@@ -68,8 +65,8 @@ class SaleEditPresenter(context: Any,
     //Sale Payment edit helper
     private val salePaymentEditHelper = DefaultOneToManyJoinEditHelper<SalePaymentWithSaleItems>(
             SalePaymentWithSaleItems::salePaymentUid ,
-            "SalePaymentWithSaleItemsKey", SalePaymentWithSaleItems.serializer().list,
-            SalePaymentWithSaleItems.serializer().list, this,
+            "SalePaymentWithSaleItemsKey", ListSerializer(SalePaymentWithSaleItems.serializer()),
+        ListSerializer(SalePaymentWithSaleItems.serializer()), this,
                 SalePaymentWithSaleItems::class) { salePaymentUid = it }
 
     fun handleAddOrEditSalePayment(salePayment: SalePaymentWithSaleItems) {

@@ -5,13 +5,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 class ReportSeries{
 
-    var reportSeriesUid: Long = 0
+    var reportSeriesUid: Int = 0
 
     var reportSeriesName: String? = null
 
-    var reportSeriesYAxis: Int = 0
+    var reportSeriesYAxis: Int = TOTAL_DURATION
 
-    var reportSeriesVisualType: Int = 0
+    var reportSeriesVisualType: Int = BAR_CHART
 
     var reportSeriesSubGroup: Int = NONE
 
@@ -23,6 +23,9 @@ class ReportSeries{
 
         const val LINE_GRAPH = 101
 
+        const val STATEMENT_QUERY = 100
+
+        const val ATTENDANCE_QUERY = 101
 
         const val TOTAL_DURATION = 200
 

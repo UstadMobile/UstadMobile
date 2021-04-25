@@ -2,10 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @SyncableEntity(tableId = Schedule.TABLE_ID,
@@ -76,6 +73,9 @@ class Schedule {
 
     @LastChangedBy
     var scheduleLastChangedBy: Int = 0
+
+    @LastChangedTime
+    var scheduleLastChangedTime: Long = 0
 
     //active or removed
     var scheduleActive: Boolean = true

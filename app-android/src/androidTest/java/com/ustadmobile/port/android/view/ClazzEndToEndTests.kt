@@ -48,6 +48,7 @@ class ClazzEndToEndTests : TestCase() {
                 lastName = "Jones"
                 admin = true
             })
+
             launchActivity<MainActivity>()
 
         }.run {
@@ -79,6 +80,11 @@ class ClazzEndToEndTests : TestCase() {
                 }
                 closeSoftKeyboard()
 
+                //Scroll to one below the holiday calendar to avoid the potential that it would be
+                //covered by the bottom nav bar
+                schoolTextInputLayout {
+                    scrollTo()
+                }
 
                 holidayCalendarTextInput{
                     click()

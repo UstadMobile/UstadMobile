@@ -3,12 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
-import androidx.room.Insert
-import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.InventoryItem
-import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
-import com.ustadmobile.lib.db.entities.PersonWithInventory
 import com.ustadmobile.lib.db.entities.PersonWithInventoryCount
 import com.ustadmobile.lib.db.entities.PersonWithInventoryItemAndStock
 import com.ustadmobile.lib.db.entities.InventoryTransactionDetail

@@ -16,7 +16,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -77,8 +77,9 @@ class ReportFilterEditPresenter(context: Any,
     }
 
     private val uidAndLabelOneToManyHelper = DefaultOneToManyJoinEditHelper(
-            UidAndLabel::uid, "state_uid_list", UidAndLabel.serializer().list,
-            UidAndLabel.serializer().list, this, UidAndLabel::class) { uid = it }
+            UidAndLabel::uid, "state_uid_list",
+            ListSerializer(UidAndLabel.serializer()),
+            ListSerializer(UidAndLabel.serializer()), this, UidAndLabel::class) { uid = it }
 
     fun handleAddOrEditUidAndLabel(entry: UidAndLabel) {
         GlobalScope.launch(doorMainDispatcher()) {

@@ -1,37 +1,24 @@
 package com.ustadmobile.port.android.view.binding
 
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.view.View
 import android.widget.ImageView
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultRegistry
 import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
-import androidx.lifecycle.findViewTreeLifecycleOwner
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.resolveAttachmentAndroidUri
-import com.ustadmobile.lib.db.entities.ContentEntryProgress
-import com.ustadmobile.lib.db.entities.CustomField
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.getActivityContext
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import kotlinx.coroutines.*
 import org.kodein.di.*
-
-class ImageViewLifecycleObserver2(view: ImageView, registry: ActivityResultRegistry, inverseBindingListener: InverseBindingListener)
-    : ViewActivityLauncherLifecycleObserver<ImageView>(view, registry, inverseBindingListener) {
-
-    override fun onPictureTakenOrSelected(pictureUri: Uri?) {
-        view.setImageFilePath(pictureUri?.toString(),null)
-        inverseBindingListener?.onChange()
-    }
-}
 
 @BindingAdapter(value=["imageUri", "fallbackDrawable"], requireAll = false)
 fun ImageView.setImageFilePath(imageFilePath: String?, fallbackDrawable: Drawable?) {
@@ -52,13 +39,22 @@ fun ImageView.setImageFilePath(imageFilePath: String?, fallbackDrawable: Drawabl
 
 @BindingAdapter("imageUriAttrChanged")
 fun ImageView.getImageFilePath(inverseBindingListener: InverseBindingListener) {
-    val activity = context.getActivityContext() as ComponentActivity
-    val imageViewLifecycleObserver = ImageViewLifecycleObserver2(this,
-            activity.activityResultRegistry, inverseBindingListener)
-    findViewTreeLifecycleOwner()?.lifecycle?.addObserver(imageViewLifecycleObserver)
+    setTag(R.id.tag_imageview_inversebindinglistener, inverseBindingListener)
+    updateImageViewLifecycleObserver()
+}
 
-    setOnClickListener {
-        imageViewLifecycleObserver.showOptionsDialog()
+@BindingAdapter("imageViewLifecycleObserver")
+fun ImageView.setImageViewLifecycleObserver(imageViewLifecycleObserver: ImageViewLifecycleObserver2) {
+    setTag(R.id.tag_imageviewlifecycleobserver, imageViewLifecycleObserver)
+    updateImageViewLifecycleObserver()
+}
+
+private fun ImageView.updateImageViewLifecycleObserver() {
+    val lifecycleObserver = getTag(R.id.tag_imageviewlifecycleobserver) as? ImageViewLifecycleObserver2
+    val inverseBindingListener = getTag(R.id.tag_imageview_inversebindinglistener) as? InverseBindingListener
+    if(lifecycleObserver != null && inverseBindingListener != null) {
+        lifecycleObserver.view = this
+        lifecycleObserver.inverseBindingListener = inverseBindingListener
     }
 }
 
@@ -270,7 +266,35 @@ private fun ImageView.updateFromImageLookupMap() {
         if(resToUse != null && resToUse != currentImageRes) {
             setImageResource(resToUse)
             setTag(R.id.tag_imagelookup_key, resToUse)
+        }else{
+            setImageDrawable(null)
         }
+    }else{
+        setImageDrawable(null)
+    }
+}
+
+@BindingAdapter("isContentCompleteImage")
+fun ImageView.isContentCompleteImage(person: PersonWithSessionsDisplay){
+    if(person.resultComplete){
+        when(person.resultSuccess){
+            StatementEntity.RESULT_SUCCESS -> {
+                setImageResource(R.drawable.exo_ic_check)
+                visibility = View.VISIBLE
+            }
+            StatementEntity.RESULT_FAILURE -> {
+                setImageResource(R.drawable.ic_close_black_24dp)
+                visibility = View.VISIBLE
+            }
+            StatementEntity.RESULT_UNSET ->{
+                setImageDrawable(null)
+                visibility = View.INVISIBLE
+            }
+        }
+    }else{
+        setImageDrawable(null)
+        context.getString(R.string.incomplete)
+        visibility = View.INVISIBLE
     }
 }
 

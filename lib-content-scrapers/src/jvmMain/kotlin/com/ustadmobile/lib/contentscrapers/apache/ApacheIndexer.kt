@@ -10,12 +10,13 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.SCRAPER_TAG
 import com.ustadmobile.lib.contentscrapers.abztract.Indexer
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.jsoup.Jsoup
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
-import java.net.HttpURLConnection
 import java.net.URL
 
 
@@ -25,15 +26,16 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
 
     private val contentImportManager: ContentImportManager by di.on(endpoint).instance()
 
+    private val okHttpClient: OkHttpClient by di.instance()
+
     override fun indexUrl(sourceUrl: String) {
         
         val srcUrl = sourceUrl.requirePostfix("/")
         val url = URL(srcUrl)
 
-        val huc: HttpURLConnection = url.openConnection() as HttpURLConnection
-
-        val data = String(huc.inputStream.readBytes())
-        huc.disconnect()
+        val okRequest = Request.Builder().url(srcUrl).build()
+        val data : String = okHttpClient.newCall(okRequest).execute().body?.string()
+            ?: throw IllegalArgumentException("$srcUrl has no http body")
 
         val document = Jsoup.parse(data)
 

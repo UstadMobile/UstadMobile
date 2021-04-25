@@ -1,6 +1,6 @@
 package com.ustadmobile.core.util
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.JobStatus
@@ -8,7 +8,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ContentEntry2DetailView
+import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -22,7 +22,8 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
-class ContentEntryOpenerTest {
+class
+ContentEntryOpenerTest {
 
     private lateinit var umAppDatabase: UmAppDatabase
 
@@ -107,7 +108,7 @@ class ContentEntryOpenerTest {
 
             ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                 true, true, false)
-            verify(impl).go(eq(ContentEntry2DetailView.VIEW_NAME), any(), eq(context), any())
+            verify(impl).go(eq(ContentEntryDetailView.VIEW_NAME), any(), eq(context), any())
         }
     }
 

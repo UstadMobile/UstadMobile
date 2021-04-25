@@ -1,9 +1,9 @@
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.mock
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.mock
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerAddOptions
@@ -155,7 +155,7 @@ class XapiPackageContentPresenterTest {
             Assert.assertTrue("Mounted path starts with url and html name",
                     firstValue.startsWith(httpd.localHttpUrl) && firstValue.contains("tetris.html"))
             val paramsProvided = UMFileUtil.parseURLQueryString(firstValue)
-            val umAccountActor = Json.parse(UmAccountActor.serializer(), paramsProvided["actor"]!!)
+            val umAccountActor = Json.decodeFromString(UmAccountActor.serializer(), paramsProvided["actor"]!!)
             Assert.assertEquals("Account actor is as expected",
                     account.username, umAccountActor.account.name)
             val expectedEndpoint = UMFileUtil.resolveLink(firstValue, "/${UMURLEncoder.encodeUTF8(endpoint.url)}/xapi/$contentEntryUid/")
@@ -187,7 +187,8 @@ class XapiPackageContentPresenterTest {
             Assert.assertTrue("Mounted path starts with url and html name",
                     firstValue.startsWith(httpd.localHttpUrl) && firstValue.contains("tetris.html"))
             val paramsProvided = UMFileUtil.parseURLQueryString(firstValue)
-            val umAccountGroupActor = Json.parse(UmAccountGroupActor.serializer(), paramsProvided["actor"]!!)
+            val umAccountGroupActor = Json.decodeFromString(UmAccountGroupActor.serializer(),
+                paramsProvided["actor"]!!)
             Assert.assertEquals("Actor object type is group",
                     umAccountGroupActor.objectType, "Group")
             Assert.assertEquals("Actor account name is groupUid",

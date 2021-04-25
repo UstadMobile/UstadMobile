@@ -8,7 +8,7 @@ import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.ContentEntry2DetailView
+import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.HarView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
@@ -18,6 +18,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import kotlin.js.JsName
@@ -39,6 +40,8 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
 
     private val contentEntryOpener: ContentEntryOpener by di.on(accountManager.activeAccount).instance()
 
+    private val systemImpl: UstadMobileSystemImpl by di.instance()
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
@@ -54,7 +57,7 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
                 })
 
                 harContainer = HarContainer(containerUid, result, accountManager.activeAccount, db,
-                        context, localHttp) {
+                        context, localHttp, di.direct.instance()) {
                     handleUrlLinkToContentEntry(it)
                 }
                 harContainer.startingUrlDeferred.await()
@@ -63,8 +66,8 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
 
             } catch (e: Exception) {
                 view.runOnUiThread(Runnable {
-                    view.showSnackBar(UstadMobileSystemImpl.instance
-                            .getString(MessageID.error_opening_file, context))
+                    view.showSnackBar(
+                        systemImpl.getString(MessageID.error_opening_file, context))
                 })
             }
         }
@@ -72,10 +75,8 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
 
     @JsName("handleUrlLinkToContentEntry")
     fun handleUrlLinkToContentEntry(sourceUrl: String) {
-        val impl = UstadMobileSystemImpl.instance
-
         val dest = sourceUrl.replace("content-detail?",
-                ContentEntry2DetailView.VIEW_NAME + "?")
+                ContentEntryDetailView.VIEW_NAME + "?")
         val params = UMFileUtil.parseURLQueryString(dest)
 
         if (params.containsKey("sourceUrl")) {
@@ -88,7 +89,7 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
                             noIframe = arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false)
                 } catch (e: Exception) {
                     if (e is NoAppFoundException) {
-                        view.showErrorWithAction(impl.getString(MessageID.no_app_found, context),
+                        view.showErrorWithAction(systemImpl.getString(MessageID.no_app_found, context),
                                 MessageID.get_app,
                                 e.mimeType ?: "")
                     } else {
