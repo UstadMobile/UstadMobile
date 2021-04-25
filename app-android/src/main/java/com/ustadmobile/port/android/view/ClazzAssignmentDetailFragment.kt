@@ -9,26 +9,29 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
 import com.google.android.material.tabs.TabLayout
 import com.toughra.ustadmobile.R
+import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentDetailBinding
 import com.toughra.ustadmobile.databinding.FragmentClazzDetailBinding
+import com.ustadmobile.core.controller.ClazzAssignmentDetailPresenter
 import com.ustadmobile.core.controller.ClazzDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 import kotlinx.android.synthetic.main.appbar_material_tabs_fixed.view.*
 
 
-interface ClazzDetailFragmentEventHandler {
+interface ClazzAssignmentDetailFragmentEventHandler {
 
 }
 
-class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzDetailFragmentEventHandler {
+class ClazzAssignmentDetailFragment: UstadDetailFragment<ClazzAssignment>(), ClazzAssignmentDetailView, ClazzDetailFragmentEventHandler {
 
-    private var mBinding: FragmentClazzDetailBinding? = null
+    private var mBinding: FragmentClazzAssignmentDetailBinding? = null
 
-    private var mPresenter: ClazzDetailPresenter? = null
+    private var mPresenter: ClazzAssignmentDetailPresenter? = null
 
     private var mPagerAdapter: ViewNameListFragmentPagerAdapter? = null
 
@@ -52,8 +55,8 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
                     if(it == null)
                         return@also
 
-                    it.fragmentClazzDetailViewpager.adapter = mPagerAdapter
-                    it.root.tabs.setupWithViewPager(it.fragmentClazzDetailViewpager)
+                    it.fragmentClazzAssignmentDetailViewpager.adapter = mPagerAdapter
+                    it.root.tabs.setupWithViewPager(it.fragmentClazzAssignmentDetailViewpager)
                 }
             }
         }
@@ -67,12 +70,12 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
         //The fab will be managed by the underlying tabs
         fabManagementEnabled = false
 
-        mBinding = FragmentClazzDetailBinding.inflate(inflater, container, false).also {
+        mBinding = FragmentClazzAssignmentDetailBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.root.tabs.tabGravity = TabLayout.GRAVITY_FILL
         }
 
-        mPresenter = ClazzDetailPresenter(requireContext(), arguments.toStringMap(), this,
+        mPresenter = ClazzAssignmentDetailPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
 
         return rootView
@@ -86,7 +89,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
     override fun onDestroyView() {
         super.onDestroyView()
-        mBinding?.fragmentClazzDetailViewpager?.adapter = null
+        mBinding?.fragmentClazzAssignmentDetailViewpager?.adapter = null
         mPagerAdapter = null
         mBinding = null
         mPresenter = null
@@ -94,28 +97,24 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
         tabs = null
     }
 
-    override var entity: Clazz? = null
+    override var entity: ClazzAssignment? = null
         get() = field
         set(value) {
             field = value
-            ustadFragmentTitle = value?.clazzName
-            mBinding?.clazz = value
+            ustadFragmentTitle = value?.clazzAssignmentTitle
+            mBinding?.clazzAssignment = value
         }
 
     companion object {
         val viewNameToFragmentMap = mapOf<String, Class<out Fragment>>(
                 ClazzDetailOverviewView.VIEW_NAME to ClazzDetailOverviewFragment::class.java,
-                ClazzMemberListView.VIEW_NAME to ClazzMemberListFragment::class.java,
-                ClazzLogListAttendanceView.VIEW_NAME to ClazzLogListAttendanceFragment::class.java,
-                ClazzAssignmentListView.VIEW_NAME to ClazzAssignmentListFragment::class.java
+                ClazzMemberListView.VIEW_NAME to ClazzMemberListFragment::class.java
 
         )
 
         val viewNameToTitleMap = mapOf(
                 ClazzDetailOverviewView.VIEW_NAME to R.string.overview,
-                ClazzMemberListView.VIEW_NAME to R.string.members,
-                ClazzLogListAttendanceView.VIEW_NAME to R.string.attendance,
-                ClazzAssignmentListView.VIEW_NAME to R.string.assignments
+                ClazzMemberListView.VIEW_NAME to R.string.student_progress,
         )
 
     }
