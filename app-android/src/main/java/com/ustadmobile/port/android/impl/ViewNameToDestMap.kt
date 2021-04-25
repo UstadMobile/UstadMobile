@@ -41,6 +41,7 @@ class ViewNameToDestMap: DestinationProvider {
                     R.id.clazzworkquestionandoptions_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             ClazzWorkDetailView.VIEW_NAME to UstadDestination(R.id.clazzwork_detail_list),
+            ClazzAssignmentListView.VIEW_NAME to UstadDestination(R.id.clazz_assignment_list),
             ContentEntryEdit2View.VIEW_NAME to UstadDestination(R.id.content_entry_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             ContentEntryListTabsView.VIEW_NAME to UstadDestination(R.id.home_content_dest),

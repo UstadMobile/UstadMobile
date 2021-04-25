@@ -149,6 +149,10 @@
         android:name="com.ustadmobile.port.android.view.ClazzWorkDetailFragment" />
 
     <fragment
+        android:id="@+id/clazz_assignment_list"
+        android:name="com.ustadmobile.port.android.view.ClazzAssignmentListFragment" />
+
+    <fragment
         android:id="@+id/home_content_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntryListTabsFragment"
         android:label="@string/content">

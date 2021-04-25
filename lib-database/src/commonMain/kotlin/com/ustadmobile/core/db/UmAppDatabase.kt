@@ -254,6 +254,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("clazzWorkDao")
     abstract val clazzWorkDao: ClazzWorkDao
 
+    @JsName("clazzAssignmentDao")
+    abstract val clazzAssignmentDao: ClazzAssignmentDao
+
     @JsName("clazzWorkSubmissionDao")
     abstract val clazzWorkSubmissionDao: ClazzWorkSubmissionDao
 
