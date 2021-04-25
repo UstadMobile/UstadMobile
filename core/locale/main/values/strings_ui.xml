@@ -808,6 +808,18 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="add_a_new_clazzwork">Add a new classwork</string>
     <string name="edit_clazzwork">Edit classwork</string>
 
+    <string name="clazz_assignment">Assignment</string>
+    <string name="new_assignment">New assignment</string>
+    <string name="edit_assignment">Edit assignment</string>
+    <string name="total_score">Total score</string>
+    <string name="visible_to_students">visible to students from</string>
+    <string name="late_submission">Late submissions</string>
+    <string name="mark_penalty">Mark penalty</string>
+    <string name="late_submission_penalty">Late submission penalty</string>
+    <string name="end_of_grace_period">End of grace period</string>
+    <string name="allow_class_comments">Allow class comments from students</string>
+    <string name="allow_private_comments">Allow private comments from students</string>
+
     <string name="marked">marked</string>
     <string name="submitted">submitted</string>
     <string name="not_submitted">not submitted</string>
