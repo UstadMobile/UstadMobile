@@ -79,7 +79,7 @@ import kotlinx.serialization.Serializable
             JOIN ClazzEnrolment ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
             JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
             JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZWORK_VIEWSTUDENTPROGRESS} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
             JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
         """,
         //ClazzWorkQuestionResponse
@@ -89,7 +89,7 @@ import kotlinx.serialization.Serializable
             JOIN ClazzEnrolment ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
             JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
             JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZWORK_VIEWSTUDENTPROGRESS} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
             JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
         """,
         //ContentEntryProgress

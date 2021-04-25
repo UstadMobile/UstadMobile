@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
         ChangeLog
         JOIN ClazzWork ON ChangeLog.chTableId = ${CLAZZ_WORK_TABLE_ID} AND ClazzWork.clazzWorkUid = ChangeLog.chEntityPk
         JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
-        JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_CLAZZWORK_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_ASSIGNMENT_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
         """
     ],
@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
         SELECT ClazzWork.* FROM
         ClazzWork
         JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid
-        JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_CLAZZWORK_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_ASSIGNMENT_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
         WHERE DeviceSession.dsDeviceId = :clientId  
     """)

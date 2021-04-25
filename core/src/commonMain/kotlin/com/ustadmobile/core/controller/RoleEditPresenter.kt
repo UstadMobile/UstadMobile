@@ -15,7 +15,6 @@ import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
 
@@ -110,8 +109,8 @@ class RoleEditPresenter(context: Any,
             BitmaskFlag(Role.PERMISSION_PERSON_PICTURE_SELECT, MessageID.permission_person_picture_select),
             BitmaskFlag(Role.PERMISSION_PERSON_PICTURE_INSERT, MessageID.permission_person_picture_insert),
             BitmaskFlag(Role.PERMISSION_PERSON_PICTURE_UPDATE, MessageID.permission_person_picture_update),
-            BitmaskFlag(Role.PERMISSION_CLAZZWORK_SELECT , MessageID.permission_clazz_assignment_view),
-            BitmaskFlag(Role.PERMISSION_CLAZZWORK_UPDATE , MessageID.permission_clazz_asignment_edit),
+            BitmaskFlag(Role.PERMISSION_ASSIGNMENT_SELECT , MessageID.permission_clazz_assignment_view),
+            BitmaskFlag(Role.PERMISSION_ASSIGNMENT_UPDATE , MessageID.permission_clazz_asignment_edit),
             BitmaskFlag(Role.PERMISSION_PERSON_DELEGATE, MessageID.permission_person_delegate),
             BitmaskFlag(Role.PERMISSION_ROLE_SELECT, MessageID.permission_role_select),
             BitmaskFlag(Role.PERMISSION_ROLE_INSERT, MessageID.permission_role_insert),

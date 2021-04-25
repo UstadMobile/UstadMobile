@@ -12,14 +12,14 @@ import kotlinx.serialization.Serializable
         JOIN ClazzWorkQuestionResponse ON ChangeLog.chTableId = ${ClazzWorkQuestionResponse.TABLE_ID} AND ChangeLog.chEntityPk = ClazzWorkQuestionResponse.clazzWorkQuestionResponseUid
         JOIN Person ON Person.personUid = ClazzWorkQuestionResponse.clazzWorkQuestionResponsePersonUid
         JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZWORK_VIEWSTUDENTPROGRESS} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid"""],
     syncFindAllQuery = """
         SELECT ClazzWorkQuestionResponse.* FROM
         ClazzWorkQuestionResponse
         JOIN Person ON Person.personUid = ClazzWorkQuestionResponse.clazzWorkQuestionResponsePersonUid
         JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZWORK_VIEWSTUDENTPROGRESS} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
         WHERE DeviceSession.dsDeviceId = :clientId
     """)

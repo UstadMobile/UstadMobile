@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
         ContentEntryProgress
         JOIN Person ON Person.personUid = ContentEntryProgress.contentEntryProgressPersonUid
         JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZWORK_VIEWSTUDENTPROGRESS} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
         WHERE DeviceSession.dsDeviceId = :clientId
     """

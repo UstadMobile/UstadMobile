@@ -156,7 +156,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         } ?: 0L
 
         return db.clazzDao.personHasPermissionWithClazz(accountManager.activeAccount.personUid,
-                    clazzUid, Role.PERMISSION_CLAZZWORK_UPDATE)
+                    clazzUid, Role.PERMISSION_ASSIGNMENT_UPDATE)
     }
 
     fun handleClickSubmit(){
