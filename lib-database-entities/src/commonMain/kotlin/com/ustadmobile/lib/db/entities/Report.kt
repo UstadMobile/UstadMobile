@@ -90,6 +90,8 @@ open class Report {
 
         const val LE = 310
 
+        const val WE = 316
+
         const val PRODUCT_CATEGORY = 311
 
         const val CUSTOMER = 312

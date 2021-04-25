@@ -301,6 +301,9 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
         }else if(entity?.reportFilterField == ReportFilter.FIELD_LE){
             navigateToPickEntityFromList(Person::class.java, R.id.person_list_dest,
                 bundleOf(UstadView.ARG_FILTER_PERSON_LE to "true"))
+        }else if(entity?.reportFilterField == ReportFilter.FIELD_WE){
+            navigateToPickEntityFromList(Person::class.java, R.id.person_list_dest,
+                    bundleOf(UstadView.ARG_FILTER_PERSON_WE to "true"))
         }else if(entity?.reportFilterField == ReportFilter.FIELD_LOCATION){
             navigateToPickEntityFromList(Location::class.java, R.id.location_list_dest)
         }else if(entity?.reportFilterField == ReportFilter.FIELD_CATEGORY){

@@ -214,6 +214,15 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                     whereList += (filterString)
 
                 }
+                ReportFilter.FIELD_WE ->{
+
+                    //TODO: This
+                    var filterString = "SaleLE.personUid "
+                    filterString += handleCondition(filter.reportFilterCondition)
+                    filterString += "(${filter.reportFilterValue}) "
+                    whereList += (filterString)
+
+                }
                 ReportFilter.FIELD_CATEGORY ->{
 
                     var filterString = "Category.categoryUid "
@@ -312,6 +321,7 @@ private fun groupBy(value: Int, dbType: Int): String {
         Report.GENDER -> " SaleLE.gender "
         Report.CLASS -> "Clazz.clazzUid "
         Report.LE -> " SaleLE.personUid "
+        Report.WE -> " SaleLE.personUid "
         Report.PRODUCT_CATEGORY -> " Category.categoryUid "
         Report.PRODUCT -> " Product.productUid "
         Report.CUSTOMER -> " Customer.personUid "

@@ -38,7 +38,8 @@ class ReportFilterEditPresenter(context: Any,
         SALE_AMOUNT(ReportFilter.FIELD_SALE_AMOUNT, MessageID.each_sales_total_afs),
         LOCATION(ReportFilter.FIELD_LOCATION, MessageID.province),
         CATEGORY(ReportFilter.FIELD_CATEGORY, MessageID.category),
-        LE(ReportFilter.FIELD_LE, MessageID.le)
+        LE(ReportFilter.FIELD_LE, MessageID.le),
+        WE(ReportFilter.FIELD_WE, MessageID.we)
 
     }
 
@@ -152,6 +153,17 @@ class ReportFilterEditPresenter(context: Any,
                     uidAndLabelOneToManyHelper.liveList.sendValue(entries)
 
                 }
+            }else if (entity.reportFilterField == ReportFilter.FIELD_WE) {
+                if (entity.reportFilterValue != null && entity.reportFilterValue?.isNotEmpty() == true) {
+                    val entries = withTimeoutOrNull(2000) {
+                        db.personDao.getPeopleFromUids(
+                                entity.reportFilterValue?.split(", ")
+                                        ?.map { it.toLong() }
+                                        ?: listOf())
+                    } ?: listOf()
+                    uidAndLabelOneToManyHelper.liveList.sendValue(entries)
+
+                }
             }else if (entity.reportFilterField == ReportFilter.FIELD_LOCATION) {
                 if (entity.reportFilterValue != null && entity.reportFilterValue?.isNotEmpty() == true) {
                     val entries = withTimeoutOrNull(2000) {
@@ -227,6 +239,14 @@ class ReportFilterEditPresenter(context: Any,
                 view.createNewFilter = systemImpl.getString(MessageID.le, context)
 
             }
+            ReportFilter.FIELD_WE  -> {
+
+                view.conditionsOptions = listOf(ConditionOption.IN_LIST_CONDITION,
+                        ConditionOption.NOT_IN_LIST_CONDITION).map { ConditionMessageIdOption(it, context) }
+                view.valueType = FilterValueType.LIST
+                view.createNewFilter = systemImpl.getString(MessageID.we, context)
+
+            }
 
         }
 
@@ -250,6 +270,7 @@ class ReportFilterEditPresenter(context: Any,
         if (entityVal?.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY ||
                 entityVal?.reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON ||
                 entityVal?.reportFilterField == ReportFilter.FIELD_LE ||
+                entityVal?.reportFilterField == ReportFilter.FIELD_WE ||
                 entityVal?.reportFilterField == ReportFilter.FIELD_LOCATION ||
                 entityVal?.reportFilterField == ReportFilter.FIELD_CATEGORY ){
             entityVal.reportFilterValue = uidAndLabelOneToManyHelper.liveList.getValue()
@@ -274,6 +295,7 @@ class ReportFilterEditPresenter(context: Any,
         if (entity.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY ||
                 entity.reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON ||
                 entity.reportFilterField == ReportFilter.FIELD_LE ||
+                entity.reportFilterField == ReportFilter.FIELD_WE ||
                 entity.reportFilterField == ReportFilter.FIELD_CATEGORY ||
                 entity.reportFilterField == ReportFilter.FIELD_LOCATION ) {
             entity.reportFilterValue = uidAndLabelOneToManyHelper.liveList.getValue()

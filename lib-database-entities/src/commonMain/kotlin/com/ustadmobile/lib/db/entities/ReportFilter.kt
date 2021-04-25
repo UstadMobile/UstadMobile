@@ -63,6 +63,8 @@ open class ReportFilter {
 
         const val FIELD_LE = 212
 
+        const val FIELD_WE = 213
+
 
     }
 
