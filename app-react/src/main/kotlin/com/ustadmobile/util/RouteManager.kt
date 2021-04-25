@@ -40,7 +40,9 @@ object RouteManager {
         UmReactDestination(view = ContentEntryDetailView.VIEW_NAME,
             component = ContentEntryDetailComponent::class),
         UmReactDestination(view = XapiPackageContentView.VIEW_NAME,
-            component = XapiPackageContentComponent::class)
+            component = XapiPackageContentComponent::class),
+        UmReactDestination(view = EpubContentView.VIEW_NAME,
+            component = EpubContentComponent::class)
     )
 
     /**

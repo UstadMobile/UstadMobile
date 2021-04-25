@@ -108,7 +108,7 @@ class EpubNavDocument {
                         }
 
                         navElements.add(currentNav)
-                    } else if(tagName == "navMap") {
+                    } else if(tagName.equals("navMap", true)) {
                         currentNav = EpubNavItem(null, null, null, 0)
                         ncxNavMap = currentNav
                     } else if (tagName == "li") {
@@ -119,7 +119,7 @@ class EpubNavDocument {
                         if (xpp.next() == XmlPullParserConstants.TEXT) {
                             currentItem?.title = xpp.getText()
                         }
-                    }else if(tagName == "navPoint") {
+                    }else if(tagName.equals("navPoint", true)) {
                         //Epub 2.0 NCX navPoint also starts a new item
                         currentItem = EpubNavItem(currentItem ?: currentNav, itemDepth)
                     }else if(tagName =="text") {
@@ -137,7 +137,7 @@ class EpubNavDocument {
                     } else if (xpp.getName() == "li") {
                         currentItem = currentItem?.parent
                         itemDepth--
-                    }else if(xpp.getName() == "navPoint") {
+                    }else if(xpp.getName().equals("navPoint", true)) {
                         currentItem = currentItem?.parent
                         itemDepth--
                     }

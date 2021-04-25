@@ -56,7 +56,7 @@ class OcfDocument {
         do {
             evtType = xpp.next()
             if (evtType == XmlPullParserConstants.START_TAG) {
-                if (ROOTFILETAG == xpp.getName()) {
+                if (xpp.getName() == "rootfile") {
                     val fullPath = xpp.getAttributeValue(null, "full-path")
                     val mediaType = xpp.getAttributeValue(null, "media-type")
                     rootFiles.add(OcfRootFile(fullPath, mediaType))
@@ -67,11 +67,6 @@ class OcfDocument {
 
     fun getRootFiles(): List<OcfRootFile> {
         return rootFiles
-    }
-
-    companion object {
-
-        val ROOTFILETAG = "rootfile"
     }
 }
 

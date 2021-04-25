@@ -79,8 +79,8 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 211
 
-    version_door = "0.0.12"
-    version_xmlpullparserkmp = '0.0.9'
+    version_door = "0.0.14"
+    version_xmlpullparserkmp = '0.0.13'
 
     version_kotlin_react = "17.0.1-pre.148-kotlin-1.4.30"
     version_kotlin_react_router_dom = "5.2.0-pre.148-kotlin-1.4.30"

@@ -6,6 +6,10 @@ import com.ustadmobile.util.RouteManager.getArgs
 import react.RBuilder
 import react.RProps
 import react.RState
+import react.dom.iframe
+import react.setState
+import styled.styledDiv
+import styled.styledIframe
 
 class XapiPackageContentComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(mProps),
     XapiPackageContentView {
@@ -19,7 +23,7 @@ class XapiPackageContentComponent(mProps: RProps): UstadBaseComponent<RProps, RS
     override var url: String = ""
         get() = field
         set(value) {
-            field = value
+            setState { field = value }
         }
 
     private lateinit var mPresenter: XapiPackageContentPresenter
@@ -31,6 +35,12 @@ class XapiPackageContentComponent(mProps: RProps): UstadBaseComponent<RProps, RS
     }
 
     override fun RBuilder.render() {
-        console.log(url)
+        styledDiv {
+            iframe {
+                attrs {
+                    src = url
+                }
+            }
+        }
     }
 }

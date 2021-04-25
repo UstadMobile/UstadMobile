@@ -1,14 +1,15 @@
 {
-    "first_dest": "ContentEntryListView",
-    "app.guest_allowed": "true",
-    "apiUrl": "http://192.168.31.22:8087/",
     "app.login_before_open": "false",
     "first_dest_login_required": "false",
-    "doordb.endpoint.url": "http://localhost:8087/",
     "app.select_server": "true",
+    "app.contentonlymode": "false",
     "appBaseName": "UstadMobile",
     "app.ui_languages": "en,fa,ps,ar,tg,bn,ne,my",
     "app.no_iframe_domans": "KhanAcademy",
     "app.register_allowed": "true",
+    "first_dest": "ContentEntryListView",
+    "app.guest_allowed": "true",
+    "apiUrl": "http://192.168.31.22:8087/",
+    "doordb.endpoint.url": "http://localhost:8087/",
     "app.register_before_open": "true"
 }

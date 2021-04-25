@@ -63,7 +63,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
         val learnerGroupUid = arguments[UstadView.ARG_LEARNER_GROUP_UID]?.toLongOrNull() ?: 0L
         val activeEndpoint = accountManager.activeAccount.endpointUrl.also {
             mountedEndpoint = it
-        }
+        } ?: return
 
         GlobalScope.launch {
             mountedPath = mounter.mountContainer(activeEndpoint, containerUid)
