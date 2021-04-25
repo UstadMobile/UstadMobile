@@ -3,10 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.dao.ClazzAssignmentDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.view.ClazzAssignmentListView
-import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.UstadEditView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ClazzAssignment
@@ -65,7 +62,7 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
             clazzAssignmentClazzUid = clazzUid
         }
         val clazzWorkJson = Json.encodeToString(ClazzAssignment.serializer(), clazzAssignment)
-        systemImpl.go(AssignmentEditView.VIEW_NAME,
+        systemImpl.go(ClazzAssignmentEditView.VIEW_NAME,
                 mapOf(UstadEditView.ARG_ENTITY_JSON to clazzWorkJson), context)
     }
 

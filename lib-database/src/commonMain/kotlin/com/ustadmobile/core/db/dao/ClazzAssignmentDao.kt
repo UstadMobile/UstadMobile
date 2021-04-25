@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Update
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
@@ -41,9 +42,19 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                 ELSE ''
             END DESC
     """)
-    abstract fun getAllAssignments(clazzUid: Long, today: Long,
+    abstract suspend fun getAllAssignments(clazzUid: Long, today: Long,
                                    sortOrder: Int, searchText: String? = "%"):
             DataSource.Factory<Int, ClazzAssignment>
+
+    @Update
+    abstract suspend fun updateAsync(clazzAssignment: ClazzAssignment)
+
+    @Query("""
+        SELECT * 
+          FROM ClazzAssignment 
+         WHERE clazzAssignmentUid = :uid
+    """)
+    abstract suspend fun findByUidAsync(uid: Long): ClazzAssignment?
 
     companion object{
 
