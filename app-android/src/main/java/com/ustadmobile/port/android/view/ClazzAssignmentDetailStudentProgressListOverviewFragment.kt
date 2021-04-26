@@ -9,14 +9,15 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
+import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
 
 
-class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewFragment<ClazzAssignmentWithMetrics, ClazzAssignmentWithMetrics>(),
+class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewFragment<PersonWithAttemptsSummary, PersonWithAttemptsSummary>(),
         ClazzAssignmentDetailStudentProgressOverviewListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener {
 
     private var mPresenter: ClazzAssignmentDetailStudentProgressOverviewListPresenter? = null
 
-    override val listPresenter: UstadListPresenter<*, in ClazzAssignmentWithMetrics>?
+    override val listPresenter: UstadListPresenter<*, in PersonWithAttemptsSummary>?
         get() = mPresenter
 
 
@@ -26,7 +27,7 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
                 arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
 
-        mDataRecyclerViewAdapter = ClazzAssignmentDetailStudentProgressListRecyclerAdapter(mPresenter)
+        mDataRecyclerViewAdapter = ContentEntryDetailAttemptsListFragment.PersonWithStatementDisplayListRecyclerAdapter(mPresenter)
         return view
     }
 
@@ -44,5 +45,11 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
 
     override val displayTypeRepo: Any?
         get() = TODO("Provide repo e.g. dbRepo.ClazzAssignmentWithMetricsDao")
+
+    override var clazzAssignmentWithMetrics: ClazzAssignmentWithMetrics?
+        get() = TODO("Not yet implemented")
+        set(value) {
+
+        }
 
 }
