@@ -5,5 +5,5 @@ import redux.RAction
 /**
  * State action which handles toolbar tabs
  */
-data class ToolbarTabs(var labels: List<String> = listOf(), var keys: List<String> = listOf(),
+data class ToolbarTabs(var labels: List<String> = listOf(), var keys: List<Any> = listOf(),
                        var selected:Any? = null, var onTabChange:(Any)-> Unit = {}): RAction

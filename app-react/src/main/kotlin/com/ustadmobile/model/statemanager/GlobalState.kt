@@ -15,4 +15,4 @@ data class GlobalState(var showFab: Boolean = false, var fabLabel: String = "",
                        var snackBarActionLabel: String? = null, var title:String? = null,
                        var onSnackActionClicked:(Event) -> Unit = {},
                        var onTabChanged:(Any) -> Unit = {}, var tabLabels: List<String> = listOf(),
-                       var selectedTab: Any? = Any(), var tabKeys: List<String> = listOf())
+                       var selectedTab: Any? = Any(), var tabKeys: List<Any> = listOf())

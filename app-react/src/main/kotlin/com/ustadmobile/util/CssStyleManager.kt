@@ -99,6 +99,8 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         height = LinearDimension("100vh")
         flexGrow = 1.0
         minWidth = 0.px
+        paddingLeft = 1.spacingUnits
+        paddingRight = 1.spacingUnits
         backgroundColor = Color(theme.palette.background.default)
     }
 
@@ -152,7 +154,6 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
     val ustadListViewComponentContainer by css {
         display = Display.inlineFlex
         flexDirection = FlexDirection.column
-        padding(1.spacingUnits)
     }
 
     val entryListItemContainer by css {
@@ -214,7 +215,7 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         width = LinearDimension.auto
         height = LinearDimension("100vh")
         flexDirection = FlexDirection.row
-        padding(1.spacingUnits)
+        padding(2.spacingUnits)
     }
 
     val entryDetailComponentEntryImage by css {
@@ -266,9 +267,17 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         color = Color.red
     }
 
-    val entryDetailsTabsContainer by css {
+    val tabsContainer by css {
         flexGrow = 1.0
         backgroundColor = Color(theme.palette.background.paper)
+    }
+
+    val responsiveIframe by css{
+        overflow = Overflow.hidden
+        width = LinearDimension("100%")
+        minHeight = LinearDimension("100%")
+        backgroundColor = Color.transparent
+        border = "0px"
     }
 
 }

@@ -92,7 +92,7 @@ open class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(
         lifecycleObservers.remove(observer)
     }
 
-    open fun onComponentRefreshed(viewName:String){}
+    open fun onComponentRefreshed(viewName:String?){}
 
     override fun componentWillUnmount() {
         for(observer in lifecycleObservers){

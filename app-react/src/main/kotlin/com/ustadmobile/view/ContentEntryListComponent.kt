@@ -38,7 +38,9 @@ import styled.css
 import styled.styledDiv
 import styled.styledImg
 
-interface EntryListProps: RProps
+interface EntryListProps: RProps{
+    var args: Map<String,String>
+}
 
 
 class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<ContentEntry,
@@ -70,7 +72,7 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
         super.componentDidMount()
     }
 
-    override fun onComponentRefreshed(viewName: String) {
+    override fun onComponentRefreshed(viewName: String?) {
         super.onComponentRefreshed(viewName)
         if(viewName == ContentEntryList2View.VIEW_NAME){
             initPresenter()

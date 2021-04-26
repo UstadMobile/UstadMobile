@@ -10,7 +10,7 @@ import styled.styledDiv
 class PlaceHolderComponent(props: RProps): RComponent<RProps,RState>(props) {
     override fun RBuilder.render() {
         styledDiv {
-            +RouteManager.getPathName()
+            +"${RouteManager.getPathName()}"
         }
     }
 }

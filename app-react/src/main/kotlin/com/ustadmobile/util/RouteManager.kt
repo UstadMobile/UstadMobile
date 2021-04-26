@@ -3,6 +3,8 @@ package com.ustadmobile.util
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FILTER
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.model.UmReactDestination
@@ -20,9 +22,10 @@ import react.router.dom.switch
 object RouteManager {
 
     val destinationList = listOf(
-        UmReactDestination("library_books", MessageID.content, ContentEntryList2View.VIEW_NAME,
-            ContentEntryListComponent::class, true,
-            args = mapOf(ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString())),
+        UmReactDestination("library_books", MessageID.content, ContentEntryListTabsView.VIEW_NAME,
+            ContentEntryListTabsComponent::class, true,
+            args = mapOf(ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
+                ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT), hasTabs = true),
         UmReactDestination("school", MessageID.schools,SchoolListView.VIEW_NAME,
             PlaceHolderComponent::class),
         UmReactDestination("people", MessageID.classes,ClazzList2View.VIEW_NAME,
@@ -42,7 +45,9 @@ object RouteManager {
         UmReactDestination(view = XapiPackageContentView.VIEW_NAME,
             component = XapiPackageContentComponent::class),
         UmReactDestination(view = EpubContentView.VIEW_NAME,
-            component = EpubContentComponent::class)
+            component = EpubContentComponent::class),
+        UmReactDestination(view = ContentEntryList2View.VIEW_NAME,
+            component = ContentEntryListComponent::class)
     )
 
     /**
@@ -56,9 +61,10 @@ object RouteManager {
     /**
      * Get current path name from location
      */
-    fun getPathName(path: String? = null): String {
-        return (path ?: window.location.href)
+    fun getPathName(path: String? = null): String? {
+        val pathName = (path ?: window.location.href)
             .substringBefore("?").substringAfter("#/")
+        return if(pathName.isEmpty() || pathName.startsWith("http")) null else pathName
     }
 
     /**

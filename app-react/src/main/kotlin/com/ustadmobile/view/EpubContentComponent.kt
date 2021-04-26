@@ -3,13 +3,13 @@ package com.ustadmobile.view
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.controller.EpubContentPresenter
 import com.ustadmobile.core.view.EpubContentView
+import com.ustadmobile.util.CssStyleManager.responsiveIframe
 import com.ustadmobile.util.RouteManager.getArgs
-import kotlinx.css.LinearDimension
 import react.RBuilder
 import react.RProps
 import react.RState
-import react.dom.iframe
 import react.setState
+import styled.css
 import styled.styledIframe
 
 class EpubContentComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(mProps), EpubContentView{
@@ -75,13 +75,10 @@ class EpubContentComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(m
     }
 
     override fun RBuilder.render() {
-        spineUrls?.forEach {
-            styledIframe {
-                attrs{
-                    width = "100%"
-                    height = "300px"
-                    src = it
-                }
+        styledIframe {
+            css(responsiveIframe)
+            attrs{
+                src = spineUrls?.get(1)?:""
             }
         }
     }

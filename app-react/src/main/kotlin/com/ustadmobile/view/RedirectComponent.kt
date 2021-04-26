@@ -3,15 +3,13 @@ package com.ustadmobile.view
 import com.ccfraser.muirwik.components.mCssBaseline
 import com.ccfraser.muirwik.components.themeContext
 import com.ustadmobile.core.controller.RedirectPresenter
-import com.ustadmobile.core.view.ContentEntryList2View
-import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.view.RedirectView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
-import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_WEB_PLATFORM
-import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.util.RouteManager.findDestination
 import com.ustadmobile.util.RouteManager.getArgs
+import com.ustadmobile.util.RouteManager.getPathName
 import com.ustadmobile.util.StateManager
 import react.RBuilder
 import react.RProps
@@ -24,11 +22,15 @@ class RedirectComponent (props: RProps): UstadBaseComponent<RProps, RState>(prop
 
     private var nextDestination: String? = null
 
-    private var arguments: MutableMap<String, String> = getArgs()
+    private var arguments = mutableMapOf<String, String>()
 
     override fun componentDidMount() {
-        mPresenter = RedirectPresenter(this, mapOf(ARG_WEB_PLATFORM to true.toString()),
-            this, di)
+        val viewName = getPathName()
+        if(viewName != null){
+            arguments[ARG_NEXT] = "${viewName}?${getArgs(mapOf(ARG_WEB_PLATFORM 
+                    to true.toString())).toQueryString()}"
+        }
+        mPresenter = RedirectPresenter(this, arguments, this, di)
         mPresenter.onCreate(mapOf())
     }
 
@@ -45,24 +47,8 @@ class RedirectComponent (props: RProps): UstadBaseComponent<RProps, RState>(prop
     }
 
     override fun showNextScreen(viewName: String, args: Map<String, String>) {
-        arguments.putAll(args)
         setState {
-            arguments = when (viewName) {
-                ContentEntryList2View.VIEW_NAME -> {
-                    if(arguments.isEmpty() && !arguments.containsKey(ARG_PARENT_ENTRY_UID))
-                        arguments[ARG_PARENT_ENTRY_UID] = MASTER_SERVER_ROOT_ENTRY_UID.toString()
-                    arguments
-                }
-
-                Login2View.VIEW_NAME -> {
-                    if(!arguments.containsKey(ARG_NEXT)){
-                        arguments[ARG_NEXT] = ContentEntryList2View.VIEW_NAME
-                    }
-                    arguments
-                }
-                else -> arguments
-            }
-
+            arguments = args.toMutableMap()
             nextDestination = viewName
         }
     }

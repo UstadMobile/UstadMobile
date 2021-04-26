@@ -42,6 +42,7 @@ import com.ustadmobile.util.UmReactUtil.isDarkModeEnabled
 import com.ustadmobile.util.UmReactUtil.zeroPx
 import kotlinext.js.jsObject
 import kotlinx.browser.document
+import kotlinx.browser.window
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -74,12 +75,9 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
     private val accountManager: UstadAccountManager by instance()
 
     private var stateChangeListener : (GlobalStateSlice) -> Unit = { slice ->
-        if(currentDestination.hasTabs && slice.state.type is ToolbarTabs){
-            //remove padding below scroller
-            document.getElementById("um-tabs")
-                ?.querySelector("div.MuiTabs-scroller")
-                ?.addClass("${CssStyleManager.name}-mainComponentTabsScroller")
-        }
+        document.getElementById("um-tabs")
+            ?.querySelector("div.MuiTabs-scroller")
+            ?.addClass("${CssStyleManager.name}-mainComponentTabsScroller")
         setState { globalState = slice.state }
     }
 
@@ -100,7 +98,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
             mActiveUserObserver)
     }
 
-    override fun onComponentRefreshed(viewName: String) {
+    override fun onComponentRefreshed(viewName: String?) {
         super.onComponentRefreshed(viewName)
         val destination = findDestination(viewName)
         if(destination != null){
@@ -113,7 +111,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
 
 
     override fun RBuilder.render() {
-        errorBoundary(fallbackComponent(systemImpl.getString(MessageID.error, this))){
+        errorBoundary(errorFallbackComponent(systemImpl.getString(MessageID.error, this))){
             mCssBaseline()
             themeContext.Consumer { theme ->
                 styledDiv {
@@ -308,7 +306,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
         }
     }
 
-    private fun fallbackComponent(text: String): ReactElement {
+    private fun errorFallbackComponent(text: String): ReactElement {
         // Note we purposely use a new RBuilder so we don't render into our normal display
         return RBuilder().mPaper {
             css(mainComponentErrorPaper)
@@ -319,11 +317,8 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
     private fun RBuilder.appBarSpacer() {
         themeContext.Consumer { theme ->
             styledDiv {
-                css{
-                    toolbarJsCssToPartialCss(theme.mixins.toolbar)
-                }
+                css{ toolbarJsCssToPartialCss(theme.mixins.toolbar) }
             }
-            mDivider {  }
         }
     }
 
