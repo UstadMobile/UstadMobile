@@ -10,14 +10,11 @@ import androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_F
 import com.google.android.material.tabs.TabLayout
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentDetailBinding
-import com.toughra.ustadmobile.databinding.FragmentClazzDetailBinding
 import com.ustadmobile.core.controller.ClazzAssignmentDetailPresenter
-import com.ustadmobile.core.controller.ClazzDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
-import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 import kotlinx.android.synthetic.main.appbar_material_tabs_fixed.view.*
@@ -107,14 +104,16 @@ class ClazzAssignmentDetailFragment: UstadDetailFragment<ClazzAssignment>(), Cla
 
     companion object {
         val viewNameToFragmentMap = mapOf<String, Class<out Fragment>>(
-                ClazzDetailOverviewView.VIEW_NAME to ClazzDetailOverviewFragment::class.java,
-                ClazzMemberListView.VIEW_NAME to ClazzMemberListFragment::class.java
+                ClazzAssignmentDetailOverviewView.VIEW_NAME to
+                        ClazzAssignmentDetailOverviewFragment::class.java,
+                ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME to
+                        ClazzAssignmentDetailStudentProgressListOverviewFragment::class.java
 
         )
 
         val viewNameToTitleMap = mapOf(
-                ClazzDetailOverviewView.VIEW_NAME to R.string.overview,
-                ClazzMemberListView.VIEW_NAME to R.string.student_progress,
+                ClazzAssignmentDetailOverviewView.VIEW_NAME to R.string.overview,
+                ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME to R.string.student_progress,
         )
 
     }
