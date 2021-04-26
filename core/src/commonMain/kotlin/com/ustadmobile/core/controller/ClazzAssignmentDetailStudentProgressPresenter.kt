@@ -1,13 +1,12 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
+import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.CommentsWithPerson
+import com.ustadmobile.lib.db.entities.ContentEntryWithAttemptsSummary
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -16,12 +15,18 @@ import org.kodein.di.instance
 class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map<String, String>, view: ClazzAssignmentDetailStudentProgressView,
                                                     di: DI, lifecycleOwner: DoorLifecycleOwner,
                                                     private val clazzAssignmentItemListener: DefaultClazzAssignmentDetailStudentProgressItemListener = DefaultClazzAssignmentDetailStudentProgressItemListener(view, ListViewMode.BROWSER, di.direct.instance(), context))
-    : UstadListPresenter<ClazzAssignmentDetailStudentProgressView, ClazzAssignment>(context, arguments, view, di, lifecycleOwner), ClazzAssignmentDetailStudentProgressItemListener by clazzAssignmentItemListener {
+    : UstadListPresenter<ClazzAssignmentDetailStudentProgressView, ContentEntryWithAttemptsSummary>(context, arguments, view, di, lifecycleOwner), ClazzAssignmentDetailStudentProgressItemListener by clazzAssignmentItemListener {
+
+    var selectedPersonUid: Long = 0
+
+    var selectedClazzAssignmentUid: Long= 0
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        updateListOnView()
         clazzAssignmentItemListener.listViewMode = mListMode
+        selectedPersonUid = arguments[ARG_PERSON_UID]?.toLong() ?: 0
+        selectedClazzAssignmentUid = arguments[ARG_CLAZZ_ASSIGNMENT_UID]?.toLong() ?: 0
+        updateListOnView()
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
@@ -29,17 +34,23 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
     }
 
     private fun updateListOnView() {
-        /* TODO: Update the list on the view from the appropriate DAO query, e.g.
-        view.list = when(sortOrder) {
-            SortOrder.ORDER_NAME_ASC -> repo.daoName.findAllActiveClazzesSortByNameAsc(
-                    searchQuery, loggedInPersonUid)
-            SortOrder.ORDER_NAME_DSC -> repo.daoName.findAllActiveClazzesSortByNameDesc(
-                    searchQuery, loggedInPersonUid)
-        }
+        /** TODO
+         * student
+         * get all entries with attempts
+         * score
+         * private comments
         */
     }
 
     override fun handleClickCreateNewFab() {
+
+    }
+
+    fun onClickEntry(entry: ContentEntryWithAttemptsSummary){
+
+    }
+
+    fun handleAddComment(commentsWithPerson: CommentsWithPerson){
 
     }
 

@@ -9,14 +9,16 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ContentEntryWithAttemptsSummary
 
 
-class ClazzAssignmentDetailStudentProgressFragment(): UstadListViewFragment<ClazzAssignment, ClazzAssignment>(),
-        ClazzAssignmentDetailStudentProgressView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+class ClazzAssignmentDetailStudentProgressFragment(): UstadListViewFragment<ContentEntryWithAttemptsSummary, ContentEntryWithAttemptsSummary>(),
+        ClazzAssignmentDetailStudentProgressView,
+        MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener, BottomSheetOptionSelectedListener{
 
     private var mPresenter: ClazzAssignmentDetailStudentProgressPresenter? = null
 
-    override val listPresenter: UstadListPresenter<*, in ClazzAssignment>?
+    override val listPresenter: UstadListPresenter<*, in ContentEntryWithAttemptsSummary>?
         get() = mPresenter
 
 
@@ -26,6 +28,16 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadListViewFragment<Claz
                 di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = ClazzAssignmentDetailStudentProgressRecyclerAdapter(mPresenter)
+
+
+        /**
+         * TODO adapters for
+         * 1. header for content
+         * 2. contentEntryList with attempts
+         * 3. score
+         * 4. private comments
+         */
+
         return view
     }
 
@@ -43,5 +55,10 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadListViewFragment<Claz
 
     override val displayTypeRepo: Any?
         get() = TODO("Provide repo e.g. dbRepo.ClazzAssignmentDao")
+
+
+    override fun onBottomSheetOptionSelected(optionSelected: BottomSheetOption) {
+        // open add class comment sheet
+    }
 
 }
