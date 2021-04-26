@@ -11,6 +11,7 @@ import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.io.UploadSessionManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
@@ -108,6 +109,9 @@ fun Application.umRestApplication(dbModeOverride: String? = null,
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 
     install(DIFeature) {
+
+        bind<UstadMobileSystemImpl>() with singleton { UstadMobileSystemImpl.instance }
+
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {
             File(tmpRootDir, context.identifier(dbMode)).also {
                 it.takeIf { !it.exists() }?.mkdirs()
