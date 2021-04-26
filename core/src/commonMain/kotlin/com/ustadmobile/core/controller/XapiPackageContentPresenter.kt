@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.Actor
 import com.ustadmobile.core.db.UmAppDatabase
@@ -63,7 +64,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
         val learnerGroupUid = arguments[UstadView.ARG_LEARNER_GROUP_UID]?.toLongOrNull() ?: 0L
         val activeEndpoint = accountManager.activeAccount.endpointUrl.also {
             mountedEndpoint = it
-        } ?: return
+        }
 
         GlobalScope.launch {
             mountedPath = mounter.mountContainer(activeEndpoint, containerUid)

@@ -59,7 +59,7 @@ class ViewNameToDestMap: DestinationProvider {
             ClazzEnrolmentEditView.VIEW_NAME to UstadDestination((R.id.clazz_enrolment_edit)),
             LeavingReasonListView.VIEW_NAME to UstadDestination((R.id.leaving_reason_list)),
             LeavingReasonEditView.VIEW_NAME to UstadDestination((R.id.leaving_reason_edit)),
-            VideoPlayerView.VIEW_NAME to UstadDestination(R.id.video_content),
+            VideoContentView.VIEW_NAME to UstadDestination(R.id.video_content),
             WebChunkView.VIEW_NAME to UstadDestination(R.id.webchunk_view,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true),
             // If ActionBarScrollBehavior is collapsing/scroll, then the WebView for Xapi content

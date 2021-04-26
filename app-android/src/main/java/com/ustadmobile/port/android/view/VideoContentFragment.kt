@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.content.Context
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
@@ -33,7 +32,7 @@ import com.ustadmobile.core.io.ext.openEntryInputStream
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.VideoPlayerView
+import com.ustadmobile.core.view.VideoContentView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -52,7 +51,7 @@ interface VideoContentFragmentEventHandler {
 }
 
 
-class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentFragmentEventHandler {
+class VideoContentFragment : UstadBaseFragment(), VideoContentView, VideoContentFragmentEventHandler {
 
     private var mBinding: FragmentVideoContentBinding? = null
 
@@ -231,10 +230,10 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
                 val mergedSource = MergingMediaSource(mediaSource, subTitleSource)
 
-                runOnUiThread(Runnable {
+                runOnUiThread {
                     player?.setMediaSource(mergedSource)
                     player?.prepare()
-                })
+                }
             } catch (ignored: IOException) {
                 loading = false
             }
@@ -268,16 +267,16 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
     private var audioListener = object : Player.EventListener {
         override fun onPlaybackStateChanged(state: Int) {
-            runOnUiThread(Runnable {
-                if(state == Player.STATE_READY && player?.playWhenReady == true){
+            runOnUiThread {
+                if (state == Player.STATE_READY && player?.playWhenReady == true) {
                     playbackPosition = player?.contentPosition ?: 0L
                     releaseAudio()
                     playAudio(playbackPosition)
-                } else{
+                } else {
                     releaseAudio()
                 }
                 super.onPlaybackStateChanged(state)
-            })
+            }
         }
     }
 

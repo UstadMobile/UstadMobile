@@ -13,7 +13,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.VideoPlayerView
+import com.ustadmobile.core.view.VideoContentView
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
@@ -23,7 +23,6 @@ import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
-import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.ext.insertVideoContent
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
@@ -45,7 +44,7 @@ class VideoContentPresenterTest {
 
     private var context: Any = Any()
 
-    private lateinit var mockView: VideoPlayerView
+    private lateinit var mockView: VideoContentView
 
     private lateinit var mockEndpoint: XapiStatementEndpoint
 

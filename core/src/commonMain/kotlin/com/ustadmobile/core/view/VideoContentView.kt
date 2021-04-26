@@ -3,7 +3,7 @@ package com.ustadmobile.core.view
 import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.lib.db.entities.ContentEntry
 
-interface VideoPlayerView : UstadView {
+interface VideoContentView : UstadView {
 
     var entry: ContentEntry?
 

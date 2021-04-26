@@ -20,9 +20,9 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
 
-abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, String>, view: VideoPlayerView,
+abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, String>, view: VideoContentView,
                                            di: DI)
-    : UstadBaseController<VideoPlayerView>(context, arguments, view, di) {
+    : UstadBaseController<VideoContentView>(context, arguments, view, di) {
 
 
     private var entry: ContentEntry? = null
