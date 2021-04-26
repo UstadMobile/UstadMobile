@@ -95,6 +95,7 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                     LEFT JOIN Person as LE ON LE.personUid = :leUid
                     LEFT JOIN Person as SaleLE ON SaleLE.personUid = Sale.salePersonUid
                     LEFT JOIN Location ON Location.locationUid = Sale.saleLocationUid 
+                    LEFT JOIN InventoryItem ON InventoryItem.inventoryItemSaleUid = Sale.saleUid
 
                 
     """.replace(":leUid","?")
@@ -216,8 +217,7 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                 }
                 ReportFilter.FIELD_WE ->{
 
-                    //TODO: This
-                    var filterString = "SaleLE.personUid "
+                    var filterString = "InventoryItem.inventoryItemWeUid "
                     filterString += handleCondition(filter.reportFilterCondition)
                     filterString += "(${filter.reportFilterValue}) "
                     whereList += (filterString)
@@ -321,7 +321,7 @@ private fun groupBy(value: Int, dbType: Int): String {
         Report.GENDER -> " SaleLE.gender "
         Report.CLASS -> "Clazz.clazzUid "
         Report.LE -> " SaleLE.personUid "
-        Report.WE -> " SaleLE.personUid "
+        Report.WE -> " InventoryItem.inventoryItemWeUid "
         Report.PRODUCT_CATEGORY -> " Category.categoryUid "
         Report.PRODUCT -> " Product.productUid "
         Report.CUSTOMER -> " Customer.personUid "
