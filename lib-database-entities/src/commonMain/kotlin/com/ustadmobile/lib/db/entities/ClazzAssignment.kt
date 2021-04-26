@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
         WHERE DeviceSession.dsDeviceId = :clientId  
     """)
 @Serializable
-class ClazzAssignment {
+open class ClazzAssignment {
 
     @PrimaryKey(autoGenerate = true)
     var clazzAssignmentUid: Long = 0
