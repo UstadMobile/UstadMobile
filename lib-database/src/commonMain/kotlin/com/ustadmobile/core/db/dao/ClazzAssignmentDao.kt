@@ -6,6 +6,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
 
 
@@ -25,12 +26,12 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                     OR ClazzAssignment.clazzAssignmentDescription :searchText)
             ORDER BY CASE(:sortOrder)
                 WHEN $SORT_DEADLINE_ASC THEN ClazzAssignment.clazzAssignmentDeadlineDateTime
-                WHEN $SORT_SCORE_ASC THEN clazzAssignmentTotalScore
+                WHEN $SORT_SCORE_ASC THEN resultScoreScaled
                 ELSE 0
             END ASC,
             CASE(:sortOrder)
                 WHEN $SORT_DEADLINE_DESC THEN ClazzAssignment.clazzAssignmentDeadlineDateTime
-                WHEN $SORT_SCORE_DESC THEN clazzAssignmentTotalScore
+                WHEN $SORT_SCORE_DESC THEN resultScoreScaled
                 ELSE 0
             END DESC,
             CASE(:sortOrder)
@@ -42,9 +43,9 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                 ELSE ''
             END DESC
     """)
-    abstract suspend fun getAllAssignments(clazzUid: Long, today: Long,
+    abstract suspend fun getAllAssignments(clazzUid: Long,
                                    sortOrder: Int, searchText: String? = "%"):
-            DataSource.Factory<Int, ClazzAssignment>
+            DataSource.Factory<Int, ClazzAssignmentWithMetrics>
 
     @Update
     abstract suspend fun updateAsync(clazzAssignment: ClazzAssignment)

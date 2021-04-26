@@ -5,9 +5,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 class ClazzAssignmentWithMetrics : ClazzAssignment() {
 
-    var submittedStudents : Int = 0
-
     var notSubmittedStudents : Int = 0
+
+    var submittedStudents : Int = 0
 
     var completedStudents : Int = 0
 

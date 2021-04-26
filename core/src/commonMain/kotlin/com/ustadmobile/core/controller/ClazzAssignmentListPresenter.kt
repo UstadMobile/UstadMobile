@@ -3,12 +3,11 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.dao.ClazzAssignmentDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -19,12 +18,15 @@ import org.kodein.di.instance
 class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>, view: ClazzAssignmentListView,
                                    di: DI, lifecycleOwner: DoorLifecycleOwner,
                                    private val assignmentItemListener: DefaultClazzAssignmentListItemListener
-                              = DefaultClazzAssignmentListItemListener(view, ListViewMode.BROWSER,
-                                      di.direct.instance(), context))
-    : UstadListPresenter<ClazzAssignmentListView, ClazzAssignment>(
+                                   = DefaultClazzAssignmentListItemListener(view, ListViewMode.BROWSER,
+                                           di.direct.instance(), context))
+    : UstadListPresenter<ClazzAssignmentListView, ClazzAssignmentWithMetrics>(
         context, arguments, view, di, lifecycleOwner),
         ClazzAssignmentListItemListener by assignmentItemListener {
 
+
+    private var clazzEnrolment: ClazzEnrolment? = null
+    private var clazzUid: Long = 0L
 
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
@@ -33,9 +35,15 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        updateListOnView()
+        clazzUid = arguments[UstadView.ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
         assignmentItemListener.listViewMode = mListMode
         selectedSortOption = SORT_OPTIONS[0]
+        GlobalScope.launch(doorMainDispatcher()) {
+            val loggedInPersonUid = accountManager.activeAccount.personUid
+            clazzEnrolment =
+                    db.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid, clazzUid)
+            updateListOnView()
+        }
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
@@ -44,15 +52,10 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
                 clazzUid, Role.PERMISSION_ASSIGNMENT_UPDATE)
     }
 
-    private fun updateListOnView() {
-        /* TODO: Update the list on the view from the appropriate DAO query, e.g.
-        view.list = when(sortOrder) {
-            SortOrder.ORDER_NAME_ASC -> repo.daoName.findAllActiveClazzesSortByNameAsc(
-                    searchQuery, loggedInPersonUid)
-            SortOrder.ORDER_NAME_DSC -> repo.daoName.findAllActiveClazzesSortByNameDesc(
-                    searchQuery, loggedInPersonUid)
-        }
-        */
+    private suspend fun updateListOnView() {
+        view.list = repo.clazzAssignmentDao.getAllAssignments(clazzUid,
+                selectedSortOption?.flag ?: 0,
+                searchText.toQueryLikeParam())
     }
 
     override fun handleClickCreateNewFab() {

@@ -7,17 +7,16 @@ import com.ustadmobile.core.controller.ClazzAssignmentListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentListView
-import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 
 
-class ClazzAssignmentListFragment(): UstadListViewFragment<ClazzAssignment, ClazzAssignment>(),
+class ClazzAssignmentListFragment(): UstadListViewFragment<ClazzAssignmentWithMetrics, ClazzAssignmentWithMetrics>(),
         ClazzAssignmentListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
 
     private var mPresenter: ClazzAssignmentListPresenter? = null
 
-    override val listPresenter: UstadListPresenter<*, in ClazzAssignment>?
+    override val listPresenter: UstadListPresenter<*, in ClazzAssignmentWithMetrics>?
         get() = mPresenter
 
 
@@ -51,8 +50,7 @@ class ClazzAssignmentListFragment(): UstadListViewFragment<ClazzAssignment, Claz
      * OnClick function that will handle when the user clicks to create a new item
      */
     override fun onClick(view: View?) {
-        if(view?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.assignment_edit_dest, ClazzAssignment::class.java)
+
     }
 
     override fun onDestroyView() {
