@@ -5,6 +5,7 @@ import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.CommentsWithPerson
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.withTimeoutOrNull
@@ -46,6 +47,9 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         return null
     }
 
+    fun handleSubmitComment(commentsWithPerson: CommentsWithPerson){
+
+    }
 
     companion object {
 

@@ -31,7 +31,9 @@ interface ClazzAssignmentDetailOverviewFragmentEventHandler {
 
 }
 
-class ClazzAssignmentDetailOverviewFragment: UstadDetailFragment<ClazzAssignment>(), ClazzAssignmentDetailOverviewView, ClazzAssignmentDetailFragmentEventHandler {
+class ClazzAssignmentDetailOverviewFragment: UstadDetailFragment<ClazzAssignment>(),
+        ClazzAssignmentDetailOverviewView, ClazzAssignmentDetailFragmentEventHandler,
+        BottomSheetOptionSelectedListener{
 
 
 
@@ -87,6 +89,10 @@ class ClazzAssignmentDetailOverviewFragment: UstadDetailFragment<ClazzAssignment
         mPresenter = ClazzAssignmentDetailOverviewPresenter(requireContext(),
                 arguments.toStringMap(), this, viewLifecycleOwner, di)
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
+    }
+
+    override fun onBottomSheetOptionSelected(optionSelected: BottomSheetOption) {
+        // TODO check if private or class selected then send comment to presenter
     }
 
     override fun onDestroyView() {
