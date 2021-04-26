@@ -8,13 +8,14 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.SCRAPER_TAG
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
+import com.ustadmobile.lib.contentscrapers.util.downloadToFile
 import com.ustadmobile.lib.db.entities.ContainerETag
 import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
-import org.apache.commons.io.FileUtils
+import okhttp3.Request
 import org.apache.commons.io.FilenameUtils
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -52,8 +53,8 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
         val urlName = URLDecoder.decode(url.path, ScraperConstants.UTF_ENCODING)
         val name = FilenameUtils.getName(urlName)
         tempDir = Files.createTempDirectory("apache").toFile()
-        var file = File(tempDir, name)
-        FileUtils.copyURLToFile(url, file)
+        val file = File(tempDir, name)
+        okHttpClient.newCall(Request.Builder().url(url).build()).downloadToFile(file)
 
         runBlocking {
 
