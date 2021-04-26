@@ -72,8 +72,6 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
 
     private lateinit var currentDestination: UmReactDestination
 
-    private val accountManager: UstadAccountManager by instance()
-
     private var stateChangeListener : (GlobalStateSlice) -> Unit = { slice ->
         document.getElementById("um-tabs")
             ?.querySelector("div.MuiTabs-scroller")

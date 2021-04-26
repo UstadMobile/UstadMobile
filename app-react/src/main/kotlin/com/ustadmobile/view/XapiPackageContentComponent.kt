@@ -9,6 +9,7 @@ import react.RProps
 import react.RState
 import react.setState
 import styled.css
+import styled.styledDiv
 import styled.styledIframe
 
 class XapiPackageContentComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(mProps),

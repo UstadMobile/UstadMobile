@@ -280,4 +280,12 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         border = "0px"
     }
 
+    val responsiveMedia by css{
+        overflow = Overflow.hidden
+        width = LinearDimension("100%")
+        minHeight = LinearDimension("100%")
+        height = LinearDimension("100%")
+        backgroundColor = Color.transparent
+    }
+
 }

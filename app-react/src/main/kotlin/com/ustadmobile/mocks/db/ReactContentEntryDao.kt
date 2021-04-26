@@ -58,7 +58,9 @@ class ReactContentEntryDao: ContentEntryDao() {
     }
 
     override suspend fun getContentByUuidAsync(parentUid: Long): ContentEntry? {
-        TODO("Not yet implemented")
+        val data = loadList(sourcePath,
+            ListSerializer(ContentEntry.serializer()))
+        return data.firstOrNull { it.contentEntryUid == parentUid}
     }
 
     override suspend fun findAllLanguageRelatedEntriesAsync(entryUuid: Long): List<ContentEntry> {

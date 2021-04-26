@@ -25,7 +25,7 @@ object RouteManager {
         UmReactDestination("library_books", MessageID.content, ContentEntryListTabsView.VIEW_NAME,
             ContentEntryListTabsComponent::class, true,
             args = mapOf(ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
-                ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT), hasTabs = true),
+                ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT)),
         UmReactDestination("school", MessageID.schools,SchoolListView.VIEW_NAME,
             PlaceHolderComponent::class),
         UmReactDestination("people", MessageID.classes,ClazzList2View.VIEW_NAME,
@@ -47,7 +47,9 @@ object RouteManager {
         UmReactDestination(view = EpubContentView.VIEW_NAME,
             component = EpubContentComponent::class),
         UmReactDestination(view = ContentEntryList2View.VIEW_NAME,
-            component = ContentEntryListComponent::class)
+            component = ContentEntryListComponent::class),
+        UmReactDestination(view = VideoContentView.VIEW_NAME,
+            component = VideoContentComponent::class)
     )
 
     /**

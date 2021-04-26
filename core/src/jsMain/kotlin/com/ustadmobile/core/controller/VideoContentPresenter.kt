@@ -1,31 +1,36 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.VideoPlayerView
+import com.ustadmobile.core.view.ContainerMounter
+import com.ustadmobile.core.view.VideoContentView
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
-import kotlinx.browser.localStorage
+import io.ktor.client.*
+import io.ktor.client.request.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.instance
 
-actual class VideoContentPresenter actual constructor(context: Any, arguments: Map<String, String>, view: VideoPlayerView,
+actual class VideoContentPresenter actual constructor(context: Any, arguments: Map<String, String>, view: VideoContentView,
                                                       di: DI)
     : VideoContentPresenterCommon(context, arguments, view, di) {
 
+    private val httpClient: HttpClient by di.instance()
+
+    private val mountHandler: ContainerMounter by instance()
 
     actual override fun handleOnResume() {
-
         GlobalScope.launch {
-            /*val baseMountUrl = localStorage.getItem("contentUrl")!!
-            val videoContent = di.def.get<String>(UMFileUtil.joinPaths(baseMountUrl,"/VideoParams/","$containerUid"))
-            val params: dynamic = JSON.parse<VideoParams>(videoContent)
-            val videoPath = UMFileUtil.joinPaths(baseMountUrl, "$containerUid",params.videoPath!!)
+            val baseMountUrl = mountHandler.mountContainer(accountManager.activeAccount.endpointUrl,containerUid)
+            val videoContent = httpClient.get<String>(UMFileUtil.joinPaths(baseMountUrl,"/videoParams"))
+            val params: VideoParams = JSON.parse(videoContent)
+            val videoPath = UMFileUtil.joinPaths(baseMountUrl,params.videoPath?:"")
             var audioPath: ContainerEntryWithContainerEntryFile? = null
             if(params.audioPath?.ceUid != 0L){
-                audioPath = ContainerEntryWithContainerEntryFile(params.audioPath?.cePath)
+                audioPath = ContainerEntryWithContainerEntryFile(params.audioPath?.cePath?:"")
             }
-            view.videoParams = VideoParams(videoPath,
-                audioPath, params.srtLangList, params.srtMap)*/
+            view.videoParams = VideoParams(videoPath, audioPath, params.srtLangList, params.srtMap)
+            view.loading = false
         }
     }
 

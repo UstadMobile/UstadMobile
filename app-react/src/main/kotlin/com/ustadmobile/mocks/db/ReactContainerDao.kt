@@ -93,13 +93,17 @@ class ReactContainerDao: ContainerDao() {
                 mimeType = "application/epub+zip"
                 containerUid = 174117271391989760
             }
+            84342L -> ContainerUidAndMimeType().apply {
+                mimeType = "application/epub+zip"
+                containerUid = 178703253267750912
+            }
             13112L -> ContainerUidAndMimeType().apply {
                 mimeType = "application/h5p-tincan+zip"
                 containerUid = 177892100433350656
             }
             62506L -> ContainerUidAndMimeType().apply {
                 mimeType = "application/khan-video+zip"
-                containerUid = 174117009398984704
+                containerUid = 178749497180626944
             }
             59108L -> ContainerUidAndMimeType().apply {
                 mimeType = "application/har+zip"

@@ -1,5 +1,6 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
@@ -17,6 +18,7 @@ import kotlinx.browser.window
 import kotlinx.coroutines.Runnable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.events.Event
@@ -28,6 +30,8 @@ open class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(
     private val lifecycleObservers: MutableList<DoorLifecycleObserver> = concurrentSafeListOf()
 
     val systemImpl : UstadMobileSystemImpl by instance()
+
+    protected val accountManager: UstadAccountManager by instance()
 
     val umTheme : StateManager.UmTheme by instance()
 

@@ -28,7 +28,7 @@ class ReactContentEntryProgressDao: ContentEntryProgressDao() {
         progress: Int,
         status: Int
     ): Int {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun insert(entity: ContentEntryProgress): Long {

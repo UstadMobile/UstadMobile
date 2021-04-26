@@ -8,11 +8,9 @@ import com.ustadmobile.model.statemanager.ToolbarTabs
 import com.ustadmobile.util.CssStyleManager.tabsContainer
 import com.ustadmobile.util.RouteManager.getArgs
 import com.ustadmobile.util.StateManager
-import kotlinx.coroutines.selects.select
 import react.RBuilder
 import react.RProps
 import react.RState
-import react.setState
 import styled.css
 import styled.styledDiv
 
