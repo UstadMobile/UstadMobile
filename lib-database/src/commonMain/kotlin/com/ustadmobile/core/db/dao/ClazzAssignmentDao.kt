@@ -21,25 +21,25 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
             FROM ClazzAssignment
         
         
-            WHERE clazzAssignmentActive
-            AND (ClazzAssignment.clazzAssignmentTitle LIKE :searchText 
-                    OR ClazzAssignment.clazzAssignmentDescription :searchText)
+            WHERE caActive
+            AND (ClazzAssignment.caTitle LIKE :searchText 
+                    OR ClazzAssignment.caDescription :searchText)
             ORDER BY CASE(:sortOrder)
-                WHEN $SORT_DEADLINE_ASC THEN ClazzAssignment.clazzAssignmentDeadlineDateTime
+                WHEN $SORT_DEADLINE_ASC THEN ClazzAssignment.caDeadlineDateTime
                 WHEN $SORT_SCORE_ASC THEN resultScoreScaled
                 ELSE 0
             END ASC,
             CASE(:sortOrder)
-                WHEN $SORT_DEADLINE_DESC THEN ClazzAssignment.clazzAssignmentDeadlineDateTime
+                WHEN $SORT_DEADLINE_DESC THEN ClazzAssignment.caDeadlineDateTime
                 WHEN $SORT_SCORE_DESC THEN resultScoreScaled
                 ELSE 0
             END DESC,
             CASE(:sortOrder)
-                WHEN $SORT_TITLE_ASC THEN ClazzAssignment.clazzAssignmentTitle
+                WHEN $SORT_TITLE_ASC THEN ClazzAssignment.caTitle
                 ELSE ''
             END ASC,
             CASE(:sortOrder)
-                WHEN $SORT_TITLE_DESC THEN ClazzAssignment.clazzAssignmentTitle
+                WHEN $SORT_TITLE_DESC THEN ClazzAssignment.caTitle
                 ELSE ''
             END DESC
     """)
@@ -53,7 +53,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
     @Query("""
         SELECT * 
           FROM ClazzAssignment 
-         WHERE clazzAssignmentUid = :uid
+         WHERE caUid = :uid
     """)
     abstract suspend fun findByUidAsync(uid: Long): ClazzAssignment?
 
