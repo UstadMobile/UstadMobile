@@ -5,14 +5,43 @@
 
     <data>
         <import type="android.view.View"/>
+        <import type="android.text.InputType" />
+        <import type="com.ustadmobile.lib.db.entities.ClazzAssignment"/>
+        <import type="com.ustadmobile.core.util.IdOption"/>
+        <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView"/>
+        <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener"/>
 
         <variable
             name="clazzAssignment"
-            type="com.ustadmobile.lib.db.entities.ClazzAssignment" />
+            type="ClazzAssignment" />
 
         <variable
             name="timeZone"
             type="String" />
+
+        <variable
+            name="caGracePeriodError"
+            type="String" />
+
+        <variable
+            name="caDeadlineError"
+            type="String" />
+
+        <variable
+            name="typeSelectionListener"
+            type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
+
+        <variable
+            name="caTitleError"
+            type="String" />
+
+        <variable
+            name="caStartDateError"
+            type="String" />
+
+        <variable
+            name="lateSubmissionOptions"
+            type="java.util.List&lt;IdOption&gt;"/>
 
         <variable
             name="loading"
@@ -42,10 +71,316 @@
             android:layout_height="wrap_content">
 
 
-            <!-- TODO: Put the actual view for editing ClazzAssignment here using two-way data binding -->
-            <!-- Available templates:
-            onetomanyrecyclerview: Adds a header, add new button, and a recycler view for one-many fields
-            -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_marginTop="@dimen/dimen_20dp"
+                android:id="@+id/ca_title_input"
+                app:errorEnabled="@{caTitleError != null}"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:enabled="@{fieldsEnabled}"
+                android:hint="@string/title"
+                app:hintEnabled="true"
+                app:errorTextColor="?colorError"
+                app:errorText="@{caTitleError}"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    android:id="@+id/ca_title_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:enabled="@{fieldsEnabled}"
+                    android:text="@={clazzAssignment.caTitle}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ca_edit_description_textinput"
+                android:layout_width="@dimen/dimen_0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginVertical="@dimen/dimen_8dp"
+                android:hint="@string/instructions_for_students"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:hintEnabled="true"
+                android:enabled="@{fieldsEnabled}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ca_title_input">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:text="@={clazzAssignment.caDescription}"
+                    android:id="@+id/ca_edit_desc_text"
+                    android:enabled="@{fieldsEnabled}"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ca_deadline_date_textinput"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:errorEnabled="@{caDeadlineError != null}"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginVertical="@dimen/dimen_16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                android:hint="@string/deadline"
+                app:errorText="@{caDeadlineError}"
+                app:layout_constraintTop_toBottomOf="@+id/ca_edit_description_textinput"
+                app:layout_constraintEnd_toStartOf="@+id/ca_deadline_datetime_textinput">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/ca_deadline_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:cursorVisible="false"
+                    android:inputType="@{InputType.TYPE_NULL}"
+                    app:dateLong="@={clazzAssignment.caDeadlineDate}"
+                    app:runOnClickWhenFocused="@{true}" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ca_deadline_datetime_textinput"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginVertical="@dimen/dimen_16dp"
+                app:layout_constraintBottom_toBottomOf="@+id/ca_deadline_date_textinput"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:hint="@string/time"
+                app:layout_constraintStart_toEndOf="@+id/ca_deadline_date_textinput"
+                app:layout_constraintTop_toTopOf="@+id/ca_deadline_date_textinput">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:cursorVisible="false"
+                    android:inputType="@{InputType.TYPE_NULL}"
+                    app:timeValue="@={clazzAssignment.caDeadlineDateTime}"
+                    app:runOnClickWhenFocused="@{true}" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/ca_timezone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginStart="32dp"
+                android:text="@{timeZone}"
+                tools:text="Class timezone: Dubai"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ca_deadline_date_textinput" />
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ca_start_date_textinput"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:errorEnabled="@{caStartDateError != null}"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginVertical="@dimen/dimen_16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                android:hint="@string/start_date"
+                app:errorText="@{caStartDateError}"
+                app:layout_constraintTop_toBottomOf="@+id/ca_timezone"
+                app:layout_constraintEnd_toStartOf="@+id/ca_start_datetime_textinput">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/ca_start_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:cursorVisible="false"
+                    android:inputType="@{InputType.TYPE_NULL}"
+                    app:dateLong="@={clazzAssignment.caStartDate}"
+                    app:runOnClickWhenFocused="@{true}" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ca_start_datetime_textinput"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginVertical="@dimen/dimen_16dp"
+                app:layout_constraintBottom_toBottomOf="@+id/ca_start_date_textinput"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:hint="@string/time"
+                app:layout_constraintStart_toEndOf="@+id/ca_start_date_textinput"
+                app:layout_constraintTop_toTopOf="@+id/ca_start_date_textinput">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:cursorVisible="false"
+                    android:inputType="@{InputType.TYPE_NULL}"
+                    app:timeValue="@={clazzAssignment.caStartDateTime}"
+                    app:runOnClickWhenFocused="@{true}" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ca_edit_late_submission_type"
+                app:layout_constraintStart_toStartOf="parent"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/late_submission"
+                android:layout_marginVertical="@dimen/dimen_16dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                app:layout_constraintTop_toBottomOf="@+id/ca_start_date_textinput">
+
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:onMessageIdOptionSelected="@{typeSelectionListener}"
+                    app:selectedMessageIdOption="@={clazzAssignment.caLateSubmissionType}"
+                    app:messageIdOptions="@{lateSubmissionOptions}"
+                     />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ca_edit_penalty_textinput"
+                android:layout_width="@dimen/dimen_0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginVertical="@dimen/dimen_8dp"
+                android:hint="@string/late_submission_penalty"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:hintEnabled="true"
+                android:visibility="@{clazzAssignment.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_REJECT ? View.GONE : View.VISIBLE}"
+                android:enabled="@{fieldsEnabled}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ca_edit_late_submission_type">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:text="@={clazzAssignment.caDescription}"
+                    android:id="@+id/ca_edit_penalty"
+                    android:enabled="@{fieldsEnabled}"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ca_grace_date_textinput"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:errorEnabled="@{caGracePeriodError != null}"
+                app:errorText="@{caGracePeriodError}"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginVertical="@dimen/dimen_16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                android:hint="@string/end_of_grace_period"
+                app:layout_constraintTop_toBottomOf="@+id/ca_edit_penalty_textinput"
+                app:layout_constraintEnd_toStartOf="@+id/ca_grace_datetime_textinput">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/ca_grace_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:cursorVisible="false"
+                    android:inputType="@{InputType.TYPE_NULL}"
+                    app:dateLong="@={clazzAssignment.caGracePeriodDate}"
+                    app:runOnClickWhenFocused="@{true}" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ca_grace_datetime_textinput"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginVertical="@dimen/dimen_16dp"
+                app:layout_constraintBottom_toBottomOf="@+id/ca_grace_date_textinput"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:hint="@string/time"
+                app:layout_constraintStart_toEndOf="@+id/ca_grace_date_textinput"
+                app:layout_constraintTop_toTopOf="@+id/ca_grace_date_textinput">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:cursorVisible="false"
+                    android:inputType="@{InputType.TYPE_NULL}"
+                    app:timeValue="@={clazzAssignment.caGracePeriodDateTime}"
+                    app:runOnClickWhenFocused="@{true}" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <TextView
+                android:id="@+id/ca_edit_content_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/content"
+                android:layout_marginVertical="@dimen/dimen_16dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ca_grace_date_textinput" />
+
+
+            <include layout="@layout/item_createnew"
+                android:id="@+id/ca_edit_content_add_new_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:onClickNew="@{() -> activityEventHandler.onClickNewContent()}"
+                app:createNewText="@{@string/add_content}"
+                app:layout_constraintTop_toBottomOf="@+id/ca_edit_content_title"
+                app:layout_constraintStart_toStartOf="parent"
+                />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/ca_recyclerview_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listitem="@layout/item_content_entry_list"
+                tools:itemCount="1"
+                app:layout_constraintTop_toBottomOf="@+id/ca_edit_content_add_new_rv"
+                app:layout_constraintStart_toStartOf="parent" />
+
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/ca_edit_class_comments"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginVertical="@dimen/dimen_16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                android:checked="@={clazzAssignment.caClassCommentEnabled}"
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:checked="true"
+                android:text="@string/allow_class_comments"
+                app:layout_constraintTop_toBottomOf="@id/ca_recyclerview_content" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/ca_edit_private_comments"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginVertical="@dimen/dimen_16dp"
+                android:checked="@={clazzAssignment.caPrivateCommentsEnabled}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:text="@string/allow_private_comments_from_students"
+                app:layout_constraintTop_toBottomOf="@id/ca_edit_class_comments" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

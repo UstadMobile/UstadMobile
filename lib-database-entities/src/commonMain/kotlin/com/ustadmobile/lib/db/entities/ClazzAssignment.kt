@@ -36,9 +36,9 @@ open class ClazzAssignment {
 
     var caDescription: String? = null
 
-    var caDeadlineDate: Long = 0
+    var caDeadlineDate: Long = Long.MAX_VALUE
 
-    var caDeadlineDateTime: Long = 0
+    var caDeadlineDateTime: Long = Long.MAX_VALUE
 
     var caStartDate: Long = 0
 
