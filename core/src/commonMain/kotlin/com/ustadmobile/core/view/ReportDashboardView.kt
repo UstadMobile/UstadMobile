@@ -4,7 +4,7 @@ interface ReportDashboardView: UstadView {
 
     companion object {
 
-        const val VIEW_NAME = "ReportDashboard"
+        const val VIEW_NAME = "ReportDashboardView"
 
     }
 }

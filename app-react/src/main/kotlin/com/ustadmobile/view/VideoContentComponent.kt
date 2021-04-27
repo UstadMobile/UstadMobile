@@ -7,11 +7,8 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.VideoContentView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.util.CssStyleManager
-import com.ustadmobile.util.CssStyleManager.responsiveIframe
 import com.ustadmobile.util.CssStyleManager.responsiveMedia
 import com.ustadmobile.util.RouteManager.getArgs
-import kotlinx.html.source
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -20,7 +17,6 @@ import react.RProps
 import react.RState
 import react.setState
 import styled.css
-import styled.styledIframe
 import styled.styledVideo
 
 class VideoContentComponent(mProps:RProps):UstadBaseComponent<RProps, RState>(mProps), VideoContentView{
@@ -53,13 +49,6 @@ class VideoContentComponent(mProps:RProps):UstadBaseComponent<RProps, RState>(mP
     }
 
     override fun RBuilder.render() {
-        /*styledIframe {
-            css(responsiveIframe)
-            attrs.asDynamic().allowfullscreen = true
-            attrs{
-                src = videoParams?.videoPath?:""
-            }
-        }*/
         styledVideo {
             css(responsiveMedia)
             attrs{

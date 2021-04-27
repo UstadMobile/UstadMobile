@@ -9,7 +9,7 @@ interface SiteTermsEditView: UstadEditView<SiteTermsWithLanguage> {
 
     companion object {
 
-        const val VIEW_NAME = "WorkspaceTermsEditEditView"
+        const val VIEW_NAME = "SiteTermsEditView"
 
     }
 

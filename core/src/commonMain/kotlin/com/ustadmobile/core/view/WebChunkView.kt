@@ -12,6 +12,6 @@ interface WebChunkView : UstadView {
 
     companion object {
 
-        const val VIEW_NAME = "WebChunk"
+        const val VIEW_NAME = "WebChunkView"
     }
 }

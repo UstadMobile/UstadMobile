@@ -1,7 +1,6 @@
 package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
-import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.EntityRoleWithNameAndRole
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails

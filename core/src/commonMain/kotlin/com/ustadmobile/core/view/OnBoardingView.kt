@@ -7,7 +7,7 @@ interface OnBoardingView : UstadView {
     fun restartUI()
 
     companion object {
-        const val VIEW_NAME = "OnBoarding"
+        const val VIEW_NAME = "OnBoardingView"
         const val PREF_TAG = "onboaring_screen"
     }
 }

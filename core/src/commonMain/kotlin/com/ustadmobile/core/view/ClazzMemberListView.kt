@@ -1,9 +1,6 @@
 package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
-import com.ustadmobile.lib.db.entities.ClazzEnrolment
-import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithPerson
-import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 
 interface ClazzMemberListView: UstadListView<PersonWithClazzEnrolmentDetails, PersonWithClazzEnrolmentDetails> {

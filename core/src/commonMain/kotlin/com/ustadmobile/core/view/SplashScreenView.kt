@@ -4,6 +4,6 @@ interface SplashScreenView : UstadView {
 
     companion object {
 
-        const val VIEW_NAME = "Splash"
+        const val VIEW_NAME = "SplashScreenView"
     }
 }

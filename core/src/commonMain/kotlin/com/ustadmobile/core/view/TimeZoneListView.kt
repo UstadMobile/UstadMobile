@@ -6,7 +6,7 @@ interface TimeZoneListView : UstadView {
 
     companion object {
 
-        const val VIEW_NAME = "TimeZoneList"
+        const val VIEW_NAME = "TimeZoneListView"
     }
 
 }

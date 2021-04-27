@@ -94,7 +94,7 @@ interface EpubContentView : UstadView {
 
     companion object {
 
-        const val VIEW_NAME = "EpubContent"
+        const val VIEW_NAME = "EpubContentView"
 
         const val ARG_INITIAL_PAGE_HREF = "initialPageHref"
 

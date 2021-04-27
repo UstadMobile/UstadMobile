@@ -11,6 +11,6 @@ interface VideoContentView : UstadView {
 
     companion object {
 
-        const val VIEW_NAME = "VideoPlayer"
+        const val VIEW_NAME = "VideoContentView"
     }
 }

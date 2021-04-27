@@ -1,9 +1,9 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.core.controller.ReportEditPresenter
-import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ObjectMessageIdOption
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.DateRangeMoment
+import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 
 
 interface ReportEditView: UstadEditView<ReportWithSeriesWithFilters> {

@@ -11,7 +11,7 @@ interface SiteEditView: UstadEditView<Site> {
 
     companion object {
 
-        const val VIEW_NAME = "WorkSpaceEditEditView"
+        const val VIEW_NAME = "SiteEditView"
 
     }
 
