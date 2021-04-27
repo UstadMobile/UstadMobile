@@ -1,11 +1,9 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.AssignmentDetailView
-import com.ustadmobile.core.view.ClazzAssignmentListView
-import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 
 
 class DefaultClazzAssignmentListItemListener(var view: ClazzAssignmentListView?,
@@ -13,10 +11,10 @@ class DefaultClazzAssignmentListItemListener(var view: ClazzAssignmentListView?,
                                              val systemImpl: UstadMobileSystemImpl,
                                              val context: Any): ClazzAssignmentListItemListener {
 
-    override fun onClickAssignment(clazzAssignment: ClazzAssignment) {
+    override fun onClickAssignment(clazzAssignment: ClazzAssignmentWithMetrics) {
         if(listViewMode == ListViewMode.BROWSER) {
-            systemImpl.go(AssignmentDetailView.VIEW_NAME,
-                    mapOf(UstadView.ARG_ENTITY_UID to clazzAssignment.assignmentUid.toString()), context)
+            systemImpl.go(ClazzAssignmentDetailView.VIEW_NAME,
+                    mapOf(UstadView.ARG_ENTITY_UID to clazzAssignment.caUid.toString()), context)
         }else {
             view?.finishWithResult(listOf(clazzAssignment))
         }

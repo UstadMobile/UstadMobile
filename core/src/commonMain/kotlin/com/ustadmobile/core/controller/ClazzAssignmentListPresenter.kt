@@ -27,6 +27,7 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
 
     private var clazzEnrolment: ClazzEnrolment? = null
     private var clazzUid: Long = 0L
+    private var progressPermission = false
 
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
@@ -40,14 +41,14 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
         selectedSortOption = SORT_OPTIONS[0]
         GlobalScope.launch(doorMainDispatcher()) {
             val loggedInPersonUid = accountManager.activeAccount.personUid
-            clazzEnrolment =
-                    db.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid, clazzUid)
+            clazzEnrolment = db.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid, clazzUid)
+            progressPermission = db.clazzDao.personHasPermissionWithClazz(accountManager.activeAccount.personUid, clazzUid,
+                    Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)
             updateListOnView()
         }
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        val clazzUid = arguments[UstadView.ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
         return db.clazzDao.personHasPermissionWithClazz(accountManager.activeAccount.personUid,
                 clazzUid, Role.PERMISSION_ASSIGNMENT_UPDATE)
     }

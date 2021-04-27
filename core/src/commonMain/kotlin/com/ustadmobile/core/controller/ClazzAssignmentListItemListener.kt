@@ -1,10 +1,10 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 
 
 interface ClazzAssignmentListItemListener {
 
-    fun onClickAssignment(clazzAssignment: ClazzAssignment)
+    fun onClickAssignment(clazzAssignment: ClazzAssignmentWithMetrics)
 
 }
