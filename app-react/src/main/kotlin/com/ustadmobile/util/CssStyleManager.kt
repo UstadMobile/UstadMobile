@@ -1,11 +1,8 @@
 package com.ustadmobile.util
 
-import com.ccfraser.muirwik.components.Colors
 import com.ccfraser.muirwik.components.spacingUnits
 import com.ccfraser.muirwik.components.styles.Breakpoint
-import com.ccfraser.muirwik.components.styles.Theme
 import com.ccfraser.muirwik.components.styles.up
-import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.css.properties.Timing
 import kotlinx.css.properties.Transition
@@ -21,6 +18,8 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
 
     private val theme = StateManager.getCurrentState().theme!!
 
+    val isMobile: Boolean = js("/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)")
+
     val appContainer by css {
         flexGrow = 1.0
         width = 100.pct
@@ -31,15 +30,24 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         flexDirection = FlexDirection.column
     }
 
-    val fab by css{
+    val bottomFixedElements by css{
+        display = Display.flex
         position = Position.fixed
+        zIndex = 99999
+        height = LinearDimension.auto
+        width = LinearDimension("100%")
+        flexDirection = FlexDirection.column
+        bottom = 0.px
+        backgroundColor = Color.transparent
+    }
+
+    val fab by css{
         right = 15.px
         bottom = 15.px
-        zIndex = 99999
     }
 
     val defaultMarginTop  by css{
-        marginTop = 16.px
+        marginTop = (if(isMobile) 7 else 2).spacingUnits
     }
 
     val progressIndicator by css {
@@ -95,12 +103,22 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         display = Display.block
     }
 
-    val mainComponentContentArea by css {
-        height = LinearDimension("100vh")
+    val mainComponentContentContainer by css {
+        height = LinearDimension("${if(isMobile) 91 else 100}vh")
         flexGrow = 1.0
         minWidth = 0.px
         paddingLeft = 1.spacingUnits
         paddingRight = 1.spacingUnits
+        backgroundColor = Color(theme.palette.background.default)
+    }
+
+    val mainComponentContents by css{
+        height = LinearDimension("100vh")
+        overflowY = Overflow.auto
+        paddingLeft = 2.spacingUnits
+        paddingRight = 2.spacingUnits
+        paddingTop = 2.spacingUnits
+        paddingBottom = (if(isMobile) 16 else 10).spacingUnits
         backgroundColor = Color(theme.palette.background.default)
     }
 
@@ -154,6 +172,7 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
     val ustadListViewComponentContainer by css {
         display = Display.inlineFlex
         flexDirection = FlexDirection.column
+        height = LinearDimension("100%")
     }
 
     val entryListItemContainer by css {
@@ -213,8 +232,8 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
 
     val entryDetailComponentContainer by css {
         width = LinearDimension.auto
-        height = LinearDimension("100vh")
-        flexDirection = FlexDirection.row
+        height = LinearDimension("100%")
+        flexDirection = if(isMobile) FlexDirection.column else FlexDirection.row
         padding(2.spacingUnits)
     }
 
@@ -224,15 +243,18 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
     }
 
     val entryDetailComponentEntryImageAndButtonContainer by css {
-        width = LinearDimension("40%")
+        width = LinearDimension("${if(isMobile) 100 else 40}%")
         display = Display.flex
-        marginRight = LinearDimension("3%")
+        marginRight = LinearDimension("${if(isMobile) 0 else 3}%")
         flexDirection = FlexDirection.column
+        paddingBottom = (if(isMobile) 0 else 5).spacingUnits
     }
 
     val entryDetailComponentEntryExtraInfo by css {
-        width = LinearDimension("57%")
+        width = LinearDimension("${if(isMobile) 100 else 57}%")
         flexDirection = FlexDirection.column
+        marginTop = (if(isMobile) 3 else 0).spacingUnits
+        paddingBottom = 10.spacingUnits
     }
 
     val chipSet by css{

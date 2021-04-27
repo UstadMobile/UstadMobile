@@ -9,12 +9,11 @@ import com.ccfraser.muirwik.components.input.mInput
 import com.ccfraser.muirwik.components.list.mList
 import com.ccfraser.muirwik.components.list.mListItemWithIcon
 import com.ccfraser.muirwik.components.styles.Breakpoint
-import com.ccfraser.muirwik.components.styles.down
 import com.ccfraser.muirwik.components.styles.up
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
+import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.model.UmReactDestination
 import com.ustadmobile.model.statemanager.GlobalState
@@ -23,11 +22,14 @@ import com.ustadmobile.model.statemanager.SnackBarState
 import com.ustadmobile.model.statemanager.ToolbarTabs
 import com.ustadmobile.util.CssStyleManager
 import com.ustadmobile.util.CssStyleManager.appContainer
+import com.ustadmobile.util.CssStyleManager.bottomFixedElements
 import com.ustadmobile.util.CssStyleManager.fab
+import com.ustadmobile.util.CssStyleManager.isMobile
 import com.ustadmobile.util.CssStyleManager.mainComponentAvatarInner
 import com.ustadmobile.util.CssStyleManager.mainComponentAvatarOuter
 import com.ustadmobile.util.CssStyleManager.mainComponentContainer
-import com.ustadmobile.util.CssStyleManager.mainComponentContentArea
+import com.ustadmobile.util.CssStyleManager.mainComponentContentContainer
+import com.ustadmobile.util.CssStyleManager.mainComponentContents
 import com.ustadmobile.util.CssStyleManager.mainComponentErrorPaper
 import com.ustadmobile.util.CssStyleManager.mainComponentSearch
 import com.ustadmobile.util.CssStyleManager.mainComponentSearchIcon
@@ -42,13 +44,11 @@ import com.ustadmobile.util.UmReactUtil.isDarkModeEnabled
 import com.ustadmobile.util.UmReactUtil.zeroPx
 import kotlinext.js.jsObject
 import kotlinx.browser.document
-import kotlinx.browser.window
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.css.*
 import kotlinx.dom.addClass
-import org.kodein.di.instance
 import react.*
 import react.dom.div
 import react.dom.span
@@ -134,7 +134,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
                         css { +mainComponentContainer }
                         mAppBar(position = MAppBarPosition.fixed) {
                             css {
-                                val removeLeftMargin = isRTLSupport or !currentDestination.showNavigation
+                                val removeLeftMargin = isMobile or isRTLSupport or !currentDestination.showNavigation
                                 position = Position.absolute
                                 marginLeft = if(removeLeftMargin) zeroPx else drawerWidth
                                 media(theme.breakpoints.up(Breakpoint.md)) {
@@ -213,40 +213,39 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
                             }
                         }
 
-                        if(currentDestination.showNavigation){
+                        if(currentDestination.showNavigation && !isMobile){
                             renderSideNavigation()
                         }
 
                         // Main content area, this div holds the contents
                         styledDiv {
                             css {
-                                +mainComponentContentArea
+                                +mainComponentContentContainer
                                 marginTop = LinearDimension(if(currentDestination.hasTabs) "56px" else "0px")
                             }
                             appBarSpacer()
                             styledDiv {
-                                css {
-                                    media(theme.breakpoints.down(Breakpoint.sm)) {
-                                        height = 100.vh - 57.px
-                                    }
-                                    media(theme.breakpoints.up(Breakpoint.sm)) {
-                                        height = 100.vh - 65.px
-                                    }
-
-                                    overflowY = Overflow.auto
-                                    padding(2.spacingUnits)
-                                    backgroundColor = Color(theme.palette.background.default)
-                                }
+                                css (mainComponentContents)
                                 renderRoutes()
                             }
                         }
 
-                        if(globalState.showFab){
-                            mFab(globalState.fabIcon, globalState.fabLabel.toUpperCase(), color = MColor.secondary) {
-                                css(fab)
-                                attrs {
-                                    onClick = globalState.onFabClicked
+                        styledDiv {
+                            css{
+                                +bottomFixedElements
+                                display = if(globalState.showFab || isMobile) Display.flex else Display.none
+                            }
+                            if(globalState.showFab){
+                                mFab(globalState.fabIcon, globalState.fabLabel.toUpperCase(), color = MColor.secondary) {
+                                    css(fab)
+                                    attrs {
+                                        onClick = globalState.onFabClicked
+                                    }
                                 }
+                            }
+
+                            if(isMobile && currentDestination.showNavigation){
+                                renderBottomNavigation()
                             }
                         }
                     }
@@ -274,6 +273,21 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
         StateManager.dispatch(SnackBarState())
     }
 
+    private fun RBuilder.renderBottomNavigation(){
+        mBottomNavigation(currentDestination, true, onChange = { _, value -> setState {
+            val destination = value as UmReactDestination
+            systemImpl.go(destination.view, destination.args,this)
+        }}) {
+
+            destinationList.filter { it.icon != null && it.view != SettingsView.VIEW_NAME }.forEach { destination ->
+                destination.icon?.let {
+                    mBottomNavigationAction(systemImpl.getString(destination.labelId, this),
+                        mIcon(it, addAsChild = false), value = destination, showLabel = true)
+                }
+            }
+        }
+    }
+
     private fun RBuilder.renderSideNavigation(){
         val p: MPaperProps = jsObject { }
         p.asDynamic().style = kotlinext.js.js {
@@ -295,7 +309,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
                                 mListItemWithIcon(it, systemImpl.getString(destination.labelId, this),
                                     divider = destination.divider , onClick = {
                                         systemImpl.go(destination.view, destination.args,this)
-                                    })
+                                    }, selected = currentDestination == destination)
                             }
                         }
                     }

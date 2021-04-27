@@ -241,6 +241,7 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UstadBaseCompone
         styledDiv {
             css{
                 +contentEntryListExtraOptions
+                display = if(hideOptions) Display.none else Display.flex
             }
             mTypography(variant = MTypographyVariant.subtitle1){
                 css {
