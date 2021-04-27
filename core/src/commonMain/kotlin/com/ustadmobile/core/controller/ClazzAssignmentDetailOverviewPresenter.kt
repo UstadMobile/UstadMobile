@@ -1,13 +1,11 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.lib.db.entities.CommentsWithPerson
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
 
@@ -34,20 +32,58 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzAssignment? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+        val loggedInPersonUid = accountManager.activeAccount.personUid
 
-        /**
-         * TODO
-         *  1. clazzAssignment Detail
-         *  2. clazzTimeZone
-         *  3. clazzAssignmentContentEntryJoin
-         *  4. Class Comments
-         *  5. Private Comments
-         */
+        val clazzAssignment = withTimeoutOrNull(2000) {
+            db.clazzAssignmentDao.findByUidAsync(entityUid)
+        } ?: ClazzAssignment()
 
-        return null
+
+        val clazzWithSchool = withTimeoutOrNull(2000) {
+            db.clazzDao.getClazzWithSchool(clazzAssignment.caClazzUid)
+        } ?: ClazzWithSchool()
+
+        view.timeZone = clazzWithSchool.effectiveTimeZone()
+
+        view.clazzAssignmentContent =
+                withTimeoutOrNull(2000) {
+                    repo.clazzAssignmentContentJoinDao.findAllContentByClazzAssignmentUidDF(
+                            clazzAssignment.caUid, loggedInPersonUid)
+                }
+
+        val loggedInPerson = withTimeoutOrNull(2000) {
+            db.personDao.findByUidAsync(loggedInPersonUid)
+        }
+        val clazzEnrolment: ClazzEnrolment? = withTimeoutOrNull(2000) {
+            db.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
+                    clazzAssignment.caClazzUid)
+        }
+
+        val isStudent = if (loggedInPerson?.admin == true) {
+            false
+        } else {
+            if (clazzEnrolment == null) {
+                false
+            } else {
+                (clazzEnrolment.clazzEnrolmentRole != ClazzEnrolment.ROLE_TEACHER)
+            }
+        }
+
+        if(isStudent && clazzAssignment.caPrivateCommentsEnabled){
+            view.clazzAssignmentPrivateComments = repo.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(
+                    ClazzAssignment.TABLE_ID, clazzAssignment.caUid,
+                    loggedInPersonUid)
+        }
+
+        if(clazzAssignment.caClassCommentEnabled){
+            view.clazzAssignmentClazzComments = repo.commentsDao.findPublicByEntityTypeAndUidLive(
+                    ClazzAssignment.TABLE_ID, clazzAssignment.caUid)
+        }
+
+        return clazzAssignment
     }
 
-    fun handleSubmitComment(commentsWithPerson: CommentsWithPerson){
+    fun handleSubmitComment(commentsWithPerson: CommentsWithPerson) {
 
     }
 

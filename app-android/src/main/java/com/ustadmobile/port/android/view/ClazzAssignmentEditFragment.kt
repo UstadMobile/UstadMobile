@@ -81,8 +81,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             it.typeSelectionListener = this
         }
 
-        // TODO change id
-        contentRecyclerView = rootView.findViewById(R.id.fragment_clazz_work_edit_content_rv)
+        contentRecyclerView = rootView.findViewById(R.id.ca_recyclerview_content)
         contentRecyclerAdapter = ContentEntryListAdapterRA(this, null)
         contentRecyclerView?.adapter = contentRecyclerAdapter
         contentRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
@@ -157,9 +156,9 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
 
     override var timeZone: String? = null
         set(value) {
-            mBinding?.timeZone =
-                    getText(R.string.class_timezone).toString() + " " + value
-            field = value
+            val newText = getText(R.string.class_timezone).toString() + " " + value
+            mBinding?.timeZone = newText
+            field = newText
         }
 
     override var lateSubmissionOptions: List<ClazzAssignmentEditPresenter.LateSubmissionOptionsMessageIdOption>? = null
@@ -191,7 +190,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
     }
 
     override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
-
+        // TODO update view to hide/unhide grace period section
     }
 
     override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {

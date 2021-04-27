@@ -54,7 +54,8 @@ class ClazzAssignmentDetailPresenter(context: Any,
 
     private fun setupTabs() {
         val entityUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
-        // TODO setup tabs
+        view.tabs = listOf("${ClazzAssignmentDetailOverviewView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid",
+                "${ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid")
     }
 
 
