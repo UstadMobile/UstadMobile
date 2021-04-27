@@ -12,8 +12,8 @@ import kotlinx.serialization.Serializable
             """
         SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, $TABLE_ID AS tableId FROM 
         ChangeLog
-        JOIN ClazzAssignment ON ChangeLog.chTableId = $TABLE_ID AND ClazzAssignment.clazzAssignmentUid = ChangeLog.chEntityPk
-        JOIN Clazz ON Clazz.clazzUid = ClazzAssignment.clazzAssignmentClazzUid 
+        JOIN ClazzAssignment ON ChangeLog.chTableId = $TABLE_ID AND ClazzAssignment.caUid = ChangeLog.chEntityPk
+        JOIN Clazz ON Clazz.clazzUid = ClazzAssignment.caClazzUid 
         JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_ASSIGNMENT_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
         """
@@ -21,7 +21,7 @@ import kotlinx.serialization.Serializable
         syncFindAllQuery = """
         SELECT Assignment.* FROM
         Assignment
-        JOIN Clazz ON Clazz.clazzUid = ClazzAssignment.clazzAssignmentClazzUid
+        JOIN Clazz ON Clazz.clazzUid = ClazzAssignment.caClazzUid
         JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_ASSIGNMENT_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
         WHERE DeviceSession.dsDeviceId = :clientId  
@@ -30,47 +30,47 @@ import kotlinx.serialization.Serializable
 open class ClazzAssignment {
 
     @PrimaryKey(autoGenerate = true)
-    var clazzAssignmentUid: Long = 0
+    var caUid: Long = 0
 
-    var clazzAssignmentTitle: String? = null
+    var caTitle: String? = null
 
-    var clazzAssignmentDescription: String? = null
+    var caDescription: String? = null
 
-    var clazzAssignmentDeadlineDate: Long = 0
+    var caDeadlineDate: Long = 0
 
-    var clazzAssignmentDeadlineDateTime: Long = 0
+    var caDeadlineDateTime: Long = 0
 
-    var clazzAssignmentStartDate: Long = 0
+    var caStartDate: Long = 0
 
-    var clazzAssignmentStartDateTime: Long = 0
+    var caStartDateTime: Long = 0
 
-    var clazzAssignmentLateSubmissionType: Int = 0
+    var caLateSubmissionType: Int = 0
 
-    var clazzAssignmentLateSubmissionPenalty: Int = 0
+    var caLateSubmissionPenalty: Int = 0
 
-    var clazzAssignmentGracePeriodDate: Long = 0
+    var caGracePeriodDate: Long = 0
 
-    var clazzAssignmentGracePeriodDateTime: Long = 0
+    var caGracePeriodDateTime: Long = 0
 
-    var clazzAssignmentActive: Boolean = true
+    var caActive: Boolean = true
 
-    var clazzAssignmentClassCommentEnabled: Boolean = true
+    var caClassCommentEnabled: Boolean = true
 
-    var clazzAssignmentPrivateCommentsEnabled: Boolean = false
+    var caPrivateCommentsEnabled: Boolean = false
 
-    var clazzAssignmentClazzUid: Long = 0
+    var caClazzUid: Long = 0
 
     @LocalChangeSeqNum
-    var clazzAssignmentLocalChangeSeqNum: Long = 0
+    var caLocalChangeSeqNum: Long = 0
 
     @MasterChangeSeqNum
-    var clazzAssignmentMasterChangeSeqNum: Long = 0
+    var caMasterChangeSeqNum: Long = 0
 
     @LastChangedBy
-    var clazzAssignmentLastChangedBy: Int = 0
+    var caLastChangedBy: Int = 0
 
     @LastChangedTime
-    var clazzAssignmentLct: Long = 0
+    var caLct: Long = 0
 
     companion object {
 

@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemAssignmentListBinding
 import com.ustadmobile.core.controller.ClazzAssignmentListItemListener
-import com.ustadmobile.lib.db.entities.ClazzAssignment
 
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
@@ -42,7 +41,7 @@ class AssignmentListRecyclerAdapter(var itemListener: ClazzAssignmentListItemLis
             : DiffUtil.ItemCallback<ClazzAssignmentWithMetrics>() {
             override fun areItemsTheSame(oldItem: ClazzAssignmentWithMetrics,
                                          newItem: ClazzAssignmentWithMetrics): Boolean {
-                return oldItem.clazzAssignmentUid == newItem.clazzAssignmentUid
+                return oldItem.caUid == newItem.caUid
             }
 
             override fun areContentsTheSame(oldItem: ClazzAssignmentWithMetrics,

@@ -34,8 +34,8 @@ class ClazzAssignmentListFragmentTest : TestCase()  {
     @Test
     fun givenAssignmentListPresent_whenClickOnAssignment_thenShouldNavigateToAssignmentDetail() {
         val testEntity = ClazzAssignment().apply {
-            clazzAssignmentTitle = "Test Name"
-            clazzAssignmentUid = dbRule.db.clazzAssignmentDao.insert(this)
+            caTitle = "Test Name"
+            caUid = dbRule.db.clazzAssignmentDao.insert(this)
         }
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
@@ -54,7 +54,7 @@ class ClazzAssignmentListFragmentTest : TestCase()  {
                 recycler{
 
                     childWith<ClazzAssignmentListScreen.Assignment>{
-                        withDescendant { withTag(testEntity.clazzAssignmentUid) }
+                        withDescendant { withTag(testEntity.caUid) }
                     }perform {
                         title {
                             click()

@@ -11,7 +11,6 @@ import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentEditBinding
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.observeResult
-import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.ContentEntryList2View
@@ -119,7 +118,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
                 ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::class.java,
                 R.id.content_entry_list_dest,
                 bundleOf(ContentEntryList2View.ARG_CLAZZWORK_FILTER to
-                        entity?.clazzAssignmentUid.toString(),
+                        entity?.caUid.toString(),
                         ContentEntryList2View.ARG_CONTENT_FILTER to
                                 ContentEntryList2View.ARG_LIBRARIES_CONTENT,
                         UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString()))

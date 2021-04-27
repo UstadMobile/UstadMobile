@@ -25,7 +25,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
         val clazzUid = withTimeoutOrNull(2000) {
             repo.clazzAssignmentDao.findByUidAsync(arguments[ARG_ENTITY_UID]?.toLong()
-                    ?: 0)?.clazzAssignmentClazzUid
+                    ?: 0)?.caClazzUid
         } ?: 0L
 
         return db.clazzDao.personHasPermissionWithClazz(accountManager.activeAccount.personUid,

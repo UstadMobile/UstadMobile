@@ -2,18 +2,14 @@ package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.navigation.Navigation
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.ustadmobile.port.android.screen.ClazzAssignmentDetailStudentProgressScreen
-import androidx.recyclerview.widget.RecyclerView
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import org.hamcrest.Matchers.equalTo
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -39,7 +35,7 @@ class ClazzAssignmentDetailStudentProgressFragmentTest : TestCase()  {
     fun givenClazzAssignmentListPresent_whenClickOnClazzAssignment_thenShouldNavigateToClazzAssignmentDetail() {
         val testEntity = ClazzAssignment().apply {
             clazzAssignmentName = "Test Name"
-            clazzAssignmentUid = dbRule.db.clazzDao.insert(this)
+            caUid = dbRule.db.clazzDao.insert(this)
         }
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
@@ -58,7 +54,7 @@ class ClazzAssignmentDetailStudentProgressFragmentTest : TestCase()  {
                 recycler{
 
                     childWith<ClazzAssignmentDetailStudentProgressScreen.ClazzAssignment>{
-                        withDescendant { withTag(testEntity.clazzAssignmentUid) }
+                        withDescendant { withTag(testEntity.caUid) }
                     }perform {
                         title {
                             click()

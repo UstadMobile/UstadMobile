@@ -12,17 +12,17 @@ import kotlinx.serialization.Serializable
             """
         SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, $TABLE_ID AS tableId FROM 
         ChangeLog
-        JOIN ClazzAssignmentContentJoin ON ChangeLog.chTableId = $TABLE_ID AND ClazzAssignmentContentJoin.clazzAssignmentContentJoinUid = ChangeLog.chEntityPk
-        JOIN ClazzAssignment ON ClazzAssignment.clazzAssignmentUid = ClazzAssignmentContentJoin.clazzAssignmentContentJoinAssignmentUid
-        JOIN Clazz ON Clazz.clazzUid = ClazzAssignment.clazzAssignmentClazzUid 
+        JOIN ClazzAssignmentContentJoin ON ChangeLog.chTableId = $TABLE_ID AND ClazzAssignmentContentJoin.cacjUid = ChangeLog.chEntityPk
+        JOIN ClazzAssignment ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
+        JOIN Clazz ON Clazz.clazzUid = ClazzAssignment.caClazzUid 
         JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_ASSIGNMENT_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid"""
         ],
         syncFindAllQuery = """
         SELECT ClazzAssignmentContentJoin.* FROM
         ClazzAssignmentContentJoin
-        JOIN ClazzAssignment ON ClazzAssignment.clazzAssignmentUid = ClazzAssignmentContentJoin.clazzAssignmentContentJoinAssignmentUid
-        JOIN Clazz ON Clazz.clazzUid = ClazzAssignment.clazzAssignmentClazzUid
+        JOIN ClazzAssignment ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
+        JOIN Clazz ON Clazz.clazzUid = ClazzAssignment.caClazzUid
         JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_ASSIGNMENT_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
         WHERE DeviceSession.dsDeviceId = :clientId""")
@@ -30,25 +30,25 @@ import kotlinx.serialization.Serializable
 class ClazzAssignmentContentJoin {
 
     @PrimaryKey(autoGenerate = true)
-    var clazzAssignmentContentJoinUid: Long = 0
+    var cacjUid: Long = 0
 
-    var clazzAssignmentContentJoinContentUid : Long = 0
+    var cacjContentUid : Long = 0
 
-    var clazzAssignmentContentJoinAssignmentUid : Long = 0
+    var cacjAssignmentUid : Long = 0
 
-    var clazzAssignmentContentJoinActive : Boolean = true
+    var cacjActive : Boolean = true
 
     @MasterChangeSeqNum
-    var clazzAssignmentContentJoinMCSN: Long = 0
+    var cacjMCSN: Long = 0
 
     @LocalChangeSeqNum
-    var clazzAssignmentContentJoinLCSN: Long = 0
+    var cacjLCSN: Long = 0
 
     @LastChangedBy
-    var clazzAssignmentContentJoinLCB: Int = 0
+    var cacjLCB: Int = 0
 
     @LastChangedTime
-    var clazzAssignmentContentJoinLct: Long = 0
+    var cacjLct: Long = 0
 
     companion object {
 

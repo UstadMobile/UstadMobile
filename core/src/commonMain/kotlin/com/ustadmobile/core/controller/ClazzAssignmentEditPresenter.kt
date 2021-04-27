@@ -14,8 +14,6 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import org.kodein.di.DI
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ClazzAssignmentDetailView
-import com.ustadmobile.core.view.ClazzWorkDetailView
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.serialization.builtins.ListSerializer
 
@@ -58,7 +56,7 @@ class ClazzAssignmentEditPresenter(context: Any,
         }?: ClazzAssignment()
 
         val clazzWithSchool = withTimeoutOrNull(2000){
-            db.clazzDao.getClazzWithSchool(clazzAssignment.clazzAssignmentClazzUid)
+            db.clazzDao.getClazzWithSchool(clazzAssignment.caClazzUid)
         }?: ClazzWithSchool()
 
         view.timeZone = clazzWithSchool.effectiveTimeZone()
@@ -67,7 +65,7 @@ class ClazzAssignmentEditPresenter(context: Any,
 
         val contentList = withTimeoutOrNull(2000) {
             db.clazzWorkContentJoinDao.findAllContentByClazzWorkUidAsync(
-                    clazzAssignment.clazzAssignmentUid, loggedInPersonUid
+                    clazzAssignment.caUid, loggedInPersonUid
             )
         }?: listOf()
 
@@ -89,7 +87,7 @@ class ClazzAssignmentEditPresenter(context: Any,
 
         GlobalScope.launch {
             val clazzWithSchool = withTimeoutOrNull(2000) {
-                db.clazzDao.getClazzWithSchool(editEntity.clazzAssignmentClazzUid)
+                db.clazzDao.getClazzWithSchool(editEntity.caClazzUid)
             } ?: ClazzWithSchool()
 
             view.timeZone = clazzWithSchool.effectiveTimeZone()
@@ -109,8 +107,8 @@ class ClazzAssignmentEditPresenter(context: Any,
     override fun handleClickSave(entity: ClazzAssignment) {
         //TODO: Any validation that is needed before accepting / saving this entity
         GlobalScope.launch(doorMainDispatcher()) {
-            if(entity.clazzAssignmentUid == 0L) {
-                entity.clazzAssignmentUid = repo.clazzAssignmentDao.insertAsync(entity)
+            if(entity.caUid == 0L) {
+                entity.caUid = repo.clazzAssignmentDao.insertAsync(entity)
             }else {
                 repo.clazzAssignmentDao.updateAsync(entity)
             }
@@ -120,14 +118,14 @@ class ClazzAssignmentEditPresenter(context: Any,
 
             repo.clazzAssignmentContentJoinDao.insertListAsync(contentToInsert.map {
                 ClazzAssignmentContentJoin().apply {
-                    clazzAssignmentContentJoinContentUid = it.contentEntryUid
-                    clazzAssignmentContentJoinAssignmentUid = entity.clazzAssignmentUid
+                    cacjContentUid = it.contentEntryUid
+                    cacjAssignmentUid = entity.caUid
                 }
             })
 
             repo.clazzWorkContentJoinDao.deactivateByUids(contentToDelete)
 
-            onFinish(ClazzAssignmentDetailView.VIEW_NAME, entity.clazzAssignmentUid, entity)
+            onFinish(ClazzAssignmentDetailView.VIEW_NAME, entity.caUid, entity)
 
         }
     }

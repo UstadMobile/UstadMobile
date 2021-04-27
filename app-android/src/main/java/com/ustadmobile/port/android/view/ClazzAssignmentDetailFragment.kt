@@ -98,7 +98,7 @@ class ClazzAssignmentDetailFragment: UstadDetailFragment<ClazzAssignment>(), Cla
         get() = field
         set(value) {
             field = value
-            ustadFragmentTitle = value?.clazzAssignmentTitle
+            ustadFragmentTitle = value?.caTitle
             mBinding?.clazzAssignment = value
         }
 

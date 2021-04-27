@@ -17,11 +17,9 @@ import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
 import kotlinx.coroutines.runBlocking
 import com.ustadmobile.core.util.ext.captureLastEntityValue
-import com.ustadmobile.core.util.test.waitUntil
 import org.kodein.di.DI
 
 
@@ -101,10 +99,10 @@ class ClazzAssignmentEditPresenterTest {
     fun givenExistingClazzAssignment_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
         val testEntity = ClazzAssignment().apply {
             someName = "Spelling Clazz"
-            clazzAssignmentUid = clientDbRule.repo.clazzAssignmentDao.insert(this)
+            caUid = clientDbRule.repo.clazzAssignmentDao.insert(this)
         }
 
-        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.clazzAssignmentUid.toString())
+        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
         val presenter = ClazzAssignmentEditPresenter(context,
                 presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
@@ -118,11 +116,11 @@ class ClazzAssignmentEditPresenterTest {
 
         runBlocking {
             db.waitUntil(5000, listOf("ClazzAssignment")) {
-                db.clazzAssignmentDao.findByUid(testEntity.clazzAssignmentUid)?.someName == "NewSpelling Clazz"
+                db.clazzAssignmentDao.findByUid(testEntity.caUid)?.someName == "NewSpelling Clazz"
             }
         }
 
-        val entitySaved = db.clazzAssignmentDao.findByUid(testEntity.clazzAssignmentUid)
+        val entitySaved = db.clazzAssignmentDao.findByUid(testEntity.caUid)
 
         Assert.assertEquals("Name was saved and updated",
                 "New Spelling Clazz", entitySaved!!.someName)

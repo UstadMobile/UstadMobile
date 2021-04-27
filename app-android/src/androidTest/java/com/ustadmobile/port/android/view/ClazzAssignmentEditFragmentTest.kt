@@ -1,10 +1,8 @@
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
-import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.fragment.findNavController
-import androidx.test.core.app.ApplicationProvider
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -109,11 +107,11 @@ class ClazzAssignmentEditFragmentTest : TestCase(){
     fun givenClazzAssignmentExists_whenOpenedUpdatedAndSaveClicked_thenShouldBeUpdatedOnDatabase() {
         val existingClazzAssignment = ClazzAssignment().apply {
             clazzAssignmentName = "New ClazzAssignment"
-            clazzAssignmentUid = dbRule.db.clazzAssignmentDao.insert(this)
+            caUid = dbRule.db.clazzAssignmentDao.insert(this)
         }
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
-                fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existingClazzAssignment.clazzAssignmentUid)) {
+                fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existingClazzAssignment.caUid)) {
             ClazzAssignmentEditFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
@@ -157,7 +155,7 @@ class ClazzAssignmentEditFragmentTest : TestCase(){
                         "New ClazzAssignment",
                         defaultGson().fromJson(entityLoadedJson, ClazzAssignment::class.java).clazzName)
 
-                val updatedEntityFromDb = dbRule.db.clazzDao.findByUidLive(existingClazzAssignment.clazzAssignmentUid)
+                val updatedEntityFromDb = dbRule.db.clazzDao.findByUidLive(existingClazzAssignment.caUid)
                         .waitUntilWithFragmentScenario(fragmentScenario) { it?.clazzName == "Updated ClazzAssignment" }
                 Assert.assertEquals("ClazzAssignment name is updated", "Updated ClazzAssignment",
                         updatedEntityFromDb?.clazzAssignmentName)

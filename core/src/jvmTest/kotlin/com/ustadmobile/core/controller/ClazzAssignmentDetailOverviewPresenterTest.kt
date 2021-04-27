@@ -8,21 +8,15 @@ import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzAssignmentDao
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.util.*
 import com.ustadmobile.door.DoorLifecycleObserver
 
-import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
 import com.ustadmobile.core.util.ext.captureLastEntityValue
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzAssignment
-import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -73,9 +67,9 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
         val testEntity = ClazzAssignment().apply {
             //set variables here
-            clazzAssignmentUid = repo.clazzAssignmentDao.insert(this)
+            caUid = repo.clazzAssignmentDao.insert(this)
         }
-        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.clazzAssignmentUid.toString())
+        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
 
         val presenter = ClazzAssignmentDetailOverviewPresenter(context, presenterArgs, mockView,
                 mockLifecycleOwner, di)
@@ -85,7 +79,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
         val entityValSet = mockView.captureLastEntityValue()!!
         Assert.assertEquals("Expected entity was set on view",
-                testEntity.clazzAssignmentUid, entityValSet.clazzAssignmentUid)
+                testEntity.caUid, entityValSet.caUid)
     }
 
     @Test
@@ -95,10 +89,10 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
         val testEntity = ClazzAssignment().apply {
             //set variables here
-            clazzAssignmentUid = repo.clazzAssignmentDao.insert(this)
+            caUid = repo.clazzAssignmentDao.insert(this)
         }
 
-        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.clazzAssignmentUid.toString())
+        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
 
         val presenter = ClazzAssignmentDetailOverviewPresenter(context, presenterArgs, mockView,
                 mockLifecycleOwner, di)
@@ -111,7 +105,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         presenter.handleClickEdit()
 
         verify(systemImplRule.systemImpl, timeout(5000)).go(eq(ClazzAssignmentEditView.VIEW_NAME),
-            eq(mapOf(ARG_ENTITY_UID to testEntity.clazzAssignmentUid.toString())), any())
+            eq(mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())), any())
     }
 
 }

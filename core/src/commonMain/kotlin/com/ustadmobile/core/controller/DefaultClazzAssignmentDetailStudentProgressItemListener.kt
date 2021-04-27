@@ -16,7 +16,7 @@ class DefaultClazzAssignmentDetailStudentProgressItemListener(var view: ClazzAss
     override fun onClickClazzAssignment(clazzAssignment: ClazzAssignment) {
         if(listViewMode == ListViewMode.BROWSER) {
             systemImpl.go(ClazzAssignmentDetailView.VIEW_NAME,
-                    mapOf(UstadView.ARG_ENTITY_UID to clazzAssignment.clazzAssignmentUid.toString()), context)
+                    mapOf(UstadView.ARG_ENTITY_UID to clazzAssignment.caUid.toString()), context)
         }else {
             view?.finishWithResult(listOf(clazzAssignment))
         }

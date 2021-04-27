@@ -62,7 +62,7 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
         val clazzUid = arguments[UstadView.ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
 
         val clazzAssignment: ClazzAssignment = ClazzAssignment().apply {
-            clazzAssignmentClazzUid = clazzUid
+            caClazzUid = clazzUid
         }
         val clazzWorkJson = Json.encodeToString(ClazzAssignment.serializer(), clazzAssignment)
         systemImpl.go(ClazzAssignmentEditView.VIEW_NAME,
