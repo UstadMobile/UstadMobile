@@ -154,9 +154,35 @@ fun EditText.setDontShowZeroListener(inverseBindingListener: InverseBindingListe
     addTextChangedListener{inverseBindingListener.onChange() }
 }
 
+
+@BindingAdapter("dontShowZeroIntET")
+fun EditText.setValueIfZeroFloat(value: Int){
+    if(value == 0){
+        setText("")
+    }else{
+        setText(value.toString())
+    }
+}
+
+@InverseBindingAdapter(attribute = "dontShowZeroIntET")
+fun EditText(et: TextView): Int {
+    if(et.text != null && et.text.toString().isNotEmpty()){
+        return et.text.toString().toInt()?:0
+    }else{
+        return 0
+    }
+}
+
+@BindingAdapter("dontShowZeroIntETAttrChanged")
+fun EditText.setDontShowZeroIntETListener(inverseBindingListener: InverseBindingListener) {
+    addTextChangedListener{inverseBindingListener.onChange() }
+}
+
 @BindingAdapter("seekCountET")
 fun EditText.setInventoryCount(value: Int){
-    setText(value.toString())
+    if(value>0) {
+        setText(value.toString())
+    }
 }
 
 @InverseBindingAdapter(attribute = "seekCountET")

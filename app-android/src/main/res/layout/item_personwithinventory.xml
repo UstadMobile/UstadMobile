@@ -79,6 +79,7 @@
             android:importantForAutofill="no"
             android:inputType="number"
             android:singleLine="false"
+            app:dontShowZeroIntET="@={person.selectedStock}"
             app:seekCountET="@={person.selectedStock}"
             app:newSaleDelivery="@{newSaleDelivery}"
             app:etPerson="@{person}"
