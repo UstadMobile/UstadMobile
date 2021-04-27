@@ -106,5 +106,6 @@
 
     <string name="image">Image</string>
     <string name="csv">CSV</string>
-
+    <string name="not_delivered">Not delivered</string>
+    <string name="not_set">Not set</string>
 </resources>

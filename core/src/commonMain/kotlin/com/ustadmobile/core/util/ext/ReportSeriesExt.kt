@@ -1,25 +1,23 @@
 package com.ustadmobile.core.util.ext
 
-import com.soywiz.klock.DateTime
-import com.soywiz.klock.years
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ABSENT
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_PARTIAL
-import com.ustadmobile.lib.db.entities.ReportSeries.Companion.SALES_TOTAL
-import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NUMBER_OF_SALES
-import com.ustadmobile.lib.db.entities.ReportSeries.Companion.AVERAGE_SALE_TOTAL
-import com.ustadmobile.lib.db.entities.ReportSeries.Companion.INTERACTIONS_RECORDED
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.AVERAGE_DURATION
-import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NUMBER_SESSIONS
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.AVERAGE_SALE_TOTAL
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.AVERAGE_USAGE_TIME_PER_USER
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.INTERACTIONS_RECORDED
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NUMBER_ACTIVE_USERS
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NUMBER_OF_SALES
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NUMBER_OF_STUDENTS_COMPLETED_CONTENT
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NUMBER_SESSIONS
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NUMBER_UNIQUE_STUDENTS_ATTENDING
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.PERCENTAGE_STUDENTS_ATTENDED
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.PERCENTAGE_STUDENTS_ATTENDED_OR_LATE
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.PERCENT_OF_STUDENTS_COMPLETED_CONTENT
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.SALES_TOTAL
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_ABSENCES
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_ATTENDANCE
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_CLASSES
@@ -321,7 +319,7 @@ private fun groupBy(value: Int, dbType: Int): String {
         Report.GENDER -> " SaleLE.gender "
         Report.CLASS -> "Clazz.clazzUid "
         Report.LE -> " SaleLE.personUid "
-        Report.WE -> " InventoryItem.inventoryItemWeUid "
+        Report.WE -> " CASE WHEN InventoryItem.inventoryItemWeUid THEN InventoryItem.inventoryItemWeUid ELSE 0 END "
         Report.PRODUCT_CATEGORY -> " Category.categoryUid "
         Report.PRODUCT -> " Product.productUid "
         Report.CUSTOMER -> " Customer.personUid "

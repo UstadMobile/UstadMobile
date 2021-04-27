@@ -22,23 +22,18 @@ import com.toughra.ustadmobile.databinding.ItemReportChartHeaderBinding
 import com.toughra.ustadmobile.databinding.ItemReportStatementListBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ReportDetailPresenter
-import com.ustadmobile.core.controller.ReportEditPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.lib.db.entities.StatementEntityWithDisplayDetails
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -218,6 +213,8 @@ class   ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(
             chartAdapter?.submitList(listOf(value))
         }
 
+
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
         mBinding = FragmentReportDetailBinding.inflate(inflater, container, false).also {
@@ -314,60 +311,22 @@ class   ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(
     }
 
     override fun onClickExportCSV() {
+        mPresenter?.generateCSVFile()
+    }
+
+    override fun shareCSVData(reportData: StringBuilder) {
         val csvReportFilePath: String
         //Create the file.
-
-
         val output = File(context?.externalCacheDir,
-                System.currentTimeMillis().toString() + ".csv")
+            System.currentTimeMillis().toString() + ".csv")
         csvReportFilePath = output.getAbsolutePath()
 
         val fileWriter = FileWriter(csvReportFilePath)
-
-        //TODO: Add filters
-        //YAxisOptions.values().map { YAxisMessageIdOption(it, context) }
-
-        //1. Add Column names
-        fileWriter.append(chartData?.reportWithFilters?.reportTitle)
-        fileWriter.append("-")
-        fileWriter.append(chartData?.reportWithFilters?.reportDescription)
-        val yAxisId = chartData?.reportWithFilters?.reportSeriesWithFiltersList?.get(0)?.reportSeriesYAxis?:0
-        val xAxisId = chartData?.reportWithFilters?.xAxis?:0
-        val yLabel = UstadMobileSystemImpl.instance.getString(
-            ReportEditPresenter.YAxisOptions.values().filter{it.optionVal == yAxisId}[0].messageId
-            , requireContext())
-        val xLabel = UstadMobileSystemImpl.instance.getString(
-            ReportEditPresenter.XAxisOptions.values().filter{it.optionVal == xAxisId}[0].messageId,
-            requireContext())
-
-        fileWriter.append("\n")
-        fileWriter.append(xLabel)
-        fileWriter.append(",")
-        fileWriter.append(yLabel)
-        fileWriter.append("\n")
-        for(everyData in chartData?.seriesData?: emptyList()){
-            //For every series
-            fileWriter.append(everyData.series.reportSeriesName)
-            fileWriter.append("\n")
-
-            for(everySeriesData in everyData.dataList){
-
-                fileWriter.append(everySeriesData.xAxis)
-                fileWriter.append(",")
-                fileWriter.append(everySeriesData.yAxis.toString())
-                fileWriter.append("\n")
-
-            }
-
-
-        }
-
-        fileWriter.append("\n")
+        fileWriter.append(reportData)
         fileWriter.close()
 
         val fileUri  = FileProvider.getUriForFile(requireContext(),
-                "${context?.packageName}.provider", output)
-
+            "${context?.packageName}.provider", output)
 
         GlobalScope.launch(Dispatchers.IO) {
             val intent = Intent(Intent.ACTION_SEND).apply {
@@ -378,7 +337,6 @@ class   ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(
             }
             startActivity(Intent.createChooser(intent, requireContext().getString(R.string.export)))
         }
-
     }
 
     override fun onClickExportImage(){

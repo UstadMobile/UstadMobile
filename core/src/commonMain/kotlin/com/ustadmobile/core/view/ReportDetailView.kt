@@ -13,6 +13,8 @@ interface ReportDetailView: UstadDetailView<ReportWithSeriesWithFilters> {
 
     var chartData: ChartData?
 
+    fun shareCSVData(reportData: StringBuilder)
+
     companion object {
 
         const val VIEW_NAME = "ReportDetailView"

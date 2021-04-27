@@ -327,51 +327,67 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
         seriesDataList.add(SeriesData(reportList, subGroupFormatter, series))
     }
 
-    val xAxisFormatter = when(report.xAxis){
+    val xAxisFormatter = xAxisFormatter(report.xAxis, xAxisList, context, impl)
+
+    return ChartData(seriesDataList.toList(), report, yAxisValueFormatter, xAxisFormatter)
+}
+
+suspend fun UmAppDatabase.xAxisFormatter( xAxis: Int, xAxisList: Set<String>,
+                                          context: Any, impl: UstadMobileSystemImpl)
+    : LabelValueFormatter? {
+
+    return when (xAxis) {
         Report.CLASS -> {
             val clazzLabelList = clazzDao.getClassNamesFromListOfIds(xAxisList
-                    .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
+                .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
             UidAndLabelFormatter(clazzLabelList)
         }
         Report.GENDER -> {
             MessageIdFormatter(
-                    genderMap.mapKeys { it.key.toString() },
-                    impl, context)
+                genderMap.mapKeys { it.key.toString() },
+                impl, context
+            )
         }
-        Report.CONTENT_ENTRY ->{
+        Report.CONTENT_ENTRY -> {
             val entryLabelList = contentEntryDao.getContentEntryFromUids(xAxisList
-                    .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
+                .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
             UidAndLabelFormatter(entryLabelList)
         }
         Report.LE, Report.CUSTOMER -> {
             val personList = personDao.getPeopleFromUids(xAxisList
-                    .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
+                .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
+            UidAndLabelFormatter(personList)
+        }
+        Report.WE -> {
+            val uidAndLabelList = personDao.getPeopleFromUids(xAxisList.map { it.toLong() })
+            val personList = uidAndLabelList.map { it.uid to it.labelName }.toMap().toMutableMap()
+            personList[0L] = impl.getString(MessageID.not_delivered, context)
             UidAndLabelFormatter(personList)
         }
 
         Report.PRODUCT -> {
             val productList = productDao.getProductsFromUids(xAxisList
-                    .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
+                .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
             UidAndLabelFormatter(productList)
         }
         Report.PROVINCE -> {
             val locationList = locationDao.getLocationsFromUids(xAxisList
-                    .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
+                .map { it.toLong() }).map { it.uid to it.labelName }.toMap().toMutableMap()
+            locationList[0L] = impl.getString(MessageID.not_set, context)
             UidAndLabelFormatter(locationList)
         }
         Report.PRODUCT_CATEGORY -> {
             val categoryList = categoryDao.getCategoriesFromUids(xAxisList
-                    .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
+                .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
             UidAndLabelFormatter(categoryList)
         }
 
-        else ->{
+        else -> {
             null
         }
     }
-
-    return ChartData(seriesDataList.toList(), report, yAxisValueFormatter, xAxisFormatter)
 }
+
 
 fun UmAppDatabase.generateStatementList(report: ReportWithSeriesWithFilters, loggedInPersonUid: Long):
         List<DataSource.Factory<Int, StatementEntityWithDisplayDetails>> {
