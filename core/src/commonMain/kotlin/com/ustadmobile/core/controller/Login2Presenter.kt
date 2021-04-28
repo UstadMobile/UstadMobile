@@ -45,9 +45,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        nextDestination = arguments[ARG_NEXT] ?: impl.getAppConfigString(
-                AppConfig.KEY_FIRST_DEST, ContentEntryListTabsView.VIEW_NAME, context) ?:
-                ContentEntryListTabsView.VIEW_NAME
+        nextDestination = arguments[ARG_NEXT] ?: impl.getAppConfigDefaultFirstDest(context)
 
         serverUrl = if (arguments.containsKey(ARG_SERVER_URL)) {
             arguments.getValue(ARG_SERVER_URL)
@@ -92,8 +90,8 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
     private fun goToNextDestAfterLoginOrGuestSelected() {
         impl.setAppPref(PREFKEY_USER_LOGGED_IN, "true", context)
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                arguments[ARG_POPUPTO_ON_FINISH] ?: UstadView.CURRENT_DEST,
-                true)
+                arguments[ARG_POPUPTO_ON_FINISH] ?: UstadView.ROOT_DEST,
+                false)
         impl.go(nextDestination, mapOf(), context, goOptions)
     }
 

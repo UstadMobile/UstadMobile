@@ -2,7 +2,9 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.putIfNotAlreadySet
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
@@ -28,8 +30,9 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
     fun handleClickAddAccount(){
         val canSelectServer = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_SERVER_SELECTION, context)
         val args = arguments.toMutableMap().also {
-            it[ARG_NEXT] = AccountListView.VIEW_NAME
-            it[UstadView.ARG_POPUPTO_ON_FINISH] = AccountListView.VIEW_NAME
+            val nextDest = impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context)
+                ?: ContentEntryListTabsView.VIEW_NAME
+            it.putIfNotAlreadySet(ARG_NEXT, nextDest)
         }
 
         impl.go(if(canSelectServer) SiteEnterLinkView.VIEW_NAME else Login2View.VIEW_NAME,args, context)
@@ -59,6 +62,9 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
 
     fun handleClickAccount(account: UmAccount){
         accountManager.activeAccount = account
-        view.showContentEntryList(account)
+        val goOptions = UstadMobileSystemCommon.UstadGoOptions(
+            arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.ROOT_DEST,
+            false)
+        impl.go(impl.getAppConfigDefaultFirstDest(context), context, goOptions)
     }
 }

@@ -112,7 +112,7 @@ interface UstadView {
 
         const val ARG_SERVER_URL = "serverUrl"
 
-        const val ARG_INTENT = "argIntent"
+        const val ARG_DEEPLINK = "argIntent"
 
         const val ARG_SNACK_MESSAGE = "snack_message"
 
@@ -123,6 +123,8 @@ interface UstadView {
         const val ARG_ENTITY_NAME = "argEntityName"
 
         const val CURRENT_DEST = ""
+
+        const val ROOT_DEST = "root"
 
         /**
          * if after selecting from a list, need to open an edit page

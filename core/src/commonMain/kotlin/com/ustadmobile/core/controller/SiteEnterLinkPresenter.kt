@@ -42,8 +42,6 @@ class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view:
                 it[ARG_SITE] = Json.encodeToString(Site.serializer(), mSite)
             }
 
-            args.putIfNotAlreadySet(ARG_POPUPTO_ON_FINISH, SiteEnterLinkView.VIEW_NAME)
-
             impl.go(Login2View.VIEW_NAME, args, context)
         }
     }

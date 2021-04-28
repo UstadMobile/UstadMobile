@@ -7,15 +7,11 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.view.AccountListView
+import com.ustadmobile.core.view.ContentEntryListTabsView
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.direct
-import org.kodein.di.instance
 import kotlin.js.JsName
-import kotlin.jvm.JvmOverloads
 
 /**
  * Class has all the shared function across all supported platforms
@@ -79,6 +75,14 @@ abstract class UstadMobileSystemCommon {
     @JsName("getAppConfigString")
     abstract fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?
 
+    /**
+     * Get the default first destination that the user should be taken to after logging in or
+     * selecting to continue as a guest.
+     */
+    fun getAppConfigDefaultFirstDest(context: Any): String {
+        return getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context) ?: ContentEntryListTabsView.VIEW_NAME
+    }
+
     fun goDeepLink(deepLink: String, accountManager: UstadAccountManager, context: Any) {
         if(deepLink.contains(LINK_ENDPOINT_VIEWNAME_DIVIDER)) {
             val endpointUrl = deepLink.substringBefore(LINK_ENDPOINT_VIEWNAME_DIVIDER)
@@ -103,35 +107,18 @@ abstract class UstadMobileSystemCommon {
      * @param destination Destination name in the form of ViewName?arg1=val1&arg2=val2 etc.
      * @param context System context object
      */
-    open fun go(destination: String, context: Any) {
-        val destinationParsed =
-        if(destination?.contains(LINK_INTENT_FILTER) == true){
-            val destinationIndex : Int? = destination.indexOf("/${LINK_INTENT_FILTER}").plus(10)
-
-            val apiUrl = destination.substring(0, destination.indexOf("/${LINK_INTENT_FILTER}")) + '/'
-
-            var charToAdd = "?"
-            val sansApi = destination.substring(destinationIndex?:0+1?:0)?:""
-            if(sansApi.contains('?') || sansApi.contains('&')){
-                charToAdd = "&"
-            }
-            destination.substring(destinationIndex?:0) +
-                    "${charToAdd}${UstadView.ARG_SERVER_URL}=$apiUrl"
-
-        }else{
-            destination
-        }
-        val destinationQueryPos = destinationParsed!!.indexOf('?')
-        if (destinationQueryPos == -1) {
-            go(destinationParsed, mapOf(), context)
-        } else {
-            go(destinationParsed.substring(0, destinationQueryPos), UMFileUtil.parseURLQueryString(
-                    destinationParsed), context)
+    open fun go(destination: String, context: Any, ustadGoOptions: UstadGoOptions = UstadGoOptions()) {
+        val destinationQueryPos = destination.indexOf('?')
+        if(destinationQueryPos == -1) {
+            go(destination, mapOf(), context, ustadGoOptions)
+        }else {
+            val destArgs = UMFileUtil.parseURLQueryString(destination)
+            go(destination.substring(0, destinationQueryPos), destArgs, context, ustadGoOptions)
         }
     }
 
     open fun go(viewName: String, args: Map<String, String?>, context: Any) {
-        go(viewName, args, context, 0, UstadGoOptions("", false))
+        go(viewName, args, context, 0, UstadGoOptions(null, false))
     }
 
     open fun go(viewName: String, args: Map<String, String?>, context: Any, ustadGoOptions: UstadGoOptions) {
@@ -411,6 +398,10 @@ abstract class UstadMobileSystemCommon {
 
         const val SUBDIR_ATTACHMENTS_NAME = "attachments"
 
+        /**
+         * The RedirectFragment will remove itself from the view stack.
+         */
+        const val PREF_ROOT_VIEWNAME = "rootViewName"
 
     }
 }
