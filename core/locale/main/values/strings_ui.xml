@@ -812,13 +812,11 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="new_assignment">New assignment</string>
     <string name="edit_assignment">Edit assignment</string>
     <string name="total_score">Total score</string>
-    <string name="visible_to_students">visible to students from</string>
     <string name="late_submission">Late submissions</string>
     <string name="mark_penalty">Mark penalty</string>
     <string name="late_submission_penalty">Late submission penalty</string>
     <string name="end_of_grace_period">End of grace period</string>
     <string name="allow_class_comments">Allow class comments from students</string>
-    <string name="your_total_score">Your total score</string>
 
     <string name="marked">marked</string>
     <string name="submitted">submitted</string>
