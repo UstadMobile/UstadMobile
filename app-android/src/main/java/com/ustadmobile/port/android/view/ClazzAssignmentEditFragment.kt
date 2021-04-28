@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentEditBinding
+import com.toughra.ustadmobile.databinding.ItemContentEntryBasicTitleListBinding
 import com.toughra.ustadmobile.databinding.ItemContentEntrySimpleListBinding
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
@@ -30,6 +31,7 @@ import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 
 interface ClazzAssignmentEditFragmentEventHandler {
     fun onClickNewContent()
+    fun onClickDeleteContent(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer)
 }
 
 class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAssignmentEditView, ClazzAssignmentEditFragmentEventHandler, DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption> {
@@ -43,24 +45,26 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
 
 
     class ContentEntryListAdapterRA(
-            val activityEventHandler: ClazzAssignmentEditFragmentEventHandler,
-            var presenter: ClazzAssignmentEditPresenter?): ListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
+            val activityEventHandler: ClazzAssignmentEditFragmentEventHandler)
+        : ListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
             ContentEntryListAdapterRA.ContentEntryListAdapterRAViewHolder>(ContentEntryList2Fragment.DIFF_CALLBACK) {
 
         class ContentEntryListAdapterRAViewHolder(
-                val binding: ItemContentEntrySimpleListBinding)
+                val binding: ItemContentEntryBasicTitleListBinding)
             : RecyclerView.ViewHolder(binding.root)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
                 : ContentEntryListAdapterRAViewHolder {
             val viewHolder = ContentEntryListAdapterRAViewHolder(
-                    ItemContentEntrySimpleListBinding.inflate(
-                            LayoutInflater.from(parent.context), parent, false))
+                    ItemContentEntryBasicTitleListBinding.inflate(
+                            LayoutInflater.from(parent.context), parent, false)).apply{
+                                this.binding.selectablePagedListAdapter = activityEventHandler
+            }
             return viewHolder
         }
 
         override fun onBindViewHolder(holder: ContentEntryListAdapterRAViewHolder, position: Int) {
-            holder.binding.contentEntry = getItem(position)
+            holder.binding.entry = getItem(position)
         }
     }
 
@@ -81,7 +85,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         }
 
         contentRecyclerView = rootView.findViewById(R.id.ca_recyclerview_content)
-        contentRecyclerAdapter = ContentEntryListAdapterRA(this, null)
+        contentRecyclerAdapter = ContentEntryListAdapterRA(this)
         contentRecyclerView?.adapter = contentRecyclerAdapter
         contentRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
@@ -195,6 +199,10 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
                                 ContentEntryList2View.ARG_LIBRARIES_CONTENT,
                         UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString()))
 
+    }
+
+    override fun onClickDeleteContent(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
+        mPresenter?.handleRemoveContent(entry)
     }
 
     override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
