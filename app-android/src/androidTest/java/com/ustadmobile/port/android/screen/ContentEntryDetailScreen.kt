@@ -1,19 +1,18 @@
 package com.ustadmobile.port.android.screen
 
-import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.agoda.kakao.image.KImageView
 import com.agoda.kakao.progress.KProgressBar
 import com.agoda.kakao.recycler.KRecyclerView
 import com.agoda.kakao.text.KTextView
 import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
-import com.ustadmobile.port.android.view.ContentEntry2DetailFragment
+import com.ustadmobile.port.android.view.ContentEntryDetailOverviewFragment
 
 object ContentEntryDetailScreen : KScreen<ContentEntryDetailScreen>() {
     override val layoutId: Int
         get() = R.layout.fragment_content_entry2_detail
     override val viewClass: Class<*>?
-        get() = ContentEntry2DetailFragment::class.java
+        get() = ContentEntryDetailOverviewFragment::class.java
 
     val entryTitleTextView = KTextView { withId(R.id.entry_detail_title)}
 

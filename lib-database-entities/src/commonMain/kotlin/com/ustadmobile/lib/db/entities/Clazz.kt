@@ -2,10 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Clazz.Companion.ENTITY_PERSONS_WITH_PERMISSION_PT1
 import com.ustadmobile.lib.db.entities.Clazz.Companion.ENTITY_PERSONS_WITH_PERMISSION_PT2
 import com.ustadmobile.lib.db.entities.Clazz.Companion.TABLE_ID
@@ -71,6 +68,9 @@ open class Clazz() {
 
     @LastChangedBy
     var clazzLastChangedBy: Int = 0
+
+    @LastChangedTime
+    var clazzLct: Long = 0
 
     /**
      * The timezone ID as per https://www.iana.org/time-zones. If null, this means use the School

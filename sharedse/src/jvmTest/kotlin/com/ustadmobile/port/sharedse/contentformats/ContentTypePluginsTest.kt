@@ -8,11 +8,13 @@ import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import com.ustadmobile.sharedse.util.UstadTestRule
 import io.ktor.client.*
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -39,6 +41,8 @@ class ContentTypePluginsTest {
 
     private lateinit var httpClient: HttpClient
 
+    private lateinit var okHttpClient: OkHttpClient
+
     @Before
     fun setup(){
 
@@ -49,6 +53,7 @@ class ContentTypePluginsTest {
             }
         }
 
+        okHttpClient = di.direct.instance()
         httpClient = di.direct.instance()
 
         val accountManager: UstadAccountManager by di.instance()
@@ -68,8 +73,10 @@ class ContentTypePluginsTest {
 
         val db = UmAppDatabase.getInstance(context)
         db.clearAllTables()
-        val dbRepo = db.asRepository<UmAppDatabase>(context, "http://localhost/dummy", "",
-            httpClient, containerTmpDir.absolutePath)
+        val dbRepo = db.asRepository(repositoryConfig(context, "http://localhost/dummy", httpClient,
+            okHttpClient){
+            attachmentsDir = containerTmpDir.absolutePath
+        })
 
         runBlocking {
             //TODO: Make this more rigorous

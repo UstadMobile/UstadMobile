@@ -5,7 +5,6 @@ import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.LanguageList
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
@@ -77,8 +76,6 @@ class IndexEtekkathoScraper {
         containerDao = repository!!.containerDao
         val languageDao = repository!!.languageDao
         headingHashMap = HashMap()
-
-        LanguageList().addAllLanguages()
 
         englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English")
 

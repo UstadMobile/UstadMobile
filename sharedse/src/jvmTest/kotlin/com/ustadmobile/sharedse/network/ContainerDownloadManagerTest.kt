@@ -9,6 +9,7 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
@@ -79,8 +80,8 @@ class ContainerDownloadManagerTest {
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
-                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository<UmAppDatabase>(
-                    Any(), context.url, "", instance(), null))
+                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository(
+                    repositoryConfig(Any(), context.url, instance(), instance())))
             }
 
             bind<ContainerDownloadRunner>() with factory {

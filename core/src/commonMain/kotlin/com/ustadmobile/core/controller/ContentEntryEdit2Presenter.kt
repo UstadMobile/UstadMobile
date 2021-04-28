@@ -6,7 +6,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.ext.convertToJsonObject
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ContentEntryEdit2View
@@ -27,6 +26,8 @@ import io.ktor.client.statement.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import org.kodein.di.DI
@@ -170,15 +171,17 @@ class ContentEntryEdit2Presenter(context: Any,
 
                         var client: HttpResponse? = null
                         try {
+
                             client = httpClient.post<HttpStatement>() {
                                 url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
-                                        "/import/downloadLink/"))
+                                        "/import/downloadLink"))
                                 parameter("parentUid", parentEntryUid)
                                 parameter("scraperType", view.entryMetaData?.scraperType)
                                 parameter("url", view.entryMetaData?.uri)
                                 parameter("conversionParams",
-                                        Json.encodeToString(JsonObject.serializer(),
-                                                conversionParams.convertToJsonObject()))
+                                        Json.encodeToString(MapSerializer(String.serializer(),
+                                                String.serializer()),
+                                                conversionParams))
                                 header("content-type", "application/json")
                                 body = entity
                             }.execute()

@@ -13,8 +13,10 @@ import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMURLEncoder
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.door.ext.writeToFile
@@ -34,6 +36,7 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
+import okhttp3.OkHttpClient
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -78,10 +81,17 @@ class TestXapiStatementResponder {
                 builder.create()
             }
 
+            bind<OkHttpClient>() with singleton {
+                OkHttpClient()
+            }
+
             bind<HttpClient>() with singleton {
                 HttpClient(OkHttp) {
                     install(JsonFeature)
                     install(HttpTimeout)
+                    engine {
+                        preconfigured = instance()
+                    }
                 }
             }
 
@@ -95,8 +105,8 @@ class TestXapiStatementResponder {
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
-                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository<UmAppDatabase>(
-                    Any(), context.url, "", instance(), null))
+                spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(Any(),
+                    context.url, instance(), instance())))
             }
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

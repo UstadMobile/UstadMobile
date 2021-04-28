@@ -18,6 +18,7 @@ import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.util.ext.linkExistingContainerEntries
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.ObserverFnWrapper
+import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_DISCONNECTED
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_METERED
@@ -211,6 +212,7 @@ class DownloadJobItemRunner
                 networkManager.releaseWifiLock(downloadWiFiLock)
             }
         }
+        Napier.d({"${mkLogPrefix()} stop complete"})
     }
 
 
@@ -344,7 +346,7 @@ class DownloadJobItemRunner
 
                 history.url = downloadEndpoint
 
-                UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
+                Napier.i(mkLogPrefix() +
                         " starting download from " + downloadEndpoint + " FromCloud=" + isFromCloud +
                         " Attempts remaining= " + attemptsRemaining)
                 downloadStartTime = getSystemTimeInMillis()
@@ -371,29 +373,33 @@ class DownloadJobItemRunner
                 val fetchStartTime = getSystemTimeInMillis()
                 Napier.d({"Requesting fetch download $timeSinceStart ms after start"})
 
-                val containerRequest = ContainerFetcherRequest2(
+                if(containerEntriesPartition.entriesWithoutMatchingFile.isNotEmpty()) {
+                    val containerRequest = ContainerFetcherRequest2(
                         containerEntriesPartition.entriesWithoutMatchingFile, siteUrl = endpointUrl,
                         mirrorUrl =  downloadEndpoint,
                         destDirUri = destinationDir ?: throw IllegalStateException("Null destination dir"))
-                var jobDeferred: Deferred<Int>? = null
-                downloadStatusLock.withLock {
-                    Napier.d({"${mkLogPrefix()} enqueuing download URL=$downloadEndpoint fileDest=" +
-                            destTmpFile.getAbsolutePath()})
-                    jobDeferred = containerFetcher.enqueue(containerRequest,
+                    var jobDeferred: Deferred<Int>? = null
+                    downloadStatusLock.withLock {
+                        Napier.d({"${mkLogPrefix()} enqueuing download URL=$downloadEndpoint fileDest=" +
+                                destTmpFile.getAbsolutePath()})
+                        jobDeferred = containerFetcher.enqueue(containerRequest,
                             object: AbstractContainerFetcherListener2() {
                                 override fun onProgress(request: ContainerFetcherRequest2,
                                                         bytesDownloaded: Long, contentLength: Long) {
                                     GlobalScope.launch {
                                         downloadItem.downloadedSoFar = existingEntriesBytesDownloaded + bytesDownloaded
                                         containerDownloadManager.handleDownloadJobItemUpdated(
-                                                DownloadJobItem(downloadItem))
+                                            DownloadJobItem(downloadItem))
                                     }
                                 }
                             })
-                    Napier.d({"${mkLogPrefix()} download queued"})
-                    currentDownloadAttempt.value = jobDeferred
+                        Napier.d({"${mkLogPrefix()} download queued"})
+                        currentDownloadAttempt.value = jobDeferred
+                    }
+                    downloadAttemptStatus = jobDeferred?.await() ?: JobStatus.FAILED
+                }else {
+                    downloadAttemptStatus = JobStatus.COMPLETE
                 }
-                downloadAttemptStatus = jobDeferred?.await() ?: JobStatus.FAILED
 
                 Napier.d({"Fetch over in ${getSystemTimeInMillis() - fetchStartTime}ms status=$downloadAttemptStatus"})
                 if(downloadAttemptStatus == JobStatus.COMPLETE) {
@@ -401,8 +407,10 @@ class DownloadJobItemRunner
                 }
             }catch(e: Exception) {
                 Napier.e({"${mkLogPrefix()} exception in download attempt"}, e)
-                if(coroutineContext.isActive)
+                if(coroutineContext.isActive) {
+                    Napier.e({"${mkLogPrefix()} waiting for retry"}, e)
                     delay(retryDelay)
+                }
             }finally {
 
             }
@@ -551,7 +559,7 @@ class DownloadJobItemRunner
 
 
     private fun mkLogPrefix(): String {
-        return "DownloadJobItem #" + downloadItem.djiUid + ":"
+        return "DownloadJobItem #" + downloadItem.djiUid + " (${this.doorIdentityHashCode}) :"
     }
 
     companion object {

@@ -14,7 +14,7 @@ import com.ustadmobile.port.android.screen.ReportListScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.util.test.ext.insertTestStatements
+import com.ustadmobile.util.test.ext.insertTestStatementsForReports
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
@@ -46,7 +46,7 @@ class ReportListFragmentTest : TestCase() {
                 admin = true
                 personUid = 42
             })
-            dbRule.repo.insertTestStatements()
+            dbRule.repo.insertTestStatementsForReports()
         }
     }
 

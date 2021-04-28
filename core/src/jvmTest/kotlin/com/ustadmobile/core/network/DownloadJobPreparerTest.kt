@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.networkmanager.DownloadJobPreparer
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -23,6 +24,7 @@ import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
 import org.junit.*
 import org.junit.Assert.*
 import org.kodein.di.*
@@ -58,10 +60,11 @@ class DownloadJobPreparerTest {
         }
 
         val httpClient: HttpClient = di.direct.instance()
+        val okHttpClient: OkHttpClient = di.direct.instance()
         serverDb = UmAppDatabase.getInstance(Any())
         serverDb.clearAllTables()
-        serverRepo = serverDb.asRepository(Any(), "http://localhost/dummy",
-            "", httpClient)
+        serverRepo = serverDb.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
+            httpClient, okHttpClient))
 
         accountManager = di.direct.instance()
         accountManager.activeAccount = UmAccount(0, "guest", "",

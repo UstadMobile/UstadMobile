@@ -135,6 +135,20 @@ ProxyTimeout 600
 RequestReadTimeout body=10,MinRate=1000
 ```
 
+HTTP2 requires Apache mpm-event and will not work with mpm-prefork and the normal vanilla php.
+The FastCGI php version must be used instead if PHP is required.
+
+```
+a2dismod mpm_prefork
+a2enmod mpm_event
+
+#If PHP is also required on the same Apache server:
+apt-get install php7.4-fpm
+a2enmod proxy_fcgi setenvif
+a2enconf php7.4-fpm
+a2dismod php7.4
+```
+
 ## Connect using the Ustad app
 
 Open the Ustad app, and enter the address of your site. The admin password will be saved to

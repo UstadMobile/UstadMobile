@@ -682,7 +682,7 @@
     <string name="option_value">विकल्प मान</string>
     <string name="refresh">रिफ्रेस गरौं</string>
     <string name="school">विद्यालय</string>
-    <string name="percentage_complete" formatted="false">%1$s% पूरा</string>
+    <string name="percentage_complete" formatted="false">%1$s%% पूरा</string>
     <string name="started_date" formatted="false">सुरू गरेको %1$s%</string>
     <string name="due_date">अन्तिम मिति</string>
     <string name="class_code">कक्षा कोड</string>

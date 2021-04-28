@@ -252,27 +252,57 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/locally_available_bottom_barrier" />
 
-            <TextView
-                android:id='@+id/entry_detail_delete_button'
-                android:layout_width="wrap_content"
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/entry_detail_option_buttons"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/delete"
-                android:textAppearance="@style/UmTheme.TextAppearance.Body2"
-                android:textColor="?colorPrimary"
-                android:tint="?colorPrimary"
-                app:drawableTint="?colorPrimary"
-                android:gravity="center"
-                android:textAllCaps="true"
-                android:padding="@dimen/dimen_8dp"
-                android:background="?attr/selectableItemBackground"
-                android:onClick="@{()-> fragmentEventHandler.handleOnClickDeleteButton()}"
-                android:visibility="@{DownloadJobExtKt.isStatusCompletedSuccessfully(downloadJobItem) ? View.VISIBLE : View.GONE}"
-                app:drawableTopCompat="@drawable/ic_delete_black_24dp"
-                app:layout_constraintBottom_toTopOf="@id/description_divider"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_chainStyle="spread"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/library_size_divider" />
+                android:gravity="center|top"
+                app:layout_constraintTop_toBottomOf="@id/library_size_divider"
+                app:layout_constraintBottom_toTopOf="@id/description_divider">
+
+                <TextView
+                    android:layout_weight="1"
+                    android:id='@+id/entry_detail_delete_button'
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxWidth="128dp"
+                    android:text="@string/delete"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                    android:textColor="?colorPrimary"
+                    android:tint="?colorPrimary"
+                    app:drawableTint="?colorPrimary"
+                    android:gravity="center"
+                    android:textAllCaps="true"
+                    android:padding="@dimen/dimen_8dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:onClick="@{()-> fragmentEventHandler.handleOnClickDeleteButton()}"
+                    android:visibility="@{DownloadJobExtKt.isStatusCompletedSuccessfully(downloadJobItem) ? View.VISIBLE : View.GONE}"
+                    app:drawableTopCompat="@drawable/ic_delete_black_24dp"/>
+
+
+                <TextView
+                    android:layout_weight="1"
+                    android:id='@+id/entry_manage_download_button'
+                    android:layout_width="wrap_content"
+                    android:maxWidth="128dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/manage_download"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                    android:textColor="?colorPrimary"
+                    android:tint="?colorPrimary"
+                    app:drawableTint="?colorPrimary"
+                    android:gravity="center"
+                    android:textAllCaps="true"
+                    android:padding="@dimen/dimen_8dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:onClick="@{()-> fragmentEventHandler.handleOnClickManageDownloadButton()}"
+                    android:visibility="@{DownloadJobExtKt.isStatusQueuedOrDownloading(downloadJobItem) ? View.VISIBLE : View.GONE}"
+                    app:drawableTopCompat="@drawable/ic_file_download_black_24dp"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+
 
 
             <androidx.appcompat.widget.AppCompatImageView
@@ -304,7 +334,7 @@
                 android:id="@+id/description_barrier"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:constraint_referenced_ids="entry_detail_delete_button"
+                app:constraint_referenced_ids="entry_detail_option_buttons"
                 app:barrierDirection="bottom"/>
 
             <View

@@ -16,6 +16,7 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.*
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
 import com.ustadmobile.lib.rest.ext.bindHostDatabase
@@ -185,11 +186,12 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
-            val attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT),
-                UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
-            val repo = db.asRepository(Any(), "http://localhost/",
-                    "", instance(), attachmentsDir.absolutePath,
-                    instance(), false)
+            val repo = db.asRepository(repositoryConfig(Any(), "http://localhost/",
+                instance(), instance()) {
+                attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT),
+                    UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME).absolutePath
+                updateNotificationManager = instance()
+            })
             ServerChangeLogMonitor(db, repo as DoorDatabaseRepository)
             repo.preload()
             db.ktorInitDbWithRepo(repo, instance<File>(tag = TAG_CONTEXT_DATA_ROOT).absolutePath)
