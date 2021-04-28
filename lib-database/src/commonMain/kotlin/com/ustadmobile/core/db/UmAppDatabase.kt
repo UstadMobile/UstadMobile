@@ -39,7 +39,7 @@ import kotlin.jvm.Volatile
     DeviceSession::class, Site::class, ContainerImportJob::class,
     LearnerGroup::class, LearnerGroupMember::class,
     GroupLearningSession::class,
-    SiteTerms::class,
+    SiteTerms::class, ClazzAssignment::class, ClazzAssignmentContentJoin::class,
 
     //Door Helper entities
     SqliteChangeSeqNums::class,
@@ -51,7 +51,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 64)
+], version = 67)
 @MinSyncVersion(58)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -4306,6 +4306,257 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+
+        val MIGRATION_66_67 = object: DoorMigration(66, 67) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                if(database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL( "CREATE TABLE IF NOT EXISTS ClazzAssignment (`caUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `caTitle` TEXT, `caDescription` TEXT, `caDeadlineDate` INTEGER NOT NULL, `caDeadlineDateTime` INTEGER NOT NULL, `caStartDate` INTEGER NOT NULL, `caStartDateTime` INTEGER NOT NULL, `caLateSubmissionType` INTEGER NOT NULL, `caLateSubmissionPenalty` INTEGER NOT NULL, `caGracePeriodDate` INTEGER NOT NULL, `caGracePeriodDateTime` INTEGER NOT NULL, `caActive` INTEGER NOT NULL, `caClassCommentEnabled` INTEGER NOT NULL, `caPrivateCommentsEnabled` INTEGER NOT NULL, `caClazzUid` INTEGER NOT NULL, `caLocalChangeSeqNum` INTEGER NOT NULL, `caMasterChangeSeqNum` INTEGER NOT NULL, `caLastChangedBy` INTEGER NOT NULL, `caLct` INTEGER NOT NULL)")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoin (`cacjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cacjContentUid` INTEGER NOT NULL, `cacjAssignmentUid` INTEGER NOT NULL, `cacjActive` INTEGER NOT NULL, `cacjMCSN` INTEGER NOT NULL, `cacjLCSN` INTEGER NOT NULL, `cacjLCB` INTEGER NOT NULL, `cacjLct` INTEGER NOT NULL)")
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignment_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzAssignment_trk_clientId_epk_csn` ON ClazzAssignment_trk (`clientId`, `epk`, `csn`)")
+                    database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzAssignment_trk_epk_clientId` ON ClazzAssignment_trk (`epk`, `clientId`)")
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoin_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzAssignmentContentJoin_trk_clientId_epk_csn` ON ClazzAssignmentContentJoin_trk (`clientId`, `epk`, `csn`)")
+                    database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzAssignmentContentJoin_trk_epk_clientId` ON ClazzAssignmentContentJoin_trk (`epk`, `clientId`)")
+
+                    database.execSQL("""
+          |CREATE TRIGGER INS_LOC_520
+          |AFTER INSERT ON ClazzAssignment
+          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
+          |    NEW.caLocalChangeSeqNum = 0)
+          |BEGIN
+          |    UPDATE ClazzAssignment
+          |    SET caMasterChangeSeqNum = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 520)
+          |    WHERE caUid = NEW.caUid;
+          |    
+          |    UPDATE SqliteChangeSeqNums
+          |    SET sCsnNextPrimary = sCsnNextPrimary + 1
+          |    WHERE sCsnTableId = 520;
+          |END
+          """.trimMargin())
+
+                    database.execSQL("""
+          |            CREATE TRIGGER INS_PRI_520
+          |            AFTER INSERT ON ClazzAssignment
+          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
+          |                NEW.caMasterChangeSeqNum = 0)
+          |            BEGIN
+          |                UPDATE ClazzAssignment
+          |                SET caMasterChangeSeqNum = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 520)
+          |                WHERE caUid = NEW.caUid;
+          |                
+          |                UPDATE SqliteChangeSeqNums
+          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+          |                WHERE sCsnTableId = 520;
+          |                
+          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+          |SELECT 520, NEW.caUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+          |            END
+          """.trimMargin())
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_LOC_520
+          |AFTER UPDATE ON ClazzAssignment
+          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
+          |    AND (NEW.caLocalChangeSeqNum == OLD.caLocalChangeSeqNum OR
+          |        NEW.caLocalChangeSeqNum == 0))
+          |BEGIN
+          |    UPDATE ClazzAssignment
+          |    SET caLocalChangeSeqNum = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = 520) 
+          |    WHERE caUid = NEW.caUid;
+          |    
+          |    UPDATE SqliteChangeSeqNums 
+          |    SET sCsnNextLocal = sCsnNextLocal + 1
+          |    WHERE sCsnTableId = 520;
+          |END
+          """.trimMargin())
+                    database.execSQL("""
+          |            CREATE TRIGGER UPD_PRI_520
+          |            AFTER UPDATE ON ClazzAssignment
+          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
+          |                AND (NEW.caMasterChangeSeqNum == OLD.caMasterChangeSeqNum OR
+          |                    NEW.caMasterChangeSeqNum == 0))
+          |            BEGIN
+          |                UPDATE ClazzAssignment
+          |                SET caMasterChangeSeqNum = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 520)
+          |                WHERE caUid = NEW.caUid;
+          |                
+          |                UPDATE SqliteChangeSeqNums
+          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+          |                WHERE sCsnTableId = 520;
+          |                
+          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+          |SELECT 520, NEW.caUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+          |            END
+          """.trimMargin())
+
+                    database.execSQL("""
+          |CREATE TRIGGER INS_LOC_521
+          |AFTER INSERT ON ClazzAssignmentContentJoin
+          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
+          |    NEW.cacjLCSN = 0)
+          |BEGIN
+          |    UPDATE ClazzAssignmentContentJoin
+          |    SET cacjMCSN = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 521)
+          |    WHERE cacjUid = NEW.cacjUid;
+          |    
+          |    UPDATE SqliteChangeSeqNums
+          |    SET sCsnNextPrimary = sCsnNextPrimary + 1
+          |    WHERE sCsnTableId = 521;
+          |END
+          """.trimMargin())
+
+                    database.execSQL("""
+          |            CREATE TRIGGER INS_PRI_521
+          |            AFTER INSERT ON ClazzAssignmentContentJoin
+          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
+          |                NEW.cacjMCSN = 0)
+          |            BEGIN
+          |                UPDATE ClazzAssignmentContentJoin
+          |                SET cacjMCSN = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 521)
+          |                WHERE cacjUid = NEW.cacjUid;
+          |                
+          |                UPDATE SqliteChangeSeqNums
+          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+          |                WHERE sCsnTableId = 521;
+          |                
+          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+          |SELECT 521, NEW.cacjUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+          |            END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_LOC_521
+          |AFTER UPDATE ON ClazzAssignmentContentJoin
+          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
+          |    AND (NEW.cacjLCSN == OLD.cacjLCSN OR
+          |        NEW.cacjLCSN == 0))
+          |BEGIN
+          |    UPDATE ClazzAssignmentContentJoin
+          |    SET cacjLCSN = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = 521) 
+          |    WHERE cacjUid = NEW.cacjUid;
+          |    
+          |    UPDATE SqliteChangeSeqNums 
+          |    SET sCsnNextLocal = sCsnNextLocal + 1
+          |    WHERE sCsnTableId = 521;
+          |END
+          """.trimMargin())
+                    database.execSQL("""
+          |            CREATE TRIGGER UPD_PRI_521
+          |            AFTER UPDATE ON ClazzAssignmentContentJoin
+          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
+          |                AND (NEW.cacjMCSN == OLD.cacjMCSN OR
+          |                    NEW.cacjMCSN == 0))
+          |            BEGIN
+          |                UPDATE ClazzAssignmentContentJoin
+          |                SET cacjMCSN = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 521)
+          |                WHERE cacjUid = NEW.cacjUid;
+          |                
+          |                UPDATE SqliteChangeSeqNums
+          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+          |                WHERE sCsnTableId = 521;
+          |                
+          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+          |SELECT 521, NEW.cacjUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+          |            END
+          """.trimMargin())
+
+                }else{
+
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignment (  caTitle  TEXT , caDescription  TEXT , caDeadlineDate  BIGINT  NOT NULL , caDeadlineDateTime  BIGINT  NOT NULL , caStartDate  BIGINT  NOT NULL , caStartDateTime  BIGINT  NOT NULL , caLateSubmissionType  INTEGER  NOT NULL , caLateSubmissionPenalty  INTEGER  NOT NULL , caGracePeriodDate  BIGINT  NOT NULL , caGracePeriodDateTime  BIGINT  NOT NULL , caActive  BOOL  NOT NULL , caClassCommentEnabled  BOOL  NOT NULL , caPrivateCommentsEnabled  BOOL  NOT NULL , caClazzUid  BIGINT  NOT NULL , caLocalChangeSeqNum  BIGINT  NOT NULL , caMasterChangeSeqNum  BIGINT  NOT NULL , caLastChangedBy  INTEGER  NOT NULL , caLct  BIGINT  NOT NULL , caUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzAssignment_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzAssignment_lcsn_seq")
+                    database.execSQL("""
+          |CREATE OR REPLACE FUNCTION 
+          | inccsn_520_fn() RETURNS trigger AS ${'$'}${'$'}
+          | BEGIN  
+          | UPDATE ClazzAssignment SET caLocalChangeSeqNum =
+          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.caLocalChangeSeqNum 
+          | ELSE NEXTVAL('ClazzAssignment_lcsn_seq') END),
+          | caMasterChangeSeqNum = 
+          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+          | THEN NEXTVAL('ClazzAssignment_mcsn_seq') 
+          | ELSE NEW.caMasterChangeSeqNum END)
+          | WHERE caUid = NEW.caUid;
+          | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+          | SELECT 520, NEW.caUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+          | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+          | RETURN null;
+          | END ${'$'}${'$'}
+          | LANGUAGE plpgsql
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER inccsn_520_trig 
+          |AFTER UPDATE OR INSERT ON ClazzAssignment 
+          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+          |EXECUTE PROCEDURE inccsn_520_fn()
+          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignment_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+          |CREATE 
+          | INDEX index_ClazzAssignment_trk_clientId_epk_csn 
+          |ON ClazzAssignment_trk (clientId, epk, csn)
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE 
+          |UNIQUE INDEX index_ClazzAssignment_trk_epk_clientId 
+          |ON ClazzAssignment_trk (epk, clientId)
+          """.trimMargin())
+                    //End: Create table ClazzAssignment for PostgreSQL
+
+                    //Begin: Create table ClazzAssignmentContentJoin for PostgreSQL
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoin (  cacjContentUid  BIGINT  NOT NULL , cacjAssignmentUid  BIGINT  NOT NULL , cacjActive  BOOL  NOT NULL , cacjMCSN  BIGINT  NOT NULL , cacjLCSN  BIGINT  NOT NULL , cacjLCB  INTEGER  NOT NULL , cacjLct  BIGINT  NOT NULL , cacjUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzAssignmentContentJoin_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzAssignmentContentJoin_lcsn_seq")
+                    database.execSQL("""
+          |CREATE OR REPLACE FUNCTION 
+          | inccsn_521_fn() RETURNS trigger AS ${'$'}${'$'}
+          | BEGIN  
+          | UPDATE ClazzAssignmentContentJoin SET cacjLCSN =
+          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.cacjLCSN 
+          | ELSE NEXTVAL('ClazzAssignmentContentJoin_lcsn_seq') END),
+          | cacjMCSN = 
+          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+          | THEN NEXTVAL('ClazzAssignmentContentJoin_mcsn_seq') 
+          | ELSE NEW.cacjMCSN END)
+          | WHERE cacjUid = NEW.cacjUid;
+          | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+          | SELECT 521, NEW.cacjUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+          | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+          | RETURN null;
+          | END ${'$'}${'$'}
+          | LANGUAGE plpgsql
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER inccsn_521_trig 
+          |AFTER UPDATE OR INSERT ON ClazzAssignmentContentJoin 
+          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+          |EXECUTE PROCEDURE inccsn_521_fn()
+          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoin_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+          |CREATE 
+          | INDEX index_ClazzAssignmentContentJoin_trk_clientId_epk_csn 
+          |ON ClazzAssignmentContentJoin_trk (clientId, epk, csn)
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE 
+          |UNIQUE INDEX index_ClazzAssignmentContentJoin_trk_epk_clientId 
+          |ON ClazzAssignmentContentJoin_trk (epk, clientId)
+          """.trimMargin())
+
+
+                }
+
+
+            }
+        }
+
+
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
@@ -4316,7 +4567,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
                     MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
                     MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
-                    MIGRATION_63_64)
+                    MIGRATION_63_64, MIGRATION_66_67)
 
 
 

@@ -10,6 +10,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 
 
 class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewFragment<PersonWithAttemptsSummary, PersonWithAttemptsSummary>(),
@@ -27,7 +28,9 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
                 arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
 
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter()
         mDataRecyclerViewAdapter = ContentEntryDetailAttemptsListFragment.PersonWithStatementDisplayListRecyclerAdapter(mPresenter)
+
         return view
     }
 
@@ -35,6 +38,7 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
      * OnClick function that will handle when the user clicks to create a new item
      */
     override fun onClick(view: View?) {
+        super.onClick(view)
     }
 
     override fun onDestroyView() {
@@ -44,12 +48,12 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
     }
 
     override val displayTypeRepo: Any?
-        get() = TODO("Provide repo e.g. dbRepo.ClazzAssignmentWithMetricsDao")
+        get() = dbRepo?.clazzAssignmentDao
 
-    override var clazzAssignmentWithMetrics: ClazzAssignmentWithMetrics?
-        get() = TODO("Not yet implemented")
+    override var clazzAssignmentWithMetrics: ClazzAssignmentWithMetrics? = null
+        get() = field
         set(value) {
-
+            field = value
         }
 
 }

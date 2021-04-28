@@ -15,7 +15,7 @@ import org.kodein.di.instance
 class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, arguments: Map<String, String>, view: ClazzAssignmentDetailStudentProgressOverviewListView,
                                                                 di: DI, lifecycleOwner: DoorLifecycleOwner,
                                                                 private val clazzAssignmentWithMetricsItemListener: DefaultClazzAssignmentDetailStudentProgressOverviewListItemListener = DefaultClazzAssignmentDetailStudentProgressOverviewListItemListener(view, ListViewMode.BROWSER, di.direct.instance(), context))
-    : UstadListPresenter<ClazzAssignmentDetailStudentProgressOverviewListView, PersonWithAttemptsSummary>(context, arguments, view, di, lifecycleOwner), ClazzAssignmentDetailStudentProgressListItemListener by clazzAssignmentWithMetricsItemListener {
+    : UstadListPresenter<ClazzAssignmentDetailStudentProgressOverviewListView, PersonWithAttemptsSummary>(context, arguments, view, di, lifecycleOwner), ClazzAssignmentDetailStudentProgressListItemListener by clazzAssignmentWithMetricsItemListener, AttemptListListener {
 
     private var filterByClazzAssignmentUid: Long = -1
 
@@ -42,10 +42,9 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
 
     }
 
-    fun onClickPersonWithAttemptsSummary(personWithAttemptsSummary: PersonWithAttemptsSummary) {
+    override fun onClickPersonWithStatementDisplay(personWithAttemptsSummary: PersonWithAttemptsSummary) {
         // TODO go to studentProgress with person and clazzAssignment selected
     }
-
 
 
 }

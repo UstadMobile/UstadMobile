@@ -19,8 +19,8 @@ import kotlinx.serialization.Serializable
         """
         ],
         syncFindAllQuery = """
-        SELECT Assignment.* FROM
-        Assignment
+        SELECT ClazzAssignment.* FROM
+        ClazzAssignment
         JOIN Clazz ON Clazz.clazzUid = ClazzAssignment.caClazzUid
         JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_ASSIGNMENT_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid

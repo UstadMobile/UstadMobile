@@ -88,12 +88,14 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
     companion object {
 
         val SORT_OPTIONS = listOf(
+                SortOrderOption(MessageID.start_date, ClazzAssignmentDao.SORT_START_DATE_ASC, true),
+                SortOrderOption(MessageID.start_date, ClazzAssignmentDao.SORT_START_DATE_DESC, false),
                 SortOrderOption(MessageID.deadline, ClazzAssignmentDao.SORT_DEADLINE_ASC, true),
                 SortOrderOption(MessageID.deadline, ClazzAssignmentDao.SORT_DEADLINE_DESC, false),
                 SortOrderOption(MessageID.title, ClazzAssignmentDao.SORT_TITLE_ASC, true),
                 SortOrderOption(MessageID.title, ClazzAssignmentDao.SORT_TITLE_DESC, false),
-                SortOrderOption(MessageID.score, ClazzAssignmentDao.SORT_SCORE_ASC, true),
-                SortOrderOption(MessageID.score, ClazzAssignmentDao.SORT_SCORE_DESC, false)
+                SortOrderOption(MessageID.xapi_score, ClazzAssignmentDao.SORT_SCORE_ASC, true),
+                SortOrderOption(MessageID.xapi_score, ClazzAssignmentDao.SORT_SCORE_DESC, false)
         )
     }
 

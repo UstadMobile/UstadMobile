@@ -5,7 +5,6 @@ import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.ClazzAssignmentContentJoin
-import com.ustadmobile.lib.db.entities.ClazzWorkContentJoin
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 
 @Dao
@@ -20,6 +19,21 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
     @Query(FINDBY_CLAZZ_ASSIGNMENT_UID)
     abstract fun findAllContentByClazzAssignmentUidDF(clazzAssignmentUid: Long, personUid : Long)
             : DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+
+    @Query("""
+        UPDATE ClazzAssignmentContentJoin 
+           SET cacjActive = :active,
+               cacjLCB = (SELECT nodeClientId 
+                            FROM SyncNode LIMIT 1) 
+        WHERE cacjUid = :uid """)
+    abstract suspend fun updateInActiveByClazzWorkQuestionUid(uid: Long, active : Boolean)
+
+
+    override suspend fun deactivateByUids(uidList: List<Long>) {
+        uidList.forEach {
+            updateInActiveByClazzWorkQuestionUid(it, true)
+        }
+    }
 
 
     companion object{

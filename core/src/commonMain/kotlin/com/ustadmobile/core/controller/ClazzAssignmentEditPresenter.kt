@@ -44,7 +44,7 @@ class ClazzAssignmentEditPresenter(context: Any,
 
     private val contentJoinEditHelper = DefaultOneToManyJoinEditHelper(
             ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::contentEntryUid,
-            "state_clazzAssignment_entry_list",
+            "state_ContentEntryWithMetrics_list",
             ListSerializer(ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer()),
             ListSerializer(ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer()),
             this, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::class) { contentEntryUid = it }
@@ -109,6 +109,8 @@ class ClazzAssignmentEditPresenter(context: Any,
             view.timeZone = clazzWithSchool.effectiveTimeZone()
         }
 
+        contentJoinEditHelper.onLoadFromJsonSavedState(bundle)
+
 
         return editEntity
     }
@@ -125,6 +127,7 @@ class ClazzAssignmentEditPresenter(context: Any,
 
             if (entity.caTitle.isNullOrEmpty()) {
                 view.caTitleError = systemImpl.getString(MessageID.field_required_prompt, context)
+                return@launch
             }
 
             if (entity.caStartDate == 0L || entity.caStartDateTime == 0L) {

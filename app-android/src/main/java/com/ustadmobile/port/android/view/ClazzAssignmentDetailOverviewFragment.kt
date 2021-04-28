@@ -94,6 +94,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         mBinding = FragmentClazzAssignmentDetailOverviewBinding.inflate(inflater, container, false).also {
             rootView = it.root
         }
+        fabManagementEnabled = true
 
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
 
@@ -105,7 +106,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         detailRecyclerAdapter = ClazzAssignmentBasicDetailRecyclerAdapter()
 
         // 2
-        contentHeaderAdapter = SimpleHeadingRecyclerAdapter(getText(R.string.person).toString()).apply {
+        contentHeaderAdapter = SimpleHeadingRecyclerAdapter(getText(R.string.content).toString()).apply {
             visible = false
         }
 
@@ -157,8 +158,9 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
                     visible = false
         }
 
+        mPresenter = ClazzAssignmentDetailOverviewPresenter(requireContext(),
+                arguments.toStringMap(), this, viewLifecycleOwner, di)
 
-        // TODO add all adapters
         detailMergerRecyclerAdapter = ConcatAdapter(detailRecyclerAdapter, contentHeaderAdapter,
             contentRecyclerAdapter, scoreRecyclerAdapter, classCommentsHeadingRecyclerAdapter,
             classCommentsRecyclerAdapter, newClassCommentRecyclerAdapter, privateCommentsHeadingRecyclerAdapter,
@@ -171,8 +173,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        mPresenter = ClazzAssignmentDetailOverviewPresenter(requireContext(),
-                arguments.toStringMap(), this, viewLifecycleOwner, di)
+
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
     }
 
@@ -201,9 +202,6 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         newClassCommentRecyclerAdapter = null
         classCommentsHeadingRecyclerAdapter = null
         privateCommentsHeadingRecyclerAdapter = null
-
-
-
 
     }
 

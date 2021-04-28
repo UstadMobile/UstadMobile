@@ -3,6 +3,8 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
+import com.ustadmobile.core.view.ClazzAssignmentEditView
+import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
@@ -28,6 +30,11 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
 
         return db.clazzDao.personHasPermissionWithClazz(accountManager.activeAccount.personUid,
                 clazzUid, Role.PERMISSION_ASSIGNMENT_UPDATE)
+    }
+
+    override fun handleClickEdit() {
+        systemImpl.go(ClazzAssignmentEditView.VIEW_NAME,
+                mapOf(ARG_ENTITY_UID to entity?.caUid.toString()), context)
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzAssignment? {

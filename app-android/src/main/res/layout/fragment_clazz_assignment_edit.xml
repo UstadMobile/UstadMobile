@@ -52,6 +52,10 @@
             type="boolean" />
 
         <variable
+            name="lateSubmissionVisibility"
+            type="int" />
+
+        <variable
             name="activityEventHandler"
             type="com.ustadmobile.port.android.view.ClazzAssignmentEditFragmentEventHandler" />
 
@@ -63,13 +67,14 @@
         android:id="@+id/fragment_clazz_assignment_edit_edit_scroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/fragment_clazz_assignment_edit_edit_clx"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/dimen_52dp">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_marginTop="@dimen/dimen_20dp"
@@ -125,11 +130,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:errorEnabled="@{caDeadlineError != null}"
+                app:errorText="@{caDeadlineError}"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_16dp"
                 app:layout_constraintStart_toStartOf="parent"
                 android:hint="@string/deadline"
-                app:errorText="@{caDeadlineError}"
                 app:layout_constraintTop_toBottomOf="@+id/ca_edit_description_textinput"
                 app:layout_constraintEnd_toStartOf="@+id/ca_deadline_datetime_textinput">
 
@@ -152,6 +157,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_16dp"
+                app:errorEnabled="@{caDeadlineError != null}"
+                app:errorText="@{caDeadlineError}"
                 app:layout_constraintBottom_toBottomOf="@+id/ca_deadline_date_textinput"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:hint="@string/time"
@@ -186,11 +193,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:errorEnabled="@{caStartDateError != null}"
+                app:errorText="@{caStartDateError}"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_16dp"
                 app:layout_constraintStart_toStartOf="parent"
                 android:hint="@string/start_date"
-                app:errorText="@{caStartDateError}"
                 app:layout_constraintTop_toBottomOf="@+id/ca_timezone"
                 app:layout_constraintEnd_toStartOf="@+id/ca_start_datetime_textinput">
 
@@ -213,6 +220,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_16dp"
+                app:errorEnabled="@{caStartDateError != null}"
+                app:errorText="@{caStartDateError}"
                 app:layout_constraintBottom_toBottomOf="@+id/ca_start_date_textinput"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:hint="@string/time"
@@ -260,20 +269,23 @@
                 android:hint="@string/late_submission_penalty"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:hintEnabled="true"
-                android:visibility="@{clazzAssignment.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_REJECT ? View.GONE : View.VISIBLE}"
+                app:suffixText="%"
+                app:suffixTextAppearance="@style/UmTheme.TextAppearance.Body2"
+                android:visibility="@{lateSubmissionVisibility}"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/ca_edit_late_submission_type">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:text="@={clazzAssignment.caDescription}"
                     android:id="@+id/ca_edit_penalty"
                     android:enabled="@{fieldsEnabled}"
+                    android:digits="0123456789"
+                    android:inputType="number"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
-            </com.google.android.material.textfield.TextInputLayout>
 
+            </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/ca_grace_date_textinput"
@@ -282,7 +294,7 @@
                 android:layout_height="wrap_content"
                 app:errorEnabled="@{caGracePeriodError != null}"
                 app:errorText="@{caGracePeriodError}"
-                android:visibility="@{clazzAssignment.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_REJECT ? View.GONE : View.VISIBLE}"
+                android:visibility="@{lateSubmissionVisibility}"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_16dp"
                 app:layout_constraintStart_toStartOf="parent"
@@ -301,13 +313,14 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/ca_grace_datetime_textinput"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:visibility="@{clazzAssignment.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_REJECT ? View.GONE : View.VISIBLE}"
+                app:errorEnabled="@{caGracePeriodError != null}"
+                app:errorText="@{caGracePeriodError}"
+                android:visibility="@{lateSubmissionVisibility}"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_16dp"
                 app:layout_constraintBottom_toBottomOf="@+id/ca_grace_date_textinput"

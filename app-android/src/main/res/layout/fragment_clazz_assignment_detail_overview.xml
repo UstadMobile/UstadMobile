@@ -17,6 +17,4 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:itemCount="8" />
 
-
-
 </layout>

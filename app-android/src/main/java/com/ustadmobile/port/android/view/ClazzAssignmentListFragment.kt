@@ -50,7 +50,7 @@ class ClazzAssignmentListFragment(): UstadListViewFragment<ClazzAssignmentWithMe
      * OnClick function that will handle when the user clicks to create a new item
      */
     override fun onClick(view: View?) {
-
+        super.onClick(view)
     }
 
     override fun onDestroyView() {

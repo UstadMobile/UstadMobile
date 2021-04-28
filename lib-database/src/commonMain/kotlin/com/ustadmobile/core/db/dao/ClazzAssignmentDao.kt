@@ -7,7 +7,6 @@ import androidx.room.Update
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
-import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
 
 
 @Dao
@@ -16,15 +15,17 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
 
     @Query("""
             SELECT ClazzAssignment.*, 
+            0 AS notSubmittedStudents, 0 AS submittedStudents, 0 AS completedStudents,
+            0 AS resultScoreScaled, 0 AS resultMax, 0 AS resultScore
             
-            
-            FROM ClazzAssignment
+             FROM ClazzAssignment
         
         
             WHERE caActive
-            AND (ClazzAssignment.caTitle LIKE :searchText 
-                    OR ClazzAssignment.caDescription :searchText)
-            ORDER BY CASE(:sortOrder)
+              AND ClazzAssignment.caClazzUid = :clazzUid
+              AND (ClazzAssignment.caTitle LIKE :searchText 
+                    OR ClazzAssignment.caDescription LIKE :searchText)
+         ORDER BY CASE(:sortOrder)
                 WHEN $SORT_DEADLINE_ASC THEN ClazzAssignment.caDeadlineDateTime
                 WHEN $SORT_SCORE_ASC THEN resultScoreScaled
                 ELSE 0
@@ -43,9 +44,9 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                 ELSE ''
             END DESC
     """)
-    abstract suspend fun getAllAssignments(clazzUid: Long,
-                                   sortOrder: Int, searchText: String? = "%"):
-            DataSource.Factory<Int, ClazzAssignmentWithMetrics>
+    abstract fun getAllAssignments(clazzUid: Long,
+                                   sortOrder: Int, searchText: String)
+            : DataSource.Factory<Int, ClazzAssignmentWithMetrics>
 
     @Update
     abstract suspend fun updateAsync(clazzAssignment: ClazzAssignment)
@@ -70,6 +71,10 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
         const val SORT_SCORE_ASC = 5
 
         const val SORT_SCORE_DESC = 6
+
+        const val SORT_START_DATE_ASC = 7
+
+        const val SORT_START_DATE_DESC = 8
 
     }
 

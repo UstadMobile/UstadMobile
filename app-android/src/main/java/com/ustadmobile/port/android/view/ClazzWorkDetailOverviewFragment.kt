@@ -429,20 +429,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
 
     companion object {
-        val DIFF_CALLBACK_COMMENTS =
-                object : DiffUtil.ItemCallback<CommentsWithPerson>() {
-            override fun areItemsTheSame(oldItem: CommentsWithPerson,
-                                         newItem: CommentsWithPerson): Boolean {
-                return oldItem.commentsUid == newItem.commentsUid
-            }
 
-            override fun areContentsTheSame(oldItem: CommentsWithPerson,
-                                            newItem: CommentsWithPerson): Boolean {
-                return oldItem.commentsPersonUid == newItem.commentsPersonUid &&
-                        oldItem.commentsText == newItem.commentsText &&
-                        oldItem.commentsDateTimeUpdated == newItem.commentsDateTimeUpdated
-            }
-        }
 
         val DU_CLAZZWORKWITHSUBMISSION =
                 object: DiffUtil.ItemCallback<ClazzWorkWithSubmission>() {

@@ -16,8 +16,8 @@
             type="PersonWithAttemptsSummary" />
 
         <variable
-            name="presenter"
-            type="com.ustadmobile.core.controller.ContentEntryDetailAttemptsListPresenter" />
+            name="listener"
+            type="com.ustadmobile.core.controller.AttemptListListener" />
 
         <variable
             name="selectablePagedListAdapter"
@@ -31,7 +31,7 @@
         android:paddingBottom="@dimen/dimen_16dp"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, person)}"
-        app:onSelectableItemClicked="@{() -> presenter.onClickPersonWithStatementDisplay(person)}"
+        app:onSelectableItemClicked="@{() -> listener.onClickPersonWithStatementDisplay(person)}"
         android:background="@drawable/bg_listitem">
 
         <de.hdodenhof.circleimageview.CircleImageView

@@ -13,7 +13,6 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentEditBinding
 import com.toughra.ustadmobile.databinding.ItemContentEntrySimpleListBinding
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
-import com.ustadmobile.core.controller.ClazzWorkEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.observeResult
@@ -89,7 +88,6 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
 
         mPresenter = ClazzAssignmentEditPresenter(requireContext(), arguments.toStringMap(), this,
                 viewLifecycleOwner, di)
-        mPresenter?.onCreate(backStackSavedState)
 
         return rootView
     }
@@ -97,6 +95,9 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setEditFragmentTitle(R.string.new_assignment, R.string.edit_assignment)
+
+        mPresenter?.onCreate(backStackSavedState)
+
         val navController = findNavController()
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
@@ -121,6 +122,13 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         set(value) {
             field = value
             mBinding?.clazzAssignment = value
+            mBinding?.lateSubmissionVisibility = if(
+                    value?.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_ACCEPT ||
+                    value?.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY){
+                View.VISIBLE
+            }else{
+                View.GONE
+            }
         }
 
     override var fieldsEnabled: Boolean = false
@@ -181,7 +189,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         navigateToPickEntityFromList(
                 ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::class.java,
                 R.id.content_entry_list_dest,
-                bundleOf(ContentEntryList2View.ARG_CLAZZWORK_FILTER to
+                bundleOf(ContentEntryList2View.ARG_CLAZZ_ASSIGNMENT_FILTER to
                         entity?.caUid.toString(),
                         ContentEntryList2View.ARG_CONTENT_FILTER to
                                 ContentEntryList2View.ARG_LIBRARIES_CONTENT,
@@ -190,7 +198,13 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
     }
 
     override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
-        // TODO update view to hide/unhide grace period section
+        mBinding?.lateSubmissionVisibility = if(
+                selectedOption.optionId == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_ACCEPT ||
+                selectedOption.optionId == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY){
+            View.VISIBLE
+        }else{
+            View.GONE
+        }
     }
 
     override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {

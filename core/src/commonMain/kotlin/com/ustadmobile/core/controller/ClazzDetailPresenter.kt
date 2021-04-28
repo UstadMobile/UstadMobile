@@ -78,16 +78,16 @@ class ClazzDetailPresenter(context: Any,
 
     companion object {
 
-        val CLAZZ_FEATURES = listOf(Clazz.CLAZZ_FEATURE_ATTENDANCE, Clazz.CLAZZ_FEATURE_CLAZZWORK)
+        val CLAZZ_FEATURES = listOf(Clazz.CLAZZ_FEATURE_ATTENDANCE, Clazz.CLAZZ_FEATURE_CLAZZ_ASSIGNMENT)
 
         //Map of the feature flag to the permission flag required for that tab to be visible
         val FEATURE_PERMISSION_MAP = mapOf(
                 Clazz.CLAZZ_FEATURE_ATTENDANCE to Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT,
-                Clazz.CLAZZ_FEATURE_CLAZZWORK to Role.PERMISSION_ASSIGNMENT_SELECT)
+                Clazz.CLAZZ_FEATURE_CLAZZ_ASSIGNMENT to Role.PERMISSION_ASSIGNMENT_SELECT)
 
         val VIEWNAME_MAP = mapOf<Long, String>(
                 Clazz.CLAZZ_FEATURE_ATTENDANCE to ClazzLogListAttendanceView.VIEW_NAME,
-                Clazz.CLAZZ_FEATURE_CLAZZWORK to ClazzWorkListView.VIEW_NAME
+                Clazz.CLAZZ_FEATURE_CLAZZ_ASSIGNMENT to ClazzAssignmentListView.VIEW_NAME
         )
     }
 

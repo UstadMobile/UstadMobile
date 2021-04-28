@@ -34,7 +34,7 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
 
         const val ARG_LIBRARIES_CONTENT = "libraries"
 
-        const val ARG_CLAZZWORK_FILTER = "clazzworkFilter"
+        const val ARG_CLAZZ_ASSIGNMENT_FILTER = "clazzAssignmentFilter"
 
         const val VIEW_NAME = "ContentEntryListView"
 

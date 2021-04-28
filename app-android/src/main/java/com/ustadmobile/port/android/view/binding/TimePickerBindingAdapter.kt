@@ -17,13 +17,13 @@ import java.util.*
  * Time binding Adapter for Date picker types.
  * Contains the logic for linking editText dates with Timepicker
  */
-fun updateTimeOnEditText(et: EditText, millisSinceMidnight: Int) {
-    if (millisSinceMidnight == 0) {
+fun updateTimeOnEditText(et: EditText, millisSinceMidnight: Long) {
+    if (millisSinceMidnight == 0L || millisSinceMidnight == Long.MAX_VALUE) {
         et.setText("")
     }else{
         val dateFormatter = DateFormat.getTimeFormat(et.context)
         val cal = Calendar.getInstance().also {
-            val (hour, minute) = millisSinceMidnightToHoursAndMins(millisSinceMidnight)
+            val (hour, minute) = millisSinceMidnightToHoursAndMins(millisSinceMidnight.toInt())
             it.set(Calendar.HOUR_OF_DAY, hour)
             it.set(Calendar.MINUTE, minute)
         }
@@ -35,7 +35,7 @@ fun openTimePicker(et: EditText, context: Context, inverseBindingListener: Inver
     val c = Calendar.getInstance()
     val timeSet = et.getTag(R.id.tag_timelong) as? Int ?: 0
     if(timeSet > 0) {
-        val (hour, minute) = millisSinceMidnightToHoursAndMins(timeSet.toInt())
+        val (hour, minute) = millisSinceMidnightToHoursAndMins(timeSet)
         c.set(Calendar.HOUR_OF_DAY, hour)
         c.set(Calendar.MINUTE, minute)
     }
@@ -44,7 +44,7 @@ fun openTimePicker(et: EditText, context: Context, inverseBindingListener: Inver
     val timeListener = { _: TimePicker, hourOfDay:Int, minute:Int ->
         val millisSinceMidnight = hoursAndMinsToMillisSinceMidnight(hourOfDay, minute)
         et.setTag(R.id.tag_timelong, millisSinceMidnight)
-        updateTimeOnEditText(et, millisSinceMidnight)
+        updateTimeOnEditText(et, millisSinceMidnight.toLong())
         inverseBindingListener.onChange()
     }
 
@@ -65,7 +65,7 @@ fun getTime(et: EditText, inverseBindingListener: InverseBindingListener){
 @BindingAdapter("timeValue")
 fun setTime(et: EditText, time: Long){
     et.setTag(R.id.tag_timelong, time)
-    updateTimeOnEditText(et, time.toInt())
+    updateTimeOnEditText(et, time)
 }
 
 @InverseBindingAdapter(attribute = "timeValue")

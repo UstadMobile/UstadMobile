@@ -50,7 +50,7 @@ class ClazzAssignmentBasicDetailRecyclerAdapter()
     override fun onBindViewHolder(holder: ClazzAssignmentDetailViewHolder, position: Int) {
         super.onBindViewHolder(holder, position)
         viewHolder?.itemView?.tag = clazzAssignment?.caUid?:0L
-        viewHolder?.itemBinding?.itemClazzworkDetailDescriptionCl?.tag =
+        viewHolder?.itemBinding?.itemClazzAssignmetnDetailDescriptionCl?.tag =
                 clazzAssignment?.caUid?:0L
         viewHolder?.itemBinding?.timeZone = timeZone
     }

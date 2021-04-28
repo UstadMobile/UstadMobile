@@ -209,7 +209,7 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
         navigateToPickEntityFromList(
                 ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::class.java,
                 R.id.content_entry_list_dest,
-                bundleOf(ContentEntryList2View.ARG_CLAZZWORK_FILTER to
+                bundleOf(ContentEntryList2View.ARG_CLAZZ_ASSIGNMENT_FILTER to
                         entity?.clazzWorkUid.toString(),
                         ContentEntryList2View.ARG_CONTENT_FILTER to
                                 ContentEntryList2View.ARG_LIBRARIES_CONTENT,
