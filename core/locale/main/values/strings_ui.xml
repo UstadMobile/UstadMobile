@@ -818,6 +818,7 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="late_submission_penalty">Late submission penalty</string>
     <string name="end_of_grace_period">End of grace period</string>
     <string name="allow_class_comments">Allow class comments from students</string>
+    <string name="your_total_score">Your total score</string>
 
     <string name="marked">marked</string>
     <string name="submitted">submitted</string>
