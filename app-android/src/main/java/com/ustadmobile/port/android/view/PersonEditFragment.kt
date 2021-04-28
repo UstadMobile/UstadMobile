@@ -25,7 +25,6 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
-import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.core.view.ClazzList2View.Companion.ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST
 import com.ustadmobile.core.view.ClazzMemberListView.Companion.ARG_HIDE_CLAZZES
 import com.ustadmobile.core.view.PersonEditView
@@ -37,6 +36,7 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
+import com.ustadmobile.port.android.view.PersonAccountEditFragment.Companion.USERNAME_FILTER
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
@@ -72,7 +72,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
     private data class ClassRoleOption(val roleId: Int, val resultKey: String, val stringId: Int)
 
     class ClazzEnrolmentWithClazzRecyclerAdapter(val eventHandler: PersonEditFragmentEventHandler,
-                                                  var presenter: PersonEditPresenter?): ListAdapter<ClazzEnrolmentWithClazz,
+            var presenter: PersonEditPresenter?): ListAdapter<ClazzEnrolmentWithClazz,
             ClazzEnrolmentWithClazzRecyclerAdapter.ClazzEnrolmentWithClazzViewHolder>(
             DIFFUTIL_CLAZZMEMBER_WITH_CLAZZ) {
 
@@ -218,61 +218,76 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             field = value
         }
 
-    override var usernameError: String? = null
+    override var usernameError: String?
         set(value) {
-            field = value
-            handleInputError(mBinding?.usernameTextinputlayout, value != null, value)
+            mBinding?.usernameError = value
         }
+        get() = mBinding?.usernameError
 
-    override var passwordError: String? = null
+    override var firstNamesFieldError: String?
         set(value) {
-            field = value
-            handleInputError(mBinding?.passwordTextinputlayout, value != null, value)
+            mBinding?.firstNamesError = value
         }
+        get() = mBinding?.firstNamesError
 
-
-
-    override var noMatchPasswordError: String? = null
+    override var lastNameFieldError: String?
         set(value) {
-            field = value
-            if(value != null){
-                handleInputError(mBinding?.passwordTextinputlayout,true, value)
-                handleInputError(mBinding?.confirmPasswordTextinputlayout, true,value)
-            }
+            mBinding?.lastNameError = value
         }
+        get() = mBinding?.lastNameError
 
-    override var confirmError: String? = null
-        set(value) {
-            field = value
-            handleInputError(mBinding?.confirmPasswordTextinputlayout, value != null, value)
-        }
 
-    override var dateOfBirthError: String? = null
+    override var genderFieldError: String?
         set(value) {
-            field = value
-            handleInputError(mBinding?.birthdayTextinputlayout, value != null, value)
+            mBinding?.genderFieldError = value
         }
+        get() = mBinding?.genderFieldError
+
+    override var passwordError: String?
+        set(value) {
+            mBinding?.passwordError = value
+        }
+        get() = mBinding?.passwordError
+
+    override var noMatchPasswordError: String?
+        set(value) {
+            mBinding?.passwordConfirmError = value
+            mBinding?.passwordError = value
+        }
+        get() = mBinding?.passwordConfirmError
+
+
+    override var confirmError: String?
+        set(value) {
+            mBinding?.passwordConfirmError = value
+        }
+        get() = mBinding?.passwordConfirmError
+
+    override var dateOfBirthError: String?
+        set(value) {
+            mBinding?.dateOfBirthFieldError = value
+        }
+        get() = mBinding?.dateOfBirthFieldError
+
+    override var lastNameError: String?
+        set(value) {
+            mBinding?.lastNameError = value
+        }
+        get() = mBinding?.lastNameError
+
+    private var imageViewLifecycleObserver: ImageViewLifecycleObserver2? = null
+
+    override var firstNameError: String?
+        set(value) {
+            mBinding?.firstNamesError = value
+        }
+        get() = mBinding?.firstNamesError
+
     override var canDelegatePermissions: Boolean? = false
         set(value) {
             mBinding?.isAdmin = value?:false
             field = value
         }
-
-    override var lastNameError: String? = null
-        get() = field
-        set(value) {
-            field = value
-            handleInputError(mBinding?.lastnameTextInputLayout, value != null, value)
-        }
-
-    override var firstNameError: String? = null
-        get() = field
-        set(value) {
-            field = value
-            handleInputError(mBinding?.firstnamesTextinputlayout, value != null, value)
-        }
-
-    private var imageViewLifecycleObserver: ImageViewLifecycleObserver2? = null
 
     override fun navigateToNextDestination(account: UmAccount?, nextDestination: String) {
         val navController = findNavController()
@@ -282,7 +297,8 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         navController.currentBackStackEntry?.savedStateHandle?.set(UstadView.ARG_SNACK_MESSAGE,
                 String.format(getString(R.string.logged_in_as),account?.username,account?.endpointUrl))
         if(umNextDestination != null){
-            val navOptions = NavOptions.Builder().setPopUpTo(umNextDestination.destinationId, true).build()
+            val navOptions = NavOptions.Builder().setPopUpTo(umNextDestination.destinationId,
+                    true).build()
             navController.navigate(umNextDestination.destinationId,null, navOptions)
         }
     }
@@ -309,7 +325,23 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    class ClearErrorTextWatcher(private val onTextFunction: () -> Unit ):TextWatcher{
+        override fun afterTextChanged(p0: Editable?) {
+
+        }
+
+        override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
+        }
+
+        override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            onTextFunction()
+        }
+    }
+
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         val rootView: View
         mBinding = FragmentPersonEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
@@ -322,7 +354,8 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
         mPresenter = PersonEditPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
-        clazzEnrolmentWithClazzRecyclerAdapter = ClazzEnrolmentWithClazzRecyclerAdapter(this, mPresenter)
+        clazzEnrolmentWithClazzRecyclerAdapter =
+                ClazzEnrolmentWithClazzRecyclerAdapter(this, mPresenter)
         rolesAndPermissionRecyclerAdapter = EntityRoleRecyclerAdapter(true, this)
         clazzMemberUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(
                 View.OnClickListener { onClickNewClazzMemberWithClazz() },
@@ -340,46 +373,35 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         mBinding?.rolesAndPermissionsRv?.adapter = ConcatAdapter(rolesAndPermissionRecyclerAdapter,
                 rolesAndPermissionUstadListHeaderRecyclerViewAdapter)
 
-        mBinding?.usernameText?.addTextChangedListener(object: TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {}
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                handleInputError(mBinding?.usernameTextinputlayout, false, null)
-            }
+        mBinding?.usernameText?.addTextChangedListener(ClearErrorTextWatcher {
+            mBinding?.usernameError = null
         })
 
-        mBinding?.passwordText?.addTextChangedListener(object: TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {}
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                handleInputError(mBinding?.passwordTextinputlayout, false, null)
-            }
+        mBinding?.firstnamesText?.addTextChangedListener(ClearErrorTextWatcher {
+            mBinding?.firstNamesError = null
         })
 
-        mBinding?.confirmPasswordText?.addTextChangedListener(object: TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {}
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                handleInputError(mBinding?.confirmPasswordTextinputlayout, false, null)
-            }
+        mBinding?.lastnameText?.addTextChangedListener(ClearErrorTextWatcher {
+            mBinding?.lastNameError = null
         })
 
-        mBinding?.birthdayText?.addTextChangedListener(object: TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {}
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                handleInputError(mBinding?.birthdayTextinputlayout, false, null)
-            }
+        mBinding?.genderValue?.addTextChangedListener(ClearErrorTextWatcher {
+            mBinding?.genderFieldError = null
         })
 
+        mBinding?.passwordText?.addTextChangedListener(ClearErrorTextWatcher {
+            mBinding?.passwordError = null
+        })
+
+        mBinding?.confirmPasswordText?.addTextChangedListener(ClearErrorTextWatcher {
+            mBinding?.passwordConfirmError = null
+        })
+
+        mBinding?.birthdayText?.addTextChangedListener(ClearErrorTextWatcher {
+            mBinding?.dateOfBirthFieldError = null
+        })
+
+        mBinding?.usernameText?.filters = arrayOf(USERNAME_FILTER)
 
         return rootView
     }
@@ -441,12 +463,15 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
     companion object {
 
-        val DIFFUTIL_CLAZZMEMBER_WITH_CLAZZ = object: DiffUtil.ItemCallback<ClazzEnrolmentWithClazz>() {
-            override fun areItemsTheSame(oldItem: ClazzEnrolmentWithClazz, newItem: ClazzEnrolmentWithClazz): Boolean {
+        val DIFFUTIL_CLAZZMEMBER_WITH_CLAZZ =
+                object: DiffUtil.ItemCallback<ClazzEnrolmentWithClazz>() {
+            override fun areItemsTheSame(oldItem: ClazzEnrolmentWithClazz,
+                                         newItem: ClazzEnrolmentWithClazz): Boolean {
                 return oldItem.clazzEnrolmentUid == newItem.clazzEnrolmentUid
             }
 
-            override fun areContentsTheSame(oldItem: ClazzEnrolmentWithClazz, newItem: ClazzEnrolmentWithClazz): Boolean {
+            override fun areContentsTheSame(oldItem: ClazzEnrolmentWithClazz,
+                                            newItem: ClazzEnrolmentWithClazz): Boolean {
                 return oldItem == newItem
             }
         }

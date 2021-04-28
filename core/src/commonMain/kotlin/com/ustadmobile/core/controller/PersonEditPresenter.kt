@@ -182,12 +182,16 @@ class PersonEditPresenter(context: Any,
             confirmError != null ||
             dateOfBirthError != null ||
             noMatchPasswordError != null ||
+            firstNamesFieldError != null ||
+            lastNameFieldError != null ||
+            genderFieldError != null ||
                     firstNameError != null ||
                     lastNameError != null
 
     override fun handleClickSave(entity: PersonWithAccount) {
         view.loading = true
         view.fieldsEnabled = false
+
         GlobalScope.launch(doorMainDispatcher()) {
             //reset all errors
             view.usernameError = null
@@ -195,10 +199,21 @@ class PersonEditPresenter(context: Any,
             view.confirmError = null
             view.dateOfBirthError = null
             view.noMatchPasswordError = null
+            view.firstNamesFieldError == null
+            view.lastNameFieldError == null
+            view.genderFieldError == null
+
+            val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
+
+            view.takeIf { entity.firstNames.isNullOrEmpty() }?.firstNamesFieldError = requiredFieldMessage
+            view.takeIf { entity.lastName.isNullOrEmpty() }?.lastNameFieldError = requiredFieldMessage
+            view.takeIf { entity.gender == Person.GENDER_UNSET }?.genderFieldError = requiredFieldMessage
+            if(entity.gender != Person.GENDER_UNSET){
+                view.genderFieldError = null
+            }
             view.firstNameError = null
             view.lastNameError = null
 
-            val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
             view.takeIf { entity.firstNames.isNullOrEmpty() }?.firstNameError = requiredFieldMessage
             view.takeIf { entity.lastName.isNullOrEmpty() }?.lastNameError = requiredFieldMessage
 
@@ -209,6 +224,7 @@ class PersonEditPresenter(context: Any,
             }
 
             if(registrationMode) {
+
 
                 view.takeIf { entity.username.isNullOrEmpty() }?.usernameError = requiredFieldMessage
                 view.takeIf { entity.newPassword.isNullOrEmpty() }?.passwordError = requiredFieldMessage

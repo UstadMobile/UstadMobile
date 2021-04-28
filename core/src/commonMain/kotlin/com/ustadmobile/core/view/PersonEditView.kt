@@ -30,6 +30,10 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var canDelegatePermissions: Boolean?
 
+    var firstNamesFieldError: String?
+    var lastNameFieldError: String?
+    var genderFieldError: String?
+
     var firstNameError: String?
 
     var lastNameError: String?
