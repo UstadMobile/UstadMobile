@@ -59,6 +59,8 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
     private var detailMergerRecyclerAdapter: ConcatAdapter? = null
     private var detailRecyclerAdapter: ClazzAssignmentBasicDetailRecyclerAdapter? = null
 
+    private var scoreRecyclerAdapter: ScoreRecyclerAdapter? = null
+
     private var classCommentsHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter? = null
     private var classCommentsRecyclerAdapter: CommentsRecyclerAdapter? = null
     private var classCommentsObserver: Observer<PagedList<CommentsWithPerson>>? = null
@@ -113,7 +115,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
                 ListViewMode.BROWSER.toString(), viewLifecycleOwner, di)
 
         // 4 score
-
+        scoreRecyclerAdapter = ScoreRecyclerAdapter()
 
 
         // 5 class
@@ -157,7 +159,10 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
 
         // TODO add all adapters
-        detailMergerRecyclerAdapter = ConcatAdapter()
+        detailMergerRecyclerAdapter = ConcatAdapter(detailRecyclerAdapter, contentHeaderAdapter,
+            contentRecyclerAdapter, scoreRecyclerAdapter, classCommentsHeadingRecyclerAdapter,
+            classCommentsRecyclerAdapter, newClassCommentRecyclerAdapter, privateCommentsHeadingRecyclerAdapter,
+            privateCommentsRecyclerAdapter, newPrivateCommentRecyclerAdapter)
         detailMergerRecyclerView?.adapter = detailMergerRecyclerAdapter
         detailMergerRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
@@ -186,6 +191,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         contentHeaderAdapter = null
         contentRecyclerAdapter = null
         contentLiveData = null
+        scoreRecyclerAdapter = null
 
         privateCommentsLiveData = null
         classCommentsLiveData = null
