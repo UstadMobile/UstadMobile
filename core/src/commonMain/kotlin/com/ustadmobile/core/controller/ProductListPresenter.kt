@@ -53,7 +53,7 @@ class ProductListPresenter(context: Any, arguments: Map<String, String>, view: P
             var filterIdOption: MutableList<ListFilterIdOption> = mutableListOf()
             filterIdOption.add(ListFilterIdOption(systemImpl.getString(MessageID.all, context),0))
             var index = 1
-            val locale = systemImpl.getSystemLocale(context)
+            val locale = systemImpl.getDisplayedLocale(context)
             for(everyCategory in categories){
                 filterIdOption.add(ListFilterIdOption(
                         everyCategory.getNameLocale(locale)?:"",
