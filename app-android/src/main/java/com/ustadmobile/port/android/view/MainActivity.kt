@@ -103,14 +103,10 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         super.onNewIntent(intent)
 
         val uri = intent?.data?.toString()
-        loadFromUriString(uri)
 
-    }
-
-    private fun loadFromUriString(uri: String?){
-
-        impl.go(uri, getActivityContext())
-
+        if(uri != null){
+            impl.goDeepLink(uri, accountManager, this)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

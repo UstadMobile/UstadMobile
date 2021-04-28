@@ -44,9 +44,16 @@ import com.ustadmobile.core.view.SplashScreenView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
+import org.kodein.di.android.di
+import org.kodein.di.instance
 
 
 class SplashScreenActivity : AppCompatActivity(), SplashScreenView  {
+
+    private val di: DI by di()
+
+    private val systemImpl: UstadMobileSystemImpl by di.instance()
 
     override var loading: Boolean = false
         get() = false
@@ -75,7 +82,6 @@ class SplashScreenActivity : AppCompatActivity(), SplashScreenView  {
 
         GlobalScope.launch {
             delay(DEFAULT_DELAY)
-            val systemImpl = UstadMobileSystemImpl.instance
             val activityClass = if(systemImpl.getAppPref(OnBoardingView.PREF_TAG, "false",
                             this@SplashScreenActivity).toBoolean()) {
                 MainActivity::class.java

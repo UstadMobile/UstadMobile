@@ -15,6 +15,8 @@ interface AccountListView : UstadView {
 
         const val VIEW_NAME = "AccountListView"
 
+        const val ARG_FILTER_BY_ENDPOINT = "filterByEndpoint"
+
     }
 
 }

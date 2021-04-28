@@ -240,7 +240,7 @@ class DownloadJobItemRunnerTest {
         }
 
         clientDi = DI {
-            bind<UstadMobileSystemImpl>() with singleton { UstadMobileSystemImpl.instance }
+            bind<UstadMobileSystemImpl>() with singleton { UstadMobileSystemImpl() }
 
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
