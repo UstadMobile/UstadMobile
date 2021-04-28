@@ -60,7 +60,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
     protected var dbRepo: UmAppDatabase? = null
 
-    private val systemImpl: UstadMobileSystemImpl by di.instance()
+    private val systemImpl: UstadMobileSystemImpl by instance()
 
     /**
      * Whether or not UstadListViewFragment should attempt to manage the MergeAdapter. The MergeAdapter

@@ -45,15 +45,16 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.DIAware
 import org.kodein.di.android.di
 import org.kodein.di.instance
 
 
-class SplashScreenActivity : AppCompatActivity(), SplashScreenView  {
+class SplashScreenActivity : AppCompatActivity(), SplashScreenView, DIAware  {
 
-    private val di: DI by di()
+    override val di: DI by di()
 
-    private val systemImpl: UstadMobileSystemImpl by di.instance()
+    private val systemImpl: UstadMobileSystemImpl by instance()
 
     override var loading: Boolean = false
         get() = false
