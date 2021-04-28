@@ -17,8 +17,9 @@ $ mkdir /home/ustad/server
 $ cp /my/Download/ustad-server-all.jar /home/ustad/ustad-server-all.jar
 
 # Install java (on Ubuntu)
-$ apt-get install openjdk-8-jre
+$ apt-get install openjdk-8-jre ffmpeg
 ```
+Note: FFMPEG is optional, but is recommended. It is used by the server to compress video.
 
 ## Install HTTPS Certificate (recommended)
 
