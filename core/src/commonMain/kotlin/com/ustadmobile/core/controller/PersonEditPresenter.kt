@@ -213,9 +213,8 @@ class PersonEditPresenter(context: Any,
             view.lastNameError = null
 
             //Email validation
-            val emailExpression = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$"
             val email = entity.emailAddr?:""
-            if(email.isNotEmpty() && !Regex(emailExpression).matches(email)){
+            if(email.isNotEmpty() && !Regex("^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$").matches(email)){
                 view.emailError = formatError
             }
 

@@ -17,7 +17,7 @@ import com.ustadmobile.core.controller.PersonAccountEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonAccountEditView
-import com.ustadmobile.core.view.PersonAccountEditView.Companion.blockCharacterSet
+import com.ustadmobile.core.view.PersonAccountEditView.Companion.BLOCK_CHARACTER_SET
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 
@@ -174,7 +174,7 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
 
             for (i in start until end) {
                 val c = source[i]
-                if (blockCharacterSet.contains(c)) {
+                if (BLOCK_CHARACTER_SET.contains(c)) {
                     ""
                 }else if(c != null || !c.equals("")) {
                     sb.append(c.toString().toLowerCase())
