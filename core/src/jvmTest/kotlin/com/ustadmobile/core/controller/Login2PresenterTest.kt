@@ -60,7 +60,11 @@ class Login2PresenterTest {
                 Unit
             }
         }
-        impl = mock ()
+
+        impl = mock {
+            on {getAppConfigDefaultFirstDest(any())}.thenReturn(ContentEntryListTabsView.VIEW_NAME)
+        }
+
         accountManager = mock{
             onBlocking { login(eq(VALID_USER), eq(VALID_PASS), any(), any()) }.thenAnswer {
                 val url = it.arguments[2] as String
@@ -187,15 +191,10 @@ class Login2PresenterTest {
 
         presenter.handleLogin(VALID_USER, VALID_PASS)
 
-        verify(impl, timeout(defaultTimeout)).go(any(), any(), any(), any())
-//        argumentCaptor<String>{
-//            verify(view, timeout(defaultTimeout)).navigateToNextDestination(anyOrNull(),capture(), capture())
-//            Assert.assertEquals("Next destination was opened",
-//                    nextDestination, secondValue)
-//
-//            Assert.assertEquals("Back stack was popped up to the provided from-destination",
-//                    fromDestination, firstValue)
-//        }
+        verify(impl, timeout(defaultTimeout)).go(eq(nextDestination), any(), any(),
+            argWhere {
+                it.popUpToViewName == UstadView.ROOT_DEST
+            })
 
         verifyBlocking(accountManager, timeout(defaultTimeout)) { login(VALID_USER, VALID_PASS, httpUrl) }
         verifyBlocking(mockRepo as DoorDatabaseSyncRepository, timeout(defaultTimeout)) { invalidateAllTables() }
@@ -222,15 +221,7 @@ class Login2PresenterTest {
 
         presenter.handleLogin(VALID_USER, VALID_PASS)
 
-        verify(impl, timeout(defaultTimeout)).go(any(), any(), any(), any())
-//        argumentCaptor<String>{
-//            verify(view, timeout(defaultTimeout)).navigateToNextDestination(anyOrNull(),capture(), capture())
-//            Assert.assertEquals("Next destination was opened",
-//                    nextDestination, secondValue)
-//            Assert.assertEquals("Back stack was popped up to the default from-destination",
-//                    Login2View.VIEW_NAME, firstValue)
-//        }
-
+        verify(impl, timeout(defaultTimeout)).go(eq(nextDestination), any(), any(), any())
         verifyBlocking(accountManager) { login(VALID_USER, VALID_PASS, httpUrl) }
     }
 
@@ -256,14 +247,7 @@ class Login2PresenterTest {
         presenter.handleLogin(VALID_USER, VALID_PASS)
 
 
-        verify(impl, timeout(defaultTimeout)).go(any(), any(), any(), any())
-//        argumentCaptor<String>{
-//            verify(view, timeout(defaultTimeout)).navigateToNextDestination(anyOrNull(),capture(), capture())
-//            Assert.assertEquals("Next destination was opened",
-//                    nextDestination, secondValue)
-//            Assert.assertEquals("Back stack was popped up to the default from-destination",
-//                    GetStartedView.VIEW_NAME, firstValue)
-//        }
+        verify(impl, timeout(defaultTimeout)).go(eq(nextDestination), any(), any(), any())
 
         verifyBlocking(accountManager) { login(VALID_USER, VALID_PASS, httpUrl) }
     }

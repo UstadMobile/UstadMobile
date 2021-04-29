@@ -1,10 +1,13 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.putIfNotAlreadySet
+import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
@@ -48,7 +51,7 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
     }
 
     fun handleClickAbout(){
-        impl.go(AboutView.VIEW_NAME, context)
+        impl.goToViewLink(AboutView.VIEW_NAME, context)
     }
 
     fun handleClickLogout(account: UmAccount){
@@ -65,6 +68,11 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
             arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.ROOT_DEST,
             false)
-        impl.go(impl.getAppConfigDefaultFirstDest(context), context, goOptions)
+        val snackMsg = impl.getString(MessageID.logged_in_as, context)
+            .replace("%1\$s", account.username ?: "")
+            .replace("%2\$s", account.endpointUrl)
+        val dest = impl.getAppConfigDefaultFirstDest(context)
+            .appendQueryArgs(mapOf(UstadView.ARG_SNACK_MESSAGE to snackMsg).toQueryString())
+        impl.goToViewLink(dest, context, goOptions)
     }
 }

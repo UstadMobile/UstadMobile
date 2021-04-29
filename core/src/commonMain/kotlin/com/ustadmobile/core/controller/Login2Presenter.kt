@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
+import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonEditView.Companion.REGISTER_VIA_LINK
@@ -54,9 +55,8 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                     AppConfig.KEY_API_URL, "http://localhost", context)?:""
         }
 
-        if(!serverUrl.endsWith("/")){
-            serverUrl += "/"
-        }
+        serverUrl = serverUrl.requirePostfix("/")
+
         val mWorkSpace = arguments[ARG_SITE]
         if(mWorkSpace != null){
             workSpace = safeParse(di, Site.serializer(), mWorkSpace)

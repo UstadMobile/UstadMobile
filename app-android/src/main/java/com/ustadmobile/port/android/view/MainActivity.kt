@@ -36,7 +36,6 @@ import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
-import com.ustadmobile.port.android.util.ext.getActivityContext
 import com.ustadmobile.port.android.view.util.UstadActivityWithProgressBar
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_main.*
@@ -105,7 +104,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val uri = intent?.data?.toString()
 
         if(uri != null){
-            impl.goDeepLink(uri, accountManager, this)
+            impl.goToDeepLink(uri, accountManager, this)
         }
     }
 

@@ -83,7 +83,7 @@ abstract class UstadMobileSystemCommon {
         return getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context) ?: ContentEntryListTabsView.VIEW_NAME
     }
 
-    fun goDeepLink(deepLink: String, accountManager: UstadAccountManager, context: Any) {
+    fun goToDeepLink(deepLink: String, accountManager: UstadAccountManager, context: Any) {
         if(deepLink.contains(LINK_ENDPOINT_VIEWNAME_DIVIDER)) {
             val endpointUrl = deepLink.substringBefore(LINK_ENDPOINT_VIEWNAME_DIVIDER)
                 .requirePostfix("/")
@@ -100,14 +100,14 @@ abstract class UstadMobileSystemCommon {
     }
 
     /**
-     * Go to a new view : This is simply a convenience wrapper for go(viewName, args, context):
-     * it will parse the a destination into the viewname and arguments, and then build a hashtable
-     * to pass on.
+     * Go to a new view using a ViewLink in the form of ViewName?arg1=val1&arg2=val2 . This function
+     * will parse the arguments from the query string into a map
      *
      * @param destination Destination name in the form of ViewName?arg1=val1&arg2=val2 etc.
      * @param context System context object
+     * @param ustadGoOptions Go Options to specify popUpTo etc.
      */
-    open fun go(destination: String, context: Any, ustadGoOptions: UstadGoOptions = UstadGoOptions()) {
+    open fun goToViewLink(destination: String, context: Any, ustadGoOptions: UstadGoOptions = UstadGoOptions()) {
         val destinationQueryPos = destination.indexOf('?')
         if(destinationQueryPos == -1) {
             go(destination, mapOf(), context, ustadGoOptions)

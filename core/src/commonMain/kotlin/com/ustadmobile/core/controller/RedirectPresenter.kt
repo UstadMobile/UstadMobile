@@ -23,7 +23,7 @@ class RedirectPresenter(context: Any, arguments: Map<String, String>, view: Redi
         val deepLink = arguments[ARG_DEEPLINK]
 
         if(deepLink?.isNotEmpty() == true){
-            systemImpl.goDeepLink(deepLink, accountManager, context)
+            systemImpl.goToDeepLink(deepLink, accountManager, context)
         }else {
             val canSelectServer = systemImpl.getAppConfigBoolean(AppConfig.KEY_ALLOW_SERVER_SELECTION,
                     context)
@@ -39,7 +39,7 @@ class RedirectPresenter(context: Any, arguments: Map<String, String>, view: Redi
                 ContentEntryListTabsView.VIEW_NAME
             }
 
-            systemImpl.go(destination, context)
+            systemImpl.goToViewLink(destination, context)
         }
     }
 

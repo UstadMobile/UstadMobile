@@ -105,7 +105,7 @@ class AccountListPresenterTest {
         presenter.handleClickAddAccount()
 
         argumentCaptor<String>{
-            verify(impl).go(capture(), any(), any())
+            verify(impl).go(viewName = capture(), args = any(), context=  any())
             assertTrue("Get started screen was opened", SiteEnterLinkView.VIEW_NAME == firstValue)
         }
     }
@@ -204,9 +204,6 @@ class AccountListPresenterTest {
 
         presenter.handleClickAbout()
 
-        argumentCaptor<String>{
-            verify(impl).go(capture(),any())
-            assertTrue("About screen was opened", AboutView.VIEW_NAME == firstValue)
-        }
+        verify(impl).goToViewLink(eq(AboutView.VIEW_NAME), any(), any())
     }
 }
