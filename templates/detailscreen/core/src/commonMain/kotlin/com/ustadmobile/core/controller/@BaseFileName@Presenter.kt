@@ -1,20 +1,13 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.@Entity@DetailView
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.@Entity@
 @DisplayEntity_Import@
 import com.ustadmobile.lib.db.entities.UmAccount
-import io.ktor.client.features.json.defaultSerializer
-import io.ktor.http.content.TextContent
-import kotlinx.coroutines.*
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.list
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.kodein.di.DI
 
@@ -26,7 +19,7 @@ class @Entity@DetailPresenter(context: Any,
     : UstadDetailPresenter<@Entity@DetailView, @DisplayEntity@>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
-        get() = TODO("PERSISTENCE_MODE.DB OR PERSISTENCE_MODE.JSON")
+        get() = TODO("PersistenceMode.DB, PersistenceMode.JSON, or PersistenceMode.LIVEDATA")
 
     /*
      * TODO: Add any required one to many join helpers here - use these templates (type then hit tab)

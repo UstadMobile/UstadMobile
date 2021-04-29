@@ -175,7 +175,6 @@ class PersonEditPresenter(context: Any,
                 entityVal)
     }
 
-
     private fun PersonEditView.hasErrors(): Boolean =
             usernameError != null ||
             passwordError != null ||
@@ -186,7 +185,8 @@ class PersonEditPresenter(context: Any,
             lastNameFieldError != null ||
             genderFieldError != null ||
                     firstNameError != null ||
-                    lastNameError != null
+                    lastNameError != null ||
+                    emailError != null
 
     override fun handleClickSave(entity: PersonWithAccount) {
         view.loading = true
@@ -196,6 +196,7 @@ class PersonEditPresenter(context: Any,
             //reset all errors
             view.usernameError = null
             view.passwordError = null
+            view.emailError = null
             view.confirmError = null
             view.dateOfBirthError = null
             view.noMatchPasswordError = null
@@ -204,6 +205,7 @@ class PersonEditPresenter(context: Any,
             view.genderFieldError == null
 
             val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
+            val formatError = impl.getString(MessageID.invalid_email, context)
 
             view.takeIf { entity.firstNames.isNullOrEmpty() }?.firstNamesFieldError = requiredFieldMessage
             view.takeIf { entity.lastName.isNullOrEmpty() }?.lastNameFieldError = requiredFieldMessage
@@ -213,6 +215,13 @@ class PersonEditPresenter(context: Any,
             }
             view.firstNameError = null
             view.lastNameError = null
+
+            //Email validation
+            val email = entity.emailAddr?:""
+            if(email.isNotEmpty() && !Regex("^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$").matches(email)){
+                view.emailError = formatError
+            }
+
 
             view.takeIf { entity.firstNames.isNullOrEmpty() }?.firstNameError = requiredFieldMessage
             view.takeIf { entity.lastName.isNullOrEmpty() }?.lastNameError = requiredFieldMessage

@@ -17,7 +17,7 @@ import com.ustadmobile.core.controller.PersonAccountEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonAccountEditView
-import com.ustadmobile.core.view.PersonAccountEditView.Companion.blockCharacterSet
+import com.ustadmobile.core.view.PersonAccountEditView.Companion.BLOCK_CHARACTER_SET
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 
@@ -80,7 +80,6 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
     override var fieldsEnabled: Boolean = true
 
     override var entity: PersonWithAccount? = null
-        get() = field
         set(value) {
             field = value
             mBinding?.person = value
@@ -106,14 +105,16 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         val rootView: View
-        mBinding = FragmentPersonAccountEditBinding.inflate(inflater, container, false).also {
+        mBinding = FragmentPersonAccountEditBinding.inflate(inflater, container,
+            false).also {
             rootView = it.root
         }
 
-        mPresenter = PersonAccountEditPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+        mPresenter = PersonAccountEditPresenter(requireContext(), arguments.toStringMap(),
+            this, di, viewLifecycleOwner)
 
         mBinding?.currentPasswordText?.addTextChangedListener(ClearErrorTextWatcher {
             mBinding?.currentPasswordError = null
@@ -121,11 +122,13 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
 
         mBinding?.newPasswordText?.addTextChangedListener(ClearErrorTextWatcher {
             mBinding?.passwordError = null
+            mBinding?.passwordConfirmError = null
         })
 
 
         mBinding?.confirmPasswordText?.addTextChangedListener(ClearErrorTextWatcher {
             mBinding?.passwordConfirmError = null
+            mBinding?.passwordError = null
         })
 
         mBinding?.accountUsernameText?.addTextChangedListener(ClearErrorTextWatcher {
@@ -171,7 +174,7 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
 
             for (i in start until end) {
                 val c = source[i]
-                if (blockCharacterSet.contains(c)) {
+                if (BLOCK_CHARACTER_SET.contains(c)) {
                     ""
                 }else if(c != null || !c.equals("")) {
                     sb.append(c.toString().toLowerCase())

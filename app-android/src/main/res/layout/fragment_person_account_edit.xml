@@ -79,9 +79,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_8dp"
-                android:hint="@string/new_password"
-                app:errorTextColor="?colorError"
-                app:hintEnabled="true"
                 app:errorText="@{passwordError}"
                 app:errorEnabled="@{passwordError != null}"
                 android:layout_margin="@dimen/dimen_16dp"
@@ -95,6 +92,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
+                    android:hint="@string/new_password"
                     android:text="@={person.newPassword}"
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
             </com.google.android.material.textfield.TextInputLayout>

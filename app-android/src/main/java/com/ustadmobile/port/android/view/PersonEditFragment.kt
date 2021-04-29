@@ -224,6 +224,12 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         }
         get() = mBinding?.usernameError
 
+    override var emailError: String?
+        set(value){
+            mBinding?.emailError = value
+        }
+        get()= mBinding?.emailError
+
     override var firstNamesFieldError: String?
         set(value) {
             mBinding?.firstNamesError = value
@@ -289,6 +295,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             field = value
         }
 
+
     override fun navigateToNextDestination(account: UmAccount?, nextDestination: String) {
         val navController = findNavController()
         val destinationProvider: DestinationProvider = di.direct.instance()
@@ -316,15 +323,6 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             mBinding?.fieldsEnabled = value
         }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        imageViewLifecycleObserver = ImageViewLifecycleObserver2(
-            requireActivity().activityResultRegistry,null, 1).also {
-            lifecycle.addObserver(it)
-        }
-    }
-
     class ClearErrorTextWatcher(private val onTextFunction: () -> Unit ):TextWatcher{
         override fun afterTextChanged(p0: Editable?) {
 
@@ -336,6 +334,15 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
         override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             onTextFunction()
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        imageViewLifecycleObserver = ImageViewLifecycleObserver2(
+            requireActivity().activityResultRegistry,null, 1).also {
+            lifecycle.addObserver(it)
         }
     }
 
@@ -399,6 +406,9 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
         mBinding?.birthdayText?.addTextChangedListener(ClearErrorTextWatcher {
             mBinding?.dateOfBirthFieldError = null
+        })
+        mBinding?.emailText?.addTextChangedListener(ClearErrorTextWatcher{
+            mBinding?.emailError = null
         })
 
         mBinding?.usernameText?.filters = arrayOf(USERNAME_FILTER)
