@@ -1,10 +1,12 @@
 package com.ustadmobile.core.contentformats.har
 
 import com.ustadmobile.core.io.ext.getStringFromContainerEntry
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.tincan.UmAccountActor
 import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.core.util.ext.toXapiActorJsonObject
+import io.ktor.client.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import io.ktor.client.request.put
 import io.ktor.client.statement.HttpStatement
 import io.ktor.http.URLBuilder
@@ -36,7 +38,7 @@ class ItemData {
 }
 
 
-class KhanProgressTracker : HarInterceptor() {
+class KhanProgressTracker(val httpClient: HttpClient) : HarInterceptor() {
 
     val exercisePath = "/api/internal/user/exercises/"
     val itemPath = "/items/"
@@ -44,7 +46,6 @@ class KhanProgressTracker : HarInterceptor() {
 
     var counter = 1
     var numCorrect = 0;
-    val client = defaultHttpClient()
     var totalTime = 0L
 
     override suspend fun intercept(request: HarRequest, response: HarResponse, harContainer: HarContainer, jsonArgs: String?): HarResponse {
@@ -244,8 +245,7 @@ class KhanProgressTracker : HarInterceptor() {
     private fun sendStatement(statement: String, harContainer: HarContainer) {
 
         GlobalScope.launch {
-
-            client.put<HttpStatement> {
+            httpClient.put<HttpStatement> {
                 url {
                     takeFrom(harContainer.localHttp)
                     encodedPath = "${encodedPath}xapi/${harContainer.entry.contentEntryUid}/statements"

@@ -1,9 +1,19 @@
 package com.ustadmobile.core.impl
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.UMURLEncoder
+import com.ustadmobile.core.util.ext.requirePostfix
+import com.ustadmobile.core.view.AccountListView
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.direct
+import org.kodein.di.instance
 import kotlin.js.JsName
 import kotlin.jvm.JvmOverloads
 
@@ -45,21 +55,6 @@ abstract class UstadMobileSystemCommon {
     internal var lastDestination: LastGoToDest? = null
 
     /**
-     * Wrapper to retrieve preference keys from the system Manifest.
-     *
-     * On Android: uses meta-data elements on the application element in AndroidManifest.xml
-     * On J2ME: uses the jad file
-     *
-     * @param key The key to lookup
-     * @param context System context object
-     *
-     * @return The value of the manifest preference key if found, null otherwise
-     */
-    @JsName("getManifestPreference")
-    abstract fun getManifestPreference(key: String, context: Any): String?
-
-
-    /**
      * Return absolute path of the application setup file. Asynchronous.
      *
      * @param context System context
@@ -73,8 +68,7 @@ abstract class UstadMobileSystemCommon {
 
     /**
      * Lookup a value from the app runtime configuration. These come from a properties file loaded
-     * from the assets folder, the path of which is set by the manifest preference
-     * com.sutadmobile.core.appconfig .
+     * from the assets folder.
      *
      * @param key The config key to lookup
      * @param defaultVal The default value to return if the key is not found
@@ -85,23 +79,21 @@ abstract class UstadMobileSystemCommon {
     @JsName("getAppConfigString")
     abstract fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?
 
-
-    /**
-     * Wrapper to retrieve preference keys from the system Manifest.
-     *
-     * On Android: uses meta-data elements on the application element in AndroidManifest.xml
-     *
-     * @param key The key to lookup
-     * @param defaultVal The default value to return if the key is not found
-     * @param context System context object
-     *
-     * @return The value of the manifest preference key if found, otherwise the default value
-     */
-    open fun getManifestPreference(key: String, defaultVal: String, context: Any): String {
-        val `val` = getManifestPreference(key, context)
-        return `val` ?: defaultVal
+    fun goDeepLink(deepLink: String, accountManager: UstadAccountManager, context: Any) {
+        if(deepLink.contains(LINK_ENDPOINT_VIEWNAME_DIVIDER)) {
+            val endpointUrl = deepLink.substringBefore(LINK_ENDPOINT_VIEWNAME_DIVIDER)
+                .requirePostfix("/")
+            val viewUri = deepLink.substringAfter(LINK_ENDPOINT_VIEWNAME_DIVIDER)
+            //if there are any accounts that match endpoint url the user wants to work with,
+            // then go to the accountmanager list in picker mode
+            if(accountManager.storedAccounts.any { it.endpointUrl == endpointUrl }) {
+                val args = mapOf(ARG_NEXT to UMURLEncoder.encodeUTF8(viewUri),
+                    AccountListView.ARG_FILTER_BY_ENDPOINT to endpointUrl,
+                    UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
+                go(AccountListView.VIEW_NAME, args, context)
+            }
+        }
     }
-
 
     /**
      * Go to a new view : This is simply a convenience wrapper for go(viewName, args, context):
@@ -111,7 +103,7 @@ abstract class UstadMobileSystemCommon {
      * @param destination Destination name in the form of ViewName?arg1=val1&arg2=val2 etc.
      * @param context System context object
      */
-    open fun go(destination: String?, context: Any) {
+    open fun go(destination: String, context: Any) {
         val destinationParsed =
         if(destination?.contains(LINK_INTENT_FILTER) == true){
             val destinationIndex : Int? = destination.indexOf("/${LINK_INTENT_FILTER}").plus(10)
@@ -349,10 +341,6 @@ abstract class UstadMobileSystemCommon {
         return getAppConfigString(AppConfig.KEY_CONTENT_DIR_NAME, DEFAULT_CONTENT_DIR_NAME, context)
     }
 
-    fun scheduleChecks(context: Any) {
-
-    }
-
 
     companion object {
         private val MIME_TYPES = mapOf("image/jpg" to "jpg", "image/jpg" to "jpg",
@@ -396,11 +384,6 @@ abstract class UstadMobileSystemCommon {
         const val ARG_REFERRER = "ref"
 
         /**
-         * As per Android Intent.FLAG_ACTIVITY_SINGLE_TOP
-         */
-        const val GO_FLAG_SINGLE_TOP = 536870912
-
-        /**
          * As per Android Intent.FLAG_CLEAR_TOP
          */
         const val GO_FLAG_CLEAR_TOP = 67108864
@@ -414,6 +397,13 @@ abstract class UstadMobileSystemCommon {
         const val TAG_LOCAL_HTTP_PORT = 64
 
         const val LINK_INTENT_FILTER = "umclient"
+
+        /**
+         * The web version of the application will always live under a folder called /umapp/. The
+         * viewname will start with a # (as it uses the REACT hash router). Therefor this string is
+         * used as a divider between the endpoint URL and the view name / view arguments
+         */
+        const val LINK_ENDPOINT_VIEWNAME_DIVIDER = "/umapp/#"
 
         const val SUBDIR_SITEDATA_NAME = "sitedata"
 

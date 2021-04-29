@@ -6,7 +6,6 @@ import com.ustadmobile.core.catalog.contenttype.H5PTypePluginCommonJvm
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.asRepository

@@ -29,6 +29,12 @@ import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
+import okhttp3.OkHttpClient
+import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -55,14 +61,28 @@ class TestXapiStateResponder {
 
     }.type
 
+    private lateinit var httpClient: HttpClient
+
+    private lateinit var okHttpClient: OkHttpClient
+
     @Before
     @Throws(IOException::class)
     fun setup() {
         checkJndiSetup()
         val endpointScope = EndpointScope()
-        val systemImplSpy = spy(UstadMobileSystemImpl.instance)
+
+        okHttpClient = OkHttpClient()
+        httpClient = HttpClient(OkHttp){
+            install(JsonFeature)
+            install(HttpTimeout)
+
+            engine {
+                preconfigured = okHttpClient
+            }
+        }
+
         di = DI {
-            bind<UstadMobileSystemImpl>() with singleton { systemImplSpy!! }
+            bind<UstadMobileSystemImpl>() with singleton { spy(UstadMobileSystemImpl()) }
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()
@@ -79,6 +99,14 @@ class TestXapiStateResponder {
             bind<XapiStateEndpoint>() with scoped(endpointScope).singleton {
                 XapiStateEndpointImpl(context, di)
             }
+
+            bind<HttpClient>() with singleton {
+                httpClient
+            }
+
+            bind<OkHttpClient>() with singleton {
+                okHttpClient
+            }
         }
 
         accountManager = di.direct.instance()
@@ -87,6 +115,11 @@ class TestXapiStateResponder {
         mockUriResource = mock<RouterNanoHTTPD.UriResource> {
             on { initParameter(0, DI::class.java) }.thenReturn(di)
         }
+    }
+
+    @After
+    fun tearDown() {
+        httpClient.close()
     }
 
     @Test

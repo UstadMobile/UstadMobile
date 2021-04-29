@@ -40,8 +40,7 @@ android {
     }
 
     kotlinOptions {
-        // Setup the Kotlin compiler options for the 'main' compilation:
-        jvmTarget = "$version_kotlin_jvmTarget"
+        jvmTarget = "1.8"
     }
 
     packagingOptions {
@@ -58,6 +57,7 @@ android {
 
     defaultConfig {
         applicationId "${baseAppId}.launcher"
+        resConfigs "en","fa","ps","ar","tg","bn","ne","my"
         minSdkVersion 21
         targetSdkVersion 30
         versionCode rootProject.ext.ustadVersionCode

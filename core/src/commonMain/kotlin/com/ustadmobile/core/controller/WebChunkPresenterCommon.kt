@@ -7,7 +7,7 @@ import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.ContentEntry2DetailView
+import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.core.view.WebChunkView
@@ -59,13 +59,15 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
 
     val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
 
+    private val systemImpl: UstadMobileSystemImpl by di.instance()
+
     @JsName("handleMountChunk")
     abstract suspend fun handleMountChunk()
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        var entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
+        val entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
         containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()
 
         GlobalScope.launch {
@@ -76,8 +78,8 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
                 })
             } catch (e: Exception) {
                 view.runOnUiThread(Runnable {
-                    view.showSnackBar(UstadMobileSystemImpl.instance
-                            .getString(MessageID.error_opening_file, context))
+                    view.showSnackBar(
+                        systemImpl.getString(MessageID.error_opening_file, context))
                 })
             }
 
@@ -89,10 +91,8 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
 
     @JsName("handleUrlLinkToContentEntry")
     fun handleUrlLinkToContentEntry(sourceUrl: String) {
-        val impl = UstadMobileSystemImpl.instance
-
         val dest = sourceUrl.replace("content-detail?",
-                ContentEntry2DetailView.VIEW_NAME + "?")
+                ContentEntryDetailView.VIEW_NAME + "?")
         val params = UMFileUtil.parseURLQueryString(dest)
 
         if (params.containsKey("sourceUrl")) {
@@ -105,7 +105,7 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
                         true, arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false)
                 } catch (e: Exception) {
                     if (e is NoAppFoundException) {
-                        view.showNoAppFoundError(impl.getString(MessageID.no_app_found, context),
+                        view.showNoAppFoundError(systemImpl.getString(MessageID.no_app_found, context),
                                 MessageID.get_app,
                                 e.mimeType ?: "")
                     } else {

@@ -46,6 +46,8 @@ class JoinWithCodePresenterTest {
 
     private var apiUrl: String? =null
 
+    private lateinit var systemImpl: UstadMobileSystemImpl
+
     @Before
     fun setup() {
         di = DI {
@@ -55,6 +57,7 @@ class JoinWithCodePresenterTest {
         mockView = mock { }
 
         accountManager = di.direct.instance()
+        systemImpl = di.direct.instance()
 
         val currentEndpoint = accountManager.activeAccount.endpointUrl
         accountManager.activeAccount = UmAccount(42L, "testuser",
@@ -125,7 +128,7 @@ class JoinWithCodePresenterTest {
         runOnUiArgCaptor.firstValue.run()
 
         verify(mockView, timeout(10000)).errorText =
-                UstadMobileSystemImpl.instance.getString(MessageID.invalid_register_code, context)
+                systemImpl.getString(MessageID.invalid_register_code, context)
     }
 
     @Test
@@ -141,7 +144,7 @@ class JoinWithCodePresenterTest {
         runOnUiArgCaptor.firstValue.run()
 
         verify(mockView, timeout(5000)).errorText =
-                UstadMobileSystemImpl.instance.getString(MessageID.invalid_register_code, context)
+            systemImpl.getString(MessageID.invalid_register_code, context)
     }
 
     @Test
@@ -158,7 +161,7 @@ class JoinWithCodePresenterTest {
         runOnUiArgCaptor.firstValue.run()
 
         verify(mockView, timeout(5000)).errorText =
-                UstadMobileSystemImpl.instance.getString(MessageID.invalid_register_code, context)
+            systemImpl.getString(MessageID.invalid_register_code, context)
     }
 
     @Test
@@ -262,7 +265,7 @@ class JoinWithCodePresenterTest {
         runOnUiArgCaptor.firstValue.run()
 
         verify(mockView, timeout(5000)).errorText =
-                UstadMobileSystemImpl.instance.getString(MessageID.invalid_register_code, context)
+                systemImpl.getString(MessageID.invalid_register_code, context)
 
     }
 

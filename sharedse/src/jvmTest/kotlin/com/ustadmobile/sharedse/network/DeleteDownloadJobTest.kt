@@ -9,7 +9,6 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.io.ext.addFileToContainer
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting

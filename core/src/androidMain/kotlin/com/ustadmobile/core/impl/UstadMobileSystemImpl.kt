@@ -60,6 +60,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
+import org.kodein.di.android.di
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.*
@@ -131,7 +132,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         override fun doInBackground(vararg params: Boolean?): String {
             val apkFile = File(context.applicationInfo.sourceDir)
             //TODO: replace this with something from appconfig.properties
-            val impl = instance
+            val di: DI by di(context)
+            val impl : UstadMobileSystemImpl = di.direct.instance()
 
             val baseName = impl.getAppConfigString(AppConfig.KEY_APP_BASE_NAME, "", context) + "-" +
                     impl.getVersion(context)
@@ -468,7 +470,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      *
      * @return The value of the manifest preference key if found, null otherwise
      */
-    actual override fun getManifestPreference(key: String, context: Any): String? {
+    fun getManifestPreference(key: String, context: Any): String? {
         try {
             val ctx = context as Context
             val ai2 = ctx.packageManager.getApplicationInfo(ctx.packageName,
@@ -497,7 +499,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String? {
         if (appConfig == null) {
             val appPrefResource = getManifestPreference("com.ustadmobile.core.appconfig",
-                    "com/ustadmobile/core/appconfig.properties", context)
+                    context) ?: "com/ustadmobile/core/appconfig.properties"
             appConfig = Properties()
             var prefIn: InputStream? = null
 
@@ -567,16 +569,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         return appPreferences!!
     }
 
-    /**
-     * Returns the system base directory to work from
-     *
-     * @return
-     */
-    actual fun getSystemBaseDir(context: Any): String {
-        return File(Environment.getExternalStorageDirectory(), getContentDirName(context))
-                .absolutePath
-    }
-
 
     /**
      * Check if the directory is writable
@@ -603,15 +595,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             canWriteFiles = testFile.delete()
         }
         return canWriteFiles
-    }
-
-    actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {
-        var path = path
-        if (path.startsWith("/")) {
-            path = path.substring(1)
-        }
-
-        return ((context as Context).assets.open(path)).readBytes()
     }
 
     /**
@@ -641,6 +624,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
          * @return A singleton instance
          */
         @JvmStatic
+        @Deprecated("This old static getter should not be used! Use DI instead!")
         actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
 
     }

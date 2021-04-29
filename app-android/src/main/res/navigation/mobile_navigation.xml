@@ -178,8 +178,32 @@
         android:label="@string/select_language" />
 
     <fragment
-        android:id="@+id/content_entry_details_dest"
-        android:name="com.ustadmobile.port.android.view.ContentEntry2DetailFragment"
+        android:id="@+id/language_edit_dest"
+        android:name="com.ustadmobile.port.android.view.LanguageEditFragment" />
+
+    <fragment
+        android:id="@+id/content_entry_detail_dest"
+        android:name="com.ustadmobile.port.android.view.ContentEntryDetailFragment"
+        android:label="" />
+
+    <fragment
+        android:id="@+id/content_entry_detail_attempt_dest"
+        android:name="com.ustadmobile.port.android.view.ContentEntryDetailAttemptsListFragment"
+        android:label="" />
+
+    <fragment
+        android:id="@+id/content_entry_detail_session_list_dest"
+        android:name="com.ustadmobile.port.android.view.SessionListFragment"
+        android:label="" />
+
+    <fragment
+        android:id="@+id/content_entry_detail_session_detail_list_dest"
+        android:name="com.ustadmobile.port.android.view.StatementListViewFragment"
+        android:label="" />
+
+    <fragment
+        android:id="@+id/content_entry_detail_overview_dest"
+        android:name="com.ustadmobile.port.android.view.ContentEntryDetailOverviewFragment"
         android:label="" />
     <fragment
         android:id="@+id/clazzwork_detail_progress_list"

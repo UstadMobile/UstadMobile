@@ -1,2 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="login">Injira</string>
+    <string name="error">Ikosa</string>
+    <string name="register_empty_fields">Uzuza ahantu hose hasabwa</string>
+    <string name="group_activity">Itsinda
+\nIgikorwa</string>
+    <string name="select_group_members">Hitamo abagize itsinda</string>
+    <string name="login_network_error">Interineti yanze: genzura ko ufite interineti.</string>
+    <string name="downloaded" value="81">Yakuruwe</string>
+    <string name="libraries">Amasomero</string>
+    <string name="ok">Ok</string>
+    <string name="confirm">Emeza</string>
+    <string name="cancel">Hagarika</string>
+    <string name="canceled">Yahagaritswe</string>
+    <string name="delete">Siba</string>
+    <string name="deleted">Yasibwe</string>
+    <string name="err_registering_new_user">Ikosa mu kwandika ukoresha sisiteme mushya:</string>
+    <string name="register_incorrect_email">Imeyili itariyo</string>
+    <string name="confirm_delete_message">Urashaka gusiba aya makuru mu gikoresho cyawe\?</string>
+    <string name="download">Kurura</string>
+    <string name="pause_download">Hagarika gukurura</string>
+    <string name="processing">Iri gutunganywa</string>
+</resources>

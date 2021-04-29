@@ -78,6 +78,7 @@ import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.ContainerMounter.Companion.FILTER_MODE_EPUB
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
@@ -87,9 +88,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
-import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import org.kodein.di.direct
 import kotlin.js.JsName
 import kotlin.jvm.Volatile
 import kotlin.math.max
@@ -131,6 +132,8 @@ class EpubContentPresenter(context: Any,
 
     var mCurrentPage: Int = 0
 
+    lateinit var contextRegistration: String
+
     private val pageTitles = mutableMapOf<Int, String?>()
 
     @Volatile
@@ -142,6 +145,7 @@ class EpubContentPresenter(context: Any,
         super.onCreate(savedState)
         val containerUid = arguments[UstadView.ARG_CONTAINER_UID]?.toLong() ?: 100
         contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
+        contextRegistration = randomUuid().toString()
         view.progressValue = -1
         view.progressVisible = true
         mountedEndpoint = accountManager.activeAccount.endpointUrl
@@ -166,8 +170,9 @@ class EpubContentPresenter(context: Any,
         GlobalScope.launch {
             val contentEntry =  db.contentEntryDao.findByUid(contentEntryUid) ?: return@launch
             val progress = ((maxPageReached + 1) * 100) / max(linearSpineUrls.size, 1)
-            xapiStatementEndpoint.storeProgressStatement(accountManager.activeAccount,
-                    contentEntry, progress, duration)
+            xapiStatementEndpoint.storeProgressStatement(
+                    accountManager.activeAccount,
+                    contentEntry, progress, duration, contextRegistration)
         }
 
     }

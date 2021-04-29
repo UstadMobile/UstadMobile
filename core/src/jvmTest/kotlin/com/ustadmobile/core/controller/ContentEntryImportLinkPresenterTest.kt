@@ -6,12 +6,14 @@ import org.mockito.kotlin.timeout
 import org.mockito.kotlin.verify
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.UmAccount
 import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -54,7 +56,10 @@ class ContentEntryImportLinkPresenterTest {
             bind<UstadAccountManager>() with singleton { accountManager }
             bind<Gson>() with singleton { Gson() }
             bind<HttpClient>() with singleton {
-                defaultHttpClient()
+                HttpClient(OkHttp) {
+                    install(JsonFeature)
+                    install(HttpTimeout)
+                }
             }
         }
 

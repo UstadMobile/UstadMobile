@@ -19,6 +19,7 @@ import kotlinx.serialization.json.Json
 import org.kodein.di.instance
 import org.kodein.di.ktor.di
 import org.kodein.di.on
+import com.ustadmobile.core.util.ext.toUmAccount
 
 private const val DEFAULT_SESSION_LENGTH = (1000L * 60 * 60 * 24 * 365)//One year
 
@@ -45,8 +46,8 @@ fun Route.PersonAuthRegisterRoute() {
                 db.deviceSessionDao.insert(DeviceSession(dsDeviceId = deviceId,
                         dsPersonUid = person.personUid, expires = getSystemTimeInMillis() + DEFAULT_SESSION_LENGTH))
 
-                call.respond(HttpStatusCode.OK,
-                        UmAccount(person.personUid, username, "", "",person.firstNames,person.lastName))
+                call.respond(HttpStatusCode.OK, person.toUmAccount(endpointUrl = "",
+                    username = username))
             }else {
                 call.respond(HttpStatusCode.Forbidden, "")
             }
@@ -90,9 +91,7 @@ fun Route.PersonAuthRegisterRoute() {
                 if(username != null){
                     val createdPerson = db.personAuthDao.findPersonByUsername(username)
                     if(createdPerson != null){
-                        call.respond(HttpStatusCode.OK,UmAccount(createdPerson.personUid,
-                                createdPerson.username, "", "",
-                                createdPerson.firstNames,createdPerson.lastName))
+                        call.respond(HttpStatusCode.OK, createdPerson.toUmAccount(""))
                     }
                 }
             }else{
@@ -128,8 +127,7 @@ fun Route.PersonAuthRegisterRoute() {
                         PersonAuthDao.PLAIN_PASS_PREFIX+newPassword)
                 db.personAuthDao.update(personAuth)
 
-                call.respond(HttpStatusCode.OK,UmAccount(person.personUid, username, "",
-                        "",person.firstNames,person.lastName))
+                call.respond(HttpStatusCode.OK, person.toUmAccount("", username))
             }else {
                 call.respond(HttpStatusCode.Forbidden, "")
             }

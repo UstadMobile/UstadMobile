@@ -4,11 +4,8 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.ustadmobile.door.annotation.*
 
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
 /**
@@ -248,6 +245,9 @@ open class ClazzEnrolment()  {
 
     @LastChangedBy
     var clazzEnrolmentLastChangedBy: Int = 0
+
+    @LastChangedTime
+    var clazzEnrolmentLct: Long = 0
 
     constructor(clazzUid: Long, personUid: Long) : this() {
         this.clazzEnrolmentClazzUid = clazzUid

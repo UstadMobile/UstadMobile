@@ -16,10 +16,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import com.ustadmobile.core.io.ext.toKmpUriString
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag.Companion.TAG_REPO
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
@@ -40,12 +40,17 @@ import com.ustadmobile.util.commontest.ext.mockResponseForConcatenatedFiles2Requ
 import com.ustadmobile.util.test.ReverseProxyDispatcher
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
 import com.ustadmobile.util.test.extractTestResourceToFile
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import io.ktor.server.engine.ApplicationEngine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.*
+import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.*
 import org.junit.*
 import org.junit.rules.TemporaryFolder
@@ -235,7 +240,7 @@ class DownloadJobItemRunnerTest {
         }
 
         clientDi = DI {
-            bind<UstadMobileSystemImpl>() with singleton { UstadMobileSystemImpl.instance }
+            bind<UstadMobileSystemImpl>() with singleton { UstadMobileSystemImpl() }
 
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
@@ -247,7 +252,8 @@ class DownloadJobItemRunnerTest {
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
-                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository<UmAppDatabase>(Any(), context.url, "", defaultHttpClient(), null))
+                spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(Any(), context.url,
+                    instance(), instance())))
             }
 
             bind<ContainerDownloadManager>() with scoped(endpointScope).singleton {
@@ -269,6 +275,34 @@ class DownloadJobItemRunnerTest {
             bind<Gson>() with singleton { Gson() }
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
+
+            bind<OkHttpClient>() with singleton {
+                OkHttpClient.Builder()
+                    .dispatcher(okhttp3.Dispatcher().also {
+                        it.maxRequests = 30
+                        it.maxRequestsPerHost = 10
+                    })
+                    .build()
+            }
+
+            bind<HttpClient>() with singleton {
+                HttpClient(OkHttp) {
+
+                    install(JsonFeature) {
+                        serializer = GsonSerializer()
+                    }
+                    install(HttpTimeout)
+
+                    val dispatcher = okhttp3.Dispatcher()
+                    dispatcher.maxRequests = 30
+                    dispatcher.maxRequestsPerHost = 10
+
+                    engine {
+                        preconfigured = instance()
+                    }
+
+                }
+            }
         }
 
 
@@ -290,8 +324,10 @@ class DownloadJobItemRunnerTest {
             it.clearAllTables()
         }
 
-        serverRepo = serverDb.asRepository(context, "http://localhost/dummy", "",
-            defaultHttpClient())
+        //this can be shared as needed
+        val httpClient: HttpClient= clientDi.direct.instance()
+        serverRepo = serverDb.asRepository(repositoryConfig(context, "http://localhost/dummy",
+            httpClient, clientDi.direct.instance()))
 
         mockLocalAvailabilityManager = clientDi.on(accountManager.activeAccount).direct.instance()
 

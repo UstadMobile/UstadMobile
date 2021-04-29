@@ -16,6 +16,7 @@ import com.google.android.material.datepicker.MaterialDatePicker.Builder.datePic
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.systemImpl
 import java.text.MessageFormat
 import java.util.*
 
@@ -118,7 +119,6 @@ fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: Inve
 
     val builder = AlertDialog.Builder(context)
 
-    val systemImpl = UstadMobileSystemImpl.instance
     val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_date_picker,
             null, false)
 
@@ -127,7 +127,7 @@ fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: Inve
     val picker = dialogView.findViewById<DatePicker>(R.id.date_picker)
     picker.init(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH), null)
 
-    builder.setPositiveButton(systemImpl.getString(MessageID.ok,
+    builder.setPositiveButton(et.systemImpl.getString(MessageID.ok,
             context)) { dialog, _ ->
 
         c[Calendar.DAY_OF_MONTH] = picker.dayOfMonth
@@ -138,7 +138,7 @@ fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: Inve
         updateDateOnEditText(et, c.timeInMillis)
         inverseBindingListener.onChange()
     }
-    builder.setNegativeButton(systemImpl.getString(MessageID.cancel,
+    builder.setNegativeButton(et.systemImpl.getString(MessageID.cancel,
             context)) { dialog, _ -> dialog.dismiss() }
     builder.show()
 }

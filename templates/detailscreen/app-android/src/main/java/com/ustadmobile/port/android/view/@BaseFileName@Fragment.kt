@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.*
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.Fragment@Entity@DetailBinding
+import androidx.navigation.fragment.findNavController
+
 import com.ustadmobile.core.controller.@Entity@DetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl

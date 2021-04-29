@@ -29,7 +29,10 @@ import org.junit.Before
 import org.junit.Rule
 
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
+import com.ustadmobile.test.port.android.util.getApplicationDi
 import org.junit.Test
+import org.kodein.di.direct
+import org.kodein.di.instance
 import java.lang.Thread.sleep
 
 
@@ -53,10 +56,11 @@ class EntityRoleEditFragmentTest : TestCase() {
 
     private lateinit var serverUrl: String
 
-    val impl =  UstadMobileSystemImpl.instance
+    lateinit var impl:  UstadMobileSystemImpl
 
     @Before
     fun setUp(){
+        impl = getApplicationDi().direct.instance()
         impl.messageIdMap = MessageIDMap.ID_MAP
 
     }

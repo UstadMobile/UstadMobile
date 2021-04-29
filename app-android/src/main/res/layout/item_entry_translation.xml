@@ -9,7 +9,7 @@
 
         <variable
             name="mPresenter"
-            type="com.ustadmobile.core.controller.ContentEntry2DetailPresenter" />
+            type="com.ustadmobile.core.controller.ContentEntryDetailOverviewPresenter" />
 
         <variable
             name="mActivity"

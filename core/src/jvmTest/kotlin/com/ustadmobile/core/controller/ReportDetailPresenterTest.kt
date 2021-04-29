@@ -10,7 +10,6 @@ import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.db.dao.ReportDao
-import com.ustadmobile.core.db.waitUntil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.*
 import com.ustadmobile.door.DoorLifecycleObserver
@@ -22,7 +21,7 @@ import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
-import com.ustadmobile.util.test.ext.insertTestStatements
+import com.ustadmobile.util.test.ext.insertTestStatementsForReports
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
@@ -67,7 +66,7 @@ class ReportDetailPresenterTest {
         whenever(repo.reportDao).thenReturn(repoReportDaoSpy)
 
         runBlocking {
-            repo.insertTestStatements()
+            repo.insertTestStatementsForReports()
         }
     }
 

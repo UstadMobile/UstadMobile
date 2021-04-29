@@ -57,6 +57,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                 labelRotationAngle = -45f
                 isGranularityEnabled = true
                 setAxisMinimum(0f)
+                this.setAvoidFirstLastClipping(true)
             }
             axisLeft.apply {
                 isEnabled = true
@@ -85,7 +86,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
         if(xAxisData == Report.DAY || xAxisData == Report.WEEK){
 
             val dateStrToLocalDate: (String) -> LocalDate = {
-                LocalDate.parse(it, DateTimeFormatter.ofPattern("dd MM yyyy"))
+                LocalDate.parse(it, DateTimeFormatter.ofPattern("dd/MM/yyyy"))
             }
             distinctXAxisSet = distinctXAxisSet.sortedBy {
                 dateStrToLocalDate(it)
@@ -94,7 +95,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
         if(xAxisData == Report.MONTH){
 
             val dateStrToYearMonth: (String) -> YearMonth = {
-                YearMonth.parse(it, DateTimeFormatter.ofPattern("MM yyyy"))
+                YearMonth.parse(it, DateTimeFormatter.ofPattern("MM/yyyy"))
             }
             distinctXAxisSet = distinctXAxisSet.sortedBy {
                 dateStrToYearMonth(it)

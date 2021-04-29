@@ -7,9 +7,9 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.toContainerEntryWithMd5
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
-import com.ustadmobile.core.util.UMUUID
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerImportJob
@@ -113,7 +113,7 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
 
                 var uploadSessionId = containerImportJob.cijSessionId
                 if(uploadSessionId == null) {
-                    uploadSessionId = UMUUID.randomUUID().toString()
+                    uploadSessionId = randomUuid().toString()
                     containerImportJob.cijSessionId = uploadSessionId
                     db.containerImportJobDao.updateSessionId(containerImportJob.cijContainerUid,
                         uploadSessionId)

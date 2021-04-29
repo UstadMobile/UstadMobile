@@ -8,12 +8,9 @@ import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.waitForListToBeSet
-import com.ustadmobile.core.view.ContentEntry2DetailView
-import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FILTER
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
-import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
@@ -107,7 +104,7 @@ class ContentEntryList2PresenterTest {
 
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
-        verify(systemImpl, timeout(defaultTimeout)).go(eq(ContentEntry2DetailView.VIEW_NAME),
+        verify(systemImpl, timeout(defaultTimeout)).go(eq(ContentEntryDetailView.VIEW_NAME),
                 argWhere {
                     it.get(ARG_ENTITY_UID) == createdEntries?.get(0)?.contentEntryUid.toString()
                 }, any())

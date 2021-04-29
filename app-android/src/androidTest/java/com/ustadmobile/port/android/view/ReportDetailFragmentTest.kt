@@ -15,7 +15,7 @@ import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.port.android.screen.ReportDetailScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.*
-import com.ustadmobile.util.test.ext.insertTestStatements
+import com.ustadmobile.util.test.ext.insertTestStatementsForReports
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
@@ -24,8 +24,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import java.time.YearMonth
-import java.time.format.DateTimeFormatter
 
 @AdbScreenRecord("Report Detail Screen Test")
 @RunWith(Parameterized::class)
@@ -52,7 +50,7 @@ class ReportDetailFragmentTest(val report: Report) : TestCase() {
                 admin = true
                 personUid = 42
             })
-            dbRule.repo.insertTestStatements()
+            dbRule.repo.insertTestStatementsForReports()
         }
     }
 

@@ -3,10 +3,7 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
@@ -52,6 +49,9 @@ class GroupLearningSession {
 
     @LastChangedBy
     var groupLearningSessionLCB: Int = 0
+
+    @LastChangedTime
+    var groupLearningSessionLct: Long = 0
 
 
     companion object {

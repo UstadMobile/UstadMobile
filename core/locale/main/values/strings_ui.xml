@@ -58,7 +58,13 @@
     <string name='settings'>Settings</string>
     <string name='language'>Language</string>
     <string name='add_a_new_language'>Add a new language</string>
+    <string name='add_new_language'>Add new language</string>
     <string name='select_language'>Pick Language</string>
+    <string name="languages">Languages</string>
+    <string name="edit_language">Edit Language</string>
+    <string name="two_letter_code">Two letter code (ISO 639–1)</string>
+    <string name="three_letter_code">Three letter code (ISO 639–2)</string>
+    <string name="languages_description">Add, remove, and modify languages used for categorizing educational content and user preferences</string>
     <string name='advanced'>Advanced</string>
     <string name='optional'>Optional</string>
     <string name='email'>Email</string>
@@ -88,6 +94,7 @@
     <string name="failed">Failed</string>
     <string name="passed">Passed</string>
     <string name="success">Success</string>
+    <string name="incomplete">Incomplete</string>
     <string name="completed">Completed</string>
     <string name="select_subtitle_video">Select Subtitle Language</string>
     <string name="no_subtitle">No Subtitles</string>
@@ -115,6 +122,7 @@
     <string name="compress">Compress</string>
     <string name="and">and</string>
     <string name="added">Added</string>
+    <string name="attempts">Attempts</string>
 
     <string name="underRegistrationAgeError">Self-registration of children under 13 is not allowed. Please ask your teacher to register you.</string>
 
@@ -626,6 +634,7 @@
     <string name="feedback_thanks">Thank you for the feedback.</string>
     <string name="start_date">Start date</string>
     <string name="end_date">End date</string>
+    <string name="last_active">Last active</string>
     <string name="save">Save</string>
     <string name="change_password">Change Password</string>
     <string name="current_password">Current Password</string>
@@ -652,11 +661,37 @@
 
     <!-- Used to show what percentage of an assignment a student has completed. The %1$s will be
     replaced with the percentage the student completed e.g. "75% complete"-->
-    <string name="percentage_complete" formatted="false">%1$s% complete</string>
+    <string name="percentage_complete" formatted="false">%1$s%% complete</string>
+
+    <string name="percentage_score" formatted="false">Score %1$s%%</string>
 
     <!-- used to show when an assignment (or other work item) was started by the assignee. The
     %1$s% will be replaced with the date that they started.-->
-    <string name="started_date" formatted="false">Started %1$s%</string>
+    <string name="started_date" formatted="false">Started %1$s</string>
+
+
+    <!-- plurals are used to handle different languages that require special treatment
+    e.g number 0 in arabic
+    possible quantities: zero, one, two, few, many, and other.-->
+    <plurals name="number_of_attempts">
+        <item quantity="one">%d attempt</item>
+        <item quantity="other">%d attempts</item>
+    </plurals>
+
+    <plurals name="duration_hours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+
+    <plurals name="duration_minutes">
+        <item quantity="one">%d min</item>
+        <item quantity="other">%d mins</item>
+    </plurals>
+
+    <plurals name="duration_seconds">
+        <item quantity="one">%d sec</item>
+        <item quantity="other">%d secs</item>
+    </plurals>
 
     <!-- Used to indicate that something (e.g. an assigment) has been started -->
     <string name="started">Started</string>
@@ -948,5 +983,13 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="video">Video</string>
 
     <string name="content_editor_create_new_category">New folder</string>
+
+    <string name="manage_download">Manage download</string>
+
+    <!--
+    Powered by credit is used on rebranded copies of the app to credit Ustad Mobile e.g.
+    "School Name app powered by Ustad Mobile"
+    -->
+    <string name="powered_by">Powered by</string>
 
 </resources>

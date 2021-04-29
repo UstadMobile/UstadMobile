@@ -18,11 +18,12 @@ import org.kodein.di.*
 import java.io.IOException
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
-import java.lang.Exception
-import java.net.HttpURLConnection
-import java.net.URL
 import com.github.aakira.napier.Napier
 import com.ustadmobile.core.io.ext.readFully
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.internal.closeQuietly
 
 
 class ContainerUploader2(val request: ContainerUploaderRequest2,
@@ -31,6 +32,8 @@ class ContainerUploader2(val request: ContainerUploaderRequest2,
                          override val di: DI) : DIAware{
 
     private val httpClient: HttpClient by di.instance()
+
+    private val okHttpClient: OkHttpClient by di.instance()
 
     suspend fun upload(): Int = withContext(Dispatchers.IO){
         lateinit var uploadSessionParams: UploadSessionParams
@@ -41,6 +44,7 @@ class ContainerUploader2(val request: ContainerUploaderRequest2,
         var bytesToUpload: Long = -1
 
         var exception: Exception? = null
+        var response: Response? = null
 
         try {
             val db: UmAppDatabase = di.direct.on(endpoint).instance(tag = DoorTag.TAG_DB)
@@ -75,25 +79,17 @@ class ContainerUploader2(val request: ContainerUploaderRequest2,
                 }
 
                 while(coroutineContext.isActive && pipeIn.readFully(buffer).also { bytesRead = it } != -1) {
-                    val urlConnection = (URL("${endpoint.url}ContainerUpload2/${request.uploadUuid}/data")
-                            .openConnection() as HttpURLConnection).also {
-                        it.doOutput = true
-                        it.requestMethod = "PUT"
-                        it.connectTimeout = 10000
-                    }
+                    val request = Request.Builder()
+                        .url("${endpoint.url}ContainerUpload2/${request.uploadUuid}/data")
+                        .put(buffer.toRequestBody(MEDIA_TYPE_OCTET_STREAM, 0, bytesRead))
+                        .build()
 
-                    urlConnection.outputStream.also {
-                        it.write(buffer, 0, bytesRead)
-                        it.flush()
-                        it.close()
-                    }
+                    response = okHttpClient.newCall(request).execute()
 
-                    urlConnection.connect()
-
-                    val responseCode = urlConnection.responseCode
-                    if(responseCode != 204 && responseCode != 200) {
-                        throw IOException("Data upload response: $responseCode")
+                    if(response.code != 204 && response.code != 200) {
+                        throw IOException("Data upload response: ${response.code}")
                     }
+                    response.closeQuietly()
 
                     bytesUploaded += bytesRead
                 }
@@ -106,6 +102,7 @@ class ContainerUploader2(val request: ContainerUploaderRequest2,
             //write job will not get stuck
             pipeIn?.copyTo(NullOutputStream())
             pipeIn?.close()
+            response?.closeQuietly()
 
             try {
                 httpClient.get<Unit>("${endpoint.url}ContainerUpload2/${request.uploadUuid}/close")
@@ -124,6 +121,8 @@ class ContainerUploader2(val request: ContainerUploaderRequest2,
     }
 
     companion object {
+
+        val MEDIA_TYPE_OCTET_STREAM = "application/octet-stream".toMediaType()
 
         const val DEFAULT_CHUNK_SIZE = 200 * 1024 //200K
     }
