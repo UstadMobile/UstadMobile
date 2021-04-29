@@ -17,4 +17,6 @@ class ClazzAssignmentWithMetrics : ClazzAssignment() {
 
     var resultScore: Int = 0
 
+    var completedContent: Boolean = false
+
 }

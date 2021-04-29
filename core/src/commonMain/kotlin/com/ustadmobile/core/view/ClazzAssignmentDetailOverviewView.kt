@@ -2,12 +2,14 @@ package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
 import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 
 
 interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignment> {
 
+    var clazzMetrics: ClazzAssignmentWithMetrics?
     var clazzAssignmentContent
             : DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?
 

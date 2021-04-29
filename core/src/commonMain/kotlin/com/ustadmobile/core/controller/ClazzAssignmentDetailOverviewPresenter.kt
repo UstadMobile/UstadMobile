@@ -78,6 +78,11 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
             }
         }
 
+        if(isStudent){
+            view.clazzMetrics = repo.clazzAssignmentDao.getAssignmentMetrics(clazzAssignment.caClazzUid,
+                clazzAssignment.caUid)
+        }
+
         if(isStudent && clazzAssignment.caPrivateCommentsEnabled){
             view.clazzAssignmentPrivateComments = repo.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(
                     ClazzAssignment.TABLE_ID, clazzAssignment.caUid,

@@ -26,6 +26,7 @@ import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
@@ -201,6 +202,12 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         privateCommentsHeadingRecyclerAdapter = null
 
     }
+
+    override var clazzMetrics: ClazzAssignmentWithMetrics? = null
+        set(value) {
+            field = value
+            scoreRecyclerAdapter?.clazzAssignment = value
+        }
 
     override var clazzAssignmentContent: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>? = null
         set(value) {
