@@ -136,10 +136,40 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
         })
 
         mBinding?.accountUsernameText?.filters = arrayOf(USERNAME_FILTER)
+        /*
+        mBinding?.accountUsernameText?.addTextChangedListener(object: TextWatcher {
+            override fun beforeTextChanged( s: CharSequence, start: Int, count: Int,after: Int){}
+            override fun afterTextChanged(s: Editable) {}
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+
+
+                val sb = StringBuilder(s.length)
+
+                if(s.isNotEmpty()) {
+                    sb.append(s.toString().substring(0, s.length - 1))
+                }
+
+                for (i in start until s.length) {
+                    val c = s[i]
+                    if (BLOCK_CHARACTER_SET.contains(c)) {
+                        ""
+                    }else if(c != null || !c.equals("")) {
+                        sb.append(c.toString().toLowerCase())
+                    } else {
+                        null
+                    }
+                }
+                sb.toString()
+                print("hi")
+
+            }
+        })
+         */
 
         return rootView
     }
 
+    private fun replaceInvalidCharacters(value: String) = value.replace("[a-zA-Z0-9 ]*".toRegex(), "")
 
     override fun onResume() {
         super.onResume()
@@ -168,6 +198,7 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
     }
 
     companion object{
+
         val USERNAME_FILTER = InputFilter { source, start, end, dest, dstart, dend ->
 
             val sb = StringBuilder(attr.end - start)
@@ -175,7 +206,7 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
             for (i in start until end) {
                 val c = source[i]
                 if (BLOCK_CHARACTER_SET.contains(c)) {
-                    ""
+                    null
                 }else if(c != null || !c.equals("")) {
                     sb.append(c.toString().toLowerCase())
                 } else {
