@@ -201,7 +201,7 @@ class PersonEditPresenter(context: Any,
             view.genderFieldError == null
 
             val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
-            val formatError = impl.getString(MessageID.field_required_prompt, context)
+            val formatError = impl.getString(MessageID.invalid_email, context)
 
             view.takeIf { entity.firstNames.isNullOrEmpty() }?.firstNamesFieldError = requiredFieldMessage
             view.takeIf { entity.lastName.isNullOrEmpty() }?.lastNameFieldError = requiredFieldMessage
