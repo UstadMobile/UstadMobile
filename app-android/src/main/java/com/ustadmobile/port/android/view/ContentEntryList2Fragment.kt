@@ -44,11 +44,6 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 
     private var localAvailabilityCallback: ContentEntryLocalAvailabilityPagedListCallback? = null
 
-    override fun showDownloadDialog(args: Map<String, String>) {
-        val systemImpl : UstadMobileSystemImpl = di.direct.instance()
-        systemImpl.go(DownloadDialogView.VIEW_NAME, args, requireContext())
-    }
-
     override var title: String? = null
         set(value) {
             ustadFragmentTitle = value

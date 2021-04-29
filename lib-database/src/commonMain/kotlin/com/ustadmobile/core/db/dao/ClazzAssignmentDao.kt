@@ -70,9 +70,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
          AND ClazzAssignment.caClazzUid = :clazzUid
          AND StatementEntity.timestamp 
      		BETWEEN ClazzAssignment.caStartDateTime 
-     		    AND (CASE WHEN ClazzAssignment.caGracePeriodDateTime > ClazzAssignment.caDeadlineDateTime 
-                          THEN ClazzAssignment.caGracePeriodDateTime 
-                          ELSE ClazzAssignment.caDeadlineDateTime END)
+     		    AND ClazzAssignment.caGracePeriodDateTime
     """)
     abstract suspend fun getAssignmentMetrics(clazzUid: Long, caUid: Long): ClazzAssignmentWithMetrics?
 

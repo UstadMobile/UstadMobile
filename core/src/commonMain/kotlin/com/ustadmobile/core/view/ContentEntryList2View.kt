@@ -8,11 +8,6 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
     fun showContentEntryAddOptions(parentEntryUid: Long)
 
     /**
-     * Show the download dialog button. If required by the OS, show a permission dialog first
-     */
-    fun showDownloadDialog(args: Map<String, String>)
-
-    /**
      * Show ContentEntryList in picker mode so the user can select a folder to move entries to.
      *
      * @param selectedContentEntryParentChildJoinUids a string which is a comma separated list of

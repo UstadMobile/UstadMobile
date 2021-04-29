@@ -173,7 +173,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
+        super.onViewCreated(view, savedInstanceState)
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
     }
 
