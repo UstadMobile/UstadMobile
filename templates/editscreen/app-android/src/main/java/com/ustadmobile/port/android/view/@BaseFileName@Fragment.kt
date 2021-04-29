@@ -40,8 +40,9 @@ class @BaseFileName@Fragment: UstadEditFragment<@Entity@>(), @BaseFileName@View,
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        mPresenter?.onCreate(backStackSavedState)
+        super.onViewCreated(view, savedInstanceState)
 
+        mPresenter?.onCreate(backStackSavedState)
     }
 
     override fun onDestroyView() {

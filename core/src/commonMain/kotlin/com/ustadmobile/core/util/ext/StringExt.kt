@@ -39,3 +39,10 @@ fun String.truncate(maxLength: Int = 24): String{
 fun String.startsWithHttpProtocol(): Boolean = toLowerCase().let {
     it.startsWith("http://") || it.startsWith("https://")
 }
+
+fun String.requireHttpPrefix(defaultProtocol: String = "https"): String {
+    if(startsWithHttpProtocol())
+        return this
+    else
+        return "$defaultProtocol://$this"
+}
