@@ -16,6 +16,8 @@ interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignment> {
     var clazzAssignmentClazzComments: DataSource.Factory<Int, CommentsWithPerson>?
     var clazzAssignmentPrivateComments: DataSource.Factory<Int, CommentsWithPerson>?
 
+    var showPrivateComments: Boolean
+
     companion object {
 
         const val VIEW_NAME = "ClazzAssignmentDetailOverviewView"

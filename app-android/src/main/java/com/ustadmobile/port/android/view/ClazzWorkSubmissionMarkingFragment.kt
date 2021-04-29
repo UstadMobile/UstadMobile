@@ -142,9 +142,10 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<PersonWithClazzWorkA
         privateCommentsHeadingRecyclerAdapter?.visible = true
 
 
-        newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
+        newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(
+                this, null,
                 requireContext().getString(R.string.add_private_comment), false, ClazzWork.CLAZZ_WORK_TABLE_ID,
-                entity?.clazzWork?.clazzWorkUid?:0L, entity?.personUid?:0L
+                entity?.clazzWork?.clazzWorkUid?:0L, entity?.personUid?:0L,
         )
         newPrivateCommentRecyclerAdapter?.visible = true
 

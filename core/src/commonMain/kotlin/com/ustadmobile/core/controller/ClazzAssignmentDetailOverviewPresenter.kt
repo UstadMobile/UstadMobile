@@ -15,21 +15,23 @@ import org.kodein.di.DI
 class ClazzAssignmentDetailOverviewPresenter(context: Any,
                                              arguments: Map<String, String>, view: ClazzAssignmentDetailOverviewView,
                                              lifecycleOwner: DoorLifecycleOwner,
-                                             di: DI)
-    : UstadDetailPresenter<ClazzAssignmentDetailOverviewView, ClazzAssignment>(context, arguments, view, di, lifecycleOwner) {
+                                             di: DI,private val newCommentItemListener: DefaultNewCommentItemListener =
+                                                     DefaultNewCommentItemListener(di, context))
+    : UstadDetailPresenter<ClazzAssignmentDetailOverviewView, ClazzAssignment>(context, arguments, view, di, lifecycleOwner),
+        NewCommentItemListener by newCommentItemListener{
 
     override val persistenceMode: PersistenceMode
-        get() = PersistenceMode.DB
+          get() = PersistenceMode.DB
 
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
-        val clazzUid = withTimeoutOrNull(2000) {
+        val clazzAssignment = withTimeoutOrNull(2000) {
             repo.clazzAssignmentDao.findByUidAsync(arguments[ARG_ENTITY_UID]?.toLong()
-                    ?: 0)?.caClazzUid
-        } ?: 0L
+                    ?: 0)
+        }
 
         return db.clazzDao.personHasPermissionWithClazz(accountManager.activeAccount.personUid,
-                clazzUid, Role.PERMISSION_ASSIGNMENT_UPDATE)
+                clazzAssignment?.caClazzUid ?: 0, Role.PERMISSION_ASSIGNMENT_UPDATE)
     }
 
     override fun handleClickEdit() {
@@ -80,6 +82,9 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
             view.clazzAssignmentPrivateComments = repo.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(
                     ClazzAssignment.TABLE_ID, clazzAssignment.caUid,
                     loggedInPersonUid)
+            view.showPrivateComments = true
+        }else{
+            view.showPrivateComments = false
         }
 
         if(clazzAssignment.caClassCommentEnabled){
@@ -90,9 +95,6 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         return clazzAssignment
     }
 
-    fun handleSubmitComment(commentsWithPerson: CommentsWithPerson) {
-
-    }
 
     companion object {
 

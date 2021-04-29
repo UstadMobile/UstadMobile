@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -25,7 +26,6 @@ import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
@@ -42,7 +42,7 @@ interface ClazzAssignmentDetailOverviewFragmentEventHandler {
 
 class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignment>(),
         ClazzAssignmentDetailOverviewView, ClazzAssignmentDetailFragmentEventHandler,
-        BottomSheetOptionSelectedListener, NewCommentHandler {
+        NewCommentHandler, OpenSheetListener {
 
 
     private var dbRepo: UmAppDatabase? = null
@@ -94,13 +94,11 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         mBinding = FragmentClazzAssignmentDetailOverviewBinding.inflate(inflater, container, false).also {
             rootView = it.root
         }
-        fabManagementEnabled = true
 
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
 
         detailMergerRecyclerView =
                 rootView.findViewById(R.id.fragment_clazz_assignment_detail_overview)
-
 
         // 1
         detailRecyclerAdapter = ClazzAssignmentBasicDetailRecyclerAdapter()
@@ -123,7 +121,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         classCommentsHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.class_comments).toString()
         ).apply {
-            visible = true
+            visible = false
         }
 
         //12 - Class comments list + new comment
@@ -131,11 +129,11 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
             this.classCommentsObserver = PagedListSubmitObserver(it)
         }
 
-        newClassCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
-                requireContext().getString(R.string.add_class_comment), true,
-                ClazzAssignment.TABLE_ID, entity?.caUid?:0L, 0,
-                accountManager.activeAccount.personUid).apply {
-                    visible = true
+        newClassCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,this,
+                requireContext().getString(R.string.add_class_comment),
+                true, ClazzAssignment.TABLE_ID, entity?.caUid?:0L,
+                0, accountManager.activeAccount.personUid).apply {
+                    visible = false
         }
 
         // 13 - Private
@@ -151,10 +149,11 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         }
 
         //17 - New Private comments section:
-        newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
-                requireContext().getString(R.string.add_private_comment), false, ClazzWork.CLAZZ_WORK_TABLE_ID,
-                entity?.caUid?:0L, 0,
-                accountManager.activeAccount.personUid).apply{
+        newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(
+                this, this,
+                requireContext().getString(R.string.add_private_comment), false, ClazzAssignment.TABLE_ID,
+                entity?.caUid?:0L, 0, accountManager.activeAccount.personUid
+        ).apply{
                     visible = false
         }
 
@@ -177,9 +176,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
     }
 
-    override fun onBottomSheetOptionSelected(optionSelected: BottomSheetOption) {
-        // TODO check if private or class selected then send comment to presenter
-    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -241,6 +238,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
             field = value
         }
 
+    override var showPrivateComments: Boolean = false
 
     override var entity: ClazzAssignment? = null
         get() = field
@@ -248,10 +246,31 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
             field = value
             detailRecyclerAdapter?.clazzAssignment = value
             detailRecyclerAdapter?.visible = true
+
+            newClassCommentRecyclerAdapter?.entityUid = entity?.caUid?:0L
+            newPrivateCommentRecyclerAdapter?.entityUid = entity?.caUid?:0L
+
+            newPrivateCommentRecyclerAdapter?.visible = showPrivateComments
+            privateCommentsHeadingRecyclerAdapter?.visible = showPrivateComments
+
+            newClassCommentRecyclerAdapter?.visible = value?.caClassCommentEnabled ?: false
+            classCommentsHeadingRecyclerAdapter?.visible = value?.caClassCommentEnabled ?: false
+
         }
 
     override fun addNewComment2(view: View, entityType: Int, entityUid: Long, comment: String, public: Boolean, to: Long, from: Long) {
+        (view.parent as View).findViewById<EditText>(R.id.item_comment_new_comment_et).setText("")
+        mPresenter?.addComment(entityType, entityUid, comment, public, to, from)
+    }
 
+    override fun open(publicComment: Boolean) {
+        val adapter = if(publicComment){
+            newClassCommentRecyclerAdapter
+        }else{
+            newPrivateCommentRecyclerAdapter
+        }
+        val entryAddOption = CommentsBottomSheet(adapter)
+        entryAddOption.show(childFragmentManager, entryAddOption.tag)
     }
 
 }

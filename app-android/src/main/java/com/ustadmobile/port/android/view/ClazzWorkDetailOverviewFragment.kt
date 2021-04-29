@@ -192,10 +192,11 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         }
 
         //13 - New class comment component
-        newPublicCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
+        newPublicCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(
+                this, null,
                 requireContext().getString(R.string.add_class_comment), true, ClazzWork.CLAZZ_WORK_TABLE_ID,
-                entity?.clazzWorkUid?:0L, 0,
-                accountManager.activeAccount.personUid)
+                entity?.clazzWorkUid?:0L, 0, accountManager.activeAccount.personUid
+        )
         newPublicCommentRecyclerAdapter?.visible = true
 
         //14 - Merger for the comments and new class comment component
@@ -214,10 +215,12 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         }
 
         //17 - New Private comments section:
-        newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
+        newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(
+                this, null ,
                 requireContext().getString(R.string.add_private_comment), false, ClazzWork.CLAZZ_WORK_TABLE_ID,
                 entity?.clazzWorkUid?:0L, 0,
-                accountManager.activeAccount.personUid)
+                accountManager.activeAccount.personUid
+        )
         newPrivateCommentRecyclerAdapter?.visible = false
 
         //18 - Merger for the private comments and new private comment component

@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.content.Context
 import android.text.format.DateFormat
+import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.DatePicker
@@ -187,6 +188,11 @@ fun setDateWithDateExtras(et: TextView, date: Long) {
 @BindingAdapter("visibleIfDateSet")
 fun View.setVisibilityIfSetDate(date: Long){
     visibility = if(date == 0L || date == Long.MAX_VALUE) View.GONE else View.VISIBLE
+}
+
+@BindingAdapter("relativeTime")
+fun TextView.setDateWithRelativeTime(date: Long){
+    text = DateUtils.getRelativeTimeSpanString(date)
 }
 
 

@@ -31,8 +31,8 @@ class ClazzAssignmentListFragment(): UstadListViewFragment<ClazzAssignmentWithMe
         return view
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         fabManager?.text = requireContext().getString(R.string.clazz_assignment)
     }
 

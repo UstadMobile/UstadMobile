@@ -8,8 +8,8 @@ import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
 class NewCommentRecyclerViewAdapter(
         var itemListener: NewCommentHandler?,
-        hintText: String? = null, commentPublic: Boolean, entityType: Int, eUid: Long,
-        toComment:Long = 0, fromComment: Long = 0)
+        var openSheetListener: OpenSheetListener?, hintText: String? = null, commentPublic: Boolean, entityType: Int,
+        eUid: Long, toComment: Long = 0, fromComment: Long = 0)
     : SingleItemRecyclerViewAdapter<NewCommentRecyclerViewAdapter.NewCommentViewHolder>() {
 
     var hintText: String? = hintText
@@ -18,10 +18,22 @@ class NewCommentRecyclerViewAdapter(
             viewHolder?.itemBinding?.hintText = value
         }
 
+    var isBottomSheet: Boolean = false
+        set(value){
+            field = value
+            viewHolder?.itemBinding?.isBottomSheet = value
+        }
+
     private var newCommentHandler: NewCommentHandler? = itemListener
         set(value) {
             field = value
             viewHolder?.itemBinding?.commentHandler = newCommentHandler
+        }
+
+    var newOpenSheetListener: OpenSheetListener? = openSheetListener
+        set(value){
+            field = value
+            viewHolder?.itemBinding?.openSheetHandler = newOpenSheetListener
         }
 
     private var publicMode: Boolean = commentPublic
@@ -72,13 +84,15 @@ class NewCommentRecyclerViewAdapter(
                     it.entityUid = entityUid
                     it.toComment = commentTo
                     it.fromComment = commentFrom
-
+                    it.isBottomSheet = isBottomSheet
+                    it.openSheetHandler = newOpenSheetListener
                 })
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
         itemListener = null
+        openSheetListener = null
         viewHolder = null
     }
 

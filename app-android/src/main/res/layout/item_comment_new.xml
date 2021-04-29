@@ -5,6 +5,8 @@
 
     <data>
 
+        <import type="android.view.View"/>
+
         <variable
             name="commentText"
             type="String" />
@@ -28,9 +30,17 @@
         <variable
             name="toComment"
             type="Long" />
+        
+        <variable
+            name="isBottomSheet"
+            type="boolean" />
 
         <variable name="commentHandler"
             type="com.ustadmobile.port.android.view.NewCommentHandler" />
+        
+        <variable
+            name="openSheetHandler"
+            type="com.ustadmobile.port.android.view.OpenSheetListener" />
 
         <variable name="hintText" type="java.lang.String"/>
 
@@ -65,6 +75,9 @@
             android:inputType="textCapSentences|textMultiLine"
             android:singleLine="false"
             android:text="@={commentText}"
+            android:focusable="@{isBottomSheet}"
+            android:clickable="@{!isBottomSheet}"
+            android:onClick="@{() -> openSheetHandler.open(publicComment)}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/item_comment_new_send_ib"
             app:layout_constraintStart_toEndOf="@+id/item_comment_new_person_icon"
@@ -73,6 +86,7 @@
         <ImageButton
             android:id="@+id/item_comment_new_send_ib"
             style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
+            android:visibility="@{isBottomSheet ? View.VISIBLE : View.GONE}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_16dp"

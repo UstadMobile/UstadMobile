@@ -15,13 +15,11 @@ class DefaultNewCommentItemListener(override val di: DI, val context: Any, var f
 
         val accountManager: UstadAccountManager by instance()
 
-        //val db: UmAppDatabase by di.activeRepoInstance()
-        val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
         val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
 
-        val commentObj = Comments(entityType, entityId, fromPerson,
+        val commentObj = Comments(entityType, entityUid, from,
                 getSystemTimeInMillis(), comment, public)
-        commentObj.commentsToPersonUid = toPerson
+        commentObj.commentsToPersonUid = to
         GlobalScope.launch {
             repo.commentsDao.insertAsync(commentObj)
         }
