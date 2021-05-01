@@ -26,13 +26,8 @@ import org.kodein.di.instance
 
 class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickListener {
 
-    private var mBinding: FragmentAccountListBinding? = null
 
-    private var mCurrentStoredAccounts: List<UmAccount>? = null
-
-    private var mActiveAccount: UmAccount? = null
-
-    class AccountAdapter(var mPresenter: AccountListPresenter?):
+    class AccountAdapter(var mPresenter: AccountListPresenter?, var isActiveAccount: Boolean = false):
             ListAdapter<UmAccount, AccountAdapter.AccountViewHolder>(DIFF_CALLBACK_ACCOUNT){
 
         class AccountViewHolder(val binding: ItemAccountListBinding): RecyclerView.ViewHolder(binding.root)
@@ -48,13 +43,12 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
 
         override fun onBindViewHolder(holder: AccountViewHolder, position: Int) {
             holder.binding.umaccount = getItem(position)
-            holder.binding.activeAccount = position == 0
-            holder.binding.logoutBtnVisibility =
-                    if(currentList.size == 1 && currentList[0].personUid == 0L || position != 0)
-                View.GONE else View.VISIBLE
-            holder.binding.profileBtnVisibility =
-                    if(currentList[0].personUid == 0L || position != 0)
-                        View.GONE else View.VISIBLE
+            holder.binding.activeAccount = isActiveAccount
+            holder.binding.logoutBtnVisibility = if(isActiveAccount) View.VISIBLE else View.GONE
+            holder.binding.profileBtnVisibility = if(isActiveAccount && holder.binding.umaccount?.personUid != 0L)
+                View.VISIBLE
+            else
+                View.GONE
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -84,25 +78,29 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         }
     }
 
+    private var mBinding: FragmentAccountListBinding? = null
+
+    private var mCurrentStoredAccounts: List<UmAccount>? = null
+
+    private var mActiveAccount: UmAccount? = null
+
     private var activeAccountObserver = Observer<UmAccount?> {
         mActiveAccount = it
-        updateAccountList()
+        if(it != null)
+            activeAccountAdapter?.submitList(listOf(it))
     }
 
     private var accountListObserver = Observer<List<UmAccount>?> {
         mCurrentStoredAccounts = it
-        updateAccountList()
+        otherAccountsAdapter?.submitList(it)
     }
 
-    private fun updateAccountList() {
-        val activeAccountVal = mActiveAccount
-        val storedAccountsVal = mCurrentStoredAccounts
-        if(activeAccountVal != null && storedAccountsVal != null) {
-            val otherAccounts: List<UmAccount> = storedAccountsVal.toMutableList().also { it.remove(activeAccountVal) }
-                    .sortedBy { it.username }
-            accountAdapter?.submitList(listOf(activeAccountVal) + otherAccounts)
+    override var activeAccountLive: DoorLiveData<UmAccount>? = null
+        set(value) {
+            field?.removeObserver(activeAccountObserver)
+            field = value
+            value?.observe(viewLifecycleOwner, activeAccountObserver)
         }
-    }
 
 
     override var accountListLive: DoorLiveData<List<UmAccount>>? = null
@@ -113,12 +111,6 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         }
 
 
-    override var activeAccountLive: DoorLiveData<UmAccount>? = null
-        set(value) {
-            field?.removeObserver(activeAccountObserver)
-            field = value
-            value?.observe(viewLifecycleOwner, activeAccountObserver)
-        }
 
     override fun showContentEntryList(account: UmAccount) {
         val navController = findNavController()
@@ -129,7 +121,9 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
     }
 
 
-    private var accountAdapter: AccountAdapter ? = null
+    private var activeAccountAdapter: AccountAdapter? = null
+
+    private var otherAccountsAdapter: AccountAdapter? = null
 
     private var aboutItemAdapter: AboutItemAdapter? = null
 
@@ -153,11 +147,13 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
 
         mBinding?.accountListRecycler?.layoutManager = LinearLayoutManager(requireContext())
         val impl: UstadMobileSystemImpl by instance()
-        mPresenter = AccountListPresenter(requireContext(),arguments.toStringMap(),this, di)
+        mPresenter = AccountListPresenter(requireContext(),arguments.toStringMap(),this, di,
+            viewLifecycleOwner)
 
         val versionText = impl.getVersion(requireContext()) + " - " +
                 UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(requireContext()))
-        accountAdapter = AccountAdapter(mPresenter)
+        activeAccountAdapter = AccountAdapter(mPresenter, isActiveAccount = true)
+        otherAccountsAdapter = AccountAdapter(mPresenter, isActiveAccount = false)
         aboutItemAdapter = AboutItemAdapter(versionText,mPresenter)
 
         ustadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
@@ -165,8 +161,8 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
                         getString(R.string.account).toLowerCase()))
         ustadListHeaderRecyclerViewAdapter?.newItemVisible = true
 
-        mergeRecyclerAdapter = ConcatAdapter(accountAdapter,
-                ustadListHeaderRecyclerViewAdapter, aboutItemAdapter)
+        mergeRecyclerAdapter = ConcatAdapter(activeAccountAdapter,
+            otherAccountsAdapter, ustadListHeaderRecyclerViewAdapter, aboutItemAdapter)
 
         mBinding?.accountListRecycler?.adapter = mergeRecyclerAdapter
 
@@ -180,7 +176,7 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         super.onDestroyView()
         mBinding?.accountListRecycler?.adapter = null
         mBinding = null
-        accountAdapter = null
+        activeAccountAdapter = null
         aboutItemAdapter = null
         mergeRecyclerAdapter = null
         mPresenter = null

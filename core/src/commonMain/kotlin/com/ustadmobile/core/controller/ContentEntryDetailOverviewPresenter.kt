@@ -1,17 +1,22 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.NoAppFoundException
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.DeletePreparationRequester
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.ContentEntryOpener
+import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
+import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -22,10 +27,7 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
-import org.kodein.di.DI
-import org.kodein.di.instance
-import org.kodein.di.instanceOrNull
-import org.kodein.di.on
+import org.kodein.di.*
 
 
 class ContentEntryDetailOverviewPresenter(context: Any,
@@ -34,6 +36,17 @@ class ContentEntryDetailOverviewPresenter(context: Any,
 
     : UstadDetailPresenter<ContentEntryDetailOverviewView, ContentEntryWithMostRecentContainer>(context,
         arguments, view, di, lifecycleOwner) {
+
+    val deepLink: String
+        get() {
+            val activeEndpoint = di.direct.instance<UstadAccountManager>().activeAccount.endpointUrl
+            val endpointAndDivider = UMFileUtil.joinPaths(activeEndpoint,
+                UstadMobileSystemCommon.LINK_ENDPOINT_VIEWNAME_DIVIDER)
+            return endpointAndDivider + ContentEntryDetailView.VIEW_NAME
+                .appendQueryArgs(arguments.toQueryString())
+        }
+
+
 
     private val isDownloadEnabled: Boolean by di.instance<Boolean>(tag = TAG_DOWNLOAD_ENABLED)
 

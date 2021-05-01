@@ -1,44 +1,102 @@
 package com.ustadmobile.core.controller
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.appendQueryArgs
-import com.ustadmobile.core.util.ext.putIfNotAlreadySet
-import com.ustadmobile.core.util.ext.toQueryString
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.AccountListView.Companion.ACTIVE_ACCOUNT_MODE_HEADER
+import com.ustadmobile.core.view.AccountListView.Companion.ARG_ACTIVE_ACCOUNT_MODE
+import com.ustadmobile.core.view.AccountListView.Companion.ARG_FILTER_BY_ENDPOINT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
+import io.ktor.client.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 
 class AccountListPresenter(context: Any, arguments: Map<String, String>, view: AccountListView,
-                           di: DI)
+                           di: DI, val doorLifecycleOwner: DoorLifecycleOwner)
     : UstadBaseController<AccountListView>(context, arguments, view, di) {
 
-    val accountManager: UstadAccountManager by instance()
+    private val accountManager: UstadAccountManager by instance()
 
-    val impl: UstadMobileSystemImpl by instance()
+    private val impl: UstadMobileSystemImpl by instance()
+
+    private var accountListLive = DoorMutableLiveData<List<UmAccount>>()
+
+    private var endpointFilter: String? = null
+
+    private lateinit var activeAccountMode: String
+
+    private lateinit var nextDest: String
+
+    private val httpClient: HttpClient by instance()
+
+    //Removes the active account from the main list (this is normally at the top)
+    private var accountListObserver : DoorObserver<List<UmAccount>> = object: DoorObserver<List<UmAccount>> {
+        override fun onChanged(t: List<UmAccount>) {
+            val newList = t.toMutableList()
+            if(activeAccountMode == ACTIVE_ACCOUNT_MODE_HEADER) {
+                val activeUserAtServer = accountManager.activeAccount.userAtServer
+                newList.removeAll { it.userAtServer ==  activeUserAtServer }
+            }
+            accountListLive.sendValue(newList)
+        }
+    }
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        view.accountListLive = accountManager.storedAccountsLive
-        view.activeAccountLive = accountManager.activeAccountLive
-    }
+        endpointFilter = arguments.get(ARG_FILTER_BY_ENDPOINT)
+        activeAccountMode = arguments.get(ARG_ACTIVE_ACCOUNT_MODE) ?: ACTIVE_ACCOUNT_MODE_HEADER
+        view.activeAccountLive = if(activeAccountMode == ACTIVE_ACCOUNT_MODE_HEADER)
+            accountManager.activeAccountLive
+        else
+            null
+
+        view.accountListLive = accountListLive
+        accountManager.storedAccountsLive.observe(doorLifecycleOwner, accountListObserver)
+        nextDest = arguments.get(ARG_NEXT) ?: impl.getAppConfigDefaultFirstDest(context)
+        }
 
     fun handleClickAddAccount(){
         val canSelectServer = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_SERVER_SELECTION, context)
         val args = arguments.toMutableMap().also {
-            val nextDest = impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context)
-                ?: ContentEntryListTabsView.VIEW_NAME
             it.putIfNotAlreadySet(ARG_NEXT, nextDest)
         }
 
-        impl.go(if(canSelectServer) SiteEnterLinkView.VIEW_NAME else Login2View.VIEW_NAME,args, context)
+        val filterByEndpoint = arguments[ARG_FILTER_BY_ENDPOINT]
+        if(filterByEndpoint != null) {
+            view.loading = true
+            GlobalScope.launch {
+                try {
+                    val site = httpClient.verifySite(filterByEndpoint)
+                    val goArgs = mapOf(ARG_SERVER_URL to filterByEndpoint,
+                        ARG_SITE to Json.encodeToString(Site.serializer(), site),
+                        ARG_NEXT to nextDest)
+
+                    impl.go(Login2View.VIEW_NAME, goArgs, context)
+                }catch(e: Exception) {
+                    Napier.e("Exception getting site object", e)
+                    view.showSnackBar(impl.getString(MessageID.login_network_error, context))
+                }
+            }
+        }else {
+            impl.go(if(canSelectServer) SiteEnterLinkView.VIEW_NAME else Login2View.VIEW_NAME,args, context)
+        }
     }
 
     fun handleClickDeleteAccount(account: UmAccount){
@@ -71,8 +129,8 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
         val snackMsg = impl.getString(MessageID.logged_in_as, context)
             .replace("%1\$s", account.username ?: "")
             .replace("%2\$s", account.endpointUrl)
-        val dest = impl.getAppConfigDefaultFirstDest(context)
-            .appendQueryArgs(mapOf(UstadView.ARG_SNACK_MESSAGE to snackMsg).toQueryString())
+        val dest = nextDest.appendQueryArgs(
+            mapOf(UstadView.ARG_SNACK_MESSAGE to snackMsg).toQueryString())
         impl.goToViewLink(dest, context, goOptions)
     }
 }

@@ -91,10 +91,13 @@ abstract class UstadMobileSystemCommon {
             //if there are any accounts that match endpoint url the user wants to work with,
             // then go to the accountmanager list in picker mode
             if(accountManager.storedAccounts.any { it.endpointUrl == endpointUrl }) {
-                val args = mapOf(ARG_NEXT to UMURLEncoder.encodeUTF8(viewUri),
+                val args = mapOf(ARG_NEXT to viewUri,
                     AccountListView.ARG_FILTER_BY_ENDPOINT to endpointUrl,
+                    AccountListView.ARG_ACTIVE_ACCOUNT_MODE to AccountListView.ACTIVE_ACCOUNT_MODE_INLIST,
                     UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
                 go(AccountListView.VIEW_NAME, args, context)
+            }else {
+                // We need to go to the login presenter
             }
         }
     }

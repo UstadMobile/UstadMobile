@@ -77,6 +77,7 @@ class RedirectFragment : UstadBaseFragment(), RedirectView {
     override fun onDestroyView() {
         super.onDestroyView()
         mPresenter = null
+        mBinding = null
     }
 
     companion object {
