@@ -49,11 +49,12 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
 
     : UstadBaseController<WebChunkView>(context, arguments, view, di) {
 
-    internal var containerUid: Long? = null
+    var containerUid: Long = 0L
 
     private val contentEntryOpener: ContentEntryOpener by di.instance()
 
     val accountManager: UstadAccountManager by instance()
+
 
     val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
 
@@ -118,6 +119,10 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
             }
 
         }
+    }
+
+    fun handleLoadUrl(url:String){
+        view.url = url
     }
 
     fun handleUpNavigation() {

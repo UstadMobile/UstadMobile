@@ -7,13 +7,11 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import io.ktor.application.call
-import io.ktor.http.HttpStatusCode
-import io.ktor.request.receive
-import io.ktor.response.respond
-import io.ktor.routing.Route
-import io.ktor.routing.post
-import io.ktor.routing.route
+import io.ktor.application.*
+import io.ktor.http.*
+import io.ktor.request.*
+import io.ktor.response.*
+import io.ktor.routing.*
 import kotlinx.coroutines.withTimeout
 import org.kodein.di.instance
 import org.kodein.di.ktor.di
@@ -49,7 +47,6 @@ fun Route.ContentEntryLinkImporter() {
             try {
                 val parentUid = call.request.queryParameters["parentUid"]?.toLong() ?: UstadView.MASTER_SERVER_ROOT_ENTRY_UID
                 val url = call.request.queryParameters["url"]?: ""
-                Napier.i("Downloadlink: $url")
 
                 val contentEntry = call.receive<ContentEntryWithLanguage>()
                 val scraperType = call.request.queryParameters["scraperType"] ?: ""

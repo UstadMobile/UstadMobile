@@ -92,6 +92,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
                     "auth" to "OjFjMGY4NTYxNzUwOGI4YWY0NjFkNzU5MWUxMzE1ZGQ1",
                     "registration" to randomUuid().toString(),
                     "activity_id" to (tinCanXml?.launchActivity?.id ?: "xapi_id"))
+            view.loading = false
             if(launchHref != null) {
                 val launchUrl = UMFileUtil.joinPaths(mountedPath, launchHref) + "?"  +
                         launchMethodParams.toQueryString()

@@ -24,7 +24,7 @@ class XapiPackageContentComponent(mProps: RProps): UstadBaseComponent<RProps, RS
     override var url: String = ""
         get() = field
         set(value) {
-            console.log(value)
+            loading = value.isEmpty()
             setState { field = value }
         }
 
@@ -37,10 +37,12 @@ class XapiPackageContentComponent(mProps: RProps): UstadBaseComponent<RProps, RS
     }
 
     override fun RBuilder.render() {
-        styledIframe {
-            css(responsiveIframe)
-            attrs{
-                src = url
+        if(url.isNotEmpty()){
+            styledIframe {
+                css(responsiveIframe)
+                attrs{
+                    src = url
+                }
             }
         }
     }

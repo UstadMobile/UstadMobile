@@ -23,26 +23,25 @@ import java.util.*
 import java.util.regex.Pattern
 
 
-class WebChunkWebViewClient(private val containerUid: Long, private val db: UmAppDatabase,
+class WebChunkWebViewClient(private val db: UmAppDatabase,
                             mPresenter: WebChunkPresenter?) : WebViewClient() {
 
     private var presenter: WebChunkPresenter? = null
     private val indexMap = HashMap<String, IndexLog.IndexEntry>()
     private val linkPatterns = HashMap<Pattern, String>()
-    lateinit var url: String
+    private lateinit var url: String
 
     init {
         try {
             this.presenter = mPresenter
 
-            val indexBytes = db.containerEntryDao.openEntryInputStream(containerUid,
+            val indexBytes = db.containerEntryDao.openEntryInputStream(presenter?.containerUid?:0,
                     "index.json")?.readBytes() ?: throw IOException("Could not find index.json")
             val indexLog = Gson().fromJson(String(indexBytes), IndexLog::class.java)
             val indexList = indexLog.entries
             val firstUrlToOpen = indexList!![0]
             url = firstUrlToOpen.url
-
-
+            presenter?.handleLoadUrl(url)
             for (log in indexList) {
                 indexMap[log.url] = log
             }
@@ -146,7 +145,7 @@ class WebChunkWebViewClient(private val containerUid: Long, private val db: UmAp
             return WebResourceResponse("", "utf-8", 200, "OK", null, null)
         }
         try {
-            val entry = db.containerEntryDao.findByPathInContainer(containerUid, log.path!!)
+            val entry = db.containerEntryDao.findByPathInContainer(presenter?.containerUid?:0, log.path!!)
                     ?: return WebResourceResponse("", "utf-8", 404, "Not Found", null, null)
 
 

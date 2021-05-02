@@ -49,7 +49,9 @@ object RouteManager {
         UmReactDestination(view = ContentEntryList2View.VIEW_NAME,
             component = ContentEntryListComponent::class),
         UmReactDestination(view = VideoContentView.VIEW_NAME,
-            component = VideoContentComponent::class)
+            component = VideoContentComponent::class),
+        UmReactDestination(view = WebChunkView.VIEW_NAME,
+            component = WebChunkComponent::class)
     )
 
     /**

@@ -6,7 +6,7 @@ interface WebChunkView : UstadView {
 
     var entry: ContentEntry?
 
-    var containerUid: Long?
+    var url: String
 
     fun showNoAppFoundError(message: String, actionMessageId: Int, mimeType: String)
 

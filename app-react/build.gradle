@@ -44,7 +44,6 @@ dependencies {
     implementation project(":lib-util")
     implementation project(":lib-database")
     implementation project(":lib-database-entities")
-    implementation npm("iframe-resizer-react","^1.1.0")
     implementation "com.ustadmobile.door:room-annotations:$version_door"
     implementation "org.kodein.di:kodein-di:$version_kodein_di"
     implementation "com.ustadmobile.door:door-runtime:$version_door"

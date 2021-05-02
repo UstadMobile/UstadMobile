@@ -1,6 +1,7 @@
 package com.ustadmobile.model.statemanager
 
 import com.ccfraser.muirwik.components.styles.Theme
+import com.ustadmobile.util.DummyStore
 import org.kodein.di.DI
 import org.w3c.dom.events.Event
 import redux.RAction
@@ -15,4 +16,6 @@ data class GlobalState(var showFab: Boolean = false, var fabLabel: String = "",
                        var snackBarActionLabel: String? = null, var title:String? = null,
                        var onSnackActionClicked:(Event) -> Unit = {},
                        var onTabChanged:(Any) -> Unit = {}, var tabLabels: List<String> = listOf(),
-                       var selectedTab: Any? = Any(), var tabKeys: List<Any> = listOf())
+                       var selectedTab: Any? = Any(), var tabKeys: List<Any> = listOf(),
+                       var dummyStore: DummyStore = DummyStore()
+)

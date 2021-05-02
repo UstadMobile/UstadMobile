@@ -5,14 +5,16 @@ import com.ustadmobile.core.controller.EpubContentPresenter
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.util.CssStyleManager.responsiveIframe
 import com.ustadmobile.util.RouteManager.getArgs
-import react.RBuilder
-import react.RProps
-import react.RState
-import react.setState
+import kotlinx.browser.window
+import kotlinx.html.IframeSandbox
+import kotlinx.html.js.onLoadFunction
+import react.*
 import styled.css
 import styled.styledIframe
 
 class EpubContentComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(mProps), EpubContentView{
+
+    private val pageList = mutableListOf<ReactElement>()
 
     override var containerTitle: String? = null
         get() = field
@@ -25,12 +27,12 @@ class EpubContentComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(m
         get() = field
         set(value) {
             field = value
-            console.log("wT", value)
         }
 
     override var spineUrls: List<String>? = null
         get() = field
         set(value) {
+            loading = value == null
             setState { field = value }
         }
 
@@ -55,7 +57,8 @@ class EpubContentComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(m
     override var progressVisible: Boolean = false
         get() = field
         set(value) {
-            setState { field = value }
+            loading = value
+            field = value
         }
 
     override var progressValue: Int = -1
@@ -72,13 +75,24 @@ class EpubContentComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(m
         super.componentDidMount()
         mPresenter = EpubContentPresenter(this,getArgs(),this, di)
         mPresenter.onCreate(mapOf())
+        window.addEventListener("message", {
+            console.log(it)
+        }, false)
     }
 
+
+
     override fun RBuilder.render() {
-        styledIframe {
-            css(responsiveIframe)
-            attrs{
-                src = spineUrls?.get(1)?:""
+        spineUrls?.forEach {
+            styledIframe{
+                css{
+                    +responsiveIframe
+                }
+                attrs{
+                    sandbox = IframeSandbox.allowSameOrigin
+                    src = it
+                    onLoadFunction = {}
+                }
             }
         }
     }

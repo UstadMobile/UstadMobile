@@ -31,6 +31,7 @@ class VideoContentComponent(mProps:RProps):UstadBaseComponent<RProps, RState>(mP
     override var videoParams: VideoContentPresenterCommon.VideoParams? = null
         get() = field
         set(value) {
+            loading = value == null
             setState{field = value}
         }
 
