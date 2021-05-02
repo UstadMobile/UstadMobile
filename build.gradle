@@ -236,6 +236,18 @@ if(project.file("local.properties").exists()) {
     ext.localProperties.load(new FileInputStream(project.file("local.properties")))
 }
 
+if(System.getenv("ACRA_HTTP_URI") != null) {
+    ext.buildConfigProperties["android.acra.url"] = System.getEnv("ACRA_HTTP_URI")
+}
+
+if(System.getenv("ACRA_BASIC_LOGIN") != null) {
+    ext.buildConfigProperties["android.acra.user"] = System.getEnv("ACRA_BASIC_LOGIN")
+}
+
+if(System.getenv("ACRA_BASIC_PASS") != null) {
+    ext.buildConfigProperties["android.acra.auth"] = System.getEnv("ACRA_BASIC_PASS")
+}
+
 /**
  * Make sure lib-database:jsJar depends on lib-database:jvmJar
  */

@@ -4,13 +4,11 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.util.ext.requirePostfix
-import com.ustadmobile.core.view.AccountListView
-import com.ustadmobile.core.view.ContentEntryListTabsView
-import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import kotlin.js.JsName
 
 /**
@@ -88,16 +86,26 @@ abstract class UstadMobileSystemCommon {
             val endpointUrl = deepLink.substringBefore(LINK_ENDPOINT_VIEWNAME_DIVIDER)
                 .requirePostfix("/")
             val viewUri = deepLink.substringAfter(LINK_ENDPOINT_VIEWNAME_DIVIDER)
+
+
+            val intentMessage = getString(MessageID.opening_link, context)
+                .replace("%1\$s", deepLink)
             //if there are any accounts that match endpoint url the user wants to work with,
-            // then go to the accountmanager list in picker mode
+            // then go to the accountmanager list in picker mode, otherwise go directly to the login
+            // screen for that particular server.
             if(accountManager.storedAccounts.any { it.endpointUrl == endpointUrl }) {
                 val args = mapOf(ARG_NEXT to viewUri,
                     AccountListView.ARG_FILTER_BY_ENDPOINT to endpointUrl,
                     AccountListView.ARG_ACTIVE_ACCOUNT_MODE to AccountListView.ACTIVE_ACCOUNT_MODE_INLIST,
+                    UstadView.ARG_TITLE to getString(MessageID.select_account, context),
+                    UstadView.ARG_INTENT_MESSAGE to intentMessage,
                     UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
                 go(AccountListView.VIEW_NAME, args, context)
             }else {
-                // We need to go to the login presenter
+                val args = mapOf(ARG_NEXT to viewUri,
+                    ARG_INTENT_MESSAGE to intentMessage,
+                    ARG_SERVER_URL to endpointUrl)
+                go(Login2View.VIEW_NAME, args, context)
             }
         }
     }

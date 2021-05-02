@@ -9,7 +9,13 @@ interface AccountListView : UstadView {
 
     var activeAccountLive: DoorLiveData<UmAccount>?
 
-    fun showContentEntryList(account: UmAccount)
+    var title: String?
+
+    /**
+     * A message that appears above the list of accounts. This is useful to explain to the user
+     * what they are doing and why we are asking them to select an account
+     */
+    var intentMessage: String?
 
     companion object {
 

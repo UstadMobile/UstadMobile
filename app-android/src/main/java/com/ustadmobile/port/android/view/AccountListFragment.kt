@@ -4,20 +4,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
-import androidx.navigation.NavOptions
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.*
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentAccountListBinding
 import com.toughra.ustadmobile.databinding.ItemAccountAboutBinding
 import com.toughra.ustadmobile.databinding.ItemAccountListBinding
+import com.toughra.ustadmobile.databinding.ItemAccountlistIntentmessageBinding
 import com.ustadmobile.core.controller.AccountListPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.AccountListView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_SNACK_MESSAGE
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
@@ -27,7 +26,7 @@ import org.kodein.di.instance
 class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickListener {
 
 
-    class AccountAdapter(var mPresenter: AccountListPresenter?, var isActiveAccount: Boolean = false):
+    class AccountAdapter(var mPresenter: AccountListPresenter?, val isActiveAccount: Boolean = false):
             ListAdapter<UmAccount, AccountAdapter.AccountViewHolder>(DIFF_CALLBACK_ACCOUNT){
 
         class AccountViewHolder(val binding: ItemAccountListBinding): RecyclerView.ViewHolder(binding.root)
@@ -37,12 +36,24 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
             val mBinding = ItemAccountListBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false).apply {
                 presenter = mPresenter
+
+                if(!isActiveAccount) {
+                    root.setOnClickListener {
+                        val account = this.umaccount
+                        if(account != null)
+                            mPresenter?.handleClickAccount(account)
+                    }
+
+                    root.background  = ContextCompat.getDrawable(root.context, R.drawable.bg_listitem)
+                }
             }
+
             return AccountViewHolder(mBinding)
         }
 
         override fun onBindViewHolder(holder: AccountViewHolder, position: Int) {
-            holder.binding.umaccount = getItem(position)
+            val account = getItem(position)
+            holder.binding.umaccount = account
             holder.binding.activeAccount = isActiveAccount
             holder.binding.logoutBtnVisibility = if(isActiveAccount) View.VISIBLE else View.GONE
             holder.binding.profileBtnVisibility = if(isActiveAccount && holder.binding.umaccount?.personUid != 0L)
@@ -58,7 +69,22 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
     }
 
 
-    class AboutItemAdapter(private val mVersionText:String, var mPresenter: AccountListPresenter?):
+    class IntentMessageViewHolder(val mBinding: ItemAccountlistIntentmessageBinding): RecyclerView.ViewHolder(mBinding.root)
+
+    class IntentMessageAdapter() : ListAdapter<String, IntentMessageViewHolder>(DIFF_CALLBACK_STRING) {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IntentMessageViewHolder {
+            return IntentMessageViewHolder(ItemAccountlistIntentmessageBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false))
+        }
+
+        override fun onBindViewHolder(holder: IntentMessageViewHolder, position: Int) {
+            holder.mBinding.message = getItem(position)
+        }
+    }
+
+    private var mIntentMessageAdapter: IntentMessageAdapter? = null
+
+    class AboutItemAdapter(private val mVersionText: String, var mPresenter: AccountListPresenter?):
             SingleItemRecyclerViewAdapter<AboutItemAdapter.AboutAccountViewHolder>(true){
 
         class AboutAccountViewHolder(val binding: ItemAccountAboutBinding): RecyclerView.ViewHolder(binding.root)
@@ -110,16 +136,17 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
             value?.observe(viewLifecycleOwner, accountListObserver)
         }
 
+    override var title: String? = null
+        set(value) {
+            ustadFragmentTitle = value
+            field = value
+        }
 
-
-    override fun showContentEntryList(account: UmAccount) {
-        val navController = findNavController()
-        val navOptions = NavOptions.Builder().setPopUpTo(R.id.account_list_dest, true).build()
-        navController.currentBackStackEntry?.savedStateHandle?.set(ARG_SNACK_MESSAGE,
-                String.format(getString(R.string.logged_in_as),account.username,account.endpointUrl))
-        navController.navigate(R.id.home_content_dest, null, navOptions)
-    }
-
+    override var intentMessage: String? = null
+        set(value) {
+            mIntentMessageAdapter?.submitList(value?.let { listOf(it) } ?: listOf())
+            field = value
+        }
 
     private var activeAccountAdapter: AccountAdapter? = null
 
@@ -160,17 +187,21 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
                 createNewText = String.format(getString(R.string.add_another),
                         getString(R.string.account).toLowerCase()))
         ustadListHeaderRecyclerViewAdapter?.newItemVisible = true
+        mIntentMessageAdapter = IntentMessageAdapter()
 
-        mergeRecyclerAdapter = ConcatAdapter(activeAccountAdapter,
+        mergeRecyclerAdapter = ConcatAdapter(activeAccountAdapter, mIntentMessageAdapter,
             otherAccountsAdapter, ustadListHeaderRecyclerViewAdapter, aboutItemAdapter)
 
         mBinding?.accountListRecycler?.adapter = mergeRecyclerAdapter
 
-        mPresenter?.onCreate(savedInstanceState.toStringMap())
-
         return rootView
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        mPresenter?.onCreate(savedInstanceState.toStringMap())
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -179,10 +210,21 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         activeAccountAdapter = null
         aboutItemAdapter = null
         mergeRecyclerAdapter = null
+        mIntentMessageAdapter = null
         mPresenter = null
     }
 
     companion object {
+
+        val DIFF_CALLBACK_STRING = object: DiffUtil.ItemCallback<String>() {
+            override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
+                return oldItem == newItem
+            }
+
+            override fun areContentsTheSame(oldItem: String, newItem: String): Boolean {
+                return oldItem == newItem
+            }
+        }
 
         val DIFF_CALLBACK_ACCOUNT = object: DiffUtil.ItemCallback<UmAccount>() {
             override fun areItemsTheSame(oldItem: UmAccount, newItem: UmAccount): Boolean {

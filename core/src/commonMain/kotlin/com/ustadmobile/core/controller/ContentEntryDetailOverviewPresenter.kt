@@ -6,17 +6,14 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.NoAppFoundException
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.DeletePreparationRequester
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.ContentEntryOpener
-import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
-import com.ustadmobile.core.util.ext.toQueryString
+import com.ustadmobile.core.util.ext.toDeepLink
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -40,10 +37,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
     val deepLink: String
         get() {
             val activeEndpoint = di.direct.instance<UstadAccountManager>().activeAccount.endpointUrl
-            val endpointAndDivider = UMFileUtil.joinPaths(activeEndpoint,
-                UstadMobileSystemCommon.LINK_ENDPOINT_VIEWNAME_DIVIDER)
-            return endpointAndDivider + ContentEntryDetailView.VIEW_NAME
-                .appendQueryArgs(arguments.toQueryString())
+            return arguments.toDeepLink(activeEndpoint, ContentEntryDetailView.VIEW_NAME)
         }
 
 

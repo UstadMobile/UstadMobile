@@ -161,6 +161,15 @@ interface UstadView {
 
         const val ARG_REGISTRATION_ALLOWED = "registration_allowed"
 
+        /**
+         * The intent message to display to the user when they open the Login or Account List screen.
+         * This tells the user what they are selecting an account for  e.g. opening link, parental
+         * registration approval, etc.
+         */
+        const val ARG_INTENT_MESSAGE = "intMsg"
+
+        const val ARG_TITLE = "title"
+
         @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
         const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
 

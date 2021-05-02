@@ -12,12 +12,15 @@ import com.ustadmobile.core.view.AccountListView.Companion.ACTIVE_ACCOUNT_MODE_H
 import com.ustadmobile.core.view.AccountListView.Companion.ARG_ACTIVE_ACCOUNT_MODE
 import com.ustadmobile.core.view.AccountListView.Companion.ARG_FILTER_BY_ENDPOINT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
+import com.ustadmobile.core.view.UstadView.Companion.ARG_TITLE
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
 import io.ktor.client.*
@@ -53,6 +56,11 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
                 val activeUserAtServer = accountManager.activeAccount.userAtServer
                 newList.removeAll { it.userAtServer ==  activeUserAtServer }
             }
+
+            if(endpointFilter != null) {
+                newList.removeAll { it.endpointUrl != endpointFilter }
+            }
+
             accountListLive.sendValue(newList)
         }
     }
@@ -70,7 +78,9 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
         view.accountListLive = accountListLive
         accountManager.storedAccountsLive.observe(doorLifecycleOwner, accountListObserver)
         nextDest = arguments.get(ARG_NEXT) ?: impl.getAppConfigDefaultFirstDest(context)
-        }
+        view.intentMessage = arguments.get(ARG_INTENT_MESSAGE)
+        view.title = arguments.get(ARG_TITLE) ?: impl.getString(MessageID.accounts, context)
+    }
 
     fun handleClickAddAccount(){
         val canSelectServer = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_SERVER_SELECTION, context)
@@ -81,7 +91,7 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
         val filterByEndpoint = arguments[ARG_FILTER_BY_ENDPOINT]
         if(filterByEndpoint != null) {
             view.loading = true
-            GlobalScope.launch {
+            GlobalScope.launch(doorMainDispatcher()) {
                 try {
                     val site = httpClient.verifySite(filterByEndpoint)
                     val goArgs = mapOf(ARG_SERVER_URL to filterByEndpoint,

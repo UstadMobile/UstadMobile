@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
@@ -9,9 +10,11 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.ext.requirePostfix
+import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonEditView.Companion.REGISTER_VIA_LINK
+import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
@@ -21,7 +24,10 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.Site
+import io.ktor.client.*
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -41,7 +47,11 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
 
     private val accountManager: UstadAccountManager by instance()
 
-    private lateinit var workSpace: Site
+    private val httpClient: HttpClient by instance()
+
+    private var workSpace: Site? = null
+
+    private var siteLoadJob: Job? = null
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -55,31 +65,39 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                     AppConfig.KEY_API_URL, "http://localhost", context)?:""
         }
 
+        view.versionInfo = impl.getVersion(context)
         serverUrl = serverUrl.requirePostfix("/")
-
-        val mWorkSpace = arguments[ARG_SITE]
-        if(mWorkSpace != null){
-            workSpace = safeParse(di, Site.serializer(), mWorkSpace)
+        view.loginIntentMessage = arguments[ARG_INTENT_MESSAGE]
+        val mSite = arguments[ARG_SITE]
+        if(mSite != null){
+            onVerifySite(safeParse(di, Site.serializer(), mSite))
         }else{
-            val isRegistrationAllowed = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_REGISTRATION,
-                    context)
-            val isGuestLoginAllowed =  if(arguments.containsKey(Login2View.ARG_NO_GUEST)){
-                false
-            }else{
-                impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_GUEST_LOGIN,
-                        context)
-            }
+            view.loading = true
+            view.inProgress = true
 
-            workSpace = Site().apply {
-                registrationAllowed = isRegistrationAllowed
-                guestLogin = isGuestLoginAllowed
-            }
+           siteLoadJob = GlobalScope.launch(doorMainDispatcher()) {
+               while(workSpace == null) {
+                   try {
+                       val site = httpClient.verifySite(serverUrl, 10000)
+                       onVerifySite(site) // onVerifySite will set the workspace var, and exit the loop
+                   }catch(e: Exception) {
+                       Napier.w("Could not load site object for $serverUrl", e)
+                       view.errorMessage = impl.getString(MessageID.login_network_error, context)
+                       delay(10000)
+                   }
+               }
+           }
 
         }
+    }
 
-        view.createAccountVisible = workSpace.registrationAllowed
-        view.connectAsGuestVisible = workSpace.guestLogin
-        view.versionInfo = impl.getVersion(context)
+    fun onVerifySite(site: Site) {
+        workSpace = site
+        view.createAccountVisible = site.registrationAllowed
+        view.connectAsGuestVisible = site.guestLogin
+
+        view.loading = false
+        view.inProgress = false
     }
 
     /**
@@ -145,6 +163,13 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         accountManager.activeAccount = UmAccount(0L,"guest",
                 "",serverUrl,"Guest","User")
         goToNextDestAfterLoginOrGuestSelected()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        siteLoadJob?.cancel()
+        siteLoadJob = null
     }
 
     companion object {

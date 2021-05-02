@@ -1,14 +1,17 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
@@ -36,6 +39,9 @@ import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
+import com.ustadmobile.port.android.view.binding.imageForeignKeyPlaceholder
+import com.ustadmobile.port.android.view.binding.setImageForeignKey
+import com.ustadmobile.port.android.view.binding.setImageForeignKeyAdapter
 import com.ustadmobile.port.android.view.util.UstadActivityWithProgressBar
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_main.*
@@ -74,6 +80,12 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     private var searchView: SearchView? = null
 
     private val destinationProvider: DestinationProvider by instance()
+
+    private val userProfileDrawable: Drawable? by lazy(LazyThreadSafetyMode.NONE) {
+        ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_24dp)?.also {
+            it.setTint(ContextCompat.getColor(this, R.color.onPrimaryColor))
+        }
+    }
 
     //Check contentonly mode. See appconfig.properties for details. When enabled, the bottom nav
     // is only visible as admin (e.g. normal users only see content)
@@ -173,12 +185,15 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val currentFrag = navController.currentDestination?.id ?: 0
         val mainScreenItemsVisible = BOTTOM_NAV_DEST.contains(currentFrag)
         menu.findItem(R.id.menu_main_settings).isVisible = (mainScreenItemsVisible && mIsAdmin == true)
-        menu.findItem(R.id.menu_main_profile).isVisible = mainScreenItemsVisible
+
+        //Should be hidden when they are on the accounts page (only)
+        val currentDestination = destinationProvider.lookupDestinationById(currentFrag)
+        menu.findItem(R.id.menu_main_profile).isVisible = currentDestination?.hideAccountIcon != true
+
         searchView = menu.findItem(R.id.menu_search).actionView as SearchView
 
-        if (mainScreenItemsVisible) {
-            setUserProfile(menu.findItem(R.id.menu_main_profile))
-        }
+        setUserProfile(menu.findItem(R.id.menu_main_profile))
+
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -225,10 +240,12 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private fun setUserProfile(menuItem: MenuItem) {
         val accountManager: UstadAccountManager by instance()
-        val profileIconLetter = accountManager.activeAccount.firstName?.first().toString()
-        val profileLetterView: TextView = menuItem.actionView.findViewById(R.id.person_name_letter)
-        profileLetterView.text = profileIconLetter.toUpperCase(Locale.ROOT)
-        profileLetterView.setOnClickListener { impl.go(AccountListView.VIEW_NAME, mapOf(), this) }
+
+        val profileImgView: ImageView = menuItem.actionView.findViewById(R.id.person_name_profilepic)
+        userProfileDrawable?.also { profileImgView.imageForeignKeyPlaceholder(it) }
+        profileImgView.setImageForeignKeyAdapter(PersonDetailFragment.FOREIGNKEYADAPTER_PERSON)
+        profileImgView.setImageForeignKey(accountManager.activeAccount.personUid)
+        profileImgView.setOnClickListener { impl.go(AccountListView.VIEW_NAME, mapOf(), this) }
     }
 
     companion object {

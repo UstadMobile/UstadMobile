@@ -8,10 +8,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.enrolPersonIntoSchoolAtLocalTimezone
-import com.ustadmobile.core.view.JoinWithCodeView
-import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.core.view.PersonEditView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SNACK_MESSAGE
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
@@ -132,7 +130,11 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                 if(clazzToJoin  != null && personToEnrol != null) {
                     dbRepo.enrolPersonIntoClazzAtLocalTimezone(personToEnrol,
                             clazzToJoin.clazzUid, ClazzEnrolment.ROLE_STUDENT_PENDING)
-                    view.finish()
+                    val message = systemImpl.getString(MessageID.please_wait_for_approval, context)
+                    systemImpl.go(ClazzList2View.VIEW_NAME,
+                        mapOf(ARG_SNACK_MESSAGE to message), context,
+                        UstadMobileSystemCommon.UstadGoOptions(popUpToViewName = UstadView.CURRENT_DEST,
+                            popUpToInclusive = true))
                 }else {
                     view.errorText = systemImpl.getString(MessageID.invalid_register_code,
                             context)
@@ -144,14 +146,17 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                 if(schoolToJoin  != null && personToEnrol != null) {
                     dbRepo.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol,
                             schoolToJoin.schoolUid, Role.ROLE_SCHOOL_STUDENT_PENDING_UID)
-                    view.finish()
+                    val message = systemImpl.getString(MessageID.please_wait_for_approval, context)
+                    systemImpl.go(SchoolListView.VIEW_NAME,
+                        mapOf(ARG_SNACK_MESSAGE to message), context,
+                        UstadMobileSystemCommon.UstadGoOptions(popUpToViewName = UstadView.CURRENT_DEST,
+                            popUpToInclusive = true))
                 }else {
                     view.errorText = systemImpl.getString(MessageID.invalid_register_code,
                             context)
                 }
             }else {
-                view.errorText = systemImpl.getString(MessageID.invalid_register_code,
-                        context)
+                view.errorText = systemImpl.getString(MessageID.error, context)
             }
 
         }
