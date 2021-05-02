@@ -1,7 +1,11 @@
 package com.ustadmobile.core.controller
 
+import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.schedule.localMidnight
+import com.ustadmobile.core.schedule.toLocalMidnight
+import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.effectiveTimeZone
@@ -77,6 +81,8 @@ class ClazzAssignmentEditPresenter(context: Any,
 
         view.timeZone = clazzWithSchool.effectiveTimeZone()
 
+
+
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
         val contentList = withTimeoutOrNull(2000) {
@@ -106,7 +112,23 @@ class ClazzAssignmentEditPresenter(context: Any,
                 db.clazzDao.getClazzWithSchool(editEntity.caClazzUid)
             } ?: ClazzWithSchool()
 
-            view.timeZone = clazzWithSchool.effectiveTimeZone()
+            val timeZone = clazzWithSchool.effectiveTimeZone()
+            view.timeZone = timeZone
+
+            val localStartDateMidnight = DateTime(editEntity.caStartDate).toLocalMidnight(timeZone).unixMillisLong
+            view.startDate = localStartDateMidnight
+            view.startTime = editEntity.caStartDate - localStartDateMidnight
+
+            val localDeadlineDateMidnight = DateTime(editEntity.caDeadlineDate).toLocalMidnight(timeZone).unixMillisLong
+            view.deadlineDate = localDeadlineDateMidnight
+            view.deadlineTime = editEntity.caDeadlineDate - localDeadlineDateMidnight
+
+            val localGracePeriodDateMidnight = DateTime(editEntity.caGracePeriodDate).toLocalMidnight(timeZone).unixMillisLong
+            view.gracePeriodDate = localGracePeriodDateMidnight
+            view.gracePeriodTime = editEntity.caGracePeriodDate - localGracePeriodDateMidnight
+
+
+
         }
 
         contentJoinEditHelper.onLoadFromJsonSavedState(bundle)
@@ -130,12 +152,24 @@ class ClazzAssignmentEditPresenter(context: Any,
                 return@launch
             }
 
-            if (entity.caStartDate == 0L || entity.caStartDateTime == 0L) {
+            val timeZone = view.timeZone ?: "UTC"
+
+            entity.caStartDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
+                    .localMidnight.utc.unixMillisLong + view.startTime
+
+            entity.caDeadlineDate = DateTime(view.deadlineDate).toOffsetByTimezone(timeZone)
+                    .localMidnight.utc.unixMillisLong + view.deadlineTime
+
+            entity.caGracePeriodDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
+                    .localMidnight.utc.unixMillisLong + view.gracePeriodTime
+
+
+            if (entity.caStartDate == 0L || entity.caStartDate == 0L) {
                 view.caStartDateError = systemImpl.getString(MessageID.field_required_prompt, context)
                 return@launch
             }
 
-            if (entity.caDeadlineDate <= entity.caStartDateTime) {
+            if (entity.caDeadlineDate <= entity.caStartDate) {
                 view.caDeadlineError = systemImpl.getString(MessageID.end_is_before_start_error, context)
                 return@launch
             }
@@ -143,15 +177,20 @@ class ClazzAssignmentEditPresenter(context: Any,
             if (entity.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_ACCEPT ||
                     entity.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY) {
 
-                if (entity.caDeadlineDateTime == Long.MAX_VALUE) {
+                if (entity.caDeadlineDate == Long.MAX_VALUE) {
                     view.caDeadlineError = systemImpl.getString(MessageID.field_required_prompt, context)
                     return@launch
                 }
 
-                if (entity.caGracePeriodDate <= entity.caDeadlineDateTime) {
-                    view.caGracePeriodError = systemImpl.getString(MessageID.end_is_before_start_error, context)
+                if (entity.caGracePeriodDate <= entity.caDeadlineDate) {
+                    view.caGracePeriodError = systemImpl.getString(MessageID.after_deadline_date_error, context)
                     return@launch
                 }
+            }
+
+            if(entity.caLateSubmissionType == 0 ||
+                    entity.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_REJECT) {
+                entity.caGracePeriodDate = entity.caDeadlineDate
             }
 
 

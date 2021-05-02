@@ -53,7 +53,7 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
                 clazzUid, Role.PERMISSION_ASSIGNMENT_UPDATE)
     }
 
-    private suspend fun updateListOnView() {
+    private fun updateListOnView() {
         view.list = repo.clazzAssignmentDao.getAllAssignments(clazzUid,
                 selectedSortOption?.flag ?: 0,
                 searchText.toQueryLikeParam())

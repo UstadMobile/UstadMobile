@@ -20,6 +20,32 @@
             type="String" />
 
         <variable
+            name="startDate"
+            type="Long" />
+
+
+        <variable
+            name="startTime"
+            type="Long" />
+
+        <variable
+            name="deadlineDate"
+            type="Long" />
+
+        <variable
+            name="deadlineTime"
+            type="Long" />
+
+        <variable
+            name="gracePeriodDate"
+            type="Long" />
+
+        <variable
+            name="gracePeriodTime"
+            type="Long" />
+
+
+        <variable
             name="caGracePeriodError"
             type="String" />
 
@@ -133,6 +159,7 @@
                 app:errorText="@{caDeadlineError}"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_16dp"
+                app:endIconMode="clear_text"
                 app:layout_constraintStart_toStartOf="parent"
                 android:hint="@string/deadline"
                 app:layout_constraintTop_toBottomOf="@+id/ca_edit_description_textinput"
@@ -144,7 +171,7 @@
                     android:layout_height="wrap_content"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateLong="@={clazzAssignment.caDeadlineDate}"
+                    app:dateLong="@={deadlineDate}"
                     app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -159,6 +186,7 @@
                 android:layout_marginVertical="@dimen/dimen_16dp"
                 app:errorEnabled="@{caDeadlineError != null}"
                 app:errorText="@{caDeadlineError}"
+                app:endIconMode="clear_text"
                 app:layout_constraintBottom_toBottomOf="@+id/ca_deadline_date_textinput"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:hint="@string/time"
@@ -170,7 +198,7 @@
                     android:layout_height="wrap_content"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:timeValue="@={clazzAssignment.caDeadlineDateTime}"
+                    app:timeValue="@={deadlineTime}"
                     app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -207,7 +235,7 @@
                     android:layout_height="wrap_content"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateLong="@={clazzAssignment.caStartDate}"
+                    app:dateLong="@={startDate}"
                     app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -233,7 +261,7 @@
                     android:layout_height="wrap_content"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:timeValue="@={clazzAssignment.caStartDateTime}"
+                    app:timeValue="@={startTime}"
                     app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -308,7 +336,7 @@
                     android:layout_height="wrap_content"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateLong="@={clazzAssignment.caGracePeriodDate}"
+                    app:dateLong="@={gracePeriodDate}"
                     app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -334,7 +362,7 @@
                     android:layout_height="wrap_content"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:timeValue="@={clazzAssignment.caGracePeriodDateTime}"
+                    app:timeValue="@={gracePeriodTime}"
                     app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>

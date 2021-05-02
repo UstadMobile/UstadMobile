@@ -38,19 +38,13 @@ open class ClazzAssignment {
 
     var caDeadlineDate: Long = Long.MAX_VALUE
 
-    var caDeadlineDateTime: Long = Long.MAX_VALUE
-
     var caStartDate: Long = 0
-
-    var caStartDateTime: Long = 0
 
     var caLateSubmissionType: Int = 0
 
     var caLateSubmissionPenalty: Int = 0
 
     var caGracePeriodDate: Long = 0
-
-    var caGracePeriodDateTime: Long = 0
 
     var caActive: Boolean = true
 
