@@ -4,14 +4,13 @@ package com.ustadmobile.core.controller
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.*
-import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.*
@@ -77,8 +76,8 @@ class ClazzListPresenterTest {
 
         //eg. verify the correct DAO method was called and was set on the view
         verify(repoClazzDaoSpy, timeout(5000)).findClazzesWithPermission(
-                eq("%"), eq(accountManager.activeAccount.personUid), eq(0), any(),
-                any(), any(), any())
+                eq("%"), eq(accountManager.activeAccount.personUid), eq(listOf()), eq(0),
+                any(), any(), any(), any(), any())
         verify(mockView, timeout(5000)).list = any()
 
     }
@@ -96,8 +95,9 @@ class ClazzListPresenterTest {
 
         //eg. verify the correct DAO method was called and was set on the view
         verify(repoClazzDaoSpy, timeout(5000)).findClazzesWithPermission(
-                eq("%"), eq(accountManager.activeAccount.personUid), eq(excludeFromSchool),
-                any(), any(), any(), any())
+                eq("%"), eq(accountManager.activeAccount.personUid), eq(listOf()),
+                eq(excludeFromSchool), any(), any(), any(), any(), any()
+        )
         verify(mockView, timeout(5000)).list = any()
     }
 

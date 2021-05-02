@@ -6,7 +6,6 @@ import com.google.gson.reflect.TypeToken
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.XContext
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
@@ -23,6 +22,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.*
 import java.util.*
+import com.github.aakira.napier.Napier
 
 class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
 
@@ -82,13 +82,19 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
                 throw StatementRequestException("no content found", 204)
             }
         } catch (e: StatementRequestException) {
+            Napier.e("StatementException", e)
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.lookup(e.errorCode),
                     "application/octet", e.message)
         } catch (e: IOException) {
+            Napier.e("IOException", e)
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
                     "application/octet", e.message)
         } catch (e: NanoHTTPD.ResponseException) {
+            Napier.e("ResponseException", e)
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/octet", e.message)
+        } catch(e: Exception) {
+            Napier.e("Other Exception", e)
+            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "text/plain", e.message)
         }
         return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NO_CONTENT,
                 "application/octet", null)
@@ -142,7 +148,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
                 NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.CONFLICT, "application/octet", null)
             } else NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/octet", e.message)
         } finally {
-            UMIOUtils.closeInputStream(`is`)
+            `is`?.close()
         }
 
     }

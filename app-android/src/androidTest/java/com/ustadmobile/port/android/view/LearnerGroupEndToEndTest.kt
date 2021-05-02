@@ -14,24 +14,25 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.JobStatus
-import com.ustadmobile.core.view.ContentEntry2DetailView
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
+import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.screen.*
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.port.android.util.waitUntilWithActivityScenario
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.io.File
+import org.junit.rules.TemporaryFolder
 
 
 @AdbScreenRecord("Learner Group End To End")
@@ -45,6 +46,10 @@ class LearnerGroupEndToEndTest : TestCase() {
     @JvmField
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
+
+    @JvmField
+    @Rule
+    val temporaryFolder = TemporaryFolder()
 
     @Before
     fun setup() {
@@ -73,13 +78,12 @@ class LearnerGroupEndToEndTest : TestCase() {
             mimeType = "application/tincan+zip"
             containerUid = dbRule.repo.containerDao.insert(this)
         }
-        val containerTmpDir = UmFileUtilSe.makeTempDir("xapicontent", "${System.currentTimeMillis()}")
-        val testFile = File.createTempFile("xapicontent", "xapifile", containerTmpDir)
-        val input = javaClass.getResourceAsStream("/com/ustadmobile/port/android/view/tincan-group.zip")
-        testFile.outputStream().use { input?.copyTo(it) }
 
-        val containerManager = ContainerManager(container, dbRule.db, dbRule.repo, containerTmpDir.absolutePath)
-        addEntriesFromZipToContainer(testFile.absolutePath, containerManager)
+        runBlocking {
+            dbRule.repo.addEntriesToContainerFromZipResource(container.containerUid, this::class.java,
+                    "/com/ustadmobile/port/android/view/tincan-group.zip",
+                    ContainerAddOptions(temporaryFolder.newFolder().toDoorUri()))
+        }
 
         DownloadJobItem().apply {
             djiContentEntryUid = 1
@@ -98,7 +102,7 @@ class LearnerGroupEndToEndTest : TestCase() {
             val context = ApplicationProvider.getApplicationContext<Context>()
             val launchIntent = Intent(context, MainActivity::class.java).also {
                 it.putExtra(UstadView.ARG_NEXT,
-                        "${ContentEntry2DetailView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=1")
+                        "${ContentEntryDetailOverviewView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=1")
             }
             activityScenario = launchActivity(intent = launchIntent)
         }.run {
@@ -170,10 +174,12 @@ class LearnerGroupEndToEndTest : TestCase() {
                     }
                 }
             }
-            MainScreen{
-                toolBarTitle{
-                    hasDescendant { withText("Hello World Example") }
-                    isDisplayed()
+            flakySafely {
+                MainScreen {
+                    toolBarTitle {
+                        hasDescendant { withText("Hello World Example") }
+                        isDisplayed()
+                    }
                 }
             }
             XapiContentScreen{

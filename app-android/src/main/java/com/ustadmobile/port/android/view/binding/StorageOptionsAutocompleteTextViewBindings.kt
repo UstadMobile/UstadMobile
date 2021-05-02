@@ -6,7 +6,7 @@ import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView
-import com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+import com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
 import com.ustadmobile.port.android.view.StorageOptionsAutocompleteTextView
 
 @BindingAdapter(value=["storageOptions", "selectedStorageOption"], requireAll =  false)
@@ -22,7 +22,7 @@ fun StorageOptionsAutocompleteTextView.setStorageOptions(storageOptions: Mutable
 }
 
 @InverseBindingAdapter(attribute = "selectedStorageOption")
-fun MessageIdAutoCompleteTextView.getSelectedStorageOption(): Int {
+fun IdOptionAutoCompleteTextView.getSelectedStorageOption(): Int {
     return this.selectedDropDownOptionId.toInt()
 }
 

@@ -13,7 +13,7 @@ import androidx.lifecycle.Observer
 import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.MergeAdapter
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentListBinding
@@ -23,6 +23,7 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
@@ -51,13 +52,15 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
     internal var mDataRecyclerViewAdapter: SelectablePagedListAdapter<DT, *>? = null
 
-    protected var mMergeRecyclerViewAdapter: MergeAdapter? = null
+    protected var mMergeRecyclerViewAdapter: ConcatAdapter? = null
 
     internal var mDataBinding: FragmentListBinding? = null
 
     protected var currentLiveData: LiveData<PagedList<DT>>? = null
 
     protected var dbRepo: UmAppDatabase? = null
+
+    private val systemImpl: UstadMobileSystemImpl by instance()
 
     /**
      * Whether or not UstadListViewFragment should attempt to manage the MergeAdapter. The MergeAdapter
@@ -116,8 +119,10 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
         override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
             menu.clear()
-            val systemImpl = UstadMobileSystemImpl.instance
             val fragmentContext = fragmentHost?.requireContext() ?: return false
+            val systemImpl: UstadMobileSystemImpl =
+                (fragmentHost as? UstadListViewFragment<*, *>)?.systemImpl ?: return false
+
             fragmentHost?.selectionOptions?.forEachIndexed { index, item ->
                 val optionText = systemImpl.getString(item.messageId, fragmentContext)
                 menu.add(0, item.commandId, index, optionText).apply {
@@ -214,7 +219,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         mListStatusAdapter = ListStatusRecyclerViewAdapter(viewLifecycleOwner)
 
         if (autoMergeRecyclerViewAdapter) {
-            mMergeRecyclerViewAdapter = MergeAdapter(mUstadListHeaderRecyclerViewAdapter,
+            mMergeRecyclerViewAdapter = ConcatAdapter(mUstadListHeaderRecyclerViewAdapter,
                     mDataRecyclerViewAdapter, mListStatusAdapter)
             mRecyclerView?.adapter = mMergeRecyclerViewAdapter
             mDataRecyclerViewAdapter?.selectedItemsLiveData?.observe(this.viewLifecycleOwner,
@@ -290,7 +295,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     }
 
     override fun onMessageIdOptionSelected(view: AdapterView<*>?,
-                                           messageIdOption: MessageIdOption) {
+                                           messageIdOption: IdOption) {
         listPresenter?.handleClickSortOrder(messageIdOption)
     }
 
@@ -328,9 +333,6 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
     }
-
-    override val viewContext: Any
-        get() = requireContext()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

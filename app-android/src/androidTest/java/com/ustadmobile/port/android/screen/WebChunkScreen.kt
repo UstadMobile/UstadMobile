@@ -10,7 +10,6 @@ object WebChunkScreen : KScreen<WebChunkScreen>() {
     override val layoutId: Int?
         get() = R.layout.fragment_web_chunk
 
-    @OptIn(ExperimentalStdlibApi::class)
     override val viewClass: Class<*>?
         get() = WebChunkFragment::class.java
 

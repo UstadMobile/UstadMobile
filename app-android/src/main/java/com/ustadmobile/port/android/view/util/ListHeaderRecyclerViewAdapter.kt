@@ -58,6 +58,9 @@ class ListHeaderRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null
         takeIf { sortOrderOption != null }.apply {
             submitList(currentHolderList)
         }
+        takeIf { filterOptions.isNotEmpty() }.apply {
+            submitList(currentHolderList)
+        }
     }
 
 

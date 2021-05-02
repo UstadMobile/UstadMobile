@@ -2,7 +2,7 @@ package com.ustadmobile.sharedse.util
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.nhaarman.mockitokotlin2.spy
+import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
@@ -13,8 +13,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ContainerMounter
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -24,6 +24,11 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
+import okhttp3.OkHttpClient
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.kodein.di.*
@@ -54,15 +59,26 @@ class UstadTestRule: TestWatcher() {
 
     var endpointScope: EndpointScope? = null
 
-    private var systemImplSpy: UstadMobileSystemImpl? = null
+    private lateinit var systemImplSpy: UstadMobileSystemImpl
 
     lateinit var diModule: DI.Module
 
-    class SomeDiThing(di: DI)
+    lateinit var httpClient: HttpClient
+
+    private lateinit var okHttpClient: OkHttpClient
 
     override fun starting(description: Description?) {
         endpointScope = EndpointScope()
-        systemImplSpy = spy(UstadMobileSystemImpl.instance)
+        systemImplSpy = spy(UstadMobileSystemImpl())
+        okHttpClient = OkHttpClient()
+        httpClient = HttpClient(OkHttp) {
+            install(JsonFeature)
+            install(HttpTimeout)
+            engine {
+                preconfigured = okHttpClient
+            }
+        }
+
         diModule = DI.Module("UstadTestRule") {
             bind<UstadMobileSystemImpl>() with singleton { systemImplSpy!! }
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
@@ -75,8 +91,17 @@ class UstadTestRule: TestWatcher() {
                 })
             }
 
+            bind<HttpClient>() with singleton{
+                httpClient
+            }
+
+            bind<OkHttpClient>() with singleton {
+                okHttpClient
+            }
+
             bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope!!).singleton {
-                spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository<UmAppDatabase>(Any(), context.url, "", defaultHttpClient(), null))
+                spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(Any(),
+                    context.url, instance(), instance())))
             }
 
             bind<ContainerMounter>() with singleton { EmbeddedHTTPD(0, di).also { it.start() } }
@@ -94,8 +119,7 @@ class UstadTestRule: TestWatcher() {
     }
 
     override fun finished(description: Description?) {
-        UstadMobileSystemImpl.instance.clearPrefs()
-
+        httpClient.close()
     }
 
 }

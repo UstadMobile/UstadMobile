@@ -1,7 +1,7 @@
 package com.ustadmobile.core.impl
 
 import com.google.gson.Gson
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
@@ -10,9 +10,12 @@ import com.ustadmobile.core.account.UstadAccounts
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.userAtServer
 import com.ustadmobile.door.DoorDatabaseSyncRepository
-import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
@@ -39,10 +42,12 @@ class UstadAccountManagerTest {
 
     private lateinit var endpointScope: EndpointScope
 
+    private lateinit var json: Json
+
     private fun MockWebServer.enqueueValidAccountResponse(umAccount: UmAccount =
                                                                   UmAccount(42L, "bob", "", mockServerUrl)) {
         enqueue(MockResponse()
-                .setBody(Json.stringify(UmAccount.serializer(), umAccount))
+                .setBody(Json.encodeToString(UmAccount.serializer(), umAccount))
                 .setResponseCode(200)
                 .addHeader("Content-Type", "application/json; charset=utf-8"))
     }
@@ -62,10 +67,19 @@ class UstadAccountManagerTest {
 
         endpointScope = EndpointScope()
 
+        json = Json { encodeDefaults = true }
+
         di = DI {
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
                 mock<UmAppDatabase>(extraInterfaces = arrayOf(DoorDatabaseSyncRepository::class)) {
                     on { (this as DoorDatabaseSyncRepository).clientId }.thenReturn(42)
+                }
+            }
+
+            bind<HttpClient>() with singleton {
+                HttpClient(OkHttp) {
+                    install(JsonFeature)
+                    install(HttpTimeout)
                 }
             }
 
@@ -104,7 +118,7 @@ class UstadAccountManagerTest {
                 accountManager.storedAccounts.size)
         argumentCaptor<String> {
             verify(mockSystemImpl).setAppPref(eq(ACCOUNTS_PREFKEY), capture(), any())
-            val accountSaved = Json.parse(UstadAccounts.serializer(), firstValue)
+            val accountSaved = json.decodeFromString(UstadAccounts.serializer(), firstValue)
             Assert.assertEquals("Saved account as active", loggedInAccount.userAtServer,
                     accountSaved.currentAccount)
         }
@@ -114,7 +128,7 @@ class UstadAccountManagerTest {
     fun givenValidLoginCredentials_whenLoginCalledForSecondAccountOnSameServer_shouldAddAccount() {
         val savedAccount = UmAccount(50L, "joe", "", mockServerUrl)
         whenever(mockSystemImpl.getAppPref(eq(ACCOUNTS_PREFKEY), any())).thenReturn(
-                Json.stringify(UstadAccounts.serializer(),
+                json.encodeToString(UstadAccounts.serializer(),
                         UstadAccounts(savedAccount.userAtServer, listOf(savedAccount))))
 
         val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
@@ -133,7 +147,7 @@ class UstadAccountManagerTest {
 
         argumentCaptor<String> {
             verify(mockSystemImpl).setAppPref(eq(ACCOUNTS_PREFKEY), capture(), any())
-            val accountSaved = Json.parse(UstadAccounts.serializer(), firstValue)
+            val accountSaved = json.decodeFromString(UstadAccounts.serializer(), firstValue)
             Assert.assertEquals("Saved account as active", loggedInAccount.userAtServer,
                     accountSaved.currentAccount)
             Assert.assertEquals("Two accounts were saved", 2,
@@ -184,8 +198,9 @@ class UstadAccountManagerTest {
         val storedAccounts = UstadAccounts("bob@$mockServerUrl",
                 listOf(UmAccount(1, "bob", "", mockServerUrl),
                         UmAccount(2, "joe", "", mockServerUrl)))
+
         whenever(mockSystemImpl.getAppPref(eq(ACCOUNTS_PREFKEY), any())).thenReturn(
-                Json.stringify(UstadAccounts.serializer(), storedAccounts))
+            json.encodeToString(UstadAccounts.serializer(), storedAccounts))
 
         val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
 
@@ -197,7 +212,7 @@ class UstadAccountManagerTest {
             accountManager.storedAccounts.size)
         argumentCaptor<String> {
             verify(mockSystemImpl).setAppPref(eq(ACCOUNTS_PREFKEY), capture(), any())
-            val accountSaved = Json.parse(UstadAccounts.serializer(), firstValue)
+            val accountSaved = json.decodeFromString(UstadAccounts.serializer(), firstValue)
             Assert.assertEquals("Saved account as active", "joe@$mockServerUrl",
                     accountSaved.currentAccount)
         }
@@ -214,7 +229,7 @@ class UstadAccountManagerTest {
                     "joe@$mockServerUrl" to timeNow - 15000,
                     "harry@$mockServerUrl" to timeNow - 5000))
         whenever(mockSystemImpl.getAppPref(eq(ACCOUNTS_PREFKEY), any())).thenReturn(
-                Json.stringify(UstadAccounts.serializer(), storedAccounts))
+                Json.encodeToString(UstadAccounts.serializer(), storedAccounts))
 
         val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
 
@@ -224,7 +239,7 @@ class UstadAccountManagerTest {
             "harry@$mockServerUrl", accountManager.activeAccount.userAtServer)
         argumentCaptor<String> {
             verify(mockSystemImpl, atLeastOnce()).setAppPref(eq(ACCOUNTS_PREFKEY), capture(), any())
-            val accountSaved = Json.parse(UstadAccounts.serializer(), lastValue)
+            val accountSaved = json.decodeFromString(UstadAccounts.serializer(), lastValue)
             Assert.assertEquals("Fallback account is saved as active acount", "harry@$mockServerUrl",
                     accountSaved.currentAccount)
         }
@@ -237,7 +252,7 @@ class UstadAccountManagerTest {
                 listOf(UmAccount(1, "bob", "", mockServerUrl)),
                 mapOf("bob@$mockServerUrl" to timeNow - 5000))
         whenever(mockSystemImpl.getAppPref(eq(ACCOUNTS_PREFKEY), any())).thenReturn(
-                Json.stringify(UstadAccounts.serializer(), storedAccounts))
+                json.encodeToString(UstadAccounts.serializer(), storedAccounts))
 
         val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
 
@@ -262,7 +277,7 @@ class UstadAccountManagerTest {
 
         val accountResponse = UmAccount(42L, "mary", "", "")
         mockWebServer.enqueue(MockResponse()
-                .setBody(Json.stringify(UmAccount.serializer(), accountResponse))
+                .setBody(json.encodeToString(UmAccount.serializer(), accountResponse))
                 .addHeader("Content-Type", "application/json; charset=utf-8"))
 
         val accountRegistered = runBlocking {

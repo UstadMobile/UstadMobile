@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.abztract
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
@@ -14,9 +15,12 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_WEBM
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_WEB_CHUNK
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.db.entities.ScrapeQueueItemWithScrapeRun
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.internal.closeQuietly
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -24,14 +28,15 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
-@ExperimentalStdlibApi
 abstract class Scraper(var contentEntryUid: Long, val sqiUid: Int, var parentContentEntryUid: Long, endpoint: Endpoint, di: DI) {
 
     val db: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
 
     val repo: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
 
-    val containerFolder: File by di.on(endpoint).instance(tag = DiTag.TAG_CONTAINER_DIR)
+    val containerFolder: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+
+    protected val okHttpClient: OkHttpClient by di.instance()
 
     val mimeTypeToContentFlag: Map<String, Int> = mapOf(
             MIMETYPE_PDF to ContentEntry.TYPE_DOCUMENT,
@@ -86,25 +91,37 @@ abstract class Scraper(var contentEntryUid: Long, val sqiUid: Int, var parentCon
     data class HeadRequestValues(val isUpdated: Boolean, val etag: String, val mimeType: String, val lastModified: Long)
 
     fun isUrlContentUpdated(url: URL, container: Container?): HeadRequestValues {
-        val conn = (url.openConnection() as HttpURLConnection)
-        conn.requestMethod = "HEAD"
-        val mimeType = conn.contentType ?: ""
-        val lastModified = conn.lastModified
-        val eTagHeaderValue = conn.getHeaderField(ETAG.toLowerCase())
+        var response: Response? = null
+        try {
+            val headRequest = Request.Builder()
+                .url(url.toString())
+                .head()
+                .build()
+            response = okHttpClient.newCall(headRequest).execute()
 
-        var isUpdated = true
-        if (lastModified != 0L) {
-            isUpdated = lastModified > container?.cntLastModified ?: 0
-        }
+            val mimeType = response.header("content-type") ?: ""
+            val lastModified = response.headers.getDate("last-modified")?.time ?: 0L
+            val eTagHeaderValue = response.header(ETAG.toLowerCase())
 
-        if (isUpdated && eTagHeaderValue != null) {
-            val eTag = db.containerETagDao.getEtagOfContainer(container?.containerUid ?: 0)
-            if (!eTag.isNullOrEmpty()) {
-                isUpdated = eTagHeaderValue != eTag
+            var isUpdated = true
+            if (lastModified != 0L) {
+                isUpdated = lastModified > container?.cntLastModified ?: 0
             }
+
+            if (isUpdated && eTagHeaderValue != null) {
+                val eTag = db.containerETagDao.getEtagOfContainer(container?.containerUid ?: 0)
+                if (!eTag.isNullOrEmpty()) {
+                    isUpdated = eTagHeaderValue != eTag
+                }
+            }
+
+            return HeadRequestValues(isUpdated, eTagHeaderValue ?: "", mimeType, lastModified)
+        }catch(e: Exception) {
+            Napier.e("Exception attempting to check $url updated", e)
+            throw e
+        }finally {
+            response?.closeQuietly()
         }
-        conn.disconnect()
-        return HeadRequestValues(isUpdated, eTagHeaderValue ?: "", mimeType, lastModified)
     }
 
     companion object {

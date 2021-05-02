@@ -27,6 +27,12 @@
     <item name="tag_chip_optionid" type="id"/>
 
 
+    <item name="tag_imageforeignkey_props" type="id"/>
+
     <item name="tag_crudidlingresource_ignore" type="id"/>
+
+    <item name="tag_imageviewlifecycleobserver" type="id"/>
+
+    <item name="tag_imageview_inversebindinglistener" type="id"/>
 
 </resources>

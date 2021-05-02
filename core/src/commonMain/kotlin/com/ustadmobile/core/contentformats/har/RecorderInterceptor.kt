@@ -1,13 +1,9 @@
 package com.ustadmobile.core.contentformats.har
 
-import com.ustadmobile.core.util.UMIOUtils
-import kotlinx.io.ByteArrayInputStream
-import kotlinx.serialization.toUtf8Bytes
 
-@ExperimentalStdlibApi
 class RecorderInterceptor : HarInterceptor() {
 
-    override fun intercept(request: HarRequest, response: HarResponse, harContainer: HarContainer, jsonArgs: String?): HarResponse {
+    override suspend fun intercept(request: HarRequest, response: HarResponse, harContainer: HarContainer, jsonArgs: String?): HarResponse {
 
         if (response.content?.mimeType?.contains("text/html") == false) {
             return response
@@ -15,10 +11,11 @@ class RecorderInterceptor : HarInterceptor() {
 
         val head = Regex("(<head([^>]*)>)")
 
-        val input = response.content?.data ?: return response
-        var data = UMIOUtils.readStreamToString(input)
+        var data = response.content?.text ?: return response
         data = data.replace(head, "$1$jsInject")
-        response.content?.data = ByteArrayInputStream(data.encodeToByteArray())
+
+        response.content?.text = data
+        response.content?.size = data.length.toLong()
 
         return response
     }

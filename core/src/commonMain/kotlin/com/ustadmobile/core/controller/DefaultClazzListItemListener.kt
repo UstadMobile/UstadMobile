@@ -19,6 +19,7 @@ import org.kodein.di.*
 class DefaultClazzListItemListener(var view: ClazzList2View?,
                                    var listViewMode: ListViewMode,
                                    val context: Any,
+                                   val arguments: Map<String, String>,
                                    override val di: DI): ClazzListItemListener, DIAware {
 
     val systemImpl: UstadMobileSystemImpl by instance()
@@ -50,7 +51,14 @@ class DefaultClazzListItemListener(var view: ClazzList2View?,
 
             }
         }else {
-            view?.finishWithResult(listOf(clazz))
+
+            if(arguments.containsKey(UstadView.ARG_GO_TO_COMPLETE)) {
+                systemImpl.go(arguments[UstadView.ARG_GO_TO_COMPLETE].toString(),
+                        arguments.plus(UstadView.ARG_FILTER_BY_CLAZZUID to clazz.clazzUid.toString()),
+                        context)
+            }else {
+                view?.finishWithResult(listOf(clazz))
+            }
         }
     }
 }

@@ -5,7 +5,7 @@
     <data>
         <import type="android.view.View"/>
         <import type="java.util.List"/>
-        <import type="com.ustadmobile.core.util.MessageIdOption"/>
+        <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="android.text.InputType"/>
         <import type="com.ustadmobile.core.util.ext.IntExtKt"/>
         <import type="com.ustadmobile.core.view.PersonEditView"/>
@@ -15,9 +15,16 @@
             type="com.ustadmobile.lib.db.entities.PersonWithAccount" />
 
         <variable
+            name="personPicture"
+            type="com.ustadmobile.lib.db.entities.PersonPicture"/>
+
+        <variable
             name="personPictureUri"
             type="String" />
 
+        <variable
+            name="imageViewLifecycleObserver"
+            type="com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2" />
 
         <variable
             name="loading"
@@ -34,11 +41,15 @@
 
         <variable
             name="genderOptions"
-            type="List&lt;MessageIdOption&gt;" />
+            type="List&lt;IdOption&gt;" />
 
         <variable
             name="registrationMode"
             type="int" />
+
+        <variable
+            name="hideClazzes"
+            type="boolean" />
 
         <variable
             name="activityEventHandler"
@@ -47,6 +58,44 @@
         <variable
             name="parentContactError"
             type="String" />
+
+        <variable
+            name="firstNamesError"
+            type="String" />
+
+        <variable
+            name="lastNameError"
+            type="String" />
+
+        <variable
+            name="usernameError"
+            type="String" />
+
+        <variable
+            name="genderFieldError"
+            type="String" />
+
+        <variable
+            name="passwordError"
+            type="String" />
+
+        <variable
+            name="passwordConfirmError"
+            type="String"
+            />
+
+        <variable
+            name="dateOfBirthFieldError"
+            type="String" />
+
+        <variable
+            name="emailError"
+            type="String" />
+
+
+
+
+
 
     </data>
 
@@ -61,19 +110,18 @@
             android:layout_height="wrap_content">
 
             <de.hdodenhof.circleimageview.CircleImageView
-                android:visibility="gone"
                 android:id="@+id/item_presenter_field_row_image_view"
                 android:layout_width="@dimen/dimen_48dp"
                 android:layout_height="@dimen/dimen_48dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 app:civ_circle_background_color="?colorSecondary"
-                app:imageUri="@={personPictureUri}"
+                app:imageUri="@={personPicture.personPictureUri}"
+                app:imageViewLifecycleObserver="@{imageViewLifecycleObserver}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.appcompat.widget.AppCompatImageView
-                android:visibility="gone"
                 android:id="@+id/item_presenter_field_row_picture_photoicon"
                 android:layout_width="@dimen/dimen_24dp"
                 android:layout_height="@dimen/dimen_24dp"
@@ -93,10 +141,13 @@
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:hintEnabled="true"
+                app:errorText="@{firstNamesError}"
+                app:errorEnabled="@{firstNamesError != null}"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:errorTextColor="?colorError"
+                app:layout_constraintTop_toBottomOf="@id/item_presenter_field_row_picture_photoicon"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 >
 
@@ -118,8 +169,11 @@
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 app:hintEnabled="true"
+                app:errorText="@{lastNameError}"
+                app:errorEnabled="@{lastNameError != null}"
                 android:enabled="@{fieldsEnabled}"
                 android:layout_marginEnd="@dimen/dimen_16dp"
+                app:errorTextColor="?colorError"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/firstnames_textinputlayout">
@@ -143,12 +197,15 @@
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:hintEnabled="true"
+                app:errorText="@{genderFieldError}"
+                app:errorEnabled="@{genderFieldError != null}"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:errorTextColor="?colorError"
                 app:layout_constraintTop_toBottomOf="@+id/lastname_textInputLayout">
 
-                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:id="@+id/gender_value"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -205,6 +262,8 @@
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:hintEnabled="true"
+                app:errorText="@{dateOfBirthFieldError}"
+                app:errorEnabled="@{dateOfBirthFieldError != null}"
                 android:enabled="@{fieldsEnabled}"
                 android:visibility="@{IntExtKt.hasFlag(registrationMode, PersonEditView.REGISTER_MODE_ENABLED) ? View.GONE : View.VISIBLE}"
                 app:layout_constraintStart_toStartOf="parent"
@@ -244,7 +303,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:maxLines="1"
-                    android:inputType="text"
+                    android:maxLength="15"
+                    android:inputType="number"
                     android:hint="@string/phone_number" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -258,6 +318,8 @@
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:hintEnabled="true"
+                app:errorText="@{emailError}"
+                app:errorEnabled="@{emailError != null}"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -268,7 +330,7 @@
                     android:text="@={person.emailAddr}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text"
+                    android:inputType="textEmailAddress"
                     android:hint="@string/email" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -314,7 +376,10 @@
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:hintEnabled="true"
+                app:errorText="@{usernameError}"
+                app:errorEnabled="@{usernameError != null}"
                 android:enabled="@{fieldsEnabled}"
+                app:errorTextColor="?colorError"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/optional_fields_bottom_barrier">
@@ -344,6 +409,8 @@
                 app:passwordToggleEnabled="true"
                 app:errorTextColor="?colorError"
                 app:hintEnabled="true"
+                app:errorText="@{passwordError}"
+                app:errorEnabled="@{passwordError != null}"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintTop_toBottomOf="@+id/username_textinputlayout">
 
@@ -369,6 +436,8 @@
                 android:layout_margin="@dimen/dimen_16dp"
                 app:passwordToggleEnabled="true"
                 app:hintEnabled="true"
+                app:errorText="@{passwordConfirmError}"
+                app:errorEnabled="@{passwordConfirmError != null}"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

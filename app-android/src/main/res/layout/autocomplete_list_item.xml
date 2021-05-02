@@ -4,8 +4,4 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="@dimen/dimen_16dp"
-    android:ellipsize="end"
-    android:maxLines="1"
-    android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1">
-
-</TextView>
+    android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"/>

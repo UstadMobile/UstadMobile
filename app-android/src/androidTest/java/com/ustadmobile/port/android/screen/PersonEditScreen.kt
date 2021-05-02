@@ -148,7 +148,7 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
 
             person.gender.takeIf { it != personOnForm?.gender }?.also {
                 testContext.flakySafely {
-                    setMessageIdOption(genderValue, impl.getString(MessageID.male, context))
+                    genderValue.setMessageIdOption(impl.getString(MessageID.male, context))
                 }
             }
 
@@ -179,7 +179,11 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
 
             if (!leftOutDateOfBirth && !registrationMode.hasFlag(PersonEditView.REGISTER_MODE_ENABLED)) {
                 person.dateOfBirth.takeIf { it != personOnForm?.dateOfBirth }?.also {
-                    setDateField(R.id.birthday_text, it)
+                    birthdayTextInput{
+                        edit{
+                            setDateWithDialog(it)
+                        }
+                    }
                 }
             }
 

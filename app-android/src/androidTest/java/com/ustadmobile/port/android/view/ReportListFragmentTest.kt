@@ -7,12 +7,14 @@ import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Report
+import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.port.android.screen.ReportListScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.util.test.ext.insertTestStatements
+import com.ustadmobile.util.test.ext.insertTestStatementsForReports
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
@@ -38,7 +40,13 @@ class ReportListFragmentTest : TestCase() {
     @Before
     fun setup() {
         runBlocking {
-            dbRule.repo.insertTestStatements()
+            dbRule.insertPersonForActiveUser(Person().apply {
+                firstNames = "Bob"
+                lastName = "Jones"
+                admin = true
+                personUid = 42
+            })
+            dbRule.repo.insertTestStatementsForReports()
         }
     }
 
@@ -47,13 +55,22 @@ class ReportListFragmentTest : TestCase() {
     fun givenReportPresent_whenClickOnReport_thenShouldNavigateToReportDetail() {
         val testEntity = Report().apply {
             reportTitle = "Test Name"
-            chartType = Report.BAR_CHART
-            yAxis = Report.AVG_DURATION
             xAxis = Report.MONTH
+            reportOwnerUid = 42
             fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
+            reportSeries = """                
+                        [{
+                         "reportSeriesUid": 0,
+                         "reportSeriesName": "Series 1",
+                         "reportSeriesYAxis": ${ReportSeries.TOTAL_DURATION},
+                         "reportSeriesVisualType": ${ReportSeries.BAR_CHART},
+                         "reportSeriesSubGroup": ${ReportSeries.NONE}
+                        }]
+                    """.trimIndent()
             reportUid = dbRule.repo.reportDao.insert(this)
         }
+
 
         init {
 
@@ -69,9 +86,12 @@ class ReportListFragmentTest : TestCase() {
             ReportListScreen {
 
                 recycler {
-                    emptyChildWith {
+                    childWith<ReportListScreen.Report> {
                         withTag(testEntity.reportUid)
                     } perform {
+
+                        reportTitle.hasText(testEntity.reportTitle!!)
+
                         click()
                     }
                 }

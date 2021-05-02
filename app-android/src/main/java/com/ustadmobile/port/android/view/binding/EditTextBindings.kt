@@ -12,6 +12,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.systemImpl
 import com.ustadmobile.lib.db.entities.*
 import java.text.MessageFormat
 import java.util.*
@@ -33,7 +34,6 @@ private fun scheduleTimeToDate(msSinceMidnight: Int) : Date{
 
 @BindingAdapter("scheduleText")
 fun TextView.setScheduleText(schedule: Schedule) {
-    val systemImpl = UstadMobileSystemImpl.instance
     val frequencyMessageId = ScheduleEditPresenter.FrequencyOption.values()
             .firstOrNull { it.optionVal == schedule.scheduleFrequency }?.messageId ?: 0
     val dayMessageId = ScheduleEditPresenter.DayOptions.values()

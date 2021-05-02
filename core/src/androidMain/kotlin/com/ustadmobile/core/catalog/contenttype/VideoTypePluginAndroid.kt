@@ -2,16 +2,18 @@ package com.ustadmobile.core.catalog.contenttype
 
 import android.content.Context
 import android.media.MediaCodecInfo
+import android.media.MediaExtractor
 import android.media.MediaFormat
 import androidx.core.net.toUri
 import com.github.aakira.napier.Napier
 import com.linkedin.android.litr.MediaTransformer
 import com.linkedin.android.litr.TransformationListener
 import com.linkedin.android.litr.analytics.TrackTransformationInfo
-import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.ext.extractVideoResolutionMetadata
-import com.ustadmobile.core.util.ext.fitWithin
+import com.ustadmobile.core.io.ext.addFileToContainer
+import com.ustadmobile.core.util.ext.*
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
@@ -82,7 +84,13 @@ class VideoTypePluginAndroid : VideoTypePlugin() {
                     setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
                 }
 
-                val audioTarget = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC, AUDIO_SAMPLE_RATE, AUDIO_CHANNEL_COUNT).apply {
+                val audioCodecInfo = MediaExtractor().useThenRelease {
+                    it.setDataSource(videoFile.path)
+                    it.getFirstAudioCodecInfo()
+                }
+
+                val audioTarget = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC,
+                    audioCodecInfo.sampleRate, audioCodecInfo.channelCount).apply {
                     setInteger(MediaFormat.KEY_BIT_RATE, AUDIO_BIT_RATE)
                 }
 
@@ -141,9 +149,8 @@ class VideoTypePluginAndroid : VideoTypePlugin() {
                 containerUid = repo.containerDao.insert(this)
             }
 
-            val containerManager = ContainerManager(container, db, repo, containerBaseDir)
-
-            containerManager.addEntries(ContainerManager.FileEntrySource(newVideo, newVideo.name))
+            repo.addFileToContainer(container.containerUid, newVideo.toDoorUri(), newVideo.name,
+                ContainerAddOptions(File(containerBaseDir).toDoorUri()))
 
             videoFile.delete()
 

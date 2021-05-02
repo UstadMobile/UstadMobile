@@ -19,7 +19,7 @@ import kotlin.jvm.Volatile
     ScheduledCheck::class,
     AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
     Person::class, DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class,
-    Clazz::class, ClazzMember::class, PersonCustomFieldValue::class,
+    Clazz::class, ClazzEnrolment::class, LeavingReason::class, PersonCustomFieldValue::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
     ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
     Language::class, LanguageVariant::class, AccessToken::class, PersonAuth::class, Role::class,
@@ -35,7 +35,7 @@ import kotlin.jvm.Volatile
     SchoolMember::class, ClazzWork::class, ClazzWorkContentJoin::class, Comments::class,
     ClazzWorkQuestion::class, ClazzWorkQuestionOption::class, ClazzWorkSubmission::class,
     ClazzWorkQuestionResponse::class, ContentEntryProgress::class,
-    Report::class, ReportFilter::class,
+    Report::class,
     DeviceSession::class, Site::class, ContainerImportJob::class,
     LearnerGroup::class, LearnerGroupMember::class,
     GroupLearningSession::class,
@@ -45,13 +45,14 @@ import kotlin.jvm.Volatile
     SqliteChangeSeqNums::class,
     UpdateNotification::class,
     TableSyncStatus::class,
-    ChangeLog::class
+    ChangeLog::class,
+    ZombieAttachmentData::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 55)
-@MinSyncVersion(28)
+], version = 65)
+@MinSyncVersion(58)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     /*
@@ -74,8 +75,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
      */
 
 
-    var attachmentsDir: String? = null
-
     override val master: Boolean
         get() = false
 
@@ -85,6 +84,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
      */
     fun preload() {
         verbDao.initPreloadedVerbs()
+        reportDao.initPreloadedTemplates()
+        leavingReasonDao.initPreloadedLeavingReasons()
+        languageDao.initPreloadedLanguages()
     }
 
     @JsName("networkNodeDao")
@@ -108,8 +110,11 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("clazzDao")
     abstract val clazzDao: ClazzDao
 
-    @JsName("clazzMemberDao")
-    abstract val clazzMemberDao: ClazzMemberDao
+    @JsName("clazzEnrolmentDao")
+    abstract val clazzEnrolmentDao: ClazzEnrolmentDao
+
+    @JsName("leavingReasonDao")
+    abstract val leavingReasonDao: LeavingReasonDao
 
     @JsName("contentEntryDao")
     abstract val contentEntryDao: ContentEntryDao
@@ -190,9 +195,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("reportDao")
     abstract val reportDao: ReportDao
-
-    @JsName("reportFilterDao")
-    abstract val reportFilterDao: ReportFilterDao
 
     @JsName("containerImportJobDao")
     abstract val containerImportJobDao: ContainerImportJobDao
@@ -1116,7 +1118,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
           |WHERE scheduledCheckUid = NEW.scheduledCheckUid
           |; END
           """.trimMargin())
-
 
 
                 }
@@ -2466,7 +2467,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
-        val MIGRATION_38_39 = object: DoorMigration(38, 39) {
+        val MIGRATION_38_39 = object : DoorMigration(38, 39) {
             override fun migrate(db: DoorSqlDatabase) {
                 db.execSQL("CREATE TABLE IF NOT EXISTS SqliteSyncablePrimaryKey (sspTableId INTEGER NOT NULL PRIMARY KEY, sspNextPrimaryKey INTEGER NOT NULL)")
 
@@ -2675,7 +2676,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
           """.trimMargin())
 
 
-                    database.execSQL( "CREATE TABLE IF NOT EXISTS LearnerGroupMember (`learnerGroupMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `learnerGroupMemberPersonUid` INTEGER NOT NULL, `learnerGroupMemberLgUid` INTEGER NOT NULL, `learnerGroupMemberRole` INTEGER NOT NULL, `learnerGroupMemberActive` INTEGER NOT NULL, `learnerGroupMemberMCSN` INTEGER NOT NULL, `learnerGroupMemberCSN` INTEGER NOT NULL, `learnerGroupMemberLCB` INTEGER NOT NULL)")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroupMember (`learnerGroupMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `learnerGroupMemberPersonUid` INTEGER NOT NULL, `learnerGroupMemberLgUid` INTEGER NOT NULL, `learnerGroupMemberRole` INTEGER NOT NULL, `learnerGroupMemberActive` INTEGER NOT NULL, `learnerGroupMemberMCSN` INTEGER NOT NULL, `learnerGroupMemberCSN` INTEGER NOT NULL, `learnerGroupMemberLCB` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroupMember_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_LearnerGroupMember_trk_clientId_epk_rx_csn` ON LearnerGroupMember_trk (`clientId`, `epk`, `rx`, `csn`)")
 
@@ -2909,7 +2910,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 try {
                     //Sometimes the permission on this goes horribly wrong for no apparent reason
                     database.execSQL("ALTER TABLE SqliteSyncablePrimaryKey RENAME to SqliteSyncablePk")
-                }catch(e: Exception) {
+                } catch (e: Exception) {
                     database.execSQL("CREATE TABLE IF NOT EXISTS SqliteSyncablePk (  sspTableId  INTEGER  PRIMARY KEY  NOT NULL , sspNextPrimaryKey  INTEGER  NOT NULL )")
                 }
 
@@ -2923,7 +2924,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                 if (database.dbType() == DoorDbType.SQLITE) {
                     database.execSQL("CREATE TABLE IF NOT EXISTS ContainerImportJob (`cijUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cijContainerUid` INTEGER NOT NULL, `cijFilePath` TEXT, `cijContainerBaseDir` TEXT, `cijContentEntryUid` INTEGER NOT NULL, `cijMimeType` TEXT, `cijSessionId` TEXT, `cijJobStatus` INTEGER NOT NULL, `cijBytesSoFar` INTEGER NOT NULL, `cijImportCompleted` INTEGER NOT NULL, `cijContentLength` INTEGER NOT NULL, `cijContainerEntryFileUids` TEXT, `cijConversionParams` TEXT)")
-                }else if (database.dbType() == DoorDbType.POSTGRES) {
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
                     database.execSQL("CREATE TABLE IF NOT EXISTS ContainerImportJob (  cijContainerUid  BIGINT , cijFilePath  TEXT , cijContainerBaseDir  TEXT , cijContentEntryUid  BIGINT , cijMimeType  TEXT , cijSessionId  TEXT , cijJobStatus  INTEGER , cijBytesSoFar  BIGINT , cijImportCompleted  BOOL , cijContentLength  BIGINT , cijContainerEntryFileUids  TEXT , cijConversionParams  TEXT , cijUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                 }
             }
@@ -2956,7 +2957,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 database.execSQL("CREATE INDEX index_Role_rolePermissions ON Role(rolePermissions)")
 
                 //Add a PersonGroup for Admin
-                if(database.dbType() == DoorDbType.POSTGRES) {
+                if (database.dbType() == DoorDbType.POSTGRES) {
                     database.execSQL("""
                         INSERT INTO PersonGroup(groupName, groupActive, personGroupFlag, groupMasterCsn, groupLocalCsn, groupLastChangedBy) 
                         SELECT 'PGA' || person.personUid AS groupName, 
@@ -3020,7 +3021,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("INSERT INTO ScrapeRun (scrapeRunUid, scrapeType, scrapeRunStatus, conversionParams) SELECT scrapeRunUid, scrapeType, status, conversionParams FROM ScrapeRun_OLD")
                     database.execSQL("DROP TABLE ScrapeRun_OLD")
 
-                }else if (database.dbType() == DoorDbType.POSTGRES) {
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
                     database.execSQL("""ALTER TABLE ScrapeRun RENAME COLUMN status to scrapeRunStatus
                         """.trimMargin())
                 }
@@ -3034,16 +3035,16 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
-        val MIGRATION_50_51 = object: DoorMigration(50, 51) {
+        val MIGRATION_50_51 = object : DoorMigration(50, 51) {
             override fun migrate(database: DoorSqlDatabase) {
                 database.execSQL("DROP TABLE IF EXISTS SqliteSyncablePk")
             }
         }
 
         //One off server only change to update clazz end time default to Long.MAX_VALUE
-        val MIGRATION_51_52 = object: DoorMigration(51, 52) {
+        val MIGRATION_51_52 = object : DoorMigration(51, 52) {
             override fun migrate(database: DoorSqlDatabase) {
-                if(database.dbType() == DoorDbType.POSTGRES) {
+                if (database.dbType() == DoorDbType.POSTGRES) {
                     database.execSQL("UPDATE Clazz SET clazzEndTime = ${systemTimeInMillis()}," +
                             "clazzLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) " +
                             "WHERE clazzEndTime = 0")
@@ -3052,9 +3053,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         //Add the WorkspaceTerms syncable entity
-        val MIGRATION_52_53 = object: DoorMigration(52, 53) {
+        val MIGRATION_52_53 = object : DoorMigration(52, 53) {
             override fun migrate(database: DoorSqlDatabase) {
-                if(database.dbType() == DoorDbType.POSTGRES) {
+                if (database.dbType() == DoorDbType.POSTGRES) {
                     database.execSQL("CREATE TABLE IF NOT EXISTS WorkspaceTerms (  termsHtml  TEXT , wtLang  TEXT , wtLastChangedBy  INTEGER  NOT NULL , wtPrimaryCsn  BIGINT  NOT NULL , wtLocalCsn  BIGINT  NOT NULL , wtUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("CREATE SEQUENCE IF NOT EXISTS WorkspaceTerms_mcsn_seq")
                     database.execSQL("CREATE SEQUENCE IF NOT EXISTS WorkspaceTerms_lcsn_seq")
@@ -3094,7 +3095,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                       |UNIQUE INDEX index_WorkspaceTerms_trk_epk_clientId 
                       |ON WorkspaceTerms_trk (epk, clientId)
                       """.trimMargin())
-                }else {
+                } else {
                     database.execSQL("CREATE TABLE IF NOT EXISTS WorkspaceTerms (  termsHtml  TEXT , wtLang  TEXT , wtLastChangedBy  INTEGER  NOT NULL , wtPrimaryCsn  INTEGER  NOT NULL , wtLocalCsn  INTEGER  NOT NULL , wtUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                       |CREATE TRIGGER INS_LOC_272
@@ -3180,12 +3181,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
-        val MIGRATION_53_54 = object: DoorMigration(53, 54) {
+        val MIGRATION_53_54 = object : DoorMigration(53, 54) {
             override fun migrate(database: DoorSqlDatabase) {
                 database.execSQL("ALTER TABLE Language ADD COLUMN Language_Type TEXT")
 
                 //Change WorkSpace into a SyncableEntity
-                if(database.dbType() == DoorDbType.POSTGRES) {
+                if (database.dbType() == DoorDbType.POSTGRES) {
                     //TODO: sync annotation add columns to table
                     database.execSQL("CREATE TABLE IF NOT EXISTS Site_trk (  epk  BIGINT NOT NULL, clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  BOOL NOT NULL, reqId  INTEGER NOT NULL, ts  BIGINT NOT NULL, pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("""
@@ -3281,7 +3282,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                       |ON SiteTerms_trk (epk, clientId)
                       """.trimMargin())
 
-                }else {
+                } else {
                     //Create site table as a syncable entity
                     database.execSQL("CREATE TABLE IF NOT EXISTS Site (  sitePcsn  INTEGER  NOT NULL , siteLcsn  INTEGER  NOT NULL , siteLcb  INTEGER  NOT NULL , siteName  TEXT , guestLogin  INTEGER  NOT NULL , registrationAllowed  INTEGER  NOT NULL , siteUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
@@ -3461,7 +3462,845 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
-        val MIGRATION_54_55 = object: DoorMigration(54, 55) {
+        val MIGRATION_54_55 = object : DoorMigration(54, 55) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("ALTER TABLE PersonPicture ADD COLUMN personPictureUri TEXT")
+                database.execSQL("ALTER TABLE PersonPicture ADD COLUMN personPictureMd5 TEXT")
+            }
+        }
+
+        //Add triggers that check for Zombie attachments
+        val MIGRATION_55_56 = object : DoorMigration(55, 56) {
+            override fun migrate(database: DoorSqlDatabase) {
+                if (database.dbType() == DoorDbType.SQLITE) {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ZombieAttachmentData (  zaTableName  TEXT , zaPrimaryKey  INTEGER  NOT NULL , zaUri  TEXT , zaUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                        CREATE TRIGGER ATTUPD_PersonPicture
+                        AFTER UPDATE ON PersonPicture FOR EACH ROW WHEN
+                        OLD.personPictureMd5 IS NOT NULL AND (SELECT COUNT(*) FROM PersonPicture WHERE personPictureMd5 = OLD.personPictureMd5) = 0
+                        BEGIN
+                        INSERT INTO ZombieAttachmentData(zaTableName, zaPrimaryKey, zaUri) VALUES('PersonPicture', OLD.personPictureUid, OLD.personPictureUri);
+                        END""")
+                } else {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ZombieAttachmentData (  zaTableName  TEXT , zaPrimaryKey  BIGINT  NOT NULL , zaUri  TEXT , zaUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                      |CREATE OR REPLACE FUNCTION attach_PersonPicture_fn() RETURNS trigger AS ${'$'}${'$'}
+                      |BEGIN
+                      |INSERT INTO ZombieAttachmentData(zaTableName, zaPrimaryKey, zaUri) 
+                      |SELECT 'PersonPicture' AS zaTableName, OLD.personPictureUid AS zaPrimaryKey, OLD.personPictureUri AS zaUri
+                      |WHERE (SELECT COUNT(*) FROM PersonPicture WHERE personPictureMd5 = OLD.personPictureMd5) = 0;
+                      |RETURN null;
+                      |END ${'$'}${'$'}
+                      |LANGUAGE plpgsql
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE TRIGGER attach_PersonPicture_trig
+                      |AFTER UPDATE ON PersonPicture
+                      |FOR EACH ROW WHEN (OLD.personPictureUri IS NOT NULL)
+                      |EXECUTE PROCEDURE attach_PersonPicture_fn();
+                      """.trimMargin())
+                }
+            }
+        }
+
+        val MIGRATION_56_57 = object : DoorMigration(56, 57) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("""
+                    UPDATE ContainerEntryFile SET 
+                    cefPath = REPLACE(cefPath, '/build/storage/singleton/container/', '/data/singleton/container/')
+                    WHERE cefPath LIKE '%/build/storage/singleton/container/%'
+                """.trimIndent())
+            }
+        }
+
+
+        val MIGRATION_57_58 = object : DoorMigration(57, 58) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                database.execSQL("DROP TABLE IF EXISTS ReportFilter")
+                database.execSQL("DROP TABLE IF EXISTS ReportFilter_trk")
+
+                // update statementVerb
+                database.execSQL("""UPDATE StatementEntity SET statementVerbUid = 
+                    ${VerbEntity.VERB_PASSED_UID} WHERE statementVerbUid IN (SELECT verbUid 
+                    FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_PASSED_URL}')""".trimMargin())
+                database.execSQL("""UPDATE StatementEntity SET statementVerbUid = 
+                    ${VerbEntity.VERB_FAILED_UID} WHERE statementVerbUid IN (SELECT verbUid 
+                    FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_FAILED_URL}')""".trimMargin())
+
+                // update subStatementVerb
+                database.execSQL("""UPDATE StatementEntity SET substatementVerbUid = 
+                    ${VerbEntity.VERB_PASSED_UID} WHERE substatementVerbUid IN (SELECT verbUid 
+                    FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_PASSED_URL}')""".trimMargin())
+                database.execSQL("""UPDATE StatementEntity SET substatementVerbUid = 
+                    ${VerbEntity.VERB_FAILED_UID} WHERE substatementVerbUid IN (SELECT verbUid 
+                    FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_FAILED_URL}')""".trimMargin())
+
+                // update langmap
+                database.execSQL("""UPDATE XLangMapEntry SET verbLangMapUid = 
+                    ${VerbEntity.VERB_PASSED_UID} WHERE verbLangMapUid IN (SELECT verbUid 
+                    FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_PASSED_URL}')""".trimMargin())
+                database.execSQL("""UPDATE XLangMapEntry SET verbLangMapUid = 
+                    ${VerbEntity.VERB_FAILED_UID} WHERE verbLangMapUid IN (SELECT verbUid 
+                    FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_FAILED_URL}')""".trimMargin())
+
+
+                if (database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS reportSeries TEXT""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS reportDescription TEXT""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS fromRelTo INTEGER""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS fromRelOffSet INTEGER""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS fromRelUnit INTEGER""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS toRelTo INTEGER""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS toRelOffSet INTEGER""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS toRelUnit INTEGER""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS priority INTEGER""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS reportDateRangeSelection INTEGER""")
+
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS isTemplate BOOL DEFAULT FALSE""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report 
+                        DROP COLUMN IF EXISTS chartType""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report 
+                        DROP COLUMN IF EXISTS yAxis""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report 
+                        DROP COLUMN IF EXISTS subGroup""".trimMargin())
+
+                    database.execSQL("ALTER TABLE StatementEntity ADD COLUMN IF NOT EXISTS contentEntryRoot BOOL DEFAULT FALSE")
+                    database.execSQL("""UPDATE StatementEntity SET contentEntryRoot = true 
+                        WHERE statementUid IN (select statementUid from StatementEntity 
+                        LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = StatementEntity.statementContentEntryUid 
+                        LEFT JOIN XObjectEntity ON XObjectEntity.xObjectUid = StatementEntity.xObjectUid 
+                        WHERE XObjectEntity.objectId = ContentEntry.entryId)""".trimMargin())
+
+                    database.execSQL("""ALTER TABLE VerbEntity ADD COLUMN IF NOT EXISTS verbInActive BOOL DEFAULT FALSE""")
+                    database.execSQL("""UPDATE VerbEntity SET verbInActive = TRUE WHERE 
+                        urlId = '${VerbEntity.VERB_PASSED_URL}' AND verbUid != ${VerbEntity.VERB_PASSED_UID}""".trimMargin())
+                    database.execSQL("""UPDATE VerbEntity SET verbInActive = TRUE WHERE 
+                        urlId = '${VerbEntity.VERB_FAILED_URL}' AND verbUid != ${VerbEntity.VERB_FAILED_UID}""".trimMargin())
+
+                } else if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN reportSeries TEXT""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN reportDescription TEXT""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report 
+                        ADD COLUMN isTemplate INTEGER""".trimMargin())
+
+                    database.execSQL("ALTER TABLE Report RENAME to Report_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Report (`reportUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `reportOwnerUid` INTEGER NOT NULL, `xAxis` INTEGER NOT NULL, `reportDateRangeSelection` INTEGER NOT NULL, `fromDate` INTEGER NOT NULL, `fromRelTo` INTEGER NOT NULL, `fromRelOffSet` INTEGER NOT NULL, `fromRelUnit` INTEGER NOT NULL, `toDate` INTEGER NOT NULL, `toRelTo` INTEGER NOT NULL, `toRelOffSet` INTEGER NOT NULL, `toRelUnit` INTEGER NOT NULL, `reportTitle` TEXT, `reportDescription` TEXT, `reportSeries` TEXT, `reportInactive` INTEGER NOT NULL, `isTemplate` INTEGER NOT NULL, `priority` INTEGER NOT NULL, `reportMasterChangeSeqNum` INTEGER NOT NULL, `reportLocalChangeSeqNum` INTEGER NOT NULL, `reportLastChangedBy` INTEGER NOT NULL)")
+                    database.execSQL("INSERT INTO Report (reportUid, reportOwnerUid, xAxis, reportDateRangeSelection, fromDate, fromRelTo, fromRelOffSet, fromRelUnit, toDate, toRelTo, toRelOffSet, toRelUnit, reportTitle, reportDescription, reportSeries, reportInactive, isTemplate, priority, reportMasterChangeSeqNum, reportLocalChangeSeqNum, reportLastChangedBy) SELECT reportUid, reportOwnerUid, xAxis,0, fromDate, 0, 0, 0, 0, 0, 0, 0, reportTitle, reportDescription, reportSeries, reportInactive, isTemplate, 1, reportMasterChangeSeqNum, reportLocalChangeSeqNum, reportLastChangedBy FROM Report_OLD")
+                    database.execSQL("DROP TABLE Report_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Report_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_Report_trk_clientId_epk_csn` ON Report_trk (`clientId`, `epk`, `csn`)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_XLangMapEntry_verbLangMapUid` ON XLangMapEntry (`verbLangMapUid`)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_StatementEntity_statementPersonUid` ON StatementEntity (`statementPersonUid`)")
+
+                    database.execSQL("ALTER TABLE StatementEntity ADD COLUMN contentEntryRoot INTEGER DEFAULT 0 NOT NULL")
+                    database.execSQL("""UPDATE StatementEntity SET contentEntryRoot = 1 WHERE 
+                        statementUid IN (select statementUid from StatementEntity LEFT JOIN 
+                        ContentEntry ON ContentEntry.contentEntryUid = StatementEntity.statementContentEntryUid 
+                        LEFT JOIN XObjectEntity ON XObjectEntity.xObjectUid = StatementEntity.xObjectUid 
+                        WHERE XObjectEntity.objectId = ContentEntry.entryId)""".trimMargin())
+
+                    database.execSQL("""ALTER TABLE VerbEntity ADD COLUMN verbInActive INTEGER DEFAULT 0 NOT NULL""")
+                    database.execSQL("""UPDATE VerbEntity SET verbInActive = 1 WHERE 
+                        urlId = '${VerbEntity.VERB_PASSED_URL}' AND verbUid != ${VerbEntity.VERB_PASSED_UID}""".trimMargin())
+                    database.execSQL("""UPDATE VerbEntity SET verbInActive = 1 WHERE 
+                        urlId = '${VerbEntity.VERB_FAILED_URL}' AND verbUid != ${VerbEntity.VERB_FAILED_UID}""".trimMargin())
+
+                }
+
+            }
+        }
+
+
+        val MIGRATION_58_59 = object : DoorMigration(58, 59) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("""ALTER TABLE ClazzLogAttendanceRecord 
+                        ADD COLUMN clazzLogAttendanceRecordPersonUid INTEGER DEFAULT 0 NOT NULL""".trimMargin())
+
+                    database.execSQL("""ALTER TABLE ClazzLogAttendanceRecord 
+                        RENAME to ClazzLogAttendanceRecord_OLD""".trimMargin())
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecord 
+                        (  clazzLogAttendanceRecordClazzLogUid  INTEGER  NOT NULL , 
+                        clazzLogAttendanceRecordPersonUid  INTEGER  NOT NULL , 
+                        attendanceStatus  INTEGER  NOT NULL , 
+                        clazzLogAttendanceRecordMasterChangeSeqNum  INTEGER  NOT NULL , 
+                        clazzLogAttendanceRecordLocalChangeSeqNum  INTEGER  NOT NULL , 
+                        clazzLogAttendanceRecordLastChangedBy  INTEGER  NOT NULL , 
+                        clazzLogAttendanceRecordUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""".trimMargin())
+                    database.execSQL("""INSERT INTO ClazzLogAttendanceRecord 
+                        (clazzLogAttendanceRecordUid, clazzLogAttendanceRecordClazzLogUid, 
+                        clazzLogAttendanceRecordPersonUid, attendanceStatus, 
+                        clazzLogAttendanceRecordMasterChangeSeqNum, 
+                        clazzLogAttendanceRecordLocalChangeSeqNum, 
+                        clazzLogAttendanceRecordLastChangedBy) SELECT 
+                        clazzLogAttendanceRecordUid, clazzLogAttendanceRecordClazzLogUid, 
+                        clazzLogAttendanceRecordPersonUid, attendanceStatus, 
+                        clazzLogAttendanceRecordMasterChangeSeqNum, 
+                        clazzLogAttendanceRecordLocalChangeSeqNum, 
+                        clazzLogAttendanceRecordLastChangedBy FROM ClazzLogAttendanceRecord_OLD""".trimMargin())
+                    database.execSQL("DROP TABLE ClazzLogAttendanceRecord_OLD")
+                    database.execSQL("""
+                          |CREATE TRIGGER INS_LOC_15
+                          |AFTER INSERT ON ClazzLogAttendanceRecord
+                          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
+                          |    NEW.clazzLogAttendanceRecordLocalChangeSeqNum = 0)
+                          |BEGIN
+                          |    UPDATE ClazzLogAttendanceRecord
+                          |    SET clazzLogAttendanceRecordMasterChangeSeqNum = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 15)
+                          |    WHERE clazzLogAttendanceRecordUid = NEW.clazzLogAttendanceRecordUid;
+                          |    
+                          |    UPDATE SqliteChangeSeqNums
+                          |    SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |    WHERE sCsnTableId = 15;
+                          |END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |            CREATE TRIGGER INS_PRI_15
+                          |            AFTER INSERT ON ClazzLogAttendanceRecord
+                          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
+                          |                NEW.clazzLogAttendanceRecordMasterChangeSeqNum = 0)
+                          |            BEGIN
+                          |                UPDATE ClazzLogAttendanceRecord
+                          |                SET clazzLogAttendanceRecordMasterChangeSeqNum = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 15)
+                          |                WHERE clazzLogAttendanceRecordUid = NEW.clazzLogAttendanceRecordUid;
+                          |                
+                          |                UPDATE SqliteChangeSeqNums
+                          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |                WHERE sCsnTableId = 15;
+                          |                
+                          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                          |SELECT 15, NEW.clazzLogAttendanceRecordUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                          |            END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |CREATE TRIGGER UPD_LOC_15
+                          |AFTER UPDATE ON ClazzLogAttendanceRecord
+                          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
+                          |    AND (NEW.clazzLogAttendanceRecordLocalChangeSeqNum == OLD.clazzLogAttendanceRecordLocalChangeSeqNum OR
+                          |        NEW.clazzLogAttendanceRecordLocalChangeSeqNum == 0))
+                          |BEGIN
+                          |    UPDATE ClazzLogAttendanceRecord
+                          |    SET clazzLogAttendanceRecordLocalChangeSeqNum = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = 15) 
+                          |    WHERE clazzLogAttendanceRecordUid = NEW.clazzLogAttendanceRecordUid;
+                          |    
+                          |    UPDATE SqliteChangeSeqNums 
+                          |    SET sCsnNextLocal = sCsnNextLocal + 1
+                          |    WHERE sCsnTableId = 15;
+                          |END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |            CREATE TRIGGER UPD_PRI_15
+                          |            AFTER UPDATE ON ClazzLogAttendanceRecord
+                          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
+                          |                AND (NEW.clazzLogAttendanceRecordMasterChangeSeqNum == OLD.clazzLogAttendanceRecordMasterChangeSeqNum OR
+                          |                    NEW.clazzLogAttendanceRecordMasterChangeSeqNum == 0))
+                          |            BEGIN
+                          |                UPDATE ClazzLogAttendanceRecord
+                          |                SET clazzLogAttendanceRecordMasterChangeSeqNum = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 15)
+                          |                WHERE clazzLogAttendanceRecordUid = NEW.clazzLogAttendanceRecordUid;
+                          |                
+                          |                UPDATE SqliteChangeSeqNums
+                          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |                WHERE sCsnTableId = 15;
+                          |                
+                          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                          |SELECT 15, NEW.clazzLogAttendanceRecordUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                          |            END
+                          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecord_trk (  epk  INTEGER , clientId  INTEGER , csn  INTEGER , rx  INTEGER , reqId  INTEGER , ts  INTEGER , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+
+
+                    database.execSQL("ALTER TABLE ClazzWorkSubmission RENAME to ClazzWorkSubmission_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkSubmission (  clazzWorkSubmissionClazzWorkUid  INTEGER  NOT NULL , clazzWorkSubmissionMarkerPersonUid  INTEGER  NOT NULL , clazzWorkSubmissionPersonUid  INTEGER  NOT NULL , clazzWorkSubmissionInactive  INTEGER  NOT NULL , clazzWorkSubmissionDateTimeStarted  INTEGER  NOT NULL , clazzWorkSubmissionDateTimeUpdated  INTEGER  NOT NULL , clazzWorkSubmissionDateTimeFinished  INTEGER  NOT NULL , clazzWorkSubmissionDateTimeMarked  INTEGER  NOT NULL , clazzWorkSubmissionText  TEXT , clazzWorkSubmissionScore  INTEGER  NOT NULL , clazzWorkSubmissionMCSN  INTEGER  NOT NULL , clazzWorkSubmissionLCSN  INTEGER  NOT NULL , clazzWorkSubmissionLCB  INTEGER  NOT NULL , clazzWorkSubmissionUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("INSERT INTO ClazzWorkSubmission (clazzWorkSubmissionUid, clazzWorkSubmissionClazzWorkUid, clazzWorkSubmissionMarkerPersonUid, clazzWorkSubmissionPersonUid, clazzWorkSubmissionInactive, clazzWorkSubmissionDateTimeStarted, clazzWorkSubmissionDateTimeUpdated, clazzWorkSubmissionDateTimeFinished, clazzWorkSubmissionDateTimeMarked, clazzWorkSubmissionText, clazzWorkSubmissionScore, clazzWorkSubmissionMCSN, clazzWorkSubmissionLCSN, clazzWorkSubmissionLCB) SELECT clazzWorkSubmissionUid, clazzWorkSubmissionClazzWorkUid, clazzWorkSubmissionMarkerPersonUid, clazzWorkSubmissionPersonUid, clazzWorkSubmissionInactive, clazzWorkSubmissionDateTimeStarted, clazzWorkSubmissionDateTimeUpdated, clazzWorkSubmissionDateTimeFinished, clazzWorkSubmissionDateTimeMarked, clazzWorkSubmissionText, clazzWorkSubmissionScore, clazzWorkSubmissionMCSN, clazzWorkSubmissionLCSN, clazzWorkSubmissionLCB FROM ClazzWorkSubmission_OLD")
+                    database.execSQL("DROP TABLE ClazzWorkSubmission_OLD")
+                    database.execSQL("""
+                          |CREATE TRIGGER INS_LOC_206
+                          |AFTER INSERT ON ClazzWorkSubmission
+                          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
+                          |    NEW.clazzWorkSubmissionLCSN = 0)
+                          |BEGIN
+                          |    UPDATE ClazzWorkSubmission
+                          |    SET clazzWorkSubmissionMCSN = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 206)
+                          |    WHERE clazzWorkSubmissionUid = NEW.clazzWorkSubmissionUid;
+                          |    
+                          |    UPDATE SqliteChangeSeqNums
+                          |    SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |    WHERE sCsnTableId = 206;
+                          |END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |            CREATE TRIGGER INS_PRI_206
+                          |            AFTER INSERT ON ClazzWorkSubmission
+                          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
+                          |                NEW.clazzWorkSubmissionMCSN = 0)
+                          |            BEGIN
+                          |                UPDATE ClazzWorkSubmission
+                          |                SET clazzWorkSubmissionMCSN = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 206)
+                          |                WHERE clazzWorkSubmissionUid = NEW.clazzWorkSubmissionUid;
+                          |                
+                          |                UPDATE SqliteChangeSeqNums
+                          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |                WHERE sCsnTableId = 206;
+                          |                
+                          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                          |SELECT 206, NEW.clazzWorkSubmissionUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                          |            END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |CREATE TRIGGER UPD_LOC_206
+                          |AFTER UPDATE ON ClazzWorkSubmission
+                          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
+                          |    AND (NEW.clazzWorkSubmissionLCSN == OLD.clazzWorkSubmissionLCSN OR
+                          |        NEW.clazzWorkSubmissionLCSN == 0))
+                          |BEGIN
+                          |    UPDATE ClazzWorkSubmission
+                          |    SET clazzWorkSubmissionLCSN = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = 206) 
+                          |    WHERE clazzWorkSubmissionUid = NEW.clazzWorkSubmissionUid;
+                          |    
+                          |    UPDATE SqliteChangeSeqNums 
+                          |    SET sCsnNextLocal = sCsnNextLocal + 1
+                          |    WHERE sCsnTableId = 206;
+                          |END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |            CREATE TRIGGER UPD_PRI_206
+                          |            AFTER UPDATE ON ClazzWorkSubmission
+                          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
+                          |                AND (NEW.clazzWorkSubmissionMCSN == OLD.clazzWorkSubmissionMCSN OR
+                          |                    NEW.clazzWorkSubmissionMCSN == 0))
+                          |            BEGIN
+                          |                UPDATE ClazzWorkSubmission
+                          |                SET clazzWorkSubmissionMCSN = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 206)
+                          |                WHERE clazzWorkSubmissionUid = NEW.clazzWorkSubmissionUid;
+                          |                
+                          |                UPDATE SqliteChangeSeqNums
+                          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |                WHERE sCsnTableId = 206;
+                          |                
+                          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                          |SELECT 206, NEW.clazzWorkSubmissionUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                          |            END
+                          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkSubmission_trk (  epk  INTEGER , clientId  INTEGER , csn  INTEGER , rx  INTEGER , reqId  INTEGER , ts  INTEGER , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+
+
+                    database.execSQL("ALTER TABLE ClazzWorkQuestionResponse RENAME to ClazzWorkQuestionResponse_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkQuestionResponse (  clazzWorkQuestionResponseClazzWorkUid  INTEGER  NOT NULL , clazzWorkQuestionResponseQuestionUid  INTEGER  NOT NULL , clazzWorkQuestionResponseText  TEXT , clazzWorkQuestionResponseOptionSelected  INTEGER  NOT NULL , clazzWorkQuestionResponsePersonUid  INTEGER  NOT NULL , clazzWorkQuestionResponseInactive  INTEGER  NOT NULL , clazzWorkQuestionResponseDateResponded  INTEGER  NOT NULL , clazzWorkQuestionResponseMCSN  INTEGER  NOT NULL , clazzWorkQuestionResponseLCSN  INTEGER  NOT NULL , clazzWorkQuestionResponseLCB  INTEGER  NOT NULL , clazzWorkQuestionResponseUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("INSERT INTO ClazzWorkQuestionResponse (clazzWorkQuestionResponseUid, clazzWorkQuestionResponseClazzWorkUid, clazzWorkQuestionResponseQuestionUid, clazzWorkQuestionResponseText, clazzWorkQuestionResponseOptionSelected, clazzWorkQuestionResponsePersonUid, clazzWorkQuestionResponseInactive, clazzWorkQuestionResponseDateResponded, clazzWorkQuestionResponseMCSN, clazzWorkQuestionResponseLCSN, clazzWorkQuestionResponseLCB) SELECT clazzWorkQuestionResponseUid, clazzWorkQuestionResponseClazzWorkUid, clazzWorkQuestionResponseQuestionUid, clazzWorkQuestionResponseText, clazzWorkQuestionResponseOptionSelected, clazzWorkQuestionResponsePersonUid, clazzWorkQuestionResponseInactive, clazzWorkQuestionResponseDateResponded, clazzWorkQuestionResponseMCSN, clazzWorkQuestionResponseLCSN, clazzWorkQuestionResponseLCB FROM ClazzWorkQuestionResponse_OLD")
+                    database.execSQL("DROP TABLE ClazzWorkQuestionResponse_OLD")
+                    database.execSQL("""
+                          |CREATE TRIGGER INS_LOC_209
+                          |AFTER INSERT ON ClazzWorkQuestionResponse
+                          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
+                          |    NEW.clazzWorkQuestionResponseLCSN = 0)
+                          |BEGIN
+                          |    UPDATE ClazzWorkQuestionResponse
+                          |    SET clazzWorkQuestionResponseMCSN = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 209)
+                          |    WHERE clazzWorkQuestionResponseUid = NEW.clazzWorkQuestionResponseUid;
+                          |    
+                          |    UPDATE SqliteChangeSeqNums
+                          |    SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |    WHERE sCsnTableId = 209;
+                          |END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |            CREATE TRIGGER INS_PRI_209
+                          |            AFTER INSERT ON ClazzWorkQuestionResponse
+                          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
+                          |                NEW.clazzWorkQuestionResponseMCSN = 0)
+                          |            BEGIN
+                          |                UPDATE ClazzWorkQuestionResponse
+                          |                SET clazzWorkQuestionResponseMCSN = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 209)
+                          |                WHERE clazzWorkQuestionResponseUid = NEW.clazzWorkQuestionResponseUid;
+                          |                
+                          |                UPDATE SqliteChangeSeqNums
+                          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |                WHERE sCsnTableId = 209;
+                          |                
+                          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                          |SELECT 209, NEW.clazzWorkQuestionResponseUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                          |            END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |CREATE TRIGGER UPD_LOC_209
+                          |AFTER UPDATE ON ClazzWorkQuestionResponse
+                          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
+                          |    AND (NEW.clazzWorkQuestionResponseLCSN == OLD.clazzWorkQuestionResponseLCSN OR
+                          |        NEW.clazzWorkQuestionResponseLCSN == 0))
+                          |BEGIN
+                          |    UPDATE ClazzWorkQuestionResponse
+                          |    SET clazzWorkQuestionResponseLCSN = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = 209) 
+                          |    WHERE clazzWorkQuestionResponseUid = NEW.clazzWorkQuestionResponseUid;
+                          |    
+                          |    UPDATE SqliteChangeSeqNums 
+                          |    SET sCsnNextLocal = sCsnNextLocal + 1
+                          |    WHERE sCsnTableId = 209;
+                          |END
+                      """.trimMargin())
+                    database.execSQL("""
+                          |            CREATE TRIGGER UPD_PRI_209
+                          |            AFTER UPDATE ON ClazzWorkQuestionResponse
+                          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
+                          |                AND (NEW.clazzWorkQuestionResponseMCSN == OLD.clazzWorkQuestionResponseMCSN OR
+                          |                    NEW.clazzWorkQuestionResponseMCSN == 0))
+                          |            BEGIN
+                          |                UPDATE ClazzWorkQuestionResponse
+                          |                SET clazzWorkQuestionResponseMCSN = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 209)
+                          |                WHERE clazzWorkQuestionResponseUid = NEW.clazzWorkQuestionResponseUid;
+                          |                
+                          |                UPDATE SqliteChangeSeqNums
+                          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |                WHERE sCsnTableId = 209;
+                          |                
+                          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                          |SELECT 209, NEW.clazzWorkQuestionResponseUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                          |            END
+                          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkQuestionResponse_trk (  epk  INTEGER , clientId  INTEGER , csn  INTEGER , rx  INTEGER , reqId  INTEGER , ts  INTEGER , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzEnrolment (`clazzEnrolmentUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzEnrolmentPersonUid` INTEGER NOT NULL, `clazzEnrolmentClazzUid` INTEGER NOT NULL, `clazzEnrolmentDateJoined` INTEGER NOT NULL, `clazzEnrolmentDateLeft` INTEGER NOT NULL, `clazzEnrolmentRole` INTEGER NOT NULL, `clazzEnrolmentAttendancePercentage` REAL NOT NULL, `clazzEnrolmentActive` INTEGER NOT NULL, `clazzEnrolmentLocalChangeSeqNum` INTEGER NOT NULL, `clazzEnrolmentMasterChangeSeqNum` INTEGER NOT NULL, `clazzEnrolmentLastChangedBy` INTEGER NOT NULL)")
+                    database.execSQL("CREATE INDEX index_ClazzEnrolment_clazzEnrolmentPersonUid_clazzEnrolmentClazzUid ON ClazzEnrolment (clazzEnrolmentPersonUid, clazzEnrolmentClazzUid)")
+                    database.execSQL("CREATE INDEX index_ClazzEnrolment_clazzEnrolmentClazzUid_clazzEnrolmentPersonUid ON ClazzEnrolment (clazzEnrolmentClazzUid, clazzEnrolmentPersonUid)")
+                    database.execSQL("CREATE INDEX index_ClazzEnrolment_clazzEnrolmentClazzUid_clazzEnrolmentRole ON ClazzEnrolment (clazzEnrolmentClazzUid, clazzEnrolmentRole)")
+                    database.execSQL("INSERT INTO ClazzEnrolment (clazzEnrolmentUid, clazzEnrolmentPersonUid, clazzEnrolmentClazzUid, clazzEnrolmentDateJoined, clazzEnrolmentDateLeft, clazzEnrolmentRole, clazzEnrolmentAttendancePercentage, clazzEnrolmentActive, clazzEnrolmentLocalChangeSeqNum, clazzEnrolmentMasterChangeSeqNum, clazzEnrolmentLastChangedBy) SELECT clazzMemberUid, clazzMemberPersonUid, clazzMemberClazzUid, clazzMemberDateJoined, clazzMemberDateLeft, clazzMemberRole, clazzMemberAttendancePercentage, clazzMemberActive,clazzMemberLocalChangeSeqNum, clazzMemberMasterChangeSeqNum, clazzMemberLastChangedBy FROM ClazzMember")
+                    database.execSQL("DROP TABLE ClazzMember")
+                    database.execSQL("DROP TABLE IF EXISTS ClazzMember_trk")
+                    database.execSQL("""
+                          |CREATE TRIGGER INS_LOC_65
+                          |AFTER INSERT ON ClazzEnrolment
+                          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
+                          |    NEW.clazzEnrolmentLocalChangeSeqNum = 0)
+                          |BEGIN
+                          |    UPDATE ClazzEnrolment
+                          |    SET clazzEnrolmentMasterChangeSeqNum = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 65)
+                          |    WHERE clazzEnrolmentUid = NEW.clazzEnrolmentUid;
+                          |    
+                          |    UPDATE SqliteChangeSeqNums
+                          |    SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |    WHERE sCsnTableId = 65;
+                          |END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |            CREATE TRIGGER INS_PRI_65
+                          |            AFTER INSERT ON ClazzEnrolment
+                          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
+                          |                NEW.clazzEnrolmentMasterChangeSeqNum = 0)
+                          |            BEGIN
+                          |                UPDATE ClazzEnrolment
+                          |                SET clazzEnrolmentMasterChangeSeqNum = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 65)
+                          |                WHERE clazzEnrolmentUid = NEW.clazzEnrolmentUid;
+                          |                
+                          |                UPDATE SqliteChangeSeqNums
+                          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |                WHERE sCsnTableId = 65;
+                          |                
+                          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                          |SELECT 65, NEW.clazzEnrolmentUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                          |            END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |CREATE TRIGGER UPD_LOC_65
+                          |AFTER UPDATE ON ClazzEnrolment
+                          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
+                          |    AND (NEW.clazzEnrolmentLocalChangeSeqNum == OLD.clazzEnrolmentLocalChangeSeqNum OR
+                          |        NEW.clazzEnrolmentLocalChangeSeqNum == 0))
+                          |BEGIN
+                          |    UPDATE ClazzEnrolment
+                          |    SET clazzEnrolmentLocalChangeSeqNum = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = 65) 
+                          |    WHERE clazzEnrolmentUid = NEW.clazzEnrolmentUid;
+                          |    
+                          |    UPDATE SqliteChangeSeqNums 
+                          |    SET sCsnNextLocal = sCsnNextLocal + 1
+                          |    WHERE sCsnTableId = 65;
+                          |END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |            CREATE TRIGGER UPD_PRI_65
+                          |            AFTER UPDATE ON ClazzEnrolment
+                          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
+                          |                AND (NEW.clazzEnrolmentMasterChangeSeqNum == OLD.clazzEnrolmentMasterChangeSeqNum OR
+                          |                    NEW.clazzEnrolmentMasterChangeSeqNum == 0))
+                          |            BEGIN
+                          |                UPDATE ClazzEnrolment
+                          |                SET clazzEnrolmentMasterChangeSeqNum = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 65)
+                          |                WHERE clazzEnrolmentUid = NEW.clazzEnrolmentUid;
+                          |                
+                          |                UPDATE SqliteChangeSeqNums
+                          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |                WHERE sCsnTableId = 65;
+                          |                
+                          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                          |SELECT 65, NEW.clazzEnrolmentUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                          |            END
+                          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzEnrolment_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                    database.execSQL("""
+                          |CREATE 
+                          | INDEX index_ClazzEnrolment_trk_clientId_epk_csn 
+                          |ON ClazzEnrolment_trk (clientId, epk, csn)
+                          """.trimMargin())
+                    database.execSQL("""
+                          |CREATE 
+                          |UNIQUE INDEX index_ClazzEnrolment_trk_epk_clientId 
+                          |ON ClazzEnrolment_trk (epk, clientId)
+                          """.trimMargin())
+                    database.execSQL("""CREATE INDEX IF NOT EXISTS `index_ClazzEnrolment_clazzEnrolmentPersonUid` ON ClazzEnrolment (`clazzEnrolmentPersonUid`)""")
+                    database.execSQL("""CREATE INDEX IF NOT EXISTS `index_ClazzEnrolment_clazzEnrolmentClazzUid` ON ClazzEnrolment (`clazzEnrolmentClazzUid`)""")
+
+
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("""ALTER TABLE ClazzLogAttendanceRecord 
+                        ADD COLUMN clazzLogAttendanceRecordPersonUid BIGINT DEFAULT 0 NOT NULL""".trimMargin())
+
+                    database.execSQL("""UPDATE ClazzLogAttendanceRecord SET 
+                        clazzLogAttendanceRecordPersonUid = (SELECT clazzMemberPersonUid 
+                        FROM ClazzMember LEFT JOIN ClazzLogAttendanceRecord ON 
+                        ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = 
+                        ClazzMember.clazzMemberUid WHERE ClazzMember.clazzMemberUid = 
+                        ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid LIMIT 1)""".trimMargin())
+
+                    database.execSQL("""ALTER TABLE ClazzLogAttendanceRecord 
+                        DROP COLUMN IF EXISTS clazzLogAttendanceRecordClazzMemberUid""".trimMargin())
+
+                    database.execSQL("""ALTER TABLE ClazzWorkSubmission 
+                        DROP COLUMN IF EXISTS clazzWorkSubmissionClazzMemberUid""".trimMargin())
+
+                    database.execSQL("""ALTER TABLE ClazzWorkSubmission 
+                        DROP COLUMN IF EXISTS clazzWorkSubmissionMarkerClazzMemberUid""".trimMargin())
+
+                    database.execSQL("""ALTER TABLE ClazzWorkQuestionResponse 
+                        DROP COLUMN IF EXISTS clazzWorkQuestionResponseClazzMemberUid""".trimMargin())
+
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzEnrolment (  clazzEnrolmentPersonUid  BIGINT  NOT NULL , clazzEnrolmentClazzUid  BIGINT  NOT NULL , clazzEnrolmentDateJoined  BIGINT  NOT NULL , clazzEnrolmentDateLeft  BIGINT  NOT NULL , clazzEnrolmentRole  INTEGER  NOT NULL , clazzEnrolmentAttendancePercentage  FLOAT  NOT NULL , clazzEnrolmentActive  BOOL  NOT NULL , clazzEnrolmentLocalChangeSeqNum  BIGINT  NOT NULL , clazzEnrolmentMasterChangeSeqNum  BIGINT  NOT NULL , clazzEnrolmentLastChangedBy  INTEGER  NOT NULL , clazzEnrolmentUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE INDEX index_ClazzEnrolment_clazzEnrolmentPersonUid_clazzEnrolmentClazzUid ON ClazzEnrolment (clazzEnrolmentPersonUid, clazzEnrolmentClazzUid)")
+                    database.execSQL("CREATE INDEX index_ClazzEnrolment_clazzEnrolmentClazzUid_clazzEnrolmentPersonUid ON ClazzEnrolment (clazzEnrolmentClazzUid, clazzEnrolmentPersonUid)")
+                    database.execSQL("CREATE INDEX index_ClazzEnrolment_clazzEnrolmentClazzUid_clazzEnrolmentRole ON ClazzEnrolment (clazzEnrolmentClazzUid, clazzEnrolmentRole)")
+                    database.execSQL("INSERT INTO ClazzEnrolment (clazzEnrolmentUid, clazzEnrolmentPersonUid, clazzEnrolmentClazzUid, clazzEnrolmentDateJoined, clazzEnrolmentDateLeft, clazzEnrolmentRole, clazzEnrolmentAttendancePercentage, clazzEnrolmentActive, clazzEnrolmentLocalChangeSeqNum, clazzEnrolmentMasterChangeSeqNum, clazzEnrolmentLastChangedBy) SELECT clazzMemberUid, clazzMemberPersonUid, clazzMemberClazzUid, clazzMemberDateJoined, clazzMemberDateLeft, clazzMemberRole, clazzMemberAttendancePercentage, clazzMemberActive, clazzMemberLocalChangeSeqNum, clazzMemberMasterChangeSeqNum, clazzMemberLastChangedBy FROM ClazzMember")
+                    database.execSQL("DROP TABLE ClazzMember")
+                    database.execSQL("DROP TABLE IF EXISTS ClazzMember_trk")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzEnrolment_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzEnrolment_lcsn_seq")
+                    database.execSQL("""
+                          |CREATE OR REPLACE FUNCTION 
+                          | inccsn_65_fn() RETURNS trigger AS ${'$'}${'$'}
+                          | BEGIN  
+                          | UPDATE ClazzEnrolment SET clazzEnrolmentLocalChangeSeqNum =
+                          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzEnrolmentLocalChangeSeqNum 
+                          | ELSE NEXTVAL('ClazzEnrolment_lcsn_seq') END),
+                          | clazzEnrolmentMasterChangeSeqNum = 
+                          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                          | THEN NEXTVAL('ClazzEnrolment_mcsn_seq') 
+                          | ELSE NEW.clazzEnrolmentMasterChangeSeqNum END)
+                          | WHERE clazzEnrolmentUid = NEW.clazzEnrolmentUid;
+                          | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                          | SELECT 65, NEW.clazzEnrolmentUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+                          | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+                          | RETURN null;
+                          | END ${'$'}${'$'}
+                          | LANGUAGE plpgsql
+                          """.trimMargin())
+                    database.execSQL("""
+                          |CREATE TRIGGER inccsn_65_trig 
+                          |AFTER UPDATE OR INSERT ON ClazzEnrolment 
+                          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                          |EXECUTE PROCEDURE inccsn_65_fn()
+                          """.trimMargin())
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_65_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_65")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzEnrolment_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                          |CREATE 
+                          | INDEX index_ClazzEnrolment_trk_clientId_epk_csn 
+                          |ON ClazzEnrolment_trk (clientId, epk, csn)
+                          """.trimMargin())
+                    database.execSQL("""
+                          |CREATE 
+                          |UNIQUE INDEX index_ClazzEnrolment_trk_epk_clientId 
+                          |ON ClazzEnrolment_trk (epk, clientId)
+                          """.trimMargin())
+
+
+                }
+
+            }
+        }
+
+        val MIGRATION_59_60 = object : DoorMigration(59, 60) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                database.execSQL("""ALTER TABLE ClazzEnrolment 
+                        ADD COLUMN clazzEnrolmentOutcome INTEGER DEFAULT 0 NOT NULL""".trimMargin())
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("""ALTER TABLE ClazzEnrolment 
+                        ADD COLUMN clazzEnrolmentLeavingReasonUid INTEGER DEFAULT 0 NOT NULL""".trimMargin())
+
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS LeavingReason (`leavingReasonUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `leavingReasonTitle` TEXT, `leavingReasonMCSN` INTEGER NOT NULL, `leavingReasonCSN` INTEGER NOT NULL, `leavingReasonLCB` INTEGER NOT NULL)""")
+                    database.execSQL("""
+                          |CREATE TRIGGER INS_LOC_410
+                          |AFTER INSERT ON LeavingReason
+                          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
+                          |    NEW.leavingReasonCSN = 0)
+                          |BEGIN
+                          |    UPDATE LeavingReason
+                          |    SET leavingReasonMCSN = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 410)
+                          |    WHERE leavingReasonUid = NEW.leavingReasonUid;
+                          |    
+                          |    UPDATE SqliteChangeSeqNums
+                          |    SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |    WHERE sCsnTableId = 410;
+                          |END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |            CREATE TRIGGER INS_PRI_410
+                          |            AFTER INSERT ON LeavingReason
+                          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
+                          |                NEW.leavingReasonMCSN = 0)
+                          |            BEGIN
+                          |                UPDATE LeavingReason
+                          |                SET leavingReasonMCSN = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 410)
+                          |                WHERE leavingReasonUid = NEW.leavingReasonUid;
+                          |                
+                          |                UPDATE SqliteChangeSeqNums
+                          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |                WHERE sCsnTableId = 410;
+                          |                
+                          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                          |SELECT 410, NEW.leavingReasonUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                          |            END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |CREATE TRIGGER UPD_LOC_410
+                          |AFTER UPDATE ON LeavingReason
+                          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
+                          |    AND (NEW.leavingReasonCSN == OLD.leavingReasonCSN OR
+                          |        NEW.leavingReasonCSN == 0))
+                          |BEGIN
+                          |    UPDATE LeavingReason
+                          |    SET leavingReasonCSN = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = 410) 
+                          |    WHERE leavingReasonUid = NEW.leavingReasonUid;
+                          |    
+                          |    UPDATE SqliteChangeSeqNums 
+                          |    SET sCsnNextLocal = sCsnNextLocal + 1
+                          |    WHERE sCsnTableId = 410;
+                          |END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |            CREATE TRIGGER UPD_PRI_410
+                          |            AFTER UPDATE ON LeavingReason
+                          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
+                          |                AND (NEW.leavingReasonMCSN == OLD.leavingReasonMCSN OR
+                          |                    NEW.leavingReasonMCSN == 0))
+                          |            BEGIN
+                          |                UPDATE LeavingReason
+                          |                SET leavingReasonMCSN = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 410)
+                          |                WHERE leavingReasonUid = NEW.leavingReasonUid;
+                          |                
+                          |                UPDATE SqliteChangeSeqNums
+                          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |                WHERE sCsnTableId = 410;
+                          |                
+                          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                          |SELECT 410, NEW.leavingReasonUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                          |            END
+                          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LeavingReason_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_LeavingReason_trk_clientId_epk_csn` ON LeavingReason_trk (`clientId`, `epk`, `csn`)")
+                    database.execSQL("""
+                        CREATE UNIQUE INDEX IF NOT EXISTS 
+                       `index_LeavingReason_trk_epk_clientId` ON 
+                       LeavingReason_trk (`epk`, `clientId`)
+                       """)
+
+
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("""UPDATE ClazzEnrolment SET 
+                    clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}""".trimMargin())
+
+                    database.execSQL("""ALTER TABLE ClazzEnrolment 
+                        ADD COLUMN clazzEnrolmentLeavingReasonUid BIGINT DEFAULT 0 NOT NULL""".trimMargin())
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LeavingReason (  leavingReasonTitle  TEXT , leavingReasonMCSN  BIGINT  NOT NULL , leavingReasonCSN  BIGINT  NOT NULL , leavingReasonLCB  INTEGER  NOT NULL , leavingReasonUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS LeavingReason_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS LeavingReason_lcsn_seq")
+                    database.execSQL("""
+                          |CREATE OR REPLACE FUNCTION 
+                          | inccsn_410_fn() RETURNS trigger AS ${'$'}${'$'}
+                          | BEGIN  
+                          | UPDATE LeavingReason SET leavingReasonCSN =
+                          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.leavingReasonCSN 
+                          | ELSE NEXTVAL('LeavingReason_lcsn_seq') END),
+                          | leavingReasonMCSN = 
+                          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                          | THEN NEXTVAL('LeavingReason_mcsn_seq') 
+                          | ELSE NEW.leavingReasonMCSN END)
+                          | WHERE leavingReasonUid = NEW.leavingReasonUid;
+                          | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                          | SELECT 410, NEW.leavingReasonUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+                          | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+                          | RETURN null;
+                          | END ${'$'}${'$'}
+                          | LANGUAGE plpgsql
+                          """.trimMargin())
+                    database.execSQL("""
+                          |CREATE TRIGGER inccsn_410_trig 
+                          |AFTER UPDATE OR INSERT ON LeavingReason 
+                          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                          |EXECUTE PROCEDURE inccsn_410_fn()
+                          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LeavingReason_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                          |CREATE 
+                          | INDEX index_LeavingReason_trk_clientId_epk_csn 
+                          |ON LeavingReason_trk (clientId, epk, csn)
+                          """.trimMargin())
+                    database.execSQL("""
+                          |CREATE 
+                          |UNIQUE INDEX index_LeavingReason_trk_epk_clientId 
+                          |ON LeavingReason_trk (epk, clientId)
+                          """.trimMargin())
+
+                }
+
+            }
+        }
+
+        val MIGRATION_60_61 = object : DoorMigration(60, 61) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                if (database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("""UPDATE Role SET 
+                    rolePermissions = ${Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT} 
+                    WHERE roleUid = ${Role.ROLE_CLAZZ_TEACHER_UID} """.trimMargin())
+
+                    database.execSQL("""UPDATE persongroupmember SET groupmemberactive = true 
+                        WHERE groupmemberactive is NULL""".trimMargin())
+
+                    database.execSQL("""INSERT INTO PersonGroup
+                        (groupName, groupActive, personGroupFlag) SELECT
+                        'Admin Group', true, ${PersonGroup.PERSONGROUP_FLAG_PERSONGROUP} 
+                        WHERE EXISTS (SELECT * FROM Person WHERE firstNames = 'Admin' 
+                        AND lastName = 'User' AND personGroupUid = 0)""".trimMargin())
+                    database.execSQL("""UPDATE PERSON SET personGroupUid = (SELECT groupUid
+                        FROM PersonGroup WHERE groupName = 'Admin Group' LIMIT 1) WHERE
+                        firstNames = 'Admin' AND lastName = 'User' AND personGroupUid = 0""".trimMargin())
+                    database.execSQL("""INSERT INTO PersonGroupMember 
+                        (groupMemberActive, groupMemberPersonUid, groupMemberGroupUid) 
+                         SELECT true,(SELECT Person.personUid FROM PERSON WHERE username = 'admin') 
+                        , (SELECT groupUid FROM PersonGroup WHERE groupName = 'Admin Group' LIMIT 1) 
+                        WHERE EXISTS (SELECT * FROM PersonGroup WHERE groupName = 'Admin Group'); """.trimMargin())
+
+                }
+
+            }
+
+
+        }
+
+        val MIGRATION_61_62 = object : DoorMigration(61, 62) {
+            override fun migrate(database: DoorSqlDatabase) {
+                if (database.dbType() == DoorDbType.POSTGRES) {
+                    database.execSQL("""ALTER TABLE Language 
+                        ADD COLUMN languageActive BOOL DEFAULT FALSE NOT NULL""")
+                    database.execSQL("""UPDATE Language SET languageActive = true""")
+                }else {
+                    database.execSQL("""ALTER TABLE Language 
+                        ADD COLUMN languageActive INTEGER DEFAULT 0 NOT NULL""")
+                }
+            }
+        }
+
+        val MIGRATION_62_63 = object: DoorMigration(62, 63) {
+            //Adds LastChangedTime field to all syncable entities so the field will be ready to use
+            //for the new p2p enabled sync systme
+            override fun migrate(database: DoorSqlDatabase) {
+                val fieldType = if(database.dbType() == DoorDbType.SQLITE) {
+                    "INTEGER"
+                }else {
+                    "BIGINT"
+                }
+
+                val lastModTimeFields = listOf("ClazzLog" to "clazzLogLastChangedTime",
+                    "ClazzLogAttendanceRecord" to "clazzLogAttendanceRecordLastChangedTime",
+                    "Schedule" to "scheduleLastChangedTime",
+                    "DateRange" to "dateRangeLct",
+                    "HolidayCalendar" to "umCalendarLct",
+                    "Holiday" to "holLct",
+                    "CustomField" to "customFieldLct",
+                    "CustomFieldValue" to "customFieldLct",
+                    "Person" to "personLct",
+                    "Clazz" to "clazzLct",
+                    "ClazzEnrolment" to "clazzEnrolmentLct",
+                    "LeavingReason" to "leavingReasonLct",
+                    "PersonCustomFieldValue" to "personCustomFieldValueLct",
+                    "ContentEntry" to "contentEntryLct",
+                    "ContentEntryContentCategoryJoin" to "ceccjLct",
+                    "ContentCategorySchema" to "contentCategorySchemaLct",
+                    "ContentEntryParentChildJoin" to "cepcjLct",
+                    "ContentEntryRelatedEntryJoin" to "cerejLct",
+                    "ContentCategory" to "contentCategoryLct",
+                    "Language" to "langLct",
+                    "LanguageVariant" to "langVariantLct",
+                    "Role" to "roleLct",
+                    "EntityRole" to "erLct",
+                    "PersonGroup" to "groupLct",
+                    "PersonGroupMember" to "groupMemberLct",
+                    "PersonPicture" to "personPictureLct",
+                    "Container" to "cntLct",
+                    "VerbEntity" to "verbLct",
+                    "XObjectEntity" to "xObjectLct",
+                    "StatementEntity" to "statementLct",
+                    "ContextXObjectStatementJoin" to "contextXObjectLct",
+                    "AgentEntity" to "agentLct",
+                    "StateEntity" to "stateLct",
+                    "StateContentEntity" to "stateContentLct",
+                    "XLangMapEntry" to "statementLangMapLct",
+                    "School" to "schoolLct",
+                    "SchoolMember" to "schoolMemberLct",
+                    "ClazzWork" to "clazzWorkLct",
+                    "ClazzWorkContentJoin" to "clazzWorkContentJoinLct",
+                    "Comments" to "commentsLct",
+                    "ClazzWorkQuestion" to "clazzWorkQuestionLct",
+                    "ClazzWorkQuestionOption" to "clazzWorkQuestionOptionLct",
+                    "ClazzWorkSubmission" to "clazzWorkSubmissionLct",
+                    "ClazzWorkQuestionResponse" to "clazzWorkQuestionResponseLct",
+                    "ContentEntryProgress" to "contentEntryProgressLct",
+                    "Report" to "reportLct",
+                    "Site" to "siteLct",
+                    "LearnerGroup" to "learnerGroupLct",
+                    "LearnerGroupMember" to "learnerGroupMemberLct",
+                    "GroupLearningSession" to "groupLearningSessionLct",
+                    "SiteTerms" to "sTermsLct",
+                    "ScheduledCheck" to "scheduledCheckLct",
+                    "CustomFieldValueOption" to "customFieldValueLct",
+                    "AuditLog" to "auditLogLct")
+
+                lastModTimeFields.forEach {
+                    database.execSQL("ALTER TABLE ${it.first} ADD COLUMN ${it.second} $fieldType NOT NULL DEFAULT 0")
+                }
+            }
+        }
+
+        val MIGRATION_63_64 = object: DoorMigration(63, 64) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("ALTER TABLE Person ADD COLUMN personCountry TEXT")
+            }
+        }
+
+        val MIGRATION_64_65 = object: DoorMigration(64, 65) {
 
             override fun migrate(database: DoorSqlDatabase) {
                 database.execSQL("ALTER TABLE Person ADD COLUMN parentalApprovalContact TEXT")
@@ -3484,7 +4323,10 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
                     MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
                     MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
-                    MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54)
+                    MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
+                    MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
+                    MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
+                    MIGRATION_63_64)
 
 
 

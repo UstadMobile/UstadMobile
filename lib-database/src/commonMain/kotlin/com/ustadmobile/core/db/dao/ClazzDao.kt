@@ -2,15 +2,14 @@ package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
 import androidx.room.Dao
-import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
-import com.ustadmobile.lib.db.entities.ClazzMember.Companion.ROLE_STUDENT
-import com.ustadmobile.lib.db.entities.ClazzMember.Companion.ROLE_TEACHER
+import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT
+import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_TEACHER
 
 @Repository
 @Dao
@@ -70,32 +69,42 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     }
 
     @Query("""
-        SELECT Clazz.*, ClazzMember.*,
-        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = ${ClazzMember.ROLE_STUDENT}) AS numStudents,
-        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = ${ClazzMember.ROLE_TEACHER}) AS numTeachers,
+        SELECT Clazz.*, ClazzEnrolment.*,
+        (SELECT COUNT(*) FROM ClazzEnrolment WHERE 
+        ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND clazzEnrolmentRole 
+        = ${ROLE_STUDENT} AND :currentTime BETWEEN 
+        ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numStudents,
+        (SELECT COUNT(*) FROM ClazzEnrolment WHERE 
+        ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND clazzEnrolmentRole 
+        = ${ROLE_TEACHER} AND :currentTime BETWEEN 
+        ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numTeachers,
         '' AS teacherNames,
         0 AS lastRecorded
         FROM 
         PersonGroupMember
         LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-        LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid AND (Role.rolePermissions &  :permission) > 0
+        LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
         LEFT JOIN Clazz ON 
             CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = :personUid) AS INTEGER) = 1
-            OR (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzUid) 
-            OR (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzSchoolUid)
-        LEFT JOIN ClazzMember ON ClazzMember.clazzMemberUid =
-            COALESCE((SELECT ClazzMember.clazzMemberUid FROM ClazzMember
+            OR ((Role.rolePermissions &  :permission) > 0 AND EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzUid) 
+            OR ((Role.rolePermissions &  :permission) > 0 AND EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzSchoolUid)
+        LEFT JOIN ClazzEnrolment ON ClazzEnrolment.clazzEnrolmentUid =
+            COALESCE((SELECT ClazzEnrolment.clazzEnrolmentUid FROM ClazzEnrolment
              WHERE
-             ClazzMember.clazzMemberPersonUid = :personUid
-             AND ClazzMember.clazzMemberClazzUid = Clazz.clazzUid LIMIT 1), 0)
+             ClazzEnrolment.clazzEnrolmentPersonUid = :personUid
+             AND ClazzEnrolment.clazzEnrolmentActive
+             AND ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid LIMIT 1), 0)
         WHERE
         PersonGroupMember.groupMemberPersonUid = :personUid
+        AND PersonGroupMember.groupMemberActive 
         AND CAST(Clazz.isClazzActive AS INTEGER) = 1
         AND Clazz.clazzName like :searchQuery
+        AND (Clazz.clazzUid NOT IN (:excludeSelectedClazzList))
         AND ( :excludeSchoolUid = 0 OR Clazz.clazzUid NOT IN (SELECT cl.clazzUid FROM Clazz AS cl WHERE cl.clazzSchoolUid = :excludeSchoolUid) ) 
         AND ( :excludeSchoolUid = 0 OR Clazz.clazzSchoolUid = 0 )
         AND ( :filter != $FILTER_ACTIVE_ONLY OR (:currentTime BETWEEN Clazz.clazzStartTime AND Clazz.clazzEndTime))
-        GROUP BY Clazz.clazzUid, ClazzMember.clazzMemberUid
+        AND ( :selectedSchool = 0 OR Clazz.clazzSchoolUid = :selectedSchool)
+        GROUP BY Clazz.clazzUid, ClazzEnrolment.clazzEnrolmentUid
         ORDER BY CASE :sortOrder
             WHEN $SORT_ATTENDANCE_ASC THEN Clazz.attendanceAverage
             ELSE 0
@@ -114,9 +123,16 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         END DESC
     """)
     abstract fun findClazzesWithPermission(searchQuery: String, personUid: Long,
-                           excludeSchoolUid: Long, sortOrder: Int, filter: Int, currentTime: Long,
-                           permission: Long)
+                                           excludeSelectedClazzList: List<Long>,
+                                           excludeSchoolUid: Long, sortOrder: Int, filter: Int,
+                                           currentTime: Long,
+                                           permission: Long,
+                                           selectedSchool: Long)
             : DataSource.Factory<Int, ClazzWithListDisplayDetails>
+
+
+    @Query("SELECT Clazz.clazzUid AS uid, Clazz.clazzName AS labelName From Clazz WHERE clazzUid IN (:ids)")
+    abstract suspend fun getClassNamesFromListOfIds(ids: List<Long>): List<UidAndLabel>
 
     @Query("SELECT * FROM Clazz WHERE clazzName = :name and CAST(isClazzActive AS INTEGER) = 1")
     abstract fun findByClazzName(name: String): List<Clazz>
@@ -138,13 +154,17 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
                                                       permission: Long) : Boolean
 
     @Query("""SELECT Clazz.*, HolidayCalendar.*, School.*,
-        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = $ROLE_STUDENT) AS numStudents,
-        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = $ROLE_TEACHER) AS numTeachers
+        (SELECT COUNT(*) FROM ClazzEnrolment WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
+        AND clazzEnrolmentRole = $ROLE_STUDENT AND :currentTime BETWEEN 
+        ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numStudents,
+        (SELECT COUNT(*) FROM ClazzEnrolment WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
+        AND clazzEnrolmentRole = $ROLE_TEACHER AND :currentTime BETWEEN 
+        ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numTeachers
         FROM Clazz 
         LEFT JOIN HolidayCalendar ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
         LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
         WHERE Clazz.clazzUid = :clazzUid""")
-    abstract fun getClazzWithDisplayDetails(clazzUid: Long): DoorLiveData<ClazzWithDisplayDetails?>
+    abstract fun getClazzWithDisplayDetails(clazzUid: Long, currentTime: Long): DoorLiveData<ClazzWithDisplayDetails?>
 
 
     /**

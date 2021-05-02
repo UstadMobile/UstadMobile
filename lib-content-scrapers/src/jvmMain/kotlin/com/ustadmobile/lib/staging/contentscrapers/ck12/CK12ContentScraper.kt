@@ -144,7 +144,7 @@ import javax.xml.transform.TransformerException
  * Create a content directory for all the url and their location into a json so it can be played back.
  *
  */
-@ExperimentalStdlibApi
+
 class CK12ContentScraper @Throws(MalformedURLException::class)
 constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, var parentEntry: ContentEntry, var contentType: String, var sqiUid: Int) : Runnable {
 

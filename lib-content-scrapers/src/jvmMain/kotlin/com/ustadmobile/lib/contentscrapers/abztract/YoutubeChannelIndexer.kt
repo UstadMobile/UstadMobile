@@ -3,7 +3,7 @@ package com.ustadmobile.lib.contentscrapers.abztract
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.util.YoutubeData
@@ -18,7 +18,6 @@ import kotlin.random.Random
 import kotlin.system.exitProcess
 
 
-@ExperimentalStdlibApi
 class YoutubeChannelIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentContentEntryUid, runUid, sqiUid, contentEntryUid, endpoint, di ) {
 
 
@@ -56,10 +55,10 @@ class YoutubeChannelIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: In
                     Thread.sleep(Random.nextLong(10000, 30000))
                     process = builder.start()
                     process!!.waitFor()
-                    data = UMIOUtils.readStreamToString(process.inputStream)
+                    data = process.inputStream.readString()
                     val exitValue = process.exitValue()
                     if (exitValue != 0) {
-                        val error = UMIOUtils.readStreamToString(process.errorStream)
+                        val error = process.errorStream.readString()
                         UMLogUtil.logError("Error Stream for src $sourceUrl with error code  $error")
                         if (!error.contains("429")) {
                             throw ScraperException(Scraper.ERROR_TYPE_UNKNOWN_YOUTUBE, "unknown error: $error")

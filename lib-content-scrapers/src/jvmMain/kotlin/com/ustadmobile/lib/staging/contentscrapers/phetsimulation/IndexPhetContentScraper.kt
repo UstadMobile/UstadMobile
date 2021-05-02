@@ -3,7 +3,6 @@ package com.ustadmobile.lib.contentscrapers.phetsimulation
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.LanguageList
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
@@ -29,7 +28,7 @@ import java.net.URL
  * By using a css selector: td.simulation-list-item span.sim-badge-html
  * We can get the url to each simulation in that category to give to PhetContentScraper to scrap its content
  */
-@ExperimentalStdlibApi
+
 class IndexPhetContentScraper {
     private lateinit var destinationDirectory: File
     private lateinit var url: URL
@@ -77,7 +76,6 @@ class IndexPhetContentScraper {
         languageDao = repository!!.languageDao
         languageVariantDao = repository!!.languageVariantDao
 
-        LanguageList().addAllLanguages()
 
         val document = Jsoup.connect(urlString).get()
 

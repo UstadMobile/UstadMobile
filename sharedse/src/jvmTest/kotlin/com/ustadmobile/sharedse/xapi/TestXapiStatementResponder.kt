@@ -2,10 +2,10 @@ package com.ustadmobile.sharedse.xapi
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.spy
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
@@ -13,11 +13,13 @@ import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMURLEncoder
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
@@ -30,6 +32,11 @@ import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
+import okhttp3.OkHttpClient
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -62,9 +69,8 @@ class TestXapiStatementResponder {
     fun setup() {
         checkJndiSetup()
         val endpointScope = EndpointScope()
-        val systemImplSpy = spy(UstadMobileSystemImpl.instance)
         di = DI {
-            bind<UstadMobileSystemImpl>() with singleton { systemImplSpy!! }
+            bind<UstadMobileSystemImpl>() with singleton { spy(UstadMobileSystemImpl()) }
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()
@@ -73,6 +79,21 @@ class TestXapiStatementResponder {
                 builder.registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
                 builder.create()
             }
+
+            bind<OkHttpClient>() with singleton {
+                OkHttpClient()
+            }
+
+            bind<HttpClient>() with singleton {
+                HttpClient(OkHttp) {
+                    install(JsonFeature)
+                    install(HttpTimeout)
+                    engine {
+                        preconfigured = instance()
+                    }
+                }
+            }
+
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope!!).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
@@ -83,7 +104,8 @@ class TestXapiStatementResponder {
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
-                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository<UmAppDatabase>(Any(), context.url, "", defaultHttpClient(), null))
+                spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(Any(),
+                    context.url, instance(), instance())))
             }
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
@@ -107,7 +129,8 @@ class TestXapiStatementResponder {
     @Throws(IOException::class)
     fun givenValidPostRequest_whenDataInQueryParamString_thenDbShouldBeUpdated() {
         val tmpFile = temporaryFolder.newFile("statement.json")
-        extractTestResourceToFile("/com/ustadmobile/port/sharedse/fullstatement", tmpFile)
+        javaClass.getResourceAsStream("/com/ustadmobile/port/sharedse/fullstatement")
+            .writeToFile(tmpFile)
 
         val contentEntryUid = 1234L
 
@@ -142,7 +165,8 @@ class TestXapiStatementResponder {
     fun givenValidPutRequest_whenDataInContentMap_thenDbShouldBeUpdated() {
 
         val tmpFile = temporaryFolder.newFile("testStatement")
-        extractTestResourceToFile("/com/ustadmobile/port/sharedse/fullstatement", tmpFile)
+        javaClass.getResourceAsStream("/com/ustadmobile/port/sharedse/fullstatement")
+            .writeToFile(tmpFile)
 
         val contentEntryUid = 1234L
 
@@ -176,7 +200,8 @@ class TestXapiStatementResponder {
     fun givenAValidPutRequest_whenPutRequestHasStatementIdParam_thenShouldUpdateDb() {
 
         val tmpFile = temporaryFolder.newFile("testStatement")
-        extractTestResourceToFile("/com/ustadmobile/port/sharedse/fullstatement", tmpFile)
+        javaClass.getResourceAsStream("/com/ustadmobile/port/sharedse/fullstatement")
+            .writeToFile(tmpFile)
 
         val contentEntryUid = 1234L
 

@@ -9,7 +9,7 @@ import com.ustadmobile.core.networkmanager.defaultGson
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.port.android.view.ClazzEditFragment
-import com.ustadmobile.test.port.android.util.setDateField
+import com.ustadmobile.test.port.android.KNestedScrollView
 
 object ClazzEditScreen : KScreen<ClazzEditScreen>() {
 
@@ -18,11 +18,19 @@ object ClazzEditScreen : KScreen<ClazzEditScreen>() {
     override val viewClass: Class<*>?
         get() = ClazzEditFragment::class.java
 
+    val scrollView = KNestedScrollView { withId(R.id.activity_clazz_edit_fields_scrollview) }
+
     val editNameLayout = KTextInputLayout { withId(R.id.activity_clazz_edit_name)}
 
     val editDescTextInput = KTextInputLayout { withId(R.id.activity_clazz_edit_description)}
 
     val holidayCalendarTextInput = KTextInputLayout { withId(R.id.activity_clazz_edit_holiday_calendar_selected)}
+
+    val clazzStartTextInput = KTextInputLayout { withId(R.id.activity_clazz_edit_start_date_edittext) }
+
+    val clazzEndTextInput = KTextInputLayout { withId(R.id.activity_clazz_edit_end_date_edittext) }
+
+    val schoolTextInputLayout = KTextInputLayout { withId(R.id.fragment_clazz_edit_school_selected) }
 
     fun fillFields(fragmentScenario: FragmentScenario<ClazzEditFragment>,
                    clazz: ClazzWithHolidayCalendarAndSchool,
@@ -46,14 +54,6 @@ object ClazzEditScreen : KScreen<ClazzEditScreen>() {
                 }
             }
         }
-
-        clazz.clazzStartTime.takeIf { it != clazzOnForm?.clazzStartTime }?.also {
-            setDateField(R.id.activity_clazz_edit_start_date_edittext, it)
-        }
-        clazz.clazzEndTime.takeIf { it != clazzOnForm?.clazzEndTime}?.also {
-            setDateField(R.id.activity_clazz_edit_end_date_edittext, it)
-        }
-
 
         if(!setFieldsRequiringNavigation) {
             return

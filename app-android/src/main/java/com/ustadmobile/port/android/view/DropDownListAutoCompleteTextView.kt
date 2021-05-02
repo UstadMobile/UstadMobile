@@ -75,7 +75,8 @@ open class DropDownListAutoCompleteTextView<T: Any>: androidx.appcompat.widget.A
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
             val viewToUse = convertView ?: LayoutInflater.from(context).inflate(layoutResId, parent, false)
-            (viewToUse as? TextView)?.text = itemAdapter?.getText(mCurrentList[position])
+            val textView = viewToUse.findViewById<TextView>(R.id.line_item)
+            textView.text = itemAdapter?.getText(mCurrentList[position])
             return viewToUse
         }
 
@@ -119,9 +120,9 @@ open class DropDownListAutoCompleteTextView<T: Any>: androidx.appcompat.widget.A
 
     var dropDownOptions = listOf<T>()
         set(value) {
-            mListBaseAdapter = ListBaseAdapter(context, value, R.layout.autocomplete_list_item,
+            mListBaseAdapter = ListBaseAdapter(context, value, R.layout.multiline_list_item,
                     dropDownListAdapter).also {
-                it.dropDownLayoutResourceId = android.R.layout.simple_spinner_dropdown_item
+                it.dropDownLayoutResourceId = R.layout.multiline_list_item
             }
             field = value
             setAdapter(mListBaseAdapter)

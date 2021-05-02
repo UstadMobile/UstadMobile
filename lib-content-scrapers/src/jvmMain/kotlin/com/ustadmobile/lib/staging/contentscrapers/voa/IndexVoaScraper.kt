@@ -6,7 +6,6 @@ import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao.Companion.STATUS_RUNNING
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.LanguageList
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
@@ -42,7 +41,7 @@ import kotlin.system.exitProcess
  * Each subcategory has a list of lessons that can have multiple video and audio.
  * These lessons can be found using css selector: div.container div.media-block-wrap div.media-block a.img-wrap
  */
-@ExperimentalStdlibApi
+
 class IndexVoaScraper internal constructor(private val indexerUrl: URL, private val parentEntry: ContentEntry, private val indexLocation: File,
                                            private val contentType: String, private val scrapeQueueItemUid: Int, private val runId: Int) : Runnable {
 
@@ -157,7 +156,7 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
 
     }
 
-    @ExperimentalStdlibApi
+
     companion object {
 
         private val ROOT_URL = "https://learningenglish.voanews.com/"
@@ -215,8 +214,6 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
             contentParentChildJoinDao = repository.contentEntryParentChildJoinDao
             val languageDao = repository.languageDao
             queueDao = db.scrapeQueueItemDao
-
-            LanguageList().addAllLanguages()
 
             englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English")
 

@@ -6,8 +6,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import androidx.core.os.bundleOf
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,65 +13,122 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentReportEditBinding
-import com.toughra.ustadmobile.databinding.ItemContentReportEditBinding
-import com.toughra.ustadmobile.databinding.ItemPersonReportEditBinding
-import com.toughra.ustadmobile.databinding.ItemVerbReportEditBinding
+import com.toughra.ustadmobile.databinding.ItemReportEditFilterBinding
+import com.toughra.ustadmobile.databinding.ItemReportEditSeriesBinding
 import com.ustadmobile.core.controller.ReportEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.IdOption
+import com.ustadmobile.core.util.ObjectMessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.ReportEditView
-import com.ustadmobile.core.view.VerbEntityListView.Companion.ARG_EXCLUDE_VERBUIDS_LIST
-import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 
 
 interface ReportEditFragmentEventHandler {
-    fun onClickNewPerson()
-    fun onClickRemovePerson(person: ReportFilterWithDisplayDetails)
-    fun onClickNewVerbDisplay()
-    fun onClickRemoveVerb(verb: ReportFilterWithDisplayDetails)
-    fun onClickAddNewContentFilter()
-    fun onClickRemoveContent(content: ReportFilterWithDisplayDetails)
+    fun onClickNewFilter(series: ReportSeries)
+    fun onClickRemoveFilter(filter: ReportFilter)
+    fun onClickEditFilter(filter: ReportFilter)
+    fun onClickNewSeries()
+    fun onClickRemoveSeries(reportSeries: ReportSeries)
 }
 
-class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditView, ReportEditFragmentEventHandler,  DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<MessageIdOption> {
+class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), ReportEditView,
+        ReportEditFragmentEventHandler,
+        DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption> {
+
     private var mBinding: FragmentReportEditBinding? = null
 
     private var mPresenter: ReportEditPresenter? = null
 
-    override val viewContext: Any
-        get() = requireContext()
+    private var seriesRecyclerView: RecyclerView? = null
 
-    override val mEditPresenter: UstadEditPresenter<*, ReportWithFilters>?
+    private var seriesAdapter: RecyclerViewSeriesAdapter? = null
+
+    override val mEditPresenter: UstadEditPresenter<*, ReportWithSeriesWithFilters>?
         get() = mPresenter
 
-    private var personRecyclerAdapter: PersonRecyclerAdapter? = null
+    class SeriesViewHolder(val itemBinding: ItemReportEditSeriesBinding,
+                           val activityEventHandler: ReportEditFragmentEventHandler,
+                           var presenter: ReportEditPresenter?) : RecyclerView.ViewHolder(itemBinding.root){
 
-    private var personRecyclerView: RecyclerView? = null
+        val filterAdapter = RecyclerViewFilterAdapter(activityEventHandler, presenter)
 
-    private val personObserver = Observer<List<ReportFilterWithDisplayDetails>?> { t ->
-        personRecyclerAdapter?.submitList(t)
+        var filterList: List<ReportFilter>? = null
+            set(value){
+                field = value
+                filterAdapter.submitList(value)
+            }
     }
 
-    private var verbDisplayRecyclerAdapter: VerbDisplayRecyclerAdapter? = null
+    class RecyclerViewSeriesAdapter(val activityEventHandler: ReportEditFragmentEventHandler,
+                                    var presenter: ReportEditPresenter?)
+        : ListAdapter<ReportSeries, SeriesViewHolder>(DIFF_CALLBACK_SERIES) {
 
-    private var verbDisplayRecyclerView: RecyclerView? = null
+        var visualOptions: List<ReportEditPresenter.VisualTypeMessageIdOption>? = null
+        var yAxisOptions: List<ReportEditPresenter.YAxisMessageIdOption>? = null
+        var subGroupOptions: List<ReportEditPresenter.SubGroupByMessageIdOption>? = null
+        var showDeleteButton: Boolean = false
+        val boundSeriesViewHolder = mutableListOf<SeriesViewHolder>()
 
-    private val verbDisplayObserver = Observer<List<ReportFilterWithDisplayDetails>?> { t ->
-        verbDisplayRecyclerAdapter?.submitList(t)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SeriesViewHolder {
+            return SeriesViewHolder(ItemReportEditSeriesBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false).apply {
+                mPresenter = presenter
+                eventHandler = activityEventHandler
+            }, activityEventHandler, presenter)
+        }
+
+        override fun onBindViewHolder(holder: SeriesViewHolder, position: Int) {
+            val series =  getItem(position)
+            holder.itemBinding.series = series
+            holder.itemBinding.visualTypeOptions = visualOptions
+            holder.itemBinding.yAxisOptions = yAxisOptions
+            holder.itemBinding.subgroupOptions = subGroupOptions
+            holder.itemBinding.showDeleteButton = showDeleteButton
+            holder.itemBinding.itemEditReportDialogVisualTypeText.tag = series.reportSeriesVisualType
+            holder.itemBinding.seriesLayout.tag = series.reportSeriesUid
+            boundSeriesViewHolder += holder
+
+            val filterRecyclerView = holder.itemBinding.itemReportEditFilterList
+
+            holder.filterList = series.reportSeriesFilters
+            filterRecyclerView.adapter = holder.filterAdapter
+            filterRecyclerView.layoutManager = LinearLayoutManager(holder.itemView.context)
+        }
+
+        override fun onViewRecycled(holder: SeriesViewHolder) {
+            super.onViewRecycled(holder)
+            boundSeriesViewHolder -= holder
+        }
+
+        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+            super.onDetachedFromRecyclerView(recyclerView)
+            boundSeriesViewHolder.clear()
+        }
     }
 
-    private var contentDisplayRecyclerAdapter: ContentDisplayRecyclerAdapter? = null
+    class FilterViewHolder(val itemBinding: ItemReportEditFilterBinding) : RecyclerView.ViewHolder(itemBinding.root)
 
-    private var contentDisplayRecyclerView: RecyclerView? = null
+    class RecyclerViewFilterAdapter(val activityEventHandler: ReportEditFragmentEventHandler?,
+                                    var presenter: ReportEditPresenter?)
+        : ListAdapter<ReportFilter, FilterViewHolder>(DIFF_CALLBACK_FILTER) {
 
-    private val contentDisplayObserver = Observer<List<ReportFilterWithDisplayDetails>?> { t ->
-        contentDisplayRecyclerAdapter?.submitList(t)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FilterViewHolder {
+            return FilterViewHolder(ItemReportEditFilterBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false).apply {
+                mPresenter = presenter
+                eventHandler = activityEventHandler
+            })
+        }
+
+        override fun onBindViewHolder(holder: FilterViewHolder, position: Int) {
+            val filter = getItem(position)
+            holder.itemBinding.filter = filter
+        }
+
     }
 
 
@@ -81,32 +136,19 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
         val rootView: View
         mBinding = FragmentReportEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.activityEventHandler = this
+            it.eventHandler = this
             it.xAxisSelectionListener = this
+            seriesRecyclerView = it.activityReportEditSeriesList
         }
 
-        personRecyclerView = rootView.findViewById(R.id.fragment_edit_who_filter_list)
-        personRecyclerAdapter = PersonRecyclerAdapter(this, null)
-        personRecyclerView?.adapter = personRecyclerAdapter
-        personRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
-
-        verbDisplayRecyclerView = rootView.findViewById(R.id.fragment_edit_did_filter_list)
-        verbDisplayRecyclerAdapter = VerbDisplayRecyclerAdapter(this, null)
-        verbDisplayRecyclerView?.adapter = verbDisplayRecyclerAdapter
-        verbDisplayRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
-
-        contentDisplayRecyclerView = rootView.findViewById(R.id.fragment_edit_content_filter_list)
-        contentDisplayRecyclerAdapter = ContentDisplayRecyclerAdapter(this, null)
-        contentDisplayRecyclerView?.adapter = contentDisplayRecyclerAdapter
-        contentDisplayRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+        seriesAdapter = RecyclerViewSeriesAdapter(this, null)
+        seriesRecyclerView?.adapter = seriesAdapter
+        seriesRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         mPresenter = ReportEditPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
 
-        personRecyclerAdapter?.presenter = mPresenter
-        verbDisplayRecyclerAdapter?.presenter = mPresenter
-        contentDisplayRecyclerAdapter?.presenter = mPresenter
-
+        seriesAdapter?.presenter = mPresenter
 
         return rootView
     }
@@ -120,152 +162,19 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                Person::class.java) {
-            val person = it.firstOrNull() ?: return@observeResult
-            val filterDetail = ReportFilterWithDisplayDetails()
-            filterDetail.entityUid = person.personUid
-            filterDetail.entityType = ReportFilter.PERSON_FILTER
-            filterDetail.person = person
-            mPresenter?.handleAddOrEditPerson(filterDetail)
+                ReportFilter::class.java) {
+            val filter = it.firstOrNull() ?: return@observeResult
+            mPresenter?.handleAddFilter(filter)
         }
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                VerbDisplay::class.java) {
-            val verb = it.firstOrNull() ?: return@observeResult
-            val filterDetail = ReportFilterWithDisplayDetails()
-            filterDetail.entityType = ReportFilter.VERB_FILTER
-            filterDetail.entityUid = verb.verbUid
-            filterDetail.verb = VerbEntity(verb.verbUid, verb.urlId)
-            filterDetail.xlangMapDisplay = verb.display
-            mPresenter?.handleAddOrEditVerbDisplay(filterDetail)
-        }
-
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                ContentEntry::class.java) {
-            val entry = it.firstOrNull() ?: return@observeResult
-            val filterDetail = ReportFilterWithDisplayDetails()
-            filterDetail.entityType = ReportFilter.CONTENT_FILTER
-            filterDetail.entityUid = entry.contentEntryUid
-            filterDetail.contentEntry = entry
-            mPresenter?.handleAddOrEditContent(filterDetail)
+                DateRangeMoment::class.java) {
+            val dateRangeMoment = it.firstOrNull() ?: return@observeResult
+            mPresenter?.handleAddCustomRange(dateRangeMoment)
         }
 
     }
 
-
-    class ContentDisplayRecyclerAdapter(val activityEventHandler: ReportEditFragmentEventHandler,
-                                        var presenter: ReportEditPresenter?) : ListAdapter<ReportFilterWithDisplayDetails, ContentDisplayRecyclerAdapter.ContentDisplayViewHolder>(DIFF_CALLBACK_PERSON) {
-
-        class ContentDisplayViewHolder(val binding: ItemContentReportEditBinding) : RecyclerView.ViewHolder(binding.root)
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContentDisplayViewHolder {
-            val viewHolder = ContentDisplayViewHolder(ItemContentReportEditBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false))
-            viewHolder.binding.mPresenter = presenter
-            viewHolder.binding.activityEventHandler = activityEventHandler
-            return viewHolder
-        }
-
-        override fun onBindViewHolder(holder: ContentDisplayViewHolder, position: Int) {
-            holder.binding.filter = getItem(position)
-        }
-    }
-
-    override var contentFilterList: DoorMutableLiveData<List<ReportFilterWithDisplayDetails>>? = null
-        get() = field
-        set(value) {
-            field?.removeObserver(contentDisplayObserver)
-            field = value
-            value?.observe(this, contentDisplayObserver)
-        }
-
-
-    class PersonRecyclerAdapter(val activityEventHandler: ReportEditFragmentEventHandler,
-                                var presenter: ReportEditPresenter?) : ListAdapter<ReportFilterWithDisplayDetails, PersonRecyclerAdapter.PersonViewHolder>(DIFF_CALLBACK_PERSON) {
-
-        class PersonViewHolder(val binding: ItemPersonReportEditBinding) : RecyclerView.ViewHolder(binding.root)
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PersonViewHolder {
-            val viewHolder = PersonViewHolder(ItemPersonReportEditBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false))
-            viewHolder.binding.mPresenter = presenter
-            viewHolder.binding.activityEventHandler = activityEventHandler
-            return viewHolder
-        }
-
-        override fun onBindViewHolder(holder: PersonViewHolder, position: Int) {
-            holder.binding.filter = getItem(position)
-        }
-    }
-
-    override fun onClickNewPerson() {
-        onSaveStateToBackStackStateHandle()
-        val list = personFilterList?.value?.map { it.entityUid }
-        navigateToPickEntityFromList(Person::class.java,
-                R.id.person_list_dest,
-                bundleOf(PersonListView.ARG_EXCLUDE_PERSONUIDS_LIST to list?.joinToString()))
-
-    }
-
-    override fun onClickRemovePerson(person: ReportFilterWithDisplayDetails) {
-        mPresenter?.handleRemovePerson(person)
-    }
-
-    override var personFilterList: DoorMutableLiveData<List<ReportFilterWithDisplayDetails>>? = null
-        set(value) {
-            field?.removeObserver(personObserver)
-            field = value
-            value?.observe(this, personObserver)
-        }
-
-
-    class VerbDisplayRecyclerAdapter(val activityEventHandler: ReportEditFragmentEventHandler,
-                                     var presenter: ReportEditPresenter?) : ListAdapter<ReportFilterWithDisplayDetails, VerbDisplayRecyclerAdapter.VerbDisplayViewHolder>(DIFF_CALLBACK_PERSON) {
-
-        class VerbDisplayViewHolder(val binding: ItemVerbReportEditBinding) : RecyclerView.ViewHolder(binding.root)
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VerbDisplayViewHolder {
-            val viewHolder = VerbDisplayViewHolder(ItemVerbReportEditBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false))
-            viewHolder.binding.mPresenter = presenter
-            viewHolder.binding.activityEventHandler = activityEventHandler
-            return viewHolder
-        }
-
-        override fun onBindViewHolder(holder: VerbDisplayViewHolder, position: Int) {
-            holder.binding.filter = getItem(position)
-        }
-    }
-
-    override var verbFilterList: DoorMutableLiveData<List<ReportFilterWithDisplayDetails>>? = null
-        set(value) {
-            field?.removeObserver(verbDisplayObserver)
-            field = value
-            value?.observe(this, verbDisplayObserver)
-        }
-
-
-    override fun onClickNewVerbDisplay() {
-        onSaveStateToBackStackStateHandle()
-        val list = verbFilterList?.value?.map { it.entityUid }
-        navigateToPickEntityFromList(VerbDisplay::class.java,
-                R.id.verb_list_dest,
-                bundleOf(ARG_EXCLUDE_VERBUIDS_LIST to list?.joinToString()))
-    }
-
-    override fun onClickRemoveVerb(verb: ReportFilterWithDisplayDetails) {
-        mPresenter?.handleRemoveVerb(verb)
-    }
-
-    override fun onClickAddNewContentFilter() {
-        onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(ContentEntry::class.java,
-                R.id.content_entry_list_dest)
-    }
-
-    override fun onClickRemoveContent(content: ReportFilterWithDisplayDetails) {
-        mPresenter?.handleRemoveContent(content)
-    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
@@ -281,13 +190,9 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
         super.onDestroyView()
         mBinding = null
         mPresenter = null
-        personRecyclerView = null
-        personRecyclerAdapter = null
-        verbDisplayRecyclerAdapter = null
-        verbDisplayRecyclerView = null
-        contentDisplayRecyclerAdapter = null
-        contentDisplayRecyclerView = null
         entity = null
+        seriesRecyclerView = null
+        seriesAdapter = null
     }
 
     override fun onResume() {
@@ -295,15 +200,18 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
         setEditFragmentTitle(R.string.create_a_new_report, R.string.edit_report)
     }
 
-    override var entity: ReportWithFilters? = null
+    override var entity: ReportWithSeriesWithFilters? = null
         get() = field
         set(value) {
             field = value
             mBinding?.report = value
-            mBinding?.chartOptions = this.chartOptions
             mBinding?.xAxisOptions = this.xAxisOptions
-            mBinding?.yAxisOptions = this.yAxisOptions
-            mBinding?.subGroupOptions = this.groupOptions
+            seriesAdapter?.submitList(value?.reportSeriesWithFiltersList)
+            val showDeleteButton = (value?.reportSeriesWithFiltersList?.size ?: 0) > 1
+            seriesAdapter?.showDeleteButton = showDeleteButton
+            seriesAdapter?.boundSeriesViewHolder?.forEach {
+                it.itemBinding.showDeleteButton = showDeleteButton
+            }
         }
 
     override var fieldsEnabled: Boolean = false
@@ -320,39 +228,124 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
             mBinding?.titleErrorText = value
         }
 
-    override var chartOptions: List<ReportEditPresenter.ChartTypeMessageIdOption>? = null
+    override var visualTypeOptions: List<ReportEditPresenter.VisualTypeMessageIdOption>? = null
+        get() = field
+        set(value) {
+            field = value
+            seriesAdapter?.visualOptions = value
+        }
 
     override var yAxisOptions: List<ReportEditPresenter.YAxisMessageIdOption>? = null
+        get() = field
+        set(value) {
+            field = value
+            seriesAdapter?.yAxisOptions = value
+        }
 
     override var xAxisOptions: List<ReportEditPresenter.XAxisMessageIdOption>? = null
-
-    override var groupOptions: List<ReportEditPresenter.GroupByMessageIdOption>? = null
         get() = field
-        set(value){
+        set(value) {
             field = value
-            mBinding?.subGroupOptions = value
+            mBinding?.xAxisOptions = value
         }
 
-    companion object {
+    override var dateRangeOptions: List<ObjectMessageIdOption<DateRangeMoment>>? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.dateRangeOptions = value
+        }
+    override var selectedDateRangeMoment: DateRangeMoment? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.dateRangeMomentSelected = field
+        }
 
-        val DIFF_CALLBACK_PERSON = object : DiffUtil.ItemCallback<ReportFilterWithDisplayDetails>() {
-            override fun areItemsTheSame(oldItem: ReportFilterWithDisplayDetails, newItem: ReportFilterWithDisplayDetails): Boolean {
-                return oldItem.reportFilterUid == newItem.reportFilterUid
-            }
-
-            override fun areContentsTheSame(oldItem: ReportFilterWithDisplayDetails,
-                                            newItem: ReportFilterWithDisplayDetails): Boolean {
-                return oldItem == newItem
+    override var subGroupOptions: List<ReportEditPresenter.SubGroupByMessageIdOption>? = null
+        get() = field
+        set(value) {
+            field = value
+            seriesAdapter?.subGroupOptions = value
+            seriesAdapter?.boundSeriesViewHolder?.forEach {
+                it.itemBinding.subgroupOptions = value
             }
         }
-    }
 
-    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: MessageIdOption) {
+    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
+        if(selectedOption.optionId == ReportEditPresenter.DateRangeOptions.NEW_CUSTOM_RANGE.code) {
+                navigateToEditEntity(null, R.id.date_range_dest,
+                        DateRangeMoment::class.java)
+        }
+        mPresenter?.handleDateRangeSelected(selectedOption)
         mPresenter?.handleXAxisSelected(selectedOption)
     }
 
     override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
 
+    }
+
+    override fun onClickNewFilter(series: ReportSeries) {
+        onSaveStateToBackStackStateHandle()
+        navigateToEditEntity(ReportFilter().apply {
+            reportFilterSeriesUid = series.reportSeriesUid
+        }, R.id.report_filter_edit_dest,
+                ReportFilter::class.java)
+    }
+
+    override fun onClickEditFilter(filter: ReportFilter){
+        onSaveStateToBackStackStateHandle()
+        navigateToEditEntity(filter, R.id.report_filter_edit_dest,
+                ReportFilter::class.java)
+    }
+
+    override fun onClickRemoveFilter(filter: ReportFilter) {
+        mPresenter?.handleRemoveFilter(filter)
+    }
+
+    override fun onClickNewSeries() {
+        mPresenter?.handleClickAddSeries()
+    }
+
+    override fun onClickRemoveSeries(reportSeries: ReportSeries) {
+        /**
+         *  when removing a series, recyclerview doesn't like if
+         *  any of the views are in focus(editText or idOptionAutoComplete)
+         *  so go through each view and clear the focus
+         */
+        seriesAdapter?.boundSeriesViewHolder?.forEach {
+            it.itemBinding.itemEditReportDialogSubgroupTextinputlayout.clearFocus()
+            it.itemBinding.itemEditReportDialogYaxisTextinputlayout.clearFocus()
+            it.itemBinding.itemEditReportDialogVisualTypeTextinputlayout.clearFocus()
+            it.itemBinding.itemReportSeriesTitleTextInputlayout.clearFocus()
+            it.itemBinding.itemReportSeriesDeleteButton.clearFocus()
+        }
+        mPresenter?.handleRemoveSeries(reportSeries)
+    }
+
+    companion object {
+
+        val DIFF_CALLBACK_SERIES = object : DiffUtil.ItemCallback<ReportSeries>() {
+            override fun areItemsTheSame(oldItem: ReportSeries, newItem: ReportSeries): Boolean {
+                return oldItem.reportSeriesUid == newItem.reportSeriesUid
+            }
+
+            override fun areContentsTheSame(oldItem: ReportSeries,
+                                            newItem: ReportSeries): Boolean {
+                return oldItem === newItem
+            }
+        }
+
+        val DIFF_CALLBACK_FILTER = object : DiffUtil.ItemCallback<ReportFilter>() {
+            override fun areItemsTheSame(oldItem: ReportFilter, newItem: ReportFilter): Boolean {
+                return oldItem.reportFilterUid == newItem.reportFilterUid
+            }
+
+            override fun areContentsTheSame(oldItem: ReportFilter,
+                                            newItem: ReportFilter): Boolean {
+                return oldItem === newItem
+            }
+        }
     }
 
 }

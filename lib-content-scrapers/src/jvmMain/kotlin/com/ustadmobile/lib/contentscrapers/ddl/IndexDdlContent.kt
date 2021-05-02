@@ -6,7 +6,6 @@ import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
 import com.ustadmobile.core.db.dao.LanguageDao
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.LanguageList
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
@@ -30,7 +29,7 @@ import java.io.IOException
  * Every resource is found by searching the html with a[href] and checking if href url contains "resource/"
  * Traverse all the pages until you hit Max number and then move to next language
  */
-@ExperimentalStdlibApi
+
 class IndexDdlContent {
     private lateinit var db: UmAppDatabase
     private var destinationDirectory: File? = null
@@ -60,8 +59,6 @@ class IndexDdlContent {
         contentParentChildJoinDao = repository.contentEntryParentChildJoinDao
         contentCategoryChildJoinDao = repository.contentEntryContentCategoryJoinDao
         languageDao = repository.languageDao
-
-        LanguageList().addAllLanguages()
 
         val englishLang = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, "en")
         val farsiLang = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, "fa")

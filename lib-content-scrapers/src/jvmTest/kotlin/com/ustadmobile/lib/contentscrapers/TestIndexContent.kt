@@ -2,7 +2,6 @@ package com.ustadmobile.lib.contentscrapers
 
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.edraakK12.IndexEdraakK12Content
 import com.ustadmobile.lib.db.entities.ScrapeRun
@@ -11,15 +10,14 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import okio.Buffer
-import okio.Okio
+import okio.buffer
+import okio.source
 import org.apache.commons.io.IOUtils
 import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
 import java.io.IOException
 import java.nio.file.Files
 
-@ExperimentalStdlibApi
+
 class TestIndexContent {
 
     //@Before
@@ -35,16 +33,15 @@ class TestIndexContent {
     internal val COMPONENT_API_PREFIX = "/api/component/"
 
     internal val indexDispatcher: Dispatcher = object : Dispatcher() {
-        @Throws(InterruptedException::class)
         override fun dispatch(request: RecordedRequest): MockResponse {
-
+            val requestPath = request.path ?: ""
             try {
 
-                if (request.path.contains(MAIN_CONTENT_CONTENT_FILE)) {
+                if (requestPath.contains(MAIN_CONTENT_CONTENT_FILE)) {
 
                     val prefixLength = COMPONENT_API_PREFIX.length
-                    val fileName = request.path.substring(prefixLength,
-                            request.path.indexOf(".txt", prefixLength))
+                    val fileName = requestPath.substring(prefixLength,
+                            requestPath.indexOf(".txt", prefixLength))
                     val body = IOUtils.toString(javaClass.getResourceAsStream("$fileName.txt"), UTF_ENCODING)
                     val response = MockResponse().setResponseCode(200)
                     response.setHeader("ETag", UTF_ENCODING.hashCode())
@@ -53,7 +50,7 @@ class TestIndexContent {
 
                     return response
 
-                } else if (request.path.contains(DETAIL_JSON_CONTENT_FILE) || request.path.contains("5a60a25f0ed49f0498cb201d")) {
+                } else if (requestPath.contains(DETAIL_JSON_CONTENT_FILE) || requestPath.contains("5a60a25f0ed49f0498cb201d")) {
 
                     val body = IOUtils.toString(javaClass.getResourceAsStream(DETAIL_JSON_CONTENT_FILE), UTF_ENCODING)
                     val response = MockResponse().setResponseCode(200)
@@ -63,18 +60,18 @@ class TestIndexContent {
 
                     return response
 
-                } else if (request.path.contains("/media/")) {
+                } else if (requestPath.contains("/media/")) {
 
-                    val fileLocation = "/com/ustadmobile/lib/contentscrapers/files/" + request.path.substring(7)
+                    val fileLocation = "/com/ustadmobile/lib/contentscrapers/files/" + requestPath.substring(7)
                     val videoIn = javaClass.getResourceAsStream(fileLocation)
-                    val source = Okio.buffer(Okio.source(videoIn))
+                    val source = videoIn.source().buffer()
                     val buffer = Buffer()
                     source.readAll(buffer)
 
                     val response = MockResponse().setResponseCode(200)
                     response.setHeader("ETag", UTF_ENCODING.hashCode())
                     if (!request.method.equals("HEAD", ignoreCase = true))
-                        response.body = buffer
+                        response.setBody(buffer)
 
                     return response
 
@@ -103,7 +100,7 @@ class TestIndexContent {
         runDao.insert(run)
 
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(indexDispatcher)
+        mockWebServer.dispatcher = indexDispatcher
 
         val tmpDir = Files.createTempDirectory("testedxcontentindexscraper").toFile()
         val containerDir = Files.createTempDirectory("container").toFile()

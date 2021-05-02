@@ -80,7 +80,7 @@ class VerbEntityListFragment() : UstadListViewFragment<VerbDisplay, VerbDisplay>
             : DiffUtil.ItemCallback<VerbDisplay>() {
             override fun areItemsTheSame(oldItem: VerbDisplay,
                                          newItem: VerbDisplay): Boolean {
-                TODO("e.g. insert primary keys here return oldItem.verbEntity == newItem.verbEntity")
+                return oldItem.verbUid == newItem.verbUid
             }
 
             override fun areContentsTheSame(oldItem: VerbDisplay,

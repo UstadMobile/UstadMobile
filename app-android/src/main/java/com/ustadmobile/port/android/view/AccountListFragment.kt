@@ -137,7 +137,7 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
 
     private var ustadListHeaderRecyclerViewAdapter: ListHeaderRecyclerViewAdapter? = null
 
-    private var mergeRecyclerAdapter: MergeAdapter? = null
+    private var mergeRecyclerAdapter: ConcatAdapter? = null
 
     override fun onClick(p0: View?) {
         mPresenter?.handleClickAddAccount()
@@ -165,7 +165,7 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
                         getString(R.string.account).toLowerCase()))
         ustadListHeaderRecyclerViewAdapter?.newItemVisible = true
 
-        mergeRecyclerAdapter = MergeAdapter(accountAdapter,
+        mergeRecyclerAdapter = ConcatAdapter(accountAdapter,
                 ustadListHeaderRecyclerViewAdapter, aboutItemAdapter)
 
         mBinding?.accountListRecycler?.adapter = mergeRecyclerAdapter

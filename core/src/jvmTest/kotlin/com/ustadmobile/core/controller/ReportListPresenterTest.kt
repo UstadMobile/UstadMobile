@@ -1,7 +1,7 @@
 
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -74,7 +74,7 @@ class ReportListPresenterTest {
         presenter.onCreate(null)
 
         //eg. verify the correct DAO method was called and was set on the view
-        verify(repoReportDaoSpy, timeout(5000)).findAllActiveReportByUserAsc(0)
+        verify(repoReportDaoSpy, timeout(5000)).findAllActiveReport(any(), any(), any(), eq(false))
         verify(mockView, timeout(5000)).list = any()
 
         //TODO: verify any other properties that the presenter should set on the view
@@ -101,6 +101,5 @@ class ReportListPresenterTest {
                 eq(mapOf(ARG_ENTITY_UID to testEntity.reportUid.toString())), any())
     }
 
-    //TODO: Add tests for other scenarios the presenter is expected to handle - e.g. different filters, etc.
 
 }

@@ -64,11 +64,6 @@ abstract class BleGattServerCommon(override val di: DI): DIAware {
                         group.toBytes())
             }
 
-            BleMessage.MESSAGE_TYPE_HTTP -> {
-                UMLog.l(UMLog.DEBUG, 691,
-                        "BLEGattServerCommon: received HTTP proxy message")
-                return handleHttpRequest(requestReceived, clientDeviceAddr)
-            }
             else -> {
                 UMLog.l(UMLog.ERROR, 691,
                         "BLEGattServerCommon: Unknown message type")
@@ -76,7 +71,5 @@ abstract class BleGattServerCommon(override val di: DI): DIAware {
             }
         }
     }
-
-    abstract fun handleHttpRequest(bleMessageReceived: BleMessage, clientDeviceAddr: String): BleMessage
 
 }

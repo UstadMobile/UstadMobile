@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.VerbEntityListView
 import com.ustadmobile.core.view.VerbEntityListView.Companion.ARG_EXCLUDE_VERBUIDS_LIST
@@ -44,7 +45,7 @@ class VerbEntityListPresenter(context: Any, arguments: Map<String, String>, view
         }
     }
 
-    override fun handleClickSortOrder(sortOption: MessageIdOption) {
+    override fun handleClickSortOrder(sortOption: IdOption) {
         val sortOrder = (sortOption as? VerbEntityListSortOption)?.sortOrder ?: return
         if (sortOrder != currentSortOrder) {
             currentSortOrder = sortOrder

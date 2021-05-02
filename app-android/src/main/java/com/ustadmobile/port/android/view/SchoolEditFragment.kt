@@ -21,6 +21,7 @@ import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.core.view.SchoolEditView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.HolidayCalendar
@@ -54,9 +55,6 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
     private val clazzObserver = Observer<List<Clazz>?>{
         t -> clazzRecyclerAdapter?.submitList(t)
     }
-
-    override val viewContext: Any
-        get() = requireContext()
 
     class ClazzRecyclerAdapter(
             val activityEventHandler: SchoolEditFragmentEventHandler,
@@ -182,8 +180,8 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
 
     override fun onClickEditClazz(clazz: Clazz?) {
         onSaveStateToBackStackStateHandle()
-
-        navigateToEditEntity(clazz, R.id.clazz_detail_dest, Clazz::class.java)
+        navigateToEditEntity(clazz, R.id.clazz_detail_dest, Clazz::class.java,
+        argBundle = bundleOf(UstadView.ARG_ENTITY_UID to clazz?.clazzUid.toString()))
     }
 
     override fun onClickDeleteClazz(clazz: Clazz) {

@@ -31,6 +31,15 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
     private val repo: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
 
     private val gson: Gson by di.instance()
+
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+
+    private val timeZone = TimeZone.getTimeZone("UTC")
+
+    init {
+        dateFormat.timeZone = timeZone
+    }
+
     /**
      * @param contentEntryUid - the contentEntryUid when it is already known. E.g. when the xapi
      * endpoint is used by the XapiPackagePresenter then the contentEntryUid is known.
@@ -211,7 +220,7 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
         }
 
         if (!isSubStatement) {
-            val date = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").format(Date())
+            val date = dateFormat.format(Date())
             statement.stored = date
 
             if (statement.timestamp.isNullOrEmpty()) {
@@ -316,6 +325,9 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
             contextStatementId = statementContext.statement?.id ?: ""
         }
 
+        val entry = db.contentEntryDao.findByUid(contentEntryUid)
+        val contentEntryRoot = xObjectEntity?.objectId == entry?.entryId
+
         val statementEntity = insertOrUpdateStatementEntity(repo.statementDao, statement, gson,
                 person?.personUid ?: 0,
                 verbEntity.verbUid,
@@ -324,12 +336,11 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
                 agentUid, authorityUid, teamUid,
                 subActorUid, subVerbUid, subObjectUid,
                 contentEntryUid = contentEntryUid,
-                learnerGroupUid = learnerGroupUid)
+                learnerGroupUid = learnerGroupUid, contentEntryRoot = contentEntryRoot)
 
         //ContentEntry should be available locally
-        val entry = db.contentEntryDao.findByUid(contentEntryUid)
-        if (xObjectEntity?.objectId == entry?.entryId) {
-            XapiUtil.insertOrUpdateEntryProgress(statementEntity, repo.contentEntryProgressDao,
+        if (contentEntryRoot) {
+            XapiUtil.insertOrUpdateEntryProgress(statementEntity, repo,
                     verbEntity)
         }
 

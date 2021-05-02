@@ -4,9 +4,11 @@ import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.io.ext.addDirToContainer
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.createSrtFile
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_KHAN
@@ -37,7 +39,7 @@ import java.nio.file.Files
 import java.util.*
 
 
-@ExperimentalStdlibApi
+
 class KhanVideoScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : YoutubeScraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
 
@@ -172,17 +174,11 @@ class KhanVideoScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid
                     ShrinkerUtil.convertKhanVideoToWebMAndCodec2(tempFile, webMFile)
                     tempFile.delete()
                 }
-
                 val container = createBaseContainer(mimetype)
-                val containerManager = ContainerManager(container, db, db, containerFolder.absolutePath)
+                val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolder.toDoorUri())
                 runBlocking {
-
-                    val fileMap = HashMap<File, String>()
-                    ContentScraperUtil.createContainerFromDirectory(tempDir!!, fileMap)
-                    fileMap.forEach {
-                        containerManager.addEntries(ContainerManager.FileEntrySource(it.component1(), it.component2()))
-                    }
-
+                    repo.addDirToContainer(container.containerUid, tempDir!!.toDoorUri(),
+                            true, containerAddOptions)
                 }
                 if (!eTag.isNullOrEmpty()) {
                     val etagContainer = ContainerETag(container.containerUid, eTag)

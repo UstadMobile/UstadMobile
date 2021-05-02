@@ -58,7 +58,9 @@ object UstadMobileConstants {
             "ps" to "\u067e\u069a\u062a\u0648",
             "fa" to "\u062f\u0631\u06cc",
             "ar" to "العربية",
-            "bn" to "বাংলা")
+            "bn" to "বাংলা",
+            "ne" to "नेपाली",
+            "my" to "မြန်မာစာ")
 
     /**
      * Anyone under this age is considered a minor. They can only register with the consent of a

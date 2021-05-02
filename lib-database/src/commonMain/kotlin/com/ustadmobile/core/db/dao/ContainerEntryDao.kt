@@ -2,7 +2,6 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.*
 import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.lib.database.annotation.UmRestAccessible
 import com.ustadmobile.lib.db.entities.ContainerEntry
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
@@ -34,7 +33,6 @@ abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
             "AND ContainerEntry.cePath = :pathInContainer")
     abstract fun findByPathInContainer(containerUid: Long, pathInContainer: String): ContainerEntryWithContainerEntryFile?
 
-    @UmRestAccessible
     @Query("SELECT ContainerEntry.*, ContainerEntryFile.cefMd5 AS cefMd5 " +
             "FROM ContainerEntry " +
             "LEFT JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid " +

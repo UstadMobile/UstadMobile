@@ -22,7 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-@ExperimentalStdlibApi
+
 class HarContentFragment : UstadBaseFragment(), HarAndroidView, FragmentBackHandler {
 
     private val clientDeferred = CompletableDeferred<HarWebViewClient>()
@@ -62,7 +62,7 @@ class HarContentFragment : UstadBaseFragment(), HarAndroidView, FragmentBackHand
         GlobalScope.launch(Dispatchers.Main) {
             val thisFrag = this@HarContentFragment
             val networkManagerBle = networkManagerProvider?.networkManager?.await()
-            presenter = HarContentPresenter(thisFrag.viewContext, arguments.toStringMap(),
+            presenter = HarContentPresenter(requireContext(), arguments.toStringMap(),
                     thisFrag, networkManagerBle?.httpd?.localHttpUrl ?: "", di)
             presenter?.onCreate(savedInstanceState.toNullableStringMap())
         }

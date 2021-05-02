@@ -7,6 +7,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.widget.AppCompatSpinner
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 
 /**
@@ -19,7 +20,7 @@ class MessageIdSpinner: AppCompatSpinner, AdapterView.OnItemSelectedListener{
 
     interface OnMessageIdOptionSelectedListener {
 
-        fun onMessageIdOptionSelected(view: AdapterView<*>?, messageIdOption: MessageIdOption)
+        fun onMessageIdOptionSelected(view: AdapterView<*>?, messageIdOption: IdOption)
 
         fun onNoMessageIdOptionSelected(view: AdapterView<*>?)
 
@@ -29,9 +30,9 @@ class MessageIdSpinner: AppCompatSpinner, AdapterView.OnItemSelectedListener{
 
     var messageIdOptionSelectedListener: OnMessageIdOptionSelectedListener? = null
 
-    private var mMessageIdArrayAdapter: ArrayAdapter<MessageIdOption>? = null
+    private var mMessageIdArrayAdapter: ArrayAdapter<IdOption>? = null
 
-    var messageIdOptions = listOf<MessageIdOption>()
+    var messageIdOptions = listOf<IdOption>()
         set(value) {
             mMessageIdArrayAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item,
                     value.toTypedArray()).also {
@@ -42,10 +43,10 @@ class MessageIdSpinner: AppCompatSpinner, AdapterView.OnItemSelectedListener{
         }
 
     var selectedMessageIdOption: Int
-        get() = (selectedItem as? MessageIdOption)?.code ?: -1
+        get() = (selectedItem as? IdOption)?.optionId ?: -1
 
         set(value) {
-            val itemIndex = messageIdOptions.indexOfFirst { it.code == value }
+            val itemIndex = messageIdOptions.indexOfFirst { it.optionId == value }
             takeIf{ itemIndex != -1}?.setSelection(itemIndex)
         }
 

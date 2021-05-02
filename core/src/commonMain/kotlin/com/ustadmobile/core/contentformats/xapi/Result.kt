@@ -4,7 +4,7 @@ class Result {
 
     var completion: Boolean = false
 
-    var success: Boolean = false
+    var success: Boolean? = null
 
     var score: Score? = null
 
@@ -43,7 +43,7 @@ class Result {
 
     override fun hashCode(): Int {
         var result = if (completion) 1 else 0
-        result = 31 * result + if (success) 1 else 0
+        result = 31 * result + if (success != null) success!!.hashCode() else 0
         result = 31 * result + if (score != null) score!!.hashCode() else 0
         result = 31 * result + if (duration != null) duration!!.hashCode() else 0
         result = 31 * result + if (response != null) response!!.hashCode() else 0

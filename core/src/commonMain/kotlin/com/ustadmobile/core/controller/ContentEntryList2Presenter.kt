@@ -1,12 +1,12 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FILTER
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_FOLDER_FILTER
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -95,7 +95,6 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 SortOrder.ORDER_NAME_ASC -> db.contentEntryDao.downloadedRootItemsAsc(loggedPersonUid)
                 SortOrder.ORDER_NAME_DSC -> db.contentEntryDao.downloadedRootItemsDesc(loggedPersonUid)
             }
-            ARG_RECYCLED_CONTENT -> repo.contentEntryDao.recycledItems(personUid = loggedPersonUid)
             else -> null
         }
 
@@ -183,7 +182,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         view.showContentEntryAddOptions(parentEntryUid)
     }
 
-    override fun handleClickSortOrder(sortOption: MessageIdOption) {
+    override fun handleClickSortOrder(sortOption: IdOption) {
         val sortOrder = (sortOption as? ContentEntryListSortOption)?.sortOrder ?: return
         if (sortOrder != currentSortOrder) {
             currentSortOrder = sortOrder

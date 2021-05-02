@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.years
 import com.ustadmobile.core.account.UstadAccountManager
@@ -216,7 +216,7 @@ class PersonEditPresenterTest  {
 
         mockWebServer.enqueue(MockResponse()
                 .setHeader("Content-Type", "application/json")
-                .setBody(Buffer().write(Json.stringify(UmAccount.serializer(),
+                .setBody(Buffer().write(Json.encodeToString(UmAccount.serializer(),
                         UmAccount(0L)).toByteArray())))
 
         val args = mapOf(

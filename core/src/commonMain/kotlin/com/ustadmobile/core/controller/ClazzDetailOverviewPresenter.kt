@@ -8,6 +8,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.lib.db.entities.Role
@@ -42,7 +43,7 @@ class ClazzDetailOverviewPresenter(context: Any,
                     Role.PERMISSION_CLAZZ_ADD_STUDENT)
         }
 
-        return repo.clazzDao.getClazzWithDisplayDetails(entityUid)
+        return repo.clazzDao.getClazzWithDisplayDetails(entityUid, systemTimeInMillis())
     }
 
     override fun handleClickEdit() {

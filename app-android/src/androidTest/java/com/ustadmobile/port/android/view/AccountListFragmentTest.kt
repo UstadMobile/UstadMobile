@@ -33,11 +33,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
 import org.kodein.di.DIAware
+import org.kodein.di.direct
 import org.kodein.di.instance
 
 
 @AdbScreenRecord("Account List Tests")
-@ExperimentalStdlibApi
 class AccountListFragmentTest : TestCase() {
 
     @JvmField
@@ -56,9 +56,9 @@ class AccountListFragmentTest : TestCase() {
 
     private val defaultNumOfAccounts = 2
 
-    private var di: DI? = null
+    private lateinit var di: DI
 
-    val impl = UstadMobileSystemImpl.instance
+    lateinit var impl: UstadMobileSystemImpl
 
     @Before
     fun setup() {
@@ -67,6 +67,7 @@ class AccountListFragmentTest : TestCase() {
         }
         mockServerUrl = mockWebServer.url("/").toString()
         di = (ApplicationProvider.getApplicationContext<Context>() as DIAware).di
+        impl = di.direct.instance()
     }
 
     @After
@@ -82,7 +83,7 @@ class AccountListFragmentTest : TestCase() {
         init {
             launchFragment(true, defaultNumOfAccounts)
         }.run {
-            val accountManager: UstadAccountManager by di!!.instance()
+            val accountManager: UstadAccountManager by di.instance()
             AccountListScreen {
                 recycler {
                     //active account was removed from the list
@@ -198,7 +199,7 @@ class AccountListFragmentTest : TestCase() {
 
         }.run {
             val fragmentScenario = launchFragment(true, defaultNumOfAccounts)
-            val accountManager: UstadAccountManager by di!!.instance()
+            val accountManager: UstadAccountManager by di.instance()
 
             AccountListScreen {
                 recycler {
@@ -234,7 +235,7 @@ class AccountListFragmentTest : TestCase() {
         }.run {
 
             val fragmentScenario = launchFragment(true, defaultNumOfAccounts)
-            val accountManager: UstadAccountManager by di!!.instance()
+            val accountManager: UstadAccountManager by di.instance()
 
             val activeAccount = accountManager.activeAccount
 
@@ -371,7 +372,7 @@ class AccountListFragmentTest : TestCase() {
         impl.setAppPref(UstadAccountManager.ACCOUNTS_PREFKEY, null, context)
 
         impl.setAppPref(UstadAccountManager.ACCOUNTS_PREFKEY,
-                Json.stringify(UstadAccounts.serializer(), storedAccounts), context)
+                Json.encodeToString(UstadAccounts.serializer(), storedAccounts), context)
     }
 
 

@@ -119,19 +119,21 @@ abstract class DownloadJobItemDao {
     @QueryLiveTables(["DownloadJobItem", "ConnectivityStatus", "DownloadJob"])
     abstract fun findNextDownloadJobItems(): DoorLiveData<List<DownloadJobItem>>
 
-    @Query("""SELECT DownloadJobItem.* FROM DownloadJobItem 
-            LEFT JOIN DownloadJob ON DownloadJobItem.djiDjUid = DownloadJob.djUid 
-            WHERE 
-             DownloadJobItem.djiContainerUid != 0 
-             AND DownloadJobItem.djiStatus >= ${JobStatus.WAITING_MIN} 
-             AND DownloadJobItem.djiStatus < ${JobStatus.RUNNING_MIN} 
-             AND ((:connectivityStatus = ${ConnectivityStatus.STATE_UNMETERED})
-              OR (:connectivityStatus = ${ConnectivityStatus.STATE_METERED} AND CAST(DownloadJob.meteredNetworkAllowed AS INT) = 1)
-              OR EXISTS(SELECT laContainerUid FROM LocallyAvailableContainer WHERE 
-                laContainerUid = DownloadJobItem.djiContainerUid))
-            ORDER BY DownloadJob.timeRequested, DownloadJobItem.djiUid LIMIT :limit
+    @Query("""
+            SELECT DownloadJobItem.* FROM DownloadJobItem 
+         LEFT JOIN DownloadJob ON DownloadJobItem.djiDjUid = DownloadJob.djUid 
+             WHERE  DownloadJobItem.djiContainerUid != 0
+                    AND DownloadJobItem.djiUid NOT IN (:excludeDjiUids)
+                    AND DownloadJobItem.djiStatus >= ${JobStatus.WAITING_MIN} 
+                    AND DownloadJobItem.djiStatus < ${JobStatus.RUNNING_MIN} 
+                    AND ((:connectivityStatus = ${ConnectivityStatus.STATE_UNMETERED})
+                    OR (:connectivityStatus = ${ConnectivityStatus.STATE_METERED} AND CAST(DownloadJob.meteredNetworkAllowed AS INT) = 1)
+                    OR EXISTS(SELECT laContainerUid 
+                                FROM LocallyAvailableContainer 
+                               WHERE laContainerUid = DownloadJobItem.djiContainerUid))
+          ORDER BY DownloadJob.timeRequested, DownloadJobItem.djiUid LIMIT :limit
     """)
-    abstract fun findNextDownloadJobItems2(limit: Int, connectivityStatus: Int): List<DownloadJobItem>
+    abstract fun findNextDownloadJobItems2(limit: Int, connectivityStatus: Int, excludeDjiUids: List<Int>): List<DownloadJobItem>
 
 
     @Query("SELECT DownloadJobItem.* FROM DownloadJobItem " +

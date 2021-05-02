@@ -5,7 +5,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import com.ustadmobile.core.view.@BaseFileName@View
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.@Entity@Dao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl

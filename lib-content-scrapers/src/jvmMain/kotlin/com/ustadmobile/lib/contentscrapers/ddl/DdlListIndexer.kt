@@ -9,8 +9,7 @@ import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import org.jsoup.Jsoup
 import org.kodein.di.DI
 
-@ExperimentalStdlibApi
-// TOOO check ddl
+// check ddl
 class DdlListIndexer(parentEntryUid: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentEntryUid, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
     override fun indexUrl(sourceUrl: String) {

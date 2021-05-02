@@ -14,7 +14,7 @@ import org.kodein.di.DI
 import java.lang.Exception
 import java.net.URL
 
-@ExperimentalStdlibApi
+
 class KhanFullIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : HarIndexer(parentContentEntry, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
     override fun indexUrl(sourceUrl: String) {

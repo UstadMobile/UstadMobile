@@ -175,13 +175,13 @@ class Login2FragmentTest : TestCase(){
         }.run {
 
             LoginScreen {
-                mockWebServer.setDispatcher(object : Dispatcher() {
-                    override fun dispatch(request: RecordedRequest?): MockResponse {
+                mockWebServer.dispatcher = object : Dispatcher() {
+                    override fun dispatch(request: RecordedRequest): MockResponse {
                         return MockResponse()
                                 .setBody(Gson().toJson(UmAccount(42, VALID_USER, "auth", "")))
                                 .setHeader("Content-Type", "application/json")
                     }
-                })
+                }
 
                 val httpUrl = mockWebServer.url("/").toString()
 
@@ -207,11 +207,11 @@ class Login2FragmentTest : TestCase(){
 
 
         init{
-            mockWebServer.setDispatcher(object: Dispatcher() {
-                override fun dispatch(request: RecordedRequest?): MockResponse {
+            mockWebServer.dispatcher = object: Dispatcher() {
+                override fun dispatch(request: RecordedRequest): MockResponse {
                     return MockResponse().setResponseCode(403)
                 }
-            })
+            }
 
         }.run {
 

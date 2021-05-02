@@ -5,7 +5,6 @@ import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.LanguageList
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
@@ -43,7 +42,7 @@ import java.util.*
  * Need to go to the next page to get more content for the same subheading.
  * This can be found by taking href link of css selector li.next a
  */
-@ExperimentalStdlibApi
+
 class IndexEtekkathoScraper {
     private var url: URL? = null
     private var contentEntryDao: ContentEntryDao? = null
@@ -77,8 +76,6 @@ class IndexEtekkathoScraper {
         containerDao = repository!!.containerDao
         val languageDao = repository!!.languageDao
         headingHashMap = HashMap()
-
-        LanguageList().addAllLanguages()
 
         englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English")
 

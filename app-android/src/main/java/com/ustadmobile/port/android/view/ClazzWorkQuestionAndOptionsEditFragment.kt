@@ -15,7 +15,7 @@ import com.toughra.ustadmobile.databinding.FragmentClazzWorkQuestionAndOptionsEd
 import com.toughra.ustadmobile.databinding.ItemClazzWorkQuestionOptionBinding
 import com.ustadmobile.core.controller.ClazzWorkQuestionAndOptionsEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkQuestionAndOptionsEditView
 import com.ustadmobile.door.DoorMutableLiveData
@@ -31,7 +31,7 @@ interface ClazzWorkQuestionAndOptionsEditFragmentEventHandler {
 
 class ClazzWorkQuestionAndOptionsEditFragment: UstadEditFragment<ClazzWorkQuestionAndOptions>(),
         ClazzWorkQuestionAndOptionsEditView,
-        DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<MessageIdOption>,
+        DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption>,
         ClazzWorkQuestionAndOptionsEditFragmentEventHandler {
 
     private var mBinding: FragmentClazzWorkQuestionAndOptionsEditBinding? = null
@@ -72,9 +72,6 @@ class ClazzWorkQuestionAndOptionsEditFragment: UstadEditFragment<ClazzWorkQuesti
             holder.binding.clazzWorkQuestionOption = option
         }
     }
-
-    override val viewContext: Any
-        get() = requireContext()
 
     override var clazzWorkQuestionOptionList: DoorMutableLiveData<List<ClazzWorkQuestionOption>>? = null
         get() = field
@@ -146,8 +143,8 @@ class ClazzWorkQuestionAndOptionsEditFragment: UstadEditFragment<ClazzWorkQuesti
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
     }
 
-    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: MessageIdOption) {
-        mBinding?.optionsVisibility = if(selectedOption.code == CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE) View.VISIBLE else View.GONE
+    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
+        mBinding?.optionsVisibility = if(selectedOption.optionId == CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE) View.VISIBLE else View.GONE
     }
 
     override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {

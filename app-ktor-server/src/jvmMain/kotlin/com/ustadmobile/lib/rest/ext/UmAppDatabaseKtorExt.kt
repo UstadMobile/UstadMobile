@@ -24,21 +24,6 @@ fun UmAppDatabase.ktorInitDbWithRepo(repo: UmAppDatabase, passwordFilePath: Stri
         })
     }
 
-    if(languageDao.totalLanguageCount() < 1) {
-        //insert all languages
-        val gson = GsonBuilder().disableHtmlEscaping().create()
-        val langListStr = BufferedReader(InputStreamReader(
-                this::class.java.getResourceAsStream("/languagedata/iso_639_3.json"))).use {
-                    it.readText()
-        }
-
-        val langList = gson.fromJson<ArrayList<Language>>(langListStr,
-                object : TypeToken<List<Language>>() {}.type)
-
-        repo.languageDao.insertList(langList)
-    }
-
-
     val adminuser = personDao.findByUsername("admin")
 
     if (adminuser == null) {

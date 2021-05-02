@@ -7,7 +7,7 @@
         <import type="android.view.View"/>
         <import type="android.text.InputType" />
         <import type="com.ustadmobile.core.impl.UMStorageDir" />
-        <import type="com.ustadmobile.core.util.MessageIdOption"/>
+        <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="com.ustadmobile.core.controller.ContentEntryEdit2Presenter.StorageOptions"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener"/>
@@ -68,7 +68,7 @@
 
         <variable
             name="licenceOptions"
-            type="java.util.List&lt;MessageIdOption&gt;"/>
+            type="java.util.List&lt;IdOption&gt;"/>
 
         <variable
             name="storageOptions"
@@ -277,7 +277,7 @@
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintTop_toBottomOf="@+id/entry_publisher">
 
-                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:enabled="@{fieldsEnabled}"

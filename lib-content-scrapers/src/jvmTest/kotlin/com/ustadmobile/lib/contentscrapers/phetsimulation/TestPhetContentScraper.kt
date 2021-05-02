@@ -9,6 +9,8 @@ import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import okio.Buffer
 import okio.Okio
+import okio.buffer
+import okio.source
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -16,7 +18,7 @@ import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 
-@ExperimentalStdlibApi
+
 class TestPhetContentScraper {
 
     @Before
@@ -42,69 +44,70 @@ class TestPhetContentScraper {
         override fun dispatch(request: RecordedRequest): MockResponse {
 
             try {
+                val requestPath = request.path ?: ""
 
-                if (request.path.startsWith("/en/api/simulation")) {
+                if (requestPath.startsWith("/en/api/simulation")) {
 
                     val buffer = readFile(HTML_FILE_LOCATION)
                     val response = MockResponse().setResponseCode(200)
-                    response.setHeader("ETag", (buffer.size().toString() + HTML_FILE_LOCATION).hashCode())
+                    response.setHeader("ETag", (buffer.size.toString() + HTML_FILE_LOCATION).hashCode())
                     if (!request.method.equals("HEAD", ignoreCase = true))
-                        response.body = buffer
+                        response.setBody(buffer)
 
                     return response
 
-                } else if (request.path.contains(PHET_MAIN_CONTENT)) {
+                } else if (requestPath.contains(PHET_MAIN_CONTENT)) {
 
                     val buffer = readFile(PHET_MAIN_CONTENT)
                     val response = MockResponse().setResponseCode(200)
-                    response.setHeader("ETag", (buffer.size().toString() + HTML_FILE_LOCATION).hashCode())
+                    response.setHeader("ETag", (buffer.size.toString() + HTML_FILE_LOCATION).hashCode())
                     if (!request.method.equals("HEAD", ignoreCase = true))
-                        response.body = buffer
+                        response.setBody(buffer)
 
                     return response
 
 
-                } else if (request.path == "/media/simulation_en.html?download") {
+                } else if (requestPath == "/media/simulation_en.html?download") {
 
                     val buffer = readFile(EN_LOCATION_FILE)
                     val response = MockResponse().setResponseCode(200)
                     response.addHeader("ETag", "16adca-5717010854ac0")
                     response.addHeader("Last-Modified", "Fri, 20 Jul 2050 15:36:51 GMT")
                     if (!request.method.equals("HEAD", ignoreCase = true))
-                        response.body = buffer
+                        response.setBody(buffer)
 
                     return response
 
-                } else if (request.path.contains("/media/simulation_es.html?download")) {
+                } else if (requestPath.contains("/media/simulation_es.html?download")) {
 
                     val buffer = readFile(ES_LOCATION_FILE)
                     val response = MockResponse().setResponseCode(200)
                     response.addHeader("ETag", "16adca-5717010854ac0")
                     response.addHeader("Last-Modified", "Fri, 20 Jul 2050 15:36:51 GMT")
                     if (!request.method.equals("HEAD", ignoreCase = true))
-                        response.body = buffer
+                        response.setBody(buffer)
 
                     return response
 
-                } else if (request.path.contains("flash")) {
+                } else if (requestPath.contains("flash")) {
 
                     val buffer = readFile(FLASH_FILE_LOCATION)
                     val response = MockResponse().setResponseCode(200)
                     response.addHeader("ETag", "16adca-5717010854ac0")
                     response.addHeader("Last-Modified", "Fri, 20 Jul 2050 15:36:51 GMT")
                     if (!request.method.equals("HEAD", ignoreCase = true))
-                        response.body = buffer
+                        response.setBody(buffer)
 
                     return response
 
-                } else if (request.path.contains("jar")) {
+                } else if (requestPath.contains("jar")) {
 
                     val buffer = readFile(JAR_FILE_LOCATION)
                     val response = MockResponse().setResponseCode(200)
                     response.addHeader("ETag", "16adca-5717010854ac0")
                     response.addHeader("Last-Modified", "Fri, 20 Jul 2050 15:36:51 GMT")
                     if (!request.method.equals("HEAD", ignoreCase = true))
-                        response.body = buffer
+                        response.setBody(buffer)
 
                     return response
                 }
@@ -120,7 +123,7 @@ class TestPhetContentScraper {
     @Throws(IOException::class)
     fun readFile(location: String): Buffer {
         val videoIn = javaClass.getResourceAsStream(location)
-        val source = Okio.buffer(Okio.source(videoIn))
+        val source = videoIn.source().buffer()
         val buffer = Buffer()
         source.readAll(buffer)
 
@@ -170,7 +173,7 @@ class TestPhetContentScraper {
         val containerDir = Files.createTempDirectory("container").toFile()
 
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         val mockServerUrl = mockWebServer.url("/en/api/simulation/equality-explorer-two-variables").toString()
         val scraper = PhetContentScraper(mockServerUrl, tmpDir, containerDir)
@@ -186,7 +189,7 @@ class TestPhetContentScraper {
         val containerDir = Files.createTempDirectory("container").toFile()
 
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         val mockServerUrl = mockWebServer.url("/en/api/simulation/equality-explorer-two-variables").toString()
         val scraper = PhetContentScraper(mockServerUrl, tmpDir, containerDir)
@@ -213,7 +216,7 @@ class TestPhetContentScraper {
         val containerDir = Files.createTempDirectory("container").toFile()
 
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         val scraper = PhetContentScraper(mockWebServer.url("/legacy/jar").toString(), tmpDir, containerDir)
         scraper.scrapeContent()
@@ -227,7 +230,7 @@ class TestPhetContentScraper {
         val containerDir = Files.createTempDirectory("container").toFile()
 
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         val scraper = PhetContentScraper(mockWebServer.url("/legacy/flash").toString(), tmpDir, containerDir)
         scraper.scrapeContent()
@@ -244,7 +247,7 @@ class TestPhetContentScraper {
 
         val index = IndexPhetContentScraper()
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         val tmpDir = Files.createTempDirectory("testphetindexscraper").toFile()
         val containerDir = Files.createTempDirectory("container").toFile()
@@ -301,7 +304,7 @@ class TestPhetContentScraper {
         val containerDir = Files.createTempDirectory("container").toFile()
 
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         val scraper = PhetContentScraper(mockWebServer.url("/en/api/simulation/equality-explorer-two-variables").toString(), tmpDir, containerDir)
         scraper.scrapeContent()

@@ -8,6 +8,8 @@ import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import okio.Buffer
 import okio.Okio
+import okio.buffer
+import okio.source
 import org.apache.commons.io.IOUtils
 import org.junit.Assert
 import org.junit.Before
@@ -16,7 +18,7 @@ import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 
-@ExperimentalStdlibApi
+
 class TestVoaScraper {
 
 
@@ -27,12 +29,12 @@ class TestVoaScraper {
 
     internal val dispatcher: Dispatcher = object : Dispatcher() {
         override fun dispatch(request: RecordedRequest): MockResponse {
-
+            val requestPath = request.path ?: ""
             try {
 
-                if (request.path.contains("json")) {
+                if (requestPath.contains("json")) {
 
-                    val fileName = request.path.substring(5)
+                    val fileName = requestPath.substring(5)
                     val body = IOUtils.toString(javaClass.getResourceAsStream(fileName),UTF_ENCODING)
                     val response = MockResponse().setResponseCode(200)
                     response.setHeader("ETag",UTF_ENCODING.hashCode())
@@ -41,7 +43,7 @@ class TestVoaScraper {
 
                     return response
 
-                } else if (request.path.contains("post")) {
+                } else if (requestPath.contains("post")) {
 
                     val data = IOUtils.toString(request.body.inputStream(), UTF_ENCODING)
                     val body: String
@@ -61,18 +63,18 @@ class TestVoaScraper {
                     return response
 
 
-                } else if (request.path.contains("content")) {
+                } else if (requestPath.contains("content")) {
 
-                    val fileLocation = request.path.substring(8)
+                    val fileLocation = requestPath.substring(8)
                     val videoIn = javaClass.getResourceAsStream(fileLocation)
-                    val source = Okio.buffer(Okio.source(videoIn))
+                    val source = videoIn.source().buffer()
                     val buffer = Buffer()
                     source.readAll(buffer)
 
                     val response = MockResponse().setResponseCode(200)
                     response.setHeader("ETag", UTF_ENCODING.hashCode())
                     if (!request.method.equals("HEAD", ignoreCase = true))
-                        response.body = buffer
+                        response.setBody(buffer)
 
                     return response
 
@@ -95,7 +97,7 @@ class TestVoaScraper {
         val tmpDir = Files.createTempDirectory("testVoaScraper").toFile()
 
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         val scraper = VoaScraper(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/voa/audiovoa.html").toString(),
                 tmpDir)
@@ -116,7 +118,7 @@ class TestVoaScraper {
         val tmpDir = Files.createTempDirectory("testVoaScraper").toFile()
 
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         val scraper = VoaScraper(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/voa/contentnoquiz.html").toString(),
                 tmpDir)
@@ -137,7 +139,7 @@ class TestVoaScraper {
         val tmpDir = Files.createTempDirectory("testVoaScraper").toFile()
 
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         val scraper = VoaScraper(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/voa/testquiz.html").toString(),
                 tmpDir)

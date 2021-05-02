@@ -1,9 +1,9 @@
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ClazzMemberDao
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
@@ -15,7 +15,7 @@ import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzMember
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.runBlocking
@@ -38,13 +38,15 @@ class JoinWithCodePresenterTest {
 
     private lateinit var clazzToEnrolInto: Clazz
 
-    private lateinit var clazzMemberRepoDaoSpy: ClazzMemberDao
+    private lateinit var clazzEnrolmentRepoDaoSpy: ClazzEnrolmentDao
 
     private lateinit var accountManager: UstadAccountManager
 
     private var context: Any = Any()
 
     private var apiUrl: String? =null
+
+    private lateinit var systemImpl: UstadMobileSystemImpl
 
     @Before
     fun setup() {
@@ -55,6 +57,7 @@ class JoinWithCodePresenterTest {
         mockView = mock { }
 
         accountManager = di.direct.instance()
+        systemImpl = di.direct.instance()
 
         val currentEndpoint = accountManager.activeAccount.endpointUrl
         accountManager.activeAccount = UmAccount(42L, "testuser",
@@ -62,8 +65,8 @@ class JoinWithCodePresenterTest {
 
         val repo: UmAppDatabase by di.activeRepoInstance()
 
-        clazzMemberRepoDaoSpy = spy(repo.clazzMemberDao)
-        whenever(repo.clazzMemberDao).thenReturn(clazzMemberRepoDaoSpy)
+        clazzEnrolmentRepoDaoSpy = spy(repo.clazzEnrolmentDao)
+        whenever(repo.clazzEnrolmentDao).thenReturn(clazzEnrolmentRepoDaoSpy)
 
         repo.personDao.insert(Person().apply {
             firstNames = "Test"
@@ -92,10 +95,10 @@ class JoinWithCodePresenterTest {
         presenter.handleClickDone(clazzToEnrolInto.clazzCode!!)
 
 
-        verifyBlocking(clazzMemberRepoDaoSpy, timeout(5000 * 5000)) {
+        verifyBlocking(clazzEnrolmentRepoDaoSpy, timeout(5000 * 5000)) {
             insertAsync(argWhere {
-                it.clazzMemberPersonUid == accountManager.activeAccount.personUid &&
-                        it.clazzMemberRole == ClazzMember.ROLE_STUDENT_PENDING
+                it.clazzEnrolmentPersonUid == accountManager.activeAccount.personUid &&
+                        it.clazzEnrolmentRole == ClazzEnrolment.ROLE_STUDENT_PENDING
             })
         }
 
@@ -125,7 +128,7 @@ class JoinWithCodePresenterTest {
         runOnUiArgCaptor.firstValue.run()
 
         verify(mockView, timeout(10000)).errorText =
-                UstadMobileSystemImpl.instance.getString(MessageID.invalid_register_code, context)
+                systemImpl.getString(MessageID.invalid_register_code, context)
     }
 
     @Test
@@ -141,7 +144,7 @@ class JoinWithCodePresenterTest {
         runOnUiArgCaptor.firstValue.run()
 
         verify(mockView, timeout(5000)).errorText =
-                UstadMobileSystemImpl.instance.getString(MessageID.invalid_register_code, context)
+            systemImpl.getString(MessageID.invalid_register_code, context)
     }
 
     @Test
@@ -158,7 +161,7 @@ class JoinWithCodePresenterTest {
         runOnUiArgCaptor.firstValue.run()
 
         verify(mockView, timeout(5000)).errorText =
-                UstadMobileSystemImpl.instance.getString(MessageID.invalid_register_code, context)
+            systemImpl.getString(MessageID.invalid_register_code, context)
     }
 
     @Test
@@ -262,7 +265,7 @@ class JoinWithCodePresenterTest {
         runOnUiArgCaptor.firstValue.run()
 
         verify(mockView, timeout(5000)).errorText =
-                UstadMobileSystemImpl.instance.getString(MessageID.invalid_register_code, context)
+                systemImpl.getString(MessageID.invalid_register_code, context)
 
     }
 

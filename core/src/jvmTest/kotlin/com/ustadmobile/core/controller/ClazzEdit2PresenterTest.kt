@@ -1,9 +1,10 @@
 
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.spy
-import com.nhaarman.mockitokotlin2.whenever
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.whenever
+import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.db.waitUntil
@@ -85,6 +86,7 @@ class ClazzEdit2PresenterTest {
 
         //TODO: Make some changes (e.g. as the user would do using data binding
         initialEntity.clazzName = "Bob"
+        initialEntity.clazzStartTime = DateTime(2020, 10, 10).unixMillisLong
 
         presenter.handleClickSave(initialEntity)
 
@@ -105,6 +107,7 @@ class ClazzEdit2PresenterTest {
         val testEntity = Clazz().apply {
             clazzName = "Spelling Clazz"
             clazzUid = repo.clazzDao.insert(this)
+            clazzStartTime = DateTime(2020, 10, 10).unixMillisLong
         }
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.clazzUid.toString())
@@ -116,6 +119,7 @@ class ClazzEdit2PresenterTest {
 
         //Make some changes to the entity (e.g. as the user would do using data binding)
         initialEntity.clazzName = "New Spelling Clazz"
+        initialEntity.clazzStartTime = DateTime(2020, 10, 10).unixMillisLong
 
         presenter.handleClickSave(initialEntity)
 

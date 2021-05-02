@@ -5,6 +5,7 @@ import android.app.DatePickerDialog
 import android.content.Context
 import android.text.format.DateFormat
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.DatePicker
 import android.widget.TextView
 import androidx.appcompat.view.ContextThemeWrapper
@@ -15,6 +16,7 @@ import com.google.android.material.datepicker.MaterialDatePicker.Builder.datePic
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.systemImpl
 import java.text.MessageFormat
 import java.util.*
 
@@ -99,7 +101,7 @@ fun updateDateTimeOnEditTextWithExtra(prepend: String, append: String?, et: Text
     } else {
         dateWithTimeFormatWithPrepend.format(arrayOf(prepend, dateDate, timeDate, append))
     }
-    if (date == 0L) {
+    if (date == 0L || date == Long.MAX_VALUE) {
         text = ""
     }
     et.text = text
@@ -109,13 +111,14 @@ fun updateDateTimeOnEditTextWithExtra(prepend: String, append: String?, et: Text
 fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: InverseBindingListener) {
     val c = Calendar.getInstance()
     val currentDate = et.getTag(R.id.tag_datelong) as? Long ?: 0L
-    if (currentDate > 0) {
-        c.timeInMillis = currentDate
+    c.timeInMillis = if(!currentDate.isSet){
+        c.time.time
+    }else{
+        currentDate
     }
 
     val builder = AlertDialog.Builder(context)
 
-    val systemImpl = UstadMobileSystemImpl.instance
     val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_date_picker,
             null, false)
 
@@ -124,7 +127,7 @@ fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: Inve
     val picker = dialogView.findViewById<DatePicker>(R.id.date_picker)
     picker.init(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH), null)
 
-    builder.setPositiveButton(systemImpl.getString(MessageID.ok,
+    builder.setPositiveButton(et.systemImpl.getString(MessageID.ok,
             context)) { dialog, _ ->
 
         c[Calendar.DAY_OF_MONTH] = picker.dayOfMonth
@@ -135,7 +138,7 @@ fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: Inve
         updateDateOnEditText(et, c.timeInMillis)
         inverseBindingListener.onChange()
     }
-    builder.setNegativeButton(systemImpl.getString(MessageID.cancel,
+    builder.setNegativeButton(et.systemImpl.getString(MessageID.cancel,
             context)) { dialog, _ -> dialog.dismiss() }
     builder.show()
 }
@@ -179,6 +182,11 @@ fun setDateWithDateExtras(et: TextView, date: Long, time: Long, append: String?,
 fun setDateWithDateExtras(et: TextView, date: Long) {
     updateDateTimeOnEditText(et, date)
     et.setTag(R.id.tag_datelong, date)
+}
+
+@BindingAdapter("visibleIfDateSet")
+fun View.setVisibilityIfSetDate(date: Long){
+    visibility = if(date == 0L || date == Long.MAX_VALUE) View.GONE else View.VISIBLE
 }
 
 

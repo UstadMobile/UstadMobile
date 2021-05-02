@@ -18,9 +18,6 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
 
     abstract protected val mEditPresenter : UstadEditPresenter<*, T>?
 
-    override val viewContext: Any
-        get() = requireContext()
-
     override fun finishWithResult(result: List<T>) {
         saveResultToBackStackSavedStateHandle(result)
     }

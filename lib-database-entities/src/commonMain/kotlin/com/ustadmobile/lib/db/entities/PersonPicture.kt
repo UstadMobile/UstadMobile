@@ -43,6 +43,16 @@ open class PersonPicture() {
     @LastChangedBy
     var personPictureLastChangedBy: Int = 0
 
+    @LastChangedTime
+    var personPictureLct: Long = 0
+
+    @AttachmentUri
+    var personPictureUri: String? = null
+
+    @AttachmentMd5
+    var personPictureMd5: String? = null
+
+    @AttachmentSize
     var fileSize: Int = 0
 
     var picTimestamp: Long = 0

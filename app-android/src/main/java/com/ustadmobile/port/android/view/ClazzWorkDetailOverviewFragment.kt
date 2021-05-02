@@ -12,7 +12,7 @@ import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.MergeAdapter
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzWorkWithSubmissionDetailBinding
@@ -102,16 +102,16 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     private var publicCommentsLiveData: LiveData<PagedList<CommentsWithPerson>>? = null
     private var publicCommentsObserver: Observer<PagedList<CommentsWithPerson>>? = null
     private var newPublicCommentRecyclerAdapter: NewCommentRecyclerViewAdapter? = null
-    private var classCommentsMergerRecyclerAdapter: MergeAdapter? = null
+    private var classCommentsMergerRecyclerAdapter: ConcatAdapter? = null
 
     private var privateCommentsRecyclerAdapter: CommentsRecyclerAdapter? = null
     private var privateCommentsLiveData: LiveData<PagedList<CommentsWithPerson>>? = null
     private var privateCommentsObserver: Observer<PagedList<CommentsWithPerson>>? = null
     private var newPrivateCommentRecyclerAdapter: NewCommentRecyclerViewAdapter? = null
-    private var privateCommentsMergerRecyclerAdapter: MergeAdapter? = null
+    private var privateCommentsMergerRecyclerAdapter: ConcatAdapter? = null
 
     private var detailRecyclerAdapter: ClazzWorkBasicDetailsRecyclerAdapter? = null
-    private var detailMergerRecyclerAdapter: MergeAdapter? = null
+    private var detailMergerRecyclerAdapter: ConcatAdapter? = null
     private var detailMergerRecyclerView: RecyclerView? = null
 
     override fun addNewComment2(view: View, entityType: Int, entityUid: Long, comment: String,
@@ -199,7 +199,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         newPublicCommentRecyclerAdapter?.visible = true
 
         //14 - Merger for the comments and new class comment component
-        classCommentsMergerRecyclerAdapter = MergeAdapter(classCommentsRecyclerAdapter,
+        classCommentsMergerRecyclerAdapter = ConcatAdapter(classCommentsRecyclerAdapter,
                 newPublicCommentRecyclerAdapter)
 
         //15 - Private comments heading
@@ -221,7 +221,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         newPrivateCommentRecyclerAdapter?.visible = false
 
         //18 - Merger for the private comments and new private comment component
-        privateCommentsMergerRecyclerAdapter = MergeAdapter(newPrivateCommentRecyclerAdapter,
+        privateCommentsMergerRecyclerAdapter = ConcatAdapter(newPrivateCommentRecyclerAdapter,
                 privateCommentsRecyclerAdapter)
 
 
@@ -229,7 +229,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                 arguments.toStringMap(), this,
                 di, this)
 
-        detailMergerRecyclerAdapter = MergeAdapter(
+        detailMergerRecyclerAdapter = ConcatAdapter(
                 detailRecyclerAdapter, contentHeadingRecyclerAdapter,
                 contentRecyclerAdapter, submissionHeadingRecyclerAdapter,
                 submissionMarkingResultRecyclerAdapter, submissionFreeTextRecyclerAdapter,
@@ -467,14 +467,14 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         }
 
         val DU_CLAZZMEMBERANDCLAZZWORKWITHSUBMISSION =
-                object: DiffUtil.ItemCallback<ClazzMemberAndClazzWorkWithSubmission>() {
-                    override fun areItemsTheSame(oldItem: ClazzMemberAndClazzWorkWithSubmission,
-                                                 newItem: ClazzMemberAndClazzWorkWithSubmission): Boolean {
+                object: DiffUtil.ItemCallback<PersonWithClazzWorkAndSubmission>() {
+                    override fun areItemsTheSame(oldItem: PersonWithClazzWorkAndSubmission,
+                                                 newItem: PersonWithClazzWorkAndSubmission): Boolean {
                         return oldItem.clazzWork?.clazzWorkUid == newItem.clazzWork?.clazzWorkUid
                     }
 
-                    override fun areContentsTheSame(oldItem: ClazzMemberAndClazzWorkWithSubmission,
-                                                    newItem: ClazzMemberAndClazzWorkWithSubmission): Boolean {
+                    override fun areContentsTheSame(oldItem: PersonWithClazzWorkAndSubmission,
+                                                    newItem: PersonWithClazzWorkAndSubmission): Boolean {
                         return oldItem.clazzWork?.clazzWorkUid == newItem.clazzWork?.clazzWorkUid
                                 && oldItem.clazzWork?.clazzWorkInstructions == newItem.clazzWork?.clazzWorkInstructions
                                 && oldItem.clazzWork?.clazzWorkCommentsEnabled == newItem.clazzWork?.clazzWorkCommentsEnabled

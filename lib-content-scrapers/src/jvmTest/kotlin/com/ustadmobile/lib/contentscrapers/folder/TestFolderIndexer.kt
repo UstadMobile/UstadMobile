@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.folder
 
-import com.nhaarman.mockitokotlin2.spy
+import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
@@ -8,7 +8,6 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
 import org.junit.Assert
 import org.junit.Before
@@ -20,7 +19,6 @@ import java.io.File
 import java.nio.file.Files
 import javax.naming.InitialContext
 
-@ExperimentalStdlibApi
 class TestFolderIndexer {
 
     private lateinit var scooterFile: File
@@ -51,7 +49,7 @@ class TestFolderIndexer {
                     it.clearAllTables()
                 })
             }
-            bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
+            bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
                 containerDir
             }
             bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {

@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.neovisionaries.i18n.CountryCode
 import com.neovisionaries.i18n.LanguageCode
 import com.ustadmobile.core.contentformats.xapi.*
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.lib.db.entities.*
@@ -50,15 +51,28 @@ object XapiUtil {
     fun insertOrUpdateVerbLangMap(dao: XLangMapEntryDao, verb: Verb, verbEntity: VerbEntity, languageDao: LanguageDao, languageVariantDao: LanguageVariantDao) {
         val verbDisplay = verb.display
         if (verbDisplay != null) {
-            val listToInsert = verbDisplay.map {
-                val split = it.key.split("-")
-                val lang = insertOrUpdateLanguageByTwoCode(languageDao, split[0])
-                val variant = insertOrUpdateLanguageVariant(languageVariantDao, split[1], lang)
+            val listToInsert = verbDisplay.mapNotNull {
+                val lang = insertOrUpdateLanguageByTwoCode(languageDao, it.key.substringBefore('-'))
+                val variant = it.key.substringAfter("-", "").let {
+                    if(it != "")
+                        insertOrUpdateLanguageVariant(languageVariantDao, it, lang)
+                    else
+                        null
+                }
 
-                XLangMapEntry(verbEntity.verbUid, 0, lang.langUid, variant?.langVariantUid
-                        ?: 0, it.value)
+                val existingMap = dao.getXLangMapFromVerb(verbEntity.verbUid, lang.langUid)
+
+                if(existingMap == null){
+                    XLangMapEntry(verbEntity.verbUid, 0, lang.langUid,
+                        variant?.langVariantUid ?: 0, it.value)
+                }else{
+                    null
+                }
             }
-            dao.insertList(listToInsert)
+
+            if (listToInsert != null && listToInsert.isNotEmpty()) {
+                dao.insertList(listToInsert)
+            }
         }
     }
 
@@ -70,10 +84,16 @@ object XapiUtil {
             val lang = insertOrUpdateLanguageByTwoCode(languageDao, split[0])
             val variant = insertOrUpdateLanguageVariant(languageVariantDao, split[1], lang)
 
-            XLangMapEntry(0, xObjectEntity.xObjectUid, lang.langUid, variant?.langVariantUid
-                    ?: 0, it.value)
-        }
-        if (listToInsert != null) {
+            val existingMap = dao.getXLangMapFromObject(xObjectEntity.xObjectUid, lang.langUid)
+
+            if(existingMap == null){
+                XLangMapEntry(0, xObjectEntity.xObjectUid, lang.langUid, variant?.langVariantUid
+                        ?: 0, it.value)
+            }else{
+                null
+            }
+        }?.filterNotNull()
+        if (listToInsert != null && listToInsert.isNotEmpty()) {
             dao.insertList(listToInsert)
         }
     }
@@ -261,7 +281,7 @@ object XapiUtil {
                                       instructorUid: Long, agentUid: Long, authorityUid: Long, teamUid: Long,
                                       subActorUid: Long, subVerbUid: Long, subObjectUid: Long,
                                       contentEntryUid: Long = 0L,
-                                      learnerGroupUid: Long): StatementEntity {
+                                      learnerGroupUid: Long, contentEntryRoot: Boolean = false): StatementEntity {
 
         val statementId = statement.id
                 ?: throw IllegalArgumentException("Statement $statement to be stored has no id!")
@@ -285,6 +305,7 @@ object XapiUtil {
                 it.stored = UMCalendarUtil.parse8601TimestampOrDefault(statement.stored)
                 it.statementContentEntryUid = contentEntryUid
                 it.statementLearnerGroupUid = learnerGroupUid
+                it.contentEntryRoot = contentEntryRoot
                 it.fullStatement = gson.toJson(statement)
             }
 
@@ -294,7 +315,12 @@ object XapiUtil {
                 statementEntity.resultCompletion = statementResult.completion
                 statementEntity.resultDuration = statementResult.duration?.let { parse8601Duration(it) } ?: 0L
                 statementEntity.resultResponse = statementResult.response
-                statementEntity.resultSuccess = statementResult.success.toInt().toByte()
+                var success = statementResult.success
+                statementEntity.resultSuccess = if(success != null) {
+                    if(success) StatementEntity.RESULT_SUCCESS else StatementEntity.RESULT_FAILURE
+                }else{
+                    StatementEntity.RESULT_UNSET
+                }
 
                 val resultScore = statementResult.score
                 if (resultScore != null) {
@@ -325,9 +351,20 @@ object XapiUtil {
         return statementEntity
     }
 
-    fun insertOrUpdateEntryProgress(statementEntity: StatementEntity, progressDao: ContentEntryProgressDao, verbEntity: VerbEntity) {
-        progressDao.updateProgress(statementEntity.statementContentEntryUid, statementEntity.statementPersonUid, statementEntity.extensionProgress, getStatusFlag(verbEntity.urlId))
+    fun insertOrUpdateEntryProgress(statementEntity: StatementEntity, repo: UmAppDatabase, verbEntity: VerbEntity) {
+        var statusFlag = getStatusFlag(verbEntity.urlId)
+        var progress  = statementEntity.extensionProgress
+        if(progress == 0 &&
+                (statusFlag == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED ||
+                        statementEntity.resultCompletion)){
+            progress = 100
+            statusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
+            repo.statementDao.updateProgress(statementEntity.statementUid, progress)
+        }
+        repo.contentEntryProgressDao.updateProgress(statementEntity.statementContentEntryUid,
+                statementEntity.statementPersonUid, progress, statusFlag)
     }
+
 
     private fun getStatusFlag(id: String?): Int {
         return statusFlagMap[id] ?: 0

@@ -24,14 +24,16 @@ import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import com.ustadmobile.core.view.UstadView
-
+import com.google.gson.Gson
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 @AdbScreenRecord("@BaseFileName@ screen Test")
 class @BaseFileName@FragmentTest : TestCase(){
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -59,21 +61,27 @@ class @BaseFileName@FragmentTest : TestCase(){
             }
         }
 
-        val currentEntity = fragmentScenario.letOnFragment { it.entity }
-        val formVals = @EditEntity@().apply {
-            //TODO: set the values that will be entered on the form here
-            //e.g. @Entity_VariableName@Name = "New @Entity@"
-        }
-
         init{
 
         }.run{
 
             @BaseFileName@Screen{
 
-                fillFields(fragmentScenario, formVals, currentEntity,
-                        impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext(),
-                        testContext = this@run)
+                @Entity@TitleInput{
+                    edit{
+                        clearText()
+                        typeText("title")
+                    }
+                }
+
+
+                //TODO: if required, use the savedstatehandle to add link entities
+                /*
+                fragmentScenario.onFragment { fragment ->
+                        fragment.findNavController().currentBackStackEntry?.savedStateHandle
+                            ?.set("RelatedEntityName", defaultGson().toJson(listOf(@Entity_VariableName@.relatedEntity)))
+                }
+                */
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
@@ -83,7 +91,7 @@ class @BaseFileName@FragmentTest : TestCase(){
                 }
 
                 Assert.assertEquals("@Entity@ data set", "New @Entity@",
-                        @Entity_VariableName@List.first() .@Entity_VariableName@Name)
+                        @Entity_VariableName@List.first().@Entity_VariableName@Name)
 
             }
 
@@ -100,7 +108,7 @@ class @BaseFileName@FragmentTest : TestCase(){
             @Entity_VariableName@Uid = dbRule.db.@Entity_VariableName@Dao.insert(this)
         }
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
+        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existing@Entity@.@Entity_VariableName@Uid)) {
             @BaseFileName@Fragment().also {
                 it.installNavController(systemImplNavRule.navController)
@@ -110,8 +118,9 @@ class @BaseFileName@FragmentTest : TestCase(){
 
         //Freeze and serialize the value as it was first shown to the user
         val entityLoadedByFragment = fragmentScenario.letOnFragment { it.entity }
-        val entityLoadedJson = defaultGson().toJson(entityLoadedByFragment)
-        val newClazzValues = defaultGson().fromJson(entityLoadedJson, @EditEntity@::class.java).apply {
+        val gson: Gson = getApplicationDi().direct.instance()
+        val entityLoadedJson = gson.toJson(entityLoadedByFragment)
+        val newClazzValues = gson.fromJson(entityLoadedJson, @EditEntity@::class.java).apply {
             @Entity_VariableName@Name = "Updated @Entity@"
         }
 
@@ -122,15 +131,28 @@ class @BaseFileName@FragmentTest : TestCase(){
 
             @BaseFileName@Screen {
 
-                fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment,
-                        impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext(),
-                        testContext = this@run)
+                @Entity@TitleInput{
+                    edit{
+                        clearText()
+                        typeText("Updated @Entity@")
+                    }
+                }
+
+
+                //TODO: if required, use the savedstatehandle to add link entities
+
+                /*
+                fragmentScenario.onFragment { fragment ->
+                    fragment..findNavController()?.currentBackStackEntry?.savedStateHandle
+                            ?.set("RelatedEntityName", defaultGson().toJson(listOf(@Entity_VariableName@.relatedEntity)))
+                }
+                */
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
                 Assert.assertEquals("Entity in database was loaded for user",
                         "New @Entity@",
-                        defaultGson().fromJson(entityLoadedJson, @EditEntity@::class.java).clazzName)
+                        gson.fromJson(entityLoadedJson, @EditEntity@::class.java).clazzName)
 
                 val updatedEntityFromDb = dbRule.db.clazzDao.findByUidLive(existing@Entity@.@Entity_VariableName@Uid)
                         .waitUntilWithFragmentScenario(fragmentScenario) { it?.clazzName == "Updated @Entity@" }

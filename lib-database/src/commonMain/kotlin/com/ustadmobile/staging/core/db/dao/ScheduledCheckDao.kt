@@ -2,15 +2,11 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
-import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ScheduledCheck
 
 
-@UmDao
 @Dao
-@UmRepository
 abstract class ScheduledCheckDao : BaseDao<ScheduledCheck> {
 
     @Delete
