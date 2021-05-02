@@ -55,10 +55,9 @@ class VideoContentPresenterTest {
     fun setup() {
         mockView = mock { }
         mockEndpoint = mock {}
-        val systemImplSpy = spy(UstadMobileSystemImpl.instance)
         val endpointScope = EndpointScope()
         di = DI {
-            bind<UstadMobileSystemImpl>() with singleton { systemImplSpy!! }
+            bind<UstadMobileSystemImpl>() with singleton { spy(UstadMobileSystemImpl()) }
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()

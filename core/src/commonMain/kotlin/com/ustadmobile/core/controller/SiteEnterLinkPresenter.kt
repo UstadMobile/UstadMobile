@@ -3,6 +3,8 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.putIfNotAlreadySet
+import com.ustadmobile.core.util.ext.requireHttpPrefix
+import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
@@ -31,13 +33,16 @@ class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view:
 
     private val httpClient: HttpClient by instance()
 
+    private var validatedLink: String? = null
+
     fun handleClickNext(){
         val mSite = site
-        if(mSite != null){
+        val validatedLinkVal = validatedLink
+        if(mSite != null && validatedLinkVal != null){
             val args = arguments.toMutableMap().also {
                 val siteLink = view.siteLink
                 if(siteLink != null)
-                    it[ARG_SERVER_URL] = siteLink
+                    it[ARG_SERVER_URL] = validatedLinkVal
 
                 it[ARG_SITE] = Json.encodeToString(Site.serializer(), mSite)
             }
@@ -57,14 +62,15 @@ class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view:
 
         checkTextLinkJob = GlobalScope.async(doorMainDispatcher()) {
             try {
-                var formattedHref = if(href.startsWith("http")) href else "https://$href"
-                formattedHref = UMFileUtil.joinPaths(formattedHref, "Site","verify")
-                site = httpClient.get<Site>(formattedHref) {
+                val endpointUrl = href.requireHttpPrefix().requirePostfix("/")
+                val siteVerifyUrl = UMFileUtil.joinPaths(endpointUrl, "Site","verify")
+                site = httpClient.get<Site>(siteVerifyUrl) {
                     timeout {
                         requestTimeoutMillis = LINK_REQUEST_TIMEOUT
                     }
                 }
                 view.validLink = site != null
+                validatedLink = endpointUrl
             }catch (e: Exception) {
                 view.validLink = false
             }

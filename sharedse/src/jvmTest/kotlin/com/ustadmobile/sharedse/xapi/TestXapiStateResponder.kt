@@ -70,7 +70,6 @@ class TestXapiStateResponder {
     fun setup() {
         checkJndiSetup()
         val endpointScope = EndpointScope()
-        val systemImplSpy = spy(UstadMobileSystemImpl.instance)
 
         okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp){
@@ -83,7 +82,7 @@ class TestXapiStateResponder {
         }
 
         di = DI {
-            bind<UstadMobileSystemImpl>() with singleton { systemImplSpy!! }
+            bind<UstadMobileSystemImpl>() with singleton { spy(UstadMobileSystemImpl()) }
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()

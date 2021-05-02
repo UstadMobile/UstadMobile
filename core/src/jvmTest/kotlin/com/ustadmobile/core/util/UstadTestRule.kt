@@ -55,7 +55,7 @@ class UstadTestRule: TestWatcher() {
 
     lateinit var endpointScope: EndpointScope
 
-    private var systemImplSpy: UstadMobileSystemImpl? = null
+    private lateinit var systemImplSpy: UstadMobileSystemImpl
 
     lateinit var diModule: DI.Module
 
@@ -65,7 +65,7 @@ class UstadTestRule: TestWatcher() {
 
     override fun starting(description: Description?) {
         endpointScope = EndpointScope()
-        systemImplSpy = spy(UstadMobileSystemImpl.instance)
+        systemImplSpy = spy(UstadMobileSystemImpl())
 
         okHttpClient = OkHttpClient.Builder().build()
 
@@ -79,9 +79,9 @@ class UstadTestRule: TestWatcher() {
         }
 
         diModule = DI.Module("UstadTestRule") {
-            bind<UstadMobileSystemImpl>() with singleton { systemImplSpy!! }
+            bind<UstadMobileSystemImpl>() with singleton { systemImplSpy }
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
-            bind<UmAppDatabase>(tag = TAG_DB) with scoped(endpointScope!!).singleton {
+            bind<UmAppDatabase>(tag = TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 spy(UmAppDatabase.getInstance(Any(), dbName).also {
@@ -89,7 +89,7 @@ class UstadTestRule: TestWatcher() {
                 })
             }
 
-            bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope!!).singleton {
+            bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope).singleton {
                 spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(
                     Any(), context.url, instance(), instance())))
             }
@@ -125,7 +125,6 @@ class UstadTestRule: TestWatcher() {
     }
 
     override fun finished(description: Description?) {
-        UstadMobileSystemImpl.instance.clearPrefs()
         httpClient.close()
     }
 

@@ -60,6 +60,8 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
     protected var dbRepo: UmAppDatabase? = null
 
+    private val systemImpl: UstadMobileSystemImpl by instance()
+
     /**
      * Whether or not UstadListViewFragment should attempt to manage the MergeAdapter. The MergeAdapter
      * is normally used to add a create new item at the start of the list when the addmode is FIRST_ITEM
@@ -117,8 +119,10 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
         override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
             menu.clear()
-            val systemImpl = UstadMobileSystemImpl.instance
             val fragmentContext = fragmentHost?.requireContext() ?: return false
+            val systemImpl: UstadMobileSystemImpl =
+                (fragmentHost as? UstadListViewFragment<*, *>)?.systemImpl ?: return false
+
             fragmentHost?.selectionOptions?.forEachIndexed { index, item ->
                 val optionText = systemImpl.getString(item.messageId, fragmentContext)
                 menu.add(0, item.commandId, index, optionText).apply {

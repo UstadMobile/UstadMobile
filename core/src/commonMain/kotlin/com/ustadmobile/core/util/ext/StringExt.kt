@@ -32,3 +32,17 @@ fun String.truncate(maxLength: Int = 24): String{
         this
     }
 }
+
+/**
+ * Check if the current string starts with https:// or http://
+ */
+fun String.startsWithHttpProtocol(): Boolean = toLowerCase().let {
+    it.startsWith("http://") || it.startsWith("https://")
+}
+
+fun String.requireHttpPrefix(defaultProtocol: String = "https"): String {
+    if(startsWithHttpProtocol())
+        return this
+    else
+        return "$defaultProtocol://$this"
+}

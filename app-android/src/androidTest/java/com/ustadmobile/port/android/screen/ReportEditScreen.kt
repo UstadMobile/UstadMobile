@@ -20,8 +20,11 @@ import com.ustadmobile.core.util.ext.toDisplayString
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.port.android.view.ReportEditFragment
 import com.ustadmobile.test.port.android.KNestedScrollView
+import com.ustadmobile.test.port.android.util.getApplicationDi
 import com.ustadmobile.test.port.android.util.setMessageIdOption
 import org.hamcrest.Matcher
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 object ReportEditScreen : KScreen<ReportEditScreen>() {
 
@@ -195,7 +198,8 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
                             }
 
                             filterName {
-                                hasText(filters.toDisplayString(context))
+                                val di = getApplicationDi()
+                                hasText(filters.toDisplayString(di.direct.instance(), context))
                             }
 
                         }

@@ -38,9 +38,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.AsyncTask
-import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.VisibleForTesting
@@ -57,11 +54,10 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
+import org.kodein.di.android.di
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.*
@@ -119,7 +115,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
        suspend fun getFile(): String {
             val apkFile = File(context.applicationInfo.sourceDir)
             //TODO: replace this with something from appconfig.properties
-            val impl = instance
+            val di: DI by di(context)
+            val impl : UstadMobileSystemImpl = di.direct.instance()
 
             val baseName = impl.getAppConfigString(AppConfig.KEY_APP_BASE_NAME, "", context) + "-" +
                     impl.getVersion(context)
@@ -609,6 +606,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
          * @return A singleton instance
          */
         @JvmStatic
+        @Deprecated("This old static getter should not be used! Use DI instead!")
         actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
 
     }
