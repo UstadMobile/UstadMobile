@@ -55,11 +55,9 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
             val account = getItem(position)
             holder.binding.umaccount = account
             holder.binding.activeAccount = isActiveAccount
-            holder.binding.logoutBtnVisibility = if(isActiveAccount) View.VISIBLE else View.GONE
-            holder.binding.profileBtnVisibility = if(isActiveAccount && holder.binding.umaccount?.personUid != 0L)
-                View.VISIBLE
-            else
-                View.GONE
+            val showLogoutAndProfile = isActiveAccount && holder.binding.umaccount?.personUid != 0L
+            holder.binding.logoutBtnVisibility = if(showLogoutAndProfile) View.VISIBLE else View.GONE
+            holder.binding.profileBtnVisibility = if(showLogoutAndProfile) View.VISIBLE else View.GONE
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
