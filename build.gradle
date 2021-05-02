@@ -237,15 +237,15 @@ if(project.file("local.properties").exists()) {
 }
 
 if(System.getenv("ACRA_HTTP_URI") != null) {
-    ext.buildConfigProperties["android.acra.url"] = System.getEnv("ACRA_HTTP_URI")
+    ext.buildConfigProperties["android.acra.url"] = System.getenv("ACRA_HTTP_URI")
 }
 
 if(System.getenv("ACRA_BASIC_LOGIN") != null) {
-    ext.buildConfigProperties["android.acra.user"] = System.getEnv("ACRA_BASIC_LOGIN")
+    ext.buildConfigProperties["android.acra.user"] = System.getenv("ACRA_BASIC_LOGIN")
 }
 
 if(System.getenv("ACRA_BASIC_PASS") != null) {
-    ext.buildConfigProperties["android.acra.auth"] = System.getEnv("ACRA_BASIC_PASS")
+    ext.buildConfigProperties["android.acra.auth"] = System.getenv("ACRA_BASIC_PASS")
 }
 
 /**
