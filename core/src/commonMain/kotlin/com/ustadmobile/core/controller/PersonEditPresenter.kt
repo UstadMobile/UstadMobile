@@ -171,30 +171,54 @@ class PersonEditPresenter(context: Any,
                 entityVal)
     }
 
-
     private fun PersonEditView.hasErrors(): Boolean =
             usernameError != null ||
             passwordError != null ||
             confirmError != null ||
             dateOfBirthError != null ||
             noMatchPasswordError != null ||
+            firstNamesFieldError != null ||
+            lastNameFieldError != null ||
+            genderFieldError != null ||
                     firstNameError != null ||
-                    lastNameError != null
+                    lastNameError != null ||
+                    emailError != null
 
     override fun handleClickSave(entity: PersonWithAccount) {
         view.loading = true
         view.fieldsEnabled = false
+
         GlobalScope.launch(doorMainDispatcher()) {
             //reset all errors
             view.usernameError = null
             view.passwordError = null
+            view.emailError = null
             view.confirmError = null
             view.dateOfBirthError = null
             view.noMatchPasswordError = null
+            view.firstNamesFieldError == null
+            view.lastNameFieldError == null
+            view.genderFieldError == null
+
+            val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
+            val formatError = impl.getString(MessageID.invalid_email, context)
+
+            view.takeIf { entity.firstNames.isNullOrEmpty() }?.firstNamesFieldError = requiredFieldMessage
+            view.takeIf { entity.lastName.isNullOrEmpty() }?.lastNameFieldError = requiredFieldMessage
+            view.takeIf { entity.gender == Person.GENDER_UNSET }?.genderFieldError = requiredFieldMessage
+            if(entity.gender != Person.GENDER_UNSET){
+                view.genderFieldError = null
+            }
             view.firstNameError = null
             view.lastNameError = null
 
-            val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
+            //Email validation
+            val email = entity.emailAddr?:""
+            if(email.isNotEmpty() && !Regex("^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$").matches(email)){
+                view.emailError = formatError
+            }
+
+
             view.takeIf { entity.firstNames.isNullOrEmpty() }?.firstNameError = requiredFieldMessage
             view.takeIf { entity.lastName.isNullOrEmpty() }?.lastNameError = requiredFieldMessage
 
@@ -205,6 +229,7 @@ class PersonEditPresenter(context: Any,
             }
 
             if(registrationMode) {
+
 
                 view.takeIf { entity.username.isNullOrEmpty() }?.usernameError = requiredFieldMessage
                 view.takeIf { entity.newPassword.isNullOrEmpty() }?.passwordError = requiredFieldMessage
