@@ -10,10 +10,7 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
-import com.ustadmobile.core.view.JoinWithCodeView
-import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.core.view.PersonEditView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.Person
@@ -102,7 +99,10 @@ class JoinWithCodePresenterTest {
             })
         }
 
-        verify(mockView, timeout(5000)).finish()
+        val systemImpl: UstadMobileSystemImpl = di.direct.instance()
+        verify(systemImpl, timeout(5000)).go(eq(ClazzList2View.VIEW_NAME), any(), any(), argWhere {
+            it.popUpToInclusive == true && it.popUpToViewName == UstadView.CURRENT_DEST
+        })
     }
 
     @Test
