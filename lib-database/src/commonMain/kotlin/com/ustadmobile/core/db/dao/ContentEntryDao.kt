@@ -17,20 +17,36 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract suspend fun insertListAsync(entityList: List<ContentEntry>)
 
     @Query("""
-        SELECT DISTINCT ContentEntry.*, ContentEntryStatus.*, Container.*, ContentEntryProgress.*, 
+        SELECT DISTINCT ContentEntry.*, Container.*, 
                0 AS cepcjUid, 0 as cepcjChildContentEntryUid, 0 AS cepcjParentContentEntryUid, 
                0 as childIndex, 0 AS cepcjLocalChangeSeqNum, 0 AS cepcjMasterChangeSeqNum, 
-               0 AS cepcjLastChangedBy, 0 as cepcjLct
+               0 AS cepcjLastChangedBy, 0 as cepcjLct, 
+               COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
+               COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
+               COALESCE(StatementEntity.extensionProgress,0) AS progress, 
+               COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete
           FROM DownloadJob 
-     LEFT JOIN ContentEntry on  DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid 
-     LEFT JOIN ContentEntryProgress ON ContentEntryProgress.contentEntryProgressContentEntryUid = ContentEntry.contentEntryUid 
-               AND ContentEntryProgress.contentEntryProgressPersonUid = :personUid AND ContentEntryProgress.contentEntryProgressActive 
-    LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid 
-    LEFT JOIN Container ON Container.containerUid = 
-                (SELECT containerUid 
-                   FROM Container 
-                   WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
-                   ORDER BY cntLastModified DESC LIMIT 1) 
+                    LEFT JOIN ContentEntry 
+                    ON DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid 
+                    
+                    LEFT JOIN StatementEntity
+							ON StatementEntity.statementUid = 
+                                (SELECT statementUid 
+							       FROM StatementEntity 
+                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
+							        AND StatementEntity.statementPersonUid = :personUid
+							        AND contentEntryRoot 
+                               ORDER BY resultScoreScaled DESC LIMIT 1)
+                    
+                    LEFT JOIN ContentEntryStatus 
+                    ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid 
+                    
+                    LEFT JOIN Container 
+                    ON Container.containerUid = 
+                        (SELECT containerUid 
+                           FROM Container 
+                          WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
+                       ORDER BY cntLastModified DESC LIMIT 1) 
         WHERE DownloadJob.djStatus < ${JobStatus.CANCELED} 
      ORDER BY ContentEntry.title ASC""")
     @JsName("downloadedRootItemsAsc")
@@ -38,22 +54,38 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
 
     @Query("""
-            SELECT DISTINCT ContentEntry.*, ContentEntryStatus.*, Container.*, ContentEntryProgress.*, 
-                   0 AS cepcjUid, 0 as cepcjChildContentEntryUid, 0 AS cepcjParentContentEntryUid, 
-                   0 as childIndex, 0 AS cepcjLocalChangeSeqNum, 0 AS cepcjMasterChangeSeqNum, 
-                   0 AS cepcjLastChangedBy, 0 as cepcjLct 
-              FROM DownloadJob 
-         LEFT JOIN ContentEntry on  DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid 
-         LEFT JOIN ContentEntryProgress ON ContentEntryProgress.contentEntryProgressContentEntryUid = ContentEntry.contentEntryUid 
-                   AND ContentEntryProgress.contentEntryProgressPersonUid = :personUid AND ContentEntryProgress.contentEntryProgressActive 
-         LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid 
-         LEFT JOIN Container ON Container.containerUid = 
-                   (SELECT containerUid 
-                      FROM Container 
-                     WHERE containerContentEntryUid =  ContentEntry.contentEntryUid 
-                   ORDER BY cntLastModified DESC LIMIT 1) 
-             WHERE DownloadJob.djStatus < ${JobStatus.CANCELED} 
-          ORDER BY ContentEntry.title DESC""")
+        SELECT DISTINCT ContentEntry.*, Container.*, 
+               0 AS cepcjUid, 0 as cepcjChildContentEntryUid, 0 AS cepcjParentContentEntryUid, 
+               0 as childIndex, 0 AS cepcjLocalChangeSeqNum, 0 AS cepcjMasterChangeSeqNum, 
+               0 AS cepcjLastChangedBy, 0 as cepcjLct, 
+               COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
+               COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
+               COALESCE(StatementEntity.extensionProgress,0) AS progress, 
+               COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete
+          FROM DownloadJob 
+                    LEFT JOIN ContentEntry 
+                    ON DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid 
+                    
+                    LEFT JOIN StatementEntity
+							ON StatementEntity.statementUid = 
+                                (SELECT statementUid 
+							       FROM StatementEntity 
+                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
+							        AND StatementEntity.statementPersonUid = :personUid
+							        AND contentEntryRoot 
+                               ORDER BY resultScoreScaled DESC LIMIT 1)
+                    
+                    LEFT JOIN ContentEntryStatus 
+                    ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid 
+                    
+                    LEFT JOIN Container 
+                    ON Container.containerUid = 
+                        (SELECT containerUid 
+                           FROM Container 
+                          WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
+                       ORDER BY cntLastModified DESC LIMIT 1) 
+        WHERE DownloadJob.djStatus < ${JobStatus.CANCELED} 
+     ORDER BY ContentEntry.title DESC""")
     @JsName("downloadedRootItemsDesc")
     abstract fun downloadedRootItemsDesc(personUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
@@ -156,14 +188,31 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("findBySourceUrlWithContentEntryStatusAsync")
     abstract suspend fun findBySourceUrlWithContentEntryStatusAsync(sourceUrl: String): ContentEntry?
 
-    @Query("""SELECT ContentEntry.*,ContentEntryStatus.*, ContentEntryParentChildJoin.*, Container.*, ContentEntryProgress.* 
+    @Query("""
+            SELECT ContentEntry.*, ContentEntryParentChildJoin.*, Container.*,
+                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
+                COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
+                COALESCE(StatementEntity.extensionProgress,0) AS progress, 
+                COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete
             FROM ContentEntry 
-            LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
-            LEFT JOIN ContentEntryProgress ON ContentEntryProgress.contentEntryProgressContentEntryUid = ContentEntry.contentEntryUid 
-                 AND ContentEntryProgress.contentEntryProgressPersonUid = :personUid AND ContentEntryProgress.contentEntryProgressActive 
-            LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid
-            LEFT JOIN Container ON Container.containerUid = (SELECT containerUid FROM Container 
-                WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1)
+                    LEFT JOIN ContentEntryParentChildJoin 
+                    ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
+                    
+                    LEFT JOIN StatementEntity
+							ON StatementEntity.statementUid = 
+                                (SELECT statementUid 
+							       FROM StatementEntity 
+                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
+							        AND StatementEntity.statementPersonUid = :personUid
+							        AND contentEntryRoot 
+                               ORDER BY resultScoreScaled DESC LIMIT 1)
+                    
+                    LEFT JOIN Container 
+                    ON Container.containerUid = 
+                        (SELECT containerUid 
+                           FROM Container 
+                          WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
+                       ORDER BY cntLastModified DESC LIMIT 1)
             WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid 
             AND 
             (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam) 
@@ -171,28 +220,51 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             AND (NOT ContentEntry.leaf OR NOT ContentEntry.leaf = :onlyFolder) 
             AND (ContentEntry.publik OR :personUid != 0) 
             AND 
-            (:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin 
-            WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY ContentEntryParentChildJoin.childIndex, ContentEntry.title ASC , ContentEntry.contentEntryUid""")
+            (:categoryParam0 = 0 OR :categoryParam0 
+                IN (SELECT ceccjContentCategoryUid 
+                      FROM ContentEntryContentCategoryJoin 
+                     WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) 
+            ORDER BY ContentEntryParentChildJoin.childIndex, ContentEntry.title ASC , ContentEntry.contentEntryUid""")
     @JsName("getChildrenByParentUidWithCategoryFilterOrderByNameAsc")
     abstract fun getChildrenByParentUidWithCategoryFilterOrderByNameAsc(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long, showHidden: Boolean, onlyFolder: Boolean): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
-    @Query("""SELECT ContentEntry.*,ContentEntryStatus.*, ContentEntryParentChildJoin.*, Container.*, ContentEntryProgress.* 
+    @Query("""
+            SELECT ContentEntry.*, ContentEntryParentChildJoin.*, Container.*,
+                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
+                COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
+                COALESCE(StatementEntity.extensionProgress,0) AS progress, 
+                COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete
             FROM ContentEntry 
-            LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
-            LEFT JOIN ContentEntryProgress ON ContentEntryProgress.contentEntryProgressContentEntryUid = ContentEntry.contentEntryUid 
-                AND ContentEntryProgress.contentEntryProgressPersonUid = :personUid AND ContentEntryProgress.contentEntryProgressActive 
-            LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid
-            LEFT JOIN Container ON Container.containerUid = (SELECT containerUid FROM Container 
-                WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1)
+                    LEFT JOIN ContentEntryParentChildJoin 
+                    ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
+                    
+                    LEFT JOIN StatementEntity
+							ON StatementEntity.statementUid = 
+                                (SELECT statementUid 
+							       FROM StatementEntity 
+                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
+							        AND StatementEntity.statementPersonUid = :personUid
+							        AND contentEntryRoot 
+                               ORDER BY resultScoreScaled DESC LIMIT 1)
+                    
+                    LEFT JOIN Container 
+                    ON Container.containerUid = 
+                        (SELECT containerUid 
+                           FROM Container 
+                          WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
+                       ORDER BY cntLastModified DESC LIMIT 1)
             WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid 
             AND 
             (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam) 
             AND (NOT ContentEntry.ceInactive OR ContentEntry.ceInactive = :showHidden) 
             AND (NOT ContentEntry.leaf OR NOT ContentEntry.leaf = :onlyFolder) 
-            AND (ContentEntry.publik OR :personUid != 0)
+            AND (ContentEntry.publik OR :personUid != 0) 
             AND 
-            (:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin 
-            WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY  ContentEntryParentChildJoin.childIndex, ContentEntry.title DESC, ContentEntry.contentEntryUid""")
+            (:categoryParam0 = 0 OR :categoryParam0 
+                IN (SELECT ceccjContentCategoryUid 
+                      FROM ContentEntryContentCategoryJoin 
+                     WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) 
+            ORDER BY ContentEntryParentChildJoin.childIndex, ContentEntry.title DESC , ContentEntry.contentEntryUid""")
     @JsName("getChildrenByParentUidWithCategoryFilterOrderByNameDesc")
     abstract fun getChildrenByParentUidWithCategoryFilterOrderByNameDesc(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long, showHidden: Boolean, onlyFolder: Boolean): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 

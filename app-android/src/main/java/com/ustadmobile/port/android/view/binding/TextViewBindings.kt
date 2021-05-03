@@ -13,12 +13,12 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.outcomeToString
+import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.lib.db.entities.*
 import java.util.*
-import com.soywiz.klock.DateFormat as KlockDateFormat
-import com.ustadmobile.core.util.ext.roleToString
-import com.ustadmobile.core.util.ext.outcomeToString
 import java.util.concurrent.TimeUnit
+import com.soywiz.klock.DateFormat as KlockDateFormat
 
 @BindingAdapter("textMessageId")
 fun TextView.setTextMessageId(messageId: Int) {
@@ -337,6 +337,12 @@ fun TextView.setDurationHoursAndMinutes(duration: Long){
 
     text = durationString
 
+}
+
+@BindingAdapter("scorePercentage")
+fun TextView.setScorePercentage(scoreProgress: ContentEntryStatementScoreProgress){
+    val score = ((scoreProgress.resultScore / scoreProgress.resultMax.toFloat()) * 100).toInt()
+    text = "$score%"
 }
 
 @BindingAdapter("durationMinsSecs")

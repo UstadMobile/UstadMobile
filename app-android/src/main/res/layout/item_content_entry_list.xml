@@ -63,9 +63,9 @@
             android:layout_height="@dimen/dimen_4dp"
             android:max="100"
             android:alpha="@{contentEntry.ceInactive ? .5f : 1f}"
-            android:progress="@{contentEntry.contentEntryProgress.contentEntryProgressProgress}"
+            android:progress="@{contentEntry.scoreProgress.progress}"
             android:progressTint="@color/primaryColor"
-            android:visibility="@{contentEntry.contentEntryProgress != null &amp; contentEntry.contentEntryProgress.contentEntryProgressProgress > 0 ? View.VISIBLE : View.GONE}"
+            android:visibility="@{contentEntry.scoreProgress.progress > 0 ? View.VISIBLE : View.GONE}"
             app:layout_constraintEnd_toEndOf="@id/content_entry_item_thumbnail"
             app:layout_constraintStart_toStartOf="@id/content_entry_item_thumbnail"
             app:layout_constraintTop_toBottomOf="@id/content_entry_item_thumbnail"
@@ -79,10 +79,36 @@
             android:translationX="8dp"
             android:translationY="-8dp"
             android:alpha="@{contentEntry.ceInactive ? .5f : 1f}"
-            app:iconStatusFlag="@{contentEntry.contentEntryProgress.contentEntryProgressStatusFlag}"
+            app:iconProgressFlag="@{contentEntry.scoreProgress}"
             app:layout_constraintEnd_toEndOf="@id/content_entry_item_thumbnail"
             app:layout_constraintTop_toBottomOf="@id/content_entry_item_thumbnail"
             tools:src="@drawable/ic_content_fail"/>
+
+
+        <TextView
+            android:paddingStart="@dimen/dimen_5dp"
+            tools:text="100%"
+            android:id="@+id/item_person_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:scorePercentage="@{contentEntry.scoreProgress}"
+            android:visibility="@{contentEntry.scoreProgress.resultMax == 0 ? View.GONE : View.VISIBLE}"
+            app:layout_constraintStart_toStartOf="@+id/content_entry_item_thumbnail"
+            app:layout_constraintTop_toBottomOf="@+id/content_progress_fail_correct"
+            android:layout_marginBottom="@dimen/dimen_16dp" />
+
+
+        <TextView
+            android:paddingStart="@dimen/dimen_5dp"
+            tools:text="(4/4)"
+            android:id="@+id/item_person_score_results"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text='@{"(" + contentEntry.scoreProgress.resultScore + &quot;/&quot; + contentEntry.scoreProgress.resultMax + ")"}'
+            android:visibility="@{contentEntry.scoreProgress.resultMax == 0 ? View.GONE : View.VISIBLE}"
+            app:layout_constraintStart_toEndOf="@+id/item_person_progress"
+            app:layout_constraintTop_toBottomOf="@+id/content_progress_fail_correct"
+            android:layout_marginBottom="@dimen/dimen_16dp" />
 
 
         <androidx.appcompat.widget.AppCompatImageView

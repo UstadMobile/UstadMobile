@@ -245,6 +245,25 @@ fun ImageView.setIconOnStatusFlag(statusFlag: Int){
     }
 }
 
+
+@BindingAdapter(value=["iconProgressFlag"])
+fun ImageView.setIconOnProgressFlag(progress: ContentEntryStatementScoreProgress){
+    when {
+        progress.contentComplete -> {
+            setImageResource(R.drawable.ic_content_complete)
+            visibility = View.VISIBLE
+        }
+        !progress.contentComplete && progress.resultMax == 0 -> {
+            setImageDrawable(null)
+            visibility = View.GONE
+        }
+        else -> {
+            setImageResource(R.drawable.ic_content_fail)
+            visibility = View.VISIBLE
+        }
+    }
+}
+
 @Suppress("UNCHECKED_CAST")
 private fun ImageView.updateFromImageLookupMap() {
     val lookupKey = getTag(R.id.tag_imagelookup_key) as? Int

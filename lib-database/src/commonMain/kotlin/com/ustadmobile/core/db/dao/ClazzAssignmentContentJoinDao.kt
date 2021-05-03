@@ -39,22 +39,27 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
     companion object{
         const val FINDBY_CLAZZ_ASSIGNMENT_UID =
                 """
-                    SELECT ContentEntry.*, ContentEntryStatus.*, ContentEntryParentChildJoin.*, 
-                            Container.*, ContentEntryProgress.*
+                    SELECT ContentEntry.*, ContentEntryParentChildJoin.*, 
+                            Container.*, COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
+                            COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
+                            COALESCE(StatementEntity.extensionProgress,0) AS progress, 
+                            COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete
                       FROM ClazzAssignmentContentJoin
                             LEFT JOIN ContentEntry 
                             ON ContentEntry.contentEntryUid = cacjContentUid 
                             
-                            LEFT JOIN ContentEntryProgress 
-                            ON ContentEntryProgress.contentEntryProgressContentEntryUid = ContentEntry.contentEntryUid 
-                                AND ContentEntryProgress.contentEntryProgressPersonUid = :personUid 
-                                AND ContentEntryProgress.contentEntryProgressActive 
+                            LEFT JOIN StatementEntity
+							ON StatementEntity.statementUid = 
+                                (SELECT statementUid 
+							       FROM StatementEntity 
+                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
+							        AND StatementEntity.statementPersonUid = :personUid
+							        AND contentEntryRoot 
+                               ORDER BY resultScoreScaled DESC LIMIT 1)
                                 
                             LEFT JOIN ContentEntryParentChildJoin 
                             ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
-                            
-                            LEFT JOIN ContentEntryStatus 
-                            ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid
+                           
                             
                             LEFT JOIN Container 
                             ON Container.containerUid = 

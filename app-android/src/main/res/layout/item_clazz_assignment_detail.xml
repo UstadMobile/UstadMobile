@@ -65,7 +65,7 @@
             android:contentDescription="@string/school"
             app:visibleIfDateSet="@{clazzAssignment.caDeadlineDate}"
             app:dateTimePrepend="@{``}"
-            app:dateTimeLongWit hExtra="@{clazzAssignment.caDeadlineDate}"
+            app:dateTimeLongWithExtra="@{clazzAssignment.caDeadlineDate}"
             app:dateTimeTimeLongWithExtra="@{clazzAssignment.caDeadlineDate}"
             app:dateTimeAppend="@{``}"
             app:layout_constraintStart_toEndOf="@+id/item_clazzwork_detail_description_icon"
