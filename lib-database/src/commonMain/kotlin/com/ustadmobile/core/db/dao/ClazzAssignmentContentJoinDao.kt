@@ -47,13 +47,19 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
                       FROM ClazzAssignmentContentJoin
                             LEFT JOIN ContentEntry 
                             ON ContentEntry.contentEntryUid = cacjContentUid 
-                            
+                             
                             LEFT JOIN StatementEntity
 							ON StatementEntity.statementUid = 
                                 (SELECT statementUid 
 							       FROM StatementEntity 
+                                        LEFT JOIN ClazzAssignment 
+                                        ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
+                       
                                   WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
 							        AND StatementEntity.statementPersonUid = :personUid
+                                    AND StatementEntity.timestamp 
+                                        BETWEEN ClazzAssignment.caStartDate 
+                                        AND ClazzAssignment.caGracePeriodDate
 							        AND contentEntryRoot 
                                ORDER BY resultScoreScaled DESC LIMIT 1)
                                 
