@@ -100,14 +100,6 @@ open class Person() {
 
     var personCountry: String? = null
 
-    var parentalApprovalContact: String? = null
-
-    //The PersonGroup that is created for parents where this person is a child
-    var personParentsGroupUid: Long = 0
-
-    //The approval entity which granted this minor access
-    var personParentApprovalUid: Long = 0
-
     fun fullName():String{
         var f = ""
         var l = ""

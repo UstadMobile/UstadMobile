@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import org.mockito.kotlin.*
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.years
+import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.EntityRoleDao
@@ -19,6 +20,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
 import junit.framework.Assert.assertEquals
@@ -29,9 +31,7 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okio.Buffer
 import org.junit.*
-import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.singleton
+import org.kodein.di.*
 
 
 class PersonEditPresenterTest  {
@@ -232,13 +232,10 @@ class PersonEditPresenterTest  {
 
         presenter.handleClickSave(person)
 
-        argumentCaptor<PersonWithAccount>().apply {
-            verifyBlocking(accountManager, timeout(timeoutInMill)){
-                register(capture(), eq(serverUrl), eq(false))
-                assertEquals("Person registration was done", person.personUid, firstValue.personUid)
-            }
+        verifyBlocking(accountManager, timeout(timeoutInMill)) {
+            register(argWhere { it.personUid == person.personUid }, eq(serverUrl),
+                argWhere<AccountRegisterOptions> { it.makeAccountActive == false } )
         }
-
     }
 
     @Test
@@ -274,7 +271,6 @@ class PersonEditPresenterTest  {
         presenter.onCreate(null)
         val personToRegister : PersonWithAccount = mockView.captureLastEntityValue(5000)!!
         personToRegister.apply {
-            parentalApprovalContact = "parent@email.com"
             firstNames = "Jane"
             lastName = "Doe"
             username = "janedoe"
@@ -282,15 +278,17 @@ class PersonEditPresenterTest  {
             confirmedPassword = "secret"
         }
 
+        mockView.stub {
+            on { approvalPersonParentJoin  }.thenReturn(PersonParentJoin().apply {
+                ppjEmail = "parent@somewhere.com"
+            })
+        }
+
         presenter.handleClickSave(personToRegister)
 
-
-        argumentCaptor<PersonWithAccount>().apply {
-            verifyBlocking(accountManager, timeout(timeoutInMill)){
-                register(capture(), eq(serverUrl), eq(false))
-                assertEquals("Person registration was done", personToRegister.personUid,
-                        firstValue.personUid)
-            }
+        verifyBlocking(accountManager, timeout(timeoutInMill* 1000)) {
+            register(argWhere { it.personUid == personToRegister.personUid },
+                eq(serverUrl), argWhere<AccountRegisterOptions> { it.parentJoin?.ppjEmail == "parent@somewhere.com" })
         }
 
         argumentCaptor<Map<String, String>> {
@@ -298,6 +296,8 @@ class PersonEditPresenterTest  {
                     capture(), any(), any())
             Assert.assertEquals("Arg for username was provided", personToRegister.username,
                     firstValue[RegisterMinorWaitForParentView.ARG_USERNAME])
+            Assert.assertEquals("Arg for parent contact was provided", "parent@somewhere.com",
+                firstValue[RegisterMinorWaitForParentView.ARG_PARENT_CONTACT])
         }
     }
 
@@ -313,7 +313,7 @@ class PersonEditPresenterTest  {
 
         val personToRegister = mockView.captureLastEntityValue(5000)!!
         personToRegister.apply {
-            parentalApprovalContact = null
+            //TODO
             firstNames = "Jane"
             lastName = "Doe"
             username = "janedoe"
@@ -321,7 +321,17 @@ class PersonEditPresenterTest  {
             confirmedPassword = "secret"
         }
 
+        val systemImpl : UstadMobileSystemImpl = di.direct.instance()
+
+
         presenter.handleClickSave(personToRegister)
+
+        val fieldRequiredErr =systemImpl.getString(MessageID.field_required_prompt, context)
+
+        verify(mockView, timeout(5000)).parentContactError = fieldRequiredErr
+        mockView.stub {
+            on { parentContactError }.thenReturn(fieldRequiredErr)
+        }
 
         verify(mockView, timeout(5000)).parentContactError = impl.getString(
                 MessageID.field_required_prompt, context)

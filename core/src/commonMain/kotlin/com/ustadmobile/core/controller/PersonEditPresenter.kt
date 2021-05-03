@@ -1,18 +1,17 @@
 package com.ustadmobile.core.controller
 
-import com.soywiz.klock.DateTime
+import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
-import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.schedule.age
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.PersonEditView.Companion.REGISTER_MODE_MINOR
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -104,7 +103,6 @@ class PersonEditPresenter(context: Any,
                 ?: ContentEntryListTabsView.VIEW_NAME
 
         view.registrationMode = registrationModeFlags
-
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): PersonWithAccount? {
@@ -119,6 +117,11 @@ class PersonEditPresenter(context: Any,
         view.personPicture = db.onDbThenRepoWithTimeout(2000) { dbToUse, _ ->
             dbToUse.takeIf { entityUid != 0L }?.personPictureDao?.findByPersonUidAsync(entityUid)
         } ?: PersonPicture()
+
+        if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)) {
+            view.approvalPersonParentJoin = PersonParentJoin()
+        }
+
 
         val clazzMemberWithClazzList = withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.clazzEnrolmentDao?.findAllClazzesByPersonWithClazzAsListAsync(entityUid)
@@ -239,7 +242,9 @@ class PersonEditPresenter(context: Any,
                 view.takeIf { entity.username.isNullOrEmpty() }?.usernameError = requiredFieldMessage
                 view.takeIf { entity.newPassword.isNullOrEmpty() }?.passwordError = requiredFieldMessage
                 view.takeIf { entity.confirmedPassword.isNullOrEmpty() }?.confirmError = requiredFieldMessage
-                view.takeIf { entity.parentalApprovalContact.isNullOrEmpty()}?.parentContactError = requiredFieldMessage
+
+                view.takeIf { registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)  && view.approvalPersonParentJoin?.ppjEmail.isNullOrBlank()}
+                    ?.parentContactError = requiredFieldMessage
 
                 view.takeIf { entity.dateOfBirth == 0L }?.dateOfBirthError = requiredFieldMessage
                 view.takeIf { entity.confirmedPassword != entity.newPassword }?.noMatchPasswordError =
@@ -252,17 +257,21 @@ class PersonEditPresenter(context: Any,
                 }
 
                 try {
-                    val umAccount = accountManager.register(entity, serverUrl, makeAccountActive = false)
+                    val umAccount = accountManager.register(entity, serverUrl, AccountRegisterOptions(
+                        makeAccountActive = false,
+                        parentJoin = view.approvalPersonParentJoin
+                    ))
+
                     val popUpToViewName = arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.CURRENT_DEST
-                    if(registrationModeFlags.hasFlag(PersonEditView.REGISTER_MODE_MINOR)) {
+                    if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)) {
                         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                                popUpToViewName, false)
+                                RegisterAgeRedirectView.VIEW_NAME, true)
                         nextDestination = "RegisterMinorWaitForParent"
                         val args = mutableMapOf<String, String>().also {
                             it.put(RegisterMinorWaitForParentView.ARG_USERNAME,
                                     entity.username ?: "")
                             it.put(RegisterMinorWaitForParentView.ARG_PARENT_CONTACT,
-                                    entity.parentalApprovalContact ?: "")
+                                    view.approvalPersonParentJoin?.ppjEmail ?: "")
                             it.put(RegisterMinorWaitForParentView.ARG_PASSWORD,
                                     entity.newPassword ?: "")
                             it.putFromOtherMapIfPresent(arguments, UstadView.ARG_POPUPTO_ON_FINISH)

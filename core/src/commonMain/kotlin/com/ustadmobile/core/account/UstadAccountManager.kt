@@ -99,10 +99,17 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         get() = _storedAccountsLive
 
 
-    suspend fun register(person: PersonWithAccount, endpointUrl: String, makeAccountActive: Boolean = true): UmAccount = withContext(Dispatchers.Default){
+    suspend fun register(person: PersonWithAccount, endpointUrl: String, makeAccountActive: Boolean) =
+        register(person, endpointUrl, AccountRegisterOptions(makeAccountActive = makeAccountActive))
+
+    suspend fun register(person: PersonWithAccount, endpointUrl: String,
+                         accountRegisterOptions: AccountRegisterOptions = AccountRegisterOptions()): UmAccount = withContext(Dispatchers.Default){
+        val parentVal = accountRegisterOptions.parentJoin
         val httpStmt = httpClient.post<HttpStatement>() {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
             parameter("person",  safeStringify(di, PersonWithAccount.serializer(), person))
+            if(parentVal != null)
+                parameter("parent", parentVal)
         }
 
         val (account: UmAccount?, status: Int) = httpStmt.execute { response ->
@@ -115,7 +122,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
         if(status == 200 && account != null) {
             account.endpointUrl = endpointUrl
-            if(makeAccountActive){
+            if(accountRegisterOptions.makeAccountActive){
                 activeAccount = account
             }
             account

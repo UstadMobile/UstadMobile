@@ -103,6 +103,12 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             value?.observe(this, clazzMemberWithClazzObserver)
         }
 
+    override var approvalPersonParentJoin: PersonParentJoin?
+        get() = mBinding?.approvalPersonParentJoin
+        set(value) {
+            mBinding?.approvalPersonParentJoin = value
+        }
+
     override var rolesAndPermissionsList: DoorLiveData<List<EntityRoleWithNameAndRole>>? = null
         set(value) {
             field?.removeObserver(rolesAndPermissionObserver)

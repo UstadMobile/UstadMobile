@@ -15,6 +15,10 @@
             type="com.ustadmobile.lib.db.entities.PersonWithAccount" />
 
         <variable
+            name="approvalPersonParentJoin"
+            type="com.ustadmobile.lib.db.entities.PersonParentJoin" />
+
+        <variable
             name="personPicture"
             type="com.ustadmobile.lib.db.entities.PersonPicture"/>
 
@@ -241,7 +245,7 @@
                     android:maxLines="1"
                     android:inputType="text"
                     android:hint="@string/parents_email_address"
-                    android:text="@={person.parentalApprovalContact}" />
+                    android:text="@={approvalPersonParentJoin.ppjEmail}" />
             </com.google.android.material.textfield.TextInputLayout>
 
 

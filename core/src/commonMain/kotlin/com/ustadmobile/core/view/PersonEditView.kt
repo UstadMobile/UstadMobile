@@ -12,6 +12,11 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var personPicture: PersonPicture?
 
+    /**
+     * This is set only when registering a minor
+     */
+    var approvalPersonParentJoin: PersonParentJoin?
+
     var clazzList: DoorLiveData<List<ClazzEnrolmentWithClazz>>?
 
     var rolesAndPermissionsList: DoorLiveData<List<EntityRoleWithNameAndRole>>?
