@@ -22,6 +22,7 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ClazzAssignmentDetailView
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.descriptors.PrimitiveKind
 
 
 class ClazzAssignmentEditPresenter(context: Any,
@@ -79,9 +80,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             db.clazzDao.getClazzWithSchool(clazzAssignment.caClazzUid)
         } ?: ClazzWithSchool()
 
-        view.timeZone = clazzWithSchool.effectiveTimeZone()
-
-
+        setTimeZoneDate(clazzWithSchool, clazzAssignment)
 
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
@@ -112,22 +111,7 @@ class ClazzAssignmentEditPresenter(context: Any,
                 db.clazzDao.getClazzWithSchool(editEntity.caClazzUid)
             } ?: ClazzWithSchool()
 
-            val timeZone = clazzWithSchool.effectiveTimeZone()
-            view.timeZone = timeZone
-
-            val localStartDateMidnight = DateTime(editEntity.caStartDate).toLocalMidnight(timeZone).unixMillisLong
-            view.startDate = localStartDateMidnight
-            view.startTime = editEntity.caStartDate - localStartDateMidnight
-
-            val localDeadlineDateMidnight = DateTime(editEntity.caDeadlineDate).toLocalMidnight(timeZone).unixMillisLong
-            view.deadlineDate = localDeadlineDateMidnight
-            view.deadlineTime = editEntity.caDeadlineDate - localDeadlineDateMidnight
-
-            val localGracePeriodDateMidnight = DateTime(editEntity.caGracePeriodDate).toLocalMidnight(timeZone).unixMillisLong
-            view.gracePeriodDate = localGracePeriodDateMidnight
-            view.gracePeriodTime = editEntity.caGracePeriodDate - localGracePeriodDateMidnight
-
-
+            setTimeZoneDate(clazzWithSchool, editEntity)
 
         }
 
@@ -135,6 +119,35 @@ class ClazzAssignmentEditPresenter(context: Any,
 
 
         return editEntity
+    }
+
+    private fun setTimeZoneDate(clazzWithSchool: ClazzWithSchool, entity: ClazzAssignment) {
+
+        val timeZone = clazzWithSchool.effectiveTimeZone()
+        view.timeZone = timeZone
+
+        val localStartDateMidnight = DateTime(entity.caStartDate).toLocalMidnight(timeZone).unixMillisLong
+        view.startDate = localStartDateMidnight
+        view.startTime = entity.caStartDate - localStartDateMidnight
+
+        if(entity.caDeadlineDate != Long.MAX_VALUE){
+            val localDeadlineDateMidnight = DateTime(entity.caDeadlineDate).toLocalMidnight(timeZone).unixMillisLong
+            view.deadlineDate = localDeadlineDateMidnight
+            view.deadlineTime = entity.caDeadlineDate - localDeadlineDateMidnight
+        }else{
+            view.deadlineDate = Long.MAX_VALUE
+            view.deadlineTime = Long.MAX_VALUE
+        }
+
+        if(entity.caGracePeriodDate == 0L || entity.caGracePeriodDate == Long.MAX_VALUE){
+            view.gracePeriodDate = Long.MAX_VALUE
+            view.gracePeriodTime = Long.MAX_VALUE
+        }else{
+            val localGracePeriodDateMidnight = DateTime(entity.caGracePeriodDate).toLocalMidnight(timeZone).unixMillisLong
+            view.gracePeriodDate = localGracePeriodDateMidnight
+            view.gracePeriodTime = entity.caGracePeriodDate - localGracePeriodDateMidnight
+        }
+
     }
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
@@ -157,12 +170,15 @@ class ClazzAssignmentEditPresenter(context: Any,
             entity.caStartDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
                     .localMidnight.utc.unixMillisLong + view.startTime
 
-            entity.caDeadlineDate = DateTime(view.deadlineDate).toOffsetByTimezone(timeZone)
-                    .localMidnight.utc.unixMillisLong + view.deadlineTime
+            if(view.deadlineDate != Long.MAX_VALUE){
+                entity.caDeadlineDate = DateTime(view.deadlineDate).toOffsetByTimezone(timeZone)
+                        .localMidnight.utc.unixMillisLong + view.deadlineTime
+            }
 
-            entity.caGracePeriodDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
-                    .localMidnight.utc.unixMillisLong + view.gracePeriodTime
-
+            if(view.gracePeriodDate != Long.MAX_VALUE){
+                entity.caGracePeriodDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
+                        .localMidnight.utc.unixMillisLong + view.gracePeriodTime
+            }
 
             if (entity.caStartDate == 0L || entity.caStartDate == 0L) {
                 view.caStartDateError = systemImpl.getString(MessageID.field_required_prompt, context)

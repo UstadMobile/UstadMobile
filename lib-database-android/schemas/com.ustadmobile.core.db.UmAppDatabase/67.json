@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 67,
-    "identityHash": "9f4b9cb335b12b1602bac26dc2f20e06",
+    "identityHash": "fe6fb6326beb2c7ed11156958527876d",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5846,7 +5846,7 @@
       },
       {
         "tableName": "ClazzAssignment",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`caUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `caTitle` TEXT, `caDescription` TEXT, `caDeadlineDate` INTEGER NOT NULL, `caDeadlineDateTime` INTEGER NOT NULL, `caStartDate` INTEGER NOT NULL, `caStartDateTime` INTEGER NOT NULL, `caLateSubmissionType` INTEGER NOT NULL, `caLateSubmissionPenalty` INTEGER NOT NULL, `caGracePeriodDate` INTEGER NOT NULL, `caGracePeriodDateTime` INTEGER NOT NULL, `caActive` INTEGER NOT NULL, `caClassCommentEnabled` INTEGER NOT NULL, `caPrivateCommentsEnabled` INTEGER NOT NULL, `caClazzUid` INTEGER NOT NULL, `caLocalChangeSeqNum` INTEGER NOT NULL, `caMasterChangeSeqNum` INTEGER NOT NULL, `caLastChangedBy` INTEGER NOT NULL, `caLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`caUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `caTitle` TEXT, `caDescription` TEXT, `caDeadlineDate` INTEGER NOT NULL, `caStartDate` INTEGER NOT NULL, `caLateSubmissionType` INTEGER NOT NULL, `caLateSubmissionPenalty` INTEGER NOT NULL, `caGracePeriodDate` INTEGER NOT NULL, `caActive` INTEGER NOT NULL, `caClassCommentEnabled` INTEGER NOT NULL, `caPrivateCommentsEnabled` INTEGER NOT NULL, `caClazzUid` INTEGER NOT NULL, `caLocalChangeSeqNum` INTEGER NOT NULL, `caMasterChangeSeqNum` INTEGER NOT NULL, `caLastChangedBy` INTEGER NOT NULL, `caLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "caUid",
@@ -5873,20 +5873,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "caDeadlineDateTime",
-            "columnName": "caDeadlineDateTime",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
             "fieldPath": "caStartDate",
             "columnName": "caStartDate",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "caStartDateTime",
-            "columnName": "caStartDateTime",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -5905,12 +5893,6 @@
           {
             "fieldPath": "caGracePeriodDate",
             "columnName": "caGracePeriodDate",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "caGracePeriodDateTime",
-            "columnName": "caGracePeriodDateTime",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -10514,7 +10496,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9f4b9cb335b12b1602bac26dc2f20e06')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'fe6fb6326beb2c7ed11156958527876d')"
     ]
   }
 }

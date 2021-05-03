@@ -141,6 +141,45 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             field = value
             mBinding?.fieldsEnabled = value
         }
+    override var startDate: Long = 0L
+        get() = mBinding?.startDate ?: 0L
+        set(value) {
+            field = value
+            mBinding?.startDate = value
+        }
+
+    override var startTime: Long = 0L
+        get() = mBinding?.startTime ?: 0L
+        set(value) {
+            field = value
+            mBinding?.startTime = value
+        }
+    override var deadlineDate: Long = 0L
+        get() = mBinding?.deadlineDate ?: 0L
+        set(value) {
+            field = value
+            mBinding?.deadlineDate = value
+        }
+    override var deadlineTime: Long = 0L
+        get() = mBinding?.deadlineTime ?: 0L
+        set(value) {
+            field = value
+            mBinding?.deadlineTime = value
+        }
+    override var gracePeriodDate: Long = 0L
+        get() = mBinding?.gracePeriodDate ?: 0L
+        set(value) {
+            field = value
+            mBinding?.gracePeriodDate = value
+        }
+
+    override var gracePeriodTime: Long = 0L
+        get() = mBinding?.gracePeriodTime ?: 0L
+        set(value) {
+            field = value
+            mBinding?.gracePeriodTime = value
+        }
+
     override var caGracePeriodError: String? = null
         get() = field
         set(value) {

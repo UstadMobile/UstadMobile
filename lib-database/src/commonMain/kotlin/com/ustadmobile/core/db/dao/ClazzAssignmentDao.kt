@@ -13,27 +13,25 @@ import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 @Repository
 abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
 
-    @Query("""
-            SELECT ClazzAssignment.*, 
+    @Query("""SELECT ClazzAssignment.*, 
             0 AS notSubmittedStudents, 0 AS submittedStudents, 0 AS completedStudents,
             0 AS resultScoreScaled, 0 AS resultMax, 0 AS resultScore, 0 as completedContent
             
              FROM ClazzAssignment
-        
-        
+                 
             WHERE caActive
               AND ClazzAssignment.caClazzUid = :clazzUid
               AND (ClazzAssignment.caTitle LIKE :searchText 
                     OR ClazzAssignment.caDescription LIKE :searchText)
          ORDER BY CASE(:sortOrder)
-                WHEN $SORT_START_DATE_ASC THEN ClazzAssignment.caStartDateTime
-                WHEN $SORT_DEADLINE_ASC THEN ClazzAssignment.caDeadlineDateTime
+                WHEN $SORT_START_DATE_ASC THEN ClazzAssignment.caStartDate
+                WHEN $SORT_DEADLINE_ASC THEN ClazzAssignment.caDeadlineDate
                 WHEN $SORT_SCORE_ASC THEN resultScoreScaled
                 ELSE 0
             END ASC,
             CASE(:sortOrder)
-                WHEN $SORT_START_DATE_DESC THEN ClazzAssignment.caStartDateTime
-                WHEN $SORT_DEADLINE_DESC THEN ClazzAssignment.caDeadlineDateTime
+                WHEN $SORT_START_DATE_DESC THEN ClazzAssignment.caStartDate
+                WHEN $SORT_DEADLINE_DESC THEN ClazzAssignment.caDeadlineDate
                 WHEN $SORT_SCORE_DESC THEN resultScoreScaled
                 ELSE 0
             END DESC,
@@ -69,8 +67,8 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
        WHERE caActive
          AND ClazzAssignment.caClazzUid = :clazzUid
          AND StatementEntity.timestamp 
-     		BETWEEN ClazzAssignment.caStartDateTime 
-     		    AND ClazzAssignment.caGracePeriodDateTime
+     		BETWEEN ClazzAssignment.caStartDate
+     		    AND ClazzAssignment.caGracePeriodDate
     """)
     abstract suspend fun getAssignmentMetrics(clazzUid: Long, caUid: Long): ClazzAssignmentWithMetrics?
 

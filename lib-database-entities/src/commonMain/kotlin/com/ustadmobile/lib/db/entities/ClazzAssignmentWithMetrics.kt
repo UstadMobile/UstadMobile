@@ -1,15 +1,13 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 @Serializable
 class ClazzAssignmentWithMetrics : ClazzAssignment() {
 
-    var notSubmittedStudents : Int = 0
-
-    var submittedStudents : Int = 0
-
-    var completedStudents : Int = 0
+    @Embedded
+    var studentProgress: StudentAssignmentProgress? = null
 
     var resultScoreScaled: Float = 0f
 
