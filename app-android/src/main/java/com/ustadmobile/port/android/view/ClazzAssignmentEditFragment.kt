@@ -9,6 +9,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.textfield.TextInputLayout
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentEditBinding
 import com.toughra.ustadmobile.databinding.ItemContentEntryBasicTitleListBinding
@@ -75,6 +76,14 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         t -> contentRecyclerAdapter?.submitList(t)
     }
 
+    private var deadlineDateListener: View.OnClickListener? = View.OnClickListener {
+        mBinding?.deadlineDate = Long.MAX_VALUE
+    }
+
+    private var deadlineDateTimeListener: View.OnClickListener? = View.OnClickListener {
+        mBinding?.deadlineTime = 0
+    }
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
@@ -82,6 +91,8 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             rootView = it.root
             it.activityEventHandler = this
             it.typeSelectionListener = this
+            it.caDeadlineDateTextinput.setEndIconOnClickListener(deadlineDateListener)
+            it.caDeadlineDatetimeTextinput.setEndIconOnClickListener(deadlineDateTimeListener)
         }
 
         contentRecyclerView = rootView.findViewById(R.id.ca_recyclerview_content)
@@ -119,6 +130,8 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         contentRecyclerView?.adapter = null
         contentRecyclerAdapter = null
         contentRecyclerView = null
+        deadlineDateListener = null
+        deadlineDateTimeListener = null
     }
 
     override var entity: ClazzAssignment? = null

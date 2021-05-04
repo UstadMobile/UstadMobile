@@ -4,7 +4,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ClazzAssignmentEditView
-import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
@@ -16,9 +15,22 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                                              arguments: Map<String, String>, view: ClazzAssignmentDetailOverviewView,
                                              lifecycleOwner: DoorLifecycleOwner,
                                              di: DI,private val newCommentItemListener: DefaultNewCommentItemListener =
-                                                     DefaultNewCommentItemListener(di, context))
+                                                     DefaultNewCommentItemListener(di, context,
+                                                             arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
+                                                     ClazzAssignment.TABLE_ID, true))
     : UstadDetailPresenter<ClazzAssignmentDetailOverviewView, ClazzAssignment>(context, arguments, view, di, lifecycleOwner),
         NewCommentItemListener by newCommentItemListener{
+
+    val clazzCommentListener: CommentListener = object : CommentListener {
+
+
+
+    }
+
+    val privateCommentListener: CommentListener = object : CommentListener {
+
+    }
+
 
     override val persistenceMode: PersistenceMode
           get() = PersistenceMode.DB
@@ -79,8 +91,8 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         }
 
         if(isStudent){
-            view.clazzMetrics = repo.clazzAssignmentDao.getAssignmentMetrics(clazzAssignment.caClazzUid,
-                clazzAssignment.caUid)
+            view.clazzMetrics = repo.clazzAssignmentDao.getStatementScoreProgressForAssignment(
+                    clazzAssignment.caUid, loggedInPersonUid)
         }
 
         if(isStudent && clazzAssignment.caPrivateCommentsEnabled){

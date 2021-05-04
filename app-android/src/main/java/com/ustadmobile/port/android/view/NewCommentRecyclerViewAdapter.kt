@@ -4,12 +4,12 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemCommentNewBinding
+import com.ustadmobile.core.controller.CommentListener
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
 class NewCommentRecyclerViewAdapter(
-        var itemListener: NewCommentHandler?,
-        var openSheetListener: OpenSheetListener?, hintText: String? = null, commentPublic: Boolean, entityType: Int,
-        eUid: Long, toComment: Long = 0, fromComment: Long = 0)
+        var itemListener: CommentListener?,
+        hintText: String? = null, commentPublic: Boolean)
     : SingleItemRecyclerViewAdapter<NewCommentRecyclerViewAdapter.NewCommentViewHolder>() {
 
     var hintText: String? = hintText
@@ -18,54 +18,15 @@ class NewCommentRecyclerViewAdapter(
             viewHolder?.itemBinding?.hintText = value
         }
 
-    var isBottomSheet: Boolean = false
-        set(value){
-            field = value
-            viewHolder?.itemBinding?.isBottomSheet = value
-        }
-
-    private var newCommentHandler: NewCommentHandler? = itemListener
+    private var newCommentHandler: CommentListener? = itemListener
         set(value) {
             field = value
             viewHolder?.itemBinding?.commentHandler = newCommentHandler
         }
 
-    var newOpenSheetListener: OpenSheetListener? = openSheetListener
-        set(value){
-            field = value
-            viewHolder?.itemBinding?.openSheetHandler = newOpenSheetListener
-        }
-
     private var publicMode: Boolean = commentPublic
         set(value){
             field = value
-            viewHolder?.itemBinding?.publicComment = value
-        }
-
-    var entityTable : Int = entityType
-        set(value){
-            field = value
-            viewHolder?.itemBinding?.entityType = value
-        }
-
-    var entityUid : Long = eUid
-        set(value){
-            field = value
-            viewHolder?.itemBinding?.entityUid = value
-        }
-
-    var commentTo : Long = toComment
-        get() = field
-        set(value){
-            field = value
-            viewHolder?.itemBinding?.toComment = value
-        }
-
-    var commentFrom : Long = fromComment
-        get() = field
-        set(value){
-            field = value
-            viewHolder?.itemBinding?.fromComment = value
         }
 
     class NewCommentViewHolder(var itemBinding: ItemCommentNewBinding)
@@ -79,20 +40,12 @@ class NewCommentRecyclerViewAdapter(
                         parent, false).also {
                     it.commentHandler = newCommentHandler
                     it.hintText = hintText
-                    it.publicComment = publicMode
-                    it.entityType = entityTable
-                    it.entityUid = entityUid
-                    it.toComment = commentTo
-                    it.fromComment = commentFrom
-                    it.isBottomSheet = isBottomSheet
-                    it.openSheetHandler = newOpenSheetListener
                 })
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
         itemListener = null
-        openSheetListener = null
         viewHolder = null
     }
 

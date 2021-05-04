@@ -8,28 +8,29 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.toughra.ustadmobile.R
+import com.toughra.ustadmobile.databinding.FragmentClazzWorkWithSubmissionDetailBinding
+import com.toughra.ustadmobile.databinding.ItemCommentNewSendBinding
 
-class CommentsBottomSheet(val adapter: NewCommentRecyclerViewAdapter?) : BottomSheetDialogFragment(){
+class CommentsBottomSheet() : BottomSheetDialogFragment() {
 
-    private var mRecyclerView: RecyclerView? = null
+    private var mBinding: ItemCommentNewSendBinding? = null
+    private var rootView: View? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        mRecyclerView = inflater.inflate(R.layout.fragment_options_bottom_sheet, container, false) as RecyclerView
+        val rootView: View
+        mBinding = ItemCommentNewSendBinding.inflate(inflater, container,
+                false).also {
+            rootView = it.root
+        }
 
-        mRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
-        adapter?.isBottomSheet = true
-        adapter?.newOpenSheetListener = null
-        mRecyclerView?.adapter = adapter
-
-
-        return mRecyclerView
+        return rootView
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        mRecyclerView?.adapter = null
-        mRecyclerView = null
+        rootView = null
+        mBinding = null
     }
 
 }

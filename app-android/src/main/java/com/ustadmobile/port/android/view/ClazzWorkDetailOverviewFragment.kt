@@ -117,7 +117,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     override fun addNewComment2(view: View, entityType: Int, entityUid: Long, comment: String,
                                 public: Boolean, to: Long, from: Long) {
         (view.parent as View).findViewById<EditText>(R.id.item_comment_new_comment_et).setText("")
-        mPresenter?.addComment(entityType, entityUid, comment, public, to, from)
+        mPresenter?.addComment(comment)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -193,10 +193,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
         //13 - New class comment component
         newPublicCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(
-                this, null,
-                requireContext().getString(R.string.add_class_comment), true, ClazzWork.CLAZZ_WORK_TABLE_ID,
-                entity?.clazzWorkUid?:0L, 0, accountManager.activeAccount.personUid
-        )
+                this,
+                requireContext().getString(R.string.add_class_comment), true)
         newPublicCommentRecyclerAdapter?.visible = true
 
         //14 - Merger for the comments and new class comment component
@@ -216,11 +214,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
         //17 - New Private comments section:
         newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(
-                this, null ,
-                requireContext().getString(R.string.add_private_comment), false, ClazzWork.CLAZZ_WORK_TABLE_ID,
-                entity?.clazzWorkUid?:0L, 0,
-                accountManager.activeAccount.personUid
-        )
+                this,
+                requireContext().getString(R.string.add_private_comment), false)
         newPrivateCommentRecyclerAdapter?.visible = false
 
         //18 - Merger for the private comments and new private comment component
@@ -373,10 +368,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             }else{
                 submissionFreeTextRecyclerAdapter?.submitList(listOf())
             }
-
-            newPublicCommentRecyclerAdapter?.entityUid = entity?.clazzWorkUid?:0L
-            newPublicCommentRecyclerAdapter?.entityUid = entity?.clazzWorkUid?:0L
-
         }
 
     override var clazzWorkContent: DataSource.Factory<Int,

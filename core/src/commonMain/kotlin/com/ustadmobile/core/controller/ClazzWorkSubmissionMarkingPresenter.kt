@@ -16,20 +16,17 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
-import com.ustadmobile.lib.db.entities.PersonWithClazzWorkAndSubmission
-import com.ustadmobile.lib.db.entities.ClazzWorkSubmission
-import com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission
-import com.ustadmobile.lib.db.entities.ClazzWork
-import com.ustadmobile.lib.db.entities.ClazzEnrolment
-import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.lib.db.entities.*
 
 class ClazzWorkSubmissionMarkingPresenter(context: Any,
               arguments: Map<String, String>, view: ClazzWorkSubmissionMarkingView, di: DI,
               lifecycleOwner: DoorLifecycleOwner,
               private val newCommentItemListener: DefaultNewCommentItemListener =
-                      DefaultNewCommentItemListener(di, context))
+                      DefaultNewCommentItemListener(di, context,arguments[ARG_CLAZZWORK_UID]?.toLong() ?: 0L,
+                              ClazzAssignment.TABLE_ID, true))
     : UstadEditPresenter<ClazzWorkSubmissionMarkingView,
         PersonWithClazzWorkAndSubmission>(context, arguments, view, di, lifecycleOwner),
         NewCommentItemListener by newCommentItemListener  {
@@ -118,11 +115,6 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                     clazzMemberAndClazzWorkWithSubmission?.personUid?:0L)
         }
         view.takeIf { it.privateComments == null}?.privateComments = privateComments
-
-        newCommentItemListener.fromPerson = loggedInPersonUid
-        newCommentItemListener.toPerson = clazzMemberAndClazzWorkWithSubmission?.personUid?:0L
-        newCommentItemListener.entityId = clazzMemberAndClazzWorkWithSubmission?.clazzWork?.clazzWorkUid?:0L
-
 
         val clazzWorkWithMetrics =
                 repo.clazzWorkDao.findClazzWorkWithMetricsByClazzWorkUidAsync(

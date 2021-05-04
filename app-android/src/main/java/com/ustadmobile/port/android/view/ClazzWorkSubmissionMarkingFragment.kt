@@ -143,9 +143,8 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<PersonWithClazzWorkA
 
 
         newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(
-                this, null,
-                requireContext().getString(R.string.add_private_comment), false, ClazzWork.CLAZZ_WORK_TABLE_ID,
-                entity?.clazzWork?.clazzWorkUid?:0L, entity?.personUid?:0L,
+                this,
+                requireContext().getString(R.string.add_private_comment), false
         )
         newPrivateCommentRecyclerAdapter?.visible = true
 
@@ -250,9 +249,6 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<PersonWithClazzWorkA
         set(value) {
             field = value
 
-            newPrivateCommentRecyclerAdapter?.entityUid = value?.clazzWork?.clazzWorkUid?:0L
-            newPrivateCommentRecyclerAdapter?.commentTo = value?.personUid ?:0L
-            newPrivateCommentRecyclerAdapter?.commentFrom = 0L
             newPrivateCommentRecyclerAdapter?.visible = true
 
             ustadFragmentTitle = value?.fullName()?:""
@@ -314,7 +310,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<PersonWithClazzWorkA
     override fun addNewComment2(view: View, entityType: Int, entityUid: Long, comment: String,
                                 public: Boolean, to: Long, from: Long) {
         (view.parent as View).findViewById<EditText>(R.id.item_comment_new_comment_et).setText("")
-        mPresenter?.addComment(entityType, entityUid, comment, public, to, from)
+        mPresenter?.addComment(comment)
     }
 
     //On click "Record for student" button
