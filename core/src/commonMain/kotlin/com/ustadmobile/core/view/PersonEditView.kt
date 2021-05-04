@@ -24,11 +24,17 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var passwordError: String?
 
+    var emailError: String?
+
     var confirmError: String?
 
     var dateOfBirthError: String?
 
     var canDelegatePermissions: Boolean?
+
+    var firstNamesFieldError: String?
+    var lastNameFieldError: String?
+    var genderFieldError: String?
 
     var firstNameError: String?
 

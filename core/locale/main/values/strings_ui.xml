@@ -989,6 +989,7 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="edit_terms_and_policies">Edit terms and policies</string>
 
+    <string name="strings_not_allowed">Special characters are not allowerd in this field</string>
     <string name='undo'>Undo</string>
 
     <string name="video">Video</string>
@@ -1002,5 +1003,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     "School Name app powered by Ustad Mobile"
     -->
     <string name="powered_by">Powered by</string>
+    <string name="invalid_email">Please enter a valid email</string>
 
 </resources>

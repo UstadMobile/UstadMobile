@@ -18,6 +18,7 @@ import com.ustadmobile.port.android.screen.PersonEditScreen
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.UmViewActions.hasInputLayoutError
+import com.ustadmobile.test.port.android.util.getApplicationDi
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
@@ -26,6 +27,8 @@ import kotlinx.coroutines.launch
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.*
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 
 @AdbScreenRecord("PersonEdit screen Test")
@@ -57,10 +60,11 @@ class PersonEditFragmentTest : TestCase() {
 
     private lateinit var serverUrl: String
 
-    val impl = UstadMobileSystemImpl.instance
+    lateinit var impl: UstadMobileSystemImpl
 
     @Before
     fun setUp() {
+        impl = getApplicationDi().direct.instance()
         impl.messageIdMap = MessageIDMap.ID_MAP
         mockWebServer = MockWebServer()
         mockWebServer.start()

@@ -1,9 +1,19 @@
 package com.ustadmobile.core.impl
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.UMURLEncoder
+import com.ustadmobile.core.util.ext.requirePostfix
+import com.ustadmobile.core.view.AccountListView
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.direct
+import org.kodein.di.instance
 import kotlin.js.JsName
 import kotlin.jvm.JvmOverloads
 
@@ -69,6 +79,21 @@ abstract class UstadMobileSystemCommon {
     @JsName("getAppConfigString")
     abstract fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?
 
+    fun goDeepLink(deepLink: String, accountManager: UstadAccountManager, context: Any) {
+        if(deepLink.contains(LINK_ENDPOINT_VIEWNAME_DIVIDER)) {
+            val endpointUrl = deepLink.substringBefore(LINK_ENDPOINT_VIEWNAME_DIVIDER)
+                .requirePostfix("/")
+            val viewUri = deepLink.substringAfter(LINK_ENDPOINT_VIEWNAME_DIVIDER)
+            //if there are any accounts that match endpoint url the user wants to work with,
+            // then go to the accountmanager list in picker mode
+            if(accountManager.storedAccounts.any { it.endpointUrl == endpointUrl }) {
+                val args = mapOf(ARG_NEXT to UMURLEncoder.encodeUTF8(viewUri),
+                    AccountListView.ARG_FILTER_BY_ENDPOINT to endpointUrl,
+                    UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
+                go(AccountListView.VIEW_NAME, args, context)
+            }
+        }
+    }
 
     /**
      * Go to a new view : This is simply a convenience wrapper for go(viewName, args, context):
@@ -78,7 +103,7 @@ abstract class UstadMobileSystemCommon {
      * @param destination Destination name in the form of ViewName?arg1=val1&arg2=val2 etc.
      * @param context System context object
      */
-    open fun go(destination: String?, context: Any) {
+    open fun go(destination: String, context: Any) {
         val destinationParsed =
         if(destination?.contains(LINK_INTENT_FILTER) == true){
             val destinationIndex : Int? = destination.indexOf("/${LINK_INTENT_FILTER}").plus(10)
@@ -372,6 +397,13 @@ abstract class UstadMobileSystemCommon {
         const val TAG_LOCAL_HTTP_PORT = 64
 
         const val LINK_INTENT_FILTER = "umclient"
+
+        /**
+         * The web version of the application will always live under a folder called /umapp/. The
+         * viewname will start with a # (as it uses the REACT hash router). Therefor this string is
+         * used as a divider between the endpoint URL and the view name / view arguments
+         */
+        const val LINK_ENDPOINT_VIEWNAME_DIVIDER = "/umapp/#"
 
         const val SUBDIR_SITEDATA_NAME = "sitedata"
 

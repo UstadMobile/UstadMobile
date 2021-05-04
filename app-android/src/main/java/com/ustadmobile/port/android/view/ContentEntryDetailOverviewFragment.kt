@@ -160,7 +160,7 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
 
             if(value != null && value.isStatusQueuedOrDownloading()) {
                 mBinding?.entryDetailProgress?.statusText = value.toStatusString(
-                        UstadMobileSystemImpl.instance, requireContext())
+                        di.direct.instance(), requireContext())
                 mBinding?.entryDetailProgress?.progress = if(value.downloadLength > 0) {
                     (value.downloadedSoFar.toFloat()) / (value.downloadLength.toFloat())
                 }else {
