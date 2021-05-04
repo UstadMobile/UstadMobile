@@ -8,8 +8,8 @@
         <import type="android.view.View"/>
 
         <variable
-            name="assignment"
-            type="com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics" />
+            name="score"
+            type="com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress" />
 
 
     </data>
@@ -36,23 +36,22 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dimen_16dp"
             android:layout_marginTop="@dimen/dimen_16dp"
-            android:text="@{@string/percentage_score((int)(assignment.resultScoreScaled * 100))}"
-            android:visibility="@{assignment.resultScoreScaled == 0 ? View.GONE : View.VISIBLE}"
+            app:scorePercentage="@{score}"
+            android:visibility="@{score.resultMax == 0 ? View.GONE : View.VISIBLE}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/dividerTop"
             style="@style/UmTheme.TextAppearance.Body1"
             android:layout_marginBottom="@dimen/dimen_16dp" />
 
         <TextView
-            android:paddingStart="@dimen/dimen_5dp"
             android:paddingEnd="@dimen/dimen_5dp"
             tools:text="(4/4)"
             android:id="@+id/item_person_score_results"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dimen_8dp"
-            android:text='@{"(" + assignment.resultScore + &quot;/&quot; + assignment.resultMax + ")"}'
-            android:visibility="@{assignment.resultScoreScaled == 0 ? View.GONE : View.VISIBLE}"
+            android:text='@{"(" + score.resultScore + &quot;/&quot; + score.resultMax + ")"}'
+            android:visibility="@{score.resultMax == 0 ? View.GONE : View.VISIBLE}"
             app:layout_constraintStart_toEndOf="@+id/item_person_score"
             app:layout_constraintTop_toBottomOf="@id/dividerTop"
             android:layout_marginTop="@dimen/dimen_16dp"

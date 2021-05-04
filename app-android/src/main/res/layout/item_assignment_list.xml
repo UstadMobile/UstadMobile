@@ -58,8 +58,8 @@
             android:id="@+id/item_person_progress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{@string/percentage_score((int)(assignment.resultScoreScaled * 100))}"
-            android:visibility="@{assignment.resultScoreScaled == 0 ? View.GONE : View.VISIBLE}"
+            app:scorePercentage="@{assignment.studentScore}"
+            android:visibility="@{assignment.studentScore.resultMax == 0 ? View.GONE : View.VISIBLE}"
             app:layout_constraintStart_toStartOf="@+id/item_clazz_assignment_newitemicon"
             app:layout_constraintTop_toBottomOf="@id/content_progress_fail_correct"
             android:layout_marginBottom="@dimen/dimen_16dp" />
@@ -71,8 +71,8 @@
             android:id="@+id/item_person_score_results"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text='@{"(" + assignment.resultScore + &quot;/&quot; + assignment.resultMax + ")"}'
-            android:visibility="@{assignment.resultScoreScaled == 0 ? View.GONE : View.VISIBLE}"
+            android:text='@{"(" + assignment.studentScore.resultScore + &quot;/&quot; + assignment.studentScore.resultMax + ")"}'
+            android:visibility="@{assignment.studentScore.resultMax == 0 ? View.GONE : View.VISIBLE}"
             app:layout_constraintStart_toEndOf="@+id/item_person_progress"
             app:layout_constraintTop_toBottomOf="@+id/content_progress_fail_correct"
             android:layout_marginBottom="@dimen/dimen_16dp" />

@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemClazzAssignmentScoreDetailBinding
-import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
+import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
 class ScoreRecyclerAdapter : SingleItemRecyclerViewAdapter<
@@ -15,12 +15,12 @@ class ScoreRecyclerAdapter : SingleItemRecyclerViewAdapter<
 
     private var viewHolder: ClazzAssignmentScoreDetailViewHolder? = null
 
-    var clazzAssignment: ClazzAssignmentWithMetrics? = null
+    var score: ContentEntryStatementScoreProgress? = null
         set(value){
             if(field == value)
                 return
             field = value
-            viewHolder?.itemBinding?.assignment = value
+            viewHolder?.itemBinding?.score = value
         }
 
 
@@ -28,7 +28,7 @@ class ScoreRecyclerAdapter : SingleItemRecyclerViewAdapter<
         return ClazzAssignmentScoreDetailViewHolder(
                 ItemClazzAssignmentScoreDetailBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
-                    it.assignment = clazzAssignment
+                    it.score = score
                 })
     }
 

@@ -7,15 +7,17 @@ import androidx.room.Update
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
+import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 
 
 @Dao
 @Repository
 abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
 
-    @Query("""SELECT ClazzAssignment.*, 
+    @Query("""
+        SELECT ClazzAssignment.*, 
             0 AS notSubmittedStudents, 0 AS submittedStudents, 0 AS completedStudents,
-            0 AS resultScoreScaled, 0 AS resultMax, 0 AS resultScore, 0 as completedContent
+            0 AS resultMax, 0 AS resultScore, 0 as contentComplete, 0 as progress
             
              FROM ClazzAssignment
                  
@@ -26,13 +28,13 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
          ORDER BY CASE(:sortOrder)
                 WHEN $SORT_START_DATE_ASC THEN ClazzAssignment.caStartDate
                 WHEN $SORT_DEADLINE_ASC THEN ClazzAssignment.caDeadlineDate
-                WHEN $SORT_SCORE_ASC THEN resultScoreScaled
+                WHEN $SORT_SCORE_ASC THEN (resultScore/resultMax)
                 ELSE 0
             END ASC,
             CASE(:sortOrder)
                 WHEN $SORT_START_DATE_DESC THEN ClazzAssignment.caStartDate
                 WHEN $SORT_DEADLINE_DESC THEN ClazzAssignment.caDeadlineDate
-                WHEN $SORT_SCORE_DESC THEN resultScoreScaled
+                WHEN $SORT_SCORE_DESC THEN (resultScore/resultMax)
                 ELSE 0
             END DESC,
             CASE(:sortOrder)
@@ -50,27 +52,30 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
 
 
     @Query("""
-        SELECT  ClazzAssignment.*, 
-         	  0 AS notSubmittedStudents, 0 AS submittedStudents, 0 AS completedStudents,
-                 AVG(CASE WHEN contentEntryRoot 
-                     THEN resultScoreScaled ELSE 0 END) AS resultScoreScaled,
-                SUM(CASE WHEN contentEntryRoot 
-                	THEN resultScoreRaw ELSE 0 END) AS resultScore, 
-                SUM(CASE WHEN contentEntryRoot 
-                     THEN resultScoreMax ELSE 0 END) AS resultMax,
-                'FALSE' AS completedContent
-         FROM ClazzAssignment
-         	LEFT JOIN ClazzAssignmentContentJoin 
-         	ON ClazzAssignmentContentJoin.cacjAssignmentUid = :caUid
-        	LEFT JOIN StatementEntity
-        	ON StatementEntity.statementContentEntryUid = ClazzAssignmentContentJoin.cacjContentUid
-       WHERE caActive
-         AND ClazzAssignment.caClazzUid = :clazzUid
-         AND StatementEntity.timestamp 
-     		BETWEEN ClazzAssignment.caStartDate
-     		    AND ClazzAssignment.caGracePeriodDate
+        SELECT COALESCE(SUM(ResultSource.resultScoreMax),0) AS resultMax, 
+               COALESCE(SUM(ResultSource.resultScoreRaw),0) AS resultScore, 
+               'FALSE' as contentComplete, 0 as progress
+     	  FROM (SELECT StatementEntity.resultScoreRaw, StatementEntity.resultScoreMax
+     	 	      FROM ClazzAssignmentContentJoin 
+                         LEFT JOIN ContentEntry 
+                         ON ContentEntry.contentEntryUid = ClazzAssignmentContentJoin.cacjContentUid 
+                       
+                         LEFT JOIN StatementEntity 
+                         ON statementUid = (SELECT statementUid 
+                                              FROM StatementEntity 
+                                                    LEFT JOIN ClazzAssignment 
+                                                    ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
+                                             WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
+                                               AND caUid = :caUid
+                                               AND statementPersonUid = :personUid
+                                               AND contentEntryRoot 
+                                               AND StatementEntity.timestamp 
+                                                    BETWEEN ClazzAssignment.caStartDate
+                                                        AND ClazzAssignment.caGracePeriodDate
+                                         ORDER BY resultScoreScaled DESC LIMIT 1)
+     	  ) AS ResultSource
     """)
-    abstract suspend fun getAssignmentMetrics(clazzUid: Long, caUid: Long): ClazzAssignmentWithMetrics?
+    abstract suspend fun getStatementScoreProgressForAssignment(caUid: Long, personUid: Long): ContentEntryStatementScoreProgress?
 
 
     @Update
