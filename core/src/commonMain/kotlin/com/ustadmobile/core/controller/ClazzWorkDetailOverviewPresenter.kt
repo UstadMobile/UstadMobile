@@ -21,8 +21,8 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                                        arguments: Map<String, String>, view: ClazzWorkDetailOverviewView,
                                        di: DI, lifecycleOwner: DoorLifecycleOwner,
                                        private val newCommentItemListener: DefaultNewCommentItemListener =
-                                               DefaultNewCommentItemListener(di, context)
-)
+                                               DefaultNewCommentItemListener(di, context,arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
+                                                       ClazzWork.CLAZZ_WORK_TABLE_ID, true))
     : UstadDetailPresenter<ClazzWorkDetailOverviewView, ClazzWorkWithSubmission>(context,
         arguments, view, di, lifecycleOwner)
         , NewCommentItemListener by newCommentItemListener {
@@ -84,9 +84,6 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                 view.viewOnlyQuizQuestions = DoorMutableLiveData(questionsAndOptionsWithResponseList)
             }
         }
-
-        newCommentItemListener.fromPerson = loggedInPersonUid
-        newCommentItemListener.entityId = clazzWorkUid
 
         //Find Content and questions
         view.clazzWorkContent =
