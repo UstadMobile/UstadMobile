@@ -180,27 +180,29 @@ suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: PersonWithClaz
 
     //find the group member and update that
     val numGroupUpdates = personGroupMemberDao.moveGroupAsync(enrolment.personUid,
-            effectiveClazz.clazzStudentsPersonGroupUid,
-            effectiveClazz.clazzPendingStudentsPersonGroupUid)
+        effectiveClazz.clazzStudentsPersonGroupUid,
+        effectiveClazz.clazzPendingStudentsPersonGroupUid)
 
     if(numGroupUpdates != 1) {
         throw IllegalStateException("Approve pending clazz member - no membership of clazz's pending group!")
     }
 
     //change the role
-    clazzEnrolmentDao.updateClazzEnrolmentRole(enrolment.personUid, clazzUid, ClazzEnrolment.ROLE_STUDENT)
+    val enrolmentUpdateCount = clazzEnrolmentDao.updateClazzEnrolmentRole(enrolment.personUid, clazzUid,
+        newRole = ClazzEnrolment.ROLE_STUDENT, oldRole = ClazzEnrolment.ROLE_STUDENT_PENDING)
+    if(enrolmentUpdateCount != 1) {
+        throw IllegalStateException("Approve pending clazz member - no update of enrolment!")
+    }
 }
 
 suspend fun UmAppDatabase.declinePendingClazzEnrolment(enrolment: PersonWithClazzEnrolmentDetails, clazzUid: Long){
     val effectiveClazz = clazzDao.findByUidAsync(clazzUid)
-            ?: throw IllegalStateException("Class does not exist")
+        ?: throw IllegalStateException("Class does not exist")
 
+        clazzEnrolmentDao.updateClazzEnrolmentActiveForPersonAndClazz(enrolment.personUid,
+            clazzUid, ClazzEnrolment.ROLE_STUDENT_PENDING, false)
 
-    clazzEnrolmentDao.updateClazzEnrolmentActiveForPersonAndClazz(
-            enrolment.personUid,
-            clazzUid,false)
-
-    personGroupMemberDao.setGroupMemberToInActive(enrolment.personUid,
+        personGroupMemberDao.setGroupMemberToInActive(enrolment.personUid,
             effectiveClazz.clazzPendingStudentsPersonGroupUid)
 
 }

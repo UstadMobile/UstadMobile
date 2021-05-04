@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ListFilterIdOption
@@ -103,7 +104,8 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
 
             } catch (e: IllegalStateException) {
                 //did not have all entities present yet (e.g. sync race condition)
-                view.showSnackBar(systemImpl.getString(MessageID.content_editor_save_error, context))
+                view.showSnackBar(systemImpl.getString(MessageID.content_editor_save_error, context) + e.message)
+                Napier.e("Exception approving member", e)
             }
         }
     }
