@@ -130,6 +130,9 @@ class ClazzAssignmentEditPresenter(context: Any,
             val localStartDateMidnight = DateTime(entity.caStartDate).toLocalMidnight(timeZone).unixMillisLong
             view.startDate = localStartDateMidnight
             view.startTime = entity.caStartDate - localStartDateMidnight
+        }else{
+            view.startDate = 0
+            view.startTime = 0
         }
 
         if(entity.caDeadlineDate != Long.MAX_VALUE){
@@ -138,12 +141,12 @@ class ClazzAssignmentEditPresenter(context: Any,
             view.deadlineTime = entity.caDeadlineDate - localDeadlineDateMidnight
         }else{
             view.deadlineDate = Long.MAX_VALUE
-            view.deadlineTime = Long.MAX_VALUE
+            view.deadlineTime = 0
         }
 
         if(entity.caGracePeriodDate == 0L || entity.caGracePeriodDate == Long.MAX_VALUE){
             view.gracePeriodDate = Long.MAX_VALUE
-            view.gracePeriodTime = Long.MAX_VALUE
+            view.gracePeriodTime = 0
         }else{
             val localGracePeriodDateMidnight = DateTime(entity.caGracePeriodDate).toLocalMidnight(timeZone).unixMillisLong
             view.gracePeriodDate = localGracePeriodDateMidnight
