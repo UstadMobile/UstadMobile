@@ -25,8 +25,6 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
         context, arguments, view, di, lifecycleOwner),
         ClazzAssignmentListItemListener by assignmentItemListener {
 
-
-    private var clazzEnrolment: ClazzEnrolment? = null
     private var clazzUid: Long = 0L
 
     override val sortOptions: List<SortOrderOption>
@@ -41,7 +39,6 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
         selectedSortOption = SORT_OPTIONS[0]
         GlobalScope.launch(doorMainDispatcher()) {
             mLoggedInPersonUid = accountManager.activeAccount.personUid
-            clazzEnrolment = db.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(mLoggedInPersonUid, clazzUid)
             updateListOnView()
         }
     }
@@ -54,8 +51,7 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
     private fun updateListOnView() {
         view.list = repo.clazzAssignmentDao.getAllAssignments(clazzUid, systemTimeInMillis(),
                 mLoggedInPersonUid, selectedSortOption?.flag ?: 0,
-                searchText.toQueryLikeParam(), clazzEnrolment?.clazzEnrolmentRole ?:
-                ClazzEnrolment.ROLE_STUDENT_PENDING, Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)
+                searchText.toQueryLikeParam(), Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)
     }
 
     override fun handleClickCreateNewFab() {

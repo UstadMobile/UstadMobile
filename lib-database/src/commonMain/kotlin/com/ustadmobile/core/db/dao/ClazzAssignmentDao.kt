@@ -17,7 +17,39 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
           AS (SELECT EXISTS(SELECT 1 
                 FROM Clazz 
                 WHERE Clazz.clazzUid = :clazzUid 
-                AND :accountPersonUid IN (${ClazzDao.ENTITY_PERSONS_WITH_PERMISSION})))
+                AND :accountPersonUid IN (${ClazzDao.ENTITY_PERSONS_WITH_PERMISSION}))),
+                
+                
+             CteBestStatementForStudent (assignmentUid, contentEntryUid, bestStatementUid, 
+                       bestStatementStudentScore, bestStatementIsComplete, bestStatementMaxScore) 
+           AS (SELECT caUid AS assignmentUid , cacjContentUid AS contentEntryUid, 
+                      statementUid AS bestStatementUid, resultScoreRaw AS bestStatementStudentScore, 
+                       resultCompletion AS bestStatementIsComplete , resultScoreMax AS bestStatementMaxScore
+                      FROM ClazzAssignmentContentJoin
+					           LEFT JOIN ClazzAssignment 
+                                ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
+                                
+                                LEFT JOIN ClazzEnrolment
+                                ON ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
+					            
+                                LEFT JOIN StatementEntity 
+					            ON statementUid = (SELECT statementUid 
+                                                     FROM StatementEntity 
+                                                    WHERE statementContentEntryUid = ClazzAssignmentContentJoin.cacjContentUid
+                                                      AND statementPersonUid = :accountPersonUid
+                                                      AND contentEntryRoot 
+                                                      AND StatementEntity.timestamp 
+                                                            BETWEEN ClazzAssignment.caStartDate
+                                                                AND ClazzAssignment.caGracePeriodDate
+                                                  ORDER BY resultScoreScaled DESC LIMIT 1)
+					 WHERE ClazzAssignment.caClazzUid = :clazzUid 
+                       AND clazzEnrolmentClazzUid = :clazzUid
+                       AND clazzEnrolmentPersonUid = :accountPersonUid
+                       AND clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT} 
+                       AND clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}
+                       AND clazzEnrolmentActive) 
+               
+                
                 
         SELECT ClazzAssignment.*, 
         
@@ -60,48 +92,29 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                           FROM ClazzAssignmentContentJoin 
                                          WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid)
                            AND StatementEntity.contentEntryRoot 
-                           AND StatementEntity.statementVerbUid 
-                                IN (${VerbEntity.VERB_COMPLETED_UID}, ${VerbEntity.VERB_SATISFIED_UID}, 
-                                ${VerbEntity.VERB_PASSED_UID}, ${VerbEntity.VERB_FAILED_UID})
+                           AND StatementEntity.resultCompletion
                            AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid) = 
                                     (SELECT COUNT(ClazzAssignmentContentJoin.cacjContentUid) 
                                        FROM ClazzAssignmentContentJoin 
                                       WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid)) 
                   ELSE 0 END) AS completedStudents, 
-                  COALESCE(Source.resultScore,0) As resultScore , COALESCE(Source.resultMax,0) AS resultMax, 
-                  COALESCE(Source.contentComplete,'FALSE') AS contentComplete , 
-                  COALESCE(Source.progress, 0) AS progress
-        
-        
-        
-            
+                  
+                  
+	        COALESCE((SELECT SUM(bestStatementStudentScore)
+               FROM CteBestStatementForStudent 
+              WHERE CteBestStatementForStudent.assignmentUid = ClazzAssignment.caUid),0) AS resultScore,
+              
+            COALESCE((SELECT SUM(bestStatementMaxScore)
+               FROM CteBestStatementForStudent 
+              WHERE CteBestStatementForStudent.assignmentUid = ClazzAssignment.caUid),0) AS resultMax,
+              
+            COALESCE((SELECT COUNT(bestStatementIsComplete) = COUNT(contentEntryUid)
+               FROM CteBestStatementForStudent 
+              WHERE CteBestStatementForStudent.assignmentUid = ClazzAssignment.caUid),'FALSE') AS contentComplete,
+              
+              0 as progress
+             
              FROM ClazzAssignment
-                    LEFT JOIN (SELECT COALESCE(SUM(ResultSource.resultScoreMax),0) AS resultMax, 
-                                      COALESCE(SUM(ResultSource.resultScoreRaw),0) AS resultScore, 
-                                       COALESCE(COUNT(ResultSource.resultCompletion) = COUNT(ResultSource.cacjContentUid),'FALSE') as contentComplete, 
-                                       0 as progress, ResultSource.cacjAssignmentUid AS assignmentUid
-     	                         FROM (SELECT StatementEntity.resultScoreRaw, 
-                                               StatementEntity.resultScoreMax, 
-                                               StatementEntity.resultCompletion,
-                                               ClazzAssignmentContentJoin.cacjAssignmentUid,
-                                               ClazzAssignmentContentJoin.cacjContentUid
-     	 	                            FROM ClazzAssignmentContentJoin 
-                                             LEFT JOIN ContentEntry 
-                                             ON ContentEntry.contentEntryUid = ClazzAssignmentContentJoin.cacjContentUid 
-                       
-                                             LEFT JOIN StatementEntity 
-                                             ON statementUid = (SELECT statementUid 
-                                                                  FROM StatementEntity 
-                                                                        LEFT JOIN ClazzAssignment 
-                                                                        ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
-                                                                 WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
-                                                                   AND (:role = ${ClazzEnrolment.ROLE_STUDENT} AND statementPersonUid = :accountPersonUid)
-                                                                   AND contentEntryRoot 
-                                                                   AND StatementEntity.timestamp 
-                                                                        BETWEEN ClazzAssignment.caStartDate
-                                                                            AND ClazzAssignment.caGracePeriodDate
-                                                             ORDER BY resultScoreScaled DESC LIMIT 1)
-     	  ) AS ResultSource) AS Source ON ClazzAssignment.caUid = Source.assignmentUid
                     JOIN Clazz ON Clazz.clazzUid = :clazzUid
             WHERE caActive
               AND ClazzAssignment.caClazzUid = :clazzUid
@@ -130,7 +143,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
             END DESC
     """)
     abstract fun getAllAssignments(clazzUid: Long, timestamp: Long, accountPersonUid: Long,
-                                   sortOrder: Int, searchText: String, role: Int, permission: Long)
+                                   sortOrder: Int, searchText: String, permission: Long)
             : DataSource.Factory<Int, ClazzAssignmentWithMetrics>
 
 
