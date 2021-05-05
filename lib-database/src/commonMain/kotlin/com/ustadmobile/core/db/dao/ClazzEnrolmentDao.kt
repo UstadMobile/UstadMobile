@@ -92,14 +92,18 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     """)
     abstract suspend fun findAllClazzesByPersonWithClazzAsListAsync(personUid: Long): List<ClazzEnrolmentWithClazz>
 
-    @Query("""SELECT ClazzEnrolment.*, Person.*
-        FROM ClazzEnrolment
-        LEFT JOIN Person ON ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
+    @Query("""
+        SELECT ClazzEnrolment.*, Person.*
+          FROM ClazzEnrolment
+    LEFT JOIN Person ON ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
-        AND :date BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft
-        AND (:roleFilter = 0 OR ClazzEnrolment.clazzEnrolmentRole = :roleFilter)
+              AND :date BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
+              AND ClazzEnrolment.clazzEnrolmentDateLeft
+              AND (:roleFilter = 0 OR ClazzEnrolment.clazzEnrolmentRole = :roleFilter)
+              AND (:personUidFilter = 0 OR ClazzEnrolment.clazzEnrolmentPersonUid)
     """)
-    abstract suspend fun getAllClazzEnrolledAtTimeAsync(clazzUid: Long, date: Long, roleFilter: Int): List<ClazzEnrolmentWithPerson>
+    abstract suspend fun getAllClazzEnrolledAtTimeAsync(clazzUid: Long, date: Long, roleFilter: Int,
+        personUidFilter: Long = 0): List<ClazzEnrolmentWithPerson>
 
     @Query("SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentUid = :uid")
     abstract suspend fun findByUid(uid: Long): ClazzEnrolment?
@@ -164,18 +168,19 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                                        filter: Int, accountPersonUid: Long, currentTime: Long): DataSource.Factory<Int, PersonWithClazzEnrolmentDetails>
 
 
-    @Query("""UPDATE ClazzEnrolment SET clazzEnrolmentActive = :enrolled,
-                clazzEnrolmentLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
-                WHERE clazzEnrolmentPersonUid = :personUid AND clazzEnrolmentClazzUid = :clazzUid""")
-    abstract suspend fun updateClazzEnrolmentActiveForPersonAndClazz(personUid: Long, clazzUid: Long, enrolled: Int): Int
+    @Query("""
+                UPDATE ClazzEnrolment
+                   SET clazzEnrolmentActive = :active,
+                       clazzEnrolmentLastChangedBy = 
+                        (SELECT nodeClientId 
+                          FROM SyncNode 
+                         LIMIT 1) 
+                WHERE clazzEnrolmentPersonUid = :personUid 
+                      AND clazzEnrolmentClazzUid = :clazzUid
+                      AND clazzEnrolmentRole = :roleId""")
+    abstract suspend fun updateClazzEnrolmentActiveForPersonAndClazz(personUid: Long, clazzUid: Long,
+                                                                     roleId: Int, active: Boolean): Int
 
-    suspend fun updateClazzEnrolmentActiveForPersonAndClazz(personUid: Long, clazzUid: Long, enrolled: Boolean): Int {
-        return if (enrolled) {
-            updateClazzEnrolmentActiveForPersonAndClazz(personUid, clazzUid, 1)
-        } else {
-            updateClazzEnrolmentActiveForPersonAndClazz(personUid, clazzUid, 0)
-        }
-    }
 
     @Query("""UPDATE ClazzEnrolment SET clazzEnrolmentActive = :enrolled,
             clazzEnrolmentLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
@@ -190,10 +195,20 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         }
     }
 
-    @Query("""UPDATE ClazzEnrolment SET clazzEnrolmentRole = :role,
-            clazzEnrolmentLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
-            WHERE clazzEnrolmentPersonUid = :personUid AND clazzEnrolmentClazzUid = :clazzUid""")
-    abstract suspend fun updateClazzEnrolmentRole(personUid: Long, clazzUid: Long, role: Int)
+    @Query("""
+            UPDATE ClazzEnrolment 
+               SET clazzEnrolmentRole = :newRole,
+                   clazzEnrolmentLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+             -- Avoid potential for duplicate approvals if user was previously refused      
+             WHERE clazzEnrolmentUid = COALESCE( 
+                    (SELECT clazzEnrolmentUid
+                       FROM ClazzEnrolment
+                      WHERE clazzEnrolmentPersonUid = :personUid 
+                            AND clazzEnrolmentClazzUid = :clazzUid
+                            AND clazzEnrolmentRole = :oldRole
+                            AND CAST(clazzEnrolmentActive AS INTEGER) = 1
+                      LIMIT 1), 0)""")
+    abstract suspend fun updateClazzEnrolmentRole(personUid: Long, clazzUid: Long, newRole: Int, oldRole: Int): Int
 
     companion object {
 

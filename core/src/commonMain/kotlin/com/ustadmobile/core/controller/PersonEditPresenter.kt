@@ -263,24 +263,26 @@ class PersonEditPresenter(context: Any,
                     ))
 
                     val popUpToViewName = arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.CURRENT_DEST
+                    accountManager.activeAccount = umAccount
+
                     if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)) {
                         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                                RegisterAgeRedirectView.VIEW_NAME, true)
+                            RegisterAgeRedirectView.VIEW_NAME, true)
                         nextDestination = "RegisterMinorWaitForParent"
                         val args = mutableMapOf<String, String>().also {
                             it.put(RegisterMinorWaitForParentView.ARG_USERNAME,
-                                    entity.username ?: "")
+                                entity.username ?: "")
                             it.put(RegisterMinorWaitForParentView.ARG_PARENT_CONTACT,
-                                    view.approvalPersonParentJoin?.ppjEmail ?: "")
+                                view.approvalPersonParentJoin?.ppjEmail ?: "")
                             it.put(RegisterMinorWaitForParentView.ARG_PASSWORD,
-                                    entity.newPassword ?: "")
+                                entity.newPassword ?: "")
                             it.putFromOtherMapIfPresent(arguments, UstadView.ARG_POPUPTO_ON_FINISH)
                         }
 
                         impl.go(RegisterMinorWaitForParentView.VIEW_NAME, args, context, goOptions)
                     }else {
                         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                                popUpToViewName, true)
+                            popUpToViewName, true)
                         accountManager.activeAccount = umAccount
                         impl.go(nextDestination, mapOf(), context, goOptions)
                     }

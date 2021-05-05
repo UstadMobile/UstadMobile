@@ -17,7 +17,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.2.0-rc01'
+        classpath 'com.android.tools.build:gradle:4.2.0'
         classpath 'com.google.gms:google-services:4.3.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
@@ -234,6 +234,18 @@ if(System.getenv("TESTSERVER_PORT") != null) {
 ext.localProperties = new Properties()
 if(project.file("local.properties").exists()) {
     ext.localProperties.load(new FileInputStream(project.file("local.properties")))
+}
+
+if(System.getenv("ACRA_HTTP_URI") != null) {
+    ext.buildConfigProperties["android.acra.url"] = System.getenv("ACRA_HTTP_URI")
+}
+
+if(System.getenv("ACRA_BASIC_LOGIN") != null) {
+    ext.buildConfigProperties["android.acra.user"] = System.getenv("ACRA_BASIC_LOGIN")
+}
+
+if(System.getenv("ACRA_BASIC_PASS") != null) {
+    ext.buildConfigProperties["android.acra.auth"] = System.getenv("ACRA_BASIC_PASS")
 }
 
 /**

@@ -5,7 +5,7 @@
 
     <data>
         <variable
-            name="code"
+            name="joinCode"
             type="String" />
 
         <variable
@@ -15,6 +15,18 @@
         <variable
             name="entityType"
             type="String" />
+        
+        <variable
+            name="buttonEnabled"
+            type="boolean" />
+        
+        <variable
+            name="buttonLabel"
+            type="String" />
+        
+        <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.JoinWithCodePresenter" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -49,9 +61,27 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@={code}"
+                android:text="@={joinCode}"
+                android:enabled="@{buttonEnabled}"
                 android:hint="@{String.format(@string/entity_code, entityType)}" />
         </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/join_button"
+            android:enabled="@{buttonEnabled}"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginTop="@dimen/dimen_20dp"
+            android:backgroundTint="?colorSecondary"
+            android:onClick="@{() -> presenter.handleClickDone(joinCode)}"
+            android:padding="@dimen/dimen_20dp"
+            android:text="@{buttonLabel}"
+            android:textColor="?colorOnSecondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/code_input_textinputlayout"
+            tools:text="@string/join_class" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

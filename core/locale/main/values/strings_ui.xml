@@ -1005,4 +1005,37 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="almost_done">Almost done</string>
 
+    <!--
+    Shown to users when we ask them to choose an account
+    -->
+    <string name="select_account">Select account</string>
+
+    <string name="opening_link">Opening link: %1$s</string>
+
+    <!--
+    When the user starts the app using a link, the app has to ask the user which account they
+    want to use to continue. This message is shown above a list of accounts that the user could
+    use to open a link. Links can be to a piece of content, to join a class, etc.
+    -->
+    <string name="select_account_to_continue">Select account to continue</string>
+
+    <!--
+    When the user selects to join a class (e.g. using a link or using the class code shared by
+    the teacher/admin), the user will be shown this error message if they are already enroled in
+    the class.
+    -->
+    <string name="you_are_already_in_class">Error: you are already enroled in the class: %1$s</string>
+
+
+    <!--
+    When the user selects to join a school (e.g. using a link or using the school code shared by
+    the teacher/admin), the user will be shown this error message if they are already enroled in
+    the class.
+    -->
+    <string name="you_are_already_in_school">Error: you are already enroled in the school: %1$s</string>
+
+    <string name="join_class">Join class</string>
+
+    <string name="join_school">Join school</string>
+
 </resources>

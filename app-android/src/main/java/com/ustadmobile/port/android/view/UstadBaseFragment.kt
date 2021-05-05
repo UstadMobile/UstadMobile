@@ -103,15 +103,22 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
             viewLifecycleOwner.lifecycle.addObserver(it)
         }
 
-        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<String>(ARG_SNACK_MESSAGE)?.observe(
+        val savedStateHandle = findNavController().currentBackStackEntry?.savedStateHandle
+        savedStateHandle?.getLiveData<String>(ARG_SNACK_MESSAGE)?.observe(
                 viewLifecycleOwner) {
             showSnackBar(it)
         }
+
+        arguments?.getString(ARG_SNACK_MESSAGE)?.also { snackBarMsg ->
+            val snackbarShown: String? = savedStateHandle?.get(KEY_ARG_SNACKBAR_SHOWN)
+            if(snackbarShown?.toBoolean() != true) {
+                showSnackBar(snackBarMsg)
+                savedStateHandle?.set(KEY_ARG_SNACKBAR_SHOWN, true.toString())
+            }
+        }
+
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
@@ -139,12 +146,12 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
 
     companion object {
 
-
-
         /**
          * The key to use in the SavedStateHandle to save the result
          */
         const val ARG_RESULT_DEST_KEY = "result_key"
+
+        const val KEY_ARG_SNACKBAR_SHOWN = "argSnackbarShown"
 
     }
 
