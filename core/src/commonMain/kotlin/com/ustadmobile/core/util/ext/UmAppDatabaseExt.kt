@@ -96,12 +96,22 @@ suspend fun UmAppDatabase.createPersonGroupAndMemberWithEnrolment(entity: ClazzE
  * Enrol the given person into the given class. The effective date of joining is midnight as per
  * the timezone of the class (e.g. when a teacher adds a student to the system who just joined and
  * wants to mark their attendance for the same day).
+ *
+ * @throws IllegalStateException when the person is already in the class
  */
+@Throws(AlreadyEnroledInClassException::class)
 suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Person, clazzUid: Long,
                                                               role: Int,
                                                               clazzWithSchool: ClazzWithSchool? = null): ClazzEnrolmentWithPerson {
     val clazzWithSchoolVal = clazzWithSchool ?: clazzDao.getClazzWithSchool(clazzUid)
         ?: throw IllegalArgumentException("Class does not exist")
+
+    val existingEnrolments = clazzEnrolmentDao.getAllClazzEnrolledAtTimeAsync(clazzUid,
+        systemTimeInMillis(), 0, personToEnrol.personUid)
+
+    if(existingEnrolments.isNotEmpty()) {
+        throw AlreadyEnroledInClassException(existingEnrolments.first())
+    }
 
     val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
     val joinTime = DateTime.now().toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
@@ -138,11 +148,18 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Per
  * the timezone of the school (e.g. when a teacher adds a student to the system who just joined and
  * wants to mark their attendance for the same day).
  */
+@Throws(AlreadyEnroledInSchoolException::class)
 suspend fun UmAppDatabase.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol: Person, schoolUid: Long,
                                                               role: Int)
         : SchoolMemberWithPerson {
     val schoolVal =  schoolDao.findByUidAsync(schoolUid)
-    ?: throw IllegalArgumentException("School does not exist")
+        ?: throw IllegalArgumentException("School does not exist")
+
+    val existingEnrolment = schoolMemberDao.findBySchoolAndPersonAndRole(schoolUid,
+        personToEnrol.personUid, 0, systemTimeInMillis())
+
+    if(existingEnrolment.isNotEmpty())
+        throw AlreadyEnroledInSchoolException(existingEnrolment.first())
 
     val schoolTimeZone = schoolVal.schoolTimeZone?: "UTC"
     val joinTime = DateTime.now().toOffsetByTimezone(schoolTimeZone).localMidnight.utc.unixMillisLong

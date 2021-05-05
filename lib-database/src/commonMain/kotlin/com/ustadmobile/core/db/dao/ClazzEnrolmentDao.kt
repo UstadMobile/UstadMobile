@@ -92,14 +92,18 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     """)
     abstract suspend fun findAllClazzesByPersonWithClazzAsListAsync(personUid: Long): List<ClazzEnrolmentWithClazz>
 
-    @Query("""SELECT ClazzEnrolment.*, Person.*
-        FROM ClazzEnrolment
-        LEFT JOIN Person ON ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
+    @Query("""
+        SELECT ClazzEnrolment.*, Person.*
+          FROM ClazzEnrolment
+    LEFT JOIN Person ON ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
-        AND :date BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft
-        AND (:roleFilter = 0 OR ClazzEnrolment.clazzEnrolmentRole = :roleFilter)
+              AND :date BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
+              AND ClazzEnrolment.clazzEnrolmentDateLeft
+              AND (:roleFilter = 0 OR ClazzEnrolment.clazzEnrolmentRole = :roleFilter)
+              AND (:personUidFilter = 0 OR ClazzEnrolment.clazzEnrolmentPersonUid)
     """)
-    abstract suspend fun getAllClazzEnrolledAtTimeAsync(clazzUid: Long, date: Long, roleFilter: Int): List<ClazzEnrolmentWithPerson>
+    abstract suspend fun getAllClazzEnrolledAtTimeAsync(clazzUid: Long, date: Long, roleFilter: Int,
+        personUidFilter: Long = 0): List<ClazzEnrolmentWithPerson>
 
     @Query("SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentUid = :uid")
     abstract suspend fun findByUid(uid: Long): ClazzEnrolment?
