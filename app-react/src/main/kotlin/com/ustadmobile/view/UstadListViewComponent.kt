@@ -149,6 +149,7 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UstadBaseCompone
                             backgroundColor = Color(if(selectedEntries.indexOf(entry) != -1)
                                 umTheme.theme.palette.action.selected
                             else umTheme.theme.palette.background.paper)
+                            width = LinearDimension("100%")
                         }
                         attrs {
                             alignItems = MListItemAlignItems.flexStart

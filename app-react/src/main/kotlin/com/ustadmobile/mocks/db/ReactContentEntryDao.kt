@@ -4,12 +4,13 @@ import androidx.paging.DataSource
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.util.DummyDataPreload.Companion.TAG_ENTRIES
 import com.ustadmobile.util.UmReactUtil.loadList
 import kotlinx.serialization.builtins.ListSerializer
 
 class ReactContentEntryDao: ContentEntryDao() {
 
-    private val sourcePath = "entries.json"
+    private val sourcePath = TAG_ENTRIES
 
     override suspend fun insertListAsync(entityList: List<ContentEntry>) {
         TODO("Not yet implemented")

@@ -22,13 +22,12 @@ class RedirectComponent (props: RProps): UstadBaseComponent<RProps, RState>(prop
 
     private var nextDestination: String? = null
 
-    private var arguments = mutableMapOf<String, String>()
+    private var arguments = mutableMapOf(ARG_WEB_PLATFORM to true.toString())
 
     override fun componentDidMount() {
         val viewName = getPathName()
         if(viewName != null){
-            arguments[ARG_NEXT] = "${viewName}?${getArgs(mapOf(ARG_WEB_PLATFORM 
-                    to true.toString())).toQueryString()}"
+            arguments[ARG_NEXT] = "${viewName}?${getArgs().toQueryString()}"
         }
         mPresenter = RedirectPresenter(this, arguments, this, di)
         mPresenter.onCreate(mapOf())

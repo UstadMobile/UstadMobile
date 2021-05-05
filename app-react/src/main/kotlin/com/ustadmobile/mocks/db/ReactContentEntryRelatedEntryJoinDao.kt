@@ -7,9 +7,7 @@ import kotlinx.serialization.builtins.ListSerializer
 
 class ReactContentEntryRelatedEntryJoinDao: ContentEntryRelatedEntryJoinDao() {
 
-    private val languagePath = "languages.json"
-
-    private val relationPath = "entry_relation.json"
+    private val relationPath = ""
 
     override fun publicContentEntryRelatedEntryJoins(): List<ContentEntryRelatedEntryJoin> {
         TODO("Not yet implemented")

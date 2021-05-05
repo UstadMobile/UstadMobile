@@ -176,7 +176,7 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
     }
 
     val entryListItemContainer by css {
-        width = LinearDimension.auto
+        width = LinearDimension("100vw")
         display = Display.flex
         flexDirection = FlexDirection.row
     }
@@ -194,14 +194,14 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
     }
 
     val entryListItemInfo by css {
-        width = LinearDimension.auto
+        width = LinearDimension.inherit
         display = Display.flex
         flexDirection = FlexDirection.column
     }
 
 
     val horizontalList by css {
-        width = LinearDimension.auto
+        width = LinearDimension("100%")
         backgroundColor = Color(theme.palette.background.paper)
     }
 
@@ -297,7 +297,7 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
     val responsiveIframe by css{
         overflow = Overflow.hidden
         width = LinearDimension("100%")
-        minHeight = LinearDimension("100%")
+        minHeight = LinearDimension("170%")
         backgroundColor = Color.transparent
         border = "0px"
     }

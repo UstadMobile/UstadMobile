@@ -9,7 +9,7 @@
     "app.register_allowed": "true",
     "first_dest": "ContentEntryListView",
     "app.guest_allowed": "true",
-    "apiUrl": "http://192.168.31.22:8087/",
+    "apiUrl": "https://maktabmobile.org/demoapp/",
     "doordb.endpoint.url": "http://localhost:8087/",
     "app.register_before_open": "true"
 }

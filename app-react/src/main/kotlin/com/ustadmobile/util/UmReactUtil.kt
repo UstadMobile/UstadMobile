@@ -1,5 +1,6 @@
 package com.ustadmobile.util
 
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import kotlinx.browser.window
 import kotlinx.coroutines.await
 import kotlinx.css.pct
@@ -15,8 +16,6 @@ object UmReactUtil {
     val zeroPx = 0.px
 
     var fullWidth = 100.pct
-
-    var placeHolderImage = "https://www.openhost.co.za/download/bootmin/img/avatar_lg.jpg"
 
     /**
      * Check if the device theme setting is current on dark mode.
@@ -34,9 +33,8 @@ object UmReactUtil {
             .map { entry -> entry[0] as String to entry[1] }.toMap() as T
     }
 
-    suspend fun <T> loadList(sourcePath: String,strategy: DeserializationStrategy<List<T>>): List<T> {
-        val res = (window.fetch(sourcePath) as Promise<dynamic>).await()
-        val data = (res.text() as Promise<String>).await()
-        return Json.decodeFromString(strategy,data).toMutableList()
+    fun <T> loadList(sourcePath: String,strategy: DeserializationStrategy<List<T>>): List<T> {
+        val data = UstadMobileSystemImpl.instance.getAppPref(sourcePath, this)
+        return if(data != null) Json.decodeFromString(strategy,data).toMutableList() else listOf()
     }
 }

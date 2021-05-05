@@ -127,7 +127,6 @@ object StateManager{
             is UmDi -> state.copy(di = action.di)
             is ToolbarTitle -> state.copy(title = action.title)
             is UmTheme -> state.copy(theme = action.theme)
-            is DummyStore -> state.copy(dummyStore = action)
             is SnackBarState -> state.copy(snackBarActionLabel = action.actionLabel,
                 snackBarMessage = action.message, onFabClicked = action.onClick)
             is ToolbarTabs -> state.copy(tabLabels = if(action.labels.isEmpty()) state.tabLabels else action.labels,

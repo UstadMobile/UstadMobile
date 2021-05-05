@@ -29,6 +29,8 @@ import com.ustadmobile.util.CssStyleManager.entryListItemContainer
 import com.ustadmobile.util.CssStyleManager.entryListItemImage
 import com.ustadmobile.util.CssStyleManager.entryListItemInfo
 import com.ustadmobile.util.RouteManager.getArgs
+import com.ustadmobile.util.UmReactUtil
+import com.ustadmobile.util.ext.renderEntryThumbnailImg
 import kotlinx.css.*
 import org.w3c.dom.Node
 import react.RBuilder
@@ -91,9 +93,8 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
             css(entryListItemContainer)
             styledImg {
                 css { +entryListItemImage }
-                attrs{
-                    src = item.thumbnailUrl.toString()
-                }}
+                attrs{ renderEntryThumbnailImg(item) }
+            }
             styledDiv {
                 css{+entryListItemInfo}
                 mTypography(item.title,variant = MTypographyVariant.h6){
@@ -104,6 +105,9 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
                 mTypography(item.description, variant = MTypographyVariant.body1, paragraph = true)
 
                 mGridContainer(spacing= MGridSpacing.spacing1){
+                    css{
+                        display = if(item.leaf) Display.flex else Display.none
+                    }
                     val messageId = CONTENT_ENTRY_TYPE_LABEL_MAP[item.contentTypeFlag]?:0
                     val icon = CONTENT_ENTRY_TYPE_ICON_MAP[item.contentTypeFlag]?:""
                     mGridItem {

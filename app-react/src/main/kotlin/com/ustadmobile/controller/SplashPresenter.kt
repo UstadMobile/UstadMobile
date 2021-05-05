@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.util.DummyDataPreload
+import com.ustadmobile.util.DummyDataPreload.Companion.TAG_ENTRIES
 import com.ustadmobile.util.StateManager
 import com.ustadmobile.util.UmReactUtil.loadMapFromLocalFile
 import com.ustadmobile.view.SplashView
@@ -33,10 +34,9 @@ class SplashPresenter(private val view: SplashView): DIAware{
         val loaded = (impl.getAppPref(LOADED_TAG, this)?:"false").toBoolean()
         view.appName = impl.getString(MessageID.app_name,this)
         val preload = DummyDataPreload(accountManager.activeAccount.endpointUrl, di)
-        if(!loaded){
+        if(!loaded || impl.getAppPref(TAG_ENTRIES, this) == null){
             preload.verifyAndImportEntries(::goToNext)
         }
-
         if(loaded){
             timerId = window.setTimeout({ goToNext()}, 200)
         }

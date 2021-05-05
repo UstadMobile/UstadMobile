@@ -21,6 +21,7 @@ import com.ustadmobile.util.CssStyleManager.entryDetailComponentEntryImage
 import com.ustadmobile.util.CssStyleManager.entryDetailComponentEntryImageAndButtonContainer
 import com.ustadmobile.util.RouteManager.getArgs
 import com.ustadmobile.util.ext.joinString
+import com.ustadmobile.util.ext.renderEntryThumbnailImg
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -100,9 +101,7 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
                 css{+entryDetailComponentEntryImageAndButtonContainer}
                 styledImg {
                     css{+entryDetailComponentEntryImage}
-                    attrs{
-                        src = entity?.thumbnailUrl.toString()
-                    }
+                    attrs{ entity?.let { renderEntryThumbnailImg(it) } }
                 }
 
                 mButton(systemImpl.getString(MessageID.open, this), size = MButtonSize.large
@@ -115,7 +114,7 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
             styledDiv {
                 css { +entryDetailComponentEntryExtraInfo }
 
-                mTypography(entity?.title, variant = MTypographyVariant.h4, gutterBottom = true)
+                mTypography(entity?.title, variant = MTypographyVariant.h4, gutterBottom = true){}
 
                 mTypography(
                     entity?.author?.let {

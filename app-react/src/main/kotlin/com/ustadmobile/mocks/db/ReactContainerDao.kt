@@ -5,6 +5,11 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerUidAndMimeType
 import com.ustadmobile.lib.db.entities.ContainerWithContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
+import com.ustadmobile.util.DummyDataPreload.Companion.TAG_CONTAINERS
+import com.ustadmobile.util.UmReactUtil
+import com.ustadmobile.util.UmReactUtil.loadList
+import kotlinx.serialization.builtins.ListSerializer
 
 class ReactContainerDao: ContainerDao() {
     override suspend fun insertListAsync(containerList: List<Container>) {
@@ -88,33 +93,12 @@ class ReactContainerDao: ContainerDao() {
     }
 
     override suspend fun getMostRecentContaineUidAndMimeType(contentEntry: Long): ContainerUidAndMimeType? {
-        return when(contentEntry){
-            41250L -> ContainerUidAndMimeType().apply {
-                mimeType = "application/epub+zip"
-                containerUid = 174117271391989760
-            }
-            84342L -> ContainerUidAndMimeType().apply {
-                mimeType = "application/epub+zip"
-                containerUid = 178703253267750912
-            }
-            13112L -> ContainerUidAndMimeType().apply {
-                mimeType = "application/h5p-tincan+zip"
-                containerUid = 177892100433350656
-            }
-            62506L -> ContainerUidAndMimeType().apply {
-                mimeType = "application/khan-video+zip"
-                containerUid = 178749497180626944
-            }
-            59108L -> ContainerUidAndMimeType().apply {
-                mimeType = "application/har+zip"
-            }
-            39313L -> ContainerUidAndMimeType().apply {
-                mimeType = "application/tincan+zip"
-                containerUid = 177902110044999680
-            }
-            else -> ContainerUidAndMimeType().apply{
-                mimeType = "application/webchunk+zip"
-            }
+
+        val data = loadList(TAG_CONTAINERS, ListSerializer(Container.serializer()))
+        val container = (data.first { it.containerContentEntryUid == contentEntry })
+        return ContainerUidAndMimeType().apply {
+            mimeType = container.mimeType?:""
+            containerUid = container.containerUid
         }
     }
 

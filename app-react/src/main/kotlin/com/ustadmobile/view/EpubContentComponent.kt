@@ -75,23 +75,20 @@ class EpubContentComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(m
         super.componentDidMount()
         mPresenter = EpubContentPresenter(this,getArgs(),this, di)
         mPresenter.onCreate(mapOf())
-        window.addEventListener("message", {
-            console.log(it)
-        }, false)
     }
 
 
 
     override fun RBuilder.render() {
-        spineUrls?.forEach {
-            styledIframe{
-                css{
-                    +responsiveIframe
-                }
-                attrs{
-                    sandbox = IframeSandbox.allowSameOrigin
-                    src = it
-                    onLoadFunction = {}
+        if(spineUrls != null){
+            spineUrls?.forEach {
+                styledIframe{
+                    css{ +responsiveIframe }
+                    attrs{
+                        sandbox = IframeSandbox.allowSameOrigin
+                        src = it
+                        onLoadFunction = {}
+                    }
                 }
             }
         }
