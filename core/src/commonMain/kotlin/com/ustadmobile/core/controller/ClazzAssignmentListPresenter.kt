@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -40,8 +41,8 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
         assignmentItemListener.listViewMode = mListMode
         selectedSortOption = SORT_OPTIONS[0]
         GlobalScope.launch(doorMainDispatcher()) {
-            val loggedInPersonUid = accountManager.activeAccount.personUid
-            clazzEnrolment = db.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid, clazzUid)
+            mLoggedInPersonUid = accountManager.activeAccount.personUid
+            clazzEnrolment = db.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(mLoggedInPersonUid, clazzUid)
             progressPermission = db.clazzDao.personHasPermissionWithClazz(accountManager.activeAccount.personUid, clazzUid,
                     Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)
             updateListOnView()
@@ -54,9 +55,10 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
     }
 
     private fun updateListOnView() {
-        view.list = repo.clazzAssignmentDao.getAllAssignments(clazzUid,
-                selectedSortOption?.flag ?: 0,
-                searchText.toQueryLikeParam())
+        view.list = repo.clazzAssignmentDao.getAllAssignments(clazzUid, systemTimeInMillis(),
+                mLoggedInPersonUid, selectedSortOption?.flag ?: 0,
+                searchText.toQueryLikeParam(), clazzEnrolment?.clazzEnrolmentRole ?:
+                ClazzEnrolment.ROLE_STUDENT_PENDING, Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)
     }
 
     override fun handleClickCreateNewFab() {

@@ -47,11 +47,12 @@
             android:layout_width="18dp"
             android:layout_height="18dp"
             android:scaleType="fitCenter"
-            android:translationX="8dp"
-            android:translationY="-8dp"
+            android:translationX="2dp"
+            android:translationY="-16dp"
+            android:src="@drawable/ic_content_complete"
+            android:visibility="@{assignment.studentScore.contentComplete ? View.VISIBLE : View.GONE}"
             app:layout_constraintEnd_toEndOf="@id/item_clazz_assignment_newitemicon"
-            app:layout_constraintTop_toBottomOf="@id/item_clazz_assignment_newitemicon"
-            tools:src="@drawable/ic_content_complete"/>
+            app:layout_constraintTop_toBottomOf="@id/item_clazz_assignment_newitemicon" />
 
         <TextView
             tools:text="100%"
@@ -140,7 +141,7 @@
             android:id="@+id/line3_progress_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@{@string/three_num_items_with_name_with_comma(assignment.studentProgress.notSubmittedStudents, @string/not_started, assignment.studentProgress.submittedStudents, @string/started, assignment.studentProgress.completedStudents, @string/completed)}"
+            android:text="@{@string/three_num_items_with_name_with_comma(assignment.studentProgress.notStartedStudents, @string/not_started, assignment.studentProgress.calculateStartedStudents(), @string/started, assignment.studentProgress.completedStudents, @string/completed)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/line3_deadline"
             app:layout_constraintTop_toBottomOf="@+id/line2_description"
