@@ -178,7 +178,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             }
 
             if(view.gracePeriodDate != Long.MAX_VALUE){
-                entity.caGracePeriodDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
+                entity.caGracePeriodDate = DateTime(view.gracePeriodDate).toOffsetByTimezone(timeZone)
                         .localMidnight.utc.unixMillisLong + view.gracePeriodTime
             }
 

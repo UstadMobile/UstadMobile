@@ -33,7 +33,10 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                           FROM CtePermissionCheck)
                  THEN (SELECT COUNT(DISTINCT clazzEnrolmentPersonUid)
                          FROM ClazzEnrolment
-                        WHERE ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft 
+                         
+                        WHERE ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                          AND ClazzEnrolment.clazzEnrolmentActive
+                          AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft 
                           AND NOT EXISTS 
                               (SELECT statementUid 
                                  FROM StatementEntity 
