@@ -126,9 +126,11 @@ class ClazzAssignmentEditPresenter(context: Any,
         val timeZone = clazzWithSchool.effectiveTimeZone()
         view.timeZone = timeZone
 
-        val localStartDateMidnight = DateTime(entity.caStartDate).toLocalMidnight(timeZone).unixMillisLong
-        view.startDate = localStartDateMidnight
-        view.startTime = entity.caStartDate - localStartDateMidnight
+        if(entity.caStartDate != 0L){
+            val localStartDateMidnight = DateTime(entity.caStartDate).toLocalMidnight(timeZone).unixMillisLong
+            view.startDate = localStartDateMidnight
+            view.startTime = entity.caStartDate - localStartDateMidnight
+        }
 
         if(entity.caDeadlineDate != Long.MAX_VALUE){
             val localDeadlineDateMidnight = DateTime(entity.caDeadlineDate).toLocalMidnight(timeZone).unixMillisLong
@@ -167,8 +169,12 @@ class ClazzAssignmentEditPresenter(context: Any,
 
             val timeZone = view.timeZone ?: "UTC"
 
-            entity.caStartDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
-                    .localMidnight.utc.unixMillisLong + view.startTime
+            if(view.startDate != 0L){
+                entity.caStartDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
+                        .localMidnight.utc.unixMillisLong + view.startTime
+            }else{
+                entity.caStartDate = 0L
+            }
 
             if(view.deadlineDate != Long.MAX_VALUE){
                 entity.caDeadlineDate = DateTime(view.deadlineDate).toOffsetByTimezone(timeZone)

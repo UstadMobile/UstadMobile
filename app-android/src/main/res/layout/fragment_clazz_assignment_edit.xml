@@ -6,8 +6,10 @@
     <data>
         <import type="android.view.View"/>
         <import type="android.text.InputType" />
+        <import type="android.content.Context" />
         <import type="com.ustadmobile.lib.db.entities.ClazzAssignment"/>
         <import type="com.ustadmobile.core.util.IdOption"/>
+        <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener"/>
 
@@ -134,9 +136,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_8dp"
-                android:hint="@string/instructions_for_students"
+                android:hint="@{StringExtKt.optional(context, @string/instructions_for_students)}"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:hintEnabled="true"
+                tools:hint="@string/instructions_for_students"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -161,7 +164,8 @@
                 android:layout_marginVertical="@dimen/dimen_16dp"
                 app:endIconMode="clear_text"
                 app:layout_constraintStart_toStartOf="parent"
-                android:hint="@string/deadline"
+                android:hint="@{StringExtKt.optional(context, @string/deadline)}"
+                tools:hint="@string/deadline"
                 app:layout_constraintTop_toBottomOf="@+id/ca_edit_description_textinput"
                 app:layout_constraintEnd_toStartOf="@+id/ca_deadline_datetime_textinput">
 
@@ -184,8 +188,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_16dp"
-                app:errorEnabled="@{caDeadlineError != null}"
-                app:errorText="@{caDeadlineError}"
                 app:endIconMode="clear_text"
                 app:layout_constraintBottom_toBottomOf="@+id/ca_deadline_date_textinput"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -248,8 +250,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_16dp"
-                app:errorEnabled="@{caStartDateError != null}"
-                app:errorText="@{caStartDateError}"
                 app:layout_constraintBottom_toBottomOf="@+id/ca_start_date_textinput"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:hint="@string/time"
@@ -346,8 +346,6 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:errorEnabled="@{caGracePeriodError != null}"
-                app:errorText="@{caGracePeriodError}"
                 android:visibility="@{lateSubmissionVisibility}"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_16dp"
