@@ -68,7 +68,9 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                        FROM ClazzAssignmentContentJoin 
                                       WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid)) 
                   ELSE 0 END) AS completedStudents, 
-                  Source.resultScore, Source.resultMax, Source.contentComplete, Source.progress
+                  COALESCE(Source.resultScore,0) As resultScore , COALESCE(Source.resultMax,0) AS resultMax, 
+                  COALESCE(Source.contentComplete,'FALSE') AS contentComplete , 
+                  COALESCE(Source.progress, 0) AS progress
         
         
         
