@@ -1,3 +1,4 @@
+/*
 
 package com.ustadmobile.core.controller
 
@@ -23,11 +24,13 @@ import com.ustadmobile.core.util.ext.captureLastEntityValue
 import org.kodein.di.DI
 
 
+*/
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
  *
  * Note:
- */
+ *//*
+
 class ClazzAssignmentEditPresenterTest {
 
     @JvmField
@@ -82,7 +85,8 @@ class ClazzAssignmentEditPresenterTest {
         val existingEntitiesLive = clientDbRule.db.clazzAssignmentDao.findAllLive()
 
         //TODO: wait until the presenter has saved the entity e.g.
-        /*
+        */
+/*
         runBlocking {
             db.waitUntil(5000, listOf("@Entity")) {
                 db.clazzAssignmentDao.findBySomeCondition()?.someField == initialEntity.someField
@@ -92,7 +96,8 @@ class ClazzAssignmentEditPresenterTest {
         val entitySaved = db.clazzAssignmentDao.findBySomeCondition()
         Assert.assertEquals("Entity was saved to database", "Bob",
                 entitySaved.someNameField)
-        */
+        *//*
+
     }
 
     @Test
@@ -127,4 +132,4 @@ class ClazzAssignmentEditPresenterTest {
     }
 
 
-}
+}*/

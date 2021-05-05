@@ -1,3 +1,4 @@
+/*
 
 package com.ustadmobile.core.controller
 
@@ -18,11 +19,13 @@ import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import org.kodein.di.DI
 
+*/
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
  *
  * Note:
- */
+ *//*
+
 class ClazzAssignmentDetailOverviewPresenterTest {
 
     @JvmField
@@ -108,4 +111,4 @@ class ClazzAssignmentDetailOverviewPresenterTest {
             eq(mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())), any())
     }
 
-}
+}*/
