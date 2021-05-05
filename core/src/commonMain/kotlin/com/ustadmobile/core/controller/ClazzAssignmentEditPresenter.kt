@@ -173,6 +173,8 @@ class ClazzAssignmentEditPresenter(context: Any,
             if(view.deadlineDate != Long.MAX_VALUE){
                 entity.caDeadlineDate = DateTime(view.deadlineDate).toOffsetByTimezone(timeZone)
                         .localMidnight.utc.unixMillisLong + view.deadlineTime
+            }else{
+                entity.caDeadlineDate = Long.MAX_VALUE
             }
 
             if(view.gracePeriodDate != Long.MAX_VALUE){

@@ -28,7 +28,6 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
 
     private var clazzEnrolment: ClazzEnrolment? = null
     private var clazzUid: Long = 0L
-    private var progressPermission = false
 
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
@@ -43,8 +42,6 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
         GlobalScope.launch(doorMainDispatcher()) {
             mLoggedInPersonUid = accountManager.activeAccount.personUid
             clazzEnrolment = db.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(mLoggedInPersonUid, clazzUid)
-            progressPermission = db.clazzDao.personHasPermissionWithClazz(accountManager.activeAccount.personUid, clazzUid,
-                    Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)
             updateListOnView()
         }
     }

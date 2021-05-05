@@ -77,10 +77,12 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
     }
 
     private var deadlineDateListener: View.OnClickListener? = View.OnClickListener {
+        deadlineDate = Long.MAX_VALUE
         mBinding?.deadlineDate = Long.MAX_VALUE
     }
 
     private var deadlineDateTimeListener: View.OnClickListener? = View.OnClickListener {
+        deadlineTime = 0
         mBinding?.deadlineTime = 0
     }
 

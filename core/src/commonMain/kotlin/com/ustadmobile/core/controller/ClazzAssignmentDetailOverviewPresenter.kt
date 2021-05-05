@@ -23,8 +23,6 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
 
     val clazzCommentListener: CommentListener = object : CommentListener {
 
-
-
     }
 
     val privateCommentListener: CommentListener = object : CommentListener {

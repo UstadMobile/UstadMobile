@@ -8,8 +8,12 @@
 
         <import type="android.view.View"/>
 
-        <variable name="commentHandler"
-            type="com.ustadmobile.port.android.view.Comment" />
+        <variable name="openSheet"
+            type="com.ustadmobile.port.android.view.OpenSheetListener" />
+
+        <variable
+            name="publicComment"
+            type="boolean" />
 
         <variable
             name="personUid"
@@ -47,6 +51,7 @@
             android:layout_marginVertical="@dimen/dimen_16dp"
             android:hint="@{hintText}"
             android:inputType="textCapSentences|textMultiLine"
+            android:onClick="@{(view) -> openSheet.open(publicComment)}"
             android:singleLine="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

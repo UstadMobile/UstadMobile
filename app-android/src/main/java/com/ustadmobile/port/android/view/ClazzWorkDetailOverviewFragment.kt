@@ -193,7 +193,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
         //13 - New class comment component
         newPublicCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(
-                this,
+                null,
                 requireContext().getString(R.string.add_class_comment), true)
         newPublicCommentRecyclerAdapter?.visible = true
 
@@ -214,7 +214,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
         //17 - New Private comments section:
         newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(
-                this,
+                null,
                 requireContext().getString(R.string.add_private_comment), false)
         newPrivateCommentRecyclerAdapter?.visible = false
 

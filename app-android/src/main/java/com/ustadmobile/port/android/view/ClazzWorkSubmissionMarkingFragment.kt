@@ -143,7 +143,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<PersonWithClazzWorkA
 
 
         newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(
-                this,
+                null,
                 requireContext().getString(R.string.add_private_comment), false
         )
         newPrivateCommentRecyclerAdapter?.visible = true

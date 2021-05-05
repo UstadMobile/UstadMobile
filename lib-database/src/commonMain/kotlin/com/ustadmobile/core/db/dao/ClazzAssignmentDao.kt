@@ -21,7 +21,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                 
         SELECT ClazzAssignment.*, 
         
-        
+           (SELECT hasPermission FROM CtePermissionCheck) AS hasMetricsPermission,
             (SELECT COUNT(*) 
                         FROM ClazzEnrolment 
                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
@@ -90,14 +90,14 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                                                         LEFT JOIN ClazzAssignment 
                                                                         ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
                                                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
-                                                                   AND (:role != ${ClazzEnrolment.ROLE_STUDENT} OR statementPersonUid = :accountPersonUid)
+                                                                   AND (:role = ${ClazzEnrolment.ROLE_STUDENT} AND statementPersonUid = :accountPersonUid)
                                                                    AND contentEntryRoot 
                                                                    AND StatementEntity.timestamp 
                                                                         BETWEEN ClazzAssignment.caStartDate
                                                                             AND ClazzAssignment.caGracePeriodDate
                                                              ORDER BY resultScoreScaled DESC LIMIT 1)
      	  ) AS ResultSource) AS Source ON ClazzAssignment.caUid = Source.assignmentUid
-                 
+                    JOIN Clazz ON Clazz.clazzUid = :clazzUid
             WHERE caActive
               AND ClazzAssignment.caClazzUid = :clazzUid
               AND (ClazzAssignment.caTitle LIKE :searchText 

@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -39,7 +38,8 @@ interface ClazzAssignmentDetailOverviewFragmentEventHandler {
 }
 
 class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignment>(),
-        ClazzAssignmentDetailOverviewView, ClazzAssignmentDetailFragmentEventHandler{
+        ClazzAssignmentDetailOverviewView, ClazzAssignmentDetailFragmentEventHandler,
+        OpenSheetListener {
 
 
     private var dbRepo: UmAppDatabase? = null
@@ -126,7 +126,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
             this.classCommentsObserver = PagedListSubmitObserver(it)
         }
 
-        newClassCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(null,
+        newClassCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_class_comment),
                 true).apply {
             visible = false
@@ -145,7 +145,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         }
 
         //17 - New Private comments section:
-        newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(null,
+        newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_private_comment), false).apply{
                     visible = false
         }
@@ -255,14 +255,13 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
         }
 
-  /*  override fun addNewComment2(view: View, entityType: Int, entityUid: Long, comment: String, public: Boolean, to: Long, from: Long) {
-        (view.parent as View).findViewById<EditText>(R.id.item_comment_new_comment_et).setText("")
-        mPresenter?.addComment(comment)
-    }
 
     override fun open(publicComment: Boolean) {
-        val sendCommentSheet = CommentsBottomSheet()
+        val sendCommentSheet = CommentsBottomSheet(publicComment,
+                if(publicComment)  requireContext().getString(R.string.add_class_comment)
+                else requireContext().getString(R.string.add_private_comment),
+                accountManager.activeAccount.personUid)
         sendCommentSheet.show(childFragmentManager, sendCommentSheet.tag)
-    }*/
+    }
 
 }

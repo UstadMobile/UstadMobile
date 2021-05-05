@@ -13,6 +13,8 @@ class StudentAssignmentProgress {
 
     var totalStudents: Int = 0
 
+    var hasMetricsPermission: Boolean = false
+
     fun calculateStartedStudents(): Int {
         startedStudents = totalStudents - completedStudents
         return startedStudents

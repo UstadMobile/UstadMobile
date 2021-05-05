@@ -4,14 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentClazzWorkWithSubmissionDetailBinding
 import com.toughra.ustadmobile.databinding.ItemCommentNewSendBinding
 
-class CommentsBottomSheet() : BottomSheetDialogFragment() {
+class CommentsBottomSheet(val publicComment: Boolean, val hintText: String, val personUid: Long) : BottomSheetDialogFragment() {
 
     private var mBinding: ItemCommentNewSendBinding? = null
     private var rootView: View? = null
@@ -22,6 +18,8 @@ class CommentsBottomSheet() : BottomSheetDialogFragment() {
         mBinding = ItemCommentNewSendBinding.inflate(inflater, container,
                 false).also {
             rootView = it.root
+            it.personUid = personUid
+            it.hintText = hintText
         }
 
         return rootView

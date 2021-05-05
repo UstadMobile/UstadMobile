@@ -4,11 +4,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemCommentNewBinding
-import com.ustadmobile.core.controller.CommentListener
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
 class NewCommentRecyclerViewAdapter(
-        var itemListener: CommentListener?,
+        var itemListener: OpenSheetListener?,
         hintText: String? = null, commentPublic: Boolean)
     : SingleItemRecyclerViewAdapter<NewCommentRecyclerViewAdapter.NewCommentViewHolder>() {
 
@@ -18,15 +17,16 @@ class NewCommentRecyclerViewAdapter(
             viewHolder?.itemBinding?.hintText = value
         }
 
-    private var newCommentHandler: CommentListener? = itemListener
+    private var openSheetHandler: OpenSheetListener? = itemListener
         set(value) {
             field = value
-            viewHolder?.itemBinding?.commentHandler = newCommentHandler
+            viewHolder?.itemBinding?.openSheet = openSheetHandler
         }
 
     private var publicMode: Boolean = commentPublic
         set(value){
             field = value
+            viewHolder?.itemBinding?.publicComment =  value
         }
 
     class NewCommentViewHolder(var itemBinding: ItemCommentNewBinding)
@@ -38,8 +38,9 @@ class NewCommentRecyclerViewAdapter(
         return NewCommentViewHolder(
                 ItemCommentNewBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
-                    it.commentHandler = newCommentHandler
+                    it.openSheet = openSheetHandler
                     it.hintText = hintText
+                    it.publicComment = publicMode
                 })
     }
 
