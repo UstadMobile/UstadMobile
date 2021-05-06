@@ -81,14 +81,16 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        titleLifecycleObserver = TitleLifecycleObserver(null, (activity as? AppCompatActivity)?.supportActionBar).also {
-            viewLifecycleOwner.lifecycle.addObserver(it)
-        }
+        titleLifecycleObserver =
+            TitleLifecycleObserver(null, (activity as? AppCompatActivity)?.supportActionBar).also {
+                viewLifecycleOwner.lifecycle.addObserver(it)
+            }
 
-        if(fabManagementEnabled) {
+        if (fabManagementEnabled) {
             fabManager = FabManagerLifecycleObserver(
-                    (activity as? UstadListViewActivityWithFab)?.activityFloatingActionButton,
-                false, 0, null).also {
+                (activity as? UstadListViewActivityWithFab)?.activityFloatingActionButton,
+                false, 0, null
+            ).also {
                 viewLifecycleOwner.lifecycle.addObserver(it)
             }
         }
@@ -98,22 +100,29 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
         }
 
         progressBarManager = ProgressBarLifecycleObserver(
-                (activity as? UstadActivityWithProgressBar)?.activityProgressBar,
-                View.INVISIBLE).also {
+            (activity as? UstadActivityWithProgressBar)?.activityProgressBar,
+            View.INVISIBLE
+        ).also {
             viewLifecycleOwner.lifecycle.addObserver(it)
         }
 
-        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<String>(ARG_SNACK_MESSAGE)?.observe(
-                viewLifecycleOwner) {
+        val savedStateHandle = findNavController().currentBackStackEntry?.savedStateHandle
+        savedStateHandle?.getLiveData<String>(ARG_SNACK_MESSAGE)?.observe(
+            viewLifecycleOwner
+        ) {
             showSnackBar(it)
         }
 
+        arguments?.getString(ARG_SNACK_MESSAGE)?.also { snackBarMsg ->
+            val snackbarShown: String? = savedStateHandle?.get(KEY_ARG_SNACKBAR_SHOWN)
+            if(snackbarShown?.toBoolean() != true) {
+                showSnackBar(snackBarMsg)
+                savedStateHandle?.set(KEY_ARG_SNACKBAR_SHOWN, true.toString())
+            }
+        }
 
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
@@ -141,12 +150,12 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
 
     companion object {
 
-
-
         /**
          * The key to use in the SavedStateHandle to save the result
          */
         const val ARG_RESULT_DEST_KEY = "result_key"
+
+        const val KEY_ARG_SNACKBAR_SHOWN = "argSnackbarShown"
 
     }
 

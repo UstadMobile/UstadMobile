@@ -255,7 +255,7 @@ class PersonEditPresenter(context: Any,
                     val umAccount = accountManager.register(entity, serverUrl)
                     accountManager.activeAccount = umAccount
                     val goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                            arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.CURRENT_DEST,
+                            arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.ROOT_DEST,
                             true)
                     impl.go(nextDestination, mapOf(), context, goOptions)
                 } catch (e: Exception) {

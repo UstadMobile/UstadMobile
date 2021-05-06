@@ -23,22 +23,23 @@ import java.util.*
 import com.soywiz.klock.DateFormat as KlockDateFormat
 import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.core.util.ext.outcomeToString
+import com.ustadmobile.core.util.ext.systemImpl
 import java.util.concurrent.TimeUnit
 
 @BindingAdapter("textMessageId")
 fun TextView.setTextMessageId(messageId: Int) {
-    text = UstadMobileSystemImpl.instance.getString(messageId, context)
+    text = systemImpl.getString(messageId, context)
 }
 
 @BindingAdapter("hintMessageId")
 fun TextView.setHintMessageId(messageId: Int) {
-    hint = UstadMobileSystemImpl.instance.getString(messageId, context)
+    hint = systemImpl.getString(messageId, context)
 }
 
 @BindingAdapter("customFieldHint")
 fun TextView.setCustomFieldHint(customField: CustomField?) {
     hint = if (customField != null) {
-        UstadMobileSystemImpl.instance.getString(customField.customFieldLabelMessageID, context)
+        systemImpl.getString(customField.customFieldLabelMessageID, context)
     } else {
         ""
     }
@@ -46,7 +47,6 @@ fun TextView.setCustomFieldHint(customField: CustomField?) {
 
 @BindingAdapter(value = ["textBitmaskValue", "textBitmaskFlags"], requireAll = false)
 fun TextView.setBitmaskListText(textBitmaskValue: Long?, textBitmaskFlags: List<BitmaskFlag>?) {
-    val systemImpl = UstadMobileSystemImpl.instance
     if (textBitmaskValue == null || textBitmaskFlags == null)
         return
 
@@ -93,7 +93,7 @@ fun TextView.setTextMessageIdOptions(textMessageIdLookupMap: Map<Int, Int>?,
                                      fallbackMessageId: Int?, fallbackMessage: String?) {
     setTag(R.id.tag_messageidoptions_list, textMessageIdLookupMap)
     setTag(R.id.tag_messageidoption_fallback, fallbackMessage ?:
-        fallbackMessageId?.let { UstadMobileSystemImpl.instance.getString(it, context) } ?: "")
+        fallbackMessageId?.let { systemImpl.getString(it, context) } ?: "")
 
     updateFromTextMessageIdOptions()
 }
@@ -106,7 +106,7 @@ private fun TextView.updateFromTextMessageIdOptions() {
     if(currentOption != null && textMessageIdOptions != null) {
         val messageId = textMessageIdOptions[currentOption]
         if(messageId != null) {
-            text = UstadMobileSystemImpl.instance.getString(messageId, context)
+            text = systemImpl.getString(messageId, context)
         }else if(fallbackMessage != null) {
             text = fallbackMessage
         }
@@ -115,7 +115,7 @@ private fun TextView.updateFromTextMessageIdOptions() {
 
 @BindingAdapter(value= ["textMessageIdOptionSelected","textMessageIdOptions"], requireAll = true)
 fun TextView.setTextFromMessageIdList(textMessageIdOptionSelected: Int, textMessageIdOptions: List<MessageIdOption>) {
-    text = UstadMobileSystemImpl.instance.getString(textMessageIdOptions
+    text = systemImpl.getString(textMessageIdOptions
             ?.firstOrNull { it.code == textMessageIdOptionSelected }?.messageId ?: 0, context)
 }
 
@@ -126,7 +126,7 @@ fun TextView.setTextFromCustomFieldDropDownOption(customFieldValue: CustomFieldV
             ?.firstOrNull { it.customFieldValueOptionUid == customFieldValue?.customFieldValueCustomFieldValueOptionUid }
     if (selectedOption != null) {
         text = if (selectedOption.customFieldValueOptionMessageId != 0) {
-            UstadMobileSystemImpl.instance.getString(selectedOption.customFieldValueOptionMessageId, context)
+            systemImpl.getString(selectedOption.customFieldValueOptionMessageId, context)
         } else {
             selectedOption.customFieldValueOptionName ?: ""
         }
@@ -273,17 +273,17 @@ fun TextView.setResponseTextFilled(responseText: String?){
 
 @BindingAdapter("memberRoleName")
 fun TextView.setMemberRoleName(clazzEnrolment: ClazzEnrolment?) {
-    text = clazzEnrolment?.roleToString(context, UstadMobileSystemImpl.instance) ?: ""
+    text = clazzEnrolment?.roleToString(context, systemImpl) ?: ""
 }
 
 @BindingAdapter("memberEnrolmentOutcomeWithReason")
 fun TextView.setMemberEnrolmentOutcome(clazzEnrolment: ClazzEnrolmentWithLeavingReason?){
-    text = "${clazzEnrolment?.roleToString(context, UstadMobileSystemImpl.instance)} - ${clazzEnrolment?.outcomeToString(context,  UstadMobileSystemImpl.instance)}"
+    text = "${clazzEnrolment?.roleToString(context, systemImpl)} - ${clazzEnrolment?.outcomeToString(context,  systemImpl)}"
 }
 
 @BindingAdapter("clazzEnrolmentWithClazzAndOutcome")
 fun TextView.setClazzEnrolmentWithClazzAndOutcome(clazzEnrolment: ClazzEnrolmentWithClazz?){
-    text = "${clazzEnrolment?.clazz?.clazzName} (${clazzEnrolment?.roleToString(context, UstadMobileSystemImpl.instance)}) - ${clazzEnrolment?.outcomeToString(context,  UstadMobileSystemImpl.instance)}"
+    text = "${clazzEnrolment?.clazz?.clazzName} (${clazzEnrolment?.roleToString(context, systemImpl)}) - ${clazzEnrolment?.outcomeToString(context,  systemImpl)}"
 }
 
 @BindingAdapter("showisolang")

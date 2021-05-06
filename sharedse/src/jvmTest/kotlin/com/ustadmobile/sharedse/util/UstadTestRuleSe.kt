@@ -59,7 +59,7 @@ class UstadTestRule: TestWatcher() {
 
     var endpointScope: EndpointScope? = null
 
-    private var systemImplSpy: UstadMobileSystemImpl? = null
+    private lateinit var systemImplSpy: UstadMobileSystemImpl
 
     lateinit var diModule: DI.Module
 
@@ -69,7 +69,7 @@ class UstadTestRule: TestWatcher() {
 
     override fun starting(description: Description?) {
         endpointScope = EndpointScope()
-        systemImplSpy = spy(UstadMobileSystemImpl.instance)
+        systemImplSpy = spy(UstadMobileSystemImpl())
         okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp) {
             install(JsonFeature)
@@ -119,7 +119,6 @@ class UstadTestRule: TestWatcher() {
     }
 
     override fun finished(description: Description?) {
-        UstadMobileSystemImpl.instance.clearPrefs()
         httpClient.close()
     }
 

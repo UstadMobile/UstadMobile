@@ -112,7 +112,7 @@ interface UstadView {
 
         const val ARG_SERVER_URL = "serverUrl"
 
-        const val ARG_INTENT = "argIntent"
+        const val ARG_DEEPLINK = "argIntent"
 
         const val ARG_SNACK_MESSAGE = "snack_message"
 
@@ -134,6 +134,8 @@ interface UstadView {
         const val ARG_CREATE_SALE = "argCreateSale"
 
         const val ARG_NEW_SALE_DELIVERY = "argNewSaleDelivery"
+
+        const val ROOT_DEST = "root"
 
         /**
          * if after selecting from a list, need to open an edit page
@@ -169,6 +171,15 @@ interface UstadView {
         const val ARG_RESULT_DEST_ID = "result_dest"
 
         const val ARG_REGISTRATION_ALLOWED = "registration_allowed"
+
+        /**
+         * The intent message to display to the user when they open the Login or Account List screen.
+         * This tells the user what they are selecting an account for  e.g. opening link, parental
+         * registration approval, etc.
+         */
+        const val ARG_INTENT_MESSAGE = "intMsg"
+
+        const val ARG_TITLE = "title"
 
         @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
         const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L

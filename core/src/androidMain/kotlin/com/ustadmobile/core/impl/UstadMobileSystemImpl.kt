@@ -60,6 +60,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
+import org.kodein.di.android.di
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.*
@@ -131,7 +132,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         override fun doInBackground(vararg params: Boolean?): String {
             val apkFile = File(context.applicationInfo.sourceDir)
             //TODO: replace this with something from appconfig.properties
-            val impl = instance
+            val di: DI by di(context)
+            val impl : UstadMobileSystemImpl = di.direct.instance()
 
             val baseName = impl.getAppConfigString(AppConfig.KEY_APP_BASE_NAME, "", context) + "-" +
                     impl.getVersion(context)
@@ -193,7 +195,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any,
                            flags: Int, ustadGoOptions: UstadGoOptions) {
 
-        val destinationQueryPos = viewName!!.indexOf('?')
+        val destinationQueryPos = viewName.indexOf('?')
         val viewNameOnly = if (destinationQueryPos == -1) {
             viewName
         }else {
@@ -222,6 +224,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                 if(popUpToViewName != null) {
                     val popUpToDestId = if(popUpToViewName == UstadView.CURRENT_DEST) {
                         navController.currentDestination?.id ?: 0
+                    }else if(popUpToViewName == UstadView.ROOT_DEST) {
+                        navController.graph.startDestination
                     }else {
                         destinationProvider.lookupDestinationName(popUpToViewName)
                                 ?.destinationId ?: 0
@@ -622,6 +626,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
          * @return A singleton instance
          */
         @JvmStatic
+        @Deprecated("This old static getter should not be used! Use DI instead!")
         actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
 
     }

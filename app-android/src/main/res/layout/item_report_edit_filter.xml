@@ -11,6 +11,10 @@
 
         <import type="com.ustadmobile.core.util.ext.ReportFilterExtKt" />
 
+        <import type="com.ustadmobile.core.impl.UstadMobileSystemImpl" />
+
+        <import type="com.ustadmobile.core.util.ext.ViewExtKt"/>
+
         <variable
             name="filter"
             type="com.ustadmobile.lib.db.entities.ReportFilter" />
@@ -27,6 +31,7 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/report_edit_filter_parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/selectableItemBackground">
@@ -41,7 +46,7 @@
             android:layout_marginTop="@dimen/dimen_16dp"
             android:layout_marginBottom="@dimen/dimen_16dp"
             android:layout_marginEnd="@dimen/dimen_16dp"
-            android:text="@{ReportFilterExtKt.toDisplayString(filter, context)}"
+            android:text="@{ReportFilterExtKt.toDisplayString(filter, ViewExtKt.getSystemImpl(reportEditFilterParent), context)}"
             android:onClick="@{() -> eventHandler.onClickEditFilter(filter)}"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"

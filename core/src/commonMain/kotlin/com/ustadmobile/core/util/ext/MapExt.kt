@@ -1,5 +1,7 @@
 package com.ustadmobile.core.util.ext
 
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMURLEncoder
 import io.ktor.client.features.json.defaultSerializer
 import io.ktor.http.content.TextContent
@@ -12,6 +14,15 @@ import kotlinx.serialization.json.JsonPrimitive
  */
 fun Map<String, String>.toQueryString(): String {
     return this.entries.map { "${it.key}=${UMURLEncoder.encodeUTF8(it.value)}" }.joinToString(separator = "&")
+}
+
+/**
+ * Where this Map<String, String> are the arguments for a presenter, generate a deep link.
+ */
+fun Map<String, String>.toDeepLink(endpointUrl: String, viewName: String): String {
+    val endpointAndDividerAndView = UMFileUtil.joinPaths(endpointUrl,
+        UstadMobileSystemCommon.LINK_ENDPOINT_VIEWNAME_DIVIDER) + viewName
+    return endpointAndDividerAndView.appendQueryArgs(toQueryString())
 }
 
 fun <T> MutableMap<String, String>.putEntityAsJson(key: String, serializer: SerializationStrategy<T>?, entity: T?){
