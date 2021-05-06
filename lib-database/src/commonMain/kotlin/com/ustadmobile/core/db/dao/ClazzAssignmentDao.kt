@@ -56,9 +56,10 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
            (SELECT hasPermission FROM CtePermissionCheck) AS hasMetricsPermission,
             (SELECT COUNT(*) 
                         FROM ClazzEnrolment 
-                        WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
-                        AND ClazzEnrolment.clazzEnrolmentActive
-                        AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}) 
+                        WHERE ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid 
+                        AND ClazzEnrolment.clazzEnrolmentActive 
+                        AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                        AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
                         AS totalStudents, 
         
             (CASE WHEN (SELECT hasPermission 
@@ -68,6 +69,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                          
                         WHERE ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
                           AND ClazzEnrolment.clazzEnrolmentActive
+                          AND ClazzAssignment.caClazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
                           AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft 
                           AND NOT EXISTS 
                               (SELECT statementUid 
@@ -83,7 +85,9 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                          FROM CtePermissionCheck)
                   THEN (SELECT COUNT(DISTINCT clazzEnrolmentPersonUid) 
                           FROM ClazzEnrolment
-                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
+                           AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                           AND ClazzEnrolment.clazzEnrolmentActive
                            AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft 
                            AND (SELECT COUNT(DISTINCT statementContentEntryUid)
                                   FROM StatementEntity
@@ -115,7 +119,6 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
               0 as progress
              
              FROM ClazzAssignment
-                    JOIN Clazz ON Clazz.clazzUid = :clazzUid
             WHERE caActive
               AND ClazzAssignment.caClazzUid = :clazzUid
               AND (ClazzAssignment.caTitle LIKE :searchText 
