@@ -143,8 +143,12 @@ class ReportDetailPresenter(context: Any,
                 listOf()
             }
             val reportWithFilter = ReportWithSeriesWithFilters(report, series)
-            val chartData =
+            var chartData =
                 db.generateChartData(reportWithFilter, context, systemImpl, loggedInPersonUid)
+            if(chartData.seriesData.isEmpty() && view.chartData != null &&
+                    view.chartData?.seriesData?.isNotEmpty() == true){
+                chartData = view.chartData as ChartData
+            }
 
             val csvString = StringBuilder()
             //Add Report title
@@ -185,7 +189,7 @@ class ReportDetailPresenter(context: Any,
                 //Get chartData for series
                 for (everySeriesData in everyData.dataList) {
                     var formattedX =
-                        chartData?.xAxisValueFormatter?.format(everySeriesData.xAxis?:"")
+                        chartData?.xAxisValueFormatter?.format(everySeriesData.xAxis?:"0")
                     if(formattedX == null){
                         formattedX = everySeriesData.xAxis
                     }
