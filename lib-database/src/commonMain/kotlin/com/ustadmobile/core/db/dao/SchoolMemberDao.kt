@@ -28,6 +28,7 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
         AND schoolMemberPersonUid = :personUid
         AND (:role = 0 OR schoolMemberRole = :role)
         AND (:timeFilter = 0 OR :timeFilter BETWEEN SchoolMember.schoolMemberJoinDate AND SchoolMember.schoolMemberLeftDate) 
+        AND CAST(schoolMemberActive AS INTEGER) = 1
     """)
     abstract suspend fun findBySchoolAndPersonAndRole(schoolUid: Long, personUid: Long, role: Int,
         timeFilter: Long = 0): List<SchoolMember>
