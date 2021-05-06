@@ -21,6 +21,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
 import com.ustadmobile.lib.rest.ext.bindHostDatabase
 import com.ustadmobile.lib.rest.ext.ktorInitDbWithRepo
+import com.ustadmobile.lib.rest.ext.toProperties
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
@@ -95,9 +96,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
     }
 
     val tmpRootDir = Files.createTempDirectory("upload").toFile()
+    val appConfig = environment.config
 
     val dbMode = dbModeOverride ?:
-        environment.config.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
+        appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
     val dataDirPath = File(environment.config.propertyOrNull("ktor.ustad.datadir")?.getString() ?: "data")
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
 
@@ -141,18 +143,9 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
             val dbHostName = context.identifier(dbMode, singletonDbName)
-            val appConfig = environment.config
-            InitialContext().bindHostDatabase(dbHostName, Properties().apply {
-                setProperty("driver",
-                    appConfig.propertyOrNull("ktor.database.driver")?.getString() ?: "org.sqlite.JDBC")
-                setProperty("url",
-                    appConfig.propertyOrNull("ktor.database.url")?.getString()
-                        ?: "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
-                setProperty("user",
-                    appConfig.propertyOrNull("ktor.database.user")?.getString() ?: "")
-                setProperty("password",
-                    appConfig.propertyOrNull("ktor.database.password")?.getString() ?: "")
-            })
+            InitialContext().bindHostDatabase(dbHostName,
+                appConfig.config("ktor.database").toProperties(
+                    listOf("driver", "url", "user", "password")))
 
             UmAppDatabase.getInstance(Any(), dbHostName)
         }
@@ -212,6 +205,17 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {
             UploadSessionManager(context, di)
         }
+
+        try {
+            appConfig.config("mail")
+
+            bind<NotificationSender>() with singleton {
+                NotificationSender(appConfig)
+            }
+        }catch(e: Exception) {
+            Napier.w("WARNING: Email sending not configured")
+        }
+
 
         registerContextTranslator { call: ApplicationCall ->
             if(dbMode == CONF_DBMODE_SINGLETON) {

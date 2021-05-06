@@ -30,6 +30,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "io.ktor:ktor-io:$version_ktor"
+                implementation "com.soywiz.korlibs.klock:klock:$version_klock"
             }
         }
 
@@ -80,6 +81,8 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
                 implementation "io.netty:netty-tcnative-boringssl-static:$version_netty_tcnative"
+
+                implementation "com.sun.mail:jakarta.mail:$version_jakartamail"
             }
         }
 

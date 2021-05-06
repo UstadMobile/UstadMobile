@@ -1,8 +1,11 @@
 package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
+import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
+import com.ustadmobile.core.impl.UstadMobileConstants
+import com.ustadmobile.core.schedule.age
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
@@ -58,24 +61,40 @@ fun Route.PersonAuthRegisterRoute() {
             val repo: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_REPO)
             val gson: Gson by di().instance()
 
-            val personString = call.request.queryParameters["person"]
-            if(personString == null){
+            val mPerson = call.request.queryParameters["person"]?.let {
+                gson.fromJson(it, PersonWithAccount::class.java)
+            }
+
+            if(mPerson == null) {
                 call.respond(HttpStatusCode.BadRequest, "No person information provided")
                 return@post
             }
 
-            val mPerson = gson.fromJson(personString, PersonWithAccount::class.java)
+            val mParentJoin = call.request.queryParameters["parent"]?.let {
+                gson.fromJson(it, PersonParentJoin::class.java)
+            }
 
-            val person = if(mPerson.personUid != 0L) db.personDao.findByUid(mPerson.personUid)
+            val mParentContact = mParentJoin?.ppjEmail
+
+            if(DateTime(mPerson.dateOfBirth).age() < UstadMobileConstants.MINOR_AGE_THRESHOLD &&
+                    mParentContact == null) {
+                call.respond(HttpStatusCode.BadRequest,
+                    "Person registering is minor and no parental contact provided")
+                return@post
+            }
+
+
+
+            val existingPerson = if(mPerson.personUid != 0L) db.personDao.findByUid(mPerson.personUid)
             else db.personDao.findByUsername(mPerson.username)
 
-            if(person != null && (mPerson.personUid == 0L ||
-                            mPerson.personUid != 0L && mPerson.username == person.username)){
+            if(existingPerson != null && (mPerson.personUid == 0L ||
+                            mPerson.personUid != 0L && mPerson.username == existingPerson.username)){
                 call.respond(HttpStatusCode.Conflict, "Person already exists, change username")
                 return@post
             }
 
-            if(person == null) {
+            if(existingPerson == null) {
                 mPerson.apply {
                     personUid = repo.insertPersonAndGroup(mPerson).personUid
                 }
