@@ -99,8 +99,9 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
               AND :date BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
               AND ClazzEnrolment.clazzEnrolmentDateLeft
+              AND CAST(clazzEnrolmentActive AS INTEGER) = 1
               AND (:roleFilter = 0 OR ClazzEnrolment.clazzEnrolmentRole = :roleFilter)
-              AND (:personUidFilter = 0 OR ClazzEnrolment.clazzEnrolmentPersonUid)
+              AND (:personUidFilter = 0 OR ClazzEnrolment.clazzEnrolmentPersonUid = :personUidFilter)
     """)
     abstract suspend fun getAllClazzEnrolledAtTimeAsync(clazzUid: Long, date: Long, roleFilter: Int,
         personUidFilter: Long = 0): List<ClazzEnrolmentWithPerson>
