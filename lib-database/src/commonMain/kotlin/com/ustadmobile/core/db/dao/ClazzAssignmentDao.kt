@@ -80,6 +80,8 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                        WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid)
                                   AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid))
                 ELSE 0 END) AS notStartedStudents,
+                
+                  0 as startedStudents,
         
             (CASE WHEN (SELECT hasPermission 
                          FROM CtePermissionCheck)
@@ -175,6 +177,78 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
      	  ) AS ResultSource
     """)
     abstract suspend fun getStatementScoreProgressForAssignment(caUid: Long, personUid: Long): ContentEntryStatementScoreProgress?
+
+
+
+    @Query("""
+        WITH CtePermissionCheck (hasPermission) 
+          AS (SELECT EXISTS(SELECT 1 
+                FROM Clazz 
+                WHERE Clazz.clazzUid = :clazzUid 
+                AND :accountPersonUid IN (${ClazzDao.ENTITY_PERSONS_WITH_PERMISSION})))
+                
+                
+        SELECT (SELECT hasPermission FROM CtePermissionCheck) AS hasMetricsPermission,
+        
+        (SELECT COUNT(*) 
+                        FROM ClazzEnrolment 
+                        WHERE ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid 
+                        AND ClazzEnrolment.clazzEnrolmentActive 
+                        AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                        AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
+                        AS totalStudents, 
+        
+            (CASE WHEN (SELECT hasPermission 
+                          FROM CtePermissionCheck)
+                 THEN (SELECT COUNT(DISTINCT clazzEnrolmentPersonUid)
+                         FROM ClazzEnrolment
+                         
+                        WHERE ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                          AND ClazzEnrolment.clazzEnrolmentActive
+                          AND ClazzAssignment.caClazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
+                          AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft 
+                          AND NOT EXISTS 
+                              (SELECT statementUid 
+                                 FROM StatementEntity 
+                                WHERE statementContentEntryUid 
+                                   IN (SELECT cacjContentUid 
+                                        FROM ClazzAssignmentContentJoin 
+                                       WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid)
+                                  AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid))
+                ELSE 0 END) AS notStartedStudents,
+                
+                0 as startedStudents,
+        
+            (CASE WHEN (SELECT hasPermission 
+                         FROM CtePermissionCheck)
+                  THEN (SELECT COUNT(DISTINCT clazzEnrolmentPersonUid) 
+                          FROM ClazzEnrolment
+                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
+                           AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                           AND ClazzEnrolment.clazzEnrolmentActive
+                           AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft 
+                           AND (SELECT COUNT(DISTINCT statementContentEntryUid)
+                                  FROM StatementEntity
+                                 WHERE statementContentEntryUid 
+                                    IN (SELECT cacjContentUid 
+                                          FROM ClazzAssignmentContentJoin 
+                                         WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid)
+                           AND StatementEntity.contentEntryRoot 
+                           AND StatementEntity.resultCompletion
+                           AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid) = 
+                                    (SELECT COUNT(ClazzAssignmentContentJoin.cacjContentUid) 
+                                       FROM ClazzAssignmentContentJoin 
+                                      WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid)) 
+                  ELSE 0 END) AS completedStudents
+
+        
+        FROM ClazzAssignment
+       WHERE caActive
+         AND caClazzUid = :clazzUid 
+         AND caUid = :uid
+    """)
+    abstract suspend fun getStudentsProgressOnAssignment(clazzUid: Long, accountPersonUid: Long,
+                                                 uid: Long, permission: Long): StudentAssignmentProgress?
 
 
     @Update

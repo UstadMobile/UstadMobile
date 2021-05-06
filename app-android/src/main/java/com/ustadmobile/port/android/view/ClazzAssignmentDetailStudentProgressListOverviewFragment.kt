@@ -4,12 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.ConcatAdapter
 import com.ustadmobile.core.controller.ClazzAssignmentDetailStudentProgressOverviewListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
+import com.ustadmobile.lib.db.entities.StudentAssignmentProgress
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 
 
@@ -21,6 +23,8 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
     override val listPresenter: UstadListPresenter<*, in PersonWithAttemptsSummary>?
         get() = mPresenter
 
+    override var autoMergeRecyclerViewAdapter: Boolean = false
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
@@ -30,6 +34,10 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
 
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter()
         mDataRecyclerViewAdapter = ContentEntryDetailAttemptsListFragment.PersonWithStatementDisplayListRecyclerAdapter(mPresenter)
+
+        mMergeRecyclerViewAdapter = ConcatAdapter(mDataRecyclerViewAdapter)
+        mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
+
 
         return view
     }
@@ -50,7 +58,7 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
     override val displayTypeRepo: Any?
         get() = dbRepo?.clazzAssignmentDao
 
-    override var clazzAssignmentWithMetrics: ClazzAssignmentWithMetrics? = null
+    override var studentProgress: StudentAssignmentProgress? = null
         get() = field
         set(value) {
             field = value

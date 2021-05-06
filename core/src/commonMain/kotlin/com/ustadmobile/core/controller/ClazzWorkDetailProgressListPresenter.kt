@@ -2,7 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ClazzWorkDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ClazzWorkDetailProgressListView
@@ -45,9 +44,6 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
     }
 
     private fun updateListOnView() {
-
-        view.clazzWorkWithMetrics = repo.clazzWorkDao.findClazzWorkWithMetricsByClazzWorkUid(
-                filterByClazzWorkUid, systemTimeInMillis())
 
         view.list = repo.clazzWorkDao.findStudentProgressByClazzWork(
                 filterByClazzWorkUid,

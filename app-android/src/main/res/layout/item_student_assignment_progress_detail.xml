@@ -7,8 +7,8 @@
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
 
         <variable
-            name="clazzWorkWithMetrics"
-            type="com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics" />
+            name="studentProgress"
+            type="com.ustadmobile.lib.db.entities.StudentAssignmentProgress" />
 
 
     </data>
@@ -57,7 +57,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@{`` + clazzWorkWithMetrics.markedStudents}"
+            android:text="@{`` + studentProgress.notStartedStudents}"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             app:layout_constraintStart_toStartOf="@+id/item_clazzwor_progress_detail_marked_title"
             app:layout_constraintTop_toTopOf="parent"
@@ -68,7 +68,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:text="@string/marked_cap"
+            android:text="@string/not_started"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/guideline2"
             app:layout_constraintStart_toStartOf="parent"
@@ -79,7 +79,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@{`` + clazzWorkWithMetrics.submittedStudents}"
+            android:text="@{`` + studentProgress.calculateStartedStudents()}"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             app:layout_constraintStart_toStartOf="@+id/item_clazzwor_progress_detail_submitted_title"
             app:layout_constraintTop_toTopOf="parent"
@@ -91,7 +91,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginBottom="16dp"
-            android:text="@string/submitted_cap"
+            android:text="@string/started"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/guideline2"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzwor_progress_detail_submitted_value" />
@@ -101,7 +101,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@{`` + clazzWorkWithMetrics.calculateNotSubmittedStudents()}"
+            android:text="@{`` + studentProgress.completedStudents}"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             app:layout_constraintStart_toStartOf="@+id/item_clazzwor_progress_detail_not_submitted_title"
             app:layout_constraintTop_toTopOf="parent"
@@ -113,7 +113,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginBottom="16dp"
-            android:text="@string/not_submitted_cap"
+            android:text="@string/completed"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/guideline3"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzwor_progress_detail_not_submitted_value" />

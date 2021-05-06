@@ -2,34 +2,29 @@ package com.ustadmobile.port.android.view
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.databinding.ItemClazzworkProgressDetailBinding
-import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
+import com.toughra.ustadmobile.databinding.ItemStudentAssignmentProgressDetailBinding
+import com.ustadmobile.lib.db.entities.StudentAssignmentProgress
+import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
 
-class ClazzWorkMetricsRecyclerAdapter(clazzWork: ClazzWorkWithMetrics?,
-                                      visible: Boolean = false)
-    : ListAdapter<ClazzWorkWithMetrics,
-        ClazzWorkMetricsRecyclerAdapter.ClazzWorkProgressViewHolder>(
-        ClazzWorkDetailProgressListFragment.DU_CLAZZWORKWITHMETRICS) {
+class StudentAssignmentProgressRecyclerAdapter(studentProgress: StudentAssignmentProgress?)
+    : SingleItemRecyclerViewAdapter<StudentAssignmentProgressRecyclerAdapter.StudentAssignmentProgressViewHolder>() {
 
-    var visible: Boolean = visible
-        set(value) {
-            if(field == value)
-                return
-            field = value
-        }
-
-    class ClazzWorkProgressViewHolder(var itemBinding: ItemClazzworkProgressDetailBinding)
+    class StudentAssignmentProgressViewHolder(var itemBinding: ItemStudentAssignmentProgressDetailBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
 
-    private var viewHolder: ClazzWorkProgressViewHolder? = null
-    private var clazzWorkVal : ClazzWorkWithMetrics? = clazzWork
+    private var viewHolder: StudentAssignmentProgressViewHolder? = null
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzWorkProgressViewHolder {
-        return ClazzWorkProgressViewHolder(
-                ItemClazzworkProgressDetailBinding.inflate(LayoutInflater.from(parent.context),
+    private var studentAssignmentProgressVal: StudentAssignmentProgress? = studentProgress
+        set(value){
+            field = value
+            visible = value?.hasMetricsPermission ?: false
+        }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StudentAssignmentProgressViewHolder {
+        return StudentAssignmentProgressViewHolder(
+                ItemStudentAssignmentProgressDetailBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
                 })
     }
@@ -39,18 +34,9 @@ class ClazzWorkMetricsRecyclerAdapter(clazzWork: ClazzWorkWithMetrics?,
         viewHolder = null
     }
 
-    override fun getItemCount(): Int {
-        return if(visible) 1 else 0
+    override fun onBindViewHolder(holder: StudentAssignmentProgressViewHolder, position: Int) {
+        super.onBindViewHolder(holder, position)
+        holder.itemBinding.studentProgress = studentAssignmentProgressVal
     }
 
-    override fun onBindViewHolder(holder: ClazzWorkProgressViewHolder, position: Int) {
-
-        holder.itemView.tag = clazzWorkVal?.clazzWorkUid?:0L
-        if(currentList.size > 0){
-            holder.itemBinding.clazzWorkWithMetrics = getItem(0)
-            holder.itemView.tag = getItem(position).clazzWorkUid
-        }else {
-            holder.itemBinding.clazzWorkWithMetrics = clazzWorkVal
-        }
-    }
 }
