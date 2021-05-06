@@ -110,8 +110,6 @@ class ClazzWorkDetailProgressListPresenterTest {
         presenter.onCreate(null)
 
 
-        verify(clazzWorkDaoSpy, timeout(5000)).findClazzWorkWithMetricsByClazzWorkUid(
-                eq(testClazzWork.clazzWork.clazzWorkUid), any())
         verify(mockView, timeout(5000)).list = any()
 
 
