@@ -257,10 +257,11 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
 
     override fun open(publicComment: Boolean) {
-        val sendCommentSheet = CommentsBottomSheet(publicComment,
-                if(publicComment)  requireContext().getString(R.string.add_class_comment)
-                else requireContext().getString(R.string.add_private_comment),
-                accountManager.activeAccount.personUid)
+        val hintText =   if(publicComment)  requireContext().getString(R.string.add_class_comment)
+                        else requireContext().getString(R.string.add_private_comment)
+        val listener = if(publicComment) mPresenter?.newClassCommentListener else mPresenter?.newPrivateCommentListener
+        val sendCommentSheet = CommentsBottomSheet(publicComment, hintText,
+                accountManager.activeAccount.personUid, listener)
         sendCommentSheet.show(childFragmentManager, sendCommentSheet.tag)
     }
 

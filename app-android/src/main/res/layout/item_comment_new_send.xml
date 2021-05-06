@@ -5,11 +5,25 @@
 
     <data>
         <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
+        <import type="com.ustadmobile.port.android.view.CommentsBottomSheet"/>
 
-        <variable name="hintText" type="java.lang.String"/>
+        <variable name="hintText"
+            type="String"/>
+
         <variable
             name="personUid"
             type="Long" />
+        <variable
+            name="comment"
+            type="String" />
+
+        <variable
+            name="sheet"
+            type="CommentsBottomSheet" />
+
+        <variable
+            name="listener"
+            type="com.ustadmobile.core.controller.NewCommentItemListener" />
 
     </data>
 
@@ -40,6 +54,9 @@
             android:inputType="textCapSentences|textMultiLine"
             android:singleLine="false"
             android:hint="@{hintText}"
+            android:text="@={comment}"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/item_comment_new_send_ib"
             app:layout_constraintStart_toEndOf="@+id/item_comment_new_person_icon"
@@ -54,6 +71,9 @@
             android:layout_marginVertical="@dimen/dimen_16dp"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
+            app:buttonListener="@{listener}"
+            app:buttonSheet="@{sheet}"
+            app:editText="@{comment}"
             android:src="@drawable/ic_send_black_24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

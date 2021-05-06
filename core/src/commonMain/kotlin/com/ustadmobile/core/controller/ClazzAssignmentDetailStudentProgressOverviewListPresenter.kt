@@ -1,29 +1,38 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
-import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.SessionListView
+import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
+import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
+import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
 
-class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, arguments: Map<String, String>, view: ClazzAssignmentDetailStudentProgressOverviewListView,
-                                                                di: DI, lifecycleOwner: DoorLifecycleOwner,
-                                                                private val clazzAssignmentWithMetricsItemListener: DefaultClazzAssignmentDetailStudentProgressOverviewListItemListener = DefaultClazzAssignmentDetailStudentProgressOverviewListItemListener(view, ListViewMode.BROWSER, di.direct.instance(), context))
-    : UstadListPresenter<ClazzAssignmentDetailStudentProgressOverviewListView, PersonWithAttemptsSummary>(context, arguments, view, di, lifecycleOwner), ClazzAssignmentDetailStudentProgressListItemListener by clazzAssignmentWithMetricsItemListener, AttemptListListener {
+class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, arguments: Map<String, String>,
+                                                                view: ClazzAssignmentDetailStudentProgressOverviewListView,
+                                                                di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadListPresenter<ClazzAssignmentDetailStudentProgressOverviewListView,
+        PersonWithAttemptsSummary>(context, arguments, view, di, lifecycleOwner), AttemptListListener {
 
     private var filterByClazzAssignmentUid: Long = -1
+    private var clazzAssignment: ClazzAssignment? = null
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         filterByClazzAssignmentUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: -1
-        clazzAssignmentWithMetricsItemListener.listViewMode = mListMode
-        updateListOnView()
+        GlobalScope.launch(doorMainDispatcher()) {
+            clazzAssignment = withTimeoutOrNull(2000) {
+                db.clazzAssignmentDao.findByUidAsync(filterByClazzAssignmentUid)
+            }
+            mLoggedInPersonUid = accountManager.activeAccount.personUid
+            updateListOnView()
+        }
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
@@ -31,10 +40,11 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
     }
 
     private fun updateListOnView() {
+        view.studentProgress = repo.clazzAssignmentDao.getStudentsProgressOnAssignment(
+                clazzAssignment?.caClazzUid?: 0,
+                mLoggedInPersonUid, clazzAssignment?.caUid ?: filterByClazzAssignmentUid,
+                Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)
 
-        // TODO get clazz assignment metrics
-
-        // TODO get all attempts for each person for all entries in assignment
 
     }
 
@@ -43,7 +53,9 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
     }
 
     override fun onClickPersonWithStatementDisplay(personWithAttemptsSummary: PersonWithAttemptsSummary) {
-        // TODO go to studentProgress with person and clazzAssignment selected
+        systemImpl.go(ClazzAssignmentDetailStudentProgressView.VIEW_NAME,
+                mapOf(UstadView.ARG_PERSON_UID to personWithAttemptsSummary.personUid.toString(),
+                UstadView.ARG_CLAZZ_ASSIGNMENT_UID to filterByClazzAssignmentUid.toString()), context)
     }
 
 

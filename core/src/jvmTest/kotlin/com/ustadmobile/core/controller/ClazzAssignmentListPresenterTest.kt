@@ -81,7 +81,7 @@ class ClazzAssignmentListPresenterTest {
 
         //eg. verify the correct DAO method was called and was set on the view
         verify(repoClazzAssignmentDaoSpy, timeout(5000)).getAllAssignments(any(), any(),
-                any(), any(), any(), any(), any())
+                any(), any(), any(), any())
         verify(mockViewClazz, timeout(5000)).list = any()
 
         //TODO: verify any other properties that the presenter should set on the view

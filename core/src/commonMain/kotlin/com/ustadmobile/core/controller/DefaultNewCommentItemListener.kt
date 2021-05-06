@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.*
 
 class DefaultNewCommentItemListener(override val di: DI, val context: Any, val entityUid: Long,
-                                    val tableId: Int, val isPrivate: Boolean): NewCommentItemListener, DIAware {
+                                    val tableId: Int, val isPublic: Boolean): NewCommentItemListener, DIAware {
 
     override fun addComment(text: String) {
 
@@ -18,7 +18,7 @@ class DefaultNewCommentItemListener(override val di: DI, val context: Any, val e
         val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
 
         val commentObj = Comments(tableId, entityUid, accountManager.activeAccount.personUid,
-                getSystemTimeInMillis(), text, isPrivate)
+                getSystemTimeInMillis(), text, isPublic)
         commentObj.commentsToPersonUid = 0
         GlobalScope.launch {
             repo.commentsDao.insertAsync(commentObj)

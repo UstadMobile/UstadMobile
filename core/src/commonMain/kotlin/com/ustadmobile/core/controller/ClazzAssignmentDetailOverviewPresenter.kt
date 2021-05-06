@@ -14,20 +14,15 @@ import org.kodein.di.DI
 class ClazzAssignmentDetailOverviewPresenter(context: Any,
                                              arguments: Map<String, String>, view: ClazzAssignmentDetailOverviewView,
                                              lifecycleOwner: DoorLifecycleOwner,
-                                             di: DI,private val newCommentItemListener: DefaultNewCommentItemListener =
+                                             di: DI,val newPrivateCommentListener: DefaultNewCommentItemListener =
                                                      DefaultNewCommentItemListener(di, context,
                                                              arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
-                                                     ClazzAssignment.TABLE_ID, true))
-    : UstadDetailPresenter<ClazzAssignmentDetailOverviewView, ClazzAssignment>(context, arguments, view, di, lifecycleOwner),
-        NewCommentItemListener by newCommentItemListener{
-
-    val clazzCommentListener: CommentListener = object : CommentListener {
-
-    }
-
-    val privateCommentListener: CommentListener = object : CommentListener {
-
-    }
+                                                     ClazzAssignment.TABLE_ID, false),
+                                             val newClassCommentListener: DefaultNewCommentItemListener =
+                                                     DefaultNewCommentItemListener(di, context,
+                                                             arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
+                                                             ClazzAssignment.TABLE_ID, true))
+    : UstadDetailPresenter<ClazzAssignmentDetailOverviewView, ClazzAssignment>(context, arguments, view, di, lifecycleOwner){
 
 
     override val persistenceMode: PersistenceMode
