@@ -1,13 +1,16 @@
 package com.ustadmobile.core.impl.locale
 
+import com.ustadmobile.core.util.ext.innerXml
 import com.ustadmobile.xmlpullparserkmp.XmlPullParser
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserConstants
+import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 
 /**
  * This class allows string retrieval from Android style string resource xml files using an integer
  * id code.
  */
 class StringsXml (xpp: XmlPullParser,
+                  xppFactory: XmlPullParserFactory,
                   idMap: Map<String, Int>,
                   val stringsXmlName: String = "",
                   val fallback: StringsXml? = null){
@@ -28,9 +31,9 @@ class StringsXml (xpp: XmlPullParser,
 
             val stringName = xpp.getAttributeValue(null, "name")
                 ?: throw IllegalArgumentException("string in xml $stringsXmlName has no name!")
-            val stringValue = xpp.nextText() ?: ""
-            val stringId = idMap[stringName]
-                ?: throw IllegalArgumentException("IdMap for $stringsXmlName has no int id for $stringName")
+
+            val stringValue = xpp.innerXml(xppFactory)
+            val stringId = idMap[stringName] ?: continue
 
             mutableMap[stringId] = stringValue
         }

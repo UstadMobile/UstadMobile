@@ -123,6 +123,7 @@ kotlin {
 
         jvmMain {
             dependsOn commonJvmMain
+            resources.srcDirs += ["locale/main", "src/main/assets"]
 
             dependencies {
                 implementation "com.google.code.gson:gson:$version_gson"

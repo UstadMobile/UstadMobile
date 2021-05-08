@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.github.aakira.napier.Napier
+import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
@@ -113,7 +114,8 @@ class PersonAccountEditPresenter(context: Any,
             try{
                 if(createAccount && !entity.newPassword.isNullOrEmpty()
                         && !entity.confirmedPassword.isNullOrEmpty()){
-                    val umAccount = accountManager.register(entity,serverUrl, false)
+                    val umAccount = accountManager.register(entity,serverUrl,
+                        AccountRegisterOptions(makeAccountActive = false))
                     if(umAccount.username != null){
                         repo.personDao.updateAsync(entity)
                     }

@@ -37,6 +37,10 @@ import java.io.*
 import java.util.*
 import kotlin.collections.ArrayList
 import com.ustadmobile.core.generated.locale.MessageIdMap
+import com.ustadmobile.core.impl.locale.StringsXml
+import com.ustadmobile.core.impl.locale.getStringsXmlResource
+import org.xmlpull.v1.XmlPullParserFactory
+import java.util.concurrent.ConcurrentHashMap
 
 
 /**
@@ -45,10 +49,28 @@ import com.ustadmobile.core.generated.locale.MessageIdMap
  *
  *
  * @author mike, kileha3
+ * @param xppFactory - XmlPullParser factory that
  */
-actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
+actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory) : UstadMobileSystemCommon(){
 
-    private var appConfig: Properties? = null
+    private val appConfig: Properties by lazy {
+        Properties().also { props ->
+            this::class.java.getResourceAsStream(APPCONFIG_PROPERTIES_PATH)?.use { propsIn ->
+                props.load(propsIn)
+            }
+        }
+    }
+
+    private val messageIdMapFlipped: Map<String, Int> by lazy {
+        MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
+    }
+
+    private val defaultStringsXml: StringsXml by lazy {
+        this::class.java.getStringsXmlResource("/values/strings_ui.xml", xppFactory,
+            messageIdMapFlipped)
+    }
+
+    private val foreignStringsXml: MutableMap<String, StringsXml> = ConcurrentHashMap()
 
     private var tmpPrefs = mutableMapOf<String, String>()
 
@@ -77,7 +99,22 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
     actual override fun getString(messageCode: Int, context: Any): String{
         //This is really only used in tests, so we just want to be sure that it is returning
         //something that is distinct
-        return MessageIdMap[messageCode] ?: throw IllegalArgumentException("Invalid message code")
+        return getString(getDisplayedLocale(context), messageCode, context)
+    }
+
+    fun getString(localeCode: String, messageId: Int, context: Any): String {
+        val localeCodeLower = localeCode.toLowerCase(Locale.ROOT)
+
+        val stringsXml = if(localeCodeLower.startsWith("en")) {
+            defaultStringsXml
+        }else {
+            foreignStringsXml.computeIfAbsent(localeCodeLower.substring(0, 2)) {
+                this::class.java.getStringsXmlResource("/values-$it/strings_ui.xml", xppFactory,
+                    messageIdMapFlipped, defaultStringsXml)
+            }
+        }
+
+        return stringsXml[messageId]
     }
 
 
@@ -197,22 +234,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
      * @return The value of the key if found, if not, the default value provided
      */
     actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?{
-        if (appConfig == null) {
-            val appPrefResource = "/com/ustadmobile/core/appconfig.properties"
-            appConfig = Properties()
-            var prefIn: InputStream? = null
-
-            try {
-                prefIn =  this::class.java.getResourceAsStream(appPrefResource)
-                appConfig!!.load(prefIn)
-            } catch (e: IOException) {
-                UMLog.l(UMLog.ERROR, 685, appPrefResource, e)
-            } finally {
-                prefIn?.close()
-            }
-        }
-
-        return appConfig!!.getProperty(key, defaultVal)
+        return appConfig.getProperty(key, defaultVal)
     }
 
 
@@ -247,6 +269,15 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
         return canWriteFiles
     }
 
+
+
+    /**
+     * Open the given link in a browser and/or tab depending on the platform
+     */
+    actual fun openLinkInBrowser(url: String, context: Any) {
+        //On JVM - do nothing at the moment. This is only used for unit testing with verify calls.
+    }
+
     actual companion object {
         /**
          * Get an instance of the system implementation - relies on the platform
@@ -255,14 +286,10 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
          * @return A singleton instance
          */
         @JvmStatic
-        actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
-    }
+        actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl(
+            XmlPullParserFactory.newInstance())
 
-    /**
-     * Open the given link in a browser and/or tab depending on the platform
-     */
-    actual fun openLinkInBrowser(url: String, context: Any) {
-        //On JVM - do nothing at the moment. This is only used for unit testing with verify calls.
+        const val APPCONFIG_PROPERTIES_PATH = "/com/ustadmobile/core/appconfig.properties"
     }
 
 }

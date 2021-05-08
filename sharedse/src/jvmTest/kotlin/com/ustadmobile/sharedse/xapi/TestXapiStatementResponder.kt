@@ -43,6 +43,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
+import org.xmlpull.v1.XmlPullParserFactory
 import java.io.IOException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -70,7 +71,9 @@ class TestXapiStatementResponder {
         checkJndiSetup()
         val endpointScope = EndpointScope()
         di = DI {
-            bind<UstadMobileSystemImpl>() with singleton { spy(UstadMobileSystemImpl()) }
+            bind<UstadMobileSystemImpl>() with singleton {
+                spy(UstadMobileSystemImpl(XmlPullParserFactory.newInstance()))
+            }
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()

@@ -1,9 +1,7 @@
 package com.ustadmobile.port.sharedse.impl.http
 
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.lib.util.UMUtil
-import com.ustadmobile.port.sharedse.util.XmlPassThroughFilter
-import com.ustadmobile.port.sharedse.util.passXmlThrough
+import com.ustadmobile.lib.util.ext.XmlSerializerFilter
+import com.ustadmobile.lib.util.ext.serializeTo
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -12,7 +10,6 @@ import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlSerializer
 import java.io.ByteArrayOutputStream
 import java.io.ByteArrayInputStream
-import java.io.IOException
 import java.io.InputStream
 import org.xmlpull.v1.XmlPullParserFactory
 
@@ -31,6 +28,45 @@ class EpubHtmlFilterSerializer(override val di: DI) : DIAware {
 
     private var `in`: InputStream? = null
 
+    class EpubXmlSerializerFilter: XmlSerializerFilter {
+
+        var seenViewPort = false
+
+        override fun beforePassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean {
+            if (evtType == XmlPullParser.END_TAG && parser.getName() == "head" && !seenViewPort) {
+                serializer.startTag(parser.getNamespace(), "meta")
+                serializer.attribute("", "name", "viewport")
+                serializer.attribute("", "content",
+                    "height=device-height, initial-scale=1,user-scalable=no")
+                serializer.endTag(parser.getNamespace(), "meta")
+
+                serializer.startTag(parser.getNamespace(), "style")
+                serializer.attribute("", "type", "text/css")
+                serializer.text("""
+                            img, video, audio {
+                                max-width: 95% !important;
+                            }
+
+                            body {
+                                margin: 8dp;
+                                overflow-x: hidden;
+                            }
+                        """.trimIndent())
+                serializer.endTag(parser.getNamespace(), "style")
+            }
+            return true
+        }
+
+        override fun afterPassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean {
+            if(evtType == XmlPullParser.START_TAG && parser.getName() == "meta"
+                && parser.getAttributeValue(null, "name") == "viewport") {
+                seenViewPort = true
+            }
+
+            return true
+        }
+    }
+
     //add the script
     val output: ByteArray
         get() {
@@ -45,46 +81,8 @@ class EpubHtmlFilterSerializer(override val di: DI) : DIAware {
             val xpp: XmlPullParser = xppFactory.newPullParser()
             xpp.setInput(`in`, "UTF-8")
 
-            xs.startDocument("UTF-8", false)
-            var seenViewPort = false
-            passXmlThrough(xpp, xs, arrayOf("script", "style", "title"), object : XmlPassThroughFilter {
-                @Throws(IOException::class)
-                override fun beforePassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean {
-                    if (evtType == XmlPullParser.END_TAG && parser.getName() == "head" && !seenViewPort) {
-                        serializer.startTag(parser.getNamespace(), "meta")
-                        serializer.attribute(parser.getNamespace(), "name", "viewport")
-                        serializer.attribute(parser.getNamespace(), "content",
-                                "height=device-height, initial-scale=1,user-scalable=no")
-                        serializer.endTag(parser.getNamespace(), "meta")
+            xpp.serializeTo(xs, inclusive = true, filter = EpubXmlSerializerFilter())
 
-                        serializer.startTag(parser.getNamespace(), "style")
-                        serializer.attribute(parser.getNamespace(), "type", "text/css")
-                        serializer.text("""
-                            img, video, audio {
-                                max-width: 95% !important;
-                            }
-
-                            body {
-                                margin: 8dp;
-                                overflow-x: hidden;
-                            }
-                        """.trimIndent())
-                        serializer.endTag(parser.getNamespace(), "style")
-                    }
-                    return true
-                }
-
-                override fun afterPassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean {
-                    if(evtType == XmlPullParser.START_TAG && parser.getName() == "meta"
-                            && parser.getAttributeValue(null, "name") == "viewport") {
-                        seenViewPort = true
-                    }
-
-                    return true
-                }
-            })
-
-            xs.endDocument()
             bout.flush()
             return bout.toByteArray()
         }

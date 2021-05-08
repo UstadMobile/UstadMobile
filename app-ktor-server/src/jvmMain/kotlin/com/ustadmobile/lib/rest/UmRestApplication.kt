@@ -10,7 +10,9 @@ import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.io.UploadSessionManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
@@ -49,6 +51,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.naming.InitialContext
 import io.ktor.client.features.json.JsonFeature
+import org.xmlpull.v1.XmlPullParserFactory
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -204,6 +207,16 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
         bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {
             UploadSessionManager(context, di)
+        }
+
+        bind<UstadMobileSystemImpl>() with singleton {
+            UstadMobileSystemImpl(instance(tag  = DiTag.XPP_FACTORY_NSAWARE))
+        }
+
+        bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
+            XmlPullParserFactory.newInstance().also {
+                it.isNamespaceAware = true
+            }
         }
 
         try {

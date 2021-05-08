@@ -82,7 +82,7 @@ ext {
     ustadVersionCode = 213
 
     version_door = "0.0.8"
-    version_xmlpullparserkmp = '0.0.8'
+    version_xmlpullparserkmp = '0.0.15'
 
     version_gradle_buildconfig_plugin = "1.1.7"
     version_jacoco_tool = "0.8.5"
