@@ -36,6 +36,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import java.io.*
 import java.util.*
 import kotlin.collections.ArrayList
+import com.ustadmobile.core.generated.locale.MessageIdMap
 
 
 /**
@@ -76,7 +77,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
     actual override fun getString(messageCode: Int, context: Any): String{
         //This is really only used in tests, so we just want to be sure that it is returning
         //something that is distinct
-        return "$messageCode"
+        return MessageIdMap[messageCode] ?: throw IllegalArgumentException("Invalid message code")
     }
 
 
