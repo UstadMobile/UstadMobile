@@ -259,8 +259,14 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
 
     override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
         mBinding?.lateSubmissionVisibility = if(
-                selectedOption.optionId == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_ACCEPT ||
                 selectedOption.optionId == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY){
+            View.VISIBLE
+        }else{
+            View.GONE
+        }
+        mBinding?.gracePeriodVisibility =if(
+                selectedOption.optionId == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY ||
+                selectedOption.optionId == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_ACCEPT){
             View.VISIBLE
         }else{
             View.GONE
