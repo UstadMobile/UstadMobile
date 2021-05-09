@@ -16,7 +16,7 @@ class StudentAssignmentProgressRecyclerAdapter(studentProgress: StudentAssignmen
 
     private var viewHolder: StudentAssignmentProgressViewHolder? = null
 
-    private var studentAssignmentProgressVal: StudentAssignmentProgress? = studentProgress
+    var studentAssignmentProgressVal: StudentAssignmentProgress? = studentProgress
         set(value){
             field = value
             visible = value?.hasMetricsPermission ?: false

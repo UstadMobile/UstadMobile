@@ -18,6 +18,7 @@ import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewFragment<PersonWithAttemptsSummary, PersonWithAttemptsSummary>(),
         ClazzAssignmentDetailStudentProgressOverviewListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener {
 
+    private var studentProgressAdapter: StudentAssignmentProgressRecyclerAdapter? = null
     private var mPresenter: ClazzAssignmentDetailStudentProgressOverviewListPresenter? = null
 
     override val listPresenter: UstadListPresenter<*, in PersonWithAttemptsSummary>?
@@ -32,10 +33,10 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
                 arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
 
-        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter()
+        studentProgressAdapter = StudentAssignmentProgressRecyclerAdapter(null)
         mDataRecyclerViewAdapter = ContentEntryDetailAttemptsListFragment.PersonWithStatementDisplayListRecyclerAdapter(mPresenter)
 
-        mMergeRecyclerViewAdapter = ConcatAdapter(mDataRecyclerViewAdapter)
+        mMergeRecyclerViewAdapter = ConcatAdapter(studentProgressAdapter, mDataRecyclerViewAdapter)
         mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
 
 
@@ -62,6 +63,7 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
         get() = field
         set(value) {
             field = value
+            studentProgressAdapter?.studentAssignmentProgressVal = studentProgress
         }
 
 }
