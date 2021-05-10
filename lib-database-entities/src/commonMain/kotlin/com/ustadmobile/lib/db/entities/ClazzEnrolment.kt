@@ -268,6 +268,11 @@ open class ClazzEnrolment()  {
 
         const val ROLE_TEACHER = 1001
 
+        /**
+         * The role given to someone who has the class code, however their registration is not yet approved.
+         */
+        const val ROLE_STUDENT_PENDING = 1002
+
         const val OUTCOME_IN_PROGRESS = 200
 
         const val OUTCOME_GRADUATED = 201
@@ -275,11 +280,6 @@ open class ClazzEnrolment()  {
         const val OUTCOME_FAILED = 202
 
         const val OUTCOME_DROPPED_OUT = 203
-
-        /**
-         * The role given to someone who has the class code, however their registration is not yet approved.
-         */
-        const val ROLE_STUDENT_PENDING = 1002
 
         const val TABLE_ID = 65
     }

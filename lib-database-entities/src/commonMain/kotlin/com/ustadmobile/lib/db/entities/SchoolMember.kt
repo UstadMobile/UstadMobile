@@ -200,7 +200,7 @@ open class SchoolMember {
 
     var schoolMemberJoinDate : Long = 0
 
-    var schoolMemberLeftDate : Long = 0
+    var schoolMemberLeftDate : Long = Long.MAX_VALUE
 
     var schoolMemberRole: Int = 0
 

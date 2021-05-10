@@ -285,7 +285,6 @@
     <fragment
         android:id="@+id/account_list_dest"
         android:name="com.ustadmobile.port.android.view.AccountListFragment"
-        android:label="@string/accounts"
         />
 
     <fragment
