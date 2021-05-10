@@ -199,13 +199,13 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                 AND cachePersonUid = ResultSource.personUid
                 ) AS progress,
                 
-               (SELECT AVG(cacheStudentScore/cacheMaxScore * 100) 
+               (SELECT SUM(cacheStudentScore/cacheMaxScore * 100) 
                FROM CacheClazzAssignment 
               WHERE cacheClazzAssignmentUid = :assignmentUid
                 AND cachePersonUid = ResultSource.personUid
                 ) AS score,
             
-            '' AS latestPrivateComment
+            cm.commentsText AS latestPrivateComment
         
          FROM (SELECT Person.personUid, Person.firstNames, Person.lastName, 
             StatementEntity.contextRegistration, StatementEntity.timestamp, 
@@ -233,6 +233,16 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                         AND PersonGroupMember.groupMemberActive  
                         AND Person.firstNames || ' ' || Person.lastName LIKE :searchText 
              GROUP BY StatementEntity.statementUid) AS ResultSource 
+             		LEFT JOIN Comments AS cm 
+                    ON cm.commentsUid = (
+                                 SELECT Comments.commentsUid 
+                                   FROM Comments 
+                                  WHERE Comments.commentsEntityType = ${ClazzAssignment.TABLE_ID}
+                                    AND commentsEntityUid = :assignmentUid
+                                    AND NOT commentsInActive
+                                    AND NOT commentsPublic
+                                    AND Comments.commentsPersonUid = ResultSource.personUid
+                               ORDER BY commentsDateTimeAdded DESC LIMIT 1)
          GROUP BY ResultSource.personUid 
          ORDER BY CASE(:sortOrder) 
                 WHEN $SORT_FIRST_NAME_ASC THEN ResultSource.firstNames
