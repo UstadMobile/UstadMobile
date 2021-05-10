@@ -130,6 +130,7 @@ kotlin {
             dependencies {
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"
             }
         }
 
