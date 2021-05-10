@@ -121,34 +121,36 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
             visible = false
         }
 
-        //12 - Class comments list + new comment
-        classCommentsRecyclerAdapter = CommentsRecyclerAdapter().also {
-            this.classCommentsObserver = PagedListSubmitObserver(it)
-        }
-
+        // 6 new class comment
         newClassCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_class_comment),
                 true).apply {
             visible = false
         }
 
-        // 13 - Private
+        //7 - Class comments list
+        classCommentsRecyclerAdapter = CommentsRecyclerAdapter().also {
+            this.classCommentsObserver = PagedListSubmitObserver(it)
+        }
+
+        // 8 - Private
         privateCommentsHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.private_comments).toString()
         ).apply {
             visible = false
         }
 
-        //16 - Private comments list
+        //9 - New Private comments section:
+        newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
+                requireContext().getString(R.string.add_private_comment), false).apply{
+            visible = false
+        }
+
+        //10 - Private comments list
         privateCommentsRecyclerAdapter = CommentsRecyclerAdapter().also{
             privateCommentsObserver = PagedListSubmitObserver(it)
         }
 
-        //17 - New Private comments section:
-        newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
-                requireContext().getString(R.string.add_private_comment), false).apply{
-                    visible = false
-        }
 
         mPresenter = ClazzAssignmentDetailOverviewPresenter(requireContext(),
                 arguments.toStringMap(), this, viewLifecycleOwner, di)

@@ -316,6 +316,7 @@
                     android:enabled="@{fieldsEnabled}"
                     android:digits="0123456789"
                     android:inputType="number"
+                    android:text="@={`` + clazzAssignment.caLateSubmissionPenalty}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 

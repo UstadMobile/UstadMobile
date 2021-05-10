@@ -40,6 +40,7 @@ import kotlin.jvm.Volatile
     LearnerGroup::class, LearnerGroupMember::class,
     GroupLearningSession::class,
     SiteTerms::class, ClazzAssignment::class, ClazzAssignmentContentJoin::class,
+    CacheClazzAssignment::class,
 
     //Door Helper entities
     SqliteChangeSeqNums::class,
@@ -51,7 +52,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 67)
+], version = 68)
 @MinSyncVersion(58)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -259,6 +260,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("clazzAssignmentContentJoinDao")
     abstract val clazzAssignmentContentJoinDao: ClazzAssignmentContentJoinDao
+
+    @JsName("cacheClazzAssignmentDao")
+    abstract val cacheClazzAssignmentDao: CacheClazzAssignmentDao
 
     @JsName("clazzWorkSubmissionDao")
     abstract val clazzWorkSubmissionDao: ClazzWorkSubmissionDao
@@ -4556,6 +4560,27 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_67_68 = object: DoorMigration(67, 68) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+
+                if(database.dbType() == DoorDbType.SQLITE) {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CacheClazzAssignment (`cacheUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cachePersonUid` INTEGER NOT NULL, `cacheContentEntryUid` INTEGER NOT NULL, `cacheClazzAssignmentUid` INTEGER NOT NULL, `cacheStudentScore` INTEGER NOT NULL, `cacheMaxScore` INTEGER NOT NULL, `cacheProgress` INTEGER NOT NULL, `cacheContentComplete` INTEGER NOT NULL, `lastCsnChecked` INTEGER NOT NULL)")
+                    database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_CacheClazzAssignment_cachePersonUid_cacheContentEntryUid_cacheClazzAssignmentUid` ON CacheClazzAssignment (`cachePersonUid`, `cacheContentEntryUid`, `cacheClazzAssignmentUid`)")
+
+
+                }else if(database.dbType() == DoorDbType.POSTGRES){
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CacheClazzAssignment (  cachePersonUid  BIGINT  NOT NULL , cacheContentEntryUid  BIGINT  NOT NULL , cacheClazzAssignmentUid  BIGINT  NOT NULL , cacheStudentScore  INTEGER  NOT NULL , cacheMaxScore  INTEGER  NOT NULL , cacheProgress  INTEGER  NOT NULL , cacheContentComplete  BOOL  NOT NULL , lastCsnChecked  BIGINT  NOT NULL , cacheUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE UNIQUE INDEX index_CacheClazzAssignment_cachePersonUid_cacheContentEntryUid_cacheClazzAssignmentUid ON CacheClazzAssignment (cachePersonUid, cacheContentEntryUid, cacheClazzAssignmentUid)")
+
+                }
+
+
+            }
+        }
+
+
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
@@ -4567,7 +4592,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
                     MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
                     MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
-                    MIGRATION_63_64, MIGRATION_66_67)
+                    MIGRATION_63_64, MIGRATION_66_67, MIGRATION_67_68)
 
 
 

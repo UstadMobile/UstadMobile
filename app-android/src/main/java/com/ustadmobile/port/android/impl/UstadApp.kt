@@ -11,6 +11,7 @@ import com.squareup.picasso.Picasso
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.assignment.setupAssignmentSyncListener
 import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImplAndroid
@@ -105,6 +106,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
                 attachmentFilters += ImageResizeAttachmentFilter("PersonPicture", 1280, 1280)
             }).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
+                it.setupAssignmentSyncListener(context, di)
             }
         }
 

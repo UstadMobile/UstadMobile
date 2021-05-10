@@ -4,61 +4,204 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
+import androidx.paging.DataSource
+import androidx.paging.PagedList
+import androidx.recyclerview.widget.ConcatAdapter
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.toughra.ustadmobile.R
+import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentDetailOverviewBinding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzAssignmentDetailStudentProgressPresenter
+import com.ustadmobile.core.controller.DefaultContentEntryListItemListener
+import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ClazzWorkDao
+import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
-import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.lib.db.entities.ContentEntryWithAttemptsSummary
+import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.door.ext.asRepositoryLiveData
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
+import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 
-class ClazzAssignmentDetailStudentProgressFragment(): UstadListViewFragment<ContentEntryWithAttemptsSummary, ContentEntryWithAttemptsSummary>(),
+class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzAssignment>(),
         ClazzAssignmentDetailStudentProgressView,
-        MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener, BottomSheetOptionSelectedListener{
+       OpenSheetListener {
 
+    private var dbRepo: UmAppDatabase? = null
+
+    val accountManager: UstadAccountManager by instance()
     private var mPresenter: ClazzAssignmentDetailStudentProgressPresenter? = null
 
-    override val listPresenter: UstadListPresenter<*, in ContentEntryWithAttemptsSummary>?
+    override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
+
+    private var mBinding: FragmentClazzAssignmentDetailOverviewBinding? = null
+
+
+    private var contentHeaderAdapter: SimpleHeadingRecyclerAdapter? = null
+    private var contentRecyclerAdapter: ContentEntryListRecyclerAdapter? = null
+
+    private var contentLiveData: LiveData<PagedList<
+            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>? = null
+    private val contentObserver = Observer<PagedList<
+            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?> { t ->
+        run {
+            contentHeaderAdapter?.visible = t?.size ?: 0 > 0
+            contentRecyclerAdapter?.submitList(t)
+        }
+    }
+
+    private var privateCommentsHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter? = null
+    private var privateCommentsRecyclerAdapter: CommentsRecyclerAdapter? = null
+    private var privateCommentsObserver: Observer<PagedList<CommentsWithPerson>>? = null
+    private var newPrivateCommentRecyclerAdapter: NewCommentRecyclerViewAdapter? = null
+    private var privateCommentsLiveData: LiveData<PagedList<CommentsWithPerson>>? = null
+
+
+    private var scoreRecyclerAdapter: ScoreRecyclerAdapter? = null
+
+    private var detailMergerRecyclerView: RecyclerView? = null
+    private var detailMergerRecyclerAdapter: ConcatAdapter? = null
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = super.onCreateView(inflater, container, savedInstanceState)
+        val rootView: View
+        mBinding = FragmentClazzAssignmentDetailOverviewBinding.inflate(inflater, container, false).also {
+            rootView = it.root
+        }
+
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
+
+
+        // 1
+        contentHeaderAdapter = SimpleHeadingRecyclerAdapter(getText(R.string.content).toString()).apply {
+            visible = false
+        }
+
+        // 2
+        contentRecyclerAdapter = ContentEntryListRecyclerAdapter(
+                DefaultContentEntryListItemListener(context = requireContext(), di = di),
+                ListViewMode.BROWSER.toString(), viewLifecycleOwner, di)
+
+        // 3
+        scoreRecyclerAdapter = ScoreRecyclerAdapter()
+
+
+        // 4 - Private
+        privateCommentsHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
+                getText(R.string.private_comments).toString()
+        ).apply {
+            visible = false
+        }
+
+        // 5 - New Private comments section:
+        newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
+                requireContext().getString(R.string.add_private_comment), false).apply{
+            visible = false
+        }
+
+        //6 - Private comments list
+        privateCommentsRecyclerAdapter = CommentsRecyclerAdapter().also{
+            privateCommentsObserver = PagedListSubmitObserver(it)
+        }
+
         mPresenter = ClazzAssignmentDetailStudentProgressPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
 
-        mDataRecyclerViewAdapter = ClazzAssignmentDetailStudentProgressRecyclerAdapter(mPresenter)
 
+        detailMergerRecyclerAdapter = ConcatAdapter(contentHeaderAdapter,
+                contentRecyclerAdapter, scoreRecyclerAdapter, privateCommentsHeadingRecyclerAdapter,
+                newPrivateCommentRecyclerAdapter, privateCommentsRecyclerAdapter)
+        detailMergerRecyclerView?.adapter = detailMergerRecyclerAdapter
+        detailMergerRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
-        /**
-         * TODO adapters for
-         * 1. header for content
-         * 2. contentEntryList with attempts
-         * 3. score
-         * 4. private comments
-         */
-
-        return view
+        return rootView
     }
 
-    /**
-     * OnClick function that will handle when the user clicks to create a new item
-     */
-    override fun onClick(view: View?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
         mPresenter = null
-        dbRepo = null
+        mBinding = null
+        mPresenter = null
+        entity = null
+
+        detailMergerRecyclerView?.adapter = null
+        contentHeaderAdapter = null
+        contentRecyclerAdapter = null
+        contentLiveData = null
+        scoreRecyclerAdapter = null
+
+        privateCommentsLiveData = null
+        newPrivateCommentRecyclerAdapter = null
+        privateCommentsRecyclerAdapter = null
+        privateCommentsHeadingRecyclerAdapter = null
     }
 
-    override val displayTypeRepo: Any?
-        get() = TODO("Provide repo e.g. dbRepo.ClazzAssignmentDao")
-
-
-    override fun onBottomSheetOptionSelected(optionSelected: BottomSheetOption) {
-        // open add class comment sheet
+    override fun open(publicComment: Boolean) {
+        val sendCommentSheet = CommentsBottomSheet(publicComment, requireContext().getString(R.string.add_private_comment),
+                accountManager.activeAccount.personUid,  mPresenter?.newPrivateCommentListener)
+        sendCommentSheet.show(childFragmentManager, sendCommentSheet.tag)
     }
+
+
+    override var clazzAssignmentContent: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>? = null
+        set(value) {
+            contentLiveData?.removeObserver(contentObserver)
+            contentLiveData = value?.asRepositoryLiveData(ClazzWorkDao)
+            field = value
+            contentLiveData?.observeIfFragmentViewIsReady(this, contentObserver)
+        }
+
+    override var clazzAssignmentPrivateComments: DataSource.Factory<Int, CommentsWithPerson>? = null
+        set(value) {
+            val dbRepoVal = dbRepo?: return
+            val privateCommentsObserverVal = privateCommentsObserver?:return
+            privateCommentsLiveData?.removeObserver(privateCommentsObserverVal)
+            privateCommentsLiveData = value?.asRepositoryLiveData(dbRepoVal.commentsDao)
+            privateCommentsLiveData?.observeIfFragmentViewIsReady(this, privateCommentsObserverVal)
+            field = value
+        }
+
+    override var person: Person? = null
+        get() = field
+        set(value) {
+            field = value
+            ustadFragmentTitle = value?.personFullName()
+        }
+
+    override var studentScore: ContentEntryStatementScoreProgress? = null
+        get() = field
+        set(value) {
+            field = value
+            scoreRecyclerAdapter?.score = value
+            scoreRecyclerAdapter?.visible = value?.resultMax?: 0 > 0
+        }
+
+
+    override var entity: ClazzAssignment? = null
+        get() = field
+        set(value) {
+            field = value
+            newPrivateCommentRecyclerAdapter?.visible = value?.caPrivateCommentsEnabled ?: false
+            privateCommentsHeadingRecyclerAdapter?.visible = value?.caPrivateCommentsEnabled ?: false
+        }
 
 }

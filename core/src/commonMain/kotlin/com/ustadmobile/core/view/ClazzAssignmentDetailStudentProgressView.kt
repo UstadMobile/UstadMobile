@@ -1,9 +1,18 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.lib.db.entities.ContentEntryWithAttemptsSummary
+import androidx.paging.DataSource
+import com.ustadmobile.lib.db.entities.*
 
 
-interface ClazzAssignmentDetailStudentProgressView: UstadListView<ContentEntryWithAttemptsSummary, ContentEntryWithAttemptsSummary> {
+interface ClazzAssignmentDetailStudentProgressView: UstadDetailView<ClazzAssignment> {
+
+    var person: Person?
+    var studentScore: ContentEntryStatementScoreProgress?
+
+    var clazzAssignmentContent
+            : DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?
+
+    var clazzAssignmentPrivateComments: DataSource.Factory<Int, CommentsWithPerson>?
 
     companion object {
         const val VIEW_NAME = "ClazzAssignmentDetailStudentProgressListView"

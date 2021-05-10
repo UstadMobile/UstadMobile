@@ -17,7 +17,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.2.0-rc01'
+        classpath 'com.android.tools.build:gradle:4.2.0'
         classpath 'com.google.gms:google-services:4.3.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
@@ -81,7 +81,7 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 214
 
-    version_door = "0.0.8"
+    version_door = "0.0.10"
     version_xmlpullparserkmp = '0.0.8'
 
     version_gradle_buildconfig_plugin = "1.1.7"

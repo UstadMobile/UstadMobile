@@ -227,6 +227,8 @@ class ClazzAssignmentEditPresenter(context: Any,
                 repo.clazzAssignmentDao.updateAsync(entity)
             }
 
+            repo.cacheClazzAssignmentDao.invalidateCacheByAssignment(entity.caUid)
+
             val contentToInsert = contentJoinEditHelper.entitiesToInsert
             val contentToDelete = contentJoinEditHelper.primaryKeysToDeactivate
 

@@ -1,10 +1,9 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.recyclerview.widget.ConcatAdapter
+import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ClazzAssignmentDetailStudentProgressOverviewListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.util.ext.toStringMap
@@ -33,14 +32,21 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
                 arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
 
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(
+                onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         studentProgressAdapter = StudentAssignmentProgressRecyclerAdapter(null)
         mDataRecyclerViewAdapter = ContentEntryDetailAttemptsListFragment.PersonWithStatementDisplayListRecyclerAdapter(mPresenter)
 
-        mMergeRecyclerViewAdapter = ConcatAdapter(studentProgressAdapter, mDataRecyclerViewAdapter)
+        mMergeRecyclerViewAdapter = ConcatAdapter(mUstadListHeaderRecyclerViewAdapter,studentProgressAdapter, mDataRecyclerViewAdapter)
         mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
 
 
         return view
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.findItem(R.id.menu_search).isVisible = true
     }
 
     /**

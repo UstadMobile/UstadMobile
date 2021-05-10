@@ -64,7 +64,8 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             MAX(CASE WHEN ResultSource.contentEntryRoot 
                 THEN ResultSource.resultScoreScaled * 100 
                 ELSE 0 END) AS score, 
-            MAX(ResultSource.extensionProgress) AS progress 
+            MAX(ResultSource.extensionProgress) AS progress,
+            '' AS latestPrivateComment
         
          FROM (SELECT Person.personUid, Person.firstNames, Person.lastName, 
             StatementEntity.contextRegistration, StatementEntity.timestamp, 

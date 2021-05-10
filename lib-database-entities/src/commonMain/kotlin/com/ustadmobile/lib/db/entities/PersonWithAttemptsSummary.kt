@@ -23,4 +23,7 @@ class PersonWithAttemptsSummary {
 
     var duration: Long = 0L
 
+    var latestPrivateComment: String? = null
+
+
 }

@@ -4,6 +4,12 @@ import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_FIRST_NAME_ASC
+import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_FIRST_NAME_DESC
+import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_LAST_ACTIVE_ASC
+import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_LAST_ACTIVE_DESC
+import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_LAST_NAME_ASC
+import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_LAST_NAME_DESC
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 
@@ -125,7 +131,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
               AND ClazzAssignment.caClazzUid = :clazzUid
               AND (ClazzAssignment.caTitle LIKE :searchText 
                     OR ClazzAssignment.caDescription LIKE :searchText)
-              AND :timestamp >= ClazzAssignment.caStartDate
+              AND (hasMetricsPermission OR :timestamp >= ClazzAssignment.caStartDate)
          ORDER BY CASE(:sortOrder)
                 WHEN $SORT_START_DATE_ASC THEN ClazzAssignment.caStartDate
                 WHEN $SORT_DEADLINE_ASC THEN ClazzAssignment.caDeadlineDate
@@ -179,6 +185,77 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
     abstract suspend fun getStatementScoreProgressForAssignment(caUid: Long, personUid: Long): ContentEntryStatementScoreProgress?
 
 
+    @Query("""
+         SELECT ResultSource.personUid, ResultSource.firstNames, ResultSource.lastName,
+            COUNT(DISTINCT(ResultSource.contextRegistration)) AS attempts, 
+            MIN(ResultSource.timestamp) AS startDate, 
+            MAX(ResultSource.timestamp) AS endDate, 
+            SUM(ResultSource.resultDuration) AS duration, 
+            
+            
+             (SELECT AVG(cacheProgress) 
+               FROM CacheClazzAssignment 
+              WHERE cacheClazzAssignmentUid = :assignmentUid
+                AND cachePersonUid = ResultSource.personUid
+                ) AS progress,
+                
+               (SELECT AVG(cacheStudentScore/cacheMaxScore * 100) 
+               FROM CacheClazzAssignment 
+              WHERE cacheClazzAssignmentUid = :assignmentUid
+                AND cachePersonUid = ResultSource.personUid
+                ) AS score,
+            
+            '' AS latestPrivateComment
+        
+         FROM (SELECT Person.personUid, Person.firstNames, Person.lastName, 
+            StatementEntity.contextRegistration, StatementEntity.timestamp, 
+            StatementEntity.resultDuration
+        
+         ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
+             LEFT JOIN StatementEntity 
+                ON StatementEntity.statementPersonUid = Person.personUid 
+                    WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
+                        AND statementContentEntryUid 
+                            IN (SELECT cacjContentUid
+                                  FROM ClazzAssignmentContentJoin
+                                        JOIN ClazzAssignment 
+                                        ON ClazzAssignment.caUid = cacjAssignmentUid
+                                        
+                                        JOIN ClazzEnrolment
+                                        ON ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
+                                        AND ClazzEnrolment.clazzEnrolmentPersonUid = StatementEntity.statementPersonUid
+                                 WHERE cacjAssignmentUid = :assignmentUid
+                                  AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                                  AND ClazzEnrolment.clazzEnrolmentActive
+                                  AND StatementEntity.timestamp
+                                        BETWEEN ClazzAssignment.caStartDate
+                                        AND ClazzAssignment.caGracePeriodDate)
+                        AND PersonGroupMember.groupMemberActive  
+                        AND Person.firstNames || ' ' || Person.lastName LIKE :searchText 
+             GROUP BY StatementEntity.statementUid) AS ResultSource 
+         GROUP BY ResultSource.personUid 
+         ORDER BY CASE(:sortOrder) 
+                WHEN $SORT_FIRST_NAME_ASC THEN ResultSource.firstNames
+                WHEN $SORT_LAST_NAME_ASC THEN ResultSource.lastName
+                ELSE ''
+            END ASC,
+            CASE(:sortOrder)
+                WHEN $SORT_FIRST_NAME_DESC THEN ResultSource.firstNames
+                WHEN $SORT_LAST_NAME_DESC THEN ResultSource.lastName
+                ELSE ''
+            END DESC,
+            CASE(:sortOrder)
+                WHEN $SORT_LAST_ACTIVE_ASC THEN endDate 
+                ELSE 0
+            END ASC,
+            CASE(:sortOrder)
+                WHEN $SORT_LAST_ACTIVE_DESC then endDate
+                ELSE 0
+            END DESC
+    """)
+    abstract fun getAttemptSummaryForStudentsInAssignment(assignmentUid: Long, accountPersonUid: Long,
+                                                          searchText: String, sortOrder: Int):
+            DataSource.Factory<Int, PersonWithAttemptsSummary>
 
     @Query("""
         WITH CtePermissionCheck (hasPermission) 
@@ -249,6 +326,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
     """)
     abstract suspend fun getStudentsProgressOnAssignment(clazzUid: Long, accountPersonUid: Long,
                                                  uid: Long, permission: Long): StudentAssignmentProgress?
+
 
 
     @Update
