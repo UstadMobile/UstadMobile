@@ -42,12 +42,19 @@ import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
+import org.quartz.Job
+import org.quartz.JobExecutionContext
+import org.quartz.Scheduler
+import org.quartz.SchedulerFactory
+import org.quartz.impl.StdScheduler
+import org.quartz.impl.StdSchedulerFactory
 import java.io.File
 import java.nio.file.Files
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.naming.InitialContext
 import io.ktor.client.features.json.JsonFeature
+import javax.sql.DataSource
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -213,6 +220,13 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             UploadSessionManager(context, di)
         }
 
+        bind<Scheduler>() with singleton {
+            InitialContext().initQuartzDb("java:/comp/env/jdbc/quartzds")
+            StdSchedulerFactory.getDefaultScheduler().also {
+                it.context.put("di", di)
+            }
+        }
+
         registerContextTranslator { call: ApplicationCall ->
             if(dbMode == CONF_DBMODE_SINGLETON) {
                 Endpoint("localhost")
@@ -226,6 +240,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 //Get the container dir so that any old directories (build/storage etc) are moved if required
                 di.on(Endpoint("localhost")).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
             }
+
+            instance<Scheduler>().start()
         }
     }
 
