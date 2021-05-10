@@ -4,9 +4,16 @@ import com.google.gson.Gson
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.LINK_ENDPOINT_VIEWNAME_DIVIDER
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.age
+import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.authenticateEncryptedPassword
@@ -23,6 +30,8 @@ import org.kodein.di.instance
 import org.kodein.di.ktor.di
 import org.kodein.di.on
 import com.ustadmobile.core.util.ext.toUmAccount
+import com.ustadmobile.core.view.UstadView
+import jakarta.mail.Message
 
 private const val DEFAULT_SESSION_LENGTH = (1000L * 60 * 60 * 24 * 365)//One year
 
@@ -74,13 +83,39 @@ fun Route.PersonAuthRegisterRoute() {
                 gson.fromJson(it, PersonParentJoin::class.java)
             }
 
+            val mLangCode = call.request.queryParameters["locale"] ?: "en"
+
             val mParentContact = mParentJoin?.ppjEmail
 
-            if(DateTime(mPerson.dateOfBirth).age() < UstadMobileConstants.MINOR_AGE_THRESHOLD &&
-                    mParentContact == null) {
-                call.respond(HttpStatusCode.BadRequest,
-                    "Person registering is minor and no parental contact provided")
-                return@post
+            val mEndpointUrl = call.request.queryParameters["endpoint"]
+
+            if(DateTime(mPerson.dateOfBirth).age() < UstadMobileConstants.MINOR_AGE_THRESHOLD) {
+                if(mParentContact == null || mEndpointUrl == null) {
+                    call.respond(HttpStatusCode.BadRequest,
+                        "Person registering is minor and no parental contact provided or no endpoint for link")
+                    return@post
+                }
+
+
+                mParentJoin.ppjUid = repo.personParentJoinDao.insertAsync(mParentJoin)
+                val systemImpl: UstadMobileSystemImpl by di().instance()
+                val appName = systemImpl.getString(mLangCode, MessageID.app_name, Any())
+                val linkArgs : Map<String, String> = mapOf(UstadView.ARG_ENTITY_UID to
+                        mParentJoin.ppjUid.toString())
+                val linkUrl = (UMFileUtil.joinPaths(mEndpointUrl,
+                    LINK_ENDPOINT_VIEWNAME_DIVIDER) + "PersonParentJoinEdit")
+                    .appendQueryArgs(linkArgs.toQueryString())
+
+                val emailText = systemImpl.getString(mLangCode, MessageID.parent_child_register_message, Any())
+                    .replace("%1\$s", mPerson.fullName())
+                    .replace("%2\$s", appName)
+                    .replace("%3\$s", linkUrl)
+                val subjectText = systemImpl.getString(mLangCode,
+                    MessageID.parent_child_register_message_subject, Any())
+                    .replace("%1\$s", appName)
+
+                val notificationSender: NotificationSender by di().instance()
+                notificationSender.sendEmail(mParentContact, subjectText, emailText)
             }
 
 

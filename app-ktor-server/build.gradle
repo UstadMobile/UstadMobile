@@ -95,6 +95,9 @@ kotlin {
                 implementation project(":lib-test-common")
                 implementation project(":sharedse")
 
+                implementation "io.ktor:ktor-server-test-host:$version_ktor"
+                implementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
+
                 implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
                 implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"

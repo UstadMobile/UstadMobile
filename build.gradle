@@ -77,6 +77,11 @@ subprojects {
 version = "0.3.35"
 group = "com.ustadmobile.app"
 
+/**
+ * Useful repository listings:
+ * Android: https://maven.google.com/web/index.html
+ * Kotlin: https://package-search.jetbrains.com/
+ */
 ext {
     ustadVersion = project.version
     ustadVersionCode = 213
@@ -133,10 +138,6 @@ ext {
     version_netty_tcnative = "2.0.38.Final"
 
 
-    /**
-     * See Google's repo index to check latest versions etc
-     * https://maven.google.com/web/index.html
-     */
     version_android_buildtools = "30.0.2"
     version_android_compile_sdk = 30
     version_android_target_sdk = 30
@@ -148,7 +149,6 @@ ext {
     //Androidx versions as per https://developer.android.com/jetpack/androidx/versions
     version_androidx_annotation = "1.1.0"
 
-    //As per https://maven.google.com/web/index.html
     version_android_material = "1.3.0"
     version_androidx_appcompat = "1.2.0"
     version_androidx_legacy_support = "1.0.0"

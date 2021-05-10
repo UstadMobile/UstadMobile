@@ -13,6 +13,7 @@ import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.io.UploadSessionManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
@@ -109,6 +110,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 
     install(DIFeature) {
+        import(commonJvmDiModule)
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {
             File(tmpRootDir, context.identifier(dbMode)).also {
                 it.takeIf { !it.exists() }?.mkdirs()
@@ -155,29 +157,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
         bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {
             ServerUpdateNotificationManagerImpl()
-        }
-
-        bind<OkHttpClient>() with singleton {
-            OkHttpClient.Builder()
-                .dispatcher(Dispatcher().also {
-                    it.maxRequests = 30
-                    it.maxRequestsPerHost = 10
-                })
-                .connectTimeout(45, TimeUnit.SECONDS)
-                .readTimeout(45, TimeUnit.SECONDS)
-                .build()
-        }
-
-
-        bind<HttpClient>() with singleton {
-            HttpClient(OkHttp){
-                install(JsonFeature)
-                install(HttpTimeout)
-
-                engine {
-                    preconfigured = instance()
-                }
-            }
         }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
