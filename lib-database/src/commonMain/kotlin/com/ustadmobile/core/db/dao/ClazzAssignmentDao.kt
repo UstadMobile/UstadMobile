@@ -47,7 +47,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                                       AND StatementEntity.timestamp 
                                                             BETWEEN ClazzAssignment.caStartDate
                                                                 AND ClazzAssignment.caGracePeriodDate
-                                                  ORDER BY resultScoreScaled DESC LIMIT 1)
+                                                  ORDER BY resultScoreScaled DESC, extensionProgress DESC  LIMIT 1)
 					 WHERE ClazzAssignment.caClazzUid = :clazzUid 
                        AND clazzEnrolmentClazzUid = :clazzUid
                        AND clazzEnrolmentPersonUid = :accountPersonUid
@@ -179,7 +179,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                                AND StatementEntity.timestamp 
                                                     BETWEEN ClazzAssignment.caStartDate
                                                         AND ClazzAssignment.caGracePeriodDate
-                                         ORDER BY resultScoreScaled DESC LIMIT 1)
+                                         ORDER BY resultScoreScaled DESC, extensionProgress DESC LIMIT 1)
      	  ) AS ResultSource
     """)
     abstract suspend fun getStatementScoreProgressForAssignment(caUid: Long, personUid: Long): ContentEntryStatementScoreProgress?

@@ -78,8 +78,9 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                     WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
                         AND PersonGroupMember.groupMemberActive  
                         AND statementContentEntryUid = :contentEntryUid
-                        AND Person.firstNames || ' ' || Person.lastName LIKE :searchText 
-             GROUP BY StatementEntity.statementUid) AS ResultSource 
+                        AND Person.firstNames || ' ' || Person.lastName LIKE :searchText              
+                   GROUP BY StatementEntity.statementUid 
+                   ORDER BY resultScoreScaled DESC, extensionProgress DESC) AS ResultSource 
          GROUP BY ResultSource.personUid 
          ORDER BY CASE(:sortOrder) 
                 WHEN $SORT_FIRST_NAME_ASC THEN ResultSource.firstNames
@@ -131,7 +132,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             AND :accountPersonUid 
                 IN (${PersonDao.ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION}) 
         GROUP BY StatementEntity.contextRegistration 
-        ORDER BY startDate DESC
+        ORDER BY startDate DESC, resultScoreScaled DESC, extensionProgress DESC
          """)
     abstract fun findSessionsForPerson(contentEntryUid: Long, accountPersonUid: Long, personUid: Long)
             : DataSource.Factory<Int, PersonWithSessionsDisplay>
