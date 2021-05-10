@@ -22,9 +22,9 @@ import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
-import com.ustadmobile.lib.rest.ext.bindHostDatabase
-import com.ustadmobile.lib.rest.ext.ktorInitDbWithRepo
-import com.ustadmobile.lib.rest.ext.toProperties
+import com.ustadmobile.lib.rest.ext.*
+import com.ustadmobile.lib.rest.messaging.MailProperties
+import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
@@ -58,6 +58,8 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.naming.InitialContext
 import io.ktor.client.features.json.JsonFeature
+import jakarta.mail.Authenticator
+import jakarta.mail.PasswordAuthentication
 import org.xmlpull.v1.XmlPullParserFactory
 import javax.sql.DataSource
 
@@ -155,10 +157,9 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
             val dbHostName = context.identifier(dbMode, singletonDbName)
-            InitialContext().bindHostDatabase(dbHostName,
-                appConfig.config("ktor.database").toProperties(
-                    listOf("driver", "url", "user", "password")))
-
+            val dbProperties = appConfig.databasePropertiesFromSection("ktor.database",
+                defaultUrl = "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
+            InitialContext().bindDataSourceIfNotExisting(dbHostName, dbProperties)
             UmAppDatabase.getInstance(Any(), dbHostName)
         }
 
@@ -196,6 +197,11 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         }
 
         bind<Scheduler>() with singleton {
+            val dbProperties = environment.config.databasePropertiesFromSection("quartz",
+                "jdbc:sqlite:data/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
+            InitialContext().apply {
+                bindDataSourceIfNotExisting("quartzds", dbProperties)
+            }
             InitialContext().initQuartzDb("java:/comp/env/jdbc/quartzds")
             StdSchedulerFactory.getDefaultScheduler().also {
                 it.context.put("di", di)
@@ -215,13 +221,27 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         try {
             appConfig.config("mail")
 
+            bind<MailProperties>() with singleton {
+                MailProperties(appConfig.property("mail.from").getString(),
+                    appConfig.toProperties(MailProperties.SMTP_PROPS))
+            }
+
             bind<NotificationSender>() with singleton {
-                NotificationSender(appConfig)
+                NotificationSender(di)
+            }
+
+            bind<Authenticator>() with singleton {
+                object: Authenticator() {
+                    override fun getPasswordAuthentication(): PasswordAuthentication {
+                        return PasswordAuthentication(
+                            appConfig.property("mail.user").getString(),
+                            appConfig.property("mail.auth").getString())
+                    }
+                }
             }
         }catch(e: Exception) {
             Napier.w("WARNING: Email sending not configured")
         }
-
 
         registerContextTranslator { call: ApplicationCall ->
             if(dbMode == CONF_DBMODE_SINGLETON) {
