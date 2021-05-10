@@ -34,6 +34,7 @@ abstract class CacheClazzAssignmentDao: BaseDao<CacheClazzAssignment> {
 	            ON statementUid = (SELECT statementUid 
                                      FROM StatementEntity 
                                     WHERE statementContentEntryUid = ClazzAssignmentContentJoin.cacjContentUid
+                                      AND statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
                                       AND contentEntryRoot 
                                       AND StatementEntity.timestamp 
                                             BETWEEN ClazzAssignment.caStartDate

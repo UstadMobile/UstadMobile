@@ -199,11 +199,15 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                 AND cachePersonUid = ResultSource.personUid
                 ) AS progress,
                 
-               (SELECT SUM(cacheStudentScore/cacheMaxScore * 100) 
-               FROM CacheClazzAssignment 
-              WHERE cacheClazzAssignmentUid = :assignmentUid
-                AND cachePersonUid = ResultSource.personUid
-                ) AS score,
+               ((CAST((SELECT SUM(cacheStudentScore) 
+                         FROM CacheClazzAssignment 
+                        WHERE cacheClazzAssignmentUid = :assignmentUid
+                          AND cachePersonUid =  ResultSource.personUid) AS REAL) 
+                          / 
+                          (SELECT SUM(cacheMaxScore)
+                             FROM CacheClazzAssignment 
+                            WHERE cacheClazzAssignmentUid = :assignmentUid
+                              AND cachePersonUid = ResultSource.personUid)) * 100) AS score,
             
             cm.commentsText AS latestPrivateComment
         
