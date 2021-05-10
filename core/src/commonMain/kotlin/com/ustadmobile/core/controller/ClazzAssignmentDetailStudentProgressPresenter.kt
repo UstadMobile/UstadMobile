@@ -20,8 +20,9 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
                                                     di: DI, lifecycleOwner: DoorLifecycleOwner,
                                                     val newPrivateCommentListener: DefaultNewCommentItemListener =
                                                             DefaultNewCommentItemListener(di, context,
-                                                                    arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L,
-                                                                    ClazzAssignment.TABLE_ID, false))
+                                                                    arguments[ARG_CLAZZ_ASSIGNMENT_UID]?.toLong() ?: 0L,
+                                                                    ClazzAssignment.TABLE_ID, false,
+                                                                    arguments[ARG_PERSON_UID]?.toLong() ?: 0L))
     : UstadDetailPresenter<ClazzAssignmentDetailStudentProgressView, ClazzAssignment>(context, arguments, view, di, lifecycleOwner),
         NewCommentItemListener by newPrivateCommentListener {
 
@@ -58,7 +59,6 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
                     repo.clazzAssignmentContentJoinDao.findAllContentByClazzAssignmentUidDF(
                             clazzAssignment.caUid, selectedPersonUid)
                 }
-
 
         view.studentScore = repo.clazzAssignmentDao.getStatementScoreProgressForAssignment(
                 clazzAssignment.caUid, selectedPersonUid)

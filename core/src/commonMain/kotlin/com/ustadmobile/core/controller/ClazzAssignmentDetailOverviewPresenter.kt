@@ -73,15 +73,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                     clazzAssignment.caClazzUid)
         }
 
-        val isStudent = if (loggedInPerson?.admin == true) {
-            false
-        } else {
-            if (clazzEnrolment == null) {
-                false
-            } else {
-                (clazzEnrolment.clazzEnrolmentRole != ClazzEnrolment.ROLE_TEACHER)
-            }
-        }
+        val isStudent = ClazzEnrolment.ROLE_STUDENT == clazzEnrolment?.clazzEnrolmentRole ?: 0
 
         if(isStudent){
             view.clazzMetrics = repo.clazzAssignmentDao.getStatementScoreProgressForAssignment(
