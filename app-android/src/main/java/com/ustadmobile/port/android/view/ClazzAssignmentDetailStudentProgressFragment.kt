@@ -84,6 +84,9 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
 
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
 
+        detailMergerRecyclerView =
+                rootView.findViewById(R.id.fragment_clazz_assignment_detail_overview)
+
 
         // 1
         contentHeaderAdapter = SimpleHeadingRecyclerAdapter(getText(R.string.content).toString()).apply {
