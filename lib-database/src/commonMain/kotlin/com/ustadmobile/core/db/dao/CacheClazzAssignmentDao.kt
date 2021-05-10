@@ -16,11 +16,12 @@ abstract class CacheClazzAssignmentDao: BaseDao<CacheClazzAssignment> {
                  cacheStudentScore, cacheMaxScore, cacheProgress, 
                  cacheContentComplete, lastCsnChecked)
        
-       SELECT caUid AS cacheClazzAssignmentUid , cacjContentUid AS cacheContentEntryUid, 
-               clazzEnrolmentPersonUid AS cachePersonUid, COALESCE(resultScoreRaw,0) AS cacheStudentScore, 
-               COALESCE(extensionProgress,0) AS cacheProgress, 
-               COALESCE(resultCompletion,'FALSE') AS cacheContentComplete, 
+       SELECT clazzEnrolmentPersonUid AS cachePersonUid, 
+                cacjContentUid AS cacheContentEntryUid, caUid AS cacheClazzAssignmentUid, 
+               COALESCE(resultScoreRaw,0) AS cacheStudentScore, 
                COALESCE(resultScoreMax,0) AS cacheMaxScore,
+               COALESCE(extensionProgress,0) AS cacheProgress,
+               COALESCE(resultCompletion,'FALSE') AS cacheContentComplete, 
                (SELECT MAX(statementLocalChangeSeqNum) FROM StatementEntity) AS lastCsnChecked
           FROM ClazzAssignmentContentJoin
 	            LEFT JOIN ClazzAssignment 
@@ -37,7 +38,7 @@ abstract class CacheClazzAssignmentDao: BaseDao<CacheClazzAssignment> {
                                       AND StatementEntity.timestamp 
                                             BETWEEN ClazzAssignment.caStartDate
                                             AND ClazzAssignment.caGracePeriodDate
-                                  ORDER BY resultScoreScaled, extensionProgress DESC LIMIT 1)
+                                  ORDER BY resultScoreScaled DESC, extensionProgress DESC LIMIT 1)
 	     WHERE clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT} 
            AND clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}
            AND clazzEnrolmentActive
