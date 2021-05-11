@@ -25,8 +25,9 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_WEB_PLATFORM
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.util.CssStyleManager
+import com.ustadmobile.util.CssStyleManager.alignTextStart
 import com.ustadmobile.util.CssStyleManager.entryListItemContainer
-import com.ustadmobile.util.CssStyleManager.entryListItemImage
+import com.ustadmobile.util.CssStyleManager.entryListItemImageContainer
 import com.ustadmobile.util.CssStyleManager.entryListItemInfo
 import com.ustadmobile.util.RouteManager.getArgs
 import com.ustadmobile.util.ext.renderEntryThumbnailImg
@@ -90,18 +91,27 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
     override fun RBuilder.renderListItem(item: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
         styledDiv {
             css(entryListItemContainer)
-            styledImg {
-                css { +entryListItemImage }
-                attrs{ renderEntryThumbnailImg(item) }
+            styledDiv {
+                css { +entryListItemImageContainer }
+                styledImg {
+                    css{
+                        width = LinearDimension("100%")
+                        height = LinearDimension("100%")
+                    }
+                    attrs{ renderEntryThumbnailImg(item) }
+                }
             }
             styledDiv {
-                css{+entryListItemInfo}
+                css(entryListItemInfo)
                 mTypography(item.title,variant = MTypographyVariant.h6){
                     css {
+                        +alignTextStart
                         marginBottom = LinearDimension("10px")
                     }
                 }
-                mTypography(item.description, variant = MTypographyVariant.body1, paragraph = true)
+                mTypography(item.description, variant = MTypographyVariant.body1, paragraph = true){
+                    css(alignTextStart)
+                }
 
                 mGridContainer(spacing= MGridSpacing.spacing1){
                     css{
@@ -118,8 +128,7 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
                     }
 
                     mGridItem {
-                        mTypography(
-                            systemImpl.getString(messageId, this),
+                        mTypography(systemImpl.getString(messageId, this),
                             variant = MTypographyVariant.body2, gutterBottom = true)
                     }
                 }

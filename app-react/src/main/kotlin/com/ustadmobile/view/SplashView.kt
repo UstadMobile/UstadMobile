@@ -6,6 +6,8 @@ interface SplashView: SplashScreenView {
 
     var appName: String?
 
+    var rtlSupported: Boolean
+
     fun showMainComponent()
 
     companion object {

@@ -11,12 +11,6 @@ import kotlin.js.Promise
 
 object UmReactUtil {
 
-    val drawerWidth = 240.px
-
-    val zeroPx = 0.px
-
-    var fullWidth = 100.pct
-
     /**
      * Check if the device theme setting is current on dark mode.
      * @return TRUE if is in dark mode otherwise FALSE.

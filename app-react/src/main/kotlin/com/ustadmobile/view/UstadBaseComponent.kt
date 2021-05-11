@@ -30,6 +30,8 @@ open class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(
 
     val systemImpl : UstadMobileSystemImpl by instance()
 
+    var isRTLSupported: Boolean = false
+
     protected val accountManager: UstadAccountManager by instance()
 
     val umTheme : StateManager.UmTheme by instance()
@@ -66,6 +68,7 @@ open class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(
         searchManager = SearchManager("um-search")
         progressBarManager = ProgressBarManager()
         window.addEventListener("hashchange",hashChangeListener)
+        isRTLSupported = systemImpl.isRTLSupported(this)
     }
 
     override fun RBuilder.render() {

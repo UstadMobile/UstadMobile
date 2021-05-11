@@ -28,11 +28,11 @@ class SplashPresenter(private val view: SplashView): DIAware{
         appConfigs.forEach {
             impl.setAppPref(it.key, it.value, this)
         }
-        var locale = impl.getLocale(this)
-        locale = if(locale.isEmpty()) "en" else locale.split("_").first()
+        val locale = impl.getDisplayedLocale(this)
         localization[locale]?.let { impl.setLocaleStrings(it) }
         val loaded = (impl.getAppPref(LOADED_TAG, this)?:"false").toBoolean()
         view.appName = impl.getString(MessageID.app_name,this)
+        view.rtlSupported = impl.isRTLSupported(this)
         val preload = DummyDataPreload(accountManager.activeAccount.endpointUrl, di)
         if(!loaded || impl.getAppPref(TAG_ENTRIES, this) == null){
             preload.verifyAndImportEntries(::goToNext)

@@ -240,6 +240,11 @@ abstract class UstadMobileSystemCommon {
                 availableLangs.map { it to (LANGUAGE_NAMES[it] ?: it) }
     }
 
+    open fun isRTLSupported(context: Any): Boolean {
+        val languages = getAppPref(AppConfig.KEY_RTL_LANGUAGES, context)
+        return languages?.split(",")?.firstOrNull{it == getDisplayedLocale(context)} != null
+    }
+
     abstract suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?>
 
     /**

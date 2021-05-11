@@ -23,9 +23,12 @@ import com.ustadmobile.model.statemanager.ToolbarTabs
 import com.ustadmobile.util.CssStyleManager
 import com.ustadmobile.util.CssStyleManager.appContainer
 import com.ustadmobile.util.CssStyleManager.bottomFixedElements
+import com.ustadmobile.util.CssStyleManager.drawerWidth
 import com.ustadmobile.util.CssStyleManager.fab
+import com.ustadmobile.util.CssStyleManager.fullWidth
 import com.ustadmobile.util.CssStyleManager.isMobile
 import com.ustadmobile.util.CssStyleManager.mainComponentAvatarInner
+import com.ustadmobile.util.CssStyleManager.mainComponentAvatarInnerRTL
 import com.ustadmobile.util.CssStyleManager.mainComponentAvatarOuter
 import com.ustadmobile.util.CssStyleManager.mainComponentContainer
 import com.ustadmobile.util.CssStyleManager.mainComponentContentContainer
@@ -34,14 +37,12 @@ import com.ustadmobile.util.CssStyleManager.mainComponentErrorPaper
 import com.ustadmobile.util.CssStyleManager.mainComponentSearch
 import com.ustadmobile.util.CssStyleManager.mainComponentSearchIcon
 import com.ustadmobile.util.CssStyleManager.progressIndicator
+import com.ustadmobile.util.CssStyleManager.zeroPx
 import com.ustadmobile.util.RouteManager.destinationList
 import com.ustadmobile.util.RouteManager.findDestination
 import com.ustadmobile.util.RouteManager.renderRoutes
 import com.ustadmobile.util.StateManager
-import com.ustadmobile.util.UmReactUtil.drawerWidth
-import com.ustadmobile.util.UmReactUtil.fullWidth
 import com.ustadmobile.util.UmReactUtil.isDarkModeEnabled
-import com.ustadmobile.util.UmReactUtil.zeroPx
 import kotlinext.js.jsObject
 import kotlinx.browser.document
 import kotlinx.coroutines.Dispatchers
@@ -59,12 +60,9 @@ interface MainProps: RProps {
     var currentDestination: UmReactDestination
 }
 
-
 class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(props){
 
     private var activeAccount: UmAccount? = null
-
-    private var isRTLSupport: Boolean = false
 
     private val altBuilder = RBuilder()
 
@@ -87,6 +85,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
 
     override fun RState.init(props: MainProps) {
         currentDestination = props.currentDestination
+        //isRTLSupported = systemImpl.isRTLSupported(this)
     }
 
     override fun componentDidMount() {
@@ -134,7 +133,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
                         css { +mainComponentContainer }
                         mAppBar(position = MAppBarPosition.fixed) {
                             css {
-                                val removeLeftMargin = isMobile or isRTLSupport or !currentDestination.showNavigation
+                                val removeLeftMargin = isMobile or isRTLSupported or !currentDestination.showNavigation
                                 position = Position.absolute
                                 marginLeft = if(removeLeftMargin) zeroPx else drawerWidth
                                 media(theme.breakpoints.up(Breakpoint.md)) {
@@ -171,6 +170,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
                                         attrs.inputProps = inputProps
                                         css {
                                             color = Color.inherit
+                                            paddingRight = (if(isRTLSupported) 60 else 0).px
                                         }
                                     }
                                 }
@@ -186,9 +186,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
                                     }
 
                                     mAvatar{
-                                        css {
-                                            +mainComponentAvatarInner
-                                        }
+                                        css (if(isRTLSupported) mainComponentAvatarInnerRTL else mainComponentAvatarInner)
                                         mTypography("${activeAccount?.firstName?.first()}",
                                             align = MTypographyAlign.center,
                                             variant = MTypographyVariant.h5){
@@ -313,6 +311,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
                             }
                         }
                     }
+                    renderLanguages(systemImpl)
                 }
             }
         }

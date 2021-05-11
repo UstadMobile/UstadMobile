@@ -3,10 +3,14 @@ package com.ustadmobile.util
 import com.ccfraser.muirwik.components.spacingUnits
 import com.ccfraser.muirwik.components.styles.Breakpoint
 import com.ccfraser.muirwik.components.styles.up
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import kotlinx.css.*
 import kotlinx.css.properties.Timing
 import kotlinx.css.properties.Transition
 import kotlinx.css.properties.ms
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.instance
 import styled.StyleSheet
 
 /**
@@ -14,11 +18,21 @@ import styled.StyleSheet
  * element just check the defined style constants.
  * They are named as per component
  */
-object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
+object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
     private val theme = StateManager.getCurrentState().theme!!
 
+    val systemImpl : UstadMobileSystemImpl by instance()
+
+    val isRTLSupported = systemImpl.isRTLSupported(this)
+
     val isMobile: Boolean = js("/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)")
+
+    val drawerWidth = 240.px
+
+    val zeroPx = 0.px
+
+    var fullWidth = 100.pct
 
     val appContainer by css {
         flexGrow = 1.0
@@ -67,6 +81,24 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         margin = "2px 0 0 2.4px"
         color = Color.white
         backgroundColor = Color(theme.palette.primary.dark)
+    }
+
+    val mainComponentAvatarInnerRTL by css {
+        width = 36.px
+        height = 36.px
+        margin = "2px 2.4px 0 0"
+        color = Color.white
+        backgroundColor = Color(theme.palette.primary.dark)
+    }
+
+    val mainLanguageSelectorFormControl by css {
+        margin(1.spacingUnits)
+        minWidth = 120.px
+        width = LinearDimension.auto
+        display = Display.flex
+        position = Position.fixed
+        height = LinearDimension.auto
+        bottom = 16.px
     }
 
     val splashComponentPreloadDiv by css{
@@ -181,10 +213,15 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         flexDirection = FlexDirection.row
     }
 
-    val entryListItemImage by css{
-        marginRight = 20.px
+    val entryListItemImageContainer by css{
+        marginRight = (if(isRTLSupported) 0 else 20).px
+        marginLeft = (if(isRTLSupported) 20 else 0).px
         width = (8.5).pc
         height = 150.px
+    }
+
+    val alignTextStart by css {
+        textAlign = TextAlign.start
     }
 
     val contentEntryListExtraOptions by css{
@@ -309,5 +346,8 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         height = LinearDimension("100%")
         backgroundColor = Color.transparent
     }
+
+    override val di: DI
+        get() = StateManager.getCurrentState().di
 
 }

@@ -44,6 +44,13 @@ class SplashComponent (props: SplashProps): UstadBaseComponent<SplashProps, RSta
             document.title = value.toString()
             field = value
         }
+    override var rtlSupported: Boolean = false
+        get() = field
+        set(value) {
+            field = value
+            document.getElementById("root")?.setAttribute(
+                "dir",if(value) "rtl" else "ltr")
+        }
 
     override fun showMainComponent() {
         setState {

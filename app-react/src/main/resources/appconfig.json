@@ -1,4 +1,5 @@
 {
+    "app.ui_languages_rtl": "ar,arc,dv,fa,ha,he,khw,ks,ku,ps,ur,yi",
     "app.login_before_open": "false",
     "first_dest_login_required": "false",
     "app.select_server": "true",
