@@ -72,24 +72,18 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         width = 40.px
         height = 40.px
         cursor = Cursor.pointer
+        margin = "0 ${if(isRTLSupported) 20 else 0}px 0 ${if(isRTLSupported) 0 else 20}px"
         backgroundColor = Color(theme.palette.primary.light)
     }
 
     val mainComponentAvatarInner by css {
         width = 36.px
         height = 36.px
-        margin = "2px 0 0 2.4px"
+        margin = "2px ${if(isRTLSupported) 2.4 else 0 }px 0 ${if(isRTLSupported) 0 else 2.4 }px"
         color = Color.white
         backgroundColor = Color(theme.palette.primary.dark)
     }
 
-    val mainComponentAvatarInnerRTL by css {
-        width = 36.px
-        height = 36.px
-        margin = "2px 2.4px 0 0"
-        color = Color.white
-        backgroundColor = Color(theme.palette.primary.dark)
-    }
 
     val mainLanguageSelectorFormControl by css {
         margin(1.spacingUnits)
@@ -199,6 +193,8 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
                 width = 300.px
             }
         }
+        color = Color.inherit
+        paddingRight = (if(isRTLSupported) 60 else 0).px
     }
 
     val ustadListViewComponentContainer by css {
@@ -220,7 +216,7 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         height = 150.px
     }
 
-    val alignTextStart by css {
+    val alignTextToStart by css {
         textAlign = TextAlign.start
     }
 
@@ -282,7 +278,7 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
     val entryDetailComponentEntryImageAndButtonContainer by css {
         width = LinearDimension("${if(isMobile) 100 else 40}%")
         display = Display.flex
-        marginRight = LinearDimension("${if(isMobile) 0 else 3}%")
+        margin = "0 ${if(isMobile || isRTLSupported) 0 else 3}% 0 ${if(isMobile || isRTLSupported) 3 else 0}%"
         flexDirection = FlexDirection.column
         paddingBottom = (if(isMobile) 0 else 5).spacingUnits
     }

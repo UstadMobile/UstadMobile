@@ -10,6 +10,8 @@ import com.ccfraser.muirwik.components.menu.mMenuItem
 import com.ccfraser.muirwik.components.targetValue
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.util.CssStyleManager
+import com.ustadmobile.util.CssStyleManager.alignTextToStart
 import com.ustadmobile.util.CssStyleManager.mainLanguageSelectorFormControl
 import kotlinx.browser.window
 import kotlinx.css.LinearDimension
@@ -43,16 +45,22 @@ class  LanguageManager(mProps: LanguageProps): RComponent<LanguageProps,RState>(
     override fun RBuilder.render() {
         mFormControl(variant = MFormControlVariant.outlined) {
             css(mainLanguageSelectorFormControl)
-            mInputLabel(props.label, htmlFor = "language", variant = MFormControlVariant.outlined) {}
+            mInputLabel(props.label, htmlFor = "language", variant = MFormControlVariant.outlined) {
+                css(alignTextToStart)
+            }
             mSelect(selectedLanguage, native = false,
                 input = mOutlinedInput(name = "language", id = "language", addAsChild = false,
                     labelWidth = 100), onChange = { event, _ -> handleOnLanguageChange(event)}) {
                 css { width = props.width}
                 languageOptions.forEach {
-                    mMenuItem(it.second, value = it.first)
+                    mMenuItem(it.second, value = it.first){
+                        css(alignTextToStart)
+                    }
                 }
             }
-            mFormHelperText(props.caption)
+            mFormHelperText(props.caption){
+                css(alignTextToStart)
+            }
         }
     }
 

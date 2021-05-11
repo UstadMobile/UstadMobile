@@ -21,6 +21,7 @@ import com.ustadmobile.model.statemanager.GlobalStateSlice
 import com.ustadmobile.model.statemanager.SnackBarState
 import com.ustadmobile.model.statemanager.ToolbarTabs
 import com.ustadmobile.util.CssStyleManager
+import com.ustadmobile.util.CssStyleManager.alignTextToStart
 import com.ustadmobile.util.CssStyleManager.appContainer
 import com.ustadmobile.util.CssStyleManager.bottomFixedElements
 import com.ustadmobile.util.CssStyleManager.drawerWidth
@@ -28,7 +29,6 @@ import com.ustadmobile.util.CssStyleManager.fab
 import com.ustadmobile.util.CssStyleManager.fullWidth
 import com.ustadmobile.util.CssStyleManager.isMobile
 import com.ustadmobile.util.CssStyleManager.mainComponentAvatarInner
-import com.ustadmobile.util.CssStyleManager.mainComponentAvatarInnerRTL
 import com.ustadmobile.util.CssStyleManager.mainComponentAvatarOuter
 import com.ustadmobile.util.CssStyleManager.mainComponentContainer
 import com.ustadmobile.util.CssStyleManager.mainComponentContentContainer
@@ -85,7 +85,6 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
 
     override fun RState.init(props: MainProps) {
         currentDestination = props.currentDestination
-        //isRTLSupported = systemImpl.isRTLSupported(this)
     }
 
     override fun componentDidMount() {
@@ -168,10 +167,6 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
                                     mInput(placeholder = "${systemImpl.getString(MessageID.search,this)}...",
                                         disableUnderline = true) {
                                         attrs.inputProps = inputProps
-                                        css {
-                                            color = Color.inherit
-                                            paddingRight = (if(isRTLSupported) 60 else 0).px
-                                        }
                                     }
                                 }
 
@@ -186,7 +181,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
                                     }
 
                                     mAvatar{
-                                        css (if(isRTLSupported) mainComponentAvatarInnerRTL else mainComponentAvatarInner)
+                                        css (mainComponentAvatarInner)
                                         mTypography("${activeAccount?.firstName?.first()}",
                                             align = MTypographyAlign.center,
                                             variant = MTypographyVariant.h5){
@@ -307,7 +302,9 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
                                 mListItemWithIcon(it, systemImpl.getString(destination.labelId, this),
                                     divider = destination.divider , onClick = {
                                         systemImpl.go(destination.view, destination.args,this)
-                                    }, selected = currentDestination == destination)
+                                    }, selected = currentDestination == destination){
+                                    css(alignTextToStart)
+                                }
                             }
                         }
                     }

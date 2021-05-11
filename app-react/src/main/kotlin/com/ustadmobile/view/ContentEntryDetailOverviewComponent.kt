@@ -13,6 +13,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
 import com.ustadmobile.lib.db.entities.DownloadJobItem
+import com.ustadmobile.util.CssStyleManager.alignTextToStart
 import com.ustadmobile.util.CssStyleManager.chipSet
 import com.ustadmobile.util.CssStyleManager.defaultMarginTop
 import com.ustadmobile.util.CssStyleManager.entryDetailComponentContainer
@@ -114,14 +115,18 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
             styledDiv {
                 css { +entryDetailComponentEntryExtraInfo }
 
-                mTypography(entity?.title, variant = MTypographyVariant.h4, gutterBottom = true){}
+                mTypography(entity?.title, variant = MTypographyVariant.h4, gutterBottom = true){
+                    css(alignTextToStart)
+                }
 
                 mTypography(
                     entity?.author?.let {
                         systemImpl.getString(MessageID.entry_details_author, this)
                             .joinString(it)
                     },
-                    variant = MTypographyVariant.h6, gutterBottom = true)
+                    variant = MTypographyVariant.h6, gutterBottom = true){
+                    css(alignTextToStart)
+                }
 
                 styledDiv {
                     mGridContainer(spacing= MGridSpacing.spacing10){
@@ -131,7 +136,9 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
                                 entity?.publisher?.let {
                                     systemImpl.getString(MessageID.entry_details_publisher,this)
                                         .joinString(":",it) },
-                                variant = MTypographyVariant.subtitle1, gutterBottom = true)
+                                variant = MTypographyVariant.subtitle1, gutterBottom = true){
+                                css(alignTextToStart)
+                            }
                         }
 
                         mGridItem {
@@ -140,19 +147,26 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
                                     systemImpl.getString(MessageID.entry_details_license,this)
                                         .joinString(it)
                                 },
-                                variant = MTypographyVariant.subtitle1, gutterBottom = true)
+                                variant = MTypographyVariant.subtitle1, gutterBottom = true){
+                                css(alignTextToStart)
+                            }
                         }
                     }
                 }
 
                 mTypography(systemImpl.getString(MessageID.description,this),
-                    variant = MTypographyVariant.caption, paragraph = true)
+                    variant = MTypographyVariant.caption, paragraph = true){
+                    css(alignTextToStart)
+                }
 
-                mTypography(entity?.description, paragraph = true)
+                mTypography(entity?.description, paragraph = true){
+                    css(alignTextToStart)
+                }
 
                 mTypography(systemImpl.getString(MessageID.also_available_in, this),
-                    variant = MTypographyVariant.caption, paragraph = true
-                )
+                    variant = MTypographyVariant.caption, paragraph = true){
+                    css(alignTextToStart)
+                }
                 styledDiv {
                     css{
                         +chipSet

@@ -25,7 +25,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_WEB_PLATFORM
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.util.CssStyleManager
-import com.ustadmobile.util.CssStyleManager.alignTextStart
+import com.ustadmobile.util.CssStyleManager.alignTextToStart
 import com.ustadmobile.util.CssStyleManager.entryListItemContainer
 import com.ustadmobile.util.CssStyleManager.entryListItemImageContainer
 import com.ustadmobile.util.CssStyleManager.entryListItemInfo
@@ -105,12 +105,12 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
                 css(entryListItemInfo)
                 mTypography(item.title,variant = MTypographyVariant.h6){
                     css {
-                        +alignTextStart
+                        +alignTextToStart
                         marginBottom = LinearDimension("10px")
                     }
                 }
                 mTypography(item.description, variant = MTypographyVariant.body1, paragraph = true){
-                    css(alignTextStart)
+                    css(alignTextToStart)
                 }
 
                 mGridContainer(spacing= MGridSpacing.spacing1){
