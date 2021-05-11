@@ -1,10 +1,10 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.putIfNotAlreadySet
 import com.ustadmobile.core.util.ext.requireHttpPrefix
 import com.ustadmobile.core.util.ext.requirePostfix
+import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
@@ -15,7 +15,6 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Site
 import io.ktor.client.*
 import io.ktor.client.features.*
-import io.ktor.client.request.get
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
@@ -47,8 +46,6 @@ class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view:
                 it[ARG_SITE] = Json.encodeToString(Site.serializer(), mSite)
             }
 
-            args.putIfNotAlreadySet(ARG_POPUPTO_ON_FINISH, SiteEnterLinkView.VIEW_NAME)
-
             impl.go(Login2View.VIEW_NAME, args, context)
         }
     }
@@ -63,12 +60,7 @@ class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view:
         checkTextLinkJob = GlobalScope.async(doorMainDispatcher()) {
             try {
                 val endpointUrl = href.requireHttpPrefix().requirePostfix("/")
-                val siteVerifyUrl = UMFileUtil.joinPaths(endpointUrl, "Site","verify")
-                site = httpClient.get<Site>(siteVerifyUrl) {
-                    timeout {
-                        requestTimeoutMillis = LINK_REQUEST_TIMEOUT
-                    }
-                }
+                site = httpClient.verifySite(endpointUrl)
                 view.validLink = site != null
                 validatedLink = endpointUrl
             }catch (e: Exception) {

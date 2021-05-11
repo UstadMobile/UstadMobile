@@ -178,7 +178,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any,
                            flags: Int, ustadGoOptions: UstadGoOptions) {
 
-        val destinationQueryPos = viewName!!.indexOf('?')
+        val destinationQueryPos = viewName.indexOf('?')
         val viewNameOnly = if (destinationQueryPos == -1) {
             viewName
         }else {
@@ -207,6 +207,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                 if(popUpToViewName != null) {
                     val popUpToDestId = if(popUpToViewName == UstadView.CURRENT_DEST) {
                         navController.currentDestination?.id ?: 0
+                    }else if(popUpToViewName == UstadView.ROOT_DEST) {
+                        navController.graph.startDestination
                     }else {
                         destinationProvider.lookupDestinationName(popUpToViewName)
                                 ?.destinationId ?: 0

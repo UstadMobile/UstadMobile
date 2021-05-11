@@ -31,6 +31,7 @@
 package com.ustadmobile.core.view
 
 import kotlinx.coroutines.Runnable
+import kotlin.js.JsName
 
 enum class GetResultMode {
     EDITORNEW, FROMLIST
@@ -110,7 +111,7 @@ interface UstadView {
 
         const val ARG_SERVER_URL = "serverUrl"
 
-        const val ARG_INTENT = "argIntent"
+        const val ARG_DEEPLINK = "argIntent"
 
         const val ARG_SNACK_MESSAGE = "snack_message"
 
@@ -123,6 +124,10 @@ interface UstadView {
         const val CURRENT_DEST = ""
 
         const val ARG_WEB_PLATFORM = "webPlatform"
+
+        const val ROOT_DEST = "root"
+
+        const val ARG_CURRENT = "current"
 
         /**
          * if after selecting from a list, need to open an edit page
@@ -159,7 +164,18 @@ interface UstadView {
 
         const val ARG_REGISTRATION_ALLOWED = "registration_allowed"
 
+        /**
+         * The intent message to display to the user when they open the Login or Account List screen.
+         * This tells the user what they are selecting an account for  e.g. opening link, parental
+         * registration approval, etc.
+         */
+        const val ARG_INTENT_MESSAGE = "intMsg"
+
+        const val ARG_TITLE = "title"
+
+        @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
         const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
+
     }
 
 }

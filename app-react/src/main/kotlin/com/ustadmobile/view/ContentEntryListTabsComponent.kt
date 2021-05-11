@@ -25,8 +25,8 @@ class ContentEntryListTabsComponent(mProps: RProps) :UstadBaseComponent<RProps, 
         systemImpl.go(ContentEntryListTabsView.VIEW_NAME,args,this)
     }
 
-    override fun onComponentRefreshed(viewName: String?) {
-        super.onComponentRefreshed(viewName)
+    override fun onViewChanged(viewName: String?) {
+        super.onViewChanged(viewName)
         if(viewName == ContentEntryListTabsView.VIEW_NAME){
             selectedTab = getSelectedFilter()
         }

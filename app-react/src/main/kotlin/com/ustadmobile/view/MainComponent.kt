@@ -96,8 +96,8 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
             mActiveUserObserver)
     }
 
-    override fun onComponentRefreshed(viewName: String?) {
-        super.onComponentRefreshed(viewName)
+    override fun onViewChanged(viewName: String?) {
+        super.onViewChanged(viewName)
         val destination = findDestination(viewName)
         if(destination != null){
             title = systemImpl.getString(destination.labelId, this)

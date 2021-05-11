@@ -35,13 +35,18 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
     override var errorMessage: String = ""
         get() = field
         set(value) {
-            field = value
+            setState { field = value }
         }
 
     override var versionInfo: String? = null
         get() = field
         set(value) {
             field = value
+        }
+    override var loginIntentMessage: String? = null
+        get() = field
+        set(value) {
+            setState { field = value }
         }
 
     override var isEmptyPassword: Boolean = false
@@ -59,19 +64,19 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
     override var inProgress: Boolean = false
         get() = field
         set(value) {
-            field = value
+            setState { field = value }
         }
 
     override var createAccountVisible: Boolean = false
         get() = field
         set(value) {
-            field = value
+            setState { field = value }
         }
 
     override var connectAsGuestVisible: Boolean = false
         get() = field
         set(value) {
-            field = value
+            setState { field = value }
         }
 
     override fun componentDidMount() {
@@ -83,6 +88,12 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
     override fun RBuilder.render() {
         styledDiv {
             css(loginComponentContainer)
+
+            if(loginIntentMessage != null){
+                mTypography(loginIntentMessage, variant = MTypographyVariant.body2,
+                    align = MTypographyAlign.center, gutterBottom = true)
+            }
+
             styledDiv {
                 css{ +loginComponentForm}
                 mTextField(label = systemImpl.getString(if(isEmptyUsername)

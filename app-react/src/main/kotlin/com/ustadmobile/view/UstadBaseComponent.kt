@@ -18,7 +18,6 @@ import kotlinx.browser.window
 import kotlinx.coroutines.Runnable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.direct
 import org.kodein.di.instance
 import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.events.Event
@@ -42,7 +41,7 @@ open class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(
     private var progressBarManager: ProgressBarManager? = null
 
     private var hashChangeListener:(Event) -> Unit = { (it as HashChangeEvent)
-        onComponentRefreshed(getPathName(it.newURL))
+        onViewChanged(getPathName(it.newURL))
     }
 
     var title: String? = null
@@ -96,7 +95,7 @@ open class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(
         lifecycleObservers.remove(observer)
     }
 
-    open fun onComponentRefreshed(viewName:String?){}
+    open fun onViewChanged(viewName:String?){}
 
     override fun componentWillUnmount() {
         for(observer in lifecycleObservers){

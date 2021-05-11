@@ -239,7 +239,7 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
 
     val entryDetailComponentEntryImage by css {
         width = LinearDimension("100%")
-        height = LinearDimension.initial
+        height = LinearDimension.fillAvailable
     }
 
     val entryDetailComponentEntryImageAndButtonContainer by css {

@@ -6,8 +6,9 @@ import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import kotlinx.coroutines.Job
 
 class ImageViewForeignKeyProps(var foreignKey: Long = 0,
+                               var foreignKeyEndpoint: String? = null,
                                var foreignKeyAttachmentUriAdapter: ForeignKeyAttachmentUriAdapter? = null,
-                               var foreignKeyLoadingOrDisplayed: Long = 0,
+                               var foreignKeyLoadingOrDisplayed: Long = -1,
                                var currentJob: Job? = null,
                                var placeholder: Drawable? = null,
                                var autoHide: Boolean = false) {

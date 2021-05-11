@@ -29,7 +29,6 @@ import com.ustadmobile.util.CssStyleManager.entryListItemContainer
 import com.ustadmobile.util.CssStyleManager.entryListItemImage
 import com.ustadmobile.util.CssStyleManager.entryListItemInfo
 import com.ustadmobile.util.RouteManager.getArgs
-import com.ustadmobile.util.UmReactUtil
 import com.ustadmobile.util.ext.renderEntryThumbnailImg
 import kotlinx.css.*
 import org.w3c.dom.Node
@@ -74,8 +73,8 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
         super.componentDidMount()
     }
 
-    override fun onComponentRefreshed(viewName: String?) {
-        super.onComponentRefreshed(viewName)
+    override fun onViewChanged(viewName: String?) {
+        super.onViewChanged(viewName)
         if(viewName == ContentEntryList2View.VIEW_NAME){
             initPresenter()
         }
