@@ -1,9 +1,19 @@
 package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
+import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileConstants
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.LINK_ENDPOINT_VIEWNAME_DIVIDER
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.schedule.age
+import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.authenticateEncryptedPassword
@@ -20,6 +30,8 @@ import org.kodein.di.instance
 import org.kodein.di.ktor.di
 import org.kodein.di.on
 import com.ustadmobile.core.util.ext.toUmAccount
+import com.ustadmobile.core.view.UstadView
+import jakarta.mail.Message
 
 private const val DEFAULT_SESSION_LENGTH = (1000L * 60 * 60 * 24 * 365)//One year
 
@@ -58,24 +70,66 @@ fun Route.PersonAuthRegisterRoute() {
             val repo: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_REPO)
             val gson: Gson by di().instance()
 
-            val personString = call.request.queryParameters["person"]
-            if(personString == null){
+            val mPerson = call.request.queryParameters["person"]?.let {
+                gson.fromJson(it, PersonWithAccount::class.java)
+            }
+
+            if(mPerson == null) {
                 call.respond(HttpStatusCode.BadRequest, "No person information provided")
                 return@post
             }
 
-            val mPerson = gson.fromJson(personString, PersonWithAccount::class.java)
+            val mParentJoin = call.request.queryParameters["parent"]?.let {
+                gson.fromJson(it, PersonParentJoin::class.java)
+            }
 
-            val person = if(mPerson.personUid != 0L) db.personDao.findByUid(mPerson.personUid)
+            val mLangCode = call.request.queryParameters["locale"] ?: "en"
+
+            val mParentContact = mParentJoin?.ppjEmail
+
+            val mEndpointUrl = call.request.queryParameters["endpoint"]
+
+            if(DateTime(mPerson.dateOfBirth).age() < UstadMobileConstants.MINOR_AGE_THRESHOLD) {
+                if(mParentContact == null || mEndpointUrl == null) {
+                    call.respond(HttpStatusCode.BadRequest,
+                        "Person registering is minor and no parental contact provided or no endpoint for link")
+                    return@post
+                }
+
+
+                mParentJoin.ppjUid = repo.personParentJoinDao.insertAsync(mParentJoin)
+                val systemImpl: UstadMobileSystemImpl by di().instance()
+                val appName = systemImpl.getString(mLangCode, MessageID.app_name, Any())
+                val linkArgs : Map<String, String> = mapOf(UstadView.ARG_ENTITY_UID to
+                        mParentJoin.ppjUid.toString())
+                val linkUrl = (UMFileUtil.joinPaths(mEndpointUrl,
+                    LINK_ENDPOINT_VIEWNAME_DIVIDER) + "PersonParentJoinEdit")
+                    .appendQueryArgs(linkArgs.toQueryString())
+
+                val emailText = systemImpl.getString(mLangCode, MessageID.parent_child_register_message, Any())
+                    .replace("%1\$s", mPerson.fullName())
+                    .replace("%2\$s", appName)
+                    .replace("%3\$s", linkUrl)
+                val subjectText = systemImpl.getString(mLangCode,
+                    MessageID.parent_child_register_message_subject, Any())
+                    .replace("%1\$s", appName)
+
+                val notificationSender: NotificationSender by di().instance()
+                notificationSender.sendEmail(mParentContact, subjectText, emailText)
+            }
+
+
+
+            val existingPerson = if(mPerson.personUid != 0L) db.personDao.findByUid(mPerson.personUid)
             else db.personDao.findByUsername(mPerson.username)
 
-            if(person != null && (mPerson.personUid == 0L ||
-                            mPerson.personUid != 0L && mPerson.username == person.username)){
+            if(existingPerson != null && (mPerson.personUid == 0L ||
+                            mPerson.personUid != 0L && mPerson.username == existingPerson.username)){
                 call.respond(HttpStatusCode.Conflict, "Person already exists, change username")
                 return@post
             }
 
-            if(person == null) {
+            if(existingPerson == null) {
                 mPerson.apply {
                     personUid = repo.insertPersonAndGroup(mPerson).personUid
                 }

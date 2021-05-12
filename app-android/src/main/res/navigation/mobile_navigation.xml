@@ -349,5 +349,15 @@
         android:name="com.ustadmobile.port.android.view.SiteTermsEditFragment"
         android:label="@string/edit_terms_and_policies"/>
 
+    <fragment
+        android:id="@+id/register_minor_wait_for_parent_dest"
+        android:name="com.ustadmobile.port.android.view.RegisterMinorWaitForParentFragment"
+        android:label="@string/almost_done"/>
+
+    <fragment
+        android:id="@+id/register_age_redirect_dest"
+        android:name="com.ustadmobile.port.android.view.RegisterAgeRedirectFragment"
+        android:label="@string/register"/>
+
 
 </navigation>

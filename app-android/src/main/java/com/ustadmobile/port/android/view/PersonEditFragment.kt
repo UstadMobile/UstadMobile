@@ -22,6 +22,7 @@ import com.ustadmobile.core.controller.PersonEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
@@ -41,6 +42,7 @@ import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import kotlinx.coroutines.runBlocking
+import com.ustadmobile.port.android.view.util.RunAfterTextChangedTextWatcher
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.File
@@ -99,6 +101,12 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             field?.removeObserver(clazzMemberWithClazzObserver)
             field = value
             value?.observe(this, clazzMemberWithClazzObserver)
+        }
+
+    override var approvalPersonParentJoin: PersonParentJoin?
+        get() = mBinding?.approvalPersonParentJoin
+        set(value) {
+            mBinding?.approvalPersonParentJoin = value
         }
 
     override var rolesAndPermissionsList: DoorLiveData<List<EntityRoleWithNameAndRole>>? = null
@@ -212,10 +220,16 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             }
         }
 
-    override var registrationMode: Boolean? = null
+    override var registrationMode: Int
+        get() = mBinding?.registrationMode ?: 0
         set(value) {
-            mBinding?.registrationMode = (value == true)
-            field = value
+            mBinding?.registrationMode = value
+        }
+
+    override var parentContactError: String?
+        get() = mBinding?.parentContactError
+        set(value) {
+            mBinding?.parentContactError = value
         }
 
     override var usernameError: String?
@@ -409,6 +423,10 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         })
 
         mBinding?.usernameText?.filters = arrayOf(USERNAME_FILTER)
+        mBinding?.parentcontactText?.addTextChangedListener(RunAfterTextChangedTextWatcher {
+            parentContactError = null
+        })
+
 
         return rootView
     }
@@ -431,7 +449,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             mPresenter?.handleAddOrEditRoleAndPermission(entityRole)
         }
 
-        if(registrationMode == true) {
+        if(registrationMode.hasFlag(PersonEditView.REGISTER_MODE_ENABLED)) {
             ustadFragmentTitle = requireContext().getString(R.string.register)
         }else {
             setEditFragmentTitle(R.string.add_a_new_person, R.string.edit_person)

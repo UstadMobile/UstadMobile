@@ -1,5 +1,6 @@
 package com.ustadmobile.core.impl
 
+import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.util.UMFileUtil
 import io.ktor.client.request.*
 import io.ktor.utils.io.charsets.*
@@ -15,27 +16,15 @@ import kotlin.js.Date
  *
  * @author mike, kileha3
  */
-actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
+actual open class UstadMobileSystemImpl: UstadMobileSystemCommon() {
 
-    private var stringMap : Map<Int,String> = mapOf()
-
-
-    /**
-     * Load all strings to be used in the app
-     */
-    @JsName("setLocaleStrings")
-    fun setLocaleStrings(values : Map<Int,String>){
-        this.stringMap = values
-    }
-
+    lateinit var currentXml: StringsXml
 
     /**
      * Get a string for use in the UI
      */
     actual override fun getString(messageCode: Int, context: Any): String {
-        val map : dynamic = this.stringMap
-        val mapVal = map[messageCode]
-        return mapVal?.toString() ?: ""
+        return currentXml[messageCode]
     }
 
 

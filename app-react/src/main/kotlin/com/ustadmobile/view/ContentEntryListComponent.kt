@@ -117,7 +117,7 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
                     css{
                         display = if(item.leaf) Display.flex else Display.none
                     }
-                    val messageId = CONTENT_ENTRY_TYPE_LABEL_MAP[item.contentTypeFlag]?:0
+                    val messageId = CONTENT_ENTRY_TYPE_LABEL_MAP[item.contentTypeFlag]?:MessageID.untitled
                     val icon = CONTENT_ENTRY_TYPE_ICON_MAP[item.contentTypeFlag]?:""
                     mGridItem {
                         mAvatar(className = "${CssStyleManager.name}-contentEntryListAvatar") {

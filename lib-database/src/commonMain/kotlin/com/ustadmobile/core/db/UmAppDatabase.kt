@@ -40,6 +40,7 @@ import kotlin.jvm.Volatile
     LearnerGroup::class, LearnerGroupMember::class,
     GroupLearningSession::class,
     SiteTerms::class,
+    PersonParentJoin::class,
 
     //Door Helper entities
     SqliteChangeSeqNums::class,
@@ -51,7 +52,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 64)
+], version = 65)
 @MinSyncVersion(58)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -281,6 +282,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val siteDao: SiteDao
 
     abstract val siteTermsDao: SiteTermsDao
+
+    abstract val personParentJoinDao: PersonParentJoinDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO
@@ -4297,6 +4300,22 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         val MIGRATION_63_64 = object: DoorMigration(63, 64) {
             override fun migrate(database: DoorSqlDatabase) {
                 database.execSQL("ALTER TABLE Person ADD COLUMN personCountry TEXT")
+            }
+        }
+
+        val MIGRATION_64_65 = object: DoorMigration(64, 65) {
+
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("ALTER TABLE Person ADD COLUMN parentalApprovalContact TEXT")
+                val longSqlType = if(database.dbType() == DoorDbType.POSTGRES) {
+                    "BIGINT"
+                }else {
+                    "INTEGER"
+                }
+
+                database.execSQL("ALTER TABLE Person ADD COLUMN personParentsGroupUid $longSqlType NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE Person ADD COLUMN personParentApprovalUid $longSqlType NOT NULL DEFAULT 0")
+
             }
         }
 

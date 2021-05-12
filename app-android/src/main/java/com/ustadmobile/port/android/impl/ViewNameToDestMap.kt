@@ -105,7 +105,11 @@ class ViewNameToDestMap: DestinationProvider {
             SiteTermsDetailView.VIEW_NAME to UstadDestination(R.id.site_terms_detail_dest),
             SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS to UstadDestination(R.id.site_terms_detail_accept_dest,
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true,
-                hideAccountIcon = true)
+                hideAccountIcon = true),
+            RegisterMinorWaitForParentView.VIEW_NAME to UstadDestination(R.id.register_minor_wait_for_parent_dest,
+                hideBottomNavigation = true),
+            RegisterAgeRedirectView.VIEW_NAME to UstadDestination(R.id.register_age_redirect_dest,
+                hideBottomNavigation = true)
     )
 
     override val navControllerViewId: Int

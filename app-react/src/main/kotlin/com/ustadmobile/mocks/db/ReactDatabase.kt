@@ -148,6 +148,8 @@ class ReactDatabase: UmAppDatabase() , DoorDatabaseSyncRepository{
         get() = TODO("Not yet implemented")
     override val siteTermsDao: SiteTermsDao
         get() = TODO("Not yet implemented")
+    override val personParentJoinDao: PersonParentJoinDao
+        get() = TODO("Not yet implemented")
     override val dbVersion: Int
         get() = TODO("Not yet implemented")
 

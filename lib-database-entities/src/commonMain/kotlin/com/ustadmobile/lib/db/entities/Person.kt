@@ -83,7 +83,7 @@ open class Person() {
      */
     var personOrgId: String? = null
 
-    //This person's groupUid
+    //The PersonGroup that is created for this individual
     var personGroupUid: Long = 0L
 
     @MasterChangeSeqNum

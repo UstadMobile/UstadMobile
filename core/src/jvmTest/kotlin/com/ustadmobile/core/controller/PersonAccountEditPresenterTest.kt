@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.google.gson.Gson
+import com.ustadmobile.core.account.AccountRegisterOptions
 import org.mockito.kotlin.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
@@ -232,7 +233,7 @@ class PersonAccountEditPresenterTest  {
 
         presenter.handleClickSave(person.apply { username = "username" })
         verifyBlocking(accountManager, timeout(defaultTimeOut).atLeastOnce()){
-            register(any(), any(), any())
+            register(any(), any(), any<AccountRegisterOptions>())
         }
     }
 

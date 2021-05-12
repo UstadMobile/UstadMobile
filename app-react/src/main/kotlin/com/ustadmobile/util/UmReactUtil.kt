@@ -27,6 +27,12 @@ object UmReactUtil {
             .map { entry -> entry[0] as String to entry[1] }.toMap() as T
     }
 
+    suspend fun loadAssetAsText(fileName: String) : String {
+        val res = (window.fetch(fileName) as Promise<dynamic>).await()
+        val data = (res.text() as Promise<dynamic>).await()
+        return data as String
+    }
+
     fun <T> loadList(sourcePath: String,strategy: DeserializationStrategy<List<T>>): List<T> {
         val data = UstadMobileSystemImpl.instance.getAppPref(sourcePath, this)
         return if(data != null) Json.decodeFromString(strategy,data).toMutableList() else listOf()
