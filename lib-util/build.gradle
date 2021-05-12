@@ -76,7 +76,6 @@ kotlin {
 
         commonJvmMain {
             dependencies {
-                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
                 compileOnly "net.sf.kxml:kxml2:$version_kxml"
             }
         }
@@ -90,7 +89,7 @@ kotlin {
 
         jvmMain {
             dependencies {
-
+                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
             }
 
             dependsOn commonJvmMain

@@ -59,7 +59,7 @@ class RegisterEndToEndTest: TestCase() {
             mockWebServer.enqueue(MockResponse()
                     .setHeader("Content-Type", "application/json")
                     .setBody(Buffer().write(
-                            Json.stringify(UmAccount.serializer(), mockAccountCreated).toByteArray())))
+                            Json.encodeToString(UmAccount.serializer(), mockAccountCreated).toByteArray())))
 
             val context = ApplicationProvider.getApplicationContext<Context>()
             val launchIntent = Intent(context, MainActivity::class.java).also {
@@ -107,7 +107,7 @@ class RegisterEndToEndTest: TestCase() {
                 closeSoftKeyboard()
 
                 genderValue {
-                    setMessageIdOption(this, "Female")
+                    setMessageIdOption("Female")
                 }
 
 
@@ -138,6 +138,7 @@ class RegisterEndToEndTest: TestCase() {
                 closeSoftKeyboard()
 
                 confirmPassTextInput {
+                    scrollTo()
                     edit {
                         typeText("secret")
                     }
