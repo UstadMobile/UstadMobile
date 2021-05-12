@@ -109,7 +109,8 @@ class ViewNameToDestMap: DestinationProvider {
             RegisterMinorWaitForParentView.VIEW_NAME to UstadDestination(R.id.register_minor_wait_for_parent_dest,
                 hideBottomNavigation = true),
             RegisterAgeRedirectView.VIEW_NAME to UstadDestination(R.id.register_age_redirect_dest,
-                hideBottomNavigation = true)
+                hideBottomNavigation = true),
+            ParentalConsentManagementView.VIEW_NAME to UstadDestination(R.id.parental_consent_management_dest)
     )
 
     override val navControllerViewId: Int

@@ -263,7 +263,6 @@ class PersonEditPresenter(context: Any,
                     ))
 
                     val popUpToViewName = arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.CURRENT_DEST
-                    accountManager.activeAccount = umAccount
 
                     if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)) {
                         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
@@ -281,6 +280,7 @@ class PersonEditPresenter(context: Any,
 
                         impl.go(RegisterMinorWaitForParentView.VIEW_NAME, args, context, goOptions)
                     }else {
+                        accountManager.activeAccount = umAccount
                         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
                             popUpToViewName, true)
                         accountManager.activeAccount = umAccount

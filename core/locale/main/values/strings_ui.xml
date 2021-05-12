@@ -1038,6 +1038,8 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="join_school">Join school</string>
 
+    <string name="parental_consent">Parental consent</string>
+
     <!--
     When a child registers (without using a link provided by a teacher), then a message is sent to
     the parent with a link allowing them to approve or reject the request.
@@ -1114,5 +1116,12 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     the child using the app. %1$s will be replaced with the date.
     -->
     <string name="status_consent_denied">Status: consent denied (%1$s)</string>
+
+    <!--
+    This is used in the context of describing the relationship between an adult and a child.
+    Normally this would be 'mother' or 'father'. In cases where someone else (e.g. an uncle, aunt,
+    foster parent, etc) is legally responsible for the child, this is the option to select
+    -->
+    <string name="other_legal_guardian">Other legal guardian</string>
 
 </resources>

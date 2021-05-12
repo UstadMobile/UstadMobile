@@ -61,6 +61,10 @@ class ParentalConsentManagementFragment: UstadEditFragment<PersonParentJoinWithM
         return rootView
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        //do nothing: this descends from edit fragment, but does not use the done checkbox
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

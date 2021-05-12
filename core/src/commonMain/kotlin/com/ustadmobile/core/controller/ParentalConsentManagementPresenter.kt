@@ -40,7 +40,7 @@ class ParentalConsentManagementPresenter(context: Any,
         view.relationshipFieldOptions = listOf(
             MessageIdOption(MessageID.mother, context, PersonParentJoin.RELATIONSHIP_MOTHER),
             MessageIdOption(MessageID.father, context, PersonParentJoin.RELATIONSHIP_FATHER),
-            MessageIdOption(MessageID.other, context, PersonParentJoin.RELATIONSHIP_OTHER)
+            MessageIdOption(MessageID.other_legal_guardian, context, PersonParentJoin.RELATIONSHIP_OTHER)
         )
     }
 

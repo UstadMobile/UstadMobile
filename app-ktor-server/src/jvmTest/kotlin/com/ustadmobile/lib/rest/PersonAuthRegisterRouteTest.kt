@@ -16,6 +16,7 @@ import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.toQueryString
+import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.ext.DoorTag
 import io.ktor.client.*
@@ -108,7 +109,7 @@ class PersonAuthRegisterRouteTest {
             //val response = response.content!!
             verifyBlocking(mockNotificationSender) {
                 sendEmail(eq("parent@email.com"), any(), argWhere {
-                    it.contains("https://org.ustadmobile.app/umapp/#PersonParentJoinEdit")
+                    it.contains("https://org.ustadmobile.app/umapp/#${ParentalConsentManagementView.VIEW_NAME}")
                 })
             }
         }
