@@ -11,6 +11,8 @@ import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.db.dao.PersonParentJoinDao
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 
@@ -51,6 +53,12 @@ class ParentalConsentManagementPresenterTest {
 
     private lateinit var repoPersonParentJoinDaoSpy: PersonParentJoinDao
 
+    private lateinit var personParentJoin: PersonParentJoin
+
+    private lateinit var parentPerson: Person
+
+    private lateinit var minorPerson: Person
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -69,39 +77,31 @@ class ParentalConsentManagementPresenterTest {
         whenever(repo.personParentJoinDao).thenReturn(repoPersonParentJoinDaoSpy)
 
         //TODO: insert any entities required for all tests
-    }
 
-    //@Test
-    fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalled_thenShouldSaveToDatabase() {
-        val db: UmAppDatabase by di.activeDbInstance()
-        val repo: UmAppDatabase by di.activeRepoInstance()
-
-        val presenterArgs = mapOf<String, String>()
-
-        val presenter = ParentalConsentManagementPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner, di)
-        presenter.onCreate(null)
-
-        val initialEntity = mockView.captureLastEntityValue()!!
-
-        //TODO: Make some changes (e.g. as the user would do using data binding
-        initialEntity.ppjApprovalTiemstamp = systemTimeInMillis()
-
-        presenter.handleClickSave(initialEntity)
-
-
-        //TODO: wait until the presenter has saved the entity e.g.
-        /*
-        runBlocking {
-            db.waitUntil(5000, listOf("@Entity")) {
-                db.personParentJoinDao.findBySomeCondition()?.someField == initialEntity.someField
-            }
+        parentPerson = Person().apply {
+            firstNames = "Pit"
+            lastName = "The Older"
+            dateOfBirth = (systemTimeInMillis() - 30 * 365 * 24 * 60 * 60 * 1000L)
+            personUid = repo.personDao.insert(this)
         }
 
-        val entitySaved = db.personParentJoinDao.findBySomeCondition()
-        Assert.assertEquals("Entity was saved to database", "Bob",
-                entitySaved.someNameField)
-        */
+        val accountManager: UstadAccountManager by di.instance()
+
+        val activeEndpoint: String = accountManager.activeAccount.endpointUrl
+        accountManager.activeAccount = parentPerson.toUmAccount(activeEndpoint)
+
+        minorPerson = Person().apply {
+            firstNames = "Pit"
+            lastName = "The Young"
+            username = "pityoung"
+            dateOfBirth = systemTimeInMillis() - (10 * 365 * 24 * 60 * 60 * 1000L)
+            personUid = repo.personDao.insert(this)
+        }
+
+        personParentJoin = PersonParentJoin().apply {
+            ppjMinorPersonUid = minorPerson.personUid
+            ppjUid = runBlocking { repo.personParentJoinDao.insertAsync(this@apply) }
+        }
     }
 
     @Test
@@ -112,30 +112,7 @@ class ParentalConsentManagementPresenterTest {
 
         val activeEndpoint: String = accountManager.activeAccount.endpointUrl
 
-        val parentPerson: Person = Person().apply {
-            firstNames = "Pit"
-            lastName = "The Older"
-            dateOfBirth = (systemTimeInMillis() - 30 * 365 * 24 * 60 * 60 * 1000L)
-            personUid = repo.personDao.insert(this)
-        }
-
-        accountManager.activeAccount = parentPerson.toUmAccount(activeEndpoint)
-
-
-        val minorPerson = Person().apply {
-            firstNames = "Pit"
-            lastName = "The Young"
-            username = "pityoung"
-            dateOfBirth = systemTimeInMillis() - (10 * 365 * 24 * 60 * 60 * 1000L)
-            personUid = repo.personDao.insert(this)
-        }
-
-        val testEntity = PersonParentJoin().apply {
-            ppjMinorPersonUid = minorPerson.personUid
-            ppjUid = runBlocking { repo.personParentJoinDao.insertAsync(this@apply) }
-        }
-
-        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.ppjUid.toString())
+        val presenterArgs = mapOf(ARG_ENTITY_UID to personParentJoin.ppjUid.toString())
         val presenter = ParentalConsentManagementPresenter(context,
                 presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
@@ -146,18 +123,19 @@ class ParentalConsentManagementPresenterTest {
         //e.g. initialEntity!!.someName = "New Spelling Clazz"
 
         initialEntity?.ppjStatus = PersonParentJoin.STATUS_APPROVED
+        initialEntity?.ppjRelationship = PersonParentJoin.RELATIONSHIP_MOTHER
         presenter.handleClickSave(initialEntity)
 
         runBlocking {
             db.waitUntil(5000, listOf("PersonParentJoin")) {
                 runBlocking {
-                    db.personParentJoinDao.findByUidWithMinorAsync(testEntity.ppjUid)?.ppjParentPersonUid != 0L
+                    db.personParentJoinDao.findByUidWithMinorAsync(personParentJoin.ppjUid)?.ppjParentPersonUid != 0L
                 }
             }
         }
 
         val entitySaved = runBlocking {
-            db.personParentJoinDao.findByUidWithMinorAsync(testEntity.ppjUid)
+            db.personParentJoinDao.findByUidWithMinorAsync(personParentJoin.ppjUid)
         }
 
         Assert.assertEquals("Status was set to approved",
@@ -167,6 +145,23 @@ class ParentalConsentManagementPresenterTest {
         Assert.assertEquals("Parent uid was set on saved entity",
             parentPerson.personUid, entitySaved?.ppjParentPersonUid)
 
+    }
+
+    @Test
+    fun givenParentChildJoinNoRelationshipSelected_whenClickSaveCalled_thenShouldSetErrorMessage() {
+        val presenterArgs = mapOf(ARG_ENTITY_UID to personParentJoin.ppjUid.toString())
+        val presenter = ParentalConsentManagementPresenter(context,
+            presenterArgs, mockView, mockLifecycleOwner, di)
+        presenter.onCreate(null)
+
+        val initialEntity = mockView.captureLastEntityValue(5000 * 1000)!!
+        initialEntity?.ppjStatus = PersonParentJoin.STATUS_APPROVED
+
+        presenter.handleClickSave(initialEntity)
+
+        val systemImpl: UstadMobileSystemImpl by di.instance()
+        verify(mockView, timeout(5000 ).atLeastOnce()).relationshipFieldError =
+            eq(systemImpl.getString(MessageID.field_required_prompt, context))
     }
 
 

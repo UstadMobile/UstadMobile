@@ -16,6 +16,8 @@ interface ParentalConsentManagementView: UstadEditView<PersonParentJoinWithMinor
 
     var relationshipFieldOptions: List<IdOption>?
 
+    var relationshipFieldError: String?
+
     companion object {
 
         const val VIEW_NAME = "ParentConsentManagement"

@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.formatDate
 import com.ustadmobile.core.util.ext.putEntityAsJson
@@ -14,6 +15,9 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import org.kodein.di.DI
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.view.PersonListView
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -51,7 +55,7 @@ class ParentalConsentManagementPresenter(context: Any,
             it.personParentJoinDao.findByUidWithMinorAsync(entityUid)
         }  ?: throw IllegalArgumentException("Should go to error page")
 
-        val minorPerson = personParentJoin?.minorPerson ?: throw IllegalArgumentException("Go to error page")
+        val minorPerson = personParentJoin.minorPerson ?: throw IllegalArgumentException("Go to error page")
         view.siteTerms = db.siteTermsDao.findSiteTerms(systemImpl.getDisplayedLocale(context))
 
         if(personParentJoin.ppjParentPersonUid == 0L) {
@@ -100,13 +104,31 @@ class ParentalConsentManagementPresenter(context: Any,
 
     override fun handleClickSave(entity: PersonParentJoinWithMinorPerson) {
         GlobalScope.launch(doorMainDispatcher()) {
+            view.relationshipFieldError = null
+
+            if(entity.ppjRelationship == 0) {
+                view.relationshipFieldError = systemImpl.getString(MessageID.field_required_prompt,
+                    context)
+                return@launch
+            }
+
             if(entity.ppjParentPersonUid == 0L)
                 entity.ppjParentPersonUid = accountManager.activeAccount.personUid
 
             entity.ppjApprovalTiemstamp = systemTimeInMillis()
             repo.personParentJoinDao.updateAsync(entity)
 
-            view.finishWithResult(listOf(entity))
+            if(arguments[UstadView.ARG_NEXT] == CURRENT_DEST) {
+                //Where this screen was accessed from another directly (e.g. PersonDetail) then the
+                // POPUPTO should simply by CURRENT_DEST, in which case we can just use popBack
+                systemImpl.popBack(CURRENT_DEST, popUpInclusive = true, context)
+            }else {
+                //Where the screen was accessed using a link, then we need to go to the PersonList screen
+                systemImpl.go(PersonListView.VIEW_NAME, mapOf(), context, UstadMobileSystemCommon.UstadGoOptions(
+                    popUpToViewName = UstadView.ROOT_DEST,
+                    popUpToInclusive = false
+                ))
+            }
         }
     }
 

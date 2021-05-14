@@ -16,6 +16,7 @@ import com.ustadmobile.port.android.screen.ParentalConsentManagementScreen
 import com.ustadmobile.port.android.util.ext.waitUntil2Blocking
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
+import com.ustadmobile.test.port.android.UmViewActions.hasInputLayoutError
 import com.ustadmobile.test.port.android.util.*
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
@@ -141,6 +142,29 @@ class ParentalConsentManagementFragmentTest : TestCase(){
                     PersonParentJoin.STATUS_APPROVED, resultSaved?.ppjStatus)
             }
 
+        }
+    }
+
+    @Test
+    fun givenExistingParentPersonJoin_whenRoleNotSelected_thenShouldShowFieldRequiredMessage() {
+        lateinit var fragmentScenario: FragmentScenario<ParentalConsentManagementFragment>
+
+        init{
+            fragmentScenario = launchParentAccountLandingFragmentInContainer()
+        }.run {
+            val entityLoadedByFragment =
+                fragmentScenario.waitUntilNotNullOnFragmentBlocking(5000) { it.entity }
+
+            ParentalConsentManagementScreen {
+                consentButton {
+                    scrollTo()
+                    click()
+                }
+
+                relationshipTextInput {
+                    hasInputLayoutError(R.string.field_required_prompt)
+                }
+            }
         }
     }
 

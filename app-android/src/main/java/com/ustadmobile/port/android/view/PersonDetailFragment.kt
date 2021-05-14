@@ -34,7 +34,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
-class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), PersonDetailView,
+class PersonDetailFragment: UstadDetailFragment<PersonWithPersonParentJoin>(), PersonDetailView,
         EntityRoleItemHandler{
 
     private var mBinding: FragmentPersonDetailBinding? = null
@@ -163,14 +163,12 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
         }
     }
 
-    override var entity: PersonWithDisplayDetails? = null
+    override var entity: PersonWithPersonParentJoin? = null
         get() = field
         set(value) {
             field = value
             mBinding?.person = value
-            if(viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
-                (activity as? AppCompatActivity)?.supportActionBar?.title =
-                        value?.firstNames + " " + value?.lastName
+            ustadFragmentTitle = value?.fullName()
         }
 
 

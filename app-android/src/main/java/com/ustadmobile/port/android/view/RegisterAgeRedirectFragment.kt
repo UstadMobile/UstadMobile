@@ -9,6 +9,7 @@ import com.toughra.ustadmobile.databinding.FragmentRegisterAgeRedirectBinding
 import com.ustadmobile.core.controller.RegisterAgeRedirectPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.RegisterAgeRedirectView
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 
 class RegisterAgeRedirectFragment() : UstadBaseFragment(), RegisterAgeRedirectView {
@@ -24,7 +25,9 @@ class RegisterAgeRedirectFragment() : UstadBaseFragment(), RegisterAgeRedirectVi
         }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        mBinding = FragmentRegisterAgeRedirectBinding.inflate(inflater, container, false)
+        mBinding = FragmentRegisterAgeRedirectBinding.inflate(inflater, container, false).also {
+            it.datePicker.maxDate = systemTimeInMillis()
+        }
         return mBinding?.root
     }
 

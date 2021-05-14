@@ -23,6 +23,16 @@ abstract class PersonParentJoinDao {
     """)
     abstract suspend fun findByUidWithMinorAsync(uid: Long): PersonParentJoinWithMinorPerson?
 
+    @Query("""
+        SELECT EXISTS(
+               SELECT ppjUid
+                 FROM PersonParentJoin
+                WHERE ppjMinorPersonUid = :minorPersonUid
+                      AND ppjParentPersonUid = :userPersonUid
+                      AND CAST(ppjInactive AS INTEGER) = 0)
+    """)
+    abstract suspend fun isParentOf(userPersonUid: Long, minorPersonUid: Long): Boolean
+
     @Update
     abstract suspend fun updateAsync(personParentJoin: PersonParentJoin)
 

@@ -82,7 +82,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/relationship_textinputlayout"
-                android:visibility="@{personParentJoin.ppjParentPersonUid == 0 ? View.VISIBLE : View.INVISIBLE}"
+                android:visibility="@{personParentJoin.ppjParentPersonUid == 0 ? View.VISIBLE : View.GONE}"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -137,13 +137,13 @@
                 android:layout_marginVertical="@dimen/dimen_8dp"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 app:layout_constraintTop_toBottomOf="@+id/terms_and_policies_header"
-                android:minHeight="@dimen/dimen_100dp"
+                android:minHeight="32dp"
                 app:htmlData="@{siteTerms.termsHtml}"
                 />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/consent_button"
-                android:visibility="@{personParentJoin.ppjParentPersonUid == 0 ? View.VISIBLE : View.INVISIBLE}"
+                android:visibility="@{personParentJoin.ppjParentPersonUid == 0 ? View.VISIBLE : View.GONE}"
                 android:onClick="@{() -> eventHandler.onClickConsent()}"
                 android:enabled="@{fieldsEnabled}"
                 android:layout_width="match_parent"
@@ -161,7 +161,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/dont_consent_button"
-                android:visibility="@{personParentJoin.ppjParentPersonUid == 0 ? View.VISIBLE : View.INVISIBLE}"
+                android:visibility="@{personParentJoin.ppjParentPersonUid == 0 ? View.VISIBLE : View.GONE}"
                 android:onClick="@{() -> eventHandler.onClickDoNotConsent()}"
                 style="@style/UmTheme.Widget.OutlinedButton"
                 android:layout_width="match_parent"
@@ -187,7 +187,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/change_consent_button"
-                android:visibility="@{personParentJoin.ppjParentPersonUid != 0 ? View.VISIBLE : View.INVISIBLE}"
+                android:visibility="@{personParentJoin.ppjParentPersonUid != 0 ? View.VISIBLE : View.GONE}"
                 android:onClick="@{() -> eventHandler.onClickChangeConsent()}"
                 android:enabled="@{fieldsEnabled}"
                 android:layout_width="match_parent"

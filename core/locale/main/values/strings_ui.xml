@@ -1124,4 +1124,12 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     -->
     <string name="other_legal_guardian">Other legal guardian</string>
 
+    <!--
+    This is the text for a button that will be available for parents when they are viewing the
+    profile of their child. They can click it to revoke or restore consent for their child to use
+    the app.
+    -->
+    <string name="manage_parental_consent">Manage parental consent</string>
+
+
 </resources>

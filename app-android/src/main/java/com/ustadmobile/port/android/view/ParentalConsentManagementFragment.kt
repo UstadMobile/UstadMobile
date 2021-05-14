@@ -47,11 +47,20 @@ class ParentalConsentManagementFragment: UstadEditFragment<PersonParentJoinWithM
             mBinding?.relationshipFieldOptions = value
         }
 
+    override var relationshipFieldError: String?
+        get() = mBinding?.relationshipFieldError
+        set(value) {
+            mBinding?.relationshipFieldError = value
+        }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
-        mBinding = FragmentParentalConsentManagementBinding.inflate(inflater, container, false).also {
-            rootView = it.root
-            it.eventHandler = this
+        mBinding = FragmentParentalConsentManagementBinding.inflate(inflater, container, false).also { binding ->
+            rootView = binding.root
+            binding.eventHandler = this
+            binding.relationshipValue.addTextChangedListener(PersonEditFragment.ClearErrorTextWatcher {
+                binding.relationshipFieldError = null
+            })
         }
 
         mPresenter = ParentalConsentManagementPresenter(requireContext(), arguments.toStringMap(), this,
