@@ -41,6 +41,7 @@ import kotlin.jvm.Volatile
     GroupLearningSession::class,
     SiteTerms::class,
     PersonParentJoin::class,
+    ScopedGrant::class,
 
     //Door Helper entities
     SqliteChangeSeqNums::class,
