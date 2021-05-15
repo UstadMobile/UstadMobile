@@ -50,6 +50,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.css.*
 import kotlinx.dom.addClass
+import kotlinx.html.id
 import react.*
 import react.dom.div
 import react.dom.span
@@ -220,6 +221,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
                             }
                             appBarSpacer()
                             styledDiv {
+                                attrs { id = "main-content" }
                                 css (mainComponentContents)
                                 renderRoutes()
                             }

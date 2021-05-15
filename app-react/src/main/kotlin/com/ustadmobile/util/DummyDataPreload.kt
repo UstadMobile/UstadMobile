@@ -49,7 +49,7 @@ class DummyDataPreload(private val endPoint:String, private val di: DI) {
             thumb = "https://docs.google.com/uc?export=download&id=1JRCHlDVZavcU8u2clmsn8R_aeTRlQjLS"),
         UmDummy("Дервиш и муравей̆", uid = 2003306L, parent = "2003300",
             link= "https://maktabmobile.org/librera/Librera.Cloud/Адабиёти бадеии бачагона/Бо забони русӣ/Дервиш и муравей.epub"),
-        UmDummy("Как кот зверей напугал", uid = 2003307L, parent = "2003300",
+        UmDummy("Дервиш и муравей̆", uid = 2003306L, parent = "2003300",
             link= "https://maktabmobile.org/librera/Librera.Cloud/Адабиёти бадеии бачагона/Бо забони русӣ/Как кот зверей напугал.epub")
     )
 

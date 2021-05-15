@@ -22,7 +22,7 @@ import com.ustadmobile.util.CssStyleManager.entryDetailComponentEntryImage
 import com.ustadmobile.util.CssStyleManager.entryDetailComponentEntryImageAndButtonContainer
 import com.ustadmobile.util.RouteManager.getArgs
 import com.ustadmobile.util.ext.joinString
-import com.ustadmobile.util.ext.renderEntryThumbnailImg
+import com.ustadmobile.view.ext.renderEntryThumbnailImg
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

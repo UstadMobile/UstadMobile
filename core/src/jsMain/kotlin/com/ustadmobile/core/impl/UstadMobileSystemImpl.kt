@@ -1,7 +1,10 @@
 package com.ustadmobile.core.impl
 
+import com.ustadmobile.core.generated.locale.MessageIdMap
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
+import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.ktor.client.request.*
 import io.ktor.utils.io.charsets.*
 import io.ktor.utils.io.core.*
@@ -16,15 +19,37 @@ import kotlin.js.Date
  *
  * @author mike, kileha3
  */
-actual open class UstadMobileSystemImpl: UstadMobileSystemCommon() {
+actual open class UstadMobileSystemImpl(private val xppFactory: XmlPullParserFactory): UstadMobileSystemCommon() {
 
-    lateinit var currentXml: StringsXml
+    private val messageIdMapFlipped: Map<String, Int> by lazy {
+        MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
+    }
+
+    private lateinit var defaultStringsXml: StringsXml
+
+    private var foreignStringXml: StringsXml? = null
+
+    var defaultTranslations: Pair<String,String> = Pair("","")
+    set(value) {
+        val xpp = xppFactory.newPullParser()
+        xpp.setInputString(value.second)
+        defaultStringsXml = StringsXml(xpp,xppFactory,messageIdMapFlipped, value.first)
+        field = value
+    }
+
+    var currentTranslations: Pair<String,String> = Pair("","")
+    set(value) {
+        val xpp = xppFactory.newPullParser()
+        xpp.setInputString(value.second)
+        foreignStringXml = StringsXml(xpp,xppFactory,messageIdMapFlipped, value.first, defaultStringsXml)
+        field = value
+    }
 
     /**
      * Get a string for use in the UI
      */
     actual override fun getString(messageCode: Int, context: Any): String {
-        return currentXml[messageCode]
+        return (foreignStringXml ?: defaultStringsXml)[messageCode]
     }
 
 
@@ -129,7 +154,7 @@ actual open class UstadMobileSystemImpl: UstadMobileSystemCommon() {
          *
          * @return A singleton instance
          */
-        actual var instance: UstadMobileSystemImpl =  UstadMobileSystemImpl()
+        actual var instance: UstadMobileSystemImpl =  UstadMobileSystemImpl(XmlPullParserFactory.newInstance())
     }
 
 

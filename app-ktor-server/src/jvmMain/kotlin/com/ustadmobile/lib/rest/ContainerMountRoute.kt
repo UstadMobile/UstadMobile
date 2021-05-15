@@ -6,27 +6,19 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.util.parseRangeRequestHeader
 import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
 import io.ktor.application.*
 import io.ktor.http.*
-import io.ktor.http.content.OutgoingContent
-import io.ktor.request.header
-import io.ktor.response.header
-import io.ktor.response.respond
-import io.ktor.routing.Route
-import io.ktor.routing.get
-import io.ktor.routing.head
-import io.ktor.routing.route
+import io.ktor.http.content.*
+import io.ktor.request.*
+import io.ktor.response.*
+import io.ktor.routing.*
 import io.ktor.util.pipeline.*
-import io.ktor.utils.io.ByteWriteChannel
-import kotlinx.serialization.builtins.ListSerializer
+import io.ktor.utils.io.*
 import org.kodein.di.instance
 import org.kodein.di.ktor.di
 import org.kodein.di.on
@@ -149,20 +141,21 @@ suspend fun Route.serve(call: ApplicationCall, isHeadRequest: Boolean){
             call.response.header(HttpHeaders.CacheControl, "cache; max-age=${TimeUnit.MINUTES.toSeconds(60)}")
 
             val ifNonMatch = call.request.headers[HttpHeaders.IfNoneMatch]
-            if(ifNonMatch != null && eTag == ifNonMatch){
+            /*if(ifNonMatch != null && eTag == ifNonMatch){
                 call.respond(HttpStatusCode.NotModified)
                 return
-            }
+            }*/
 
             val contentType = UMFileUtil.getContentType(pathInContainer)
+            val mimeType = "${contentType.contentType}/${contentType.contentSubtype}"
 
             var inputStream: InputStream = if(contentType.contentSubtype.contains("video"))
                 RangeInputStream(actualFile.inputStream(), rangeResponse.fromByte, rangeResponse.toByte)
             else actualFile.inputStream()
-
             if(fileIsGzipped && acceptsGzip){
                 inputStream = GZIPInputStream(inputStream)
             }
+            inputStream = EpubFilesFilter(di()).filterResponse(inputStream, mimeType)
             call.respond(object : OutgoingContent.WriteChannelContent() {
                 override val contentType = contentType
                 override val status = if(isRangeRequest)

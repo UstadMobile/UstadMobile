@@ -4,14 +4,12 @@ import com.ustadmobile.lib.util.ext.XmlSerializerFilter
 import com.ustadmobile.lib.util.ext.serializeTo
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.instance
 import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlSerializer
 import java.io.ByteArrayOutputStream
-import java.io.ByteArrayInputStream
 import java.io.InputStream
 import org.xmlpull.v1.XmlPullParserFactory
+import com.ustadmobile.core.view.UstadView.Companion.KEY_IFRAME_HEIGHTS
 
 /**
  * Performs some minor tweaks on HTML being served to enable EPUB pagination and handling html
@@ -20,17 +18,23 @@ import org.xmlpull.v1.XmlPullParserFactory
  * This is only applied to HTML which is a top level frame, allownig content in an iframe to work
  * as expected.
  * - Add a meta viewport tag  -
+ * - Compute document height to be set to an iframe for smooth scrolling on a client
  *
  */
 class EpubHtmlFilterSerializer(override val di: DI) : DIAware {
 
     var scriptSrcToAdd: String? = null
 
+    var liveWebServer: Boolean = false
+
     private var `in`: InputStream? = null
 
     class EpubXmlSerializerFilter: XmlSerializerFilter {
 
         var seenViewPort = false
+
+        //Flag which controls what to be added to the page depending on whether it is on mobile or live server
+        var onLiveWebServer: Boolean = false
 
         override fun beforePassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean {
             if (evtType == XmlPullParser.END_TAG && parser.getName() == "head" && !seenViewPort) {
@@ -44,15 +48,31 @@ class EpubHtmlFilterSerializer(override val di: DI) : DIAware {
                 serializer.attribute("", "type", "text/css")
                 serializer.text("""
                             img, video, audio {
-                                max-width: 95% !important;
+                                max-width: ${if(onLiveWebServer) "100" else "95"}% !important;
                             }
 
                             body {
                                 margin: 8dp;
                                 overflow-x: hidden;
+                                display: flex;
+                                justify-content: center;
                             }
                         """.trimIndent())
                 serializer.endTag(parser.getNamespace(), "style")
+            } else if (evtType == XmlPullParser.END_TAG && parser.getName() == "body" && onLiveWebServer){
+                serializer.startTag(parser.getNamespace(), "script")
+                serializer.attribute("", "type", "text/javascript")
+                serializer.text("""
+                            window.onload = function () { 
+                                var heights = localStorage.getItem("$KEY_IFRAME_HEIGHTS");
+                                heights = heights ? JSON.parse(heights) : {};
+                                const height = document.querySelector("body").scrollHeight,
+                                page = window.location.href.split('/').pop().split('#')[0].split('?')[0];
+                                heights[page] = height;
+                                localStorage.setItem("$KEY_IFRAME_HEIGHTS", JSON.stringify(heights));
+                            }
+                        """.trimIndent())
+                serializer.endTag(parser.getNamespace(), "script")
             }
             return true
         }
@@ -81,7 +101,9 @@ class EpubHtmlFilterSerializer(override val di: DI) : DIAware {
             val xpp: XmlPullParser = xppFactory.newPullParser()
             xpp.setInput(`in`, "UTF-8")
 
-            xpp.serializeTo(xs, inclusive = true, filter = EpubXmlSerializerFilter())
+            xpp.serializeTo(xs, inclusive = true, filter = EpubXmlSerializerFilter().apply {
+                onLiveWebServer = liveWebServer
+            })
 
             bout.flush()
             return bout.toByteArray()

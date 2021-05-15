@@ -4,6 +4,7 @@ import com.ustadmobile.core.controller.XapiPackageContentPresenter
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.util.CssStyleManager.responsiveIframe
 import com.ustadmobile.util.RouteManager.getArgs
+import kotlinx.html.IframeSandbox
 import react.RBuilder
 import react.RProps
 import react.RState
@@ -38,7 +39,7 @@ class XapiPackageContentComponent(mProps: RProps): UstadBaseComponent<RProps, RS
 
     override fun RBuilder.render() {
         if(url.isNotEmpty()){
-            styledIframe {
+            styledIframe(sandbox = IframeSandbox.allowScripts) {
                 css(responsiveIframe)
                 attrs{
                     src = url

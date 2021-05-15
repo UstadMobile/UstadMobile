@@ -3,6 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.KEY_IFRAME_HEIGHTS
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.concurrentSafeListOf
@@ -14,6 +15,7 @@ import com.ustadmobile.util.SearchManager
 import com.ustadmobile.util.StateManager
 import com.ustadmobile.util.StateManager.getCurrentState
 import kotlinx.atomicfu.atomic
+import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlinx.coroutines.Runnable
 import org.kodein.di.DI
@@ -69,6 +71,7 @@ open class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(
         progressBarManager = ProgressBarManager()
         window.addEventListener("hashchange",hashChangeListener)
         isRTLSupported = systemImpl.isRTLSupported(this)
+        localStorage.removeItem(KEY_IFRAME_HEIGHTS)
     }
 
     override fun RBuilder.render() {

@@ -10,7 +10,6 @@ import com.ccfraser.muirwik.components.menu.mMenuItem
 import com.ccfraser.muirwik.components.targetValue
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.util.CssStyleManager
 import com.ustadmobile.util.CssStyleManager.alignTextToStart
 import com.ustadmobile.util.CssStyleManager.mainLanguageSelectorFormControl
 import kotlinx.browser.window
@@ -29,7 +28,7 @@ interface LanguageProps: RProps {
 }
 
 
-class  LanguageManager(mProps: LanguageProps): RComponent<LanguageProps,RState>(mProps){
+class  LanguageComponent(mProps: LanguageProps): RComponent<LanguageProps,RState>(mProps){
 
     private lateinit var languageOptions: List<Pair<String, String>>
 
@@ -74,7 +73,7 @@ class  LanguageManager(mProps: LanguageProps): RComponent<LanguageProps,RState>(
 
 fun RBuilder.renderLanguages(systemImpl: UstadMobileSystemImpl, width: LinearDimension = 200.px,
                              label : String = systemImpl.getString(MessageID.language, this),
-                             caption: String = "") = child(LanguageManager::class) {
+                             caption: String = "") = child(LanguageComponent::class) {
     attrs.systemImpl = systemImpl
     attrs.width = width
     attrs.label = label

@@ -1,4 +1,4 @@
-package com.ustadmobile.util.ext
+package com.ustadmobile.view.ext
 
 import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlinx.html.HTMLTag

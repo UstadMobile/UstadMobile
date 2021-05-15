@@ -1,6 +1,7 @@
 package com.ustadmobile.model.statemanager
 
 import com.ccfraser.muirwik.components.styles.Theme
+import com.ustadmobile.util.StateManager
 import org.kodein.di.DI
 import org.w3c.dom.events.Event
 import redux.RAction

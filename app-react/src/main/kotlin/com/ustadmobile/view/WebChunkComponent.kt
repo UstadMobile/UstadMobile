@@ -4,7 +4,9 @@ import com.ustadmobile.core.controller.WebChunkPresenter
 import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.util.CssStyleManager
+import com.ustadmobile.util.CssStyleManager.responsiveIframe
 import com.ustadmobile.util.RouteManager.getArgs
+import kotlinx.html.IframeSandbox
 import react.RBuilder
 import react.RProps
 import react.RState
@@ -37,8 +39,8 @@ class WebChunkComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(mPro
 
     override fun RBuilder.render() {
         if(url.isNotEmpty()){
-            styledIframe {
-                css(CssStyleManager.responsiveIframe)
+            styledIframe(sandbox = IframeSandbox.allowScripts)  {
+                css(responsiveIframe)
                 attrs{
                     src = url
                 }

@@ -5,16 +5,19 @@ import com.ustadmobile.core.controller.EpubContentPresenter
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.util.CssStyleManager.responsiveIframe
 import com.ustadmobile.util.RouteManager.getArgs
+import kotlinx.browser.document
+import kotlinx.browser.localStorage
 import kotlinx.browser.window
+import kotlinx.css.LinearDimension
 import kotlinx.html.IframeSandbox
+import kotlinx.html.id
 import kotlinx.html.js.onLoadFunction
+import org.khronos.webgl.Uint8Array
 import react.*
 import styled.css
 import styled.styledIframe
 
 class EpubContentComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(mProps), EpubContentView{
-
-    private val pageList = mutableListOf<ReactElement>()
 
     override var containerTitle: String? = null
         get() = field
@@ -77,20 +80,7 @@ class EpubContentComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(m
         mPresenter.onCreate(mapOf())
     }
 
-
-
     override fun RBuilder.render() {
-        if(spineUrls != null){
-            spineUrls?.forEach {
-                styledIframe{
-                    css{ +responsiveIframe }
-                    attrs{
-                        sandbox = IframeSandbox.allowSameOrigin
-                        src = it
-                        onLoadFunction = {}
-                    }
-                }
-            }
-        }
+        renderIframe(spineUrls)
     }
 }

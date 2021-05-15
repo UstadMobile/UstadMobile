@@ -3,14 +3,15 @@
     "app.login_before_open": "false",
     "first_dest_login_required": "false",
     "app.select_server": "true",
-    "app.contentonlymode": "false",
     "appBaseName": "UstadMobile",
     "app.ui_languages": "en,fa,ps,ar,tg,bn,ne,my",
     "app.no_iframe_domans": "KhanAcademy",
     "app.register_allowed": "true",
+    "app.ui_default_language": "en",
     "first_dest": "ContentEntryListView",
     "app.guest_allowed": "true",
-    "apiUrl": "http://192.168.31.22:8090/",
+    "apiUrl": "https://maktabmobile.org/demoapp/",
     "doordb.endpoint.url": "http://localhost:8087/",
+    "app.content_only_mode": "false",
     "app.register_before_open": "true"
 }

@@ -30,7 +30,7 @@ import com.ustadmobile.util.CssStyleManager.entryListItemContainer
 import com.ustadmobile.util.CssStyleManager.entryListItemImageContainer
 import com.ustadmobile.util.CssStyleManager.entryListItemInfo
 import com.ustadmobile.util.RouteManager.getArgs
-import com.ustadmobile.util.ext.renderEntryThumbnailImg
+import com.ustadmobile.view.ext.renderEntryThumbnailImg
 import kotlinx.css.*
 import org.w3c.dom.Node
 import react.RBuilder

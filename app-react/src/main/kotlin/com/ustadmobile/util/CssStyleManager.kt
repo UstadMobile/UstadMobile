@@ -330,7 +330,7 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
     val responsiveIframe by css{
         overflow = Overflow.hidden
         width = LinearDimension("100%")
-        minHeight = LinearDimension("170%")
+        minHeight = LinearDimension("100%")
         backgroundColor = Color.transparent
         border = "0px"
     }

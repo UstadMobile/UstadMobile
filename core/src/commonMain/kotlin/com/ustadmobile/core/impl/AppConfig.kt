@@ -23,6 +23,8 @@ object AppConfig {
 
     const val KEY_RTL_LANGUAGES = "app.ui_languages_rtl"
 
+    const val KEY_DEFAULT_LANGUAGE = "app.ui_default_language"
+
     const val KEY_ALLOW_GUEST_LOGIN= "app.guest_allowed"
 
     const val KEY_ALLOW_REGISTRATION = "app.register_allowed"
@@ -31,6 +33,6 @@ object AppConfig {
 
     const val KEY_NO_IFRAME = "app.no_iframe_domans"
 
-    const val KEY_CONTENT_ONLY_MODE = "app.contentonlymode"
+    const val KEY_CONTENT_ONLY_MODE = "app.content_only_mode"
 
 }
