@@ -42,6 +42,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
 import java.io.FileOutputStream
+import java.io.FileWriter
 import java.io.IOException
 import kotlin.math.abs
 
@@ -50,9 +51,12 @@ interface ReportDetailFragmentEventHandler {
     fun onClickAddToDashboard(report: ReportWithSeriesWithFilters)
     fun onClickExportButton()
     fun onClickAddAsTemplate(report: ReportWithSeriesWithFilters)
+    fun onClickExportImage()
+    fun onClickExportCSV()
 }
 
-class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(), ReportDetailView, ReportDetailFragmentEventHandler {
+class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(), ReportDetailView,
+    ReportDetailFragmentEventHandler, BottomSheetOptionSelectedListener {
 
     private var mBinding: FragmentReportDetailBinding? = null
 
@@ -284,6 +288,56 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
     }
 
     override fun onClickExportButton() {
+        val optionList =
+            listOf(
+                BottomSheetOption(R.drawable.ic_export,
+                    requireContext().getString(R.string.image),
+                    EXPORT_IMAGE),
+                BottomSheetOption(R.drawable.ic_export,
+                    requireContext().getString(R.string.csv),
+                    EXPORT_CSV))
+
+        val sheet = OptionsBottomSheetFragment(optionList, this)
+        sheet.show(childFragmentManager, sheet.tag)
+    }
+
+    override fun onBottomSheetOptionSelected(optionSelected: BottomSheetOption) {
+        when(optionSelected.optionCode){
+            EXPORT_IMAGE -> onClickExportImage()
+            EXPORT_CSV -> onClickExportCSV()
+        }
+    }
+
+    override fun onClickExportCSV() {
+        mPresenter?.generateCSVFile()
+    }
+
+    override fun shareCSVData(reportData: StringBuilder) {
+        val csvReportFilePath: String
+        //Create the file.
+        val output = File(context?.externalCacheDir,
+            System.currentTimeMillis().toString() + ".csv")
+        csvReportFilePath = output.getAbsolutePath()
+
+        val fileWriter = FileWriter(csvReportFilePath)
+        fileWriter.append(reportData)
+        fileWriter.close()
+
+        val fileUri  = FileProvider.getUriForFile(requireContext(),
+            "${context?.packageName}.provider", output)
+
+        GlobalScope.launch(Dispatchers.IO) {
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                putExtra(Intent.EXTRA_STREAM, fileUri)
+                type = "text/*"
+            }
+            startActivity(Intent.createChooser(intent, requireContext().getString(R.string.export)))
+        }
+    }
+
+    override fun onClickExportImage(){
         GlobalScope.launch(Dispatchers.IO) {
             val intent = Intent(Intent.ACTION_SEND).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -322,6 +376,9 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
 
 
     companion object {
+
+        const val EXPORT_IMAGE = 1
+        const val EXPORT_CSV = 2
 
         val DIFFUTIL_STATEMENT = object : DiffUtil.ItemCallback<StatementEntityWithDisplayDetails>() {
             override fun areItemsTheSame(oldItem: StatementEntityWithDisplayDetails, newItem: StatementEntityWithDisplayDetails): Boolean {

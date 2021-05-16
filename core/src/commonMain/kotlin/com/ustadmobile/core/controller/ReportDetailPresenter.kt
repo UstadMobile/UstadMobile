@@ -1,6 +1,8 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.generateChartData
 import com.ustadmobile.core.util.ext.generateStatementList
 import com.ustadmobile.core.util.safeParse
@@ -119,6 +121,91 @@ class ReportDetailPresenter(context: Any,
             report.reportOwnerUid = 0
             repo.reportDao.insertAsync(report)
         }
+    }
+
+    fun generateCSVFile() {
+        GlobalScope.launch {
+            val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+            val report = withTimeoutOrNull(2000) {
+                db.reportDao.findByUid(entityUid)
+            } ?: Report()
+
+
+            val series = if (!report.reportSeries.isNullOrEmpty()) {
+                safeParseList(
+                    di,
+                    ListSerializer(ReportSeries.serializer()),
+                    ReportSeries::class, report.reportSeries ?: ""
+                )
+            } else {
+                listOf()
+            }
+            val reportWithFilter = ReportWithSeriesWithFilters(report, series)
+            var chartData =
+                db.generateChartData(reportWithFilter, context, systemImpl, loggedInPersonUid)
+            if(chartData.seriesData.isEmpty() && view.chartData != null &&
+                view.chartData?.seriesData?.isNotEmpty() == true){
+                chartData = view.chartData as ChartData
+            }
+
+            val csvString = StringBuilder()
+            //Add Report title
+            csvString.append(chartData?.reportWithFilters?.reportTitle)
+            val reportDesc = chartData?.reportWithFilters?.reportDescription ?: ""
+            //Add Report description (if it exists)
+            if (reportDesc.isNotEmpty()) {
+                csvString.append(" (")
+                csvString.append(reportDesc)
+                csvString.append(") ")
+            }
+            csvString.append("\n")
+            //Add Column names
+            val yAxisId =
+                chartData?.reportWithFilters?.reportSeriesWithFiltersList?.get(0)?.reportSeriesYAxis
+                    ?: 0
+            val xAxisId = chartData?.reportWithFilters?.xAxis ?: 0
+            val yLabel = UstadMobileSystemImpl.instance.getString(
+                ReportEditPresenter.YAxisOptions.values()
+                    .filter { it.optionVal == yAxisId }[0].messageId, context
+            )
+            val xLabel = UstadMobileSystemImpl.instance.getString(
+                ReportEditPresenter.XAxisOptions.values()
+                    .filter { it.optionVal == xAxisId }[0].messageId,
+                context
+            )
+            csvString.append("\n")
+            csvString.append(xLabel)
+            csvString.append(",")
+            csvString.append(yLabel)
+            csvString.append("\n")
+
+            for (everyData in chartData?.seriesData ?: emptyList()) {
+                //For every series, add Series name
+                csvString.append(everyData.series.reportSeriesName)
+                csvString.append("\n")
+
+                //Get chartData for series
+                for (everySeriesData in everyData.dataList) {
+                    var formattedX =
+                        chartData?.xAxisValueFormatter?.format(everySeriesData.xAxis?:"0")
+                    if(formattedX == null){
+                        formattedX = everySeriesData.xAxis
+                    }
+                    csvString.append(formattedX)
+
+                    csvString.append(",")
+                    csvString.append(everySeriesData.yAxis.toString())
+                    csvString.append("\n")
+                }
+            }
+
+            csvString.append("\n")
+
+            view.runOnUiThread(Runnable {
+                view.shareCSVData(csvString)
+            })
+        }
+
     }
 
 }
