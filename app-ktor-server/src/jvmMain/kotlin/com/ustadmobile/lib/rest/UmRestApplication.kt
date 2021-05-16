@@ -20,7 +20,9 @@ import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
 import com.ustadmobile.lib.rest.ext.bindHostDatabase
+import com.ustadmobile.lib.rest.ext.databasePropertiesFromSection
 import com.ustadmobile.lib.rest.ext.ktorInitDbWithRepo
+import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
@@ -42,12 +44,19 @@ import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
+import org.quartz.Job
+import org.quartz.JobExecutionContext
+import org.quartz.Scheduler
+import org.quartz.SchedulerFactory
+import org.quartz.impl.StdScheduler
+import org.quartz.impl.StdSchedulerFactory
 import java.io.File
 import java.nio.file.Files
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.naming.InitialContext
 import io.ktor.client.features.json.JsonFeature
+import javax.sql.DataSource
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -213,6 +222,18 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             UploadSessionManager(context, di)
         }
 
+        bind<Scheduler>() with singleton {
+            val dbProperties = environment.config.databasePropertiesFromSection("quartz",
+                "jdbc:sqlite:data/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
+            InitialContext().apply {
+                bindDataSourceIfNotExisting("quartzds", dbProperties)
+                initQuartzDb("java:/comp/env/jdbc/quartzds")
+            }
+            StdSchedulerFactory.getDefaultScheduler().also {
+                it.context.put("di", di)
+            }
+        }
+
         registerContextTranslator { call: ApplicationCall ->
             if(dbMode == CONF_DBMODE_SINGLETON) {
                 Endpoint("localhost")
@@ -226,6 +247,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 //Get the container dir so that any old directories (build/storage etc) are moved if required
                 di.on(Endpoint("localhost")).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
             }
+
+            instance<Scheduler>().start()
         }
     }
 

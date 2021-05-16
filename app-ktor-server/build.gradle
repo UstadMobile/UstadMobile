@@ -67,6 +67,8 @@ kotlin {
 
                 implementation "com.github.aakira:napier-jvm:$version_napier"
 
+                implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"
+
                 implementation project(":core")
                 implementation project(":sharedse")
                 implementation project(":lib-database")
