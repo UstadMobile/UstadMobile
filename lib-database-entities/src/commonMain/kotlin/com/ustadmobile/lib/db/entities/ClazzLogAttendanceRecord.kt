@@ -3,18 +3,25 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.CLAZZLOGATTENDANCERECORD_SCOPED_GRANT_JOIN_CLAUSE
 import kotlinx.serialization.Serializable
 
 @SyncableEntity(tableId = ClazzLogAttendanceRecord.TABLE_ID,
     notifyOnUpdate = [
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClazzLogAttendanceRecord.TABLE_ID} AS tableId FROM 
-            ChangeLog
-            JOIN ClazzLogAttendanceRecord ON ChangeLog.chTableId = ${ClazzLogAttendanceRecord.TABLE_ID} AND ChangeLog.chEntityPk = ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid
-            JOIN Person ON Person.personUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+               ${ClazzLogAttendanceRecord.TABLE_ID} AS tableId 
+          FROM ChangeLog
+            JOIN ClazzLogAttendanceRecord 
+                 ON ChangeLog.chTableId = ${ClazzLogAttendanceRecord.TABLE_ID} 
+                    AND ChangeLog.chEntityPk = ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid
+            JOIN ScopedGrant 
+                 ON $CLAZZLOGATTENDANCERECORD_SCOPED_GRANT_JOIN_CLAUSE
+                    AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT}) > 0
+            JOIN PersonGroupMember 
+                 ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+            JOIN DeviceSession
+                 ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid    
         """
     ],
     syncFindAllQuery = """
@@ -82,6 +89,20 @@ open class ClazzLogAttendanceRecord() {
 
 
     companion object {
+
+        const val CLAZZLOGATTENDANCERECORD_SCOPED_GRANT_JOIN_CLAUSE = """
+            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+             OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid)
+             OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = (
+                    SELECT clazzLogClazzUid 
+                      FROM ClazzLog
+                     WHERE clazzLogUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid)))
+            
+        """
+
 
         const val TABLE_ID = 15
 

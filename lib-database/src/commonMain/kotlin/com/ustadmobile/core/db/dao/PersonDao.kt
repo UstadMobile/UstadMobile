@@ -12,10 +12,7 @@ import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_PERSON_VIA_SCOPED_GRANT_PT1
-import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_PERSON_VIA_SCOPED_GRANT_PT2
 import com.ustadmobile.lib.db.entities.Person.Companion.PERSON_SCOPED_GRANT_JOIN_ON_CLAUSE
-import com.ustadmobile.lib.util.authenticateEncryptedPassword
 import com.ustadmobile.lib.util.encryptPassword
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.serialization.Serializable
@@ -249,9 +246,9 @@ abstract class PersonDao : BaseDao<Person> {
         const val SQL_SELECT_LIST_WITH_PERMISSION = """
          SELECT Person.* 
            FROM PersonGroupMember 
-                ${Person.JOIN_PERSON_VIA_SCOPED_GRANT_PT1}
+                ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1}
                     ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_PERSON_VIA_SCOPED_GRANT_PT2}
+                    ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
          WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
            AND PersonGroupMember.groupMemberActive 
            AND (:excludeClazz = 0 OR :excludeClazz NOT IN
@@ -284,7 +281,7 @@ abstract class PersonDao : BaseDao<Person> {
     """
 
 
-        const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
+        private const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
             SELECT DISTINCT Person_Perm.personUid FROM Person Person_Perm
             LEFT JOIN PersonGroupMember ON Person_Perm.personUid = PersonGroupMember.groupMemberPersonUid
             LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
@@ -292,7 +289,7 @@ abstract class PersonDao : BaseDao<Person> {
             WHERE
             CAST(Person_Perm.admin AS INTEGER) = 1 OR ( (
             """
-        const val ENTITY_PERSONS_WITH_PERMISSION_PT2 =  """
+        private const val ENTITY_PERSONS_WITH_PERMISSION_PT2 =  """
             = 0) AND (Person_Perm.personUid = Person.personUid))
             OR
             (
@@ -308,10 +305,11 @@ abstract class PersonDao : BaseDao<Person> {
             AND (Role.rolePermissions & 
         """
 
-        const val ENTITY_PERSONS_WITH_PERMISSION_PT4 = ") > 0)"
+        private const val ENTITY_PERSONS_WITH_PERMISSION_PT4 = ") > 0)"
 
         const val SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L// 28 days
 
+        @Deprecated("Replaced with ScopedGrant")
         const val ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 0 ${ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT4"
 
 

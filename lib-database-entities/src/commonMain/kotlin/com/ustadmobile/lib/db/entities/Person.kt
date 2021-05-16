@@ -3,9 +3,8 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_PERSON_VIA_SCOPED_GRANT_PT1
-import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_PERSON_VIA_SCOPED_GRANT_PT2
-import com.ustadmobile.lib.db.entities.Person.Companion.PERSON_SCOPED_GRANT_JOIN_ON_CLAUSE
+import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
+import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
 import com.ustadmobile.lib.db.entities.Person.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
@@ -23,21 +22,18 @@ import kotlinx.serialization.Serializable
                JOIN Person 
                     ON ChangeLog.chTableId = $TABLE_ID 
                        AND ChangeLog.chEntityPk = Person.personUid
-               JOIN ScopedGrant 
-                    ON $PERSON_SCOPED_GRANT_JOIN_ON_CLAUSE
-               JOIN PersonGroupMember 
-                    ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-               JOIN DeviceSession
-                    ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+               ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_PERSON_SELECT}
+                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}
         """],
         syncFindAllQuery ="""
             SELECT Person.*
               FROM DeviceSession
                    JOIN PersonGroupMember 
                         ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
-                   $JOIN_PERSON_VIA_SCOPED_GRANT_PT1 
+                   $JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1 
                         ${Role.PERMISSION_PERSON_SELECT}
-                        $JOIN_PERSON_VIA_SCOPED_GRANT_PT2
+                        $JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
              WHERE DeviceSession.dsDeviceId = :clientId
         """
     )
@@ -187,6 +183,7 @@ open class Person() {
 
         const val GENDER_OTHER = 4
 
+        @Deprecated("Replaced with ScopedGrant")
         const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
             SELECT DISTINCT Person_Perm.personUid FROM Person Person_Perm
             LEFT JOIN PersonGroupMember ON Person_Perm.personUid = PersonGroupMember.groupMemberPersonUid
@@ -196,6 +193,7 @@ open class Person() {
             CAST(Person_Perm.admin AS INTEGER) = 1 OR ( (
             """
 
+        @Deprecated("Replaced with ScopedGrant")
         const val ENTITY_PERSONS_WITH_PERMISSION_PT2 =  """
             = 0) AND (Person_Perm.personUid = Person.personUid))
             OR
@@ -212,8 +210,10 @@ open class Person() {
             AND (Role.rolePermissions & 
         """
 
+        @Deprecated("Replaced with ScopedGrant")
         const val ENTITY_PERSONS_WITH_PERMISSION_PT4 = ") > 0)"
 
+        @Deprecated("Replaced with ScopedGrant")
         const val FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1 = """
             FROM
              PersonGroupMember
@@ -224,6 +224,7 @@ open class Person() {
                  OR (Person.personUid = :accountPersonUid)
              OR ((Role.rolePermissions & """
 
+        @Deprecated("Replaced with ScopedGrant")
         const val FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2 = """) > 0
                  AND ((EntityRole.erTableId= ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid)
                  OR (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzEnrolmentClazzUid FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = Person.personUid AND ClazzEnrolment.clazzEnrolmentActive))
@@ -251,18 +252,33 @@ open class Person() {
                            )
         """
 
-        const val JOIN_PERSON_VIA_SCOPED_GRANT_PT1 = """
+        const val JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1 = """
             JOIN ScopedGrant
                  ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
                     AND (ScopedGrant.sgPermissions &"""
 
         //In between is where to put the required permission
 
-        const val JOIN_PERSON_VIA_SCOPED_GRANT_PT2 = """
+        const val JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2 = """
                                                     ) > 0
             JOIN Person 
                  ON $PERSON_SCOPED_GRANT_JOIN_ON_CLAUSE
         """
+
+        const val JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1 = """
+            JOIN ScopedGrant 
+                   ON ${Person.PERSON_SCOPED_GRANT_JOIN_ON_CLAUSE}
+                   AND (ScopedGrant.sgPermissions & 
+        """
+
+        const val JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2 = """
+                                                     ) > 0
+             JOIN PersonGroupMember 
+                   ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+              JOIN DeviceSession
+                   ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+        """
+
     }
 
 
