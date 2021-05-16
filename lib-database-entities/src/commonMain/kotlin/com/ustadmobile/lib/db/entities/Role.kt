@@ -301,5 +301,8 @@ open class Role() {
                         PERMISSION_SCHOOL_ADD_STAFF or
                         PERMISSION_SCHOOL_ADD_STUDENT
 
+        const val ALL_PERMISSIONS = Long.MAX_VALUE
+
+
     }
 }

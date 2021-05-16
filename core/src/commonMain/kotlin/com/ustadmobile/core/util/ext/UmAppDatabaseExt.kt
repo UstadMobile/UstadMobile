@@ -262,6 +262,9 @@ suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(entity: T): T{
     personGroupMemberDao.insertAsync(
             PersonGroupMember(entity.personUid, entity.personGroupUid))
 
+    //Grant the person all permissions on their own data
+    grantScopedPermission(entity, Role.ALL_PERMISSIONS, Person.TABLE_ID, entity.personUid)
+
     return entity
 }
 
@@ -567,3 +570,21 @@ suspend fun UmAppDatabase.linkExistingContainerEntries(containerUid: Long,
             entriesNeedDownloaded)
 }
 
+data class ScopedGrantResult(val sgUid: Long)
+
+suspend fun UmAppDatabase.grantScopedPermission(toGroupUid: Long, permissions: Long,
+                                                scopeTableId: Int, scopeEntityUid: Long) : ScopedGrantResult{
+    val sgUid = scopedGrantDao.insertAsync(ScopedGrant().apply {
+        sgGroupUid = toGroupUid
+        sgPermissions = permissions
+        sgTableId = scopeTableId
+        sgEntityUid = scopeEntityUid
+    })
+
+    return ScopedGrantResult(sgUid)
+}
+
+suspend fun UmAppDatabase.grantScopedPermission(toPerson: Person, permissions: Long,
+                                                scopeTableId: Int, scopeEntityUid: Long): ScopedGrantResult {
+    return grantScopedPermission(toPerson.personGroupUid, permissions, scopeTableId, scopeEntityUid)
+}

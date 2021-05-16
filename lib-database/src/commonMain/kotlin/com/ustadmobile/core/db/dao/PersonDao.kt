@@ -146,19 +146,23 @@ abstract class PersonDao : BaseDao<Person> {
      * (e.g. where give the person permission over their own entity automatically).
      */
     @Query("""
-        SELECT 1
-          FROM Person
-          JOIN ScopedGrant
-               ON $PERSON_SCOPED_GRANT_JOIN_ON_CLAUSE
-          JOIN PersonGroupMember 
-               ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-         WHERE Person.personUid = :personUid
-           AND (ScopedGrant.sgPermissions & :permission) > 0
-           AND PersonGroupMember.groupMemberPersonUid = :accountPersonUid
-           AND (:checkPermissionForSelf = :checkPermissionForSelf)
-         LIMIT 1  
+        SELECT EXISTS(
+                SELECT 1
+                  FROM Person
+                  JOIN ScopedGrant
+                       ON $PERSON_SCOPED_GRANT_JOIN_ON_CLAUSE
+                  JOIN PersonGroupMember 
+                       ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+                 WHERE Person.personUid = :personUid
+                   AND (ScopedGrant.sgPermissions & :permission) > 0
+                   AND PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+                 LIMIT 1)
     """)
-    abstract suspend fun personHasPermissionAsync(accountPersonUid: Long, personUid: Long, permission: Long, checkPermissionForSelf: Int = 0): Boolean
+    abstract suspend fun personHasPermissionAsync(
+        accountPersonUid: Long,
+        personUid: Long,
+        permission: Long
+    ): Boolean
 
     @Query("SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), 0)")
     abstract suspend fun personIsAdmin(accountPersonUid: Long): Boolean

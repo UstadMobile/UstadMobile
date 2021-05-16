@@ -141,9 +141,11 @@ class PersonEditPresenter(context: Any,
         }
 
         val canDelegate = if(loggedInPersonUid != 0L) {
-            repo.personDao.personHasPermissionAsync(loggedInPersonUid?: 0,
-                    arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
-                    Role.PERMISSION_PERSON_DELEGATE, checkPermissionForSelf = 1)
+            repo.personDao.personHasPermissionAsync(
+                loggedInPersonUid?: 0,
+                arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
+                Role.PERMISSION_PERSON_DELEGATE
+            )
         }else {
             false
         }

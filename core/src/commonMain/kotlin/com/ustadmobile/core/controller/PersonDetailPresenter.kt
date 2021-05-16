@@ -11,7 +11,6 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.*
 import org.kodein.di.DI
 
@@ -35,8 +34,10 @@ class PersonDetailPresenter(context: Any,
             } ?: Person()
 
             //Reset password uses additional seeked permission
-            val hasAuthPermission = repo.personDao.personHasPermissionAsync(activePersonUid,
-                entityUid, Role.PERMISSION_RESET_PASSWORD)
+            val hasAuthPermission = repo.personDao.personHasPermissionAsync(
+                activePersonUid,
+                entityUid, Role.PERMISSION_RESET_PASSWORD
+            )
             view.changePasswordVisible = person.username != null
                     && (activePersonUid == entityUid || hasAuthPermission)
 
@@ -54,9 +55,11 @@ class PersonDetailPresenter(context: Any,
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
-        return repo.personDao.personHasPermissionAsync(account?.personUid ?: 0,
-                arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
-                    Role.PERMISSION_PERSON_UPDATE)
+        return repo.personDao.personHasPermissionAsync(
+            account?.personUid ?: 0,
+            arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
+            Role.PERMISSION_PERSON_UPDATE
+        )
     }
 
     override fun handleClickEdit() {

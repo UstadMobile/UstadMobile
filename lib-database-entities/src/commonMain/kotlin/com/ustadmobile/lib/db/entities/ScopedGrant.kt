@@ -45,7 +45,7 @@ class ScopedGrant {
         const val ALL_TABLES = -2
 
 
-        const val ALL_ENTITIES = -2
+        const val ALL_ENTITIES = -2L
 
     }
 }

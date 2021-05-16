@@ -286,6 +286,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     abstract val personParentJoinDao: PersonParentJoinDao
 
+    abstract val scopedGrantDao: ScopedGrantDao
+
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO
 

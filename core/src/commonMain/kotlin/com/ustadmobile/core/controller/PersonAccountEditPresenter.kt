@@ -54,8 +54,10 @@ class PersonAccountEditPresenter(context: Any,
         } ?: Person()
 
         activeUserHasPasswordResetPermission = withTimeoutOrNull(2000) {
-            db.personDao.personHasPermissionAsync(activePersonUid, entityUid,
-                Role.PERMISSION_RESET_PASSWORD, 0)
+            db.personDao.personHasPermissionAsync(
+                activePersonUid, entityUid,
+                Role.PERMISSION_RESET_PASSWORD
+            )
         } ?: false
 
         view.currentPasswordVisible = !activeUserHasPasswordResetPermission

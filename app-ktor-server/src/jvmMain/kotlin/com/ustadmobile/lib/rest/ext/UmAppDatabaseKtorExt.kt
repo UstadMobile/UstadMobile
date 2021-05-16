@@ -4,6 +4,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
+import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.encryptPassword
@@ -42,6 +43,12 @@ fun UmAppDatabase.ktorInitDbWithRepo(repo: UmAppDatabase, passwordFilePath: Stri
         if (!adminPassFile.parentFile.isDirectory) {
             adminPassFile.parentFile.mkdirs()
         }
+
+        runBlocking {
+            repo.grantScopedPermission(adminPerson, Role.ALL_PERMISSIONS, ScopedGrant.ALL_TABLES,
+                ScopedGrant.ALL_ENTITIES)
+        }
+
 
         adminPassFile.writeText(adminPass)
         println("Saved admin password to ${adminPassFile.absolutePath}")
