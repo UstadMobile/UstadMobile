@@ -20,7 +20,9 @@ import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
 import com.ustadmobile.lib.rest.ext.bindHostDatabase
+import com.ustadmobile.lib.rest.ext.databasePropertiesFromSection
 import com.ustadmobile.lib.rest.ext.ktorInitDbWithRepo
+import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
@@ -221,7 +223,12 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         }
 
         bind<Scheduler>() with singleton {
-            InitialContext().initQuartzDb("java:/comp/env/jdbc/quartzds")
+            val dbProperties = environment.config.databasePropertiesFromSection("quartz",
+                "jdbc:sqlite:data/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
+            InitialContext().apply {
+                bindDataSourceIfNotExisting("quartzds", dbProperties)
+                initQuartzDb("java:/comp/env/jdbc/quartzds")
+            }
             StdSchedulerFactory.getDefaultScheduler().also {
                 it.context.put("di", di)
             }
