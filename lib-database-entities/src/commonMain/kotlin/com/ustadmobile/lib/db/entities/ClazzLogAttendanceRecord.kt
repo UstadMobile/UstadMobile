@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.FROM_CLAZZLOGATTENDANCERECORD_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.FROM_SCOPEDGRANT_TO_CLAZZLOGATTENDANCERECORD_JOIN_ON_CLAUSE
 import kotlinx.serialization.Serializable
 
 @SyncableEntity(tableId = ClazzLogAttendanceRecord.TABLE_ID,
@@ -25,13 +26,16 @@ import kotlinx.serialization.Serializable
         """
     ],
     syncFindAllQuery = """
-            SELECT ClazzLogAttendanceRecord.* FROM
-            ClazzLogAttendanceRecord
-            JOIN Person ON Person.personUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
-            WHERE DeviceSession.dsDeviceId = :clientId
+            SELECT ClazzLogAttendanceRecord.*
+              FROM DeviceSession
+                   JOIN PersonGroupMember 
+                        ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+                   JOIN ScopedGrant 
+                        ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+                            AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT}) > 0
+                   JOIN ClazzLogAttendanceRecord 
+                        ON $FROM_SCOPEDGRANT_TO_CLAZZLOGATTENDANCERECORD_JOIN_ON_CLAUSE
+             WHERE DeviceSession.dsDeviceId = :clientId
         """)
 @Entity
 @Serializable
@@ -111,6 +115,27 @@ open class ClazzLogAttendanceRecord() {
                      
                      )
             
+        """
+
+        const val FROM_SCOPEDGRANT_TO_CLAZZLOGATTENDANCERECORD_JOIN_ON_CLAUSE = """
+            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+             OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid)
+             OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+                AND ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid IN (
+                    SELECT clazzLogUid 
+                      FROM ClazzLog
+                     WHERE clazzLogClazzUid = ScopedGrant.sgEntityUid))
+             OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                AND ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid IN (
+                     SELECT clazzLogUid
+                       FROM ClazzLog
+                      WHERE clazzLogClazzUid IN (
+                            SELECT clazzUid
+                              FROM Clazz
+                             WHERE clazzSchoolUid = ScopedGrant.sgEntityUid)))
+            )         
         """
 
 
