@@ -62,7 +62,7 @@ kotlin {
                 implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
                 implementation "commons-cli:commons-cli:$version_apache_commons_cli"
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-                implementation "com.github.aakira:napier-jvm:$version_napier"
+                implementation "io.github.aakira:napier-jvm:$version_napier"
 
                 implementation "com.soywiz.korlibs.klock:klock-jvm:$version_klock"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"

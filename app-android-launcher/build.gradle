@@ -135,7 +135,7 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
-    implementation "com.github.aakira:napier:$version_napier"
+    implementation "io.github.aakira:napier:$version_napier"
     implementation "com.google.android.material:material:$version_android_material"
 
     implementation "com.google.android.gms:play-services-safetynet:$version_android_play_services_safetynet"
