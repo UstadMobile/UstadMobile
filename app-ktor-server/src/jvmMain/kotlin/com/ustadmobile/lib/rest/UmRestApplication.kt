@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.rest
 
-import com.github.aakira.napier.DebugAntilog
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
@@ -202,8 +202,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 "jdbc:sqlite:data/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
             InitialContext().apply {
                 bindDataSourceIfNotExisting("quartzds", dbProperties)
+                initQuartzDb("java:/comp/env/jdbc/quartzds")
             }
-            InitialContext().initQuartzDb("java:/comp/env/jdbc/quartzds")
             StdSchedulerFactory.getDefaultScheduler().also {
                 it.context.put("di", di)
             }

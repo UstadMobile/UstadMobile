@@ -9,7 +9,7 @@ import java.security.DigestInputStream
 import java.security.MessageDigest
 import java.util.zip.GZIPInputStream
 import java.io.IOException
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 
 /**
  * To verify data integrity ConcatenatedInput and ConcatenatedOutput streams need to md5 sum,

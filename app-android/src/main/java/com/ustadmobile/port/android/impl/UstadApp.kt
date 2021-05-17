@@ -1,8 +1,9 @@
 package com.ustadmobile.port.android.impl
 
 import android.content.Context
-import com.github.aakira.napier.DebugAntilog
-import com.github.aakira.napier.Napier
+import android.os.Build
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.squareup.picasso.OkHttp3Downloader

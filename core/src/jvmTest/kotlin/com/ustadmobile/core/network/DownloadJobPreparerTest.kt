@@ -1,6 +1,6 @@
 package com.ustadmobile.core.network
 
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.google.gson.Gson
 import org.mockito.kotlin.mock
 import com.ustadmobile.core.account.Endpoint

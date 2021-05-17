@@ -11,7 +11,7 @@ import kotlin.coroutines.coroutineContext
 import java.util.concurrent.atomic.AtomicLong
 import com.ustadmobile.core.io.ConcatenatedEntry
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.ustadmobile.door.ext.toHexString
 import java.io.*
 import com.ustadmobile.core.util.ext.encodeBase64
