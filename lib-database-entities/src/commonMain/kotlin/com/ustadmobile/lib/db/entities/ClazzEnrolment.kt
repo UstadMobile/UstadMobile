@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.CLAZZENROLMENT_SCOPED_GRANT_JOIN_ON_CLAUSE
+import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.FROM_SCOPEDGRANT_TO_CLAZZENROLMENT_JOIN__ON_CLAUSE
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
 
@@ -252,7 +252,7 @@ import kotlinx.serialization.Serializable
                    ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
                       AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_SELECT}) > 0 
               JOIN ClazzEnrolment 
-                   ON $CLAZZENROLMENT_SCOPED_GRANT_JOIN_ON_CLAUSE
+                   ON $FROM_SCOPEDGRANT_TO_CLAZZENROLMENT_JOIN__ON_CLAUSE
              WHERE DeviceSession.dsDeviceId = :clientId
     """)
 @Serializable
@@ -317,18 +317,40 @@ open class ClazzEnrolment()  {
 
     companion object {
 
-        const val CLAZZENROLMENT_SCOPED_GRANT_JOIN_ON_CLAUSE = """
+        const val FROM_SCOPEDGRANT_TO_CLAZZENROLMENT_JOIN__ON_CLAUSE = """
             ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
                   AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
               OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
                   AND ScopedGrant.sgEntityUid = ClazzEnrolment.clazzEnrolmentPersonUid)
               OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
-                  AND ScopedGrant.sgEntityUid = ClazzEnrolment.clazzEnrolmentClazzUid))
+                  AND ScopedGrant.sgEntityUid = ClazzEnrolment.clazzEnrolmentClazzUid)
+              OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                  AND ClazzEnrolment.clazzEnrolmentClazzUid IN (
+                      SELECT clazzUid 
+                        FROM Clazz
+                       WHERE clazzSchoolUid = ScopedGrant.sgEntityUid))
+                  )
         """
+
+        const val FROM_CLAZZENROLMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE = """
+            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                  AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+              OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
+                  AND ScopedGrant.sgEntityUid = ClazzEnrolment.clazzEnrolmentPersonUid)
+              OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+                  AND ScopedGrant.sgEntityUid = ClazzEnrolment.clazzEnrolmentClazzUid)
+              OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                 AND ScopedGrant.sgEntityUid = (
+                     SELECT clazzSchoolUid
+                       FROM Clazz
+                      WHERE clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid))
+            )                
+        """
+
 
         const val JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1 = """
             JOIN ScopedGrant 
-                 ON $CLAZZENROLMENT_SCOPED_GRANT_JOIN_ON_CLAUSE
+                 ON $FROM_CLAZZENROLMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
                     AND (ScopedGrant.sgPermissions &
         """
 

@@ -12,7 +12,7 @@ import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.Person.Companion.PERSON_SCOPED_GRANT_JOIN_ON_CLAUSE
+import com.ustadmobile.lib.db.entities.Person.Companion.FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
 import com.ustadmobile.lib.util.encryptPassword
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.serialization.Serializable
@@ -147,7 +147,7 @@ abstract class PersonDao : BaseDao<Person> {
                 SELECT 1
                   FROM Person
                   JOIN ScopedGrant
-                       ON $PERSON_SCOPED_GRANT_JOIN_ON_CLAUSE
+                       ON $FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
                   JOIN PersonGroupMember 
                        ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
                  WHERE Person.personUid = :personUid

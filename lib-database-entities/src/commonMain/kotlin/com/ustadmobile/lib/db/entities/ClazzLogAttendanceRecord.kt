@@ -3,7 +3,7 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.CLAZZLOGATTENDANCERECORD_SCOPED_GRANT_JOIN_CLAUSE
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.FROM_CLAZZLOGATTENDANCERECORD_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
 import kotlinx.serialization.Serializable
 
 @SyncableEntity(tableId = ClazzLogAttendanceRecord.TABLE_ID,
@@ -16,7 +16,7 @@ import kotlinx.serialization.Serializable
                  ON ChangeLog.chTableId = ${ClazzLogAttendanceRecord.TABLE_ID} 
                     AND ChangeLog.chEntityPk = ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid
             JOIN ScopedGrant 
-                 ON $CLAZZLOGATTENDANCERECORD_SCOPED_GRANT_JOIN_CLAUSE
+                 ON $FROM_CLAZZLOGATTENDANCERECORD_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
                     AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT}) > 0
             JOIN PersonGroupMember 
                  ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
@@ -90,7 +90,7 @@ open class ClazzLogAttendanceRecord() {
 
     companion object {
 
-        const val CLAZZLOGATTENDANCERECORD_SCOPED_GRANT_JOIN_CLAUSE = """
+        const val FROM_CLAZZLOGATTENDANCERECORD_TO_SCOPEDGRANT_JOIN_ON_CLAUSE = """
             ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
                 AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
              OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
@@ -99,7 +99,17 @@ open class ClazzLogAttendanceRecord() {
                 AND ScopedGrant.sgEntityUid = (
                     SELECT clazzLogClazzUid 
                       FROM ClazzLog
-                     WHERE clazzLogUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid)))
+                     WHERE clazzLogUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid))
+             OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = (
+                    SELECT clazzSchoolUid
+                      FROM Clazz
+                     WHERE clazzUid = (
+                            SELECT clazzLogClazzUid 
+                              FROM ClazzLog
+                             WHERE clazzLogUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid)))
+                     
+                     )
             
         """
 

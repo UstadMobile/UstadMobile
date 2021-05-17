@@ -236,9 +236,48 @@ open class Person() {
                  ))))"""
 
 
+        const val JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1 = """
+            JOIN ScopedGrant
+                 ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+                    AND (ScopedGrant.sgPermissions &"""
 
-        const val PERSON_SCOPED_GRANT_JOIN_ON_CLAUSE = """
+        //In between is where to put the required permission
+
+        //The class subquery is most efficient and logical when ScopedGrant has already been joined
+        // (e.g. we are looking to join from ScopedGrant out to person)
+        const val FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE = """
                 ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                    AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+                 OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
+                    AND ScopedGrant.sgEntityUid = Person.personUid)
+                 OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}       
+                    AND Person.personUid IN (
+                        SELECT DISTINCT clazzEnrolmentPersonUid
+                          FROM ClazzEnrolment
+                         WHERE clazzEnrolmentClazzUid =ScopedGrant.sgEntityUid 
+                           AND ClazzEnrolment.clazzEnrolmentActive))
+                 OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                    AND Person.personUid IN (
+                        SELECT DISTINCT schoolMemberPersonUid
+                          FROM SchoolMember
+                         WHERE schoolMemberSchoolUid = ScopedGrant.sgEntityUid
+                           AND schoolMemberActive))
+                           )
+        """
+
+
+        const val JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2 = """
+                                                    ) > 0
+            JOIN Person 
+                 ON $FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
+        """
+
+
+
+        //The class/school subquery is most efficient and logical when Person has already been joined
+        // (e.g. we are looking to join from Person out to ScopedGrant)
+        const val FROM_SCOPEDGRANT_TO_PERSON_JOIN_ON_CLAUSE = """
+            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
                     AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
                  OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
                     AND ScopedGrant.sgEntityUid = Person.personUid)
@@ -248,28 +287,22 @@ open class Person() {
                           FROM ClazzEnrolment
                          WHERE clazzEnrolmentPersonUid = Person.personUid 
                            AND ClazzEnrolment.clazzEnrolmentActive))
-                           
+                 OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                    AND ScopedGrant.sgEntityUid IN (
+                        SELECT DISTINCT schoolMemberSchoolUid
+                          FROM SchoolMember
+                         WHERE schoolMemberPersonUid = Person.personUid
+                           AND schoolMemberActive))
                            )
         """
 
-        const val JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1 = """
-            JOIN ScopedGrant
-                 ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                    AND (ScopedGrant.sgPermissions &"""
-
-        //In between is where to put the required permission
-
-        const val JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2 = """
-                                                    ) > 0
-            JOIN Person 
-                 ON $PERSON_SCOPED_GRANT_JOIN_ON_CLAUSE
-        """
 
         const val JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1 = """
             JOIN ScopedGrant 
-                   ON ${Person.PERSON_SCOPED_GRANT_JOIN_ON_CLAUSE}
+                   ON $FROM_SCOPEDGRANT_TO_PERSON_JOIN_ON_CLAUSE
                    AND (ScopedGrant.sgPermissions & 
         """
+
 
         const val JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2 = """
                                                      ) > 0
