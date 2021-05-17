@@ -336,8 +336,6 @@ dependencies {
     implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy"
     implementation "androidx.recyclerview:recyclerview:$version_androidx_recyclerview"
 
-    implementation "com.google.android.gms:play-services-safetynet:$version_android_play_services_safetynet"
-
     //Image loading library
     implementation "com.squareup.picasso:picasso:$version_android_picasso"
 
