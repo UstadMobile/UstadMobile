@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.contentscrapers
 
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.google.common.collect.Lists
 import com.google.gson.GsonBuilder
 import com.neovisionaries.i18n.CountryCode
