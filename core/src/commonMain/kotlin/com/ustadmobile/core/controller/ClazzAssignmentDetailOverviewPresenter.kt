@@ -65,9 +65,6 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                             clazzAssignment.caUid, loggedInPersonUid)
                 }
 
-        val loggedInPerson = withTimeoutOrNull(2000) {
-            db.personDao.findByUidAsync(loggedInPersonUid)
-        }
         val clazzEnrolment: ClazzEnrolment? = withTimeoutOrNull(2000) {
             db.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
                     clazzAssignment.caClazzUid)

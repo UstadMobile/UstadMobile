@@ -205,7 +205,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                                   WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
 							        AND StatementEntity.statementPersonUid = :personUid
 							        AND contentEntryRoot 
-                               ORDER BY resultScoreScaled DESC LIMIT 1)
+                               ORDER BY resultScoreScaled DESC, extensionProgress DESC LIMIT 1)
                     
                     LEFT JOIN Container 
                     ON Container.containerUid = 
@@ -245,7 +245,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                                   WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
 							        AND StatementEntity.statementPersonUid = :personUid
 							        AND contentEntryRoot 
-                               ORDER BY resultScoreScaled DESC LIMIT 1)
+                               ORDER BY resultScoreScaled DESC, extensionProgress DESC LIMIT 1)
                     
                     LEFT JOIN Container 
                     ON Container.containerUid = 

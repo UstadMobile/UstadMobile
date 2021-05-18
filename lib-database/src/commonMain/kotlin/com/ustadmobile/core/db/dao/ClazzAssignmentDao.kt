@@ -132,27 +132,19 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
 
 
     @Query("""
-        SELECT COALESCE(SUM(ResultSource.resultScoreMax),0) AS resultMax, 
-               COALESCE(SUM(ResultSource.resultScoreRaw),0) AS resultScore, 
+        SELECT COALESCE(SUM(ResultSource.cacheMaxScore),0) AS resultMax, 
+               COALESCE(SUM(ResultSource.cacheStudentScore),0) AS resultScore, 
                'FALSE' as contentComplete, 0 as progress
-     	  FROM (SELECT StatementEntity.resultScoreRaw, StatementEntity.resultScoreMax
+     	  FROM (SELECT CacheClazzAssignment.cacheStudentScore, CacheClazzAssignment.cacheMaxScore
      	 	      FROM ClazzAssignmentContentJoin 
                          LEFT JOIN ContentEntry 
                          ON ContentEntry.contentEntryUid = ClazzAssignmentContentJoin.cacjContentUid 
-                       
-                         LEFT JOIN StatementEntity 
-                         ON statementUid = (SELECT statementUid 
-                                              FROM StatementEntity 
-                                                    LEFT JOIN ClazzAssignment 
-                                                    ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
-                                             WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
-                                               AND caUid = :caUid
-                                               AND statementPersonUid = :personUid
-                                               AND contentEntryRoot 
-                                               AND StatementEntity.timestamp 
-                                                    BETWEEN ClazzAssignment.caStartDate
-                                                        AND ClazzAssignment.caGracePeriodDate
-                                         ORDER BY resultScoreScaled DESC, extensionProgress DESC LIMIT 1)
+                         
+                         LEFT JOIN CacheClazzAssignment
+                         ON cacheContentEntryUid = ClazzAssignmentContentJoin.cacjContentUid 
+                         AND cachePersonUid = :personUid
+                         AND cacheClazzAssignmentUid = :caUid
+                  GROUP BY ClazzAssignmentContentJoin.cacjContentUid
      	  ) AS ResultSource
     """)
     abstract suspend fun getStatementScoreProgressForAssignment(caUid: Long, personUid: Long): ContentEntryStatementScoreProgress?

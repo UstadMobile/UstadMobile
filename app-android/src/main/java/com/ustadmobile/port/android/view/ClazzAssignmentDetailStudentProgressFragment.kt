@@ -156,6 +156,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         newPrivateCommentRecyclerAdapter = null
         privateCommentsRecyclerAdapter = null
         privateCommentsHeadingRecyclerAdapter = null
+        detailMergerRecyclerView = null
     }
 
     override fun open(publicComment: Boolean) {
