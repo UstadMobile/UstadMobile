@@ -10,7 +10,7 @@ interface ClazzAssignmentDetailStudentProgressView: UstadDetailView<ClazzAssignm
     var studentScore: ContentEntryStatementScoreProgress?
 
     var clazzAssignmentContent
-            : DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?
+            : DataSource.Factory<Int, ContentWithAttemptSummary>?
 
     var clazzAssignmentPrivateComments: DataSource.Factory<Int, CommentsWithPerson>?
 

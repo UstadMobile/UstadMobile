@@ -51,12 +51,12 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
 
 
     private var contentHeaderAdapter: SimpleHeadingRecyclerAdapter? = null
-    private var contentRecyclerAdapter: ContentEntryListRecyclerAdapter? = null
+    private var contentRecyclerAdapter: ContentWithAttemptRecyclerAdapter? = null
 
     private var contentLiveData: LiveData<PagedList<
-            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>? = null
+            ContentWithAttemptSummary>>? = null
     private val contentObserver = Observer<PagedList<
-            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?> { t ->
+            ContentWithAttemptSummary>?> { t ->
         run {
             contentHeaderAdapter?.visible = t?.size ?: 0 > 0
             contentRecyclerAdapter?.submitList(t)
@@ -82,11 +82,14 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             rootView = it.root
         }
 
+
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
+
+        mPresenter = ClazzAssignmentDetailStudentProgressPresenter(requireContext(), arguments.toStringMap(), this,
+                di, viewLifecycleOwner)
 
         detailMergerRecyclerView =
                 rootView.findViewById(R.id.fragment_clazz_assignment_detail_overview)
-
 
         // 1
         contentHeaderAdapter = SimpleHeadingRecyclerAdapter(getText(R.string.content).toString()).apply {
@@ -94,9 +97,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         }
 
         // 2
-        contentRecyclerAdapter = ContentEntryListRecyclerAdapter(
-                DefaultContentEntryListItemListener(context = requireContext(), di = di),
-                ListViewMode.BROWSER.toString(), viewLifecycleOwner, di)
+        contentRecyclerAdapter = ContentWithAttemptRecyclerAdapter(mPresenter)
 
         // 3
         scoreRecyclerAdapter = ScoreRecyclerAdapter()
@@ -119,10 +120,6 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         privateCommentsRecyclerAdapter = CommentsRecyclerAdapter().also{
             privateCommentsObserver = PagedListSubmitObserver(it)
         }
-
-        mPresenter = ClazzAssignmentDetailStudentProgressPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
-
 
         detailMergerRecyclerAdapter = ConcatAdapter(contentHeaderAdapter,
                 contentRecyclerAdapter, scoreRecyclerAdapter, privateCommentsHeadingRecyclerAdapter,
@@ -166,10 +163,11 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
     }
 
 
-    override var clazzAssignmentContent: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>? = null
+    override var clazzAssignmentContent: DataSource.Factory<Int, ContentWithAttemptSummary>? = null
         set(value) {
+            val dbRepoVal = dbRepo?: return
             contentLiveData?.removeObserver(contentObserver)
-            contentLiveData = value?.asRepositoryLiveData(ClazzWorkDao)
+            contentLiveData = value?.asRepositoryLiveData(dbRepoVal.clazzAssignmentDao)
             field = value
             contentLiveData?.observeIfFragmentViewIsReady(this, contentObserver)
         }

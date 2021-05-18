@@ -2,15 +2,13 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
+import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.lib.db.entities.CommentsWithPerson
-import com.ustadmobile.lib.db.entities.ContentEntryWithAttemptsSummary
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -24,7 +22,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
                                                                     ClazzAssignment.TABLE_ID, false,
                                                                     arguments[ARG_PERSON_UID]?.toLong() ?: 0L))
     : UstadDetailPresenter<ClazzAssignmentDetailStudentProgressView, ClazzAssignment>(context, arguments, view, di, lifecycleOwner),
-        NewCommentItemListener by newPrivateCommentListener {
+        NewCommentItemListener by newPrivateCommentListener, ContentWithAttemptListener {
 
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
@@ -37,7 +35,6 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
     var selectedPersonUid: Long = 0
 
     var selectedClazzAssignmentUid: Long= 0
-
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -56,7 +53,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
 
         view.clazzAssignmentContent =
                 withTimeoutOrNull(2000) {
-                    repo.clazzAssignmentContentJoinDao.findAllContentByClazzAssignmentUidDF(
+                    repo.clazzAssignmentContentJoinDao.findAllContentWithAttemptsByClazzAssignmentUid(
                             clazzAssignment.caUid, selectedPersonUid)
                 }
 
@@ -70,6 +67,12 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
         }
 
         return clazzAssignment
+    }
+
+    override fun onClickContentWithAttempt(contentWithAttemptSummary: ContentWithAttemptSummary) {
+        val args =  mapOf(UstadView.ARG_ENTITY_UID to contentWithAttemptSummary.contentEntryUid.toString(),
+                UstadView.ARG_PARENT_ENTRY_TITLE to contentWithAttemptSummary.contentEntryTitle)
+        systemImpl.go(ContentEntryDetailView.VIEW_NAME, args, context)
     }
 
 }

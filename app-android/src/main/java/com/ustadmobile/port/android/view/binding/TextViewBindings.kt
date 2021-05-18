@@ -9,7 +9,6 @@ import androidx.databinding.BindingAdapter
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.DateTimeTz
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
@@ -295,16 +294,16 @@ fun TextView.setRolesAndPermissionsText(entityRole: EntityRoleWithNameAndRole){
 
 }
 
-@BindingAdapter("statementDate")
-fun TextView.setStatementDate(person: PersonWithAttemptsSummary){
+@BindingAdapter(value=["statementStartDate", "statementEndDate"])
+fun TextView.setStatementDate(statementStartDate: Long, statementEndDate: Long){
     val dateFormatter = DateFormat.getDateFormat(context)
-    var statementDate = dateFormatter.format(person.startDate)
+    var statementDate = dateFormatter.format(statementStartDate)
 
-    if(person.endDate != 0L && person.endDate != Long.MAX_VALUE){
-        val startDate = DateTime(person.startDate)
-        val endDate = DateTime(person.endDate)
+    if(statementEndDate != 0L && statementEndDate!= Long.MAX_VALUE){
+        val startDate = DateTime(statementStartDate)
+        val endDate = DateTime(statementEndDate)
         if(startDate.dayOfYear != endDate.dayOfYear){
-            statementDate += " - ${dateFormatter.format(person.endDate)}"
+            statementDate += " - ${dateFormatter.format(statementEndDate)}"
         }
     }
 
