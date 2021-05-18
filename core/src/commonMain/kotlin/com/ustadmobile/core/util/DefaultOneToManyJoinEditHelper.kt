@@ -30,7 +30,7 @@ class DefaultOneToManyJoinEditHelper<T: Any>(pkGetter: (T) -> Long,
             pksToDeactivate.addAll(pksToDeactivateStr.split(',').map { it.toLong() })
         }
 
-        val fakePkStartVal = (liveList.getValue()?.map { pkGetter(it) }?.min() ?: 0L) -1
+        val fakePkStartVal = (liveList.getValue()?.map { pkGetter(it) }?.minOrNull() ?: 0L) -1
         atomicLong.value = fakePkStartVal
     }
 

@@ -27,7 +27,7 @@ fun LinearLayout.setQuestionOptionsWithResponse(options: List<ClazzWorkQuestionO
 
         if(response == item.clazzWorkQuestionOptionUid){
             option.isSelected = true
-            option.setTextColor(ContextCompat.getColor(context, R.color.common_google_signin_btn_text_dark_pressed))
+            option.setTextColor(ContextCompat.getColor(context, R.color.primaryColor))
         }
 
 
