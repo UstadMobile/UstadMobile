@@ -14,6 +14,8 @@ import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.systemImpl
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.view.ReportTemplateListFragment
+import com.ustadmobile.port.android.view.ReportTemplateListFragment.Companion.REPORT_TITLE_TO_ID
 import java.text.MessageFormat
 import java.util.*
 
@@ -124,6 +126,24 @@ fun getRealValueInt(et: TextView): Int {
 @BindingAdapter(value = ["minValue", "setMaxValue"])
 fun EditText.setMinMax(min: String, max: Int){
     filters =   arrayOf(InputFilterMinMax(Integer.valueOf(min), max))
+}
+
+@SuppressLint("SetTextI18n")
+@BindingAdapter("reportTitleText")
+fun TextView.setReportTitleText(report: Report) {
+    val reportTitleId = report.reportTitleId
+    text = if(REPORT_TITLE_TO_ID.containsKey(reportTitleId)) {
+        systemImpl.getString(REPORT_TITLE_TO_ID[reportTitleId] ?: 0, context)
+    }else{ report.reportTitle }
+}
+
+@SuppressLint("SetTextI18n")
+@BindingAdapter("reportDescText")
+fun TextView.setReportDescText(report: Report) {
+    val reportDescId = report.reportDescId
+    text = if(REPORT_TITLE_TO_ID.containsKey(reportDescId)) {
+        systemImpl.getString(REPORT_TITLE_TO_ID[reportDescId] ?: 0, context)
+    }else{ report.reportDescription }
 }
 
 

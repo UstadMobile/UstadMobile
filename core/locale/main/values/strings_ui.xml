@@ -1027,4 +1027,16 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="join_school">Join school</string>
 
+    <string name="blank_report">Blank report</string>
+    <string name="start_from_scratch">Start from scratch</string>
+    <string name="attendance_over_time_by_class">Attendance over time by class</string>
+    <string name="percentage_of_students_attending_over_time">Percentage of students attending over time</string>
+    <string name="content_completion">Content completion</string>
+    <string name="number_of_students_completed_time">Number of students who have completed selected content</string>
+    <string name="content_usage_by_class">Content usage by class</string>
+    <string name="total_content_usage_duration_class">Total content usage duration subgroup by class</string>
+    <string name="content_usage_over_time">Content usage over time</string>
+    <string name="total_content_duration_gender">Total content usage duration over time (disaggregated by gender)</string>
+    <string name="unique_content_users_over_time">Unique content users over time</string>
+    <string name="number_of_active_users_over_time">Number of active users over time</string>
 </resources>
