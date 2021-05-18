@@ -140,12 +140,19 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             field = value
             mBinding?.clazzAssignment = value
             mBinding?.lateSubmissionVisibility = if(
-                    value?.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_ACCEPT ||
                     value?.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY){
                 View.VISIBLE
             }else{
                 View.GONE
             }
+            mBinding?.gracePeriodVisibility = if(
+                    value?.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY ||
+                    value?.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_ACCEPT){
+                View.VISIBLE
+            }else{
+                View.GONE
+            }
+
         }
 
     override var fieldsEnabled: Boolean = false
