@@ -26,13 +26,13 @@ import kotlinx.serialization.Serializable
     syncFindAllQuery = """
         SELECT PersonGroup.*
           FROM DeviceSession
-          JOIN PersonGroupMember
-               ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
-          ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1}
-                ${Role.PERMISSION_PERSON_SELECT}
-                ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
-          JOIN PersonGroup 
-               ON PersonGroup.groupUid = PersonGroupMember.groupMemberGroupUid
+               JOIN PersonGroupMember
+                    ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+               ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_PERSON_SELECT}
+                    ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+               JOIN PersonGroup 
+                    ON PersonGroup.groupUid = PersonGroupMember.groupMemberGroupUid
          WHERE DeviceSession.dsDeviceId = :clientId
         """)
 @Serializable
