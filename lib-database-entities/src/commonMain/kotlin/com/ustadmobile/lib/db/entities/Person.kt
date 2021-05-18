@@ -306,10 +306,10 @@ open class Person() {
 
         const val JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2 = """
                                                      ) > 0
-             JOIN PersonGroupMember 
-                   ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+             JOIN PersonGroupMember AS PrsGrpMbr
+                   ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
               JOIN DeviceSession
-                   ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+                   ON DeviceSession.dsPersonUid = PrsGrpMbr.groupMemberPersonUid
         """
 
     }
