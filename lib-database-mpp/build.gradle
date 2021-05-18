@@ -31,7 +31,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
-                implementation "com.github.aakira:napier:$version_napier"
+                implementation "io.github.aakira:napier:$version_napier"
                 implementation project(":lib-database")
                 implementation project(":lib-database-entities")
                 implementation "com.ustadmobile.door:door-runtime:$version_door"
@@ -47,7 +47,7 @@ kotlin {
                 implementation project(":lib-database")
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
-                implementation "com.github.aakira:napier-jvm:$version_napier"
+                implementation "io.github.aakira:napier-jvm:$version_napier"
             }
         }
 
