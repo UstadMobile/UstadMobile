@@ -40,32 +40,27 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
         const val FINDBY_CLAZZ_ASSIGNMENT_UID =
                 """
                     SELECT ContentEntry.*, ContentEntryParentChildJoin.*, 
-                            Container.*, COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
-                            COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
-                            COALESCE(StatementEntity.extensionProgress,0) AS progress, 
-                            COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete
+                            Container.*, 
+                             COALESCE(CacheClazzAssignment.cacheStudentScore,0) AS resultScore,
+                                           
+                             COALESCE(CacheClazzAssignment.cacheMaxScore,0) AS resultMax,
+                                                         
+                             COALESCE(CacheClazzAssignment.cacheProgress,0) AS progress,                            
+                            
+                             COALESCE(CacheClazzAssignment.cacheContentComplete,'FALSE') AS contentComplete       
+                             
                       FROM ClazzAssignmentContentJoin
                             LEFT JOIN ContentEntry 
                             ON ContentEntry.contentEntryUid = cacjContentUid 
-                             
-                            LEFT JOIN StatementEntity
-							ON StatementEntity.statementUid = 
-                                (SELECT statementUid 
-							       FROM StatementEntity 
-                                        LEFT JOIN ClazzAssignment 
-                                        ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
-                       
-                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
-							        AND StatementEntity.statementPersonUid = :personUid
-                                    AND StatementEntity.timestamp 
-                                        BETWEEN ClazzAssignment.caStartDate 
-                                        AND ClazzAssignment.caGracePeriodDate
-							        AND contentEntryRoot 
-                               ORDER BY resultScoreScaled DESC LIMIT 1)
-                                
+                            
                             LEFT JOIN ContentEntryParentChildJoin 
                             ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
                            
+                            LEFT JOIN CacheClazzAssignment
+                            ON cacheContentEntryUid = ClazzAssignmentContentJoin.cacjContentUid
+                                AND cachePersonUid = :personUid
+                                AND cacheClazzAssignmentUid = :clazzAssignmentUid
+                                                        
                             
                             LEFT JOIN Container 
                             ON Container.containerUid = 
