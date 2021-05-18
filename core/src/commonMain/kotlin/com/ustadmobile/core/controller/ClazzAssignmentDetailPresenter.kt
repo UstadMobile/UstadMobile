@@ -6,7 +6,6 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.*
@@ -36,7 +35,7 @@ class ClazzAssignmentDetailPresenter(context: Any,
             editEntity = ClazzAssignment()
         }
 
-        setupTabs()
+        setupTabs(editEntity)
 
         return editEntity
     }
@@ -47,18 +46,18 @@ class ClazzAssignmentDetailPresenter(context: Any,
             withTimeoutOrNull(2000) { db.clazzAssignmentDao.findByUidAsync(entityUid) }
         } ?: ClazzAssignment()
 
-        setupTabs()
+        setupTabs(entry)
 
         return entry
     }
 
 
-    private fun setupTabs() {
+    private fun setupTabs(assignment: ClazzAssignment) {
         val entityUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
         GlobalScope.launch(doorMainDispatcher()) {
             val loggedInPersonUid = accountManager.activeAccount.personUid
             val hasPermission = db.clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
-                    entityUid, Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT)
+                    assignment.caClazzUid, Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)
             if(hasPermission){
                 view.tabs = listOf("${ClazzAssignmentDetailOverviewView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid",
                         "${ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid")
