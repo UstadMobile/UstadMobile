@@ -141,11 +141,9 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
     }
 
 
-    val personPermission = """${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} 
-        ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
-         """.replace(":accountPersonUid", "?")
-    paramList.add(accountPersonUid)
-    paramList.add(accountPersonUid)
+    val personPermission = """${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
+        ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+         """
 
     var sqlList = """SELECT  Person.* , XLangMapEntry.* ,StatementEntity.* 
                 $personPermission LEFT JOIN StatementEntity ON 

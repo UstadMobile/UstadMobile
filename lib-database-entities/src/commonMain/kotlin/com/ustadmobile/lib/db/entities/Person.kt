@@ -183,58 +183,6 @@ open class Person() {
 
         const val GENDER_OTHER = 4
 
-        @Deprecated("Replaced with ScopedGrant")
-        const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
-            SELECT DISTINCT Person_Perm.personUid FROM Person Person_Perm
-            LEFT JOIN PersonGroupMember ON Person_Perm.personUid = PersonGroupMember.groupMemberPersonUid
-            LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
-            WHERE
-            CAST(Person_Perm.admin AS INTEGER) = 1 OR ( (
-            """
-
-        @Deprecated("Replaced with ScopedGrant")
-        const val ENTITY_PERSONS_WITH_PERMISSION_PT2 =  """
-            = 0) AND (Person_Perm.personUid = Person.personUid))
-            OR
-            (
-            ((EntityRole.erTableId = ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid) OR 
-            (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzEnrolmentClazzUid FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = Person.personUid)) OR
-            (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.PersonUid)) OR
-            (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (
-                SELECT DISTINCT Clazz.clazzSchoolUid 
-                FROM Clazz
-                JOIN ClazzEnrolment ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
-            ))
-            ) 
-            AND (Role.rolePermissions & 
-        """
-
-        @Deprecated("Replaced with ScopedGrant")
-        const val ENTITY_PERSONS_WITH_PERMISSION_PT4 = ") > 0)"
-
-        @Deprecated("Replaced with ScopedGrant")
-        const val FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1 = """
-            FROM
-             PersonGroupMember
-             LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-             LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid 
-             LEFT JOIN Person ON
-             CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = :accountPersonUid) AS INTEGER) = 1
-                 OR (Person.personUid = :accountPersonUid)
-             OR ((Role.rolePermissions & """
-
-        @Deprecated("Replaced with ScopedGrant")
-        const val FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2 = """) > 0
-                 AND ((EntityRole.erTableId= ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid)
-                 OR (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzEnrolmentClazzUid FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = Person.personUid AND ClazzEnrolment.clazzEnrolmentActive))
-                 OR (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid)) OR
-                 (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (
-                 SELECT DISTINCT Clazz.clazzSchoolUid 
-                 FROM Clazz
-                 JOIN ClazzEnrolment ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
-                 ))))"""
-
 
         const val JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1 = """
             JOIN ScopedGrant

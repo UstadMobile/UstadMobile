@@ -6,7 +6,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.FROM_SCOPEDGRANT_TO_CLAZZENROLMENT_JOIN__ON_CLAUSE
-import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
+import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
 
 import kotlinx.serialization.Serializable
@@ -47,9 +47,23 @@ import kotlinx.serialization.Serializable
             JOIN ClazzEnrolment 
                  ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
                     AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
-                  ${Role.PERMISSION_PERSON_SELECT} 
-                  $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
+            JOIN ScopedGrant 
+                 ON ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                         AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+                      OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
+                          AND ScopedGrant.sgEntityUid = ClazzEnrolment.clazzEnrolmentPersonUid)
+                      OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+                          AND ScopedGrant.sgEntityUid = ClazzEnrolment.clazzEnrolmentClazzUid)
+                      OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                         AND ScopedGrant.sgEntityUid = (
+                             SELECT clazzSchoolUid
+                               FROM Clazz
+                              WHERE clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid)))
+                    AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_SELECT}) > 0                               
+            JOIN PersonGroupMember 
+                   ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+            JOIN DeviceSession
+                   ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid  
         """,
         //Person
         """
@@ -59,11 +73,9 @@ import kotlinx.serialization.Serializable
             JOIN ClazzEnrolment 
                  ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
                     AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            JOIN Person 
-                 ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}     
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
+                  ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT} 
+                  $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2     
         """,
         //AgentEntity
         """
@@ -73,11 +85,9 @@ import kotlinx.serialization.Serializable
             JOIN ClazzEnrolment 
                  ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
                     AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            JOIN Person 
-                 ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}
+                    $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
         """,
         //ClazzLogAttendanceRecord
         """
@@ -87,47 +97,9 @@ import kotlinx.serialization.Serializable
             JOIN ClazzEnrolment 
                  ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
                     AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
                   ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT} 
                   $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
-        """,
-        //ClazzWorkSubmission
-        """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
-                ${ClazzWorkSubmission.TABLE_ID} AS tableId 
-          FROM ChangeLog
-            JOIN ClazzEnrolment 
-                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
-                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
-                  ${Role.PERMISSION_CLAZZWORK_SELECT} 
-                  $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
-        """,
-        //ClazzWorkQuestionResponse
-        """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
-                ${ClazzWorkQuestionResponse.TABLE_ID} AS tableId 
-          FROM ChangeLog
-            JOIN ClazzEnrolment 
-                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
-                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
-                  ${Role.PERMISSION_CLAZZWORK_SELECT} 
-                  $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
-        """,
-        //ContentEntryProgress
-        """
-     SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
-            ${ContentEntryProgress.CONTENT_ENTRY_PROGRESS_TABLE_ID} AS tableId 
-       FROM ChangeLog
-            JOIN ClazzEnrolment 
-                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
-                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            JOIN Person 
-                 ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}    
         """,
         //GroupLearningSession
         """
@@ -137,11 +109,9 @@ import kotlinx.serialization.Serializable
             JOIN ClazzEnrolment 
                  ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
                     AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            JOIN Person 
-                 ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}
+                    $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
         """,
         //LearnerGroup
         """
@@ -151,11 +121,9 @@ import kotlinx.serialization.Serializable
             JOIN ClazzEnrolment 
                  ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
                     AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            JOIN Person 
-                 ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}      
+                    $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2      
         """,
         //LearnerGroupMember
         """
@@ -165,11 +133,9 @@ import kotlinx.serialization.Serializable
             JOIN ClazzEnrolment 
                  ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
                     AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            JOIN Person 
-                 ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}      
+                    $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2      
         """,
         //PersonGroup
         """
@@ -179,11 +145,9 @@ import kotlinx.serialization.Serializable
             JOIN ClazzEnrolment 
                  ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
                     AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            JOIN Person 
-                 ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}    
+                    $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
         """,
         //PersonGroupMember
         """
@@ -193,11 +157,9 @@ import kotlinx.serialization.Serializable
             JOIN ClazzEnrolment 
                  ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
                     AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            JOIN Person 
-                 ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}
+                    $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
         """,
         //PersonPicture
         """
@@ -207,11 +169,9 @@ import kotlinx.serialization.Serializable
             JOIN ClazzEnrolment 
                  ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
                     AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            JOIN Person 
-                 ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
                     ${Role.PERMISSION_PERSON_PICTURE_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}
+                    $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
                     
         """,
         //SchoolMember
@@ -222,11 +182,9 @@ import kotlinx.serialization.Serializable
             JOIN ClazzEnrolment 
                  ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
                     AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            JOIN Person 
-                 ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}
+                    $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
         """,
         //StatementEntity
         """
@@ -236,11 +194,9 @@ import kotlinx.serialization.Serializable
             JOIN ClazzEnrolment 
                  ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
                     AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            JOIN Person 
-                 ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
                     ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}
+                    $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
         """
     ],
     syncFindAllQuery = """
@@ -333,22 +289,17 @@ open class ClazzEnrolment()  {
         """
 
         const val FROM_CLAZZENROLMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE = """
-            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
-                  AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
-              OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
-                  AND ScopedGrant.sgEntityUid = ClazzEnrolment.clazzEnrolmentPersonUid)
-              OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+            (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
                   AND ScopedGrant.sgEntityUid = ClazzEnrolment.clazzEnrolmentClazzUid)
-              OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
-                 AND ScopedGrant.sgEntityUid = (
-                     SELECT clazzSchoolUid
-                       FROM Clazz
-                      WHERE clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid))
-            )                
         """
 
 
-        const val JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1 = """
+        /**
+         * When the sync status of other tables is being invalidated because of a change on
+         * ClazzEnrolment, we only need to consider grants that are scoped by class. Grants that
+         * are scoped by School or Person are not affected.
+         */
+        const val JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1 = """
             JOIN ScopedGrant 
                  ON $FROM_CLAZZENROLMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
                     AND (ScopedGrant.sgPermissions &

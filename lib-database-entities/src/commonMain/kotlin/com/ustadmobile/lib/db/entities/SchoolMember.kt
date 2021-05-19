@@ -5,9 +5,11 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.SchoolMember.Companion.FROM_SCHOOLMEMBER_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
-import com.ustadmobile.lib.db.entities.SchoolMember.Companion.JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
+import com.ustadmobile.lib.db.entities.SchoolMember.Companion.FROM_SCHOOLMEMBER_TO_SCOPEDGRANT_JOIN_ON_PERSON_OR_CLAZZ_PERMISSION_CLAUSE
+import com.ustadmobile.lib.db.entities.SchoolMember.Companion.FROM_SCHOOLMEMBER_TO_SCOPEDGRANT_JOIN_ON_SCHOOL_PERMISSION_CLAUSE
+import com.ustadmobile.lib.db.entities.SchoolMember.Companion.JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PERSON_OR_CLAZZ_PERMISSION_PT1
 import com.ustadmobile.lib.db.entities.SchoolMember.Companion.JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
+import com.ustadmobile.lib.db.entities.SchoolMember.Companion.JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
 import kotlinx.serialization.Serializable
 
 /**
@@ -27,7 +29,7 @@ import kotlinx.serialization.Serializable
                JOIN SchoolMember 
                     ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                         AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PERSON_OR_CLAZZ_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
                     $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
         """,
@@ -39,7 +41,7 @@ import kotlinx.serialization.Serializable
           FROM ChangeLog
                JOIN SchoolMember ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                     AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
                     $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
         """,
@@ -50,7 +52,7 @@ import kotlinx.serialization.Serializable
           FROM ChangeLog
                JOIN SchoolMember ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                     AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
                     $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2 
         """,
@@ -61,7 +63,7 @@ import kotlinx.serialization.Serializable
           FROM ChangeLog
                JOIN SchoolMember ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                     AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT}
                     $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2 
         """,
@@ -73,7 +75,7 @@ import kotlinx.serialization.Serializable
                JOIN SchoolMember 
                     ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                         AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
                     $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2          
         """,
@@ -85,7 +87,7 @@ import kotlinx.serialization.Serializable
                JOIN SchoolMember 
                     ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                         AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
                     $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2         
         """,
@@ -96,7 +98,7 @@ import kotlinx.serialization.Serializable
           FROM ChangeLog
                JOIN SchoolMember ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                     AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
                     $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
         """,
@@ -108,7 +110,7 @@ import kotlinx.serialization.Serializable
                JOIN SchoolMember 
                     ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                         AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
                     $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2     
         """,
@@ -120,7 +122,7 @@ import kotlinx.serialization.Serializable
                JOIN SchoolMember 
                     ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                        AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
                     $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
         """,
@@ -132,7 +134,7 @@ import kotlinx.serialization.Serializable
                JOIN SchoolMember 
                     ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                         AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_PICTURE_SELECT}
                     $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2 
         """,
@@ -144,7 +146,7 @@ import kotlinx.serialization.Serializable
                JOIN SchoolMember 
                     ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID}
                             AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
                     $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2  
         """,
@@ -156,7 +158,7 @@ import kotlinx.serialization.Serializable
                JOIN SchoolMember 
                     ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID}
                             AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_CLAZZ_SELECT}
                     $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2  
         """,
@@ -167,7 +169,7 @@ import kotlinx.serialization.Serializable
             JOIN SchoolMember 
                  ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                         AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-                 $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
+                 $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}
                     $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2  
         """
@@ -183,7 +185,7 @@ import kotlinx.serialization.Serializable
                         ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
                            AND (ScopedGrant.sgPermissions &  ${Role.PERMISSION_PERSON_SELECT}) > 0
                    JOIN SchoolMember
-                        ON $FROM_SCHOOLMEMBER_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
+                        ON $FROM_SCHOOLMEMBER_TO_SCOPEDGRANT_JOIN_ON_PERSON_OR_CLAZZ_PERMISSION_CLAUSE
              WHERE DeviceSession.dsDeviceId = :clientId         
     """)
 @Serializable
@@ -227,7 +229,11 @@ open class SchoolMember {
     companion object {
         const val TABLE_ID = 200
 
-        const val FROM_SCHOOLMEMBER_TO_SCOPEDGRANT_JOIN_ON_CLAUSE = """
+        /**
+         * This version of the where clause will find anyone who has permission to see this. This
+         * is needed for updates to the entity itself.
+         */
+        const val FROM_SCHOOLMEMBER_TO_SCOPEDGRANT_JOIN_ON_PERSON_OR_CLAZZ_PERMISSION_CLAUSE = """
             ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
                   AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
               OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
@@ -236,11 +242,37 @@ open class SchoolMember {
                  AND ScopedGrant.sgEntityUid = SchoolMember.schoolMemberSchoolUid))
         """
 
-        const val JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1 = """
+        const val JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PERSON_OR_CLAZZ_PERMISSION_PT1 = """
             JOIN ScopedGrant
-                 ON $FROM_SCHOOLMEMBER_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
+                 ON $FROM_SCHOOLMEMBER_TO_SCOPEDGRANT_JOIN_ON_PERSON_OR_CLAZZ_PERMISSION_CLAUSE
                     AND (ScopedGrant.sgPermissions &
         """
+
+        /**
+         * This version of the join clause will only find those who have permission granted by school,
+         * e.g. the entity table sync status needs invalidated because they may now have permission
+         * over additional entities.
+         *
+         * E.g. now that someone is a SchoolMember, those who have the PERSON_SELECT permission over
+         * the school can now see this person profile, which was not previously the case. That means
+         * the Person table must be invalidated for anyone with the PERSON_SELECT permission granted
+         * on the school applicable for this SchoolMember.
+         *
+         * We only need to invalidate the sync status where permission was granted by school. School
+         * membership changes do not have any affect on permissions that were acquired by class or
+         * person scopes, or superadmin grants.
+         */
+        const val FROM_SCHOOLMEMBER_TO_SCOPEDGRANT_JOIN_ON_SCHOOL_PERMISSION_CLAUSE = """
+            (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                 AND ScopedGrant.sgEntityUid = SchoolMember.schoolMemberSchoolUid)
+        """
+
+        const val JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1 = """
+            JOIN ScopedGrant
+                 ON $FROM_SCHOOLMEMBER_TO_SCOPEDGRANT_JOIN_ON_SCHOOL_PERMISSION_CLAUSE
+                    AND (ScopedGrant.sgPermissions &
+        """
+
 
         const val JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2 = """
             ) > 0  
@@ -249,6 +281,7 @@ open class SchoolMember {
             JOIN DeviceSession
                    ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid    
         """
+
 
 
     }
