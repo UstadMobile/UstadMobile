@@ -135,7 +135,7 @@
             android:layout_marginStart="@dimen/dimen_10dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:text="@{@plurals/number_of_attempts(contentEntry.attempts, contentEntry.attempts)}"
-            app:drawableStartCompat="@drawable/ic_baseline_timer_12"
+            app:drawableStartCompat="@drawable/ic_baseline_settings_backup_restore_12"
             android:drawablePadding="@dimen/dimen_4dp"
             app:layout_constraintStart_toEndOf="@+id/content_entry_item_thumbnail"
             app:layout_constraintTop_toBottomOf="@+id/content_entry_item_title"
