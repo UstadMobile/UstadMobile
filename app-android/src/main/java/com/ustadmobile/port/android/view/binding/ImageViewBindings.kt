@@ -13,6 +13,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.isContentComplete
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.door.ext.resolveAttachmentAndroidUri
@@ -243,20 +244,24 @@ fun ImageView.setIconOnStatusFlag(statusFlag: Int){
 }
 
 
-@BindingAdapter(value=["iconProgressFlag"])
-fun ImageView.setIconOnProgressFlag(progress: ContentEntryStatementScoreProgress){
-    when {
-        progress.contentComplete -> {
+@BindingAdapter(value = ["iconProgressFlag"])
+fun ImageView.setIconOnProgressFlag(progress: ContentEntryStatementScoreProgress?) {
+    when (progress?.isContentComplete()) {
+        StatementEntity.CONTENT_COMPLETE, StatementEntity.CONTENT_PASSED -> {
             setImageResource(R.drawable.ic_content_complete)
             visibility = View.VISIBLE
         }
-        !progress.contentComplete && progress.resultMax == 0 -> {
+        StatementEntity.CONTENT_FAILED -> {
+            setImageResource(R.drawable.ic_content_fail)
+            visibility = View.VISIBLE
+        }
+        StatementEntity.CONTENT_INCOMPLETE -> {
             setImageDrawable(null)
             visibility = View.GONE
         }
         else -> {
-            setImageResource(R.drawable.ic_content_fail)
-            visibility = View.VISIBLE
+            setImageDrawable(null)
+            visibility = View.GONE
         }
     }
 }
