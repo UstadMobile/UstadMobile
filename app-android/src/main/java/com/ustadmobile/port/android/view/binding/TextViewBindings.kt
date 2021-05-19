@@ -339,7 +339,10 @@ fun TextView.setDurationHoursAndMinutes(duration: Long){
 }
 
 @BindingAdapter("scorePercentage")
-fun TextView.setScorePercentage(scoreProgress: ContentEntryStatementScoreProgress){
+fun TextView.setScorePercentage(scoreProgress: ContentEntryStatementScoreProgress?){
+    if(scoreProgress == null){
+        return
+    }
     val score = ((scoreProgress.resultScore / scoreProgress.resultMax.toFloat()) * 100).toInt()
     text = "$score%"
 }

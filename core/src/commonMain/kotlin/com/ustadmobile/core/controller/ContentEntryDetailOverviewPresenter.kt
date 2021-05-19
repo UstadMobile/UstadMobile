@@ -96,7 +96,8 @@ class ContentEntryDetailOverviewPresenter(context: Any,
         val result = db.contentEntryRelatedEntryJoinDao.findAllTranslationsWithContentEntryUid(entityUid)
         view.availableTranslationsList = result
 
-        view.contentEntryProgress = db.contentEntryProgressDao.getProgressByContentAndPersonAsync(entityUid, accountManager.activeAccount.personUid)
+
+        view.scoreProgress = db.statementDao.getBestScoreForContentForPerson(entityUid, accountManager.activeAccount.personUid)
 
         if (db == repo) {
             val containerUid = entity.container?.containerUid ?: 0L

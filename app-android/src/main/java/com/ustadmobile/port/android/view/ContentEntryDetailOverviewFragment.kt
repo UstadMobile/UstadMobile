@@ -25,10 +25,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.ContentEntryProgress
-import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
-import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
-import com.ustadmobile.lib.db.entities.DownloadJobItem
+import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -170,11 +167,11 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
             }
             field = value
         }
-    override var contentEntryProgress: ContentEntryProgress? = null
+    override var scoreProgress: ContentEntryStatementScoreProgress? = null
         get() = field
         set(value) {
             field = value
-            mBinding?.contentEntryProgress = value
+            mBinding?.scoreProgress = value
         }
 
     class AvailableTranslationRecyclerAdapter(var activityEventHandler: ContentEntryDetailFragmentEventHandler?,

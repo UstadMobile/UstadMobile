@@ -11,15 +11,13 @@
 
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
 
-        <import type="com.ustadmobile.lib.db.entities.ContentEntryProgress" />
-
         <variable
             name="contentEntry"
             type="com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer" />
 
         <variable
-            name="contentEntryProgress"
-            type="com.ustadmobile.lib.db.entities.ContentEntryProgress" />
+            name="scoreProgress"
+            type="com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress" />
 
         <variable
             name="loading"
@@ -80,9 +78,9 @@
                 android:layout_width="0dp"
                 android:layout_height="@dimen/dimen_4dp"
                 android:max="100"
-                android:progress="@{contentEntryProgress.contentEntryProgressProgress}"
+                android:progress="@{scoreProgress.progress}"
                 android:progressTint="@color/primaryColor"
-                android:visibility="@{contentEntryProgress != null &amp; contentEntryProgress.contentEntryProgressProgress > 0 ? View.VISIBLE : View.GONE}"
+                android:visibility="@{scoreProgress.progress > 0 ? View.VISIBLE : View.GONE}"
                 app:layout_constraintEnd_toEndOf="@id/entry_detail_thumbnail"
                 app:layout_constraintStart_toStartOf="@id/entry_detail_thumbnail"
                 app:layout_constraintTop_toBottomOf="@id/entry_detail_thumbnail"
@@ -95,11 +93,38 @@
                 android:scaleType="fitCenter"
                 android:translationX="8dp"
                 android:translationY="-8dp"
-                app:iconStatusFlag="@{contentEntryProgress.contentEntryProgressStatusFlag}"
+                app:iconProgressFlag="@{scoreProgress}"
                 app:layout_constraintEnd_toEndOf="@id/entry_detail_thumbnail"
                 app:layout_constraintTop_toBottomOf="@id/entry_detail_thumbnail"
                 tools:srcCompat="@drawable/ic_content_complete"
                 />
+
+            <TextView
+                android:paddingStart="@dimen/dimen_5dp"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                tools:text="100%"
+                android:id="@+id/item_person_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:scorePercentage="@{scoreProgress}"
+                android:visibility="@{scoreProgress == null || scoreProgress.resultMax == 0 ? View.GONE : View.VISIBLE}"
+                app:layout_constraintStart_toStartOf="@+id/entry_detail_thumbnail"
+                app:layout_constraintTop_toBottomOf="@+id/content_progress_fail_correct"
+                android:layout_marginBottom="@dimen/dimen_16dp" />
+
+
+            <TextView
+                android:paddingStart="@dimen/dimen_5dp"
+                tools:text="(4/4)"
+                android:id="@+id/item_person_score_results"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text='@{"(" + scoreProgress.resultScore + &quot;/&quot; + scoreProgress.resultMax + ")"}'
+                android:visibility="@{scoreProgress == null || scoreProgress.resultMax == 0 ? View.GONE : View.VISIBLE}"
+                app:layout_constraintStart_toEndOf="@+id/item_person_progress"
+                app:layout_constraintTop_toBottomOf="@+id/content_progress_fail_correct"
+                android:layout_marginBottom="@dimen/dimen_16dp" />
+
 
             <TextView
                 android:id="@+id/entry_detail_title"
@@ -183,7 +208,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
-                app:constraint_referenced_ids="entry_detail_content_size,entry_detail_thumbnail" />
+                app:constraint_referenced_ids="entry_detail_content_size,item_person_progress" />
 
             <LinearLayout
                 android:id="@+id/entry_detail_anchor_download"

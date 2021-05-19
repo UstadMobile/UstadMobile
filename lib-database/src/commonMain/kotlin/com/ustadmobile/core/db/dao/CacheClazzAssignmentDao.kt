@@ -14,7 +14,7 @@ abstract class CacheClazzAssignmentDao: BaseDao<CacheClazzAssignment> {
         REPLACE INTO CacheClazzAssignment 
                 (cachePersonUid, cacheContentEntryUid, cacheClazzAssignmentUid, 
                  cacheStudentScore, cacheMaxScore, cacheProgress, 
-                 cacheContentComplete, lastCsnChecked)
+                 cacheContentComplete, cacheSuccess, lastCsnChecked)
        
        SELECT clazzEnrolmentPersonUid AS cachePersonUid, 
                 cacjContentUid AS cacheContentEntryUid, caUid AS cacheClazzAssignmentUid, 
@@ -22,6 +22,7 @@ abstract class CacheClazzAssignmentDao: BaseDao<CacheClazzAssignment> {
                COALESCE(resultScoreMax,0) AS cacheMaxScore,
                COALESCE(extensionProgress,0) AS cacheProgress,
                COALESCE(resultCompletion,'FALSE') AS cacheContentComplete, 
+               COALESCE(resultSuccess,0) AS cacheSuccess,
                (SELECT MAX(statementLocalChangeSeqNum) FROM StatementEntity) AS lastCsnChecked
           FROM ClazzAssignmentContentJoin
 	            LEFT JOIN ClazzAssignment 

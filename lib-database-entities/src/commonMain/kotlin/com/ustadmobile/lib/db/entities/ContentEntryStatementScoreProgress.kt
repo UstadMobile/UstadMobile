@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_UNSET
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -13,6 +14,8 @@ class ContentEntryStatementScoreProgress {
 
     var progress: Int = 0
 
+    var success: Byte = RESULT_UNSET
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
@@ -23,6 +26,7 @@ class ContentEntryStatementScoreProgress {
         if (resultMax != other.resultMax) return false
         if (contentComplete != other.contentComplete) return false
         if (progress != other.progress) return false
+        if (success != other.success) return false
 
         return true
     }
@@ -32,6 +36,7 @@ class ContentEntryStatementScoreProgress {
         result = 31 * result + resultMax
         result = 31 * result + contentComplete.hashCode()
         result = 31 * result + progress
+        result = 31 * result + success
         return result
     }
 

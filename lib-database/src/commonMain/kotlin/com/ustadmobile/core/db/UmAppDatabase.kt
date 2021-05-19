@@ -52,7 +52,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 68)
+], version = 69)
 @MinSyncVersion(58)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -4580,6 +4580,24 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+          val MIGRATION_68_69 = object: DoorMigration(68, 69) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                database.execSQL("ALTER TABLE CacheClazzAssignment ADD COLUMN cachePenalty INTEGER NOT NULL DEFAULT 0")
+
+                if(database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("ALTER TABLE CacheClazzAssignment ADD COLUMN cacheSuccess INTEGER NOT NULL DEFAULT 0")
+
+                }else if(database.dbType() == DoorDbType.POSTGRES){
+
+                    database.execSQL("ALTER TABLE CacheClazzAssignment ADD COLUMN cacheSuccess SMALLINT NOT NULL DEFAULT 0")
+
+                }
+
+            }
+        }
+
 
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
@@ -4592,7 +4610,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
                     MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
                     MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
-                    MIGRATION_63_64, MIGRATION_66_67, MIGRATION_67_68)
+                    MIGRATION_63_64, MIGRATION_66_67, MIGRATION_67_68, MIGRATION_68_69)
 
 
 

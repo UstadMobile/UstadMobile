@@ -24,7 +24,8 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
                COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
                COALESCE(StatementEntity.extensionProgress,0) AS progress, 
-               COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete
+               COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
+               COALESCE(StatementEntity.resultSuccess, 0) AS success
           FROM DownloadJob 
                     LEFT JOIN ContentEntry 
                     ON DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid 
@@ -61,7 +62,8 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
                COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
                COALESCE(StatementEntity.extensionProgress,0) AS progress, 
-               COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete
+               COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
+               COALESCE(StatementEntity.resultSuccess, 0) AS success
           FROM DownloadJob 
                     LEFT JOIN ContentEntry 
                     ON DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid 
@@ -233,7 +235,8 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                 COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
                 COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
                 COALESCE(StatementEntity.extensionProgress,0) AS progress, 
-                COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete
+                COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
+                COALESCE(StatementEntity.resultSuccess, 0) AS success
             FROM ContentEntry 
                     LEFT JOIN ContentEntryParentChildJoin 
                     ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 

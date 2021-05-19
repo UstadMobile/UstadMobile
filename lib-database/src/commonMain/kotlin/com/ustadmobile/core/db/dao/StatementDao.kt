@@ -105,6 +105,29 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                                                      searchText: String, sortOrder: Int)
             : DataSource.Factory<Int, PersonWithAttemptsSummary>
 
+
+    @Query("""
+        SELECT 
+                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
+                COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
+                COALESCE(StatementEntity.extensionProgress,0) AS progress, 
+                COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
+                COALESCE(StatementEntity.resultSuccess, 0) AS success
+                
+        FROM ContentEntry
+            LEFT JOIN StatementEntity
+							ON StatementEntity.statementUid = 
+                                (SELECT statementUid 
+							       FROM StatementEntity 
+                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
+							        AND StatementEntity.statementPersonUid = :accountPersonUid
+							        AND contentEntryRoot 
+                               ORDER BY resultScoreScaled DESC, extensionProgress DESC LIMIT 1)
+                               
+       WHERE contentEntryUid = :contentEntryUid
+    """)
+    abstract suspend fun getBestScoreForContentForPerson(contentEntryUid: Long, accountPersonUid: Long): ContentEntryStatementScoreProgress?
+
     @Query("""
         SELECT MIN(timestamp) AS startDate, 
             MAX(CASE 

@@ -15,7 +15,7 @@ interface ContentEntryDetailOverviewView: UstadDetailView<ContentEntryWithMostRe
 
     var downloadJobItem: DownloadJobItem?
 
-    var contentEntryProgress: ContentEntryProgress?
+    var scoreProgress: ContentEntryStatementScoreProgress?
 
     var locallyAvailable: Boolean
 

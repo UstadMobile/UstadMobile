@@ -31,6 +31,8 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
                             
         COALESCE(CacheClazzAssignment.cacheContentComplete,'FALSE') AS contentComplete,
         
+        COALESCE(CacheClazzAssignment.cacheSuccess,0) AS success,
+        
         MIN(ResultSource.timestamp) AS startDate,
         MAX(ResultSource.timestamp)  AS endDate,
         SUM(ResultSource.resultDuration) AS duration, 
@@ -110,7 +112,9 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
                                                          
                              COALESCE(CacheClazzAssignment.cacheProgress,0) AS progress,                            
                             
-                             COALESCE(CacheClazzAssignment.cacheContentComplete,'FALSE') AS contentComplete       
+                             COALESCE(CacheClazzAssignment.cacheContentComplete,'FALSE') AS contentComplete,
+                                 
+                             COALESCE(CacheClazzAssignment.cacheSuccess,0) AS success
                              
                       FROM ClazzAssignmentContentJoin
                             LEFT JOIN ContentEntry 

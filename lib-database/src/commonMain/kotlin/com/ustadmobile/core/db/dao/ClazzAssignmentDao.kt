@@ -95,6 +95,8 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                         FROM CacheClazzAssignment
                         WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
                           AND cachePersonUid = :accountPersonUid),'FALSE') AS contentComplete,
+                          
+             0 as success,           
                  
               
               0 as progress
@@ -134,7 +136,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
     @Query("""
         SELECT COALESCE(SUM(ResultSource.cacheMaxScore),0) AS resultMax, 
                COALESCE(SUM(ResultSource.cacheStudentScore),0) AS resultScore, 
-               'FALSE' as contentComplete, 0 as progress
+               'FALSE' as contentComplete, 0 as progress, 0 as success
      	  FROM (SELECT CacheClazzAssignment.cacheStudentScore, CacheClazzAssignment.cacheMaxScore
      	 	      FROM ClazzAssignmentContentJoin 
                          LEFT JOIN ContentEntry 
@@ -173,6 +175,8 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                              FROM CacheClazzAssignment 
                             WHERE cacheClazzAssignmentUid = :assignmentUid
                               AND cachePersonUid = ResultSource.personUid)) * 100) AS score,
+                              
+                              0 as success,
             
             cm.commentsText AS latestPrivateComment
         

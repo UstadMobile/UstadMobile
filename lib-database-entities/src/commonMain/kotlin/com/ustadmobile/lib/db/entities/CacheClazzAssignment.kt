@@ -3,6 +3,7 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_UNSET
 import kotlinx.serialization.Serializable
 
 @Entity(indices = [Index(value = ["cachePersonUid", "cacheContentEntryUid","cacheClazzAssignmentUid"],
@@ -26,6 +27,10 @@ class CacheClazzAssignment {
     var cacheProgress: Int = 0
 
     var cacheContentComplete: Boolean = false
+
+    var cacheSuccess: Byte = RESULT_UNSET
+
+    var cachePenalty: Int = 0
 
     var lastCsnChecked: Long = 0
 
