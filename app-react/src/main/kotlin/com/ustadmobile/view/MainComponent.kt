@@ -67,6 +67,8 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
 
     private val altBuilder = RBuilder()
 
+    override var viewName: String? = null
+
     private  var globalState: GlobalState = GlobalState()
 
     private lateinit var currentDestination: UmReactDestination
@@ -88,16 +90,15 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
         currentDestination = props.currentDestination
     }
 
-    override fun componentDidMount() {
-        super.componentDidMount()
+    override fun onComponentReady() {
         StateManager.subscribe(stateChangeListener)
         accountManager.activeAccountLive.observeWithLifecycleOwner(this,
             mActiveUserObserver)
     }
 
-    override fun onViewChanged(viewName: String?) {
-        super.onViewChanged(viewName)
-        val destination = findDestination(viewName)
+    override fun onViewChanged(newView: String?) {
+        super.onViewChanged(newView)
+        val destination = findDestination(newView)
         if(destination != null){
             if(destination.labelId != 0){
                 title = systemImpl.getString(destination.labelId, this)
@@ -234,7 +235,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
                             }
                             if(globalState.showFab){
                                 mFab(globalState.fabIcon, globalState.fabLabel.toUpperCase(), color = MColor.secondary) {
-                                    css(fab)
+                                    css{+fab}
                                     attrs {
                                         onClick = globalState.onFabClicked
                                     }

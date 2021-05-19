@@ -55,8 +55,8 @@ class  IframeComponent(mProps: IframeProps): RComponent<IframeProps,RState>(mPro
         if(!didUpdate && prevProps.sources?.isNotEmpty() == true){
             didUpdate = true
             val sources = props.sources
-            paginateOnScrollManager = PaginateOnScrollManager(prevProps.sources?.size!!, 10)
-            paginateOnScrollManager?.onPageChanged = {_, endIndex ->
+            paginateOnScrollManager = PaginateOnScrollManager(prevProps.sources?.size!!, prevProps.pageSize)
+            paginateOnScrollManager?.onScrollPageChanged = { _, _, endIndex ->
                 if(sources != null){
                     val items = sources.slice(IntRange(0, endIndex)).toMutableList()
                     setState { sourceToLoad = items.toHashSet() }

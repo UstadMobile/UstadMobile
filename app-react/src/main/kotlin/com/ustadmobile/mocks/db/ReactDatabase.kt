@@ -19,7 +19,7 @@ class ReactDatabase: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val downloadJobItemHistoryDao: DownloadJobItemHistoryDao
         get() = TODO("Not yet implemented")
     override val personDao: PersonDao
-        get() = TODO("Not yet implemented")
+        get() = PersonDaoJs()
     override val clazzDao: ClazzDao
         get() = TODO("Not yet implemented")
     override val clazzEnrolmentDao: ClazzEnrolmentDao

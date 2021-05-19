@@ -7,6 +7,7 @@ import com.ustadmobile.core.view.UstadView.Companion.KEY_IFRAME_HEIGHTS
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import com.ustadmobile.model.statemanager.FabState
 import com.ustadmobile.model.statemanager.SnackBarState
 import com.ustadmobile.model.statemanager.ToolbarTitle
 import com.ustadmobile.util.ProgressBarManager
@@ -25,7 +26,7 @@ import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.events.Event
 import react.*
 
-open class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(props),
+abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(props),
     UstadView, DIAware, DoorLifecycleOwner {
 
     private val lifecycleObservers: MutableList<DoorLifecycleObserver> = concurrentSafeListOf()
@@ -43,6 +44,14 @@ open class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(
     protected var searchManager: SearchManager? = null
 
     private var progressBarManager: ProgressBarManager? = null
+
+    protected abstract val viewName: String?
+
+    protected var fabState: FabState = FabState(icon = "add", onClick = ::onFabClick)
+    set(value) {
+        StateManager.dispatch(value)
+        field = value
+    }
 
     private var hashChangeListener:(Event) -> Unit = { (it as HashChangeEvent)
         onViewChanged(getPathName(it.newURL))
@@ -62,6 +71,8 @@ open class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(
             field = value
         }
 
+    abstract fun onComponentReady()
+
     override fun componentDidMount() {
         for(observer in lifecycleObservers){
             observer.onStart(this)
@@ -72,11 +83,21 @@ open class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(
         window.addEventListener("hashchange",hashChangeListener)
         isRTLSupported = systemImpl.isRTLSupported(this)
         localStorage.removeItem(KEY_IFRAME_HEIGHTS)
+        onComponentReady()
     }
 
     override fun RBuilder.render() {
         lifecycleStatus.value = DoorLifecycleObserver.CREATED
     }
+
+    open fun onViewChanged(newView: String?) {
+       if(newView != null && viewName != null && newView == viewName){
+
+       }
+    }
+
+    open fun onFabClick(event: Event){}
+
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
         StateManager.dispatch(SnackBarState(message,
@@ -100,8 +121,6 @@ open class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(
     override fun removeObserver(observer: DoorLifecycleObserver) {
         lifecycleObservers.remove(observer)
     }
-
-    open fun onViewChanged(viewName:String?){}
 
     override fun componentWillUnmount() {
         for(observer in lifecycleObservers){

@@ -6,6 +6,7 @@ import com.ccfraser.muirwik.components.button.mIconButton
 import com.ccfraser.muirwik.components.list.*
 import com.ustadmobile.core.controller.OnSortOptionSelected
 import com.ustadmobile.core.controller.UstadListPresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption
@@ -14,7 +15,6 @@ import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.SelectionOption
 import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.door.ext.concurrentSafeListOf
-import com.ustadmobile.model.statemanager.FabState
 import com.ustadmobile.util.CssStyleManager
 import com.ustadmobile.util.CssStyleManager.chipSet
 import com.ustadmobile.util.CssStyleManager.contentEntryListExtraOptions
@@ -22,13 +22,15 @@ import com.ustadmobile.util.CssStyleManager.horizontalList
 import com.ustadmobile.util.CssStyleManager.listCreateNewContainer
 import com.ustadmobile.util.CssStyleManager.listItemCreateNewDiv
 import com.ustadmobile.util.CssStyleManager.ustadListViewComponentContainer
-import com.ustadmobile.util.StateManager
 import com.ustadmobile.util.ext.format
 import kotlinx.browser.window
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.css.*
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.RProps
@@ -44,8 +46,6 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UstadBaseCompone
 
     protected abstract val listPresenter: UstadListPresenter<*, in DT>?
 
-    private lateinit var fabState: FabState
-
     private var showCreateNewItem:Boolean = false
 
     private var isEventHandled = false
@@ -57,6 +57,8 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UstadBaseCompone
     protected var showEditOptionsMenu:Boolean = false
 
     private var listItemPressTimer = -1
+
+    protected var dbRepo: UmAppDatabase? = null
 
     private val itemPressEventHandler:(Event) -> Unit  = {
         if(!isEventHandled){
@@ -97,8 +99,7 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UstadBaseCompone
         set(value) {
             showCreateNewItem = value == ListViewAddMode.FIRST_ITEM
             if(value == ListViewAddMode.FAB){
-                fabState.visible = value == ListViewAddMode.FAB
-                StateManager.dispatch(fabState)
+                fabState = fabState.copy(visible = value == ListViewAddMode.FAB)
             }
             setState { field = value }
         }
@@ -115,11 +116,9 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UstadBaseCompone
             setState { field = value }
         }
 
-    override fun componentDidMount() {
-        super.componentDidMount()
-        fabState = FabState(label = systemImpl.getString(MessageID.content, this),
-            icon = "add", onClick = ::onFabClick)
+    override fun onComponentReady() {
         searchManager?.searchListener = listPresenter
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
     }
 
     override fun RBuilder.render() {
@@ -201,8 +200,7 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UstadBaseCompone
         }
     }
 
-
-    open fun RBuilder.renderListItem(item: DT){}
+    abstract fun RBuilder.renderListItem(item: DT)
 
     open fun RBuilder.renderHeaderView(){
         styledDiv {
@@ -268,13 +266,15 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UstadBaseCompone
         }
     }
 
-    abstract fun RBuilder.renderAddEntryOptions()
+    open fun RBuilder.renderAddEntryOptions(){}
 
-    abstract fun RBuilder.renderEditOptionMenu()
+    open fun RBuilder.renderEditOptionMenu(){}
 
     abstract fun handleClickEntry(entry: DT)
 
-    abstract fun styleList(): RuleSet?
+    open fun styleList(): RuleSet? {
+        return null
+    }
 
     override fun onClickSort(sortOption: SortOrderOption) {
         //activate selected sort option
@@ -285,7 +285,7 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UstadBaseCompone
         //Save result to back stack here
     }
 
-    private fun onFabClick(event: Event){
+    override fun onFabClick(event: Event) {
         listPresenter?.handleClickCreateNewFab()
     }
 

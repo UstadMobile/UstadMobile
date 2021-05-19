@@ -22,6 +22,9 @@ class XapiPackageContentComponent(mProps: RProps): UstadBaseComponent<RProps, RS
             field = value
             title = value
         }
+
+    override var viewName: String? = null
+
     override var url: String = ""
         get() = field
         set(value) {
@@ -31,20 +34,12 @@ class XapiPackageContentComponent(mProps: RProps): UstadBaseComponent<RProps, RS
 
     private lateinit var mPresenter: XapiPackageContentPresenter
 
-    override fun componentDidMount() {
-        super.componentDidMount()
+    override fun onComponentReady() {
         mPresenter = XapiPackageContentPresenter(this,getArgs(),this,di)
         mPresenter.onCreate(mapOf())
     }
 
     override fun RBuilder.render() {
-        if(url.isNotEmpty()){
-            styledIframe(sandbox = IframeSandbox.allowScripts) {
-                css(responsiveIframe)
-                attrs{
-                    src = url
-                }
-            }
-        }
+        renderIframe(listOf(url), 1)
     }
 }

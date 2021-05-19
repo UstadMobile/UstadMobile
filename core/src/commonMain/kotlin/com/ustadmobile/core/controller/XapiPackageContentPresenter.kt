@@ -1,13 +1,13 @@
 package com.ustadmobile.core.controller
 
-import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentformats.xapi.Actor
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.tincan.UmAccountActor
 import com.ustadmobile.core.tincan.UmAccountGroupActor
-import com.ustadmobile.core.util.*
+import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.util.ext.toXapiActorJsonObject
 import com.ustadmobile.core.util.ext.toXapiGroupJsonObject
@@ -18,7 +18,7 @@ import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.ktor.client.*
-import io.ktor.client.request.get
+import io.ktor.client.request.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable

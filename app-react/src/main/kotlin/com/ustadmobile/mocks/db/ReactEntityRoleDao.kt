@@ -15,7 +15,7 @@ class ReactEntityRoleDao: EntityRoleDao() {
         accountPersonUid: Long,
         permission: Long
     ): Boolean {
-        return false
+        return true
     }
 
     override suspend fun userHasAnySinglePermission(

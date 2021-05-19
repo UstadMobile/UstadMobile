@@ -28,6 +28,9 @@ class VideoContentComponent(mProps:RProps):UstadBaseComponent<RProps, RState>(mP
             title = value?.title
             mPresenter?.onResume()
         }
+
+    override var viewName: String? = VideoContentView.VIEW_NAME
+
     override var videoParams: VideoContentPresenterCommon.VideoParams? = null
         get() = field
         set(value) {
@@ -41,8 +44,7 @@ class VideoContentComponent(mProps:RProps):UstadBaseComponent<RProps, RState>(mP
 
     private var containerUid: Long = 0
 
-    override fun componentDidMount() {
-        super.componentDidMount()
+    override fun onComponentReady() {
         db = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
         containerUid = getArgs()[ARG_CONTAINER_UID]?.toLong()?:0L
         mPresenter = VideoContentPresenter(this, getArgs(), this, di)

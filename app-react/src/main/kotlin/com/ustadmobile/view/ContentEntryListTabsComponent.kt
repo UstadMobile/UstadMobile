@@ -19,25 +19,19 @@ class ContentEntryListTabsComponent(mProps: RProps) :UstadBaseComponent<RProps, 
 
     private var selectedTab: Any = ""
 
+    override val viewName: String
+    get() = ContentEntryListTabsView.VIEW_NAME
+
     private val tabChangeListener:(Any)-> Unit = {
         val args = getArgs()
         args[ARG_CONTENT_FILTER] = viewNameFilterMap[it]?:""
         systemImpl.go(ContentEntryListTabsView.VIEW_NAME,args,this)
     }
 
-    override fun onViewChanged(viewName: String?) {
-        super.onViewChanged(viewName)
-        if(viewName == ContentEntryListTabsView.VIEW_NAME){
-            selectedTab = getSelectedFilter()
-        }
-    }
-
-
-    override fun componentDidMount() {
-        super.componentDidMount()
+    override fun onComponentReady() {
         selectedTab = getSelectedFilter()
         val tabs = listOf(systemImpl.getString(MessageID.libraries, this),
-        systemImpl.getString(MessageID.downloaded, this))
+            systemImpl.getString(MessageID.downloaded, this))
         StateManager.dispatch(ToolbarTabs(tabs, listOf(MessageID.libraries,MessageID.downloaded),
             getSelectedFilter(), tabChangeListener))
     }

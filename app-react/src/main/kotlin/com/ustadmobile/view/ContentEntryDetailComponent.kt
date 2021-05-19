@@ -26,6 +26,9 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
+    override val viewName: String
+        get() = ContentEntryDetailView.VIEW_NAME
+
     private var selectedTab: Any = ContentEntryDetailOverviewView.VIEW_NAME
 
     override var tabs: List<String>? = null
@@ -50,8 +53,7 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
         }
 
 
-    override fun componentDidMount() {
-        super.componentDidMount()
+    override fun onComponentReady() {
         mPresenter = ContentEntryDetailPresenter(this, getArgs(), this, di, this)
         mPresenter.onCreate(mapOf())
     }

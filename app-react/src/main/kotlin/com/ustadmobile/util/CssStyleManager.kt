@@ -26,6 +26,10 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
 
     val isRTLSupported = systemImpl.isRTLSupported(this)
 
+    val defaultMarginEnd = "0 ${if(isRTLSupported) 20 else 0}px 0 ${if(isRTLSupported) 0 else 20}px"
+
+    val defaultContainerWidth = LinearDimension("74.8vw")
+
     val isMobile: Boolean = js("/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)")
 
     val drawerWidth = 240.px
@@ -56,7 +60,9 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
     }
 
     val fab by css{
-        right = 15.px
+        if(!isRTLSupported) right = 15.px
+        if(isRTLSupported) left = 15.px
+        margin = "0 ${if(isRTLSupported) 90 else 0}% 0 ${if(isRTLSupported) 0 else 90}%"
         bottom = 15.px
     }
 
@@ -204,7 +210,7 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
     }
 
     val entryListItemContainer by css {
-        width = LinearDimension("100vw")
+        width = defaultContainerWidth
         display = Display.flex
         flexDirection = FlexDirection.row
     }
@@ -249,6 +255,11 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
 
     val contentEntryListIcon by css {
         fontSize = LinearDimension("0.65em")
+        marginBottom = 4.px
+    }
+
+    val fallBackAvatar by css {
+        fontSize = LinearDimension("1em")
         marginBottom = 4.px
     }
 
@@ -343,6 +354,25 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         backgroundColor = Color.transparent
     }
 
+    val personListItemContainer by css{
+        display = Display.flex
+        width = defaultContainerWidth
+        flexDirection = FlexDirection.row
+    }
+
+    val personListItemAvatar by css {
+        width = 50.px
+        height = 50.px
+        margin = "2px ${if(isRTLSupported) 2.4 else 0 }px 0 ${if(isRTLSupported) 0 else 2.4 }px"
+        color = Color.white
+        backgroundColor = Color(theme.palette.primary.dark)
+    }
+
+    val personListItemInfo by css {
+        display = Display.flex
+        margin = "0 ${if(isRTLSupported) 30 else 0}px 0 ${if(isRTLSupported) 0 else 30}px"
+        flexDirection = FlexDirection.column
+    }
     override val di: DI
         get() = StateManager.getCurrentState().di
 

@@ -6,28 +6,31 @@ import org.w3c.dom.Element
 import org.w3c.dom.events.Event
 
 /**
- * Manages scroll functionality
+ * Manages element scroll functionality
+ * @param viewToObserve Id of the view to be watched for scroll events (Div)
+ * @param triggerOnDownScroll Flag to decide which scroll direction should trigger the event
+ * @param triggerThreshold Percentage on which the event should be triggered
+ * @param delay How long event should wait to be triggered
  */
-class  ScrollManager(private val viewId: String, private val triggerThreshold:Int = 100,
-                     private val triggerOnDownScroll: Boolean = true,
-                     private val delay: Int = 200) {
+class  ScrollManager(private val viewToObserve: String, private val triggerThreshold:Int = 50,
+                     private val triggerOnDownScroll: Boolean = true, private val delay: Int = 200) {
 
     private var scrollElement: Element? = null
 
     private var scrollHandlerTimeOutId =  -1
 
-    private var lastScrollTop = 0
+    private var lastScrollPercentage = 0
 
     private var scrollHandler:(Int) -> Unit = {
-        val triggerCondition = (if(triggerOnDownScroll) it > lastScrollTop else lastScrollTop > it)
-        scrollListener?.let { listener -> listener(triggerCondition && it >= triggerThreshold, it) }
-        lastScrollTop = it
+        val shouldTrigger = (if(triggerOnDownScroll) it > lastScrollPercentage else lastScrollPercentage > it)
+        scrollListener?.let { listener -> listener(shouldTrigger && it >= triggerThreshold, it) }
+        lastScrollPercentage = it
     }
 
     var scrollListener: ((Boolean, Int) -> Unit?)? = null
         set(value) {
             if(value != null){
-                scrollElement = document.getElementById(viewId)
+                scrollElement = document.getElementById(viewToObserve)
                 scrollElement?.addEventListener("scroll", scrollEventCallback)
             }
             field = value
@@ -38,14 +41,13 @@ class  ScrollManager(private val viewId: String, private val triggerThreshold:In
         val scrollPercentage = js("Math.ceil((target.scrollTop/target.scrollHeight) * 100)")
             .toString().toInt()
         if(scrollHandlerTimeOutId != -1) window.clearTimeout(scrollHandlerTimeOutId)
-        scrollHandlerTimeOutId = window.setTimeout(scrollHandler,delay,
-            scrollPercentage)
+        scrollHandlerTimeOutId = window.setTimeout(scrollHandler,delay, scrollPercentage)
     }
 
     fun onDestroy(){
         scrollElement?.removeEventListener("scroll", scrollEventCallback)
         scrollElement = null
-        lastScrollTop = 0
+        lastScrollPercentage = 0
         window.clearTimeout(scrollHandlerTimeOutId)
         scrollHandlerTimeOutId = -1
         scrollListener = null

@@ -61,6 +61,11 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
     override val listPresenter: UstadListPresenter<*, in ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?
         get() = mPresenter
 
+    override val displayTypeRepo: Any?
+        get() = dbRepo?.contentEntryDao
+
+    override val viewName: String
+        get() = ContentEntryList2View.VIEW_NAME
 
     override var editOptionVisible: Boolean = false
         get() = field
@@ -69,19 +74,9 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
             setState { field = value }
         }
 
-    override fun componentDidMount() {
-        initPresenter()
-        super.componentDidMount()
-    }
 
-    override fun onViewChanged(viewName: String?) {
-        super.onViewChanged(viewName)
-        if(viewName == ContentEntryList2View.VIEW_NAME){
-            initPresenter()
-        }
-    }
-
-    private fun initPresenter(){
+    override fun onComponentReady() {
+        fabState.label = systemImpl.getString(MessageID.content, this)
         val args = getArgs(mapOf(ARG_WEB_PLATFORM to true.toString(),
             ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT))
         mPresenter = ContentEntryList2Presenter(this, args, this,di,this)
@@ -139,16 +134,6 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
     override fun handleClickEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
         mPresenter.onClickContentEntry(entry)
     }
-
-
-    override val displayTypeRepo: Any?
-        get() = TODO("Not yet implemented")
-
-
-    override fun styleList(): RuleSet? {
-        return null
-    }
-
 
     override fun showContentEntryAddOptions(parentEntryUid: Long) {
         setState {

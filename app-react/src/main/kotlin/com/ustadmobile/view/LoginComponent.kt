@@ -38,6 +38,8 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
             setState { field = value }
         }
 
+    override var viewName: String? = Login2View.VIEW_NAME
+
     override var versionInfo: String? = null
         get() = field
         set(value) {
@@ -79,8 +81,7 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
             setState { field = value }
         }
 
-    override fun componentDidMount() {
-        super.componentDidMount()
+    override fun onComponentReady() {
         mPresenter = Login2Presenter(this, getArgs(),this, di)
         mPresenter.onCreate(mapOf())
     }

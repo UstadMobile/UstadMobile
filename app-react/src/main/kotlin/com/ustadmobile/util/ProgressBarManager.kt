@@ -12,7 +12,10 @@ class  ProgressBarManager {
 
     var progressBarVisibility: Boolean = false
     set(value) {
-        progressView.asDynamic().style.display = if(value) "block" else "none"
+        val style = progressView?.asDynamic().style
+        if(style != null){
+            style.display = if(value) "block" else "none"
+        }
        field = value
     }
 

@@ -25,24 +25,27 @@ class RedirectComponent (props: RProps): UstadBaseComponent<RProps, RState>(prop
 
     private var arguments = mutableMapOf(ARG_WEB_PLATFORM to true.toString())
 
+    override var viewName: String? = null
+
     private var timeOutId = 0
 
-    override fun componentDidMount() {
-        super.componentDidMount()
-        val viewName = getPathName()
+    override fun onComponentReady() {
+        val currentView = getPathName()
         val args = getArgs()
-        if(viewName != null && args.isNotEmpty()){
-            arguments[ARG_CURRENT] = viewName + "?" + args.toQueryString()
+
+        //responsible for handling browser refresh
+        if(currentView != null){
+            arguments[ARG_CURRENT] = currentView + "?" + args.toQueryString()
         }
         timeOutId = window.setTimeout({
-           handleNextDestination()
+            handleNextDestination()
         }, 1500)
         mPresenter = RedirectPresenter(this, arguments, this, di)
         mPresenter.onCreate(mapOf())
     }
 
-    override fun onViewChanged(viewName: String?) {
-        super.onViewChanged(viewName)
+    override fun onViewChanged(newView: String?) {
+        super.onViewChanged(newView)
         window.clearTimeout(timeOutId)
         handleNextDestination()
     }

@@ -32,7 +32,9 @@ class SplashComponent (props: SplashProps): UstadBaseComponent<SplashProps, RSta
 
     private var showMainComponent: Boolean = false
 
-    override fun componentDidMount() {
+    override var viewName: String? = null
+
+    override fun onComponentReady() {
         mPresenter = SplashPresenter(this)
         GlobalScope.launch(Dispatchers.Main) {
             mPresenter.handleResourceLoading()

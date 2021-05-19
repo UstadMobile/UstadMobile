@@ -1,35 +1,50 @@
 package com.ustadmobile.util
 
+/**
+ * Handle paginate on scrolling
+ * @param totalItems Number of items to be paginated
+ * @param pageSize size of a page
+ */
 class  PaginateOnScrollManager(private val totalItems: Int, private val pageSize: Int) {
 
-    private var pageIndex = 1
+    private var pageNumber = 1
 
     private var scrollManager: ScrollManager? = null
 
-    private var onItemsScroll: (Boolean, Int) -> Unit = { fullFilled, _ ->
+    private val totalPages:Double = totalItems.toDouble()/pageSize
+
+    private var onScroll: (Boolean, Int) -> Unit = { fullFilled, _ ->
         if(fullFilled){
-            pageIndex++
-            val startIndex = if(((pageIndex - 1) * pageSize) > totalItems) 0
-            else (pageIndex - 1) * pageSize
-            val endIndex = if((pageIndex * pageSize) < totalItems) pageIndex * pageSize
+            var pages = totalPages
+            pages = js("Math.ceil(pages)").toString().toDouble()
+            if(pageNumber.toDouble() == pages) pageNumber else pageNumber++
+            val startIndex = if(((pageNumber - 1) * pageSize) > totalItems) 0
+            else (pageNumber - 1) * pageSize
+            val endIndex = if((pageNumber * pageSize) < totalItems) pageNumber * pageSize
             else totalItems - 1
-            onPageChanged?.let { it(startIndex, endIndex)}
+            onScrollPageChanged?.let { it(pageNumber,startIndex, endIndex)}
         }
     }
 
-    var onPageChanged: ((Int, Int) -> Unit?)? = null
+    /**
+     * On page changed takes page number as first param, startIndex and endIndex respectively
+     */
+    var onScrollPageChanged: ((Int, Int, Int) -> Unit?)? = null
         set(value) {
             if(value != null){
-                value(pageIndex, pageSize)
+                value(pageNumber,pageNumber, pageSize)
             }
-            scrollManager = ScrollManager("main-content", 70)
-            scrollManager?.scrollListener = onItemsScroll
+            if(pageSize != totalItems && totalPages > 1){
+                scrollManager = ScrollManager("main-content")
+                scrollManager?.scrollListener = onScroll
+            }
             field = value
         }
 
     fun onDestroy(){
+        scrollManager?.onDestroy()
         scrollManager = null
-        onPageChanged = null
+        onScrollPageChanged = null
     }
 
 }

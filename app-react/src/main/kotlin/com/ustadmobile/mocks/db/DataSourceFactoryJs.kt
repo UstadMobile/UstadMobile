@@ -1,10 +1,14 @@
 package com.ustadmobile.mocks.db
 
 import androidx.paging.DataSource
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.util.UmReactUtil.loadList
 import kotlinx.serialization.DeserializationStrategy
 
-class DataSourceFactoryJs<Key,Value, EXtra>(private val key:String? = null, private val filterBy: Any,
+class DataSourceFactoryJs<Key,Value, EXtra>(private val key:String? = null,
+                                            private val filterBy: Any,
                                             private val sourcePath: String,
                                             private val dStrategy: DeserializationStrategy<List<Value>>,
                                             private val extraStrategy: DeserializationStrategy<List<EXtra>>? = null,
@@ -16,6 +20,16 @@ class DataSourceFactoryJs<Key,Value, EXtra>(private val key:String? = null, priv
 
     override suspend fun getData(offset: Int, limit: Int): List<Value> {
         var dataSet = loadList(sourcePath,dStrategy)
+
+        if(sourcePath == "people"){
+            return listOf(PersonWithDisplayDetails().apply {
+                personUid = filterBy.toString().toLong()
+                username = "admin"
+                firstNames = "Admin"
+                admin = true
+                lastName = "Users"
+            } as Value)
+        }
 
         if(key != null && dataSet.isNotEmpty()){
             dataSet = dataSet.filter{it.asDynamic()[key].toString() == filterBy.toString()}

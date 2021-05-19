@@ -31,7 +31,7 @@ object RouteManager {
         UmReactDestination("people", MessageID.classes,ClazzList2View.VIEW_NAME,
             PlaceHolderComponent::class),
         UmReactDestination("person", MessageID.people, PersonListView.VIEW_NAME,
-            PlaceHolderComponent::class),
+            PersonListComponent::class),
         UmReactDestination("pie_chart", MessageID.reports, ReportListView.VIEW_NAME,
             PlaceHolderComponent::class, divider = true),
         UmReactDestination("settings", MessageID.settings, SettingsView.VIEW_NAME,
@@ -66,8 +66,9 @@ object RouteManager {
      * Get current path name from location
      */
     fun getPathName(path: String? = null): String? {
-        val pathName = (path ?: window.location.href)
-            .substringBefore("?").substringAfter("#/")
+        var pathName = (path ?: window.location.href).substringAfter("#/")
+        if(pathName.indexOf("?") != -1)
+            pathName = pathName.substringBefore("?")
         return if(pathName.isEmpty() || pathName.startsWith("http")) null else pathName
     }
 

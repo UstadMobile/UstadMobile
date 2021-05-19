@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.css.Display
 import kotlinx.css.display
 import kotlinx.css.margin
+import org.w3c.dom.events.Event
 import react.RBuilder
 import react.RProps
 import react.setState
@@ -42,6 +43,9 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
     private lateinit var mPresenter: ContentEntryDetailOverviewPresenter
 
     private var translations: List<ContentEntryRelatedEntryJoinWithLanguage>? = null
+
+    override val viewName: String
+        get() = ContentEntryDetailOverviewView.VIEW_NAME
 
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
@@ -83,13 +87,11 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
             field = value
         }
 
-    override fun componentDidMount() {
-        super.componentDidMount()
+    override fun onComponentReady() {
         mPresenter = ContentEntryDetailOverviewPresenter(this,getArgs(),
             this,di,this)
         mPresenter.onCreate(mapOf())
     }
-
 
     override fun RBuilder.render() {
         styledDiv{
@@ -182,6 +184,12 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
             }
         }
 
+    }
+
+    override fun onFabClick(event: Event) {
+        super.onFabClick(event)
+        console.log("clicked")
+        mPresenter.handleClickEdit()
     }
 
     override fun showDownloadDialog(args: Map<String, String>) {

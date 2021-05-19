@@ -23,6 +23,9 @@ class WebChunkComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(mPro
             field = value
             title = value?.title
         }
+
+    override var viewName: String? = null
+
     override var url: String = ""
         get() = field
         set(value) {
@@ -30,22 +33,14 @@ class WebChunkComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(mPro
             field = value
         }
 
-    override fun componentDidMount() {
-        super.componentDidMount()
+    override fun onComponentReady() {
         mPresenter = WebChunkPresenter(this, getArgs(), this, di)
         mPresenter?.onCreate(mapOf())
     }
 
 
     override fun RBuilder.render() {
-        if(url.isNotEmpty()){
-            styledIframe(sandbox = IframeSandbox.allowScripts)  {
-                css(responsiveIframe)
-                attrs{
-                    src = url
-                }
-            }
-        }
+        renderIframe(listOf(url), 1)
     }
 
     override fun showNoAppFoundError(message: String, actionMessageId: Int, mimeType: String) {

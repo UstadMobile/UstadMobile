@@ -4,8 +4,6 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.UstadDetailView
-import com.ustadmobile.model.statemanager.FabState
-import com.ustadmobile.util.StateManager
 import org.w3c.dom.events.Event
 import react.RProps
 import react.RState
@@ -15,19 +13,16 @@ abstract class UstadDetailComponent<T: Any>(mProps: RProps) : UstadBaseComponent
 
     abstract val detailPresenter: UstadDetailPresenter<*, *>?
 
-    override fun componentDidMount() {}
-
     override var editButtonMode: EditButtonMode = EditButtonMode.GONE
         get() = field
         set(value) {
+            fabState = fabState.copy(label = systemImpl.getString(MessageID.edit, this),
+                icon = "edit", visible = true)
+            console.log(fabState)
             field = value
-            StateManager.dispatch(FabState(visible = value == EditButtonMode.FAB,
-                label = systemImpl.getString(MessageID.edit, this),
-                    icon = "edit", onClick = ::onFabClick))
         }
 
-
-    private fun onFabClick(event: Event){
+    override fun onFabClick(event: Event) {
         detailPresenter?.handleClickEdit()
     }
 

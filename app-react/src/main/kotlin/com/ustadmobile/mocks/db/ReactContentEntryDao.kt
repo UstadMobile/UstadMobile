@@ -185,7 +185,7 @@ class ReactContentEntryDao: ContentEntryDao() {
         contentEntryUid: Long,
         permission: Long
     ): Boolean {
-        TODO("Not yet implemented")
+        return true
     }
 
     override suspend fun toggleVisibilityContentEntryItems(

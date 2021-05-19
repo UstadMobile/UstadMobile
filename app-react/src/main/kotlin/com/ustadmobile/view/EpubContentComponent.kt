@@ -26,7 +26,9 @@ class EpubContentComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(m
             field = value
         }
 
-    override var windowTitle: String? = null
+    override var viewName: String? = EpubContentView.VIEW_NAME
+
+        override var windowTitle: String? = null
         get() = field
         set(value) {
             field = value
@@ -74,8 +76,7 @@ class EpubContentComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(m
 
     override fun scrollToSpinePosition(spinePosition: Int, hashAnchor: String?) {}
 
-    override fun componentDidMount() {
-        super.componentDidMount()
+    override fun onComponentReady() {
         mPresenter = EpubContentPresenter(this,getArgs(),this, di)
         mPresenter.onCreate(mapOf())
     }
