@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.CacheClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 
 @Dao
@@ -14,7 +15,7 @@ abstract class CacheClazzAssignmentDao: BaseDao<CacheClazzAssignment> {
         REPLACE INTO CacheClazzAssignment 
                 (cachePersonUid, cacheContentEntryUid, cacheClazzAssignmentUid, 
                  cacheStudentScore, cacheMaxScore, cacheProgress, 
-                 cacheContentComplete, cacheSuccess, lastCsnChecked)
+                 cacheContentComplete, cacheSuccess,cachePenalty, lastCsnChecked)
        
        SELECT clazzEnrolmentPersonUid AS cachePersonUid, 
                 cacjContentUid AS cacheContentEntryUid, caUid AS cacheClazzAssignmentUid, 
@@ -23,6 +24,7 @@ abstract class CacheClazzAssignmentDao: BaseDao<CacheClazzAssignment> {
                COALESCE(extensionProgress,0) AS cacheProgress,
                COALESCE(resultCompletion,'FALSE') AS cacheContentComplete, 
                COALESCE(resultSuccess,0) AS cacheSuccess,
+               caLateSubmissionPenalty AS cachePenalty,
                (SELECT MAX(statementLocalChangeSeqNum) FROM StatementEntity) AS lastCsnChecked
           FROM ClazzAssignmentContentJoin
 	            LEFT JOIN ClazzAssignment 
@@ -40,7 +42,8 @@ abstract class CacheClazzAssignmentDao: BaseDao<CacheClazzAssignment> {
                                       AND StatementEntity.timestamp 
                                             BETWEEN ClazzAssignment.caStartDate
                                             AND ClazzAssignment.caGracePeriodDate
-                                  ORDER BY resultScoreScaled DESC, extensionProgress DESC LIMIT 1)
+                                  ORDER BY resultScoreScaled DESC, 
+                                            extensionProgress DESC LIMIT 1)
 	     WHERE clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT} 
            AND clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}
            AND clazzEnrolmentActive
