@@ -10,7 +10,7 @@
     "app.ui_default_language": "en",
     "first_dest": "ContentEntryListView",
     "app.guest_allowed": "true",
-    "apiUrl": "https://maktabmobile.org/demoapp/",
+    "apiUrl": "http://localhost:8090/",
     "doordb.endpoint.url": "http://localhost:8087/",
     "app.content_only_mode": "false",
     "app.register_before_open": "true"

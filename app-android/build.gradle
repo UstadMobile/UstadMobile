@@ -16,9 +16,9 @@ buildscript {
     }
 }
 
-plugins {
+/*plugins {
     id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha05"
-}
+}*/
 
 apply plugin: 'com.android.library'
 apply plugin: "kotlin-android"
@@ -447,7 +447,7 @@ dependencies {
     androidTestImplementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
     androidTestImplementation "commons-io:commons-io:$version_commons_io"
-    androidTestImplementation "com.ustadmobile.adbscreenrecorder:lib-client:$version_android_adbscreenrecorder"
+    //androidTestImplementation "com.ustadmobile.adbscreenrecorder:lib-client:$version_android_adbscreenrecorder"
 
     kaptAndroidTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"
 }

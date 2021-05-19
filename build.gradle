@@ -90,8 +90,8 @@ ext {
     version_kotlin_redux = "4.0.5-pre.148-kotlin-1.4.30"
     version_kotlin_react_redux = "7.2.2-pre.148-kotlin-1.4.30"
     version_muirwik_components = "0.6.7"
-    version_door = "0.0.15"
-    version_xmlpullparserkmp = '0.0.17'
+    version_door = "0.0.17"
+    version_xmlpullparserkmp = '0.0.19'
 
     version_gradle_buildconfig_plugin = "1.1.7"
     version_jacoco_tool = "0.8.5"
