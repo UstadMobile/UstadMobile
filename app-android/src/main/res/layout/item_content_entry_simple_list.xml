@@ -8,7 +8,6 @@
         <import type="com.ustadmobile.port.android.view.ContentEntryList2Fragment"/>
         <import type="android.view.View"/>
         <import type="com.ustadmobile.port.android.view.ContentEntryListRecyclerAdapter"/>
-        <import type="com.ustadmobile.lib.db.entities.ContentEntryProgress" />
 
         <variable
             name="contentEntry"

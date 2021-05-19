@@ -14,6 +14,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryProgress
+import com.ustadmobile.lib.db.entities.StatementEntity
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -106,9 +107,6 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
 
         GlobalScope.launch {
             val progress = (position.toFloat() / videoLength * 100).toInt()
-            val flag = if (progress == 100) ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED or ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED else 0
-            repo.contentEntryProgressDao.updateProgress(entryUuid, accountManager.activeAccount.personUid, progress, flag)
-
             entry?.also {
                 statementEndpoint.storeProgressStatement(
                         accountManager.activeAccount, it, progress,

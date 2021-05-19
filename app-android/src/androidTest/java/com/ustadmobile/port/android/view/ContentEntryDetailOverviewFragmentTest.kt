@@ -19,9 +19,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.dbVersionHeader
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryProgress
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.screen.ContentEntryDetailScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.*
@@ -81,15 +79,14 @@ class ContentEntryDetailOverviewFragmentTest : TestCase() {
             val accountManager: UstadAccountManager by di.instance()
             val activeAccount = accountManager.activeAccount
 
-            ContentEntryProgress().apply {
-                contentEntryProgressContentEntryUid = testEntry.contentEntryUid
-                contentEntryProgressProgress = 100
-                contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED
-                contentEntryProgressActive = true
-                contentEntryProgressPersonUid = activeAccount.personUid
-                contentEntryProgressUid = dbRule.repo.contentEntryProgressDao.insert(this)
+            StatementEntity().apply {
+                extensionProgress = 100
+                statementPersonUid = activeAccount.personUid
+                statementContentEntryUid = testEntry.contentEntryUid
+                contentEntryRoot = true
+                statementVerbUid = VerbEntity.VERB_COMPLETED_UID
+                statementUid = dbRule.repo.statementDao.insert(this)
             }
-
 
             launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                     fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {

@@ -217,33 +217,6 @@ fun ImageView.setImageLookupMap(imageLookupMap: Map<Int, Int>?, imageLookupFallb
     updateFromImageLookupMap()
 }
 
-@BindingAdapter(value=["iconStatusFlag"])
-fun ImageView.setIconOnStatusFlag(statusFlag: Int){
-    when {
-        (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED ->{
-            setImageResource(R.drawable.ic_content_complete)
-            visibility = View.VISIBLE
-        }
-        (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED -> {
-            setImageResource(R.drawable.ic_content_complete)
-            visibility = View.VISIBLE
-        }
-        (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED -> {
-            setImageResource(R.drawable.ic_content_complete)
-            visibility = View.VISIBLE
-        }
-        (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED -> {
-            setImageResource(R.drawable.ic_content_fail)
-            visibility = View.VISIBLE
-        }
-        else -> {
-            setImageDrawable(null)
-            visibility = View.GONE
-        }
-    }
-}
-
-
 @BindingAdapter(value = ["iconProgressFlag"])
 fun ImageView.setIconOnProgressFlag(progress: ContentEntryStatementScoreProgress?) {
     when (progress?.isContentComplete()) {

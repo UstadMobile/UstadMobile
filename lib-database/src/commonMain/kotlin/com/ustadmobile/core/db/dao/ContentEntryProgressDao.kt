@@ -31,23 +31,6 @@ abstract class ContentEntryProgressDao : BaseDao<ContentEntryProgress> {
     abstract fun updateProgressByContentEntryAndPerson(contentEntryUid: Long, personUid: Long,
                                                        progress: Int, status: Int): Int
 
-    @Transaction
-    open fun updateProgress(entryUuid: Long, personUid: Long, currentProgress: Int, statusFlag: Int) {
-        val progressOnDb = getProgressByContentAndPerson(entryUuid, personUid)
-                ?: ContentEntryProgress().apply {
-                    contentEntryProgressActive = true
-                    contentEntryProgressProgress = currentProgress
-                    contentEntryProgressContentEntryUid = entryUuid
-                    contentEntryProgressPersonUid = personUid
-                    contentEntryProgressStatusFlag = statusFlag
-                    contentEntryProgressUid = insert(this)
-                }
-
-        if (currentProgress > progressOnDb.contentEntryProgressProgress) {
-            updateProgressByContentEntryAndPerson(entryUuid, personUid, currentProgress, statusFlag)
-        }
-    }
-
     companion object {
 
         const val FIND_PROGRESS_BY_CONTENT_AND_PERSON_QUERY =
