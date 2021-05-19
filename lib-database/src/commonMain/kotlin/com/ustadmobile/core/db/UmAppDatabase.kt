@@ -224,11 +224,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("groupLearningSessionDao")
     abstract val groupLearningSessionDao: GroupLearningSessionDao
 
-    @JsName("contentEntryProgressDao")
-    abstract val contentEntryProgressDao: ContentEntryProgressDao
-
     abstract val syncresultDao: SyncResultDao
-
 
     abstract val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
     abstract val clazzLogDao: ClazzLogDao
