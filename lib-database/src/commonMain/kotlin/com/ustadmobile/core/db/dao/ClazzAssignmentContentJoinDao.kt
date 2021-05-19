@@ -4,9 +4,7 @@ import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.lib.db.entities.ClazzAssignmentContentJoin
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.lib.db.entities.ContentWithAttemptSummary
+import com.ustadmobile.lib.db.entities.*
 
 @Dao
 @Repository
@@ -22,13 +20,6 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
             : DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
-    //COUNT(DISTINCT(ResultSource.contextRegistration))
-
-    //MIN(ResultSource.timestamp)
-
-    //MAX(ResultSource.timestamp)
-    //SUM(ResultSource.resultDuration)
-
     @Query("""
         SELECT ContentEntry.title AS contentEntryTitle, ContentEntry.contentEntryUid,
         
@@ -40,12 +31,12 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
                             
         COALESCE(CacheClazzAssignment.cacheContentComplete,'FALSE') AS contentComplete,
         
-            0 AS attempts, 
-            0 AS startDate, 
-            0 AS endDate, 
-            0 AS duration
+        MIN(ResultSource.timestamp) AS startDate,
+        MAX(ResultSource.timestamp)  AS endDate,
+        SUM(ResultSource.resultDuration) AS duration, 
+        COUNT(DISTINCT(ResultSource.contextRegistration)) AS attempts
         
-        FROM ClazzAssignmentContentJoin
+        FROM  ClazzAssignmentContentJoin
                 LEFT JOIN ContentEntry 
                 ON ContentEntry.contentEntryUid = cacjContentUid 
                 
@@ -53,14 +44,43 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
                 ON cacheContentEntryUid = ClazzAssignmentContentJoin.cacjContentUid
                 AND cachePersonUid = :personUid
                 AND cacheClazzAssignmentUid = :clazzAssignmentUid
+                
+                
+                LEFT JOIN ( SELECT StatementEntity.timestamp, 
+                    StatementEntity.statementContentEntryUid, 
+                    StatementEntity.contextRegistration, StatementEntity.resultDuration
+                      
+                 ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
+                           LEFT JOIN StatementEntity 
+                           ON StatementEntity.statementPersonUid = Person.personUid 
+                WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
+                  AND PersonGroupMember.groupMemberActive  
+                  AND statementContentEntryUid
+                            IN (SELECT cacjContentUid
+                                  FROM ClazzAssignmentContentJoin
+                                        JOIN ClazzAssignment 
+                                        ON ClazzAssignment.caUid = cacjAssignmentUid
+                                        
+                                        JOIN ClazzEnrolment
+                                        ON ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
+                                        AND ClazzEnrolment.clazzEnrolmentPersonUid = StatementEntity.statementPersonUid
+                                 WHERE cacjAssignmentUid = :clazzAssignmentUid
+                                  AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                                  AND ClazzEnrolment.clazzEnrolmentActive
+                                  AND StatementEntity.timestamp
+                                        BETWEEN ClazzAssignment.caStartDate
+                                        AND ClazzAssignment.caGracePeriodDate)
+              GROUP BY StatementEntity.statementUid) AS ResultSource
+          ON ClazzAssignmentContentJoin.cacjContentUid = ResultSource.statementContentEntryUid   
             
         WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = :clazzAssignmentUid
           AND cacjActive    
-          AND (ContentEntry.publik OR :personUid != 0)      
+          AND (ContentEntry.publik OR :personUid != 0)  
+     GROUP BY ResultSource.statementContentEntryUid
      ORDER BY ContentEntry.title, ContentEntry.contentEntryUid   
     """)
     abstract fun findAllContentWithAttemptsByClazzAssignmentUid(clazzAssignmentUid: Long,
-                                                               personUid: Long):
+                                                               personUid: Long, accountPersonUid: Long):
             DataSource.Factory<Int, ContentWithAttemptSummary>
 
     @Query("""

@@ -43,6 +43,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzAssignment? {
+        val mLoggedInPersonUid = accountManager.activeAccount.personUid
         val clazzAssignment = withTimeoutOrNull(2000) {
             db.clazzAssignmentDao.findByUidAsync(selectedClazzAssignmentUid)
         } ?: ClazzAssignment()
@@ -54,7 +55,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
         view.clazzAssignmentContent =
                 withTimeoutOrNull(2000) {
                     repo.clazzAssignmentContentJoinDao.findAllContentWithAttemptsByClazzAssignmentUid(
-                            clazzAssignment.caUid, selectedPersonUid)
+                            clazzAssignment.caUid, selectedPersonUid, mLoggedInPersonUid)
                 }
 
         view.studentScore = repo.clazzAssignmentDao.getStatementScoreProgressForAssignment(
