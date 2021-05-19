@@ -1,8 +1,6 @@
 package com.ustadmobile.core.network
 
-import com.github.aakira.napier.Napier
 import com.google.gson.Gson
-import org.mockito.kotlin.mock
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
@@ -13,7 +11,6 @@ import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.networkmanager.DownloadJobPreparer
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorDatabaseRepository
-import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag
@@ -23,24 +20,21 @@ import com.ustadmobile.lib.rest.ContainerDownload
 import com.ustadmobile.sharedse.network.ContainerDownloadManagerImpl
 import com.ustadmobile.sharedse.network.insertTestContentEntries
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
+import io.github.aakira.napier.Napier
 import io.ktor.application.*
 import io.ktor.client.*
 import io.ktor.features.*
 import io.ktor.gson.*
 import io.ktor.http.*
 import io.ktor.routing.*
-import io.ktor.server.engine.ApplicationEngine
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.junit.*
 import org.junit.Assert.*
 import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
-import org.kodein.di.ktor.di
-import org.kodein.type.TypeToken
-import org.kodein.type.erased
 
 class DownloadJobPreparerTest {
 

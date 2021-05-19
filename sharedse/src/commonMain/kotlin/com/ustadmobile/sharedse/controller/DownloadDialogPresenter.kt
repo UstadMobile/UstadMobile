@@ -1,6 +1,6 @@
 package com.ustadmobile.sharedse.controller
 
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.db.JobStatus

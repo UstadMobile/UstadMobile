@@ -15,7 +15,7 @@ import org.kodein.di.instance
 
 class StorageOptionsAutocompleteTextView: DropDownListAutoCompleteTextView<UMStorageDir> {
 
-    private val di: DI by di()
+    private val di: DI by di(context)
 
     private val messageIdDropdownAdapter = object: DropDownListAutoCompleteAdapter<UMStorageDir> {
 

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.util
 
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.util.copyOnWriteListOf

@@ -9,7 +9,7 @@ import java.lang.Integer.min
 import java.security.MessageDigest
 import com.ustadmobile.door.util.NullOutputStream
 import com.ustadmobile.core.io.ext.readFully
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 
 
 /**

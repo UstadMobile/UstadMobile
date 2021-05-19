@@ -1,6 +1,6 @@
 package com.ustadmobile.core.contentformats
 
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData

@@ -11,7 +11,7 @@ import org.kodein.di.instance
 
 class CustomFieldAutoCompleteTextView : DropDownListAutoCompleteTextView<CustomFieldValueOption> {
 
-    private val di: DI by di()
+    private val di: DI by di(context)
 
     private val customFieldValueOptionAdapter = object: DropDownListAutoCompleteAdapter<CustomFieldValueOption> {
         override fun getId(item: CustomFieldValueOption) = item.customFieldValueOptionUid

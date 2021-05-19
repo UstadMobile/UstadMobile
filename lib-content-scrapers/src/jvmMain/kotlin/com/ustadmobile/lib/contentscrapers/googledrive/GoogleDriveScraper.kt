@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.googledrive
 
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.soywiz.klock.DateFormat
 import com.soywiz.klock.parse
 import com.ustadmobile.core.account.Endpoint

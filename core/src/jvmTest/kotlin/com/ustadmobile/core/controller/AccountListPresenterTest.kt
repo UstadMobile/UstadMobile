@@ -1,7 +1,6 @@
 
 package com.ustadmobile.core.controller
 
-import org.mockito.kotlin.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
@@ -11,9 +10,9 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.getFirstValue
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
 import io.ktor.client.*
@@ -30,6 +29,7 @@ import org.junit.Test
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
+import org.mockito.kotlin.*
 
 class AccountListPresenterTest {
 
@@ -267,7 +267,7 @@ class AccountListPresenterTest {
         presenter.handleClickAddAccount()
 
         verify(mockView, timeout(5000).atLeastOnce()).accountListLive = argWhere {
-            it.value.get().size == 1 && it.value.get().first().endpointUrl == activeEndpointArg
+            it.getValue()?.size == 1 && it.getFirstValue().endpointUrl == activeEndpointArg
         }
 
         verify(impl, timeout(5000)).go(eq(Login2View.VIEW_NAME), argWhere { argMap ->

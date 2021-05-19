@@ -18,7 +18,7 @@ import org.kodein.di.*
 import java.io.IOException
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.ustadmobile.core.io.ext.readFully
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType

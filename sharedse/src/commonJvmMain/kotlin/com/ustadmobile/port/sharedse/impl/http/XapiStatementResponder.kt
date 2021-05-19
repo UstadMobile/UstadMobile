@@ -22,7 +22,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.*
 import java.util.*
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 
 class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
 

@@ -71,7 +71,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
-                implementation "com.github.aakira:napier:$version_napier"
+                implementation "io.github.aakira:napier:$version_napier"
                 compileOnly project(":lib-database-entities")
                 compileOnly project(":lib-database")
                 compileOnly "com.ustadmobile.door:door-runtime:$version_door"

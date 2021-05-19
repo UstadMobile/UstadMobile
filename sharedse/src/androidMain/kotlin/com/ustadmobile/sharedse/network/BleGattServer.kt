@@ -9,7 +9,7 @@ import android.os.Build
 import android.os.ParcelUuid
 import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.port.sharedse.util.AsyncServiceManager
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.BLE_CHARACTERISTICS

@@ -1,7 +1,5 @@
 package com.ustadmobile.lib.rest
 
-import com.github.aakira.napier.DebugAntilog
-import com.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
@@ -10,14 +8,12 @@ import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.io.UploadSessionManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
-import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.ext.DoorTag
@@ -26,42 +22,28 @@ import com.ustadmobile.lib.rest.ext.*
 import com.ustadmobile.lib.rest.messaging.MailProperties
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import io.ktor.application.Application
-import io.ktor.application.ApplicationCall
-import io.ktor.application.install
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
+import io.ktor.application.*
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
-import io.ktor.features.CORS
-import io.ktor.features.CallLogging
-import io.ktor.features.ContentNegotiation
-import io.ktor.gson.GsonConverter
-import io.ktor.gson.gson
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
-import io.ktor.request.header
-import io.ktor.routing.Routing
-import okhttp3.Dispatcher
-import okhttp3.OkHttpClient
+import io.ktor.features.*
+import io.ktor.gson.*
+import io.ktor.http.*
+import io.ktor.request.*
+import io.ktor.routing.*
+import jakarta.mail.Authenticator
+import jakarta.mail.PasswordAuthentication
 import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
-import org.quartz.Job
-import org.quartz.JobExecutionContext
 import org.quartz.Scheduler
-import org.quartz.SchedulerFactory
-import org.quartz.impl.StdScheduler
 import org.quartz.impl.StdSchedulerFactory
+import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.nio.file.Files
 import java.util.*
-import java.util.concurrent.TimeUnit
 import javax.naming.InitialContext
-import io.ktor.client.features.json.JsonFeature
-import jakarta.mail.Authenticator
-import jakarta.mail.PasswordAuthentication
-import org.xmlpull.v1.XmlPullParserFactory
-import javax.sql.DataSource
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -205,8 +187,9 @@ fun Application.umRestApplication(dbModeOverride: String? = null,
                 "jdbc:sqlite:data/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
             InitialContext().apply {
                 bindDataSourceIfNotExisting("quartzds", dbProperties)
+                initQuartzDb("java:/comp/env/jdbc/quartzds")
             }
-            InitialContext().initQuartzDb("java:/comp/env/jdbc/quartzds")
+
             StdSchedulerFactory.getDefaultScheduler().also {
                 it.context.put("di", di)
             }

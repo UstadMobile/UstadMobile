@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.core.content.edit
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

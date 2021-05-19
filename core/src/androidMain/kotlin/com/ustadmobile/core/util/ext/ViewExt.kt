@@ -12,6 +12,6 @@ import org.kodein.di.instance
  */
 val View.systemImpl: UstadMobileSystemImpl
     get() {
-        val di: DI by di()
+        val di: DI by di(context)
         return di.direct.instance()
     }

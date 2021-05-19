@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.contentscrapers.apache
 
 import ScraperTypes
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.util.ext.requirePostfix
