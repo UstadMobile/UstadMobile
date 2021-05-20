@@ -18,17 +18,11 @@ abstract class UstadDetailComponent<T: Any>(mProps: RProps) : UstadBaseComponent
         set(value) {
             fabState = fabState.copy(label = systemImpl.getString(MessageID.edit, this),
                 icon = "edit", visible = true)
-            console.log(fabState)
             field = value
         }
 
     override fun onFabClick(event: Event) {
+        super.onFabClick(event)
         detailPresenter?.handleClickEdit()
     }
-
-
-    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
-        //handle showing snackbar
-    }
-
 }

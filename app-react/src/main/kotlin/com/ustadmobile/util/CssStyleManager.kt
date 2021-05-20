@@ -1,5 +1,6 @@
 package com.ustadmobile.util
 
+import com.ccfraser.muirwik.components.MGridAlignContent
 import com.ccfraser.muirwik.components.spacingUnits
 import com.ccfraser.muirwik.components.styles.Breakpoint
 import com.ccfraser.muirwik.components.styles.up
@@ -373,6 +374,36 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         margin = "0 ${if(isRTLSupported) 30 else 0}px 0 ${if(isRTLSupported) 0 else 30}px"
         flexDirection = FlexDirection.column
     }
+
+    val personDetailComponentContainer by css{
+        display = Display.flex
+        width = defaultContainerWidth
+        flexDirection = FlexDirection.column
+    }
+
+    val personDetailComponentActions by css{
+        display = Display.flex
+        flexDirection = FlexDirection.column
+        alignContent = Align.center
+        alignItems = Align.center
+        paddingBottom = 16.px
+        padding = "16px 30px 16px 30px"
+        cursor = Cursor.pointer
+        hover {
+            backgroundColor = Color(theme.palette.action.selected)
+        }
+    }
+
+    val personDetailComponentActionIcon by css{
+        marginBottom = 10.px
+    }
+
+    val personDetailComponentInfo by css{
+        display = Display.flex
+        flexDirection = FlexDirection.row
+        marginTop = 20.px
+    }
+
     override val di: DI
         get() = StateManager.getCurrentState().di
 

@@ -15,3 +15,15 @@ fun RBuilder.renderAvatar(attachmentId: Long, fallback: String){
         if(src == null) mIcon(fallback, className= "${CssStyleManager.name}-fallBackAvatar")
     }
 }
+
+fun RBuilder.handleCall(phoneNumber: String?){
+
+}
+
+fun RBuilder.handleMail(email: String?){
+
+}
+
+fun RBuilder.handleSMS(phoneNumber: String?){
+
+}

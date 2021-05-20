@@ -4,6 +4,8 @@ import androidx.paging.DataSource
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.mocks.DoorLiveDataJs
+import com.ustadmobile.mocks.db.ReactDatabase.Companion.ALLOW_ACCESS
 import kotlinx.serialization.builtins.ListSerializer
 
 class PersonDaoJs: PersonDao() {
@@ -44,7 +46,7 @@ class PersonDaoJs: PersonDao() {
         permission: Long,
         checkPermissionForSelf: Int
     ): Boolean {
-        TODO("Not yet implemented")
+        return ALLOW_ACCESS
     }
 
     override suspend fun personIsAdmin(accountPersonUid: Long): Boolean {
@@ -56,7 +58,13 @@ class PersonDaoJs: PersonDao() {
     }
 
     override suspend fun findByUid(uid: Long): Person? {
-        TODO("Not yet implemented")
+        return Person().apply {
+            personUid = uid
+            username = "admin"
+            firstNames = "Admin"
+            admin = true
+            lastName = "Users"
+        }
     }
 
     override suspend fun findPersonAccountByUid(uid: Long): PersonWithAccount? {
@@ -109,8 +117,15 @@ class PersonDaoJs: PersonDao() {
         TODO("Not yet implemented")
     }
 
-    override fun findByUidWithDisplayDetailsLive(personUid: Long): DoorLiveData<PersonWithDisplayDetails?> {
-        TODO("Not yet implemented")
+    override fun findByUidWithDisplayDetailsLive(mPersonUid: Long): DoorLiveData<PersonWithDisplayDetails?> {
+        val person = PersonWithDisplayDetails().apply {
+            personUid = mPersonUid
+            username = "admin"
+            firstNames = "Admin"
+            admin = true
+            lastName = "Users"
+        }
+        return DoorLiveDataJs(person) as DoorLiveData<PersonWithDisplayDetails?>
     }
 
     override fun insertAuditLog(entity: AuditLog): Long {

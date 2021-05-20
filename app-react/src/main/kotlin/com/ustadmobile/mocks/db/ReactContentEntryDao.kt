@@ -4,6 +4,7 @@ import androidx.paging.DataSource
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.mocks.db.ReactDatabase.Companion.ALLOW_ACCESS
 import com.ustadmobile.util.DummyDataPreload.Companion.TAG_ENTRIES
 import com.ustadmobile.util.UmReactUtil.loadList
 import kotlinx.serialization.builtins.ListSerializer
@@ -185,7 +186,7 @@ class ReactContentEntryDao: ContentEntryDao() {
         contentEntryUid: Long,
         permission: Long
     ): Boolean {
-        return true
+        return ALLOW_ACCESS
     }
 
     override suspend fun toggleVisibilityContentEntryItems(
