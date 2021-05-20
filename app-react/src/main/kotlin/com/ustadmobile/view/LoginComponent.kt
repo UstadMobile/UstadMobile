@@ -1,13 +1,14 @@
 package com.ustadmobile.view
 
 import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.button.MButtonSize
-import com.ccfraser.muirwik.components.button.MButtonVariant
-import com.ccfraser.muirwik.components.button.mButton
+import com.ccfraser.muirwik.components.button.*
 import com.ccfraser.muirwik.components.form.MFormControlVariant
+import com.ccfraser.muirwik.components.form.mFormControl
+import com.ccfraser.muirwik.components.input.*
 import com.ustadmobile.core.controller.Login2Presenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.model.UmLabel
 import com.ustadmobile.util.CssStyleManager
 import com.ustadmobile.util.CssStyleManager.defaultMarginTop
 import com.ustadmobile.util.CssStyleManager.errorTextMessage
@@ -32,6 +33,12 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
 
     private var password: String = ""
 
+    private var showPassword = false
+
+    private var passwordLabel: UmLabel = UmLabel(systemImpl.getString(MessageID.password, this))
+
+    private var usernameLabel: UmLabel = UmLabel(systemImpl.getString(MessageID.username, this))
+
     override var errorMessage: String = ""
         get() = field
         set(value) {
@@ -54,19 +61,26 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
     override var isEmptyPassword: Boolean = false
         get() = field
         set(value) {
-            setState { field = value }
+            field = value
+            setState { passwordLabel = passwordLabel.copy(error = value,
+                text = systemImpl.getString(if(value) MessageID.field_required_prompt
+                else MessageID.password, this)) }
         }
 
     override var isEmptyUsername: Boolean = false
         get() = field
         set(value) {
-            setState { field = value }
+            field = value
+            setState { usernameLabel = usernameLabel.copy(error = value,
+                text = systemImpl.getString(if(value) MessageID.field_required_prompt
+                else MessageID.username, this)) }
         }
 
     override var inProgress: Boolean = false
         get() = field
         set(value) {
-            setState { field = value }
+            field = value
+            setState {loading = value}
         }
 
     override var createAccountVisible: Boolean = false
@@ -97,27 +111,40 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
 
             styledDiv {
                 css{ +loginComponentForm}
-                mTextField(label = systemImpl.getString(if(isEmptyUsername)
-                    MessageID.field_required_prompt else MessageID.username, this),
-                    value = username, error = isEmptyUsername, disabled = inProgress,
+                mTextField(label = "${usernameLabel.text}",
+                    value = username, error = usernameLabel.error, disabled = inProgress,
                     variant = MFormControlVariant.outlined, onChange = {
                             it.persist()
                         setState {
                             username = it.targetInputValue
                             isEmptyUsername = false
+                            errorMessage = ""
                         }
                     }) {css(loginComponentFormElementsMargin)}
 
-                mTextField(label = systemImpl.getString(if(isEmptyPassword)
-                    MessageID.field_required_prompt else MessageID.password, this),
-                    value = password, disabled = inProgress, error = isEmptyPassword,
-                    type = InputType.password, variant = MFormControlVariant.outlined, onChange = {
-                        it.persist()
-                        setState {
-                            password = it.targetInputValue
-                            isEmptyPassword = false
+
+                mFormControl(variant = MFormControlVariant.outlined) {
+                    css(loginComponentFormElementsMargin)
+                    mInputLabel("${passwordLabel.text}", error = passwordLabel.error,
+                        variant = MFormControlVariant.outlined, htmlFor = "password-input")
+                    mOutlinedInput(labelWidth = passwordLabel.width,id = "password-input",value = password, disabled = inProgress,
+                        error = passwordLabel.error,
+                        type =  if(showPassword) InputType.text else InputType.password, onChange = {
+                            it.persist()
+                            setState {
+                                password = it.targetInputValue
+                                isEmptyPassword = false
+                                errorMessage = "" }}) {
+                        attrs{
+                            endAdornment = mInputAdornment {
+                                mIconButton(if(showPassword) "visibility" else "visibility_off", edge = MIconEdge.end, onClick = {
+                                        setState { showPassword = !showPassword }
+                                    })
+                            }
                         }
-                    }) {css(loginComponentFormElementsMargin)}
+
+                    }
+                }
 
                 styledDiv {
                     css{

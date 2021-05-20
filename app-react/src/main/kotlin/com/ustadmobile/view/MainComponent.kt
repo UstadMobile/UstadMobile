@@ -16,10 +16,7 @@ import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.model.UmReactDestination
-import com.ustadmobile.model.statemanager.GlobalState
-import com.ustadmobile.model.statemanager.GlobalStateSlice
-import com.ustadmobile.model.statemanager.SnackBarState
-import com.ustadmobile.model.statemanager.ToolbarTabs
+import com.ustadmobile.model.statemanager.*
 import com.ustadmobile.util.CssStyleManager
 import com.ustadmobile.util.CssStyleManager.alignTextToStart
 import com.ustadmobile.util.CssStyleManager.appContainer
