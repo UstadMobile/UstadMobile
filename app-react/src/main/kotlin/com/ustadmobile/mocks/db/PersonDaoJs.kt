@@ -68,7 +68,13 @@ class PersonDaoJs: PersonDao() {
     }
 
     override suspend fun findPersonAccountByUid(uid: Long): PersonWithAccount? {
-        TODO("Not yet implemented")
+        return PersonWithAccount().apply {
+            personUid = uid
+            username = "admin"
+            firstNames = "Admin"
+            admin = true
+            lastName = "Users"
+        }
     }
 
     override fun findByUidLive(uid: Long): DoorLiveData<Person?> {

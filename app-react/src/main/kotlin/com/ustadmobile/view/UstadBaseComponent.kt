@@ -47,9 +47,9 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
 
     protected abstract val viewName: String?
 
-    protected var fabState: FabState = FabState(icon = "add", onClick = ::onFabClick)
+    protected var fabState: FabState = FabState(icon = "add", onClick = ::onFabClick, visible = false)
     set(value) {
-        StateManager.dispatch(value)
+        window.setTimeout({StateManager.dispatch(value)}, 100)
         field = value
     }
 
@@ -83,6 +83,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         window.addEventListener("hashchange",hashChangeListener)
         isRTLSupported = systemImpl.isRTLSupported(this)
         localStorage.removeItem(KEY_IFRAME_HEIGHTS)
+        StateManager.dispatch(fabState)
         onComponentReady()
     }
 

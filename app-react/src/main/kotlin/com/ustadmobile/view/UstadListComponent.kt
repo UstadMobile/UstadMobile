@@ -39,7 +39,7 @@ import react.setState
 import styled.css
 import styled.styledDiv
 
-abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<RProps,RState>(mProps),
+abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<RProps,RState>(mProps),
     UstadListView<RT, DT>, OnSortOptionSelected {
 
     protected abstract val displayTypeRepo: Any?
@@ -117,8 +117,10 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UstadBaseCompone
         }
 
     override fun onComponentReady() {
-        searchManager?.searchListener = listPresenter
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
+        window.setTimeout({
+            searchManager?.searchListener = listPresenter
+        }, 100)
     }
 
     override fun RBuilder.render() {

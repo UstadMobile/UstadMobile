@@ -23,7 +23,7 @@ interface PersonListProps: RProps {
     var args: Map<String,String>
 }
 
-class PersonListComponent(mProps: PersonListProps): UstadListViewComponent<Person, PersonWithDisplayDetails>(mProps),
+class PersonListComponent(mProps: PersonListProps): UstadListComponent<Person, PersonWithDisplayDetails>(mProps),
     PersonListView{
 
     private lateinit var mPresenter: PersonListPresenter
@@ -40,7 +40,7 @@ class PersonListComponent(mProps: PersonListProps): UstadListViewComponent<Perso
 
 
     override fun onComponentReady() {
-        //super.onComponentReady()
+        super.onComponentReady()
         fabState.label = systemImpl.getString(MessageID.person, this)
         if(getArgs().containsKey(UstadView.ARG_CODE_TABLE)){
 

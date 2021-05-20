@@ -29,7 +29,7 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
 
     val defaultMarginEnd = "0 ${if(isRTLSupported) 20 else 0}px 0 ${if(isRTLSupported) 0 else 20}px"
 
-    val defaultContainerWidth = LinearDimension("74.8vw")
+    private val defaultContainerWidth = LinearDimension("74.8vw")
 
     val isMobile: Boolean = js("/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)")
 
@@ -327,6 +327,7 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
     val loginComponentFormElementsMargin by css {
         marginLeft = 1.spacingUnits
         marginRight = 1.spacingUnits
+        marginTop = 2.spacingUnits
         width = LinearDimension("100%")
     }
 
@@ -375,6 +376,10 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         flexDirection = FlexDirection.column
     }
 
+    val passwordLabelMargin by css {
+        margin = "0 ${if(isRTLSupported) 20 else 0}px 0 ${if(isRTLSupported) 0 else 20}px"
+    }
+
     val personDetailComponentContainer by css{
         display = Display.flex
         width = defaultContainerWidth
@@ -402,6 +407,19 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         display = Display.flex
         flexDirection = FlexDirection.row
         marginTop = 20.px
+    }
+
+    val formTextField by css{
+        marginLeft = 1.spacingUnits
+        marginRight = 1.spacingUnits
+        marginTop = 2.spacingUnits
+        width = LinearDimension("100%")
+    }
+
+    val formFieldsContainer by css{
+        alignContent = Align.center
+        alignItems = Align.center
+        width = 50.pc
     }
 
     override val di: DI

@@ -16,3 +16,7 @@ fun String.format(vararg args: Any): String{
 fun String.joinString(vararg args: Any): String {
     return "$this ${args.joinToString(" ")}"
 }
+
+fun String.clean(): String{
+    return this.replace("\\", "")
+}

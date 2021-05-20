@@ -45,7 +45,7 @@ interface EntryListProps: RProps{
 }
 
 
-class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<ContentEntry,
+class ContentEntryListComponent(props: EntryListProps): UstadListComponent<ContentEntry,
         ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>(props), ContentEntryList2View{
 
     private lateinit var mPresenter: ContentEntryList2Presenter
@@ -76,7 +76,8 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
 
 
     override fun onComponentReady() {
-        fabState.label = systemImpl.getString(MessageID.content, this)
+        super.onComponentReady()
+        fabState = fabState.copy(label = systemImpl.getString(MessageID.content, this))
         val args = getArgs(mapOf(ARG_WEB_PLATFORM to true.toString(),
             ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT))
         mPresenter = ContentEntryList2Presenter(this, args, this,di,this)

@@ -4,23 +4,16 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.util.RouteManager.getArgs
+import kotlinx.browser.window
 import org.w3c.dom.events.Event
 import react.RProps
 import react.RState
 
 abstract class UstadEditComponent<T: Any>(mProps: RProps): UstadBaseComponent<RProps, RState>(mProps), UstadEditView<T> {
 
-    override val viewName: String?
-        get() = null
-
     abstract protected val mEditPresenter : UstadEditPresenter<*, T>?
-
-    override var fieldsEnabled: Boolean
-        get() = TODO("Not yet implemented")
-        set(value) {}
 
     override fun finishWithResult(result: List<T>) {
         TODO("Not yet implemented")
