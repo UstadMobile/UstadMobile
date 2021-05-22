@@ -10,10 +10,21 @@ import kotlinx.serialization.builtins.ListSerializer
 
 class PersonDaoJs: PersonDao() {
 
+    private var person: PersonWithAccount? = null
+
+    init {
+        person?.apply {
+            username = "admin"
+            firstNames = "Admin"
+            admin = true
+            lastName = "Users"
+        }
+    }
+
     private val mPath: String = "people"
 
     override suspend fun insertListAsync(entityList: List<Person>) {
-        TODO("Not yet implemented")
+        TODO("Not yetfindPersonAccountByUid implemented")
     }
 
     override suspend fun insertOrReplace(person: Person) {
@@ -60,29 +71,26 @@ class PersonDaoJs: PersonDao() {
     override suspend fun findByUid(uid: Long): Person? {
         return Person().apply {
             personUid = uid
-            username = "admin"
-            firstNames = "Admin"
-            admin = true
-            lastName = "Users"
+
         }
     }
 
     override suspend fun findPersonAccountByUid(uid: Long): PersonWithAccount? {
-        return PersonWithAccount().apply {
+        return person?.apply {
             personUid = uid
-            username = "admin"
-            firstNames = "Admin"
-            admin = true
-            lastName = "Users"
         }
     }
 
     override fun findByUidLive(uid: Long): DoorLiveData<Person?> {
-        TODO("Not yet implemented")
+        return DoorLiveDataJs(person?.apply {
+            personUid = uid
+        })
     }
 
     override suspend fun findByUidAsync(uid: Long): Person? {
-        TODO("Not yet implemented")
+        return person?.apply {
+            personUid = uid
+        }
     }
 
     override suspend fun updateAsync(entity: Person): Int {
@@ -124,14 +132,9 @@ class PersonDaoJs: PersonDao() {
     }
 
     override fun findByUidWithDisplayDetailsLive(mPersonUid: Long): DoorLiveData<PersonWithDisplayDetails?> {
-        val person = PersonWithDisplayDetails().apply {
+        return DoorLiveDataJs(person?.apply {
             personUid = mPersonUid
-            username = "admin"
-            firstNames = "Admin"
-            admin = true
-            lastName = "Users"
-        }
-        return DoorLiveDataJs(person) as DoorLiveData<PersonWithDisplayDetails?>
+        }) as DoorLiveData<PersonWithDisplayDetails?>
     }
 
     override fun insertAuditLog(entity: AuditLog): Long {
@@ -139,7 +142,7 @@ class PersonDaoJs: PersonDao() {
     }
 
     override fun getAllPerson(): List<Person> {
-        TODO("Not yet implemented")
+        return listOf(person!!)
     }
 
     override fun insert(entity: Person): Long {

@@ -42,7 +42,8 @@ class ReactEntityRoleDao: EntityRoleDao() {
     }
 
     override suspend fun filterByPersonWithExtraAsList(personGroupUid: Long): List<EntityRoleWithNameAndRole> {
-        TODO("Not yet implemented")
+        return DataSourceFactoryJs<Int,EntityRoleWithNameAndRole, Any>(null,personGroupUid,"",
+            ListSerializer(EntityRoleWithNameAndRole.serializer()),null,null,null).getData(0,0)
     }
 
     override suspend fun findByUidAsync(uid: Long): EntityRole? {

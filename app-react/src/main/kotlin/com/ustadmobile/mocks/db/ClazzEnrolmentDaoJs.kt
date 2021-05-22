@@ -51,7 +51,7 @@ class ClazzEnrolmentDaoJs: ClazzEnrolmentDao() {
     }
 
     override suspend fun findAllClazzesByPersonWithClazzAsListAsync(personUid: Long): List<ClazzEnrolmentWithClazz> {
-        TODO("Not yet implemented")
+        return listOf()
     }
 
     override suspend fun getAllClazzEnrolledAtTimeAsync(

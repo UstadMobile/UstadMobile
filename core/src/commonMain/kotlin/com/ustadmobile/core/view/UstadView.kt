@@ -162,6 +162,11 @@ interface UstadView {
          */
         const val ARG_RESULT_DEST_ID = "result_dest"
 
+        /**
+         * The key to use in the SavedStateHandle to save the result
+         */
+        const val ARG_RESULT_DEST_KEY = "result_key"
+
         const val ARG_REGISTRATION_ALLOWED = "registration_allowed"
 
         /**

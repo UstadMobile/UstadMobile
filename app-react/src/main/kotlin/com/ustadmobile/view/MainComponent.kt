@@ -98,7 +98,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
         val destination = findDestination(newView)
         if(destination != null){
             if(destination.labelId != 0){
-                title = systemImpl.getString(destination.labelId, this)
+                title = getString(destination.labelId)
             }
             setState {
                 currentDestination = destination
@@ -108,7 +108,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
 
 
     override fun RBuilder.render() {
-        errorBoundary(errorFallbackComponent(systemImpl.getString(MessageID.error, this))){
+        errorBoundary(errorFallbackComponent(getString(MessageID.error))){
             mCssBaseline()
             themeContext.Consumer { theme ->
                 styledDiv {
@@ -147,9 +147,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
 
                             mToolbar {
                                 attrs.asDynamic().id = "um-toolbar"
-                                mHidden(xsDown = true){
-                                    mToolbarTitle(globalState.title?:"")
-                                }
+                                mToolbarTitle(globalState.title?:"")
 
                                 styledDiv {
                                     css{
@@ -165,7 +163,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
                                         val className = "${CssStyleManager.name}-mainComponentInputSearch"
                                         val id = "um-search"
                                     }
-                                    mInput(placeholder = "${systemImpl.getString(MessageID.search,this)}...",
+                                    mInput(placeholder = "${getString(MessageID.search)}...",
                                         disableUnderline = true) {
                                         attrs.inputProps = inputProps
                                     }
@@ -207,9 +205,10 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
                             }
                         }
 
-                        if(currentDestination.showNavigation && !isMobile){
+                        if(currentDestination.showNavigation){
                             renderSideNavigation()
                         }
+
 
                         // Main content area, this div holds the contents
                         styledDiv {
@@ -239,7 +238,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
                                 }
                             }
 
-                            if(isMobile && currentDestination.showNavigation){
+                            if(currentDestination.showNavigation){
                                 renderBottomNavigation()
                             }
                         }
@@ -269,18 +268,20 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
     }
 
     private fun RBuilder.renderBottomNavigation(){
-        mBottomNavigation(currentDestination, true, onChange = { _, value -> setState {
-            val destination = value as UmReactDestination
-            systemImpl.go(destination.view, destination.args,this)
-        }}) {
+       mHidden(mdUp = true) {
+           mBottomNavigation(currentDestination, true, onChange = { _, value -> setState {
+               val destination = value as UmReactDestination
+               systemImpl.go(destination.view, destination.args,this)
+           }}) {
 
-            destinationList.filter { it.icon != null && it.view != SettingsView.VIEW_NAME }.forEach { destination ->
-                destination.icon?.let {
-                    mBottomNavigationAction(systemImpl.getString(destination.labelId, this),
-                        mIcon(it, addAsChild = false), value = destination, showLabel = true)
-                }
-            }
-        }
+               destinationList.filter { it.icon != null && it.view != SettingsView.VIEW_NAME }.forEach { destination ->
+                   destination.icon?.let {
+                       mBottomNavigationAction(getString(destination.labelId),
+                           mIcon(it, addAsChild = false), value = destination, showLabel = true)
+                   }
+               }
+           }
+       }
     }
 
     private fun RBuilder.renderSideNavigation(){
@@ -290,7 +291,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
             "100%"; minHeight = "100vh"
         }
 
-        mHidden(smDown = true, implementation = MHiddenImplementation.css) {
+        mHidden(mdDown = true, implementation = MHiddenImplementation.css) {
             mDrawer(true, MDrawerAnchor.left, MDrawerVariant.permanent, paperProps = p) {
                 appBarSpacer()
                 themeContext.Consumer { theme ->
@@ -301,7 +302,7 @@ class MainComponent(props: MainProps): UstadBaseComponent<MainProps, RState>(pro
                         }
                         destinationList.filter { it.icon != null }.forEach { destination ->
                             destination.icon?.let {
-                                mListItemWithIcon(it, systemImpl.getString(destination.labelId, this),
+                                mListItemWithIcon(it, getString(destination.labelId),
                                     divider = destination.divider , onClick = {
                                         systemImpl.go(destination.view, destination.args,this)
                                     }, selected = currentDestination == destination){

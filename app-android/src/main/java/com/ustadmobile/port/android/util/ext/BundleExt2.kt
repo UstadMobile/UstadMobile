@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.util.ext
 import android.os.Bundle
 import androidx.navigation.NavBackStackEntry
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
 import com.ustadmobile.port.android.view.UstadBaseFragment
 
 /**
@@ -20,7 +21,7 @@ fun Bundle.putResultDestInfo(backState: NavBackStackEntry, destinationResultKey:
     putString(UstadView.ARG_RESULT_DEST_ID,
             backStateArgs?.takeIf{ !overwriteDest }?.getString(UstadView.ARG_RESULT_DEST_ID)
             ?: backState.destination.id.toString())
-    putString(UstadBaseFragment.ARG_RESULT_DEST_KEY,
-            backStateArgs?.takeIf{ !overwriteDest }?.getString(UstadBaseFragment.ARG_RESULT_DEST_KEY)
+    putString(ARG_RESULT_DEST_KEY,
+            backStateArgs?.takeIf{ !overwriteDest }?.getString(ARG_RESULT_DEST_KEY)
             ?: destinationResultKey)
 }

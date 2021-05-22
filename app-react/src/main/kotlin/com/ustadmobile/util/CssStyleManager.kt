@@ -3,6 +3,7 @@ package com.ustadmobile.util
 import com.ccfraser.muirwik.components.MGridAlignContent
 import com.ccfraser.muirwik.components.spacingUnits
 import com.ccfraser.muirwik.components.styles.Breakpoint
+import com.ccfraser.muirwik.components.styles.down
 import com.ccfraser.muirwik.components.styles.up
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import kotlinx.css.*
@@ -21,7 +22,7 @@ import styled.StyleSheet
  */
 object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
-    private val theme = StateManager.getCurrentState().theme!!
+    val theme = StateManager.getCurrentState().theme!!
 
     val systemImpl : UstadMobileSystemImpl by instance()
 
@@ -30,6 +31,8 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
     val defaultMarginEnd = "0 ${if(isRTLSupported) 20 else 0}px 0 ${if(isRTLSupported) 0 else 20}px"
 
     private val defaultContainerWidth = LinearDimension("74.8vw")
+
+    private val tabletAndHighEnd = Breakpoint.md
 
     val isMobile: Boolean = js("/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)")
 
@@ -63,12 +66,15 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
     val fab by css{
         if(!isRTLSupported) right = 15.px
         if(isRTLSupported) left = 15.px
-        margin = "0 ${if(isRTLSupported) 90 else 0}% 0 ${if(isRTLSupported) 0 else 90}%"
-        bottom = 15.px
+        position = Position.fixed
+        bottom = 70.px
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            bottom = 15.px
+        }
     }
 
     val defaultMarginTop  by css{
-        marginTop = (if(isMobile) 7 else 2).spacingUnits
+        marginTop = 2.spacingUnits
     }
 
     val progressIndicator by css {
@@ -151,7 +157,10 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         paddingLeft = 2.spacingUnits
         paddingRight = 2.spacingUnits
         paddingTop = 2.spacingUnits
-        paddingBottom = (if(isMobile) 16 else 10).spacingUnits
+        paddingBottom = 16.spacingUnits
+        media(theme.breakpoints.up(Breakpoint.sm)) {
+            paddingBottom = 10.spacingUnits
+        }
         backgroundColor = Color(theme.palette.background.default)
     }
 
@@ -278,7 +287,14 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
     val entryDetailComponentContainer by css {
         width = LinearDimension.auto
         height = LinearDimension("100%")
-        flexDirection = if(isMobile) FlexDirection.column else FlexDirection.row
+        flexDirection = FlexDirection.column
+        media(theme.breakpoints.up(Breakpoint.md)) {
+            flexDirection = FlexDirection.row
+        }
+
+        media(theme.breakpoints.down(Breakpoint.md)) {
+            flexDirection = FlexDirection.column
+        }
         padding(2.spacingUnits)
     }
 
@@ -409,17 +425,54 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         marginTop = 20.px
     }
 
-    val formTextField by css{
+    val formMidWidthTextField by css{
         marginLeft = 1.spacingUnits
         marginRight = 1.spacingUnits
         marginTop = 2.spacingUnits
+        width = LinearDimension("70%")
+    }
+
+    //media query using media query
+    val formMinWidthTextField by css{
+        marginLeft = 1.spacingUnits
+        marginRight = 1.spacingUnits
+        marginTop = 2.spacingUnits
+        width = LinearDimension("97%")
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            width = LinearDimension("45%")
+            margin = "16px ${if(isRTLSupported) 3 else 0}% 0 ${if(isRTLSupported) 0 else 3}%"
+        }
+    }
+
+    val alignContentCenterContainer by css{
+        textAlign = TextAlign.center
+    }
+
+    val defaultFullWidth by css {
         width = LinearDimension("100%")
     }
 
-    val formFieldsContainer by css{
-        alignContent = Align.center
-        alignItems = Align.center
-        width = 50.pc
+    val helperText by css{
+        color = Color(theme.palette.error.main)
+        marginLeft = LinearDimension("${if(isRTLSupported) 0 else 16}px")
+        marginRight= LinearDimension("${if(isRTLSupported) 16 else 0}px")
+    }
+
+    val profileImageContainer by css {
+        width = LinearDimension("100%")
+        margin = "4%"
+        textAlign = TextAlign.center
+    }
+
+    val profileImage by css {
+        textAlign = TextAlign.center
+        position = Position.relative
+        width = LinearDimension("92%")
+        height = LinearDimension("300px")
+    }
+
+    val profileImageIcon by css {
+        fontSize = LinearDimension("3em")
     }
 
     override val di: DI

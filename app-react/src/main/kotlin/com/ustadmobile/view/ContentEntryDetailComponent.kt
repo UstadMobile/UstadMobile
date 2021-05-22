@@ -35,8 +35,8 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
         get() = field
         set(value) {
             field = value
-            val labels = value?.map { systemImpl.getString(
-                viewNameToTitleMap[it.substringBefore("?")]?:0, this) }
+            val labels = value?.map { getString(
+                viewNameToTitleMap[it.substringBefore("?")]?:0) }
             if(labels != null){
                 StateManager.dispatch(ToolbarTabs(labels, selected = selectedTab,
                     keys = viewNameToTitleMap.keys.toList()) {

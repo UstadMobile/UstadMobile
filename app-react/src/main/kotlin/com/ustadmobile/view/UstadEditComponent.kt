@@ -6,6 +6,7 @@ import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.util.RouteManager.getArgs
+import com.ustadmobile.view.ext.saveResultToBackStackSavedStateHandle
 import kotlinx.browser.window
 import org.w3c.dom.events.Event
 import react.RProps
@@ -16,7 +17,7 @@ abstract class UstadEditComponent<T: Any>(mProps: RProps): UstadBaseComponent<RP
     abstract protected val mEditPresenter : UstadEditPresenter<*, T>?
 
     override fun finishWithResult(result: List<T>) {
-        TODO("Not yet implemented")
+        saveResultToBackStackSavedStateHandle(result)
     }
 
 

@@ -41,6 +41,7 @@ object RouteManager {
         UmReactDestination(view = WebChunkView.VIEW_NAME, component = WebChunkComponent::class),
         UmReactDestination(view = PersonDetailView.VIEW_NAME, component = PersonDetailComponent::class),
         UmReactDestination(view = PersonAccountEditView.VIEW_NAME, component = PersonAccountEditComponent::class),
+        UmReactDestination(view = PersonEditView.VIEW_NAME, component = PersonEditComponent::class),
     )
 
     /**

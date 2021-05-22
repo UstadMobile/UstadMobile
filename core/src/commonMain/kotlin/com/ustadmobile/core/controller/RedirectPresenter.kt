@@ -48,18 +48,10 @@ class RedirectPresenter(context: Any, arguments: Map<String, String>, view: Redi
         }
     }
 
-    private fun nextDestination(destination: String, isWeb:Boolean, args: MutableMap<String, String>): String{
+    private fun nextDestination(destination: String, isWeb:Boolean, args: MutableMap<String, String>): String {
         var nextDest = destination
-        if((destination == ContentEntryListTabsView.VIEW_NAME || destination == Login2View.VIEW_NAME) && isWeb){
-            if(!args.containsKey(UstadView.ARG_PARENT_ENTRY_UID)){
-                args[UstadView.ARG_PARENT_ENTRY_UID] = UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString()
-            }else if(!args.containsKey(ContentEntryList2View.ARG_CONTENT_FILTER)){
-                args[ContentEntryList2View.ARG_CONTENT_FILTER] =
-                    ContentEntryList2View.ARG_LIBRARIES_CONTENT
-            }else if(!args.containsKey(ARG_NEXT) && destination == Login2View.VIEW_NAME) {
-                args[ARG_NEXT] = ContentEntryListTabsView.VIEW_NAME
-            }
-
+        if(destination == Login2View.VIEW_NAME && isWeb && !args.containsKey(ARG_NEXT)){
+            args[ARG_NEXT] = ContentEntryListTabsView.VIEW_NAME
             nextDest = destination + "?" + args.toQueryString()
         }
         return nextDest

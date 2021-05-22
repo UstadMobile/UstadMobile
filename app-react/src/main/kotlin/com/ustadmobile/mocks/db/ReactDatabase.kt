@@ -57,8 +57,10 @@ class ReactDatabase: UmAppDatabase() , DoorDatabaseSyncRepository{
         get() = TODO("Not yet implemented")
     override val entityRoleDao: EntityRoleDao
         get() = ReactEntityRoleDao()
+
     override val personPictureDao: PersonPictureDao
-        get() = TODO("Not yet implemented")
+        get() = PersonPictureDaoJS()
+
     override val scrapeRunDao: ScrapeRunDao
         get() = TODO("Not yet implemented")
     override val contentEntryStatusDao: ContentEntryStatusDao

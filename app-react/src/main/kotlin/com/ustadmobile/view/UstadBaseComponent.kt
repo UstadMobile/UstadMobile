@@ -123,6 +123,10 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         lifecycleObservers.remove(observer)
     }
 
+    open fun getString(messageId: Int): String {
+        return systemImpl.getString(messageId, this)
+    }
+
     override fun componentWillUnmount() {
         for(observer in lifecycleObservers){
             observer.onStop(this)

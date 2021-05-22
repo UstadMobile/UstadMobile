@@ -14,6 +14,7 @@ import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
 import com.ustadmobile.port.android.util.ext.putResultDestInfo
 import com.ustadmobile.port.android.view.UstadBaseFragment
 import com.ustadmobile.port.android.view.UstadEditFragment
@@ -28,7 +29,7 @@ fun Fragment.saveResultToBackStackSavedStateHandle(result: List<*>) {
 
 fun Fragment.saveResultToBackStackSavedStateHandle(result: String) {
     val saveToDestination = arguments?.getString(UstadView.ARG_RESULT_DEST_ID)
-    val saveToKey = arguments?.getString(UstadBaseFragment.ARG_RESULT_DEST_KEY)
+    val saveToKey = arguments?.getString(ARG_RESULT_DEST_KEY)
     val navController = findNavController()
     if(saveToDestination != null && saveToKey != null) {
         val saveToDestId = saveToDestination.toInt()

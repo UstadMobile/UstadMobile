@@ -4,6 +4,7 @@ import com.ccfraser.muirwik.components.*
 import com.ccfraser.muirwik.components.button.*
 import com.ccfraser.muirwik.components.form.MFormControlVariant
 import com.ccfraser.muirwik.components.form.mFormControl
+import com.ccfraser.muirwik.components.form.mFormHelperText
 import com.ccfraser.muirwik.components.input.*
 import com.ustadmobile.core.controller.Login2Presenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -12,6 +13,7 @@ import com.ustadmobile.model.UmLabel
 import com.ustadmobile.util.CssStyleManager
 import com.ustadmobile.util.CssStyleManager.defaultMarginTop
 import com.ustadmobile.util.CssStyleManager.errorTextMessage
+import com.ustadmobile.util.CssStyleManager.helperText
 import com.ustadmobile.util.CssStyleManager.loginComponentContainer
 import com.ustadmobile.util.CssStyleManager.loginComponentForm
 import com.ustadmobile.util.CssStyleManager.loginComponentFormElementsMargin
@@ -35,9 +37,11 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
 
     private var showPassword = false
 
-    private var passwordLabel: UmLabel = UmLabel(systemImpl.getString(MessageID.password, this))
+    private var passwordLabel: UmLabel = UmLabel(getString(MessageID.password))
 
-    private var usernameLabel: UmLabel = UmLabel(systemImpl.getString(MessageID.username, this))
+    private var usernameLabel: UmLabel = UmLabel(getString(MessageID.username))
+
+    private val caption = getString(MessageID.field_required_prompt)
 
     override var errorMessage: String = ""
         get() = field
@@ -62,18 +66,18 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
         get() = field
         set(value) {
             field = value
-            setState { passwordLabel = passwordLabel.copy(error = value,
-                text = systemImpl.getString(if(value) MessageID.field_required_prompt
-                else MessageID.password, this)) }
+            if(value){
+                setState { passwordLabel = passwordLabel.copy(caption = caption) }
+            }
         }
 
     override var isEmptyUsername: Boolean = false
         get() = field
         set(value) {
             field = value
-            setState { usernameLabel = usernameLabel.copy(error = value,
-                text = systemImpl.getString(if(value) MessageID.field_required_prompt
-                else MessageID.username, this)) }
+            if(value){
+                setState { usernameLabel = usernameLabel.copy(caption = caption)}
+            }
         }
 
     override var inProgress: Boolean = false
@@ -111,7 +115,7 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
 
             styledDiv {
                 css{ +loginComponentForm}
-                mTextField(label = "${usernameLabel.text}",
+                mTextField(label = "${usernameLabel.text}", helperText = usernameLabel.caption,
                     value = username, error = usernameLabel.error, disabled = inProgress,
                     variant = MFormControlVariant.outlined, onChange = {
                             it.persist()
@@ -144,6 +148,7 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
                         }
 
                     }
+                    passwordLabel.caption?.let { mFormHelperText(it){css(helperText)} }
                 }
 
                 styledDiv {
@@ -158,7 +163,7 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
                         align = MTypographyAlign.center)
                 }
 
-                mButton(systemImpl.getString(MessageID.login, this),
+                mButton(getString(MessageID.login),
                     size = MButtonSize.large, disabled = inProgress
                     ,color = MColor.secondary,variant = MButtonVariant.contained, onClick = {
                         mPresenter.handleLogin(username, password)
@@ -177,7 +182,7 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
                         css{
                             marginLeft = 16.px
                         }
-                        mButton(systemImpl.getString(MessageID.create_account,this),
+                        mButton(getString(MessageID.create_account),
                             variant = MButtonVariant.text, color = MColor.primary, disabled = inProgress,
                             size = MButtonSize.large, onClick = {mPresenter.handleCreateAccount()}){
                             css{
@@ -187,7 +192,7 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
                     }
 
                     mGridItem {
-                        mButton(systemImpl.getString(MessageID.connect_as_guest,this),
+                        mButton(getString(MessageID.connect_as_guest),
                             variant = MButtonVariant.text, color = MColor.primary,disabled = inProgress,
                             size = MButtonSize.large, onClick = { mPresenter.handleConnectAsGuest() }){
                             css{
