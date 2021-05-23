@@ -42,10 +42,6 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
 
     lateinit var contextRegistration: String
 
-    internal lateinit var contentEntryDao: ContentEntryDao
-    internal lateinit var containerDao: ContainerDao
-    internal lateinit var containerEntryDao: ContainerEntryDao
-
     data class VideoParams(val videoPath: String? = null,
                            val audioPath: ContainerEntryWithContainerEntryFile? = null,
                            val srtLangList: MutableList<String> = mutableListOf(),
@@ -61,9 +57,6 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        containerEntryDao = db.containerEntryDao
-        containerDao = db.containerDao
-        contentEntryDao = db.contentEntryDao
         contextRegistration = randomUuid().toString()
 
         entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
@@ -71,7 +64,7 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
 
         view.loading = true
         GlobalScope.launch(doorMainDispatcher()) {
-            entry = contentEntryDao.getContentByUuidAsync(entryUuid)
+            entry = db.contentEntryDao.findByUidAsync(entryUuid)
             view.entry = entry
         }
 
@@ -105,7 +98,7 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
             return
         }
 
-        GlobalScope.launch {
+        GlobalScope.launch(doorMainDispatcher()) {
             val progress = (position.toFloat() / videoLength * 100).toInt()
             entry?.also {
                 statementEndpoint.storeProgressStatement(

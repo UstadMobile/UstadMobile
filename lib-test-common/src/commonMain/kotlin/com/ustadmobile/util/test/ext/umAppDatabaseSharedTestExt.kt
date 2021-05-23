@@ -917,12 +917,10 @@ suspend fun UmAppDatabase.insertVideoContent(): Container {
     spanishQuiz.leaf = true
     spanishQuiz.contentEntryUid = contentEntryDao.insert(spanishQuiz)
 
-    val container = Container()
-    container.containerContentEntryUid = spanishQuiz.contentEntryUid
-    val containerUid = containerDao.insert(container)
-    container.containerUid = containerUid
-
-    return container
+    return Container().apply {
+        containerContentEntryUid = spanishQuiz.contentEntryUid
+        containerUid  = containerDao.insert(this)
+    }
 }
 
 suspend fun UmAppDatabase.insertPersonWithRole(person: Person, role: Role,

@@ -9,8 +9,11 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
+import com.ustadmobile.core.contentformats.xapi.endpoints.storeProgressStatement
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.VideoPlayerView
@@ -31,15 +34,25 @@ import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
+import org.junit.Assert
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.*
+import org.mockito.ArgumentMatchers
 import java.io.IOException
 import javax.naming.InitialContext
 
 class VideoContentPresenterTest {
 
+    @JvmField
+    @Rule
+    var ustadTestRule = UstadTestRule()
+
     lateinit var accountManager: UstadAccountManager
+
+    val account = UmAccount(42, "username", "fefe1010fe",
+            "http://localhost/")
 
     lateinit var di: DI
 
@@ -51,82 +64,58 @@ class VideoContentPresenterTest {
 
     var container: Container? = null
 
+    private lateinit var endpoint: Endpoint
+
     @Before
-    @Throws(IOException::class)
     fun setup() {
-        mockView = mock { }
+        val endpointUrl = account.endpointUrl!!
+        endpoint = Endpoint(endpointUrl)
+
         mockEndpoint = mock {}
-        val endpointScope = EndpointScope()
         di = DI {
-            bind<UstadMobileSystemImpl>() with singleton { spy(UstadMobileSystemImpl()) }
-            bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
-            bind<Gson>() with singleton {
-                val builder = GsonBuilder()
-                builder.registerTypeAdapter(Statement::class.java, StatementSerializer())
-                builder.registerTypeAdapter(Statement::class.java, StatementDeserializer())
-                builder.registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
-                builder.create()
-            }
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope!!).singleton {
-                val dbName = sanitizeDbNameFromUrl(context.url)
-                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName).also {
-                    it.clearAllTables()
-                    it.preload()
-                })
-            }
+            import(ustadTestRule.diModule)
+            bind<XapiStatementEndpoint>() with singleton { mockEndpoint }
+        }
 
-            bind<HttpClient>() with singleton {
-                HttpClient(OkHttp) {
-                    install(JsonFeature)
-                    install(HttpTimeout)
-                    engine {
-                        preconfigured = instance()
-                    }
-                }
-            }
+        di.direct.instance<UstadAccountManager>().activeAccount = account
 
-            bind<OkHttpClient>() with singleton {
-                OkHttpClient()
-            }
-
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope!!).singleton {
-                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository(
-                    repositoryConfig(Any(), context.url, instance(), instance())))
-            }
-            registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
-
-            bind<XapiStatementEndpoint>() with scoped(endpointScope).singleton {
-                mockEndpoint
+        mockView = mock{
+            on { runOnUiThread(any())}.doAnswer{
+                Thread(it.getArgument<Any>(0) as Runnable).start()
             }
         }
 
-        val repo: UmAppDatabase by di.activeRepoInstance()
-
-        accountManager = di.direct.instance()
-        accountManager.activeAccount.personUid = 42
+        val db: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
+        val repo: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
 
         runBlocking {
             container = repo.insertVideoContent()
-        }
 
+            val entry = db.contentEntryDao.findByUidAsync(container!!.containerContentEntryUid)
+        }
 
     }
 
     @Test
     fun givenVideo_whenVideoStartsPlaying_ProgressIsUpdatedAndStatementSent() {
-
+        Assert.assertNotNull(container)
         val presenterArgs = mapOf(UstadView.ARG_CONTENT_ENTRY_UID to
                 container!!.containerContentEntryUid.toString(),
                 UstadView.ARG_CONTAINER_UID to container!!.containerUid.toString())
-        
+
+
         val presenter = VideoContentPresenter(context,
                 presenterArgs, mockView, di)
         presenter.onCreate(null)
 
+        verify(mockView, timeout(5000)).entry = any()
+
         presenter.updateProgress(0, 100, true)
 
-        verify(mockEndpoint, timeout(5000)).storeStatements(any(), eq(""), eq(container!!.containerContentEntryUid))
+        runBlocking {
+            verify(mockEndpoint, timeout(5000)).storeStatements(
+                    any(), any(), any())
+        }
 
     }
 
