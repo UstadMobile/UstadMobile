@@ -52,7 +52,11 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                    IN (SELECT cacjContentUid 
                                         FROM ClazzAssignmentContentJoin 
                                        WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid)
-                                  AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid))
+                                  AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
+                                  AND StatementEntity.timestamp
+                                        BETWEEN ClazzAssignment.caStartDate
+                                        AND ClazzAssignment.caGracePeriodDate
+                                  ))
                 ELSE 0 END) AS notStartedStudents,
                 
                   0 as startedStudents,
@@ -73,6 +77,9 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                          WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid)
                            AND StatementEntity.contentEntryRoot 
                            AND StatementEntity.resultCompletion
+                           AND StatementEntity.timestamp
+                                        BETWEEN ClazzAssignment.caStartDate
+                                        AND ClazzAssignment.caGracePeriodDate
                            AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid) = 
                                     (SELECT COUNT(ClazzAssignmentContentJoin.cacjContentUid) 
                                        FROM ClazzAssignmentContentJoin 
@@ -274,7 +281,11 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                    IN (SELECT cacjContentUid 
                                         FROM ClazzAssignmentContentJoin 
                                        WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid)
-                                  AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid))
+                                  AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
+                                   AND StatementEntity.timestamp
+                                        BETWEEN ClazzAssignment.caStartDate
+                                        AND ClazzAssignment.caGracePeriodDate
+                                  ))
                 ELSE 0 END) AS notStartedStudents,
                 
                 0 as startedStudents,
@@ -295,6 +306,9 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                          WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid)
                            AND StatementEntity.contentEntryRoot 
                            AND StatementEntity.resultCompletion
+                           AND StatementEntity.timestamp
+                                        BETWEEN ClazzAssignment.caStartDate
+                                        AND ClazzAssignment.caGracePeriodDate
                            AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid) = 
                                     (SELECT COUNT(ClazzAssignmentContentJoin.cacjContentUid) 
                                        FROM ClazzAssignmentContentJoin 
