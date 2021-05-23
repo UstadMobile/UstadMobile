@@ -54,31 +54,24 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
                       
                  ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
                            LEFT JOIN StatementEntity 
-                           ON StatementEntity.statementPersonUid = Person.personUid 
-                WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
-                  AND PersonGroupMember.groupMemberActive  
-                  AND statementContentEntryUid
-                            IN (SELECT cacjContentUid
+                           ON StatementEntity.statementPersonUid = Person.personUid
+                            AND StatementEntity.statementContentEntryUid = (SELECT cacjContentUid
                                   FROM ClazzAssignmentContentJoin
                                         JOIN ClazzAssignment 
                                         ON ClazzAssignment.caUid = cacjAssignmentUid
-                                        
-                                        JOIN ClazzEnrolment
-                                        ON ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
-                                        AND ClazzEnrolment.clazzEnrolmentPersonUid = StatementEntity.statementPersonUid
                                  WHERE cacjAssignmentUid = :clazzAssignmentUid
-                                  AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-                                  AND ClazzEnrolment.clazzEnrolmentActive
                                   AND StatementEntity.timestamp
                                         BETWEEN ClazzAssignment.caStartDate
                                         AND ClazzAssignment.caGracePeriodDate)
+                WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
+                  AND PersonGroupMember.groupMemberActive  
               GROUP BY StatementEntity.statementUid) AS ResultSource
           ON ClazzAssignmentContentJoin.cacjContentUid = ResultSource.statementContentEntryUid   
             
         WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = :clazzAssignmentUid
           AND cacjActive    
           AND (ContentEntry.publik OR :personUid != 0)  
-     GROUP BY ResultSource.statementContentEntryUid
+     GROUP BY ClazzAssignmentContentJoin.cacjContentUid, ResultSource.statementContentEntryUid
      ORDER BY ContentEntry.title, ContentEntry.contentEntryUid   
     """)
     abstract fun findAllContentWithAttemptsByClazzAssignmentUid(clazzAssignmentUid: Long,

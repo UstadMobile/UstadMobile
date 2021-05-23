@@ -296,6 +296,11 @@ fun TextView.setRolesAndPermissionsText(entityRole: EntityRoleWithNameAndRole){
 
 @BindingAdapter(value=["statementStartDate", "statementEndDate"])
 fun TextView.setStatementDate(statementStartDate: Long, statementEndDate: Long){
+    if(statementStartDate == 0L){
+        text = ""
+        return
+    }
+
     val dateFormatter = DateFormat.getDateFormat(context)
     var statementDate = dateFormatter.format(statementStartDate)
 

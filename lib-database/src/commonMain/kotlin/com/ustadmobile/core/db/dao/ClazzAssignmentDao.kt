@@ -162,8 +162,8 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
     @Query("""
          SELECT ResultSource.personUid, ResultSource.firstNames, ResultSource.lastName,
             COUNT(DISTINCT(ResultSource.contextRegistration)) AS attempts, 
-            MIN(ResultSource.timestamp) AS startDate, 
-            MAX(ResultSource.timestamp) AS endDate, 
+            COALESCE(MIN(ResultSource.timestamp),0) AS startDate, 
+            COALESCE(MAX(ResultSource.timestamp),0) AS endDate, 
             SUM(ResultSource.resultDuration) AS duration, 
             
             
@@ -192,27 +192,26 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
             StatementEntity.resultDuration
         
          ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
+             LEFT JOIN ClazzEnrolment
+             ON ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid 
+                AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+                          
              LEFT JOIN StatementEntity 
                 ON StatementEntity.statementPersonUid = Person.personUid 
-                    WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
-                        AND statementContentEntryUid 
-                            IN (SELECT cacjContentUid
+                    AND StatementEntity.statementContentEntryUid = (SELECT cacjContentUid
                                   FROM ClazzAssignmentContentJoin
                                         JOIN ClazzAssignment 
                                         ON ClazzAssignment.caUid = cacjAssignmentUid
-                                        
-                                        JOIN ClazzEnrolment
-                                        ON ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
-                                        AND ClazzEnrolment.clazzEnrolmentPersonUid = StatementEntity.statementPersonUid
                                  WHERE cacjAssignmentUid = :assignmentUid
-                                  AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-                                  AND ClazzEnrolment.clazzEnrolmentActive
                                   AND StatementEntity.timestamp
                                         BETWEEN ClazzAssignment.caStartDate
                                         AND ClazzAssignment.caGracePeriodDate)
+                    WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
                         AND PersonGroupMember.groupMemberActive  
-                        AND Person.firstNames || ' ' || Person.lastName LIKE :searchText 
-             GROUP BY StatementEntity.statementUid) AS ResultSource 
+                        AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
+                        AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}     
+                        AND ClazzEnrolment.clazzEnrolmentActive
+          GROUP BY Person.personUid, StatementEntity.statementUid) AS ResultSource 
              		LEFT JOIN Comments AS cm 
                     ON cm.commentsUid = (
                                  SELECT Comments.commentsUid 
@@ -243,7 +242,8 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                 ELSE 0
             END DESC
     """)
-    abstract fun getAttemptSummaryForStudentsInAssignment(assignmentUid: Long, accountPersonUid: Long,
+    abstract fun getAttemptSummaryForStudentsInAssignment(assignmentUid: Long, clazzUid: Long,
+                                                          accountPersonUid: Long,
                                                           searchText: String, sortOrder: Int):
             DataSource.Factory<Int, PersonWithAttemptsSummary>
 

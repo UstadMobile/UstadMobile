@@ -60,7 +60,8 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
                 Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)
 
         view.list = repo.clazzAssignmentDao.getAttemptSummaryForStudentsInAssignment(
-                filterByClazzAssignmentUid, mLoggedInPersonUid, searchText.toQueryLikeParam(),
+                filterByClazzAssignmentUid, clazzAssignment?.caClazzUid ?: 0,
+                mLoggedInPersonUid, searchText.toQueryLikeParam(),
                 selectedSortOption?.flag ?: StatementDao.SORT_FIRST_NAME_ASC)
 
     }
