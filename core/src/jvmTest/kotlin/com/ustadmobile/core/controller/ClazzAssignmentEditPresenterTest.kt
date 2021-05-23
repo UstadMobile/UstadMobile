@@ -1,3 +1,4 @@
+/*
 
 package com.ustadmobile.core.controller
 
@@ -28,10 +29,12 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
 
 
+*/
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
  *
- * Note:*/
+ * Note:*//*
+
 
 
 class ClazzAssignmentEditPresenterTest {
@@ -147,3 +150,4 @@ class ClazzAssignmentEditPresenterTest {
 
 
 }
+*/

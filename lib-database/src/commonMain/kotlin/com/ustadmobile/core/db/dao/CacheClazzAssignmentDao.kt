@@ -24,7 +24,9 @@ abstract class CacheClazzAssignmentDao: BaseDao<CacheClazzAssignment> {
                COALESCE(extensionProgress,0) AS cacheProgress,
                COALESCE(resultCompletion,'FALSE') AS cacheContentComplete, 
                COALESCE(resultSuccess,0) AS cacheSuccess,
-               caLateSubmissionPenalty AS cachePenalty,
+               (CASE WHEN timestamp > caDeadlineDate 
+                     THEN caLateSubmissionPenalty 
+                     ELSE 0 END) AS cachePenalty,
                (SELECT MAX(statementLocalChangeSeqNum) FROM StatementEntity) AS lastCsnChecked
           FROM ClazzAssignmentContentJoin
 	            LEFT JOIN ClazzAssignment 
@@ -36,13 +38,17 @@ abstract class CacheClazzAssignmentDao: BaseDao<CacheClazzAssignment> {
 			    LEFT JOIN StatementEntity 
 	            ON statementUid = (SELECT statementUid 
                                      FROM StatementEntity 
+                                            LEFT JOIN ClazzAssignment 
+                                            ON caUid = ClazzAssignmentContentJoin.cacjAssignmentUid 
                                     WHERE statementContentEntryUid = ClazzAssignmentContentJoin.cacjContentUid
                                       AND statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
                                       AND contentEntryRoot 
                                       AND StatementEntity.timestamp 
                                             BETWEEN ClazzAssignment.caStartDate
                                             AND ClazzAssignment.caGracePeriodDate
-                                  ORDER BY resultScoreScaled DESC, 
+                                  ORDER BY CASE WHEN timestamp > ClazzAssignment.caDeadlineDate 
+                                                THEN resultScoreScaled * (1 - (caLateSubmissionPenalty/100))
+                                                ELSE resultScoreScaled END DESC, 
                                             extensionProgress DESC LIMIT 1)
 	     WHERE clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT} 
            AND clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}

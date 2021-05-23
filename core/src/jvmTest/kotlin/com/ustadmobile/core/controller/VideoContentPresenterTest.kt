@@ -90,8 +90,6 @@ class VideoContentPresenterTest {
 
         runBlocking {
             container = repo.insertVideoContent()
-
-            val entry = db.contentEntryDao.findByUidAsync(container!!.containerContentEntryUid)
         }
 
     }

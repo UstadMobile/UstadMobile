@@ -220,6 +220,10 @@ class ClazzAssignmentEditPresenter(context: Any,
                 entity.caGracePeriodDate = entity.caDeadlineDate
             }
 
+            if(entity.caLateSubmissionType != ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY){
+                entity.caLateSubmissionPenalty = 0
+            }
+
 
             if (entity.caUid == 0L) {
                 entity.caUid = repo.clazzAssignmentDao.insertAsync(entity)
