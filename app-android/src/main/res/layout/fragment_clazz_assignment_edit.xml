@@ -318,7 +318,7 @@
                     android:inputType="number"
                     app:minValue="@{0}"
                     app:setMaxValue="@{100}"
-                    android:text="@={`` + clazzAssignment.caLateSubmissionPenalty}"
+                    android:text="@={clazzAssignment.caLateSubmissionPenalty}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 

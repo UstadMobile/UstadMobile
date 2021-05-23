@@ -11,7 +11,6 @@ import androidx.databinding.InverseBindingAdapter
 import com.google.android.material.textfield.TextInputEditText
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ScheduleEditPresenter
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.systemImpl
 import com.ustadmobile.lib.db.entities.*
 import java.text.MessageFormat
@@ -124,6 +123,22 @@ fun getRealValueInt(et: TextView): Int {
 @BindingAdapter(value = ["minValue", "setMaxValue"])
 fun EditText.setMinMax(min: Int, max: Int){
     filters =   arrayOf(InputFilterMinMax(min, max))
+}
+
+
+@InverseBindingAdapter(attribute = "android:text")
+fun EditText.getInteger(): Int {
+    val num = text.toString()
+    return if (num.isEmpty()) 0 else try {
+        num.toInt()
+    } catch (e: NumberFormatException) {
+        0
+    }
+}
+
+@BindingAdapter("android:text")
+fun EditText.setInteger(value: Int){
+    setText(value.toString())
 }
 
 
