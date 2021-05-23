@@ -122,8 +122,8 @@ fun getRealValueInt(et: TextView): Int {
 }
 
 @BindingAdapter(value = ["minValue", "setMaxValue"])
-fun EditText.setMinMax(min: String, max: Int){
-    filters =   arrayOf(InputFilterMinMax(Integer.valueOf(min), max))
+fun EditText.setMinMax(min: Int, max: Int){
+    filters =   arrayOf(InputFilterMinMax(min, max))
 }
 
 

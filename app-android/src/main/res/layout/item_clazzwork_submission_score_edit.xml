@@ -45,7 +45,7 @@
             android:layout_marginVertical="@dimen/dimen_16dp"
             android:inputType="number"
             tools:text="77"
-            app:minValue="@{`0`}"
+            app:minValue="@{0}"
             app:setMaxValue="@{clazzWorkWithSubmission.clazzWork.clazzWorkMaximumScore}"
             android:text="@={`` + clazzWorkWithSubmission.submission.clazzWorkSubmissionScore}"
             android:visibility="@{(clazzWorkWithSubmission.clazzWork.clazzWorkSubmissionType == noneType || clazzWorkWithSubmission.submission.clazzWorkSubmissionUid != 0L)?View.VISIBLE:View.GONE}"
