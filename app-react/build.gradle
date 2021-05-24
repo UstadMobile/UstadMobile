@@ -41,9 +41,14 @@ dependencies {
     implementation "org.jetbrains:kotlin-react-redux:$version_kotlin_react_redux"
     implementation "com.ccfraser.muirwik:muirwik-components:$version_muirwik_components"
     implementation project(":core")
+    implementation npm("dateformat","^4.5.1")
     implementation project(":lib-util")
     implementation project(":lib-database")
+    implementation npm("@material-ui/pickers", "^3.3.10")
     implementation project(":lib-database-entities")
+    implementation npm("date-fns","^2.21.3")
+    implementation npm("moment","^2.29.1")
+    implementation npm("@date-io/moment","^2.10.11")
     implementation "com.ustadmobile.door:room-annotations:$version_door"
     implementation "org.kodein.di:kodein-di:$version_kodein_di"
     implementation "com.ustadmobile.door:door-runtime:$version_door"

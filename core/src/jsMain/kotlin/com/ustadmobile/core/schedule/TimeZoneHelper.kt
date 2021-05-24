@@ -5,13 +5,11 @@ import kotlin.js.Date
 actual fun getTimezoneOffset(timezoneName: String, timeUtc: Long): Int {
     val date = Date(timeUtc)
     val format = js("new Intl.DateTimeFormat('en-US',{timeStyle: 'long',timeZone: timezoneName}).format(date)").toString()
-    val offset = format.substring(format.indexOf("T")+1)
     return getOffset(format)
 }
 actual fun getRawTimezoneOffset(timezoneName: String): Int {
     val date = Date()
     val format = js("new Intl.DateTimeFormat('en-US',{timeStyle: 'long',timeZone: timezoneName}).format(date)").toString()
-    val offset = format.substring(format.indexOf("T")+1)
     return getOffset(format) * 60
 }
 
