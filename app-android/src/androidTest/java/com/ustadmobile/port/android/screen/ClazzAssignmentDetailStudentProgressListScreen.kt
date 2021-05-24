@@ -23,12 +23,25 @@ object ClazzAssignmentDetailStudentProgressListScreen : KScreen<ClazzAssignmentD
         withId(R.id.fragment_list_recyclerview)
     }, itemTypeBuilder = {
         itemType(::ClazzAssignmentWithMetrics)
+        itemType(::StudentAttempt)
     })
 
 
     class ClazzAssignmentWithMetrics(parent: Matcher<View>) : KRecyclerItem<ClazzAssignmentWithMetrics>(parent) {
-        val title: KTextView = KTextView(parent) { withId(R.id.line1_text) }
+        val notStartedText: KTextView = KTextView(parent) { withId(R.id.item_clazz_progress_detail_not_started_value) }
+        val startedText: KTextView = KTextView(parent) { withId(R.id.item_clazz_assignment_progress_detail_started_value) }
+        val completedText: KTextView = KTextView(parent) { withId(R.id.item_clazz_assignment_progress_detail_completed_value) }
     }
+
+    class StudentAttempt(parent: Matcher<View>) : KRecyclerItem<StudentAttempt>(parent) {
+        val personName: KTextView = KTextView(parent) { withId(R.id.item_person_text) }
+        val attemptCount: KTextView = KTextView(parent) { withId(R.id.item_person_line2_text) }
+        val startEndDate:KTextView = KTextView(parent) { withId(R.id.item_person_line3_text) }
+        val progressText:KTextView = KTextView(parent) { withId(R.id.attempt_progress_text) }
+        val scoreText:KTextView = KTextView(parent) { withId(R.id.attempt_score_text) }
+        val commentText:KTextView = KTextView(parent) { withId(R.id.attempt_private_comment) }
+    }
+
 
 
 }

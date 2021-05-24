@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.screen
 
 import android.view.View
 import com.agoda.kakao.common.views.KView
+import com.agoda.kakao.edit.KEditText
 import com.agoda.kakao.image.KImageView
 import com.agoda.kakao.recycler.KRecyclerItem
 import com.agoda.kakao.recycler.KRecyclerView
@@ -22,31 +23,30 @@ object ClazzAssignmentDetailStudentProgressScreen : KScreen<ClazzAssignmentDetai
     val recycler: KRecyclerView = KRecyclerView({
         withId(R.id.fragment_list_recyclerview)
     }, itemTypeBuilder = {
-        itemType(::ClazzAssignment)
-        itemType(::SortOption)
+        itemType(::Content)
+        itemType(::TotalScore)
+        itemType(::PrivateComments)
+        itemType(::NewPrivateComments)
     })
 
-
-    val sortList: KRecyclerView = KRecyclerView({
-        withId(R.id.fragment_sort_order_list)
-    }, itemTypeBuilder = {
-        itemType(::Sort)
-    })
-
-
-    class ClazzAssignment(parent: Matcher<View>) : KRecyclerItem<ClazzAssignment>(parent) {
-        val title: KTextView = KTextView(parent) { withId(R.id.line1_text) }
+    class Content(parent: Matcher<View>) : KRecyclerItem<Content>(parent) {
+        val contentTitle: KTextView = KTextView(parent) { withId(R.id.content_entry_item_title) }
+        val score: KTextView = KTextView(parent) {withId(R.id.item_person_progress)}
+        val scoreResults: KTextView = KTextView(parent) {withId(R.id.item_person_score_results)}
     }
 
-    class SortOption(parent: Matcher<View>) : KRecyclerItem<SortOption>(parent) {
-        val sortLayout = KView(parent) { withId(R.id.item_sort_selected_layout) }
-        val selectedSort = KTextView(parent) { withId(R.id.item_sort_selected_text)}
-        val selectedOrder = KImageView(parent) { withId(R.id.item_sort_asc_desc)}
+    class TotalScore(parent: Matcher<View>) : KRecyclerItem<TotalScore>(parent) {
+        val score: KTextView = KTextView(parent) {withId(R.id.item_person_score)}
+        val scoreResults: KTextView = KTextView(parent) {withId(R.id.item_person_total_score_results)}
     }
 
-    class Sort(parent: Matcher<View>) : KRecyclerItem<Sort>(parent) {
-        val personName: KTextView = KTextView(parent) { withId(R.id.item_person_text) }
+    class PrivateComments(parent: Matcher<View>) : KRecyclerItem<PrivateComments>(parent) {
+        val commenterName: KTextView = KTextView(parent) {withId(R.id.item_comments_list_text)}
+        val commenterComment: KTextView = KTextView(parent) {withId(R.id.item_comments_list_line2_text)}
     }
 
+    class NewPrivateComments(parent: Matcher<View>) : KRecyclerItem<NewPrivateComments>(parent) {
+        val newComment: KEditText = KEditText(parent) {withId(R.id.item_comment_new_comment_et)}
+    }
 
 }
