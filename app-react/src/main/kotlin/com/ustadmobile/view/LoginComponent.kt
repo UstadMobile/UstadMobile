@@ -5,19 +5,20 @@ import com.ccfraser.muirwik.components.button.*
 import com.ccfraser.muirwik.components.form.MFormControlVariant
 import com.ccfraser.muirwik.components.form.mFormControl
 import com.ccfraser.muirwik.components.form.mFormHelperText
-import com.ccfraser.muirwik.components.input.*
+import com.ccfraser.muirwik.components.input.mInputAdornment
+import com.ccfraser.muirwik.components.input.mInputLabel
+import com.ccfraser.muirwik.components.input.mOutlinedInput
 import com.ustadmobile.core.controller.Login2Presenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.model.UmLabel
 import com.ustadmobile.util.CssStyleManager
-import com.ustadmobile.util.CssStyleManager.defaultMarginTop
-import com.ustadmobile.util.CssStyleManager.errorTextMessage
-import com.ustadmobile.util.CssStyleManager.helperText
-import com.ustadmobile.util.CssStyleManager.loginComponentContainer
-import com.ustadmobile.util.CssStyleManager.loginComponentForm
-import com.ustadmobile.util.CssStyleManager.loginComponentFormElementsMargin
+import com.ustadmobile.util.CssStyleManager.alignContentCenterContainer
+import com.ustadmobile.util.CssStyleManager.defaultFullWidth
+import com.ustadmobile.util.CssStyleManager.errorTextClass
 import com.ustadmobile.util.RouteManager.getArgs
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
 import kotlinx.css.*
 import kotlinx.html.InputType
 import react.RBuilder
@@ -25,7 +26,6 @@ import react.RProps
 import react.RState
 import react.setState
 import styled.css
-import styled.styledDiv
 
 class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), Login2View {
 
@@ -100,108 +100,125 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
         }
 
     override fun onComponentReady() {
+        title = getString(MessageID.login)
         mPresenter = Login2Presenter(this, getArgs(),this, di)
         mPresenter.onCreate(mapOf())
     }
 
     override fun RBuilder.render() {
-        styledDiv {
-            css(loginComponentContainer)
-
-            if(loginIntentMessage != null){
-                mTypography(loginIntentMessage, variant = MTypographyVariant.body2,
-                    align = MTypographyAlign.center, gutterBottom = true)
+        val spacing = MGridSpacing.spacing6
+        val gridSizeOnLeft = MGridSize.cells3
+        val gridSizeOnCenterOnMdDown = MGridSize.cells6
+        val gridSizeOnCenterLgUp = MGridSize.cells4
+        umGridContainer(spacing) {
+            css {
+                +alignContentCenterContainer
+                marginTop = (if(createAccountVisible || connectAsGuestVisible) 10 else 13).spacingUnits
             }
+            umItem(MGridSize.cells12, MGridSize.cells12) {
 
-            styledDiv {
-                css{ +loginComponentForm}
-                mTextField(label = "${usernameLabel.text}", helperText = usernameLabel.caption,
-                    value = username, error = usernameLabel.error, disabled = inProgress,
-                    variant = MFormControlVariant.outlined, onChange = {
-                            it.persist()
-                        setState {
-                            username = it.targetInputValue
-                            isEmptyUsername = false
-                            errorMessage = ""
-                        }
-                    }) {css(loginComponentFormElementsMargin)}
+                umGridContainer(spacing) {
+                    css{display = if(loginIntentMessage != null) Display.block else Display.none}
+                    mHidden(xsDown = true) { umItem(MGridSize.cells12, gridSizeOnLeft) {} }
+                    umItem(MGridSize.cells12, gridSizeOnCenterOnMdDown) {
+                        mTypography(loginIntentMessage, variant = MTypographyVariant.body2,
+                            align = MTypographyAlign.center, gutterBottom = true)
+                    }
+                }
 
+                umGridContainer(spacing) {
+                    mHidden(xsDown = true) { umItem(MGridSize.cells12, gridSizeOnLeft, gridSizeOnCenterLgUp) {} }
+                    umItem(MGridSize.cells12, gridSizeOnCenterOnMdDown, gridSizeOnCenterLgUp) {
+                        mTextField(label = "${usernameLabel.text}", helperText = usernameLabel.caption,
+                            value = username, error = usernameLabel.error, disabled = inProgress,
+                            variant = MFormControlVariant.outlined, onChange = {
+                                it.persist()
+                                setState {
+                                    username = it.targetInputValue
+                                    isEmptyUsername = false
+                                    errorMessage = ""
+                                }
+                            }) {css(defaultFullWidth)}
+                    }
+                }
 
-                mFormControl(variant = MFormControlVariant.outlined) {
-                    css(loginComponentFormElementsMargin)
-                    mInputLabel("${passwordLabel.text}", error = passwordLabel.error,
-                        variant = MFormControlVariant.outlined, htmlFor = "password-input")
-                    mOutlinedInput(labelWidth = passwordLabel.width,id = "password-input",value = password, disabled = inProgress,
-                        error = passwordLabel.error,
-                        type =  if(showPassword) InputType.text else InputType.password, onChange = {
-                            it.persist()
-                            setState {
-                                password = it.targetInputValue
-                                isEmptyPassword = false
-                                errorMessage = "" }}) {
-                        attrs{
-                            endAdornment = mInputAdornment {
-                                mIconButton(if(showPassword) "visibility" else "visibility_off", edge = MIconEdge.end, onClick = {
-                                        setState { showPassword = !showPassword }
-                                    })
+                umGridContainer(spacing) {
+                    mHidden(xsDown = true) { umItem(MGridSize.cells12, gridSizeOnLeft,gridSizeOnCenterLgUp) {} }
+                    umItem(MGridSize.cells12, gridSizeOnCenterOnMdDown,gridSizeOnCenterLgUp) {
+                        mFormControl(variant = MFormControlVariant.outlined) {
+                            css(defaultFullWidth)
+                            mInputLabel("${passwordLabel.text}", error = passwordLabel.error,
+                                variant = MFormControlVariant.outlined, htmlFor = "password-input")
+                            mOutlinedInput(labelWidth = passwordLabel.width,id = "password-input",value = password, disabled = inProgress,
+                                error = passwordLabel.error,
+                                type =  if(showPassword) InputType.text else InputType.password, onChange = {
+                                    it.persist()
+                                    setState {
+                                        password = it.targetInputValue
+                                        isEmptyPassword = false
+                                        errorMessage = "" }}) {
+                                attrs{
+                                    endAdornment = mInputAdornment {
+                                        mIconButton(if(showPassword) "visibility" else "visibility_off", edge = MIconEdge.end, onClick = {
+                                            setState { showPassword = !showPassword }
+                                        })
+                                    }
+                                }
+
                             }
+                            passwordLabel.caption?.let { mFormHelperText(it){css(errorTextClass)} }
                         }
-
                     }
-                    passwordLabel.caption?.let { mFormHelperText(it){css(helperText)} }
                 }
 
-                styledDiv {
-                    css{
-                        +defaultMarginTop
-                        +loginComponentFormElementsMargin
-                        +errorTextMessage
-                        display = if(errorMessage.isEmpty()) Display.none else Display.block
+                umGridContainer(spacing) {
+                    css{display = if(errorMessage.isNotEmpty()) Display.flex else Display.none}
+                    mHidden(xsDown = true) { umItem(MGridSize.cells12, gridSizeOnLeft,gridSizeOnCenterLgUp) {} }
+                    umItem(MGridSize.cells12, gridSizeOnCenterOnMdDown,gridSizeOnCenterLgUp) {
+                        mTypography(errorMessage, variant = MTypographyVariant.subtitle2,
+                            className = "${CssStyleManager.name}-errorTextClass",
+                            align = MTypographyAlign.center)
                     }
-                    mTypography(errorMessage, variant = MTypographyVariant.subtitle2,
-                        className = "${CssStyleManager.name}-errorOnInput",
-                        align = MTypographyAlign.center)
                 }
 
-                mButton(getString(MessageID.login),
-                    size = MButtonSize.large, disabled = inProgress
-                    ,color = MColor.secondary,variant = MButtonVariant.contained, onClick = {
-                        mPresenter.handleLogin(username, password)
-                    }){
-                    css {
-                        +loginComponentFormElementsMargin
-                        +defaultMarginTop
-                        height = 50.px
-                    }}
-
-                mGridContainer(spacing= MGridSpacing.spacing6){
-                    css{
-                        +defaultMarginTop
+                umGridContainer(spacing) {
+                    mHidden(xsDown = true) { umItem(MGridSize.cells12, gridSizeOnLeft,gridSizeOnCenterLgUp) {} }
+                    umItem(MGridSize.cells12, gridSizeOnCenterOnMdDown,gridSizeOnCenterLgUp) {
+                        mButton(getString(MessageID.login),
+                            size = MButtonSize.large, disabled = inProgress
+                            ,color = MColor.secondary,variant = MButtonVariant.contained, onClick = {
+                                mPresenter.handleLogin(username, password)
+                            }){
+                            css {
+                                +defaultFullWidth
+                                height = 50.px
+                            }}
                     }
-                    mGridItem {
-                        css{
-                            marginLeft = 16.px
-                        }
+                }
+
+                umGridContainer(spacing) {
+                    css{display = if(createAccountVisible) Display.block else Display.none}
+                    mHidden(xsDown = true) { umItem(MGridSize.cells12, gridSizeOnLeft,gridSizeOnCenterLgUp) {} }
+                    umItem(MGridSize.cells12, gridSizeOnCenterOnMdDown,gridSizeOnCenterLgUp) {
                         mButton(getString(MessageID.create_account),
                             variant = MButtonVariant.text, color = MColor.primary, disabled = inProgress,
                             size = MButtonSize.large, onClick = {mPresenter.handleCreateAccount()}){
-                            css{
-                                display = if(createAccountVisible) Display.block else Display.none
-                            }
-                        }
-                    }
-
-                    mGridItem {
-                        mButton(getString(MessageID.connect_as_guest),
-                            variant = MButtonVariant.text, color = MColor.primary,disabled = inProgress,
-                            size = MButtonSize.large, onClick = { mPresenter.handleConnectAsGuest() }){
-                            css{
-                                display = if(connectAsGuestVisible) Display.block else Display.none
-                            }
+                            css(defaultFullWidth)
                         }
                     }
                 }
 
+                umGridContainer(spacing) {
+                    css{display = if(connectAsGuestVisible) Display.block else Display.none}
+                    mHidden(xsDown = true) { umItem(MGridSize.cells12, gridSizeOnLeft,gridSizeOnCenterLgUp) {} }
+                    umItem(MGridSize.cells12, gridSizeOnCenterOnMdDown,gridSizeOnCenterLgUp) {
+                        mButton(getString(MessageID.connect_as_guest),
+                            variant = MButtonVariant.text, color = MColor.primary,disabled = inProgress,
+                            size = MButtonSize.large, onClick = { mPresenter.handleConnectAsGuest() }){
+                            css(defaultFullWidth)
+                        }
+                    }
+                }
             }
         }
     }

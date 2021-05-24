@@ -3,10 +3,6 @@ package com.ustadmobile.util
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FILTER
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
-import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
-import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.model.UmReactDestination
 import com.ustadmobile.view.*
 import kotlinx.browser.window
@@ -23,9 +19,7 @@ object RouteManager {
 
     val destinationList = listOf(
         UmReactDestination("library_books", MessageID.content, ContentEntryListTabsView.VIEW_NAME,
-            ContentEntryListTabsComponent::class, true,
-            args = mapOf(ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
-                ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT)),
+            ContentEntryListTabsComponent::class, true),
         UmReactDestination("school", MessageID.schools,SchoolListView.VIEW_NAME, PlaceHolderComponent::class),
         UmReactDestination("people", MessageID.classes,ClazzList2View.VIEW_NAME, PlaceHolderComponent::class),
         UmReactDestination("person", MessageID.people, PersonListView.VIEW_NAME, PersonListComponent::class),

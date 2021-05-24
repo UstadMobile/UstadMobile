@@ -17,18 +17,21 @@ import kotlinx.css.LinearDimension
 import kotlinx.css.px
 import kotlinx.css.width
 import org.w3c.dom.events.Event
-import react.*
+import react.RBuilder
+import react.RProps
+import react.RState
+import react.setState
 import styled.css
 
 interface LanguageProps: RProps {
     var systemImpl: UstadMobileSystemImpl
     var width: LinearDimension
-    var caption: String
-    var label: String
+    var caption: String?
+    var label: String?
 }
 
 
-class  LanguageComponent(mProps: LanguageProps): RComponent<LanguageProps,RState>(mProps){
+class  LanguageComponent(mProps: LanguageProps): UstadBaseComponent<LanguageProps,RState>(mProps){
 
     private lateinit var languageOptions: List<Pair<String, String>>
 
@@ -44,7 +47,7 @@ class  LanguageComponent(mProps: LanguageProps): RComponent<LanguageProps,RState
     override fun RBuilder.render() {
         mFormControl(variant = MFormControlVariant.outlined) {
             css(mainLanguageSelectorFormControl)
-            mInputLabel(props.label, htmlFor = "language", variant = MFormControlVariant.outlined) {
+            mInputLabel(props.label?:getString(MessageID.language), htmlFor = "language", variant = MFormControlVariant.outlined) {
                 css(alignTextToStart)
             }
             mSelect(selectedLanguage, native = false,
@@ -57,7 +60,7 @@ class  LanguageComponent(mProps: LanguageProps): RComponent<LanguageProps,RState
                     }
                 }
             }
-            mFormHelperText(props.caption){
+            mFormHelperText(props.caption?:""){
                 css(alignTextToStart)
             }
         }
@@ -69,11 +72,15 @@ class  LanguageComponent(mProps: LanguageProps): RComponent<LanguageProps,RState
         setState { selectedLanguage = value }
         window.location.reload()
     }
+
+    override val viewName: String?
+        get() = null
+
+    override fun onComponentReady() {}
 }
 
 fun RBuilder.renderLanguages(systemImpl: UstadMobileSystemImpl, width: LinearDimension = 200.px,
-                             label : String = systemImpl.getString(MessageID.language, this),
-                             caption: String = "") = child(LanguageComponent::class) {
+                             label : String? = null, caption: String? = null) = child(LanguageComponent::class) {
     attrs.systemImpl = systemImpl
     attrs.width = width
     attrs.label = label
