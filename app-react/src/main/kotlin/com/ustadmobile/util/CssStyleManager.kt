@@ -1,9 +1,7 @@
 package com.ustadmobile.util
 
-import com.ccfraser.muirwik.components.MGridAlignContent
 import com.ccfraser.muirwik.components.spacingUnits
 import com.ccfraser.muirwik.components.styles.Breakpoint
-import com.ccfraser.muirwik.components.styles.down
 import com.ccfraser.muirwik.components.styles.up
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import kotlinx.css.*
@@ -32,11 +30,11 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
 
     private val defaultContainerWidth = LinearDimension("74.8vw")
 
-    private val tabletAndHighEnd = Breakpoint.md
+    val tabletAndHighEnd = Breakpoint.md
 
     val isMobile: Boolean = js("/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)")
 
-    val drawerWidth = 240.px
+    const val drawerWidth = 240
 
     val zeroPx = 0.px
 
@@ -52,6 +50,14 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         flexDirection = FlexDirection.column
     }
 
+    val mainToolbar by css{
+        if(isRTLSupported){
+            paddingRight = 30.px
+        }else{
+            paddingLeft = 30.px
+        }
+    }
+
     val bottomFixedElements by css{
         display = Display.flex
         position = Position.fixed
@@ -63,7 +69,19 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         backgroundColor = Color.transparent
     }
 
-    val fab by css{
+    val mainBrandIconContainer by css {
+        height = 43.px
+        marginTop = 20.px
+        width = LinearDimension("100%")
+        padding = "0px ${if(isRTLSupported) 20 else 0 }px 0 ${if(isRTLSupported) 0 else 20 }px"
+    }
+
+    val mainBrandIcon by css{
+        width = LinearDimension("80%")
+        height = LinearDimension("60%")
+    }
+
+    val mainComponentFab by css{
         if(!isRTLSupported) right = 15.px
         if(isRTLSupported) left = 15.px
         position = Position.fixed
@@ -85,14 +103,14 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         width = 40.px
         height = 40.px
         cursor = Cursor.pointer
-        margin = "0 ${if(isRTLSupported) 20 else 0}px 0 ${if(isRTLSupported) 0 else 20}px"
+        margin = "0px ${if(isRTLSupported) 40 else 0 }% 0 ${if(isRTLSupported) 0 else 40 }%"
         backgroundColor = Color(theme.palette.primary.light)
     }
 
     val mainComponentAvatarInner by css {
         width = 36.px
         height = 36.px
-        margin = "2px ${if(isRTLSupported) 2.4 else 0 }px 0 ${if(isRTLSupported) 0 else 2.4 }px"
+        margin = "2px ${if(isRTLSupported) 2.4 else 0 }px 0 ${if(isRTLSupported) 0 else 2 }px"
         color = Color.white
         backgroundColor = Color(theme.palette.primary.dark)
     }
@@ -157,9 +175,9 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         paddingLeft = 2.spacingUnits
         paddingRight = 2.spacingUnits
         paddingTop = 2.spacingUnits
-        paddingBottom = 16.spacingUnits
-        media(theme.breakpoints.up(Breakpoint.sm)) {
-            paddingBottom = 10.spacingUnits
+        paddingBottom = 17.spacingUnits
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            paddingBottom = 15.spacingUnits
         }
         backgroundColor = Color(theme.palette.background.default)
     }
@@ -182,6 +200,7 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
 
     val mainComponentSearch by css {
         position = Position.relative
+        marginTop = 4.px
         borderRadius = theme.shape.borderRadius.px
         backgroundColor = Color(fade(theme.palette.common.white, 0.15))
         hover {
@@ -189,14 +208,13 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         }
         marginLeft = 0.px
         marginRight = 30.px
-        width = 100.pct
         media(theme.breakpoints.up(Breakpoint.sm)) {
             marginLeft = 1.spacingUnits
             width = LinearDimension.auto
         }
     }
 
-    val mainComponentInputSearch by css {
+    val mainComponentInputSearchClass by css {
         paddingTop = 1.spacingUnits
         paddingRight = 1.spacingUnits
         paddingBottom = 1.spacingUnits
@@ -213,10 +231,11 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         paddingRight = (if(isRTLSupported) 60 else 0).px
     }
 
-    val ustadListViewComponentContainer by css {
+    val listComponentContainer by css {
         display = Display.inlineFlex
         flexDirection = FlexDirection.column
         height = LinearDimension("100%")
+        width = LinearDimension("100%")
     }
 
     val entryListItemContainer by css {
@@ -258,17 +277,17 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         padding = "10px"
     }
 
-    val contentEntryListAvatar by css {
+    val contentEntryListContentAvatarClass by css {
         height = 3.spacingUnits
         width = 3.spacingUnits
     }
 
-    val contentEntryListIcon by css {
+    val contentEntryListContentTyeIconClass by css {
         fontSize = LinearDimension("0.65em")
         marginBottom = 4.px
     }
 
-    val fallBackAvatar by css {
+    val fallBackAvatarClass by css {
         fontSize = LinearDimension("1em")
         marginBottom = 4.px
     }
@@ -278,30 +297,11 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         marginLeft = 16.px
     }
 
-    val listCreateNewIcon by css {
+    val listCreateNewIconClass by css {
         fontSize = LinearDimension("2.5em")
         marginTop = 5.px
     }
 
-
-    val entryDetailComponentContainer by css {
-        width = LinearDimension.auto
-        height = LinearDimension("100%")
-        flexDirection = FlexDirection.column
-        media(theme.breakpoints.up(Breakpoint.md)) {
-            flexDirection = FlexDirection.row
-        }
-
-        media(theme.breakpoints.down(Breakpoint.md)) {
-            flexDirection = FlexDirection.column
-        }
-        padding(2.spacingUnits)
-    }
-
-    val entryDetailComponentEntryImage by css {
-        width = LinearDimension("100%")
-        height = LinearDimension.fillAvailable
-    }
 
     val entryDetailComponentEntryImageAndButtonContainer by css {
         width = LinearDimension("${if(isMobile) 100 else 40}%")
@@ -311,10 +311,15 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         paddingBottom = (if(isMobile) 0 else 5).spacingUnits
     }
 
-    val entryDetailComponentEntryExtraInfo by css {
-        width = LinearDimension("${if(isMobile) 100 else 57}%")
+    val entryDetailOpenBtn by css {
+        margin = "2% 1.5% 0% 1.5%"
+        width = LinearDimension("98%")
+    }
+
+    val entryDetailEntryExtraInfo by css {
+        width = LinearDimension("100%")
         flexDirection = FlexDirection.column
-        marginTop = (if(isMobile) 3 else 0).spacingUnits
+        margin = "0 2% 0 2%"
         paddingBottom = 10.spacingUnits
     }
 
@@ -324,36 +329,15 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         flexWrap = FlexWrap.wrap
     }
 
-    val loginComponentContainer by css{
-        position = Position.relative
-        left = LinearDimension("50%")
-        float = Float.left
-    }
-
-    val loginComponentForm by css{
-        position = Position.relative
-        left = LinearDimension("-50%")
-        float = Float.left
-        display = Display.flex
-        flexDirection = FlexDirection.column
-        width = 390.px
-        marginTop = LinearDimension("30%")
-    }
-
-    val loginComponentFormElementsMargin by css {
-        marginLeft = 1.spacingUnits
-        marginRight = 1.spacingUnits
-        marginTop = 2.spacingUnits
-        width = LinearDimension("100%")
-    }
-
-    val errorTextMessage by css {
-        color = Color.red
-    }
-
     val tabsContainer by css {
         flexGrow = 1.0
         backgroundColor = Color(theme.palette.background.paper)
+    }
+
+    val selectionContainer by css{
+        paddingTop = 12.px
+        paddingBottom = 12.px
+        backgroundColor = Color(theme.palette.background.default)
     }
 
     val responsiveIframe by css{
@@ -372,34 +356,13 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         backgroundColor = Color.transparent
     }
 
-    val personListItemContainer by css{
-        display = Display.flex
-        width = defaultContainerWidth
-        flexDirection = FlexDirection.row
-    }
 
     val personListItemAvatar by css {
         width = 50.px
         height = 50.px
         margin = "2px ${if(isRTLSupported) 2.4 else 0 }px 0 ${if(isRTLSupported) 0 else 2.4 }px"
-        color = Color.white
-        backgroundColor = Color(theme.palette.primary.dark)
-    }
-
-    val personListItemInfo by css {
-        display = Display.flex
-        margin = "0 ${if(isRTLSupported) 30 else 0}px 0 ${if(isRTLSupported) 0 else 30}px"
-        flexDirection = FlexDirection.column
-    }
-
-    val passwordLabelMargin by css {
-        margin = "0 ${if(isRTLSupported) 20 else 0}px 0 ${if(isRTLSupported) 0 else 20}px"
-    }
-
-    val personDetailComponentContainer by css{
-        display = Display.flex
-        width = defaultContainerWidth
-        flexDirection = FlexDirection.column
+        color = Color(theme.palette.background.paper)
+        backgroundColor = Color(theme.palette.action.disabled)
     }
 
     val personDetailComponentActions by css{
@@ -410,6 +373,7 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         paddingBottom = 16.px
         padding = "16px 30px 16px 30px"
         cursor = Cursor.pointer
+        width = LinearDimension("100%")
         hover {
             backgroundColor = Color(theme.palette.action.selected)
         }
@@ -419,12 +383,6 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         marginBottom = 10.px
     }
 
-    val personDetailComponentInfo by css{
-        display = Display.flex
-        flexDirection = FlexDirection.row
-        marginTop = 20.px
-    }
-
     val formMidWidthTextField by css{
         marginLeft = 1.spacingUnits
         marginRight = 1.spacingUnits
@@ -432,7 +390,6 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         width = LinearDimension("70%")
     }
 
-    //media query using media query
     val formMinWidthTextField by css{
         marginLeft = 1.spacingUnits
         marginRight = 1.spacingUnits
@@ -452,28 +409,41 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware 
         width = LinearDimension("100%")
     }
 
-    val helperText by css{
+    val errorTextClass by css{
         color = Color(theme.palette.error.main)
         marginLeft = LinearDimension("${if(isRTLSupported) 0 else 16}px")
         marginRight= LinearDimension("${if(isRTLSupported) 16 else 0}px")
     }
 
-    val profileImageContainer by css {
+    val imageContainer by css {
         width = LinearDimension("100%")
-        margin = "4%"
+        margin = "1.5%"
         textAlign = TextAlign.center
     }
 
-    val profileImage by css {
+    val entityImageClass by css {
         textAlign = TextAlign.center
         position = Position.relative
-        width = LinearDimension("92%")
+        width = LinearDimension("98%")
         height = LinearDimension("300px")
     }
 
-    val profileImageIcon by css {
+    val entityThumbnailClass by css {
+        textAlign = TextAlign.center
+        position = Position.relative
+        width = LinearDimension("98%")
+        height = LinearDimension("120px")
+    }
+
+    val entityImageIconClass by css {
         fontSize = LinearDimension("3em")
     }
+
+    val detailIconClass by css {
+        fontSize = LinearDimension("2em")
+        marginTop = 3.px
+    }
+
 
     override val di: DI
         get() = StateManager.getCurrentState().di

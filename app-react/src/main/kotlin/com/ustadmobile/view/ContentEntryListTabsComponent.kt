@@ -30,8 +30,7 @@ class ContentEntryListTabsComponent(mProps: RProps) :UstadBaseComponent<RProps, 
 
     override fun onComponentReady() {
         selectedTab = getSelectedFilter()
-        val tabs = listOf(systemImpl.getString(MessageID.libraries, this),
-            systemImpl.getString(MessageID.downloaded, this))
+        val tabs = listOf(getString(MessageID.libraries), getString(MessageID.downloaded))
         StateManager.dispatch(ToolbarTabs(tabs, listOf(MessageID.libraries,MessageID.downloaded),
             getSelectedFilter(), tabChangeListener))
     }

@@ -16,26 +16,23 @@ import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.util.CssStyleManager.alignTextToStart
 import com.ustadmobile.util.CssStyleManager.chipSet
 import com.ustadmobile.util.CssStyleManager.defaultMarginTop
-import com.ustadmobile.util.CssStyleManager.entryDetailComponentContainer
-import com.ustadmobile.util.CssStyleManager.entryDetailComponentEntryExtraInfo
-import com.ustadmobile.util.CssStyleManager.entryDetailComponentEntryImage
-import com.ustadmobile.util.CssStyleManager.entryDetailComponentEntryImageAndButtonContainer
+import com.ustadmobile.util.CssStyleManager.entryDetailEntryExtraInfo
+import com.ustadmobile.util.CssStyleManager.entryDetailOpenBtn
 import com.ustadmobile.util.RouteManager.getArgs
 import com.ustadmobile.util.ext.joinString
-import com.ustadmobile.view.ext.renderEntryThumbnailImg
+import com.ustadmobile.view.ext.umEntityAvatar
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.css.Display
-import kotlinx.css.display
-import kotlinx.css.margin
+import kotlinx.css.*
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.RProps
 import react.setState
 import styled.css
 import styled.styledDiv
-import styled.styledImg
 
 class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ContentEntryWithMostRecentContainer>(mProps),
     ContentEntryDetailOverviewView {
@@ -94,90 +91,84 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
     }
 
     override fun RBuilder.render() {
-        styledDiv{
-            css{
-                +entryDetailComponentContainer
-                display = if(entity == null ) Display.none else Display.flex
-            }
+        umGridContainer(MGridSpacing.spacing6) {
+            umItem(MGridSize.cells12, MGridSize.cells4){
+                css{flexDirection = FlexDirection.column}
+                val fallBackSrc = "assets/"+if(entity?.leaf == true) "book.png" else "folder.png"
+                umEntityAvatar(entity?.thumbnailUrl,fallBackSrc,showIcon = false)
 
-            styledDiv {
-                css{+entryDetailComponentEntryImageAndButtonContainer}
-                styledImg {
-                    css{+entryDetailComponentEntryImage}
-                    attrs{ entity?.let { renderEntryThumbnailImg(it) } }
-                }
-
-                mButton(systemImpl.getString(MessageID.open, this), size = MButtonSize.large
+                mButton(getString(MessageID.open), size = MButtonSize.large
                     ,color = MColor.secondary,variant = MButtonVariant.contained, onClick = {
                         mPresenter.handleOnClickOpenDownloadButton() }){
-                    css { +defaultMarginTop}
+                    css {
+                        +defaultMarginTop
+                        +entryDetailOpenBtn
+                    }
                 }
             }
 
-            styledDiv {
-                css { +entryDetailComponentEntryExtraInfo }
-
-                mTypography(entity?.title, variant = MTypographyVariant.h4, gutterBottom = true){
-                    css(alignTextToStart)
-                }
-
-                mTypography(
-                    entity?.author?.let {
-                        systemImpl.getString(MessageID.entry_details_author, this)
-                            .joinString(it)
-                    },
-                    variant = MTypographyVariant.h6, gutterBottom = true){
-                    css(alignTextToStart)
-                }
-
+            umItem(MGridSize.cells12, MGridSize.cells8){
                 styledDiv {
-                    mGridContainer(spacing= MGridSpacing.spacing10){
+                    css { +entryDetailEntryExtraInfo }
 
-                        mGridItem {
-                            mTypography(
-                                entity?.publisher?.let {
-                                    systemImpl.getString(MessageID.entry_details_publisher,this)
-                                        .joinString(":",it) },
-                                variant = MTypographyVariant.subtitle1, gutterBottom = true){
-                                css(alignTextToStart)
+                    mTypography(entity?.title, variant = MTypographyVariant.h4, gutterBottom = true){
+                        css(alignTextToStart)
+                    }
+
+                    mTypography(
+                        entity?.author?.let {getString(MessageID.entry_details_author).joinString(it)
+                        },
+                        variant = MTypographyVariant.h6, gutterBottom = true){
+                        css(alignTextToStart)
+                    }
+
+                    styledDiv {
+                        mGridContainer(spacing= MGridSpacing.spacing10){
+
+                            mGridItem {
+                                mTypography(
+                                    entity?.publisher?.let {
+                                        getString(MessageID.entry_details_publisher).joinString(":",it) },
+                                    variant = MTypographyVariant.subtitle1, gutterBottom = true){
+                                    css(alignTextToStart)
+                                }
                             }
-                        }
 
-                        mGridItem {
-                            mTypography(
-                                entity?.licenseName?.let {
-                                    systemImpl.getString(MessageID.entry_details_license,this)
-                                        .joinString(it)
-                                },
-                                variant = MTypographyVariant.subtitle1, gutterBottom = true){
-                                css(alignTextToStart)
+                            mGridItem {
+                                mTypography(
+                                    entity?.licenseName?.let {
+                                        getString(MessageID.entry_details_license).joinString(it)
+                                    },
+                                    variant = MTypographyVariant.subtitle1, gutterBottom = true){
+                                    css(alignTextToStart)
+                                }
                             }
                         }
                     }
-                }
 
-                mTypography(systemImpl.getString(MessageID.description,this),
-                    variant = MTypographyVariant.caption, paragraph = true){
-                    css(alignTextToStart)
-                }
-
-                mTypography(entity?.description, paragraph = true){
-                    css(alignTextToStart)
-                }
-
-                mTypography(systemImpl.getString(MessageID.also_available_in, this),
-                    variant = MTypographyVariant.caption, paragraph = true){
-                    css(alignTextToStart)
-                }
-                styledDiv {
-                    css{
-                        +chipSet
-                        display = if(translations == null) Display.none else Display.flex
+                    mTypography(getString(MessageID.description),
+                        variant = MTypographyVariant.caption, paragraph = true){
+                        css(alignTextToStart)
                     }
-                    translations?.forEach { translation ->
-                        mChip("${translation.language?.name}", onClick = {
-                            mPresenter.handleOnTranslationClicked(translation.language?.langUid?:0) }) {
-                            css { margin(1.spacingUnits) }
+
+                    mTypography(entity?.description, paragraph = true){
+                        css(alignTextToStart)
+                    }
+
+                    mTypography(getString(MessageID.also_available_in),
+                        variant = MTypographyVariant.caption, paragraph = true){
+                        css(alignTextToStart)
+                    }
+                    styledDiv {
+                        css{
+                            +chipSet
+                            display = if(translations == null) Display.none else Display.flex
+                        }
+                        translations?.forEach { translation ->
+                            mChip("${translation.language?.name}", onClick = {
+                                mPresenter.handleOnTranslationClicked(translation.language?.langUid?:0) }) {
+                                css { margin(1.spacingUnits) }
+                            }
                         }
                     }
                 }
@@ -188,7 +179,6 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
 
     override fun onFabClick(event: Event) {
         super.onFabClick(event)
-        console.log("clicked")
         mPresenter.handleClickEdit()
     }
 

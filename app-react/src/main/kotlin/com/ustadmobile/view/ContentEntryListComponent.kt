@@ -26,11 +26,10 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.util.CssStyleManager
 import com.ustadmobile.util.CssStyleManager.alignTextToStart
-import com.ustadmobile.util.CssStyleManager.entryListItemContainer
-import com.ustadmobile.util.CssStyleManager.entryListItemImageContainer
-import com.ustadmobile.util.CssStyleManager.entryListItemInfo
 import com.ustadmobile.util.RouteManager.getArgs
-import com.ustadmobile.view.ext.renderEntryThumbnailImg
+import com.ustadmobile.view.ext.umEntityAvatar
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
 import kotlinx.css.*
 import org.w3c.dom.Node
 import react.RBuilder
@@ -38,7 +37,6 @@ import react.RProps
 import react.setState
 import styled.css
 import styled.styledDiv
-import styled.styledImg
 
 interface EntryListProps: RProps{
     var args: Map<String,String>
@@ -77,7 +75,7 @@ class ContentEntryListComponent(props: EntryListProps): UstadListComponent<Conte
 
     override fun onComponentReady() {
         super.onComponentReady()
-        fabState = fabState.copy(label = systemImpl.getString(MessageID.content, this))
+        fabState = fabState.copy(label = getString(MessageID.content))
         val args = getArgs(mapOf(ARG_WEB_PLATFORM to true.toString(),
             ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT))
         mPresenter = ContentEntryList2Presenter(this, args, this,di,this)
@@ -85,47 +83,48 @@ class ContentEntryListComponent(props: EntryListProps): UstadListComponent<Conte
     }
 
     override fun RBuilder.renderListItem(item: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
-        styledDiv {
-            css(entryListItemContainer)
-            styledDiv {
-                css { +entryListItemImageContainer }
-                styledImg {
-                    css{
-                        width = LinearDimension("100%")
-                        height = LinearDimension("100%")
-                    }
-                    attrs{ renderEntryThumbnailImg(item) }
-                }
-            }
-            styledDiv {
-                css(entryListItemInfo)
-                mTypography(item.title,variant = MTypographyVariant.h6){
-                    css {
-                        +alignTextToStart
-                        marginBottom = LinearDimension("10px")
-                    }
-                }
-                mTypography(item.description, variant = MTypographyVariant.body1, paragraph = true){
-                    css(alignTextToStart)
-                }
 
-                mGridContainer(spacing= MGridSpacing.spacing1){
-                    css{
-                        display = if(item.leaf) Display.flex else Display.none
-                    }
-                    val messageId = CONTENT_ENTRY_TYPE_LABEL_MAP[item.contentTypeFlag]?:MessageID.untitled
-                    val icon = CONTENT_ENTRY_TYPE_ICON_MAP[item.contentTypeFlag]?:""
-                    mGridItem {
-                        mAvatar(className = "${CssStyleManager.name}-contentEntryListAvatar") {
-                            mIcon(icon, className= "${CssStyleManager.name}-contentEntryListIcon"){
-                                css{marginTop = 4.px}
-                            }
+        umGridContainer(MGridSpacing.spacing7) {
+            umItem(MGridSize.cells2){
+                val fallBackSrc = "assets/"+if(item.leaf) "book.png" else "folder.png"
+                umEntityAvatar(item.thumbnailUrl,fallBackSrc,showIcon = false,
+                className = "${CssStyleManager.name}-entityThumbnailClass")
+            }
+
+            umItem(MGridSize.cells10){
+                umItem(MGridSize.cells12){
+                    mTypography(item.title,variant = MTypographyVariant.h6){
+                        css {
+                            +alignTextToStart
+                            marginBottom = LinearDimension("10px")
                         }
                     }
+                }
 
-                    mGridItem {
-                        mTypography(systemImpl.getString(messageId, this),
-                            variant = MTypographyVariant.body2, gutterBottom = true)
+                umItem(MGridSize.cells12){
+                    mTypography(item.description, variant = MTypographyVariant.body1, paragraph = true){
+                        css(alignTextToStart)
+                    }
+                }
+
+                umItem(MGridSize.cells12){
+                    mGridContainer(spacing= MGridSpacing.spacing1){
+                        css{
+                            display = if(item.leaf) Display.flex else Display.none
+                        }
+                        val messageId = CONTENT_ENTRY_TYPE_LABEL_MAP[item.contentTypeFlag]?:MessageID.untitled
+                        val icon = CONTENT_ENTRY_TYPE_ICON_MAP[item.contentTypeFlag]?:""
+                        mGridItem {
+                            mAvatar(className = "${CssStyleManager.name}-contentEntryListContentAvatarClass") {
+                                mIcon(icon, className= "${CssStyleManager.name}-contentEntryListContentTyeIconClass"){
+                                    css{marginTop = 4.px}
+                                }
+                            }
+                        }
+
+                        mGridItem {
+                            mTypography(getString(messageId), variant = MTypographyVariant.body2, gutterBottom = true)
+                        }
                     }
                 }
             }
@@ -159,8 +158,7 @@ class ContentEntryListComponent(props: EntryListProps): UstadListComponent<Conte
                                     mIcon("create_new_folder")
                                 }
                             }
-                            mListItemText(primary = systemImpl.getString(
-                                MessageID.content_editor_create_new_category,this))
+                            mListItemText(primary = getString(MessageID.content_editor_create_new_category))
                         }
 
                         mListItem(button = true, onClick = {
@@ -170,15 +168,14 @@ class ContentEntryListComponent(props: EntryListProps): UstadListComponent<Conte
                                     mIcon("exit_to_app")
                                 }
                             }
-                            mListItemText(primary = systemImpl.getString(
-                                MessageID.import_content,this))
+                            mListItemText(primary = getString(MessageID.import_content))
                         }
                     }
                 }
             }
 
             mDialogActions {
-                mButton(systemImpl.getString(MessageID.cancel,this), color = MColor.primary, onClick = { setState {showAddEntryOptions = false}})
+                mButton(getString(MessageID.cancel), color = MColor.primary, onClick = { setState {showAddEntryOptions = false}})
             }
         }
     }
@@ -214,10 +211,10 @@ class ContentEntryListComponent(props: EntryListProps): UstadListComponent<Conte
         styledDiv{
             mMenu(showingEditOptions, anchorElement = anchorElement,
                 onClose = { _, _ -> setState { showingEditOptions = false; anchorElement = null}}) {
-                mMenuItem(systemImpl.getString(MessageID.edit, this), onClick = {
+                mMenuItem(getString(MessageID.edit), onClick = {
                     mPresenter.handleClickEditFolder()
                 })
-                mMenuItem(systemImpl.getString(MessageID.show_hidden_items, this), onClick = {
+                mMenuItem(getString(MessageID.show_hidden_items), onClick = {
                     mPresenter.handleClickShowHiddenItems()
                 })
             }

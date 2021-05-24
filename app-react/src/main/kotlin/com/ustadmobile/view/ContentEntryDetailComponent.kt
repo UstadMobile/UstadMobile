@@ -8,9 +8,9 @@ import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.model.statemanager.ToolbarTabs
-import com.ustadmobile.util.CssStyleManager.tabsContainer
 import com.ustadmobile.util.RouteManager.getArgs
 import com.ustadmobile.util.StateManager
+import kotlinx.css.flexGrow
 import react.Component
 import react.RBuilder
 import react.RProps
@@ -60,13 +60,12 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
 
     override fun RBuilder.render() {
         styledDiv {
-            css { +tabsContainer }
+            css { flexGrow = 1.0}
             val vClass = viewNameToComponentMap[selectedTab]
             if(vClass != null){
                 child(vClass){}
             }
         }
-
     }
 
     override fun componentWillUnmount() {
