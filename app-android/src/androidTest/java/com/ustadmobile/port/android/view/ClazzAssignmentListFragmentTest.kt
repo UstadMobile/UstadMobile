@@ -8,13 +8,14 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.toughra.ustadmobile.R
 import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 
-@AdbScreenRecord("Assignment screen tests")
+@AdbScreenRecord("Assignment list screen tests")
 class ClazzAssignmentListFragmentTest : TestCase()  {
 
     @JvmField
@@ -35,7 +36,7 @@ class ClazzAssignmentListFragmentTest : TestCase()  {
     fun givenAssignmentListPresent_whenClickOnAssignment_thenShouldNavigateToAssignmentDetail() {
         val testEntity = ClazzAssignment().apply {
             caTitle = "Test Name"
-            caUid = dbRule.db.clazzAssignmentDao.insert(this)
+            caUid = dbRule.repo.clazzAssignmentDao.insert(this)
         }
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
@@ -54,7 +55,7 @@ class ClazzAssignmentListFragmentTest : TestCase()  {
                 recycler{
 
                     childWith<ClazzAssignmentListScreen.Assignment>{
-                        withDescendant { withTag(testEntity.caUid) }
+                        withDescendant { withText(testEntity.caTitle!!) }
                     }perform {
                         title {
                             click()
@@ -65,7 +66,7 @@ class ClazzAssignmentListFragmentTest : TestCase()  {
 
                 flakySafely {
                     Assert.assertEquals("After clicking on item, it navigates to detail view",
-                            R.id.assignment_detail_dest, systemImplNavRule.navController.currentDestination?.id)
+                            R.id.clazz_assignment_detail_dest, systemImplNavRule.navController.currentDestination?.id)
                 }
 
 

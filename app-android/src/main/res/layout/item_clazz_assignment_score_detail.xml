@@ -46,7 +46,7 @@
         <TextView
             android:paddingEnd="@dimen/dimen_5dp"
             tools:text="(4/4)"
-            android:id="@+id/item_person_score_results"
+            android:id="@+id/item_person_total_score_results"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dimen_8dp"

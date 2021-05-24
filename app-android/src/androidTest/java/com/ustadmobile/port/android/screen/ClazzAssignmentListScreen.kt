@@ -26,7 +26,10 @@ object ClazzAssignmentListScreen : KScreen<ClazzAssignmentListScreen>() {
     })
 
     class Assignment(parent: Matcher<View>) : KRecyclerItem<Assignment>(parent) {
-        val title: KTextView = KTextView(parent) { withId(R.id.line1_text) }
+        val title: KTextView = KTextView(parent) { withId(R.id.line1_title) }
+        val desc: KTextView = KTextView(parent) { withId(R.id.line2_description) }
+        val deadline: KTextView = KTextView(parent) {withId(R.id.line3_deadline)}
+        val studentProgressText: KTextView = KTextView(parent) {withId(R.id.line3_progress_text)}
     }
 
 }

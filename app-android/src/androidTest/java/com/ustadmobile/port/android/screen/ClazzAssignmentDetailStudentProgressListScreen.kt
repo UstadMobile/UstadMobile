@@ -23,29 +23,11 @@ object ClazzAssignmentDetailStudentProgressListScreen : KScreen<ClazzAssignmentD
         withId(R.id.fragment_list_recyclerview)
     }, itemTypeBuilder = {
         itemType(::ClazzAssignmentWithMetrics)
-        itemType(::SortOption)
-    })
-
-
-    val sortList: KRecyclerView = KRecyclerView({
-        withId(R.id.fragment_sort_order_list)
-    }, itemTypeBuilder = {
-        itemType(::Sort)
     })
 
 
     class ClazzAssignmentWithMetrics(parent: Matcher<View>) : KRecyclerItem<ClazzAssignmentWithMetrics>(parent) {
         val title: KTextView = KTextView(parent) { withId(R.id.line1_text) }
-    }
-
-    class SortOption(parent: Matcher<View>) : KRecyclerItem<SortOption>(parent) {
-        val sortLayout = KView(parent) { withId(R.id.item_sort_selected_layout) }
-        val selectedSort = KTextView(parent) { withId(R.id.item_sort_selected_text)}
-        val selectedOrder = KImageView(parent) { withId(R.id.item_sort_asc_desc)}
-    }
-
-    class Sort(parent: Matcher<View>) : KRecyclerItem<Sort>(parent) {
-        val personName: KTextView = KTextView(parent) { withId(R.id.item_person_text) }
     }
 
 

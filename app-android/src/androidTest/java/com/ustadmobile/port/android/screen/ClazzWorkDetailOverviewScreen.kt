@@ -34,7 +34,7 @@ object ClazzWorkDetailOverviewScreen : KScreen<ClazzWorkDetailOverviewScreen>() 
 
     class ClazzWorkBasicDetail(parent: Matcher<View>) : KRecyclerItem<ClazzWorkBasicDetail>(parent) {
         val title: KTextView = KTextView(parent) { withId(R.id.item_clazzwork_detail_description_title) }
-        val startDate: KTextView = KTextView(parent) { withId(R.id.item_clazzwork_detail_description_start_date) }
+        val startDate: KTextView = KTextView(parent) { withId(R.id.item_ca_detail_description_deadline_date) }
         val dueDate: KTextView = KTextView(parent) { withId(R.id.item_clazzwork_detail_description_due_date) }
     }
 

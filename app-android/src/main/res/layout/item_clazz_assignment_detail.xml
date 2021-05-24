@@ -41,7 +41,7 @@
 
 
         <ImageView
-            android:id="@+id/item_clazzwork_detail_description_icon"
+            android:id="@+id/item_ca_detail_description_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
@@ -55,7 +55,7 @@
             app:layout_constraintTop_toBottomOf="@+id/item_ca_detail_description" />
 
         <TextView
-            android:id="@+id/item_clazzwork_detail_description_start_date"
+            android:id="@+id/item_ca_detail_description_deadline_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
@@ -68,12 +68,12 @@
             app:dateTimeLongWithExtra="@{clazzAssignment.caDeadlineDate}"
             app:dateTimeTimeLongWithExtra="@{clazzAssignment.caDeadlineDate}"
             app:dateTimeAppend="@{``}"
-            app:layout_constraintStart_toEndOf="@+id/item_clazzwork_detail_description_icon"
+            app:layout_constraintStart_toEndOf="@+id/item_ca_detail_description_icon"
             app:layout_constraintTop_toBottomOf="@+id/item_ca_detail_description"
             tools:text="28/Feb/2020 - 8:00 am" />
 
         <TextView
-            android:id="@+id/item_clazzwork_detail_description_timezone"
+            android:id="@+id/item_ca_detail_description_timezone"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
@@ -82,10 +82,10 @@
             android:contentDescription="@string/school"
             android:text="@{timeZone}"
             app:visibleIfDateSet="@{clazzAssignment.caDeadlineDate}"
-            app:layout_constraintBottom_toBottomOf="@+id/item_clazzwork_detail_description_start_date"
+            app:layout_constraintBottom_toBottomOf="@+id/item_ca_detail_description_deadline_date"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/item_clazzwork_detail_description_start_date"
-            app:layout_constraintTop_toTopOf="@+id/item_clazzwork_detail_description_start_date"
+            app:layout_constraintStart_toEndOf="@+id/item_ca_detail_description_deadline_date"
+            app:layout_constraintTop_toTopOf="@+id/item_ca_detail_description_deadline_date"
             tools:text="(Asia, Dubai)" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

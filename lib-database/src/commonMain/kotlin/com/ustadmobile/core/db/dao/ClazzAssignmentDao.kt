@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_LAST_ACTIVE_ASC
 import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_LAST_ACTIVE_DESC
 import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_LAST_NAME_ASC
 import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_LAST_NAME_DESC
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 
@@ -341,6 +342,11 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
           FROM ClazzAssignment LIMIT 1
     """)
     abstract fun findClazzAssignment(): ClazzAssignment?
+
+    @Query("""SELECT * 
+                      FROM ClazzAssignment 
+                     WHERE caUid = :uid""")
+    abstract fun findByUidLive(uid: Long): DoorLiveData<ClazzAssignment?>
 
     companion object{
 
