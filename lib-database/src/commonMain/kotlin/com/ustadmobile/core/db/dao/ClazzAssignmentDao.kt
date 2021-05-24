@@ -336,6 +336,12 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
     """)
     abstract suspend fun findByUidAsync(uid: Long): ClazzAssignment?
 
+    @Query("""
+        SELECT * 
+          FROM ClazzAssignment LIMIT 1
+    """)
+    abstract fun findClazzAssignment(): ClazzAssignment?
+
     companion object{
 
         const val SORT_DEADLINE_ASC = 1

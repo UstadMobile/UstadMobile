@@ -1,39 +1,43 @@
-/*
 
 package com.ustadmobile.core.controller
 
 
+import com.google.gson.Gson
+import com.soywiz.klock.DateTime
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ClazzAssignmentDao
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.activeDbInstance
+import com.ustadmobile.core.util.activeRepoInstance
+import com.ustadmobile.core.util.ext.captureLastEntityValue
+import com.ustadmobile.core.util.test.waitUntil
+import com.ustadmobile.core.view.ClazzAssignmentDetailView
+import com.ustadmobile.core.view.ClazzAssignmentEditView
+import com.ustadmobile.core.view.ReportDetailView
+import com.ustadmobile.core.view.UstadEditView
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.ClazzAssignment
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import com.ustadmobile.core.view.ClazzAssignmentEditView
-import com.nhaarman.mockitokotlin2.*
-import com.soywiz.klock.DateTime
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.core.db.dao.ClazzAssignmentDao
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.lib.db.entities.ClazzAssignment
-
-
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import org.junit.Assert
-import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.util.activeRepoInstance
-import kotlinx.coroutines.runBlocking
-import com.ustadmobile.core.util.ext.captureLastEntityValue
-import com.ustadmobile.lib.db.entities.Clazz
 import org.kodein.di.DI
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.spy
-import org.mockito.kotlin.whenever
+import org.kodein.di.instance
+import org.mockito.kotlin.*
 
 
-*/
-/**
+/*
+*
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
  *
- * Note:*//*
+ * Note:
+*/
 
 
 
@@ -53,7 +57,7 @@ class ClazzAssignmentEditPresenterTest {
 
     private lateinit var repoClazzAssignmentDaoSpy: ClazzAssignmentDao
 
-    private lateinit var clazzAssignment: ClazzAssignment
+    private lateinit var testClazz: Clazz
 
     @Before
     fun setup() {
@@ -72,59 +76,79 @@ class ClazzAssignmentEditPresenterTest {
         repoClazzAssignmentDaoSpy = spy(repo.clazzAssignmentDao)
         whenever(repo.clazzAssignmentDao).thenReturn(repoClazzAssignmentDaoSpy)
 
-        val testEntity = Clazz().apply {
+        testClazz = Clazz().apply {
             clazzName = "Spelling Clazz"
             clazzUid = repo.clazzDao.insert(this)
             clazzStartTime = DateTime(2020, 8, 10).unixMillisLong
         }
 
-        clazzAssignment = ClazzAssignment().apply {
-            caTitle = "test Assignment"
-            caStartDate = DateTime(2020, 10, 10).unixMillisLong
-            caClazzUid = testEntity.clazzUid
-            caUid = repo.clazzAssignmentDao.insert(this)
-        }
+        whenever(mockView.deadlineDate).thenReturn(Long.MAX_VALUE)
+        whenever(mockView.gracePeriodDate).thenReturn(Long.MAX_VALUE)
+        whenever(mockView.startDate).thenReturn(DateTime(2020, 10, 10).unixMillisLong)
+
     }
 
     @Test
     fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalled_thenShouldSaveToDatabase() {
-        val presenterArgs = mapOf<String, String>()
 
+        val repo: UmAppDatabase by di.activeRepoInstance()
+        val db: UmAppDatabase by di.activeDbInstance()
+
+        val systemImpl: UstadMobileSystemImpl by di.instance()
+
+        val newAssignment = ClazzAssignment().apply {
+            caClazzUid = testClazz.clazzUid
+        }
+        val jsonStr = Gson().toJson(newAssignment)
+
+        val presenterArgs = mutableMapOf<String, String>()
+        presenterArgs[ARG_ENTITY_JSON] = jsonStr
         val presenter = ClazzAssignmentEditPresenter(context,
                 presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
 
+        verify(mockView, timeout(5000)).deadlineDate = eq(Long.MAX_VALUE)
+        verify(mockView, timeout(5000)).gracePeriodTime = eq(0)
+
         val initialEntity = mockView.captureLastEntityValue()!!
 
         //TODO: Make some changes (e.g. as the user would do using data binding
-        //e.g. initialEntity.someNameField = "Bob"
+        initialEntity.caTitle = "Test Clazz Assignment"
 
         presenter.handleClickSave(initialEntity)
 
-        val existingEntitiesLive = clientDbRule.db.clazzAssignmentDao.findAllLive()
+        verify(systemImpl, timeout(5000)).go(eq(ClazzAssignmentDetailView.VIEW_NAME),
+                any(), any(), any())
 
         //TODO: wait until the presenter has saved the entity e.g.
         runBlocking {
-            db.waitUntil(5000, listOf("@Entity")) {
-                db.clazzAssignmentDao.findBySomeCondition()?.someField == initialEntity.someField
+            db.waitUntil(5000, listOf("ClazzAssignment")) {
+                db.clazzAssignmentDao.findClazzAssignment()?.caTitle == "Test Clazz Assignment"
             }
         }
 
-        val entitySaved = db.clazzAssignmentDao.findBySomeCondition()
-        Assert.assertEquals("Entity was saved to database", "Bob",
-                entitySaved.someNameField)
+        val entitySaved = db.clazzAssignmentDao.findClazzAssignment()
+        Assert.assertEquals("Entity was saved to database", "Test Clazz Assignment",
+                entitySaved!!.caTitle)
 
 
     }
 
     @Test
     fun givenExistingClazzAssignment_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
-        val testEntity = ClazzAssignment().apply {
-            someName = "Spelling Clazz"
-            caUid = clientDbRule.repo.clazzAssignmentDao.insert(this)
+
+        val repo: UmAppDatabase by di.activeRepoInstance()
+        val db: UmAppDatabase by di.activeDbInstance()
+
+
+        val clazzAssignment = ClazzAssignment().apply {
+            caTitle = "test Assignment"
+            caStartDate = DateTime(2020, 10, 10).unixMillisLong
+            caClazzUid = testClazz.clazzUid
+            caUid = repo.clazzAssignmentDao.insert(this)
         }
 
-        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
+        val presenterArgs = mapOf(ARG_ENTITY_UID to clazzAssignment.caUid.toString())
         val presenter = ClazzAssignmentEditPresenter(context,
                 presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
@@ -132,22 +156,25 @@ class ClazzAssignmentEditPresenterTest {
         val initialEntity = mockView.captureLastEntityValue()!!
 
         //Make some changes to the entity (e.g. as the user would do using data binding)
-        //e.g. initialEntity!!.someName = "New Spelling Clazz"
+        initialEntity!!.caTitle = "New Spelling Clazz"
 
         presenter.handleClickSave(initialEntity)
 
         runBlocking {
             db.waitUntil(5000, listOf("ClazzAssignment")) {
-                db.clazzAssignmentDao.findByUid(testEntity.caUid)?.someName == "NewSpelling Clazz"
+                runBlocking {
+                    db.clazzAssignmentDao.findByUidAsync(clazzAssignment.caUid)?.caTitle == "New Spelling Clazz"
+                }
             }
+
+            val entitySaved = db.clazzAssignmentDao.findByUidAsync(clazzAssignment.caUid)
+
+            Assert.assertEquals("Name was saved and updated",
+                    "New Spelling Clazz", entitySaved!!.caTitle)
         }
 
-        val entitySaved = db.clazzAssignmentDao.findByUid(testEntity.caUid)
 
-        Assert.assertEquals("Name was saved and updated",
-                "New Spelling Clazz", entitySaved!!.someName)
     }
 
 
 }
-*/

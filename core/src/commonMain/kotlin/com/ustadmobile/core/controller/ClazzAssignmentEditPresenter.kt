@@ -34,10 +34,10 @@ class ClazzAssignmentEditPresenter(context: Any,
     enum class LateSubmissionOptions(val optionVal: Int, val messageId: Int) {
         REJECT(ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_REJECT,
                 MessageID.reject),
-        MARK_PENALTY(ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY,
-                MessageID.mark_penalty),
         ACCEPT(ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_ACCEPT,
                 MessageID.accept),
+        MARK_PENALTY(ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY,
+                MessageID.mark_penalty)
     }
 
     class LateSubmissionOptionsMessageIdOption(day: LateSubmissionOptions, context: Any)
