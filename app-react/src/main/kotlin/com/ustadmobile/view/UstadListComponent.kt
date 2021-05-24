@@ -17,12 +17,14 @@ import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.util.CssStyleManager
 import com.ustadmobile.util.CssStyleManager.chipSet
-import com.ustadmobile.util.CssStyleManager.contentEntryListExtraOptions
 import com.ustadmobile.util.CssStyleManager.horizontalList
+import com.ustadmobile.util.CssStyleManager.listComponentContainer
 import com.ustadmobile.util.CssStyleManager.listCreateNewContainer
 import com.ustadmobile.util.CssStyleManager.listItemCreateNewDiv
-import com.ustadmobile.util.CssStyleManager.ustadListViewComponentContainer
+import com.ustadmobile.util.CssStyleManager.selectionContainer
 import com.ustadmobile.util.ext.format
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
 import kotlinx.browser.window
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -125,7 +127,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
 
     override fun RBuilder.render() {
         styledDiv {
-            css(ustadListViewComponentContainer)
+            css(listComponentContainer)
             renderFilters()
             renderMenuOptions()
 
@@ -207,10 +209,10 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
     open fun RBuilder.renderHeaderView(){
         styledDiv {
             css(listItemCreateNewDiv)
-            mListItemIcon("add","${CssStyleManager.name}-listCreateNewIcon")
+            mListItemIcon("add","${CssStyleManager.name}-listCreateNewIconClass")
             mTypography(variant = MTypographyVariant.button) {
                 css{ marginTop = 3.px }
-                +systemImpl.getString(MessageID.add_new, this)
+                +getString(MessageID.add_new)
             }
         }
     }
@@ -239,32 +241,35 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
 
     private fun RBuilder.renderMenuOptions(){
         val hideOptions = selectedEntries.isNullOrEmpty() or !showEditOptionsMenu
-        styledDiv {
-            css{
-                +contentEntryListExtraOptions
-                display = if(hideOptions) Display.none else Display.flex
-            }
-            mTypography(variant = MTypographyVariant.subtitle1){
-                css {
-                    width = 10.pc
-                    marginTop = 10.px
-                    marginLeft = 16.px
-                    display = if(hideOptions) Display.none else Display.block
-                }
-                +systemImpl.getString(MessageID.items_selected, this).format(selectedEntries.size)
-            }
-            mGridContainer(spacing= MGridSpacing.spacing2, justify = MGridJustify.flexEnd){
-                selectionOptions?.forEach { option ->
-                    mGridItem {
-                        css { display = if(hideOptions) Display.none else Display.block}
-                        mIconButton(SELECTION_ICONS_MAP[option]?:"delete", color = MColor.default,onClick = {
-                            listPresenter?.handleClickSelectionOption(selectedEntries, option)
-                            setState { selectedEntries.clear()}
-                        })
+        umGridContainer {
+            css{+selectionContainer}
+            umItem(MGridSize.cells7, MGridSize.cells8){
+                mTypography(variant = MTypographyVariant.subtitle1){
+                    css {
+                        width = 10.pc
+                        marginTop = 10.px
+                        marginLeft = 16.px
+                        display = if(hideOptions) Display.none else Display.block
                     }
+                    +getString(MessageID.items_selected).format(selectedEntries.size)
                 }
-                renderEditOptionMenu()
             }
+
+            umItem(MGridSize.cells5, MGridSize.cells4){
+                umGridContainer(spacing= MGridSpacing.spacing2, justify = MGridJustify.flexEnd){
+                    selectionOptions?.forEach { option ->
+                        mGridItem {
+                            css { display = if(hideOptions) Display.none else Display.block}
+                            mIconButton(SELECTION_ICONS_MAP[option]?:"delete", color = MColor.default,onClick = {
+                                listPresenter?.handleClickSelectionOption(selectedEntries, option)
+                                setState { selectedEntries.clear()}
+                            })
+                        }
+                    }
+                    renderEditOptionMenu()
+                }
+            }
+
         }
     }
 

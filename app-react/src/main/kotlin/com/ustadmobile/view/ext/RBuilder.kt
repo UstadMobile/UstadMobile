@@ -2,22 +2,23 @@ package com.ustadmobile.view.ext
 
 import com.ccfraser.muirwik.components.*
 import com.ustadmobile.util.CssStyleManager
+import com.ustadmobile.util.CssStyleManager.imageContainer
 import com.ustadmobile.util.CssStyleManager.personListItemAvatar
 import kotlinx.css.*
-import kotlinx.html.onClick
-import react.RBuilder
-import react.RProps
-import com.ccfraser.muirwik.components.spacingUnits
-import com.ustadmobile.util.CssStyleManager.profileImageContainer
 import kotlinx.html.js.onClickFunction
 import org.w3c.dom.events.Event
-import styled.*
+import react.RBuilder
+import react.RProps
+import styled.StyledHandler
+import styled.css
+import styled.styledDiv
+import styled.styledSpan
 
-fun RBuilder.renderAvatar(attachmentId: Long, fallback: String){
+fun RBuilder.umProfileAvatar(attachmentId: Long, fallback: String){
     val src = null
     mAvatar(src,variant = MAvatarVariant.circular){
         css (personListItemAvatar)
-        if(src == null) mIcon(fallback, className= "${CssStyleManager.name}-fallBackAvatar")
+        if(src == null) mIcon(fallback, className= "${CssStyleManager.name}-fallBackAvatarClass")
     }
 }
 
@@ -31,20 +32,25 @@ fun RBuilder.umGridContainer(spacing: MGridSpacing = MGridSpacing.spacing0,
     }
 }
 
-fun RBuilder.umItem(xs: MGridSize, sm: MGridSize?, className: String? = null, handler: StyledHandler<MGridProps>? = null) {
+fun RBuilder.umItem(xs: MGridSize, sm: MGridSize? = null, lg: MGridSize? = null, className: String? = null, handler: StyledHandler<MGridProps>? = null) {
     mGridItem(xs = xs) {
         sm?.let { attrs.sm = it }
+        lg?.let { attrs.md = it }
         setStyledPropsAndRunHandler(className, handler)
     }
 }
 
-fun RBuilder.umProfileAvatar (src: String? = null, iconName: String = "add_a_photo", imgProps: RProps? = null,
-                       variant: MAvatarVariant = MAvatarVariant.rounded,
-                       className: String? = "${CssStyleManager.name}-profileImage", clickEvent:(Event) -> Unit){
+fun RBuilder.umEntityAvatar (src: String? = null, fallbackSrc: String? = "assets/account.jpg",
+                             iconName: String = "add_a_photo", imgProps: RProps? = null,
+                             variant: MAvatarVariant = MAvatarVariant.rounded,
+                             showIcon: Boolean = true,
+                             className: String? = "${CssStyleManager.name}-entityImageClass",
+                             clickEvent:(Event) -> Unit = {  }){
 
     styledDiv {
-        css(profileImageContainer)
-        mAvatar(src = src,variant = variant, imgProps = imgProps, className = className) {
+        css(imageContainer)
+        mAvatar(src = if(src.isNullOrEmpty()) fallbackSrc else src,
+            variant = variant, imgProps = imgProps, className = className) {
             styledSpan{
                 css{
                     position = Position.absolute
@@ -54,7 +60,9 @@ fun RBuilder.umProfileAvatar (src: String? = null, iconName: String = "add_a_pho
                 attrs{
                     onClickFunction = clickEvent
                 }
-                mIcon(iconName, className = "${CssStyleManager.name}-profileImageIcon")
+                if(showIcon){
+                    mIcon(iconName, className = "${CssStyleManager.name}-entityImageIconClass")
+                }
             }
         }
     }

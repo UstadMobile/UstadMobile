@@ -24,7 +24,10 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.events.Event
-import react.*
+import react.RBuilder
+import react.RComponent
+import react.RProps
+import react.RState
 
 abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(props),
     UstadView, DIAware, DoorLifecycleOwner {
@@ -61,7 +64,9 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         get() = field
         set(value) {
             field = value
-            value?.let { StateManager.dispatch(ToolbarTitle(it)) }
+            window.setTimeout({
+                value?.let { StateManager.dispatch(ToolbarTitle(it)) }
+            },200)
         }
 
     override var loading: Boolean = false
@@ -101,8 +106,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
 
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
-        StateManager.dispatch(SnackBarState(message,
-            systemImpl.getString(actionMessageId, this)) { action() })
+        StateManager.dispatch(SnackBarState(message, getString(actionMessageId)) { action() })
     }
 
     override fun runOnUiThread(r: Runnable?) {
@@ -124,7 +128,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
     }
 
     open fun getString(messageId: Int): String {
-        return systemImpl.getString(messageId, this)
+        return if(messageId == 0) "" else systemImpl.getString(messageId, this)
     }
 
     override fun componentWillUnmount() {

@@ -7,7 +7,6 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.util.RouteManager.getArgs
 import com.ustadmobile.view.ext.saveResultToBackStackSavedStateHandle
-import kotlinx.browser.window
 import org.w3c.dom.events.Event
 import react.RProps
 import react.RState
@@ -23,7 +22,7 @@ abstract class UstadEditComponent<T: Any>(mProps: RProps): UstadBaseComponent<RP
 
     override fun onComponentReady() {
         fabState = fabState.copy(visible = true, icon = "check",
-            label = systemImpl.getString(MessageID.save, this))
+            label = getString(MessageID.save))
     }
 
     override fun onFabClick(event: Event) {
@@ -36,9 +35,9 @@ abstract class UstadEditComponent<T: Any>(mProps: RProps): UstadBaseComponent<RP
         val entityUid = getArgs()[ARG_ENTITY_UID]?.toLong() ?: 0L
         val entityJsonStr = getArgs()[ARG_ENTITY_JSON]
         title = if(entityUid != 0L || entityJsonStr != null){
-           systemImpl.getString(editStringId, this)
+           getString(editStringId)
         }else {
-           systemImpl.getString(newTitleId, this)
+           getString(newTitleId)
         }
     }
 }
