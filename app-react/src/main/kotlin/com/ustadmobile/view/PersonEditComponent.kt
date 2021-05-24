@@ -22,13 +22,15 @@ import com.ustadmobile.model.UmLabel
 import com.ustadmobile.util.CssStyleManager.alignTextToStart
 import com.ustadmobile.util.CssStyleManager.defaultFullWidth
 import com.ustadmobile.util.CssStyleManager.defaultMarginTop
-import com.ustadmobile.util.CssStyleManager.helperText
+import com.ustadmobile.util.CssStyleManager.errorTextClass
 import com.ustadmobile.util.RouteManager.getArgs
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
-import com.ustadmobile.view.ext.umProfileAvatar
+import com.ustadmobile.view.ext.umEntityAvatar
 import kotlinx.css.Display
 import kotlinx.css.display
+import kotlinx.css.marginTop
+import kotlinx.css.px
 import kotlinx.html.InputType
 import react.RBuilder
 import react.RProps
@@ -228,7 +230,8 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
 
         umGridContainer(MGridSpacing.spacing4) {
             umItem(MGridSize.cells12, MGridSize.cells4){
-                umProfileAvatar {
+                css{marginTop = 12.px}
+                umEntityAvatar {
 
                 }
             }
@@ -284,7 +287,7 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
                                     }
                                 }
                             }
-                            genderLabel.caption?.let { mFormHelperText(it){ css(helperText) }
+                            genderLabel.caption?.let { mFormHelperText(it){ css(errorTextClass) }
                             }
                         }
                     }
@@ -356,7 +359,7 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
                                 }
                             }
 
-                            passwordLabel.caption?.let { mFormHelperText(it){css(helperText)} }
+                            passwordLabel.caption?.let { mFormHelperText(it){css(errorTextClass)} }
                         }
                     }
                     umItem(MGridSize.cells12,MGridSize.cells6 ) {
@@ -381,7 +384,7 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
                                 }
                             }
 
-                            confirmPasswordLabel.caption?.let { mFormHelperText(it){css(helperText)} }
+                            confirmPasswordLabel.caption?.let { mFormHelperText(it){css(errorTextClass)} }
                         }
                     }
                 }

@@ -2,6 +2,7 @@ package com.ustadmobile.view
 
 import androidx.paging.DataSource
 import com.ccfraser.muirwik.components.*
+import com.ustadmobile.core.controller.PersonConstants.GENDER_MESSAGE_ID_MAP
 import com.ustadmobile.core.controller.PersonDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -10,22 +11,23 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.EntityRoleWithNameAndRole
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.util.CssStyleManager
+import com.ustadmobile.util.CssStyleManager.alignTextToStart
+import com.ustadmobile.util.CssStyleManager.defaultFullWidth
+import com.ustadmobile.util.CssStyleManager.defaultMarginTop
 import com.ustadmobile.util.CssStyleManager.personDetailComponentActionIcon
 import com.ustadmobile.util.CssStyleManager.personDetailComponentActions
-import com.ustadmobile.util.CssStyleManager.personDetailComponentContainer
-import com.ustadmobile.util.CssStyleManager.personDetailComponentInfo
 import com.ustadmobile.util.RouteManager.getArgs
-import com.ustadmobile.view.ext.handleCall
-import com.ustadmobile.view.ext.handleMail
-import com.ustadmobile.view.ext.handleSMS
+import com.ustadmobile.util.dateFormat
+import com.ustadmobile.view.ext.*
 import kotlinx.css.Display
 import kotlinx.css.display
-import org.w3c.dom.events.Event
+import kotlinx.css.marginTop
+import kotlinx.css.px
 import react.RBuilder
 import react.RProps
 import react.setState
 import styled.css
-import styled.styledDiv
+import kotlin.js.Date
 
 class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithDisplayDetails>(mProps), PersonDetailView {
 
@@ -45,7 +47,7 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithDisp
     override var clazzes: DataSource.Factory<Int, ClazzEnrolmentWithClazzAndAttendance>? = null
         get() = field
         set(value) {
-            field = value
+            setState { field = value }
         }
 
     override var changePasswordVisible: Boolean = false
@@ -63,115 +65,130 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithDisp
     override var rolesAndPermissions: DataSource.Factory<Int, EntityRoleWithNameAndRole>? = null
         get() = field
         set(value) {
-            field = value
+            setState { field = value }
         }
 
     override var entity: PersonWithDisplayDetails? = null
         get() = field
         set(value) {
-            field = value
+            title = value?.firstNames +" "+ value?.lastName
+            setState { field = value }
         }
 
     override fun RBuilder.render() {
-        styledDiv {
-            css{+personDetailComponentContainer}
-            mGridContainer(spacing= MGridSpacing.spacing9){
+        umGridContainer {
+            umItem(MGridSize.cells12){
+                umGridContainer(MGridSpacing.spacing4) {
+                    createAction("call",MessageID.call, MGridSize.cells4, MGridSize.cells2,
+                        entity?.phoneNum != null){ handleCall(entity?.phoneNum) }
+                    createAction("message",MessageID.text, MGridSize.cells4, MGridSize.cells2,
+                        entity?.phoneNum != null){ handleSMS(entity?.phoneNum) }
+                    createAction("email",MessageID.email, MGridSize.cells4, MGridSize.cells2,
+                        entity?.emailAddr != null){ handleMail(entity?.emailAddr) }
+                    createAction("vpn_key",MessageID.change_password, MGridSize.cells6, MGridSize.cells3,
+                        changePasswordVisible){ mPresenter.handleChangePassword() }
+                    createAction("person_add",MessageID.create_account, MGridSize.cells6, MGridSize.cells3,
+                        showCreateAccountVisible){ mPresenter.handleCreateAccount() }
+                }
+            }
 
-                mGridItem {
-                    css{display = if(entity?.phoneNum != null) Display.flex else Display.none}
-                    mPaper(variant = MPaperVariant.elevation) {
-                        attrs {
-                            onClick = { handleCall(entity?.phoneNum) }
-                        }
-                        css { +personDetailComponentActions }
-                        mIcon("call"){
-                            css{+personDetailComponentActionIcon}
-                        }
-                        mTypography(
-                            systemImpl.getString(MessageID.call, this),
-                            variant = MTypographyVariant.body1, gutterBottom = true){
-                            css(CssStyleManager.alignTextToStart)
+            umItem(MGridSize.cells12){
+                mDivider { css{
+                    +defaultFullWidth
+                    +defaultMarginTop
+                } }
+            }
+
+            umItem(MGridSize.cells12){
+                umGridContainer(MGridSpacing.spacing6) {
+                    umItem(MGridSize.cells12, MGridSize.cells4){
+                        css{marginTop = 12.px}
+                        umEntityAvatar(showIcon = false) {
+
                         }
                     }
-                }
 
-                mGridItem {
-                    css{display = if(entity?.phoneNum != null) Display.flex else Display.none}
-                    mPaper(variant = MPaperVariant.elevation) {
-                        attrs {
-                            onClick = { handleSMS(entity?.phoneNum) }
-                        }
-                        css { +personDetailComponentActions }
-                        mIcon("message"){
-                            css{+personDetailComponentActionIcon}
-                        }
-                        mTypography(
-                            systemImpl.getString(MessageID.text, this),
-                            variant = MTypographyVariant.body1, gutterBottom = true){
-                            css(CssStyleManager.alignTextToStart)
-                        }
-                    }
-                }
+                    umItem(MGridSize.cells12, MGridSize.cells8) {
+                        css(defaultMarginTop)
+                        umGridContainer(MGridSpacing.spacing4){
 
-                mGridItem {
-                    css{display = if(entity?.emailAddr != null) Display.flex else Display.none}
-                    mPaper(variant = MPaperVariant.elevation) {
-                        attrs {
-                            onClick = { handleMail(entity?.emailAddr) }
-                        }
-                        css { +personDetailComponentActions }
-                        mIcon("email"){
-                            css{+personDetailComponentActionIcon}
-                        }
-                        mTypography(
-                            systemImpl.getString(MessageID.email, this),
-                            variant = MTypographyVariant.body1, gutterBottom = true){
-                            css(CssStyleManager.alignTextToStart)
-                        }
-                    }
-                }
+                            umItem(MGridSize.cells12){
+                                mTypography(getString(MessageID.basic_details),
+                                    variant = MTypographyVariant.caption){
+                                    css(alignTextToStart)
+                                }
+                            }
 
+                            umItem(MGridSize.cells12){
+                                createInformation("event", dateFormat(Date(entity?.dateOfBirth?:0),
+                                    "dd/mm/yyyy").toString(), MessageID.birthday)
+                                createInformation(null, getString(GENDER_MESSAGE_ID_MAP[entity?.gender]?:0),
+                                    MessageID.field_person_gender)
+                                createInformation("badge", entity?.personOrgId, MessageID.organization_id)
+                                createInformation("account_circle", entity?.username, MessageID.username)
+                            }
 
-                mGridItem {
-                    css{display = if(changePasswordVisible) Display.flex else Display.none}
-                    mPaper(variant = MPaperVariant.elevation) {
-                        attrs {
-                            onClick = { mPresenter?.handleChangePassword() }
-                        }
-                        css { +personDetailComponentActions }
-                        mIcon("vpn_key"){
-                            css{+personDetailComponentActionIcon}
-                        }
-                        mTypography(
-                            systemImpl.getString(MessageID.change_password, this),
-                            variant = MTypographyVariant.body1, gutterBottom = true){
-                            css(CssStyleManager.alignTextToStart)
-                        }
-                    }
-                }
+                            umItem(MGridSize.cells12){
+                                mTypography(getString(MessageID.contact_details),
+                                    variant = MTypographyVariant.caption){
+                                    css(alignTextToStart)
+                                }
+                            }
 
-                mGridItem {
-                    css{display = if(showCreateAccountVisible) Display.flex else Display.none}
-                    mPaper(variant = MPaperVariant.elevation) {
-                        attrs {
-                            onClick = { mPresenter?.handleCreateAccount() }
-                        }
-                        css { +personDetailComponentActions }
-                        mIcon("person_add"){
-                            css{+personDetailComponentActionIcon}
-                        }
-                        mTypography(
-                            systemImpl.getString(MessageID.create_account, this),
-                            variant = MTypographyVariant.body1, gutterBottom = true){
-                            css(CssStyleManager.alignTextToStart)
+                            umItem(MGridSize.cells12){
+                                createInformation("call",entity?.phoneNum,MessageID.phone_number)
+                                createInformation("email",entity?.emailAddr,MessageID.email)
+                                createInformation("place",entity?.personAddress,MessageID.address)
+                            }
                         }
                     }
                 }
             }
-            styledDiv {
-                css { +personDetailComponentInfo}
+        }
+    }
 
-                +"hello there"
+    private fun RBuilder.createAction(icon: String, messageId: Int, xs: MGridSize,
+                                      sm: MGridSize? = null, visible: Boolean = false,
+                                      action:() -> Unit){
+        umItem(xs, sm){
+            css{display = if(visible) Display.flex else Display.none}
+            mPaper(variant = MPaperVariant.elevation) {
+                attrs {
+                    onClick = { action() }
+                }
+                css { +personDetailComponentActions }
+                mIcon(icon){
+                    css{+personDetailComponentActionIcon}
+                }
+                mTypography(getString(messageId), variant = MTypographyVariant.body1, gutterBottom = true){
+                    css(alignTextToStart)
+                }
+            }
+        }
+    }
+
+    private fun RBuilder.createInformation(icon:String? = null, data: String?, label: Int){
+        umGridContainer {
+            css{
+                +defaultMarginTop
+                display = if(data == "0" || data.isNullOrEmpty())
+                    Display.none else Display.flex
+            }
+            umItem(MGridSize.cells2){
+               if(icon != null){
+                   mIcon(icon, className = "${CssStyleManager.name}-detailIconClass")
+               }
+            }
+
+            umItem(MGridSize.cells10){
+                mTypography("$data", variant = MTypographyVariant.body1){
+                    css(alignTextToStart)
+                }
+
+                mTypography(getString(label),
+                    variant = MTypographyVariant.body2){
+                    css(alignTextToStart)
+                }
             }
         }
     }

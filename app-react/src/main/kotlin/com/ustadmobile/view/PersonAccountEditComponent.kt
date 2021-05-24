@@ -16,13 +16,13 @@ import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.model.UmLabel
 import com.ustadmobile.util.CssStyleManager
-import com.ustadmobile.util.CssStyleManager.errorTextMessage
 import com.ustadmobile.util.CssStyleManager.alignContentCenterContainer
-import com.ustadmobile.util.CssStyleManager.formMidWidthTextField
-import com.ustadmobile.util.CssStyleManager.helperText
-import com.ustadmobile.util.CssStyleManager.loginComponentFormElementsMargin
+import com.ustadmobile.util.CssStyleManager.defaultFullWidth
+import com.ustadmobile.util.CssStyleManager.errorTextClass
 import com.ustadmobile.util.RouteManager.getArgs
 import com.ustadmobile.util.ext.clean
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
 import kotlinx.css.Display
 import kotlinx.css.display
 import kotlinx.html.InputType
@@ -30,7 +30,6 @@ import react.RBuilder
 import react.RProps
 import react.setState
 import styled.css
-import styled.styledDiv
 
 class PersonAccountEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount>(mProps),
     PersonAccountEditView {
@@ -119,104 +118,118 @@ class PersonAccountEditComponent(mProps: RProps) : UstadEditComponent<PersonWith
     }
 
     override fun RBuilder.render() {
-        styledDiv {
+        val spacing = MGridSpacing.spacing6
+        umGridContainer(spacing) {
             css{+alignContentCenterContainer}
-
-            styledDiv {
-
-                mTextField(label = "${usernameLabel.text}", value = entity?.username,
-                    error = usernameLabel.error, disabled = !fieldsEnabled, helperText = usernameLabel.caption,
-                    variant = MFormControlVariant.outlined, onChange = {
-                        it.persist()
-                        setState {
-                            entity?.username = it.targetInputValue
-                            usernameError = null
-                            errorMessage = "" }
-                    }) {
-                    css(formMidWidthTextField)
+            umItem(MGridSize.cells12, MGridSize.cells12){
+                umGridContainer(spacing) {
+                    mHidden(xsDown = true) {
+                        umItem(MGridSize.cells12, MGridSize.cells3){} }
+                    umItem(MGridSize.cells12, MGridSize.cells6){
+                        mTextField(label = "${usernameLabel.text}", value = entity?.username,
+                            error = usernameLabel.error, disabled = !fieldsEnabled, helperText = usernameLabel.caption,
+                            variant = MFormControlVariant.outlined, onChange = {
+                                it.persist()
+                                setState {
+                                    entity?.username = it.targetInputValue
+                                    usernameError = null
+                                    errorMessage = "" }
+                            }) { css(CssStyleManager.defaultFullWidth) }
+                    }
                 }
 
-                mFormControl {
-                    css{
-                        +formMidWidthTextField
-                        display = if(currentPasswordVisible) Display.flex else Display.none
-                    }
-                    mInputLabel("${currentPasswordLabel.text}", error = currentPasswordLabel.error,
-                        variant = MFormControlVariant.outlined, htmlFor = "current-password")
-                    mOutlinedInput(value = entity?.currentPassword, labelWidth = currentPasswordLabel.width,error = currentPasswordError != null,
-                        id = "current-password",type = if(showCurrentPassword) InputType.text else InputType.password, onChange = {
-                            it.persist()
-                            setState {
-                                entity?.currentPassword = it.targetInputValue
-                                currentPasswordError = null
-                                errorMessage = "" } }) {
-                        attrs{
-                            endAdornment = mInputAdornment {
-                                mIconButton(if(showCurrentPassword) "visibility" else "visibility_off",edge = MIconEdge.end, onClick = {
-                                    setState { showCurrentPassword = !showCurrentPassword }
-                                })
+                umGridContainer(spacing) {
+                    css{display = if(currentPasswordVisible) Display.flex else Display.none}
+                    mHidden(xsDown = true) { umItem(MGridSize.cells12, MGridSize.cells3){} }
+                    umItem(MGridSize.cells12, MGridSize.cells6){
+                        mFormControl {
+                            css(defaultFullWidth)
+                            mInputLabel("${currentPasswordLabel.text}", error = currentPasswordLabel.error,
+                                variant = MFormControlVariant.outlined, htmlFor = "current-password")
+                            mOutlinedInput(value = entity?.currentPassword, labelWidth = currentPasswordLabel.width,error = currentPasswordError != null,
+                                id = "current-password",type = if(showCurrentPassword) InputType.text else InputType.password, onChange = {
+                                    it.persist()
+                                    setState {
+                                        entity?.currentPassword = it.targetInputValue
+                                        currentPasswordError = null
+                                        errorMessage = "" } }) {
+                                attrs{
+                                    endAdornment = mInputAdornment {
+                                        mIconButton(if(showCurrentPassword) "visibility" else "visibility_off",edge = MIconEdge.end, onClick = {
+                                            setState { showCurrentPassword = !showCurrentPassword }
+                                        })
+                                    }
+                                }
                             }
                         }
                     }
                 }
 
-                mFormControl {
-                    css(formMidWidthTextField)
+                umGridContainer(spacing) {
+                    mHidden(xsDown = true) { umItem(MGridSize.cells12, MGridSize.cells3){} }
+                    umItem(MGridSize.cells12, MGridSize.cells6){
+                        mFormControl {
+                            css(defaultFullWidth)
 
-                    mInputLabel("${newPasswordLabel.text}",error = newPasswordError != null,
-                        variant = MFormControlVariant.outlined, htmlFor = "new-password")
-                    mOutlinedInput(value = entity?.newPassword, labelWidth = newPasswordLabel.width,
-                        error = newPasswordError != null, id = "new-password",
-                        type = if(showNewPassword) InputType.text else InputType.password, onChange = {
-                            setState {
-                                entity?.newPassword = it.targetInputValue
-                                newPasswordError = null
-                                errorMessage = "" } }) {
-                        attrs{
-                            endAdornment = mInputAdornment {
-                                mIconButton(if(showNewPassword) "visibility" else "visibility_off",edge = MIconEdge.end,onClick = {
-                                    setState { showNewPassword = !showNewPassword }
-                                })
+                            mInputLabel("${newPasswordLabel.text}",error = newPasswordError != null,
+                                variant = MFormControlVariant.outlined, htmlFor = "new-password")
+                            mOutlinedInput(value = entity?.newPassword, labelWidth = newPasswordLabel.width,
+                                error = newPasswordError != null, id = "new-password",
+                                type = if(showNewPassword) InputType.text else InputType.password, onChange = {
+                                    setState {
+                                        entity?.newPassword = it.targetInputValue
+                                        newPasswordError = null
+                                        errorMessage = "" } }) {
+                                attrs{
+                                    endAdornment = mInputAdornment {
+                                        mIconButton(if(showNewPassword) "visibility" else "visibility_off",edge = MIconEdge.end,onClick = {
+                                            setState { showNewPassword = !showNewPassword }
+                                        })
+                                    }
+                                }
                             }
+
+                            newPasswordLabel.caption?.let { mFormHelperText(it){css(errorTextClass)} }
                         }
                     }
-
-                    newPasswordLabel.caption?.let { mFormHelperText(it){css(helperText)} }
                 }
 
-                mFormControl {
-                    css(formMidWidthTextField)
-                    mInputLabel("${confirmPasswordLabel.text?.clean()}",error = confirmPasswordLabel.error,
-                        variant = MFormControlVariant.outlined, htmlFor = "confirm-password")
-                    mOutlinedInput(value = entity?.confirmedPassword, labelWidth = confirmPasswordLabel.width,error = confirmPasswordLabel.error,
-                        id = "confirm-password", type = if(showConfirmPassword) InputType.text else InputType.password,onChange = {
-                            setState {
-                                entity?.confirmedPassword = it.targetInputValue
-                                confirmedPasswordError = null
-                                errorMessage = "" } }) {
-                        attrs{
-                            endAdornment = mInputAdornment {
-                                mIconButton(if(showConfirmPassword) "visibility" else "visibility_off",edge = MIconEdge.end, onClick = {
-                                    setState { showConfirmPassword = !showConfirmPassword }
-                                })
+                umGridContainer(spacing) {
+                    mHidden(xsDown = true) { umItem(MGridSize.cells12, MGridSize.cells3){} }
+                    umItem(MGridSize.cells12, MGridSize.cells6){
+                        mFormControl {
+                            css(defaultFullWidth)
+                            mInputLabel("${confirmPasswordLabel.text?.clean()}",error = confirmPasswordLabel.error,
+                                variant = MFormControlVariant.outlined, htmlFor = "confirm-password")
+                            mOutlinedInput(value = entity?.confirmedPassword, labelWidth = confirmPasswordLabel.width,error = confirmPasswordLabel.error,
+                                id = "confirm-password", type = if(showConfirmPassword) InputType.text else InputType.password,onChange = {
+                                    setState {
+                                        entity?.confirmedPassword = it.targetInputValue
+                                        confirmedPasswordError = null
+                                        errorMessage = "" } }) {
+                                attrs{
+                                    endAdornment = mInputAdornment {
+                                        mIconButton(if(showConfirmPassword) "visibility" else "visibility_off",edge = MIconEdge.end, onClick = {
+                                            setState { showConfirmPassword = !showConfirmPassword }
+                                        })
+                                    }
+                                }
                             }
+                            confirmPasswordLabel.caption?.let { mFormHelperText(it){css(errorTextClass)} }
                         }
                     }
-                    confirmPasswordLabel.caption?.let { mFormHelperText(it){css(helperText)} }
                 }
 
-                styledDiv {
-                    css{
-                        +loginComponentFormElementsMargin
-                        +errorTextMessage
-                        display = if(errorMessage?.isEmpty() == true) Display.none else Display.block
+                umGridContainer(spacing) {
+                    css{ display = if(errorMessage?.isEmpty() == true) Display.none else Display.block }
+                    mHidden(xsDown = true) { umItem(MGridSize.cells12, MGridSize.cells3){} }
+                    umItem(MGridSize.cells12, MGridSize.cells6){
+                        mTypography(errorMessage, variant = MTypographyVariant.subtitle2,
+                            className = "${CssStyleManager.name}-errorTextClass",
+                            align = MTypographyAlign.center)
                     }
-                    mTypography(errorMessage, variant = MTypographyVariant.subtitle2,
-                        className = "${CssStyleManager.name}-errorOnInput",
-                        align = MTypographyAlign.center)
                 }
             }
-
         }
     }
 

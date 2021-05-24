@@ -10,15 +10,16 @@ import kotlinx.serialization.builtins.ListSerializer
 
 class PersonDaoJs: PersonDao() {
 
-    private var person: PersonWithAccount? = null
-
-    init {
-        person?.apply {
-            username = "admin"
-            firstNames = "Admin"
-            admin = true
-            lastName = "Users"
-        }
+    private var person: PersonWithAccount? = PersonWithAccount().apply {
+        username = "admin"
+        firstNames = "Admin"
+        admin = true
+        emailAddr = "admin@admin.com"
+        phoneNum = "+255 71242 5886"
+        personAddress = "Miyuji Proper, Dodoma"
+        dateOfBirth = 706563066000
+        lastName = "Users"
+        gender = 2
     }
 
     private val mPath: String = "people"
@@ -132,7 +133,7 @@ class PersonDaoJs: PersonDao() {
     }
 
     override fun findByUidWithDisplayDetailsLive(mPersonUid: Long): DoorLiveData<PersonWithDisplayDetails?> {
-        return DoorLiveDataJs(person?.apply {
+       return DoorLiveDataJs(person?.apply {
             personUid = mPersonUid
         }) as DoorLiveData<PersonWithDisplayDetails?>
     }
