@@ -37,6 +37,8 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
 
         const val ARG_MOVING_COUNT = "moveCount"
 
+        const val ARG_SELECT_FOLDER_VISIBLE = "selectFolderVisible"
+
     }
 
 }

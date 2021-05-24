@@ -256,7 +256,8 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
                         entity?.caUid.toString(),
                         ContentEntryList2View.ARG_CONTENT_FILTER to
                                 ContentEntryList2View.ARG_LIBRARIES_CONTENT,
-                        UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString()))
+                        UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString(),
+                        ContentEntryList2View.ARG_SELECT_FOLDER_VISIBLE to false.toString()))
 
     }
 

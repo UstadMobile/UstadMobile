@@ -22,6 +22,10 @@
             type="boolean" />
 
         <variable
+            name="selectFolderVisible"
+            type="boolean" />
+
+        <variable
             name="selectablePagedListAdapter"
             type="ContentEntryListRecyclerAdapter" />
 
@@ -274,7 +278,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/content_entry_select_btn"
-                android:visibility="@{isPickerMode ? View.VISIBLE: View.GONE}"
+                android:visibility="@{isPickerMode &amp; (contentEntry.leaf || selectFolderVisible) ? View.VISIBLE: View.GONE}"
                 style="@style/UmTheme.Widget.OutlinedButton"
                 android:onClick="@{() -> itemListener.onClickSelectContentEntry(contentEntry)}"
                 android:layout_width="wrap_content"

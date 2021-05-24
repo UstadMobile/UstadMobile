@@ -108,7 +108,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         //3
         contentRecyclerAdapter = ContentEntryListRecyclerAdapter(
                 DefaultContentEntryListItemListener(context = requireContext(), di = di),
-                ListViewMode.BROWSER.toString(), viewLifecycleOwner, di)
+                ListViewMode.BROWSER.toString(), false, viewLifecycleOwner, di)
 
         // 4 score
         scoreRecyclerAdapter = ScoreRecyclerAdapter()
