@@ -154,6 +154,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                          ON cacheContentEntryUid = ClazzAssignmentContentJoin.cacjContentUid 
                          AND cachePersonUid = :personUid
                          AND cacheClazzAssignmentUid = :caUid
+                  WHERE cacjActive
                   GROUP BY ClazzAssignmentContentJoin.cacjContentUid
      	  ) AS ResultSource
     """)
@@ -204,6 +205,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                         JOIN ClazzAssignment 
                                         ON ClazzAssignment.caUid = cacjAssignmentUid
                                  WHERE cacjAssignmentUid = :assignmentUid
+                                  AND cacjActive
                                   AND StatementEntity.timestamp
                                         BETWEEN ClazzAssignment.caStartDate
                                         AND ClazzAssignment.caGracePeriodDate)
@@ -304,7 +306,8 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                  WHERE statementContentEntryUid 
                                     IN (SELECT cacjContentUid 
                                           FROM ClazzAssignmentContentJoin 
-                                         WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid)
+                                         WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
+                                           AND cacjActive)
                            AND StatementEntity.contentEntryRoot 
                            AND StatementEntity.resultCompletion
                            AND StatementEntity.timestamp
@@ -313,7 +316,8 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                            AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid) = 
                                     (SELECT COUNT(ClazzAssignmentContentJoin.cacjContentUid) 
                                        FROM ClazzAssignmentContentJoin 
-                                      WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid)) 
+                                      WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid
+                                        AND cacjActive)) 
                   ELSE 0 END) AS completedStudents
 
         

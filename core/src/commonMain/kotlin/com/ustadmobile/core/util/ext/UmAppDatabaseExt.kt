@@ -475,40 +475,6 @@ suspend fun UmAppDatabase.enrollPersonToSchool(schoolUid: Long,
     }
 }
 
-
-suspend fun UmAppDatabase.getQuestionListForView(clazzWorkWithSubmission: ClazzWorkWithSubmission, responsePersonUid : Long)
-        : List<ClazzWorkQuestionAndOptionWithResponse>{
-
-    val questionsAndOptionsWithResponses :List<ClazzWorkQuestionAndOptionWithResponseRow> = withTimeoutOrNull(2000){
-        clazzWorkQuestionDao.findAllQuestionsAndOptionsWithResponse(clazzWorkWithSubmission.clazzWorkUid,
-                responsePersonUid)
-    } ?: listOf()
-
-    val questionsAndOptionsWithResponseList: List<ClazzWorkQuestionAndOptionWithResponse> =
-            questionsAndOptionsWithResponses.groupBy { it.clazzWorkQuestion }.entries
-                    .map {
-                        val questionUid = it.key?.clazzWorkQuestionUid ?: 0L
-
-                        ClazzWorkQuestionAndOptionWithResponse(
-                                clazzWorkWithSubmission ,
-                                it.key ?: ClazzWorkQuestion(),
-                                it.value.map {
-                                    it.clazzWorkQuestionOption ?: ClazzWorkQuestionOption()
-                                },
-                                it.value.map {
-                                    it.clazzWorkQuestionOptionResponse
-                                }.first()?: ClazzWorkQuestionResponse().apply {
-                                    clazzWorkQuestionResponseQuestionUid = questionUid?:0L
-                                    clazzWorkQuestionResponsePersonUid = responsePersonUid
-                                    clazzWorkQuestionResponseClazzWorkUid = clazzWorkWithSubmission.clazzWorkUid
-                                            ?: 0L
-                                })
-                    }
-
-
-    return questionsAndOptionsWithResponseList
-}
-
 /**
  * Gets the maximum number of items that can be in a query parameter of type list. This is 100 on
  * SQLite and unlimited (-1) on Postgres

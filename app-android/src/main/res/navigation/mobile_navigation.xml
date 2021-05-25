@@ -136,19 +136,6 @@
         android:id="@+id/schoolmember_list_dest"
         android:name="com.ustadmobile.port.android.view.SchoolMemberListFragment" />
     <fragment
-        android:id="@+id/clazzwork_list_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkListFragment" />
-    <fragment
-        android:id="@+id/clazzwork_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkEditFragment" />
-    <fragment
-        android:id="@+id/clazzworkquestionandoptions_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkQuestionAndOptionsEditFragment" />
-    <fragment
-        android:id="@+id/clazzwork_detail_list"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkDetailFragment" />
-
-    <fragment
         android:id="@+id/clazz_assignment_list"
         android:name="com.ustadmobile.port.android.view.ClazzAssignmentListFragment" />
 
@@ -221,14 +208,6 @@
         android:id="@+id/content_entry_detail_overview_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntryDetailOverviewFragment"
         android:label="" />
-    <fragment
-        android:id="@+id/clazzwork_detail_progress_list"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkDetailProgressListFragment" />
-
-    <fragment
-        android:id="@+id/clazzworksubmission_marking_edit"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkSubmissionMarkingFragment"
-        />
 
     <fragment
         android:id="@+id/clazz_enrolment_list"

@@ -1,7 +1,6 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
-import com.ustadmobile.core.controller.ClazzWorkEditPresenter
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
@@ -14,6 +13,7 @@ interface ClazzAssignmentEditView: UstadEditView<ClazzAssignment> {
 
     var deadlineDate: Long
     var deadlineTime: Long
+
     var gracePeriodDate: Long
     var gracePeriodTime: Long
 

@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Transaction
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 
@@ -83,14 +84,19 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
            SET cacjActive = :active,
                cacjLCB = (SELECT nodeClientId 
                             FROM SyncNode LIMIT 1) 
-        WHERE cacjUid = :uid """)
-    abstract suspend fun updateInActiveByClazzWorkQuestionUid(uid: Long, active : Boolean)
+        WHERE cacjContentUid = :contentUid 
+          AND cacjAssignmentUid = :clazzAssignmentUid""")
+    abstract suspend fun updateInActiveByClazzAssignmentContentJoinUid(contentUid: Long, active : Boolean,
+                                                                       clazzAssignmentUid: Long)
 
+    suspend fun deactivateByUids(uidList: List<Long>, clazzAssignmentUid: Long) {
+        uidList.forEach {
+            updateInActiveByClazzAssignmentContentJoinUid(it, false, clazzAssignmentUid)
+        }
+    }
 
     override suspend fun deactivateByUids(uidList: List<Long>) {
-        uidList.forEach {
-            updateInActiveByClazzWorkQuestionUid(it, true)
-        }
+        // not used
     }
 
 

@@ -19,7 +19,6 @@ import com.ustadmobile.core.controller.ClazzAssignmentDetailOverviewPresenter
 import com.ustadmobile.core.controller.DefaultContentEntryListItemListener
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ClazzWorkDao
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ListViewMode
@@ -206,8 +205,9 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
     override var clazzAssignmentContent: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>? = null
         set(value) {
+            val dvRepoVal = dbRepo?: return
             contentLiveData?.removeObserver(contentObserver)
-            contentLiveData = value?.asRepositoryLiveData(ClazzWorkDao)
+            contentLiveData = value?.asRepositoryLiveData(dvRepoVal.clazzAssignmentDao)
             field = value
             contentLiveData?.observeIfFragmentViewIsReady(this, contentObserver)
         }

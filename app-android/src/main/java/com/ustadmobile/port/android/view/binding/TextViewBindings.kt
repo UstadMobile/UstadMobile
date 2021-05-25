@@ -208,34 +208,6 @@ fun TextView.setFileSize(fileSize: Long) {
     text = UMFileUtil.formatFileSize(fileSize)
 }
 
-@BindingAdapter(value=["clazzMemberWithClazzWorkAndProgress"])
-fun TextView.setClazzWorkMarking(clazzEnrolmentWithClazzWorkAndProgress: ClazzEnrolmentWithClazzWorkProgress){
-    var line = clazzEnrolmentWithClazzWorkAndProgress.mClazzWorkSubmission.statusString(context)
-    if(clazzEnrolmentWithClazzWorkAndProgress.clazzWorkHasContent && clazzEnrolmentWithClazzWorkAndProgress.mProgress >= 0) {
-        line += " ${context.getString(R.string.completed)} " +
-                "${clazzEnrolmentWithClazzWorkAndProgress.mProgress.toInt()}% " +
-                context.getString(R.string.of_content)
-    }
-    text = line
-}
-
-fun ClazzWorkSubmission?.statusString(context: Context) = when {
-    this == null -> context.getString(R.string.not_submitted_cap)
-    this.clazzWorkSubmissionDateTimeMarked > 0 -> context.getString(R.string.marked).capitalize()
-    this.clazzWorkSubmissionDateTimeFinished > 0 -> context.getString(R.string.submitted).capitalize()
-    else -> context.getString(R.string.not_submitted_cap).capitalize()
-
-}
-
-@BindingAdapter(value=["selectedClazzWorkQuestionType"])
-fun TextView.setTypeText(clazzWorkQuestionType: Int){
-    if(clazzWorkQuestionType == ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT){
-        text = context.getString(R.string.sel_question_type_free_text)
-    }else if(clazzWorkQuestionType == ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE){
-        text = context.getString(R.string.quiz)
-    }
-}
-
 
 @BindingAdapter(value=["responseTextFilled"])
 fun TextView.setResponseTextFilled(responseText: String?){

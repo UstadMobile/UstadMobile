@@ -248,9 +248,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("schoolMemberDao")
     abstract val schoolMemberDao: SchoolMemberDao
 
-    @JsName("clazzWorkDao")
-    abstract val clazzWorkDao: ClazzWorkDao
-
     @JsName("clazzAssignmentDao")
     abstract val clazzAssignmentDao: ClazzAssignmentDao
 
@@ -260,23 +257,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("cacheClazzAssignmentDao")
     abstract val cacheClazzAssignmentDao: CacheClazzAssignmentDao
 
-    @JsName("clazzWorkSubmissionDao")
-    abstract val clazzWorkSubmissionDao: ClazzWorkSubmissionDao
-
-    @JsName("clazzWorkContentJoinDao")
-    abstract val clazzWorkContentJoinDao: ClazzWorkContentJoinDao
-
-    @JsName("clazzWorkQuestionDao")
-    abstract val clazzWorkQuestionDao: ClazzWorkQuestionDao
-
-    @JsName("clazzWorkQuestionOptionDao")
-    abstract val clazzWorkQuestionOptionDao: ClazzWorkQuestionOptionDao
-
     @JsName("commentsDao")
     abstract val commentsDao: CommentsDao
-
-    @JsName("clazzWorkQuestionResponseDao")
-    abstract val clazzWorkQuestionResponseDao: ClazzWorkQuestionResponseDao
 
     @JsName("syncNodeDao")
     abstract val syncNodeDao: SyncNodeDao
