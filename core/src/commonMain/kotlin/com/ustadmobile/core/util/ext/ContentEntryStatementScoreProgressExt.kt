@@ -30,3 +30,7 @@ fun ContentEntryStatementScoreProgress.isContentComplete(): Int {
     }
     return CONTENT_INCOMPLETE
 }
+
+fun ContentEntryStatementScoreProgress.calculateScoreWithPenalty(): Int{
+    return (((resultScore / resultMax.toFloat()) * 100) * (1 - (penalty/100))).toInt()
+}

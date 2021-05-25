@@ -8,6 +8,7 @@
         <import type="com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary"/>
         <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+        <import type="com.ustadmobile.core.util.ext.ContentEntryStatementScoreProgressExtKt"/>
         <import type="android.view.View"/>
         <import type="com.ustadmobile.port.android.view.ContentEntryDetailAttemptsListFragment"/>
         <import type="com.ustadmobile.port.android.view.ContentEntryDetailAttemptsListFragment.PersonWithStatementDisplayListRecyclerAdapter"/>
@@ -121,8 +122,8 @@
             android:id="@+id/attempt_progress_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{@string/percentage_complete(person.progress)}"
-            android:visibility="@{person.progress == 0 ? View.INVISIBLE : View.VISIBLE}"
+            android:text="@{@string/percentage_complete(person.scoreProgress.progress)}"
+            android:visibility="@{person.scoreProgress == null || person.scoreProgress.progress == 0 ? View.INVISIBLE : View.VISIBLE}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/item_person_line3_text"
             app:layout_constraintBottom_toTopOf="@+id/attempt_score_text"
@@ -138,8 +139,8 @@
             android:layout_height="@dimen/dimen_4dp"
             android:max="100"
             android:progressTint="@color/primaryColor"
-            android:progress="@{person.progress}"
-            android:visibility="@{person.progress == 0 ? View.GONE : View.VISIBLE}"
+            android:progress="@{person.scoreProgress.progress}"
+            android:visibility="@{person.scoreProgress == null || person.scoreProgress.progress == 0 ? View.GONE : View.VISIBLE}"
             app:layout_constraintEnd_toStartOf="@id/attempt_progress_text"
             app:layout_constraintBottom_toBottomOf="@id/attempt_progress_text"
             app:layout_constraintStart_toStartOf="@id/item_person_line3_text"
@@ -153,8 +154,8 @@
             android:id="@+id/attempt_score_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@{@string/percentage_score(person.score)}"
-            android:visibility="@{person.score == 0 ? View.GONE : View.VISIBLE}"
+            android:text="@{@string/percentage_score(ContentEntryStatementScoreProgressExtKt.calculateScoreWithPenalty(person.scoreProgress))}"
+            android:visibility="@{person.scoreProgress == null || person.scoreProgress.resultMax == 0 ? View.GONE : View.VISIBLE}"
             app:layout_constraintTop_toBottomOf="@id/attempt_progress_text"
             app:layout_constraintStart_toStartOf="@id/attempt_progress_text"
             app:layout_constraintEnd_toEndOf="parent"
@@ -170,8 +171,8 @@
             android:layout_width="0dp"
             android:layout_height="@dimen/dimen_4dp"
             android:max="100"
-            android:progress="@{person.score}"
-            android:visibility="@{person.score == 0 ? View.GONE : View.VISIBLE}"
+            android:visibility="@{person.scoreProgress == null || person.scoreProgress.resultMax == 0 ? View.GONE : View.VISIBLE}"
+            app:scoreProgress="@{person.scoreProgress}"
             android:progressTint="@color/primaryColor"
             app:layout_constraintEnd_toStartOf="@id/attempt_score_text"
             app:layout_constraintBottom_toBottomOf="@id/attempt_score_text"

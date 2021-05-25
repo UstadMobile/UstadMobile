@@ -55,30 +55,6 @@
             app:layout_constraintEnd_toEndOf="@id/item_clazz_assignment_newitemicon"
             app:layout_constraintTop_toBottomOf="@id/item_clazz_assignment_newitemicon" />
 
-        <TextView
-            tools:text="100%"
-            android:id="@+id/item_person_progress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:scorePercentage="@{assignment.studentScore}"
-            android:visibility="@{assignment.studentScore.resultMax == 0 ? View.GONE : View.VISIBLE}"
-            app:layout_constraintStart_toStartOf="@+id/item_clazz_assignment_newitemicon"
-            app:layout_constraintTop_toBottomOf="@id/content_progress_fail_correct"
-            android:layout_marginBottom="@dimen/dimen_16dp" />
-
-        <TextView
-            android:paddingStart="@dimen/dimen_5dp"
-            android:paddingEnd="@dimen/dimen_5dp"
-            tools:text="(4/4)"
-            android:id="@+id/item_person_score_results"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text='@{"(" + assignment.studentScore.resultScore + &quot;/&quot; + assignment.studentScore.resultMax + ")"}'
-            android:visibility="@{assignment.studentScore.resultMax == 0 ? View.GONE : View.VISIBLE}"
-            app:layout_constraintStart_toEndOf="@+id/item_person_progress"
-            app:layout_constraintTop_toBottomOf="@+id/content_progress_fail_correct"
-            android:layout_marginBottom="@dimen/dimen_16dp" />
-
         <!-- Line 1-->
         <TextView
             android:id="@+id/line1_title"
@@ -136,6 +112,33 @@
             tools:text="17/10/2021"
             />
 
+        <TextView
+            tools:text="100%"
+            app:drawableStartCompat="@drawable/ic_baseline_emoji_events_24"
+            android:drawablePadding="@dimen/dimen_4dp"
+            android:layout_marginStart="@dimen/dimen_12dp"
+            android:id="@+id/item_person_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:scorePercentage="@{assignment.studentScore}"
+            android:visibility="@{assignment.studentScore.resultMax == 0 ? View.GONE : View.VISIBLE}"
+            app:layout_constraintStart_toEndOf="@+id/line3_deadline"
+            app:layout_constraintTop_toBottomOf="@id/line2_description"
+            android:layout_marginBottom="@dimen/dimen_16dp" />
+
+        <TextView
+            android:paddingStart="@dimen/dimen_5dp"
+            android:paddingEnd="@dimen/dimen_5dp"
+            tools:text="(4/4)"
+            android:id="@+id/item_person_score_results"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text='@{"(" + assignment.studentScore.resultScore + &quot;/&quot; + assignment.studentScore.resultMax + ")"}'
+            android:visibility="@{assignment.studentScore.resultMax == 0 ? View.GONE : View.VISIBLE}"
+            app:layout_constraintStart_toEndOf="@+id/item_person_progress"
+            app:layout_constraintTop_toBottomOf="@+id/line2_description"
+            android:layout_marginBottom="@dimen/dimen_16dp" />
+
 
         <TextView
             android:paddingStart="@dimen/dimen_8dp"
@@ -145,8 +148,8 @@
             android:visibility="@{assignment.studentProgress.hasMetricsPermission ? View.VISIBLE : View.GONE}"
             android:text="@{@string/three_num_items_with_name_with_comma(assignment.studentProgress.notStartedStudents, @string/not_started, assignment.studentProgress.calculateStartedStudents(), @string/started, assignment.studentProgress.completedStudents, @string/completed)}"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/line3_deadline"
-            app:layout_constraintTop_toBottomOf="@+id/line2_description"
+            app:layout_constraintStart_toStartOf="@+id/line1_title"
+            app:layout_constraintTop_toBottomOf="@+id/line3_deadline"
             tools:text="1 not started, 2 started, 2 completed" />
 
 

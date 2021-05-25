@@ -16,6 +16,8 @@ class ContentEntryStatementScoreProgress {
 
     var success: Byte = RESULT_UNSET
 
+    var penalty: Int = 0
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
@@ -27,6 +29,7 @@ class ContentEntryStatementScoreProgress {
         if (contentComplete != other.contentComplete) return false
         if (progress != other.progress) return false
         if (success != other.success) return false
+        if (penalty != other.penalty) return false
 
         return true
     }
@@ -37,6 +40,7 @@ class ContentEntryStatementScoreProgress {
         result = 31 * result + contentComplete.hashCode()
         result = 31 * result + progress
         result = 31 * result + success
+        result = 31 * result + penalty
         return result
     }
 

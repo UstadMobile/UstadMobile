@@ -113,7 +113,10 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
                             
                              COALESCE(CacheClazzAssignment.cacheContentComplete,'FALSE') AS contentComplete,
                                  
-                             COALESCE(CacheClazzAssignment.cacheSuccess,0) AS success
+                             COALESCE(CacheClazzAssignment.cacheSuccess,0) AS success,
+                             
+                             COALESCE(CacheClazzAssignment.cachePenalty,0) AS penalty    
+                           
                              
                       FROM ClazzAssignmentContentJoin
                             LEFT JOIN ContentEntry 

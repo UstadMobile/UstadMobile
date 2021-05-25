@@ -105,6 +105,11 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                         WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
                           AND cachePersonUid = :accountPersonUid),'FALSE') AS contentComplete,
                           
+            COALESCE((SELECT SUM(cachePenalty) 
+                        FROM CacheClazzAssignment 
+                       WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
+                         AND cachePersonUid = :accountPersonUid),0) AS penalty,                      
+                          
              0 as success,           
                  
               
@@ -145,8 +150,10 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
     @Query("""
         SELECT COALESCE(SUM(ResultSource.cacheMaxScore),0) AS resultMax, 
                COALESCE(SUM(ResultSource.cacheStudentScore),0) AS resultScore, 
-               'FALSE' as contentComplete, 0 as progress, 0 as success
-     	  FROM (SELECT CacheClazzAssignment.cacheStudentScore, CacheClazzAssignment.cacheMaxScore
+               'FALSE' as contentComplete, 0 as progress, 0 as success,
+               COALESCE(SUM(ResultSource.cachePenalty),0) AS penalty
+     	  FROM (SELECT CacheClazzAssignment.cacheStudentScore, CacheClazzAssignment.cacheMaxScore,
+                        CacheClazzAssignment.cachePenalty
      	 	      FROM ClazzAssignmentContentJoin 
                          LEFT JOIN ContentEntry 
                          ON ContentEntry.contentEntryUid = ClazzAssignmentContentJoin.cacjContentUid 
@@ -176,18 +183,25 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                 AND cachePersonUid = ResultSource.personUid
                 ) AS progress,
                 
-               ((CAST((SELECT SUM(cacheStudentScore) 
+                0 as success, 
+                
+                'FALSE' as contentComplete,
+                
+                (SELECT SUM(cacheStudentScore) 
                          FROM CacheClazzAssignment 
                         WHERE cacheClazzAssignmentUid = :assignmentUid
-                          AND cachePersonUid =  ResultSource.personUid) AS REAL) 
-                          / 
-                          (SELECT SUM(cacheMaxScore)
+                          AND cachePersonUid =  ResultSource.personUid) AS resultScore,
+                          
+                (SELECT SUM(cacheMaxScore)
                              FROM CacheClazzAssignment 
                             WHERE cacheClazzAssignmentUid = :assignmentUid
-                              AND cachePersonUid = ResultSource.personUid)) * 100) AS score,
-                              
-                              0 as success,
-            
+                              AND cachePersonUid = ResultSource.personUid) AS resultMax, 
+                                        
+                 (SELECT SUM(cachePenalty)
+                             FROM CacheClazzAssignment 
+                            WHERE cacheClazzAssignmentUid = :assignmentUid
+                              AND cachePersonUid = ResultSource.personUid) AS penalty,                         
+
             cm.commentsText AS latestPrivateComment
         
          FROM (SELECT Person.personUid, Person.firstNames, Person.lastName, 

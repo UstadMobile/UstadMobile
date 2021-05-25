@@ -12,6 +12,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.core.util.ext.outcomeToString
 import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.core.util.ext.systemImpl
@@ -320,8 +321,8 @@ fun TextView.setScorePercentage(scoreProgress: ContentEntryStatementScoreProgres
     if(scoreProgress == null){
         return
     }
-    val score = ((scoreProgress.resultScore / scoreProgress.resultMax.toFloat()) * 100).toInt()
-    text = "$score%"
+    // (4/5) * (1 - 20%) = penalty applied to score
+    text = "${scoreProgress.calculateScoreWithPenalty()}%"
 }
 
 @BindingAdapter("durationMinsSecs")

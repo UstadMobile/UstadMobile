@@ -62,14 +62,22 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             MAX(ResultSource.timestamp) AS endDate, 
             SUM(ResultSource.resultDuration) AS duration, 
             MAX(CASE WHEN ResultSource.contentEntryRoot 
-                THEN ResultSource.resultScoreScaled * 100 
-                ELSE 0 END) AS score, 
+                THEN resultScoreRaw
+                ELSE 0 END) AS resultScore, 
+            MAX(CASE WHEN ResultSource.contentEntryRoot 
+                THEN resultScoreMax
+                ELSE 0 END) AS resultMax,     
             MAX(ResultSource.extensionProgress) AS progress,
+            0 as penalty,
+            'FALSE' as contentComplete,
+            0 as success,
+         
             '' AS latestPrivateComment
         
          FROM (SELECT Person.personUid, Person.firstNames, Person.lastName, 
             StatementEntity.contextRegistration, StatementEntity.timestamp, 
-            StatementEntity.resultDuration, StatementEntity.resultScoreScaled, 
+            StatementEntity.resultDuration, StatementEntity.resultScoreRaw, 
+            StatementEntity.resultScoreMax,
             StatementEntity.contentEntryRoot, StatementEntity.extensionProgress
         
          ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
@@ -112,7 +120,8 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                 COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
                 COALESCE(StatementEntity.extensionProgress,0) AS progress, 
                 COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
-                COALESCE(StatementEntity.resultSuccess, 0) AS success
+                COALESCE(StatementEntity.resultSuccess, 0) AS success,
+                0 as penalty
                 
         FROM ContentEntry
             LEFT JOIN StatementEntity
