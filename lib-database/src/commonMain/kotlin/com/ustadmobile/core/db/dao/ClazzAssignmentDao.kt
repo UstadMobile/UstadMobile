@@ -52,7 +52,8 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                 WHERE statementContentEntryUid 
                                    IN (SELECT cacjContentUid 
                                         FROM ClazzAssignmentContentJoin 
-                                       WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid)
+                                       WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
+                                         AND cacjActive)
                                   AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
                                   AND StatementEntity.timestamp
                                         BETWEEN ClazzAssignment.caStartDate
@@ -203,9 +204,8 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                     AND StatementEntity.statementContentEntryUid = (SELECT cacjContentUid
                                   FROM ClazzAssignmentContentJoin
                                         JOIN ClazzAssignment 
-                                        ON ClazzAssignment.caUid = cacjAssignmentUid
-                                 WHERE cacjAssignmentUid = :assignmentUid
-                                  AND cacjActive
+                                        ON ClazzAssignment.caUid = :assignmentUid
+                                 WHERE cacjActive
                                   AND StatementEntity.timestamp
                                         BETWEEN ClazzAssignment.caStartDate
                                         AND ClazzAssignment.caGracePeriodDate)
@@ -283,7 +283,8 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                 WHERE statementContentEntryUid 
                                    IN (SELECT cacjContentUid 
                                         FROM ClazzAssignmentContentJoin 
-                                       WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid)
+                                       WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
+                                         AND cacjActive)
                                   AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
                                    AND StatementEntity.timestamp
                                         BETWEEN ClazzAssignment.caStartDate

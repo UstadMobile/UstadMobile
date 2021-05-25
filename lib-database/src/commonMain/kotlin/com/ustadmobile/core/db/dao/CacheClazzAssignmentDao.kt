@@ -54,6 +54,7 @@ abstract class CacheClazzAssignmentDao: BaseDao<CacheClazzAssignment> {
            AND clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}
            AND clazzEnrolmentActive
            AND caActive
+           AND cacjActive
            AND (:clazzUid = 0 OR ClazzAssignment.caClazzUid = :clazzUid)
            AND (:assignmentUid = 0 OR ClazzAssignment.caUid = :assignmentUid)
            AND (:personUid = 0 OR ClazzEnrolment.clazzEnrolmentPersonUid = :personUid)
@@ -61,6 +62,16 @@ abstract class CacheClazzAssignmentDao: BaseDao<CacheClazzAssignment> {
       GROUP BY cacheClazzAssignmentUid, cacheContentEntryUid, cachePersonUid
     """)
     abstract suspend fun cacheBestStatements(clazzUid: Long, assignmentUid: Long, personUid: Long)
+
+    @Query("""
+        DELETE
+         FROM CacheClazzAssignment
+        WHERE cacheContentEntryUid 
+                IN (SELECT cacjContentUid 
+                     FROM ClazzAssignmentContentJoin
+                    WHERE NOT cacjActive)
+    """)
+    abstract suspend fun deleteCachedInactiveContent()
 
 
     @Query("""
