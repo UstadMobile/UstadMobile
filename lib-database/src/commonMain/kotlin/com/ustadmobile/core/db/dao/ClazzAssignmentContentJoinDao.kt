@@ -34,6 +34,8 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
         
         COALESCE(CacheClazzAssignment.cacheSuccess,0) AS success,
         
+        COALESCE(CacheClazzAssignment.cachePenalty,0) AS penalty,
+        
         MIN(ResultSource.timestamp) AS startDate,
         MAX(ResultSource.timestamp)  AS endDate,
         SUM(ResultSource.resultDuration) AS duration, 
@@ -55,8 +57,8 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
                       
                  ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
                            LEFT JOIN StatementEntity 
-                           ON StatementEntity.statementPersonUid = Person.personUid
-                            AND StatementEntity.statementContentEntryUid = (SELECT cacjContentUid
+                           ON StatementEntity.statementPersonUid = :personUid 
+                            AND StatementEntity.statementContentEntryUid IN (SELECT cacjContentUid
                                   FROM ClazzAssignmentContentJoin
                                         JOIN ClazzAssignment 
                                         ON ClazzAssignment.caUid = cacjAssignmentUid
@@ -64,9 +66,9 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
                                   AND StatementEntity.timestamp
                                         BETWEEN ClazzAssignment.caStartDate
                                         AND ClazzAssignment.caGracePeriodDate)
-                WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
+                WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid               
                   AND PersonGroupMember.groupMemberActive  
-              GROUP BY StatementEntity.statementUid) AS ResultSource
+             GROUP BY StatementEntity.statementUid) AS ResultSource
           ON ClazzAssignmentContentJoin.cacjContentUid = ResultSource.statementContentEntryUid   
             
         WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = :clazzAssignmentUid

@@ -151,7 +151,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
         SELECT COALESCE(SUM(ResultSource.cacheMaxScore),0) AS resultMax, 
                COALESCE(SUM(ResultSource.cacheStudentScore),0) AS resultScore, 
                'FALSE' as contentComplete, 0 as progress, 0 as success,
-               COALESCE(SUM(ResultSource.cachePenalty),0) AS penalty
+               COALESCE(AVG(ResultSource.cachePenalty),0) AS penalty
      	  FROM (SELECT CacheClazzAssignment.cacheStudentScore, CacheClazzAssignment.cacheMaxScore,
                         CacheClazzAssignment.cachePenalty
      	 	      FROM ClazzAssignmentContentJoin 
@@ -197,7 +197,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                             WHERE cacheClazzAssignmentUid = :assignmentUid
                               AND cachePersonUid = ResultSource.personUid) AS resultMax, 
                                         
-                 (SELECT SUM(cachePenalty)
+                 (SELECT AVG(cachePenalty)
                              FROM CacheClazzAssignment 
                             WHERE cacheClazzAssignmentUid = :assignmentUid
                               AND cachePersonUid = ResultSource.personUid) AS penalty,                         
@@ -215,7 +215,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                           
              LEFT JOIN StatementEntity 
                 ON StatementEntity.statementPersonUid = Person.personUid 
-                    AND StatementEntity.statementContentEntryUid = (SELECT cacjContentUid
+                    AND StatementEntity.statementContentEntryUid IN (SELECT cacjContentUid
                                   FROM ClazzAssignmentContentJoin
                                         JOIN ClazzAssignment 
                                         ON ClazzAssignment.caUid = :assignmentUid

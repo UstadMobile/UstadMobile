@@ -76,12 +76,16 @@
             android:paddingStart="@dimen/dimen_5dp"
             tools:text="100%"
             android:id="@+id/item_person_progress"
+            app:drawableStartCompat="@drawable/ic_baseline_emoji_events_24"
+            android:drawablePadding="@dimen/dimen_4dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_10dp"
+            android:layout_marginEnd="@dimen/dimen_4dp"
             app:scorePercentage="@{contentEntry.scoreProgress}"
             android:visibility="@{contentEntry.scoreProgress.resultMax == 0 ? View.GONE : View.VISIBLE}"
-            app:layout_constraintStart_toStartOf="@+id/content_entry_item_thumbnail"
-            app:layout_constraintTop_toBottomOf="@+id/content_progress_fail_correct"
+            app:layout_constraintStart_toEndOf="@+id/content_entry_item_thumbnail"
+            app:layout_constraintTop_toBottomOf="@+id/item_content_person_duration"
             android:layout_marginBottom="@dimen/dimen_16dp" />
 
 
@@ -94,8 +98,25 @@
             android:text='@{"(" + contentEntry.scoreProgress.resultScore + &quot;/&quot; + contentEntry.scoreProgress.resultMax + ")"}'
             android:visibility="@{contentEntry.scoreProgress.resultMax == 0 ? View.GONE : View.VISIBLE}"
             app:layout_constraintStart_toEndOf="@+id/item_person_progress"
-            app:layout_constraintTop_toBottomOf="@+id/content_progress_fail_correct"
+            app:layout_constraintTop_toBottomOf="@+id/item_content_person_duration"
             android:layout_marginBottom="@dimen/dimen_16dp" />
+
+        <TextView
+            android:paddingStart="@dimen/dimen_5dp"
+            tools:text="(20% late penalty)"
+            android:layout_marginStart="@dimen/dimen_4dp"
+            android:id="@+id/item_person_penalty"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:textColor="@color/errorColor"
+            android:layout_marginEnd="@dimen/dimen_4dp"
+            android:text="@{@string/late_penalty(contentEntry.scoreProgress.penalty)}"
+            android:visibility="@{contentEntry.scoreProgress.penalty == 0 ? View.GONE : View.VISIBLE}"
+            app:layout_constraintStart_toEndOf="@+id/item_person_score_results"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_content_person_duration"
+            android:layout_marginBottom="@dimen/dimen_16dp" />
+
 
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -135,7 +156,6 @@
             android:layout_marginStart="@dimen/dimen_10dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:text="@{@plurals/number_of_attempts(contentEntry.attempts, contentEntry.attempts)}"
-            android:visibility="@{contentEntry.attempts == 0 ? View.GONE : View.VISIBLE}"
             app:drawableStartCompat="@drawable/ic_baseline_settings_backup_restore_12"
             android:drawablePadding="@dimen/dimen_4dp"
             app:layout_constraintStart_toEndOf="@+id/content_entry_item_thumbnail"
@@ -149,7 +169,6 @@
             tools:text="1/2/2020 - 2/2/2020"
             app:statementStartDate="@{contentEntry.startDate}"
             app:statementEndDate="@{contentEntry.endDate}"
-            android:visibility="@{contentEntry.attempts == 0 ? View.GONE : View.VISIBLE}"
             android:id="@+id/item_entry_attempt_start_end"
             android:layout_width="@dimen/dimen_0dp"
             android:layout_height="wrap_content"
