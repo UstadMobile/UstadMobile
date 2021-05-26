@@ -208,6 +208,7 @@ open class ContentEntry() {
         if (publik != other.publik) return false
         if (ceInactive != other.ceInactive) return false
         if (contentTypeFlag != other.contentTypeFlag) return false
+        if (completionCriteria != other.completionCriteria) return false
         if (contentEntryLocalChangeSeqNum != other.contentEntryLocalChangeSeqNum) return false
         if (contentEntryMasterChangeSeqNum != other.contentEntryMasterChangeSeqNum) return false
         if (contentEntryLastChangedBy != other.contentEntryLastChangedBy) return false
@@ -235,6 +236,7 @@ open class ContentEntry() {
         result = 31 * result + publik.hashCode()
         result = 31 * result + ceInactive.hashCode()
         result = 31 * result + contentTypeFlag
+        result = 31 * result + completionCriteria
         result = 31 * result + contentEntryLocalChangeSeqNum.hashCode()
         result = 31 * result + contentEntryMasterChangeSeqNum.hashCode()
         result = 31 * result + contentEntryLastChangedBy

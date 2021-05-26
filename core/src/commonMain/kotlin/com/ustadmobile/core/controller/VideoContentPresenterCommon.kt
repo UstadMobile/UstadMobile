@@ -4,17 +4,13 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.storeProgressStatement
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContainerDao
-import com.ustadmobile.core.db.dao.ContainerEntryDao
-import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryProgress
-import com.ustadmobile.lib.db.entities.StatementEntity
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -98,7 +94,7 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
             return
         }
 
-        GlobalScope.launch(doorMainDispatcher()) {
+        GlobalScope.launch{
             val progress = (position.toFloat() / videoLength * 100).toInt()
             entry?.also {
                 statementEndpoint.storeProgressStatement(
