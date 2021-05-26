@@ -17,6 +17,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.randomUuid
+import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
@@ -59,6 +60,19 @@ class ContentEntryEdit2Presenter(context: Any,
         LICENSE_TYPE_CC0(ContentEntry.LICENSE_TYPE_CC_0, MessageID.license_type_cc_0)
     }
 
+    enum class CompletionCriteriaOptions(val optionVal: Int, val messageId: Int) {
+        MANAGED_BY_CONTENT(ContentEntry.COMPLETION_CRITERIA_MANAGED_BY_CONTENT,
+                MessageID.managed_by_content),
+        MIN_SCORE(ContentEntry.COMPLETION_CRITERIA_MIN_SCORE,
+                MessageID.min_score),
+        STUDENTS_MARKS_COMPLETE(ContentEntry.COMPLETION_CRITERIA_MARKED_BY_STUDENT,
+                MessageID.student_marks_content)
+    }
+
+    class CompletionCriteriaMessageIdOption(day: CompletionCriteriaOptions, context: Any)
+        : MessageIdOption(day.messageId, context, day.optionVal)
+
+
     data class UmStorageOptions(var messageId: Int, var label: String)
 
     private var parentEntryUid: Long = 0
@@ -79,6 +93,7 @@ class ContentEntryEdit2Presenter(context: Any,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.licenceOptions = LicenceOptions.values().map { LicenceMessageIdOptions(it, context) }
+        view.completionCriteriaOptions = CompletionCriteriaOptions.values().map { CompletionCriteriaMessageIdOption(it, context) }
         parentEntryUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0
         GlobalScope.launch(doorMainDispatcher()) {
             view.storageOptions = systemImpl.getStorageDirsAsync(context)

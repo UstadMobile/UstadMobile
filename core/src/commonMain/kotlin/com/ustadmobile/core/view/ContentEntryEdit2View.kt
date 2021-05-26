@@ -12,6 +12,8 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
 
     var licenceOptions: List<ContentEntryEdit2Presenter.LicenceMessageIdOptions>?
 
+    var completionCriteriaOptions: List<ContentEntryEdit2Presenter.CompletionCriteriaMessageIdOption>?
+
     var selectedStorageIndex: Int
 
     var titleErrorEnabled: Boolean

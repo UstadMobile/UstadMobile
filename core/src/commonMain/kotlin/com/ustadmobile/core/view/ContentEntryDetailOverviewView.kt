@@ -19,6 +19,8 @@ interface ContentEntryDetailOverviewView: UstadDetailView<ContentEntryWithMostRe
 
     var locallyAvailable: Boolean
 
+    var markCompleteVisible: Boolean
+
     companion object {
 
         const val VIEW_NAME = "ContentEntryDetailOverviewView"

@@ -38,6 +38,8 @@ interface ContentEntryDetailFragmentEventHandler {
     fun handleOnClickDeleteButton()
 
     fun handleOnClickManageDownloadButton()
+
+    fun handleOnClickMarkComplete()
 }
 
 class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMostRecentContainer>(), ContentEntryDetailOverviewView, ContentEntryDetailFragmentEventHandler{
@@ -71,6 +73,12 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
         set(value) {
             field = value
             mBinding?.locallyAvailable = value
+        }
+
+    override var markCompleteVisible: Boolean = false
+        set(value) {
+            field = value
+            mBinding?.markCompleteVisible = value
         }
 
 
@@ -107,6 +115,10 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
 
     override fun handleOnClickManageDownloadButton() {
         mPresenter?.handleOnClickManageDownload()
+    }
+
+    override fun handleOnClickMarkComplete() {
+
     }
 
     override var availableTranslationsList: DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage>? = null
