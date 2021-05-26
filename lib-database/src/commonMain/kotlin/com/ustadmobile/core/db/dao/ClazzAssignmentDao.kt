@@ -214,17 +214,20 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                 AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
                           
              LEFT JOIN StatementEntity 
-                ON StatementEntity.statementPersonUid = Person.personUid 
-                    AND StatementEntity.statementContentEntryUid IN (SELECT cacjContentUid
-                                  FROM ClazzAssignmentContentJoin
-                                        JOIN ClazzAssignment 
-                                        ON ClazzAssignment.caUid = :assignmentUid
-                                 WHERE cacjActive
-                                  AND StatementEntity.timestamp
-                                        BETWEEN ClazzAssignment.caStartDate
-                                        AND ClazzAssignment.caGracePeriodDate)
+             ON StatementEntity.statementPersonUid = Person.personUid 
+                
+             LEFT JOIN ClazzAssignmentContentJoin 
+             ON ClazzAssignmentContentJoin.cacjContentUid = StatementEntity.statementContentEntryUid
+		     
+             LEFT JOIN ClazzAssignment 
+             ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid   
                     WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
                         AND PersonGroupMember.groupMemberActive  
+                        AND ClazzAssignment.caUid = :assignmentUid
+                        AND cacjActive
+                        AND StatementEntity.timestamp
+                            BETWEEN ClazzAssignment.caStartDate
+                            AND ClazzAssignment.caGracePeriodDate            
                         AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
                         AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}     
                         AND ClazzEnrolment.clazzEnrolmentActive
