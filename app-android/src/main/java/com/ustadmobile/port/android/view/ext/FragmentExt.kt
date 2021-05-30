@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
+import com.google.gson.Gson
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.networkmanager.defaultGson
 import com.ustadmobile.core.util.ext.putEntityAsJson
@@ -17,13 +18,20 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.port.android.util.ext.putResultDestInfo
 import com.ustadmobile.port.android.view.UstadBaseFragment
 import com.ustadmobile.port.android.view.UstadEditFragment
+import org.kodein.di.DI
+import org.kodein.di.android.di
+import org.kodein.di.android.x.closestDI
+import org.kodein.di.instance
 
 /**
  * Save the result of a fragment (e.g. a selection from a list or newly created entity) to the
  * BackStack SavedStateHandle as specified by ARG_RESULT_DEST_ID and ARG_RESULT_DEST_KEY
  */
 fun Fragment.saveResultToBackStackSavedStateHandle(result: List<*>) {
-    saveResultToBackStackSavedStateHandle(defaultGson().toJson(result))
+    val di: DI by closestDI()
+    val gson: Gson by di.instance()
+
+    saveResultToBackStackSavedStateHandle(gson.toJson(result))
 }
 
 fun Fragment.saveResultToBackStackSavedStateHandle(result: String) {

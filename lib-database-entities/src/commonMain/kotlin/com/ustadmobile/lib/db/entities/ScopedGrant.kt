@@ -4,9 +4,11 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.TABLE_ID
+import kotlinx.serialization.Serializable
 
 @Entity
 @SyncableEntity(tableId = TABLE_ID)
+@Serializable
 class ScopedGrant {
 
     @PrimaryKey(autoGenerate = true)

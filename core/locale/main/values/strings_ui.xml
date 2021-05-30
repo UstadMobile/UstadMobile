@@ -1131,5 +1131,35 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     -->
     <string name="manage_parental_consent">Manage parental consent</string>
 
+    <!-- Used in the context of permission management -->
+    <string name="view_class_content">View class content</string>
+
+    <!-- Used in the context of permission management -->
+    <string name="edit_class_content">Edit class content</string>
+
+    <!-- Used in the context of permission management -->
+    <string name="view_class_learning_records">View class learning records</string>
+
+    <!-- Used in the context of permission management. Member refers to a member in a class or school (teacher, students, etc) -->
+    <string name="view_contact_details_of_members">View member contact details</string>
+
+    <!-- Used in the context of permission management. Member refers to a member in a class or school (teacher, students, etc) -->
+    <string name="edit_contact_details_of_members">Edit member contact details</string>
+
+     <!--
+     Used in the context of permission management.
+     Member refers to a member in a class or school (teacher, students, etc).
+     Socioeconomic refers to information about social or economic status e.g. level of Internet access,
+     refugee status, etc.
+     -->
+    <string name="view_socioeconomic_details_of_members">View socioeconomic details of members</string>
+
+     <!--
+     Used in the context of permission management.
+     Member refers to a member in a class or school (teacher, students, etc).
+     Socioeconomic refers to information about social or economic status e.g. level of Internet access,
+     refugee status, etc.
+     -->
+    <string name="edit_socioeconomic_details_of_members">Edit socioeconomic details of members</string>
 
 </resources>

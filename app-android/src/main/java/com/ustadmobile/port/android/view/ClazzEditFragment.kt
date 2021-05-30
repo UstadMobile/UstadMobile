@@ -23,6 +23,7 @@ import com.ustadmobile.core.util.LongWrapper
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.TimeZoneListFragment.Companion.RESULT_TIMEZONE_KEY
@@ -80,6 +81,11 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         set(value) {
             field = value
             mDataBinding?.clazzStartDateError = value
+        }
+
+    override var scopedGrants: DoorLiveData<ScopedGrantAndName>? = null
+        set(value) {
+            field = value
         }
 
     class ScheduleRecyclerAdapter(val activityEventHandler: ClazzEdit2ActivityEventHandler,
