@@ -198,6 +198,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                 COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
                 COALESCE(StatementEntity.extensionProgress,0) AS progress, 
                 COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
+                COALESCE(StatementEntity.resultSuccess, 0) AS success,
                 0 as penalty
             FROM ContentEntry 
                     LEFT JOIN ContentEntryParentChildJoin 

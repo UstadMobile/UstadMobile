@@ -3,20 +3,20 @@ package com.ustadmobile.port.android.view.binding
 import android.annotation.SuppressLint
 import android.content.Context
 import android.text.format.DateFormat
+import android.view.View
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.DateTimeTz
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
-import com.ustadmobile.core.util.ext.outcomeToString
-import com.ustadmobile.core.util.ext.roleToString
-import com.ustadmobile.core.util.ext.systemImpl
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.VerbEntity.Companion.VERB_ANSWERED_UID
 import java.util.*
 import java.util.concurrent.TimeUnit
 import com.soywiz.klock.DateFormat as KlockDateFormat
@@ -342,6 +342,47 @@ fun TextView.setDurationMinutesAndSeconds(duration: Long){
             seconds.toInt(), seconds.toInt())
 
     text = durationString
+
+}
+
+@BindingAdapter("statementQuestionAnswer")
+fun TextView.setStatementQuestionAnswer(statementEntity: StatementEntity){
+    if(statementEntity.statementVerbUid != VERB_ANSWERED_UID){
+        visibility = View.GONE
+        return
+    }else{
+        visibility = View.VISIBLE
+    }
+    val fullStatementJson = statementEntity.fullStatement ?: return
+    val statement = gson.fromJson(fullStatementJson, Statement::class.java)
+    var statementText = statement?.`object`?.definition?.description?.get("en-US")
+    val answerResponse = statement.result?.response
+    if(answerResponse?.isNotEmpty() == true || answerResponse?.contains("[,]") == true){
+        val responses = answerResponse.split("[,]")
+        val choiceMap = statement.`object`?.definition?.choices
+        val sourceMap = statement?.`object`?.definition?.source
+        val targetMap = statement?.`object`?.definition?.target
+        statementText += "<br />"
+        responses.forEachIndexed { i, it ->
+
+            var description = choiceMap?.find { choice -> choice.id == it }?.description?.get("en-US")
+            if(it.contains("[.]")){
+                val dragResponse = it.split("[.]")
+                description = ""
+                description += sourceMap?.find { source -> source.id == dragResponse[0] }?.description?.get("en-US")
+                description += " on "
+                description += targetMap?.find { target -> target.id == dragResponse[1] }?.description?.get("en-US")
+            }
+
+
+            statementText += "${i+1}: ${if(description.isNullOrEmpty()) it else description} <br />"
+
+
+        }
+
+    }
+    text = HtmlCompat.fromHtml(statementText ?: "", HtmlCompat.FROM_HTML_MODE_LEGACY)
+
 
 }
 
