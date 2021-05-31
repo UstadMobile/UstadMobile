@@ -15,8 +15,14 @@ abstract class ScopedGrantDao {
     @Insert
     abstract suspend fun insertAsync(scopedGrant: ScopedGrant): Long
 
+    @Insert
+    abstract suspend fun insertListAsync(scopedGrantList: List<ScopedGrant>)
+
     @Update
     abstract suspend fun updateAsync(scopedGrant: ScopedGrant)
+
+    @Update
+    abstract suspend fun updateListAsync(scopedGrantList: List<ScopedGrant>)
 
     @Query("""
         SELECT ScopedGrant.*,

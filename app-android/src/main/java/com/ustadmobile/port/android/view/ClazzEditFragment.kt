@@ -83,7 +83,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             mDataBinding?.clazzStartDateError = value
         }
 
-    override var scopedGrants: DoorLiveData<ScopedGrantAndName>? = null
+    override var scopedGrants: DoorLiveData<List<ScopedGrantAndName>>? = null
         set(value) {
             field = value
         }

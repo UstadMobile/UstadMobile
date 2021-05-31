@@ -76,5 +76,10 @@ open class PersonGroup() {
 
         const val PERSONGROUP_FLAG_PARENT_GROUP = 2
 
+        const val PERSONGROUP_FLAG_STUDENTGROUP = 4
+
+        const val PERSONGROUP_FLAG_TEACHERGROUP = 8
+
+
     }
 }

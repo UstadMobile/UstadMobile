@@ -14,7 +14,7 @@ interface ClazzEdit2View: UstadEditView<ClazzWithHolidayCalendarAndSchool> {
 
     var clazzStartDateError: String?
 
-    var scopedGrants: DoorLiveData<ScopedGrantAndName>?
+    var scopedGrants: DoorLiveData<List<ScopedGrantAndName>>?
 
     companion object {
 

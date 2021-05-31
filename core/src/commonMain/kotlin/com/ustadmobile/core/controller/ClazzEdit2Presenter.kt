@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.schedule.*
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
+import com.ustadmobile.core.util.ScopedGrantOneToManyHelper
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
@@ -17,8 +18,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_SCHOOL_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
-import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
-import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -38,12 +38,15 @@ class ClazzEdit2Presenter(context: Any,
             ARG_SAVEDSTATE_SCHEDULES, ListSerializer(Schedule.serializer()),
             ListSerializer(Schedule.serializer()), this, Schedule::class) {scheduleUid = it}
 
+    val scopedGrantOneToManyHelper = ScopedGrantOneToManyHelper(this)
+
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.clazzSchedules = scheduleOneToManyJoinEditHelper.liveList
+        view.scopedGrants = scopedGrantOneToManyHelper.liveList
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWithHolidayCalendarAndSchool? {
@@ -62,8 +65,14 @@ class ClazzEdit2Presenter(context: Any,
         val schedules = db.onRepoWithFallbackToDb(2000) {
             it.scheduleDao.takeIf { clazzUid != 0L }?.findAllSchedulesByClazzUidAsync(clazzUid)
         } ?: listOf()
-
         scheduleOneToManyJoinEditHelper.liveList.sendValue(schedules)
+
+        val scopedGrants = db.onRepoWithFallbackToDb(2000) {
+            it.scopedGrantDao.takeIf {  clazzUid != 0L }?.findByTableIdAndEntityUid(
+                Clazz.TABLE_ID, clazzUid)
+        } ?: listOf() //TODO: Create default ScopedGrants for owner, students, teachers.
+        scopedGrantOneToManyHelper.liveList.sendValue(scopedGrants)
+
         return clazz
     }
 
@@ -78,7 +87,6 @@ class ClazzEdit2Presenter(context: Any,
         }
 
         scheduleOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
-
         return clazz
     }
 
@@ -122,6 +130,8 @@ class ClazzEdit2Presenter(context: Any,
                 it.scheduleClazzUid = entity.clazzUid
             }
 
+            scopedGrantOneToManyHelper.commitToDatabase(repo, Clazz.TABLE_ID, entity.clazzUid)
+
 
             val fromDateTime = DateTime.now().toOffsetByTimezone(entity.effectiveTimeZone).localMidnight
 
@@ -151,6 +161,15 @@ class ClazzEdit2Presenter(context: Any,
     fun handleRemoveSchedule(schedule: Schedule) {
         scheduleOneToManyJoinEditHelper.onDeactivateEntity(schedule)
     }
+
+    fun handleAddOrEditScopedGrantAndName(scopedGrantAndName: ScopedGrantAndName) {
+        scopedGrantOneToManyHelper.onEditResult(scopedGrantAndName)
+    }
+
+    fun handleRemoveScopedGrantAndName(scopedGrantAndName: ScopedGrantAndName) {
+        scopedGrantOneToManyHelper.onDeactivateEntity(scopedGrantAndName)
+    }
+
 
     companion object {
 
