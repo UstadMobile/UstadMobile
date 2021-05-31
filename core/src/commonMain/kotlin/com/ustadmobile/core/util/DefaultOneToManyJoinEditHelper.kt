@@ -7,7 +7,7 @@ import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import kotlin.reflect.KClass
 
-class DefaultOneToManyJoinEditHelper<T: Any>(pkGetter: (T) -> Long,
+open class DefaultOneToManyJoinEditHelper<T: Any>(pkGetter: (T) -> Long,
                                              serializationKey: String,
                                              serializationStrategy: SerializationStrategy<List<T>>,
                                              deserializationStrategy: DeserializationStrategy<List<T>>,
