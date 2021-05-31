@@ -1,23 +1,21 @@
 package com.ustadmobile.port.android.view.binding
 
 import android.app.AlertDialog
-import android.app.DatePickerDialog
 import android.content.Context
 import android.text.format.DateFormat
 import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.DatePicker
+import android.widget.EditText
 import android.widget.TextView
-import androidx.appcompat.view.ContextThemeWrapper
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
-import com.google.android.material.datepicker.MaterialDatePicker.Builder.datePicker
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.systemImpl
+import com.ustadmobile.port.android.view.ext.calendar
 import java.text.MessageFormat
 import java.util.*
 
@@ -27,7 +25,7 @@ import java.util.*
  * a default. 0 and Long.MAX_VALUE are reserved defaults. MAX_VALUE is used for end times to simplify
  * queries.
  */
-private val Long.isSet: Boolean
+val Long.isSet: Boolean
     get() = this != 0L && this != Long.MAX_VALUE
 
 /**
@@ -35,13 +33,23 @@ private val Long.isSet: Boolean
  * Contains the logic for linking editText dates with Datepicker
  */
 
-fun updateDateOnEditText(et: TextView, date: Long) {
-    val dateFormatter = DateFormat.getDateFormat(et.context)
-    if (!date.isSet) {
-        et.setText("")
-    } else {
-        et.setText(dateFormatter.format(date))
+fun updateDateOnEditText(et: TextView, date: Long, timeZone: String? = null) {
+    if(!date.isSet){
+        et.text = ""
+        return
     }
+    val dateFormatter = DateFormat.getDateFormat(et.context)
+    dateFormatter.takeIf { timeZone != null }?.timeZone = TimeZone.getTimeZone(timeZone)
+    et.text = dateFormatter.format(date)
+}
+
+private fun EditText.updateDateWithTimeZone(){
+    if(!calendar.timeInMillis.isSet){
+        setText("")
+        return
+    }
+    val dateFormatter = DateFormat.getDateFormat(context)
+    setText(dateFormatter.format(calendar.time))
 }
 
 /**
@@ -50,12 +58,12 @@ fun updateDateOnEditText(et: TextView, date: Long) {
  */
 
 fun updateDateOnEditTextWithExtraText(prepent: String, append: String, et: TextView, date: Long) {
-    val dateFormatter = DateFormat.getDateFormat(et.context)
     if (!date.isSet) {
-        et.setText(prepent + " " + append)
-    } else {
-        et.setText(prepent + " " + dateFormatter.format(date) + " - " + append)
+        et.text = "$prepent $append"
+        return
     }
+    val dateFormatter = DateFormat.getDateFormat(et.context)
+    et.text = "$prepent ${dateFormatter.format(date)} $append"
 }
 
 private val MS_PER_HOUR = 3600000
@@ -92,21 +100,50 @@ fun updateDateTimeOnEditText(et: TextView, date: Long) {
  */
 
 fun updateDateTimeOnEditTextWithExtra(prepend: String, append: String?, et: TextView, date: Long, time: Long) {
+    if (!date.isSet) {
+        et.text = ""
+        return
+    }
     val dateDate = Date(date)
-
     val timeDate = scheduleTimeToDate(time.toInt())
 
-    var text = ""
-    text = if (prepend.isEmpty()) {
+    et.text = if (prepend.isEmpty()) {
         dateWithTimeFormat.format(arrayOf(dateDate, timeDate, append))
     } else {
         dateWithTimeFormatWithPrepend.format(arrayOf(prepend, dateDate, timeDate, append))
     }
-    if (date == 0L || date == Long.MAX_VALUE) {
-        text = ""
-    }
-    et.text = text
+}
 
+fun openDateTimeZonePicker(et: EditText, context: Context, inverseBindingListener: InverseBindingListener){
+    val calendar = Calendar.getInstance()
+    calendar.timeInMillis = if(!et.calendar.timeInMillis.isSet){
+        calendar.timeInMillis
+    }else{
+        et.calendar.timeInMillis
+    }
+    val builder = AlertDialog.Builder(context)
+
+    val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_date_picker,
+            null, false)
+
+    builder.setView(dialogView)
+
+    val picker = dialogView.findViewById<DatePicker>(R.id.date_picker)
+    picker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH), null)
+
+    builder.setPositiveButton(et.systemImpl.getString(MessageID.ok,
+            context)) { dialog, _ ->
+
+        et.calendar[Calendar.DAY_OF_MONTH] = picker.dayOfMonth
+        et.calendar[Calendar.MONTH] = picker.month
+        et.calendar[Calendar.YEAR] = picker.year
+        et.updateDateWithTimeZone()
+        inverseBindingListener.onChange()
+    }
+    builder.setNegativeButton(et.systemImpl.getString(MessageID.cancel,
+            context)) { dialog, _ -> dialog.dismiss() }
+    builder.show()
 }
 
 fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: InverseBindingListener) {
@@ -159,11 +196,37 @@ fun getDateString(et: TextView, inverseBindingListener: InverseBindingListener) 
     }
 }
 
+@BindingAdapter("dateTimeLongAttrChanged")
+fun EditText.getDateTimeLong(inverseBindingListener: InverseBindingListener){
+    setOnClickListener{
+        openDateTimeZonePicker(this, context, inverseBindingListener)
+    }
+}
+
 @BindingAdapter("dateLong")
 fun setDate(et: TextView, date: Long) {
-    updateDateOnEditText(et, date)
+    updateDateOnEditText(et, date, null)
     et.setTag(R.id.tag_datelong, date)
 }
+
+@BindingAdapter("dateTimeLong")
+fun EditText.setDateTime(date: Long){
+    calendar.timeInMillis = date
+    updateDateWithTimeZone()
+}
+
+@BindingAdapter("timeZone")
+fun EditText.etTimeZone(timeZone: String?){
+    if(timeZone.isNullOrEmpty()){
+        return
+    }
+    calendar.timeZone = TimeZone.getTimeZone(timeZone)
+    updateDateWithTimeZone()
+    updateTimeWithTimeZone()
+}
+
+
+
 
 @BindingAdapter("dateLongWithExtra", "dateAppend", "datePrepend")
 fun setDateWithExtras(et: TextView, date: Long, append: String?, prepend: String?) {
@@ -206,6 +269,7 @@ fun setDateString(et: TextView, dateLongString: String?) {
     et.setTag(R.id.tag_datelong, date)
 }
 
+
 @InverseBindingAdapter(attribute = "dateLong")
 fun getRealValue(et: TextView): Long {
     return et.getTag(R.id.tag_datelong) as? Long ?: 0L
@@ -216,8 +280,14 @@ fun getRealStringValue(et: TextView): String {
     return getRealValue(et).toString()
 }
 
+@InverseBindingAdapter(attribute = "dateTimeLong")
+fun getRealDateTimeZoneValue(et: TextView): Long {
+    return (et.getTag(R.id.tag_calendar) as? Calendar)?.timeInMillis ?: 0L
+}
+
 @BindingAdapter("dateUseSpinners")
 fun TextView.setDateUseSpinners(dateUseSpinners: Boolean) {
     setTag(R.id.tag_dateusespinner, dateUseSpinners)
 }
+
 

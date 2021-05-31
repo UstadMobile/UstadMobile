@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.*
 import android.widget.AdapterView
 import androidx.core.os.bundleOf
+import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -75,11 +76,11 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
     }
 
     private var deadlineDateListener: View.OnClickListener? = View.OnClickListener {
-        deadlineDate = Long.MAX_VALUE
-    }
-
-    private var deadlineDateTimeListener: View.OnClickListener? = View.OnClickListener {
-        deadlineTime = 0
+        entity?.caDeadlineDate = Long.MAX_VALUE
+        entity?.caLateSubmissionType = 0
+        mBinding?.lateSubmissionVisibility = View.GONE
+        mBinding?.gracePeriodVisibility = View.GONE
+        mBinding?.clazzAssignment = entity
     }
 
 
@@ -89,8 +90,10 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             rootView = it.root
             it.activityEventHandler = this
             it.typeSelectionListener = this
+            it.caDeadlineDate.doAfterTextChanged {
+                mBinding?.clazzAssignment = entity
+            }
             it.caDeadlineDateTextinput.setEndIconOnClickListener(deadlineDateListener)
-            it.caDeadlineDatetimeTextinput.setEndIconOnClickListener(deadlineDateTimeListener)
         }
 
         contentRecyclerView = rootView.findViewById(R.id.ca_recyclerview_content)
@@ -129,7 +132,6 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         contentRecyclerAdapter = null
         contentRecyclerView = null
         deadlineDateListener = null
-        deadlineDateTimeListener = null
     }
 
     override var entity: ClazzAssignment? = null
@@ -158,45 +160,6 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         set(value) {
             field = value
             mBinding?.fieldsEnabled = value
-        }
-    override var startDate: Long = 0L
-        get() = mBinding?.startDate ?: 0L
-        set(value) {
-            field = value
-            mBinding?.startDate = value
-        }
-
-    override var startTime: Long = 0L
-        get() = mBinding?.startTime ?: 0L
-        set(value) {
-            field = value
-            mBinding?.startTime = value
-        }
-
-    override var deadlineDate: Long = 0L
-        get() = mBinding?.deadlineDate ?: 0L
-        set(value) {
-            field = value
-            mBinding?.deadlineDate = value
-        }
-    override var deadlineTime: Long = 0L
-        get() = mBinding?.deadlineTime ?: 0L
-        set(value) {
-            field = value
-            mBinding?.deadlineTime = value
-        }
-    override var gracePeriodDate: Long = 0L
-        get() = mBinding?.gracePeriodDate ?: 0L
-        set(value) {
-            field = value
-            mBinding?.gracePeriodDate = value
-        }
-
-    override var gracePeriodTime: Long = 0L
-        get() = mBinding?.gracePeriodTime ?: 0L
-        set(value) {
-            field = value
-            mBinding?.gracePeriodTime = value
         }
 
     override var caGracePeriodError: String? = null

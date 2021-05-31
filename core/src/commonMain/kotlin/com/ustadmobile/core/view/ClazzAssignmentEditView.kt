@@ -8,15 +8,6 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusA
 
 interface ClazzAssignmentEditView: UstadEditView<ClazzAssignment> {
 
-    var startDate: Long
-    var startTime: Long
-
-    var deadlineDate: Long
-    var deadlineTime: Long
-
-    var gracePeriodDate: Long
-    var gracePeriodTime: Long
-
     var caGracePeriodError: String?
     var caDeadlineError: String?
     var caTitleError: String?
