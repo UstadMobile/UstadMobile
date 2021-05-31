@@ -132,7 +132,7 @@ class ClazzAssignmentEditPresenter(context: Any,
                 return@launch
             }
 
-            if (entity.caStartDate == 0L || entity.caStartDate == 0L) {
+            if (entity.caStartDate == 0L) {
                 view.caStartDateError = systemImpl.getString(MessageID.field_required_prompt, context)
                 return@launch
             }

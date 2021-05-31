@@ -14,8 +14,6 @@ import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.view.ClazzAssignmentDetailView
 import com.ustadmobile.core.view.ClazzAssignmentEditView
-import com.ustadmobile.core.view.ReportDetailView
-import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
@@ -82,9 +80,6 @@ class ClazzAssignmentEditPresenterTest {
             clazzStartTime = DateTime(2020, 8, 10).unixMillisLong
         }
 
-        whenever(mockView.deadlineDate).thenReturn(Long.MAX_VALUE)
-        whenever(mockView.gracePeriodDate).thenReturn(Long.MAX_VALUE)
-        whenever(mockView.startDate).thenReturn(DateTime(2020, 10, 10).unixMillisLong)
 
     }
 
@@ -107,13 +102,11 @@ class ClazzAssignmentEditPresenterTest {
                 presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
 
-        verify(mockView, timeout(5000)).deadlineDate = eq(Long.MAX_VALUE)
-        verify(mockView, timeout(5000)).gracePeriodTime = eq(0)
-
         val initialEntity = mockView.captureLastEntityValue()!!
 
         //TODO: Make some changes (e.g. as the user would do using data binding
         initialEntity.caTitle = "Test Clazz Assignment"
+        initialEntity.caStartDate = DateTime(2021,5,10).unixMillisLong
 
         presenter.handleClickSave(initialEntity)
 
