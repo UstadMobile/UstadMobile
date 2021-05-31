@@ -66,6 +66,7 @@ fun XapiStatementEndpoint.storeCompletedStatement(account: UmAccount, entry: Con
 
         this.result = Result().apply {
             this.completion = true
+            this.extensions = mapOf("https://w3id.org/xapi/cmi5/result/extensions/progress" to 100)
             if(scoreProgress != null){
                 success = true
                 this.score = Score().apply {

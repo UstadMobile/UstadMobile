@@ -140,7 +140,7 @@
             android:id="@+id/item_person_progress_image"
             android:tint="?colorOnIconTint"
             app:srcCompat="@drawable/exo_ic_check"
-            android:visibility="@{statement.resultScoreScaled == 0 ? View.GONE : View.VISIBLE}"
+            android:visibility="@{statement.resultScoreMax > 0 ? View.VISIBLE : View.GONE}"
             android:layout_width="12dp"
             android:layout_height="12dp"
             app:layout_constraintStart_toStartOf="@+id/item_person_start_date_image"
@@ -156,7 +156,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@{@string/percentage_score((int)(statement.resultScoreScaled * 100))}"
-            android:visibility="@{statement.resultScoreScaled == 0 ? View.GONE : View.VISIBLE}"
+            android:visibility="@{statement.resultScoreMax > 0 ? View.VISIBLE : View.GONE}"
             app:layout_constraintStart_toEndOf="@+id/item_person_progress_image"
             app:layout_constraintTop_toBottomOf="@+id/item_person_start_date_time"
             android:layout_marginBottom="@dimen/dimen_16dp" />
@@ -170,7 +170,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text='@{"(" + statement.resultScoreRaw + &quot;/&quot; + statement.resultScoreMax + ")"}'
-            android:visibility="@{statement.resultScoreScaled == 0 ? View.GONE : View.VISIBLE}"
+            android:visibility="@{statement.resultScoreMax > 0 ? View.VISIBLE : View.GONE}"
             app:layout_constraintStart_toEndOf="@+id/item_person_progress"
             app:layout_constraintTop_toBottomOf="@+id/item_person_start_date_time"
             android:layout_marginBottom="@dimen/dimen_16dp" />
