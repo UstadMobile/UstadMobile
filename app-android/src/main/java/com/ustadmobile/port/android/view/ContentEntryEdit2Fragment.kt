@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebView
+import android.widget.AdapterView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,10 +29,13 @@ import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.UMStorageDir
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.util.ext.*
@@ -52,7 +56,9 @@ interface ContentEntryEdit2FragmentEventHandler {
 
 }
 
-class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = null) : UstadEditFragment<ContentEntryWithLanguage>(), ContentEntryEdit2View, ContentEntryEdit2FragmentEventHandler {
+class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = null)
+    : UstadEditFragment<ContentEntryWithLanguage>(), ContentEntryEdit2View,
+        ContentEntryEdit2FragmentEventHandler, DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption> {
 
     private var mBinding: FragmentContentEntryEdit2Binding? = null
 
@@ -285,6 +291,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             it.compressionEnabled = true
             it.showVideoPreview = false
             it.showWebPreview = false
+            it.completionCriteriaListener = this
             webView = it.entryEditWebPreview
             webView?.webChromeClient = WebChromeClient()
             playerView = it.entryEditVideoPreview
@@ -357,6 +364,15 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         }
         return super.onOptionsItemSelected(item)
     }
+
+    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
+        mBinding?.minScoreVisible = selectedOption.optionId == ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
+    }
+
+    override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
+
+    }
+
 
     private val viewLifecycleObserver = object : DefaultLifecycleObserver {
 

@@ -64,7 +64,7 @@ class ContentEntryEdit2Presenter(context: Any,
         MANAGED_BY_CONTENT(ContentEntry.COMPLETION_CRITERIA_MANAGED_BY_CONTENT,
                 MessageID.managed_by_content),
         MIN_SCORE(ContentEntry.COMPLETION_CRITERIA_MIN_SCORE,
-                MessageID.min_score),
+                MessageID.minimum_score),
         STUDENTS_MARKS_COMPLETE(ContentEntry.COMPLETION_CRITERIA_MARKED_BY_STUDENT,
                 MessageID.student_marks_content)
     }

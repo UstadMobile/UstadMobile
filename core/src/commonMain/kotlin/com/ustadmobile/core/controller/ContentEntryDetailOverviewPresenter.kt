@@ -1,6 +1,8 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
+import com.ustadmobile.core.contentformats.xapi.endpoints.storeCompletedStatement
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
@@ -59,7 +61,11 @@ class ContentEntryDetailOverviewPresenter(context: Any,
 
     private val availabilityRequestDeferred = CompletableDeferred<AvailabilityMonitorRequest>()
 
+    val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
+
     private var contentEntryUid = 0L
+
+    private var contextRegistration: String? = null
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -98,6 +104,15 @@ class ContentEntryDetailOverviewPresenter(context: Any,
 
 
         view.scoreProgress = db.statementDao.getBestScoreForContentForPerson(entityUid, accountManager.activeAccount.personUid)
+        if(entity.completionCriteria == ContentEntry.COMPLETION_CRITERIA_MARKED_BY_STUDENT){
+            contextRegistration = db.statementDao.findLatestRegistrationStatement(
+                    accountManager.activeAccount.personUid, entityUid)
+            view.markCompleteVisible = contextRegistration != null
+        }else{
+            view.markCompleteVisible = false
+        }
+
+
 
         if (db == repo) {
             val containerUid = entity.container?.containerUid ?: 0L
@@ -201,6 +216,17 @@ class ContentEntryDetailOverviewPresenter(context: Any,
                     mapOf(ARG_CONTENT_ENTRY_UID to contentEntryUid.toString(),
                             ARG_LEARNER_GROUP_UID to learnerGroup.learnerGroupUid.toString()),
                     context)
+        }
+    }
+
+    fun handleOnClickMarkComplete() {
+        if(accountManager.activeAccount.personUid == 0L)
+            return //no one is really logged in
+
+        GlobalScope.launch {
+            val contentEntry = view.entity ?: return@launch
+            statementEndpoint.storeCompletedStatement(accountManager.activeAccount, contentEntry,
+                    contextRegistration ?: "", null)
         }
     }
 

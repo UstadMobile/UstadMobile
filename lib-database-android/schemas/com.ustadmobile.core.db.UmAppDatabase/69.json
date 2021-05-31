@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 69,
-    "identityHash": "c6e585ebea58f5840bab95765af8e7b6",
+    "identityHash": "5caeb21e78c2b1305773c4bdeb7ee0ba",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -1836,7 +1836,7 @@
       },
       {
         "tableName": "ContentEntry",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contentEntryUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT, `description` TEXT, `entryId` TEXT, `author` TEXT, `publisher` TEXT, `licenseType` INTEGER NOT NULL, `licenseName` TEXT, `licenseUrl` TEXT, `sourceUrl` TEXT, `thumbnailUrl` TEXT, `lastModified` INTEGER NOT NULL, `primaryLanguageUid` INTEGER NOT NULL, `languageVariantUid` INTEGER NOT NULL, `contentFlags` INTEGER NOT NULL, `leaf` INTEGER NOT NULL, `publik` INTEGER NOT NULL, `ceInactive` INTEGER NOT NULL, `contentTypeFlag` INTEGER NOT NULL, `contentEntryLocalChangeSeqNum` INTEGER NOT NULL, `contentEntryMasterChangeSeqNum` INTEGER NOT NULL, `contentEntryLastChangedBy` INTEGER NOT NULL, `contentEntryLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contentEntryUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT, `description` TEXT, `entryId` TEXT, `author` TEXT, `publisher` TEXT, `licenseType` INTEGER NOT NULL, `licenseName` TEXT, `licenseUrl` TEXT, `sourceUrl` TEXT, `thumbnailUrl` TEXT, `lastModified` INTEGER NOT NULL, `primaryLanguageUid` INTEGER NOT NULL, `languageVariantUid` INTEGER NOT NULL, `contentFlags` INTEGER NOT NULL, `leaf` INTEGER NOT NULL, `publik` INTEGER NOT NULL, `ceInactive` INTEGER NOT NULL, `completionCriteria` INTEGER NOT NULL, `minScore` INTEGER NOT NULL, `contentTypeFlag` INTEGER NOT NULL, `contentEntryLocalChangeSeqNum` INTEGER NOT NULL, `contentEntryMasterChangeSeqNum` INTEGER NOT NULL, `contentEntryLastChangedBy` INTEGER NOT NULL, `contentEntryLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "contentEntryUid",
@@ -1943,6 +1943,18 @@
           {
             "fieldPath": "ceInactive",
             "columnName": "ceInactive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completionCriteria",
+            "columnName": "completionCriteria",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "minScore",
+            "columnName": "minScore",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -10587,7 +10599,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c6e585ebea58f5840bab95765af8e7b6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5caeb21e78c2b1305773c4bdeb7ee0ba')"
     ]
   }
 }

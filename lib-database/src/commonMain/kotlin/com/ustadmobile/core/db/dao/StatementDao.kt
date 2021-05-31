@@ -194,6 +194,32 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                                             personUid: Long, contextRegistration: String)
             : DataSource.Factory<Int, StatementWithSessionDetailDisplay>
 
+
+    @Query("""
+        SELECT SUM(resultScoreRaw) AS resultScore, 
+               SUM(resultScoreMax) AS resultMax,
+               SUM(extensionProgress) As progress,
+               0 as progress,
+               0 as penalty,
+               0 as success,
+               'FALSE' as contentComplete
+         FROM StatementEntity
+        WHERE contextRegistration = :contextRegistration
+          AND NOT contentEntryRoot
+          AND statementVerbUid = ${VerbEntity.VERB_ANSWERED_UID}
+    """)
+    abstract fun findScoreForSession(contextRegistration: String): ContentEntryStatementScoreProgress?
+
+    @Query("""
+        SELECT contextRegistration 
+          FROM StatementEntity
+         WHERE statementPersonUid = :accountPersonUid
+           AND statementContentEntryUid = :entryUid
+      ORDER BY timestamp DESC 
+    """)
+    abstract suspend fun findLatestRegistrationStatement(accountPersonUid: Long, entryUid: Long): String?
+
+
     @Serializable
     data class ReportData(var yAxis: Float = 0f, var xAxis: String? = "", var subgroup: String? = "")
 

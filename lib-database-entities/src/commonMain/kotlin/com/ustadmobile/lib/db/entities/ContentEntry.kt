@@ -108,6 +108,11 @@ open class ContentEntry() {
      */
     var completionCriteria: Int = COMPLETION_CRITERIA_MANAGED_BY_CONTENT
 
+    /**
+     * Minimum score for content to mark as complete if completion criteria is set to min score
+     */
+    var minScore: Int = 0
+
     var contentTypeFlag: Int = 0
 
     @LocalChangeSeqNum
@@ -209,6 +214,7 @@ open class ContentEntry() {
         if (ceInactive != other.ceInactive) return false
         if (contentTypeFlag != other.contentTypeFlag) return false
         if (completionCriteria != other.completionCriteria) return false
+        if (minScore != other.minScore) return false
         if (contentEntryLocalChangeSeqNum != other.contentEntryLocalChangeSeqNum) return false
         if (contentEntryMasterChangeSeqNum != other.contentEntryMasterChangeSeqNum) return false
         if (contentEntryLastChangedBy != other.contentEntryLastChangedBy) return false
@@ -237,6 +243,7 @@ open class ContentEntry() {
         result = 31 * result + ceInactive.hashCode()
         result = 31 * result + contentTypeFlag
         result = 31 * result + completionCriteria
+        result = 31 * result + minScore
         result = 31 * result + contentEntryLocalChangeSeqNum.hashCode()
         result = 31 * result + contentEntryMasterChangeSeqNum.hashCode()
         result = 31 * result + contentEntryLastChangedBy

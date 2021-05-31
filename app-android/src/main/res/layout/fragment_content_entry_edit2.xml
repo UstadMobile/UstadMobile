@@ -75,8 +75,17 @@
             type="java.util.List&lt;IdOption&gt;"/>
 
         <variable
+            name="minScoreVisible"
+            type="boolean" />
+
+        <variable
             name="storageOptions"
             type="java.util.List&lt;UMStorageDir&gt;"/>
+
+        <variable
+            name="completionCriteriaListener"
+            type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
+
 
     </data>
 
@@ -227,22 +236,57 @@
                 android:id="@+id/entry_content_completion"
                 app:layout_constraintStart_toStartOf="parent"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="@dimen/dimen_16dp"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:enabled="@{fieldsEnabled}"
+                app:layout_constraintEnd_toStartOf="@id/entry_content_min_score"
                 app:layout_constraintTop_toBottomOf="@+id/entry_description">
 
                 <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:enabled="@{fieldsEnabled}"
+                    app:onMessageIdOptionSelected="@{completionCriteriaListener}"
                     app:selectedMessageIdOption="@={contentEntry.completionCriteria}"
                     app:messageIdOptions="@{completionCriteriaOptions}"
                     android:hint="@string/completion_criteria"/>
 
             </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_marginTop="@dimen/dimen_16dp"
+                android:id="@+id/entry_content_min_score"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_20dp"
+                android:hint="@string/min_score"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:hintEnabled="true"
+                app:suffixText="%"
+                app:suffixTextAppearance="@style/UmTheme.TextAppearance.Body2"
+                android:enabled="@{fieldsEnabled}"
+                android:visibility="@{minScoreVisible ? View.VISIBLE : View.GONE}"
+                app:layout_constraintWidth_percent="0.3"
+                app:layout_constraintStart_toEndOf="@id/entry_content_completion"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/entry_description">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/ca_edit_min_score"
+                    android:enabled="@{fieldsEnabled}"
+                    android:digits="0123456789"
+                    android:inputType="number"
+                    app:minValue="@{0}"
+                    app:setMaxValue="@{100}"
+                    android:text="@={contentEntry.minScore}"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
 
 
             <com.google.android.material.textfield.TextInputLayout

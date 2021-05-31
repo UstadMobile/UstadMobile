@@ -118,7 +118,7 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
     }
 
     override fun handleOnClickMarkComplete() {
-
+        mPresenter?.handleOnClickMarkComplete()
     }
 
     override var availableTranslationsList: DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage>? = null
