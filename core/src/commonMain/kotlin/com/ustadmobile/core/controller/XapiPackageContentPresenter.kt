@@ -123,7 +123,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
             val contentEntry = db.contentEntryDao.findByUid(contentEntryUid) ?: return@launch
             if(contentEntry.completionCriteria != ContentEntry.COMPLETION_CRITERIA_MIN_SCORE) return@launch
             val score = db.statementDao.findScoreForSession(contextRegistration) ?: return@launch
-            val scoreTotal = score.resultScore.toFloat() / score.resultMax
+            val scoreTotal = (score.resultScore.toFloat() / score.resultMax) * 100
             if(scoreTotal > contentEntry.minScore){
                 statementEndpoint.storeCompletedStatement(accountManager.activeAccount,
                         contentEntry, contextRegistration, score)
