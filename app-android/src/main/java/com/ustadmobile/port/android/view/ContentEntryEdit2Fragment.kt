@@ -86,6 +86,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         set(value) {
             field = value
             mBinding?.contentEntry = value
+            mBinding?.minScoreVisible = value?.completionCriteria == ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
         }
 
     override var entryMetaData: ImportedContentEntryMetaData? = null
