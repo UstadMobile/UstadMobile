@@ -10,7 +10,7 @@ import com.ustadmobile.core.view.*
 @Keep
 class ViewNameToDestMap: DestinationProvider {
 
-    val destinationMap = mapOf(
+    private val destinationMap = mapOf(
             ClazzEdit2View.VIEW_NAME to UstadDestination(R.id.clazz_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             ClazzList2View.VIEW_NAME to UstadDestination(R.id.home_clazzlist_dest),
@@ -118,5 +118,9 @@ class ViewNameToDestMap: DestinationProvider {
 
     override fun lookupDestinationName(viewName: String) = destinationMap[viewName]
 
-    override fun lookupDestinationById(destinationId: Int) = destinationMap.values.firstOrNull { it.destinationId == destinationId }
+    override fun lookupDestinationById(destinationId: Int) = destinationMap.values
+            .firstOrNull { it.destinationId == destinationId }
+
+    override fun lookupViewNameById(destinationId: Int) = destinationMap.entries
+            .firstOrNull { it.value.destinationId == destinationId }?.key
 }
