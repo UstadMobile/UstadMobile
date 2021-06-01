@@ -19,7 +19,7 @@ object ClazzAssignmentDetailStudentProgressScreen : KScreen<ClazzAssignmentDetai
         get() = ClazzAssignmentDetailStudentProgressFragment::class.java
 
     val recycler: KRecyclerView = KRecyclerView({
-        withId(R.id.fragment_list_recyclerview)
+        withId(R.id.fragment_clazz_assignment_detail_overview)
     }, itemTypeBuilder = {
         itemType(::Content)
         itemType(::TotalScore)

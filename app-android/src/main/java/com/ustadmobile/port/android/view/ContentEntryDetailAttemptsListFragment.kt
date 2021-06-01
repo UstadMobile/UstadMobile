@@ -39,6 +39,7 @@ class ContentEntryDetailAttemptsListFragment(): UstadListViewFragment<PersonWith
         override fun onBindViewHolder(holder: PersonWithStatementDisplayListViewHolder, position: Int) {
             val item = getItem(position)
             holder.itemBinding.person = item
+            holder.itemView.tag = item?.personUid
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
         }
 
