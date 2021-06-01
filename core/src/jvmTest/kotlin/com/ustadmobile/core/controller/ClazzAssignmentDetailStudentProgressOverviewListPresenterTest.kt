@@ -1,46 +1,53 @@
-/*
 
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ClazzAssignmentDao
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.activeDbInstance
+import com.ustadmobile.core.util.activeRepoInstance
+import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
+import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
+import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.CacheClazzAssignment
+import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
+import com.ustadmobile.util.test.ext.insertTestClazzAssignment
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
-import com.ustadmobile.core.view.ClazzAssignmentWithMetricsDetailView
-import com.nhaarman.mockitokotlin2.*
-import com.ustadmobile.core.util.SystemImplRule
-import com.ustadmobile.core.util.UmAppDatabaseClientRule
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.core.db.dao.ClazzAssignmentWithMetricsDao
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
-import com.ustadmobile.core.util.ext.waitForListToBeSet
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.mockito.kotlin.*
 
-*/
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
  *
  * Note:
- *//*
+ */
 
 class ClazzAssignmentDetailStudentProgressOverviewListPresenterTest {
 
-    @JvmField
-    @Rule
-    var systemImplRule = SystemImplRule()
+    private var cacheAssignment: CacheClazzAssignment? = null
 
     @JvmField
     @Rule
-    var clientDbRule = UmAppDatabaseClientRule(useDbAsRepo = true)
+    var ustadTestRule = UstadTestRule()
 
     private lateinit var mockView: ClazzAssignmentDetailStudentProgressOverviewListView
 
     private lateinit var context: Any
 
+    private lateinit var di: DI
+
     private lateinit var mockLifecycleOwner: DoorLifecycleOwner
 
-    private lateinit var repoClazzAssignmentWithMetricsDaoSpy: ClazzAssignmentWithMetricsDao
+    private lateinit var repoClazzAssignmentDaoSpy: ClazzAssignmentDao
 
     @Before
     fun setup() {
@@ -49,58 +56,55 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenterTest {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
         context = Any()
-        repoClazzAssignmentWithMetricsDaoSpy = spy(clientDbRule.db.clazzAssignmentWithMetricsDao)
-        whenever(clientDbRule.db.clazzAssignmentWithMetricsDao).thenReturn(repoClazzAssignmentWithMetricsDaoSpy)
+        di = DI {
+            import(ustadTestRule.diModule)
+        }
+        val repo: UmAppDatabase by di.activeRepoInstance()
+        cacheAssignment = repo.insertTestClazzAssignment()
 
-        //TODO: insert any entities required for all tests
+        repoClazzAssignmentDaoSpy = spy(repo.clazzAssignmentDao)
+        whenever(repo.clazzAssignmentDao).thenReturn(repoClazzAssignmentDaoSpy)
+
     }
 
     @Test
-    fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
-        //TODO: insert any entities that are used only in this test
-        val testEntity = ClazzAssignmentWithMetrics().apply {
-            //set variables here
-            clazzAssignmentWithMetricsUid = clientDbRule.db.clazzAssignmentWithMetricsDao.insert(this)
+    fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnViewAndClickGoesToDetail() {
+
+        val db: UmAppDatabase by di.activeDbInstance()
+        val clazzAssignment = runBlocking {
+            db.clazzAssignmentDao.findByUidAsync(cacheAssignment!!.cacheClazzAssignmentUid)!!
         }
 
-        //TODO: add any arguments required for the presenter here e.g.
-        // ClazzAssignmentDetailStudentProgressListView.ARG_SOME_FILTER to "filterValue"
-        val presenterArgs = mapOf<String,String>()
+        val presenterArgs = mutableMapOf<String, String>()
+        presenterArgs[ARG_ENTITY_UID] = cacheAssignment?.cacheClazzAssignmentUid.toString()
         val presenter = ClazzAssignmentDetailStudentProgressOverviewListPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
         //eg. verify the correct DAO method was called and was set on the view
-        verify(repoClazzAssignmentWithMetricsDaoSpy, timeout(5000)).findByClazzAssignmentWithMetricsUidAsFactory()
+        runBlocking {
+            verify(repoClazzAssignmentDaoSpy, timeout(5000))
+                    .getStudentsProgressOnAssignment(eq(clazzAssignment.caClazzUid), any(),
+                            eq(cacheAssignment!!.cacheClazzAssignmentUid), any())
+        }
+
+        verify(repoClazzAssignmentDaoSpy, timeout(5000))
+                .getAttemptSummaryForStudentsInAssignment(eq(cacheAssignment!!.cacheClazzAssignmentUid),
+                        eq(clazzAssignment.caClazzUid), any(), any(), any())
+        verify(mockView, timeout(5000)).studentProgress = any()
         verify(mockView, timeout(5000)).list = any()
 
-        //TODO: verify any other properties that the presenter should set on the view
+        presenter.onClickPersonWithStatementDisplay(PersonWithAttemptsSummary().apply {
+            this.personUid = cacheAssignment!!.cachePersonUid
+        })
+
+        val systemImpl: UstadMobileSystemImpl by di.instance()
+        verify(systemImpl, timeout(5000)).go(eq(ClazzAssignmentDetailStudentProgressView.VIEW_NAME),
+                eq(mapOf(ARG_PERSON_UID to cacheAssignment!!.cachePersonUid.toString(),
+                        ARG_CLAZZ_ASSIGNMENT_UID to cacheAssignment!!.cacheClazzAssignmentUid.toString())),
+                any())
+
     }
 
-    @Test
-    fun givenPresenterCreatedInBrowseMode_whenOnClickEntryCalled_thenShouldGoToDetailView() {
-        val presenterArgs = mapOf<String,String>()
-        val testEntity = ClazzAssignmentWithMetrics().apply {
-            //set variables here
-            clazzAssignmentWithMetricsUid = clientDbRule.db.clazzAssignmentWithMetricsDao.insert(this)
-        }
-        val presenter = ClazzAssignmentDetailStudentProgressOverviewListPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
-        presenter.onCreate(null)
-        mockView.waitForListToBeSet()
 
-
-        presenter.handleClickEntry(testEntity)
-
-
-        verify(systemImplRule.systemImpl, timeout(5000)).go(eq(ClazzAssignmentWithMetricsDetailView.VIEW_NAME),
-                eq(mapOf(ARG_ENTITY_UID to testEntity.clazzAssignmentWithMetricsUid.toString())), any())
-    }
-
-    //TODO: Add tests for other scenarios the presenter is expected to handle - e.g. different filters, etc.
-
-}*/
+}

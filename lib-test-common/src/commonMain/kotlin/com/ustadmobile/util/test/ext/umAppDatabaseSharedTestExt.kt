@@ -18,6 +18,80 @@ private fun Person.asClazzMember(clazzUid: Long, clazzMemberRole: Int, joinTime:
     }
 }
 
+fun UmAppDatabase.insertTestClazzAssignment(admin: Boolean = false): CacheClazzAssignment{
+
+    val testClazz = Clazz().apply {
+        clazzUid = clazzDao.insert(this)
+    }
+
+    val student = Person().apply{
+        firstNames = "Student"
+        lastName = "A"
+        this.admin = admin
+        this.personUid = 42
+        personDao.insert(this)
+    }
+
+    val contentEntry = ContentEntry().apply {
+        title = "Quiz 1"
+        this.contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
+        this.description = "Math Quiz"
+        leaf = true
+        contentEntryUid = contentEntryDao.insert(this)
+    }
+
+    val clazzEnrolment = ClazzEnrolment().apply {
+        clazzEnrolmentClazzUid = testClazz.clazzUid
+        clazzEnrolmentDateJoined = DateTime(2021, 5, 1).unixMillisLong
+        clazzEnrolmentRole = ClazzEnrolment.ROLE_STUDENT
+        clazzEnrolmentPersonUid = student.personUid
+        clazzEnrolmentOutcome = ClazzEnrolment.OUTCOME_IN_PROGRESS
+        clazzEnrolmentUid = clazzEnrolmentDao.insert(this)
+    }
+
+    val clazzAssignment = ClazzAssignment().apply {
+        caTitle = "New Clazz Assignment"
+        caDescription = "complete quiz"
+        caDeadlineDate = DateTime(2021, 5, 5).unixMillisLong
+        caClazzUid = testClazz.clazzUid
+        caUid = clazzAssignmentDao.insert(this)
+    }
+
+    ClazzAssignmentContentJoin().apply {
+        cacjContentUid = contentEntry.contentEntryUid
+        cacjAssignmentUid = clazzAssignment.caUid
+        cacjUid = clazzAssignmentContentJoinDao.insert(this)
+    }
+
+    val cacheClazzAssignment = CacheClazzAssignment().apply {
+        this.cacheClazzAssignmentUid = clazzAssignment.caUid
+        this.cacheContentEntryUid = contentEntry.contentEntryUid
+        this.cacheContentComplete = true
+        this.cacheMaxScore = 15
+        this.cachePersonUid = student.personUid
+        this.cacheStudentScore = 5
+        this.cacheProgress = 100
+        this.cacheUid = cacheClazzAssignmentDao.insert(this)
+    }
+
+    StatementEntity().apply {
+        statementContentEntryUid = contentEntry.contentEntryUid
+        contentEntryRoot = true
+        resultCompletion = true
+        extensionProgress = 100
+        resultScoreRaw = 5
+        resultScoreMax = 15
+        statementPersonUid = student.personUid
+        statementVerbUid = VerbEntity.VERB_COMPLETED_UID
+        contextRegistration = randomUuid().toString()
+        statementUid = statementDao.insert(this)
+    }
+
+    return cacheClazzAssignment
+
+}
+
+
 suspend fun UmAppDatabase.insertTestClazzAndMembers(numClazzStudents: Int, numClazzTeachers: Int = 1,
                                                     clazzJoinTime: Long = (getSystemTimeInMillis() - (86400 * 1000)),
                                                     studentNamer: (Int) -> Pair<String, String> = { "Test" to "Student $it" },

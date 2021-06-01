@@ -1,4 +1,3 @@
-/*
 
 package com.ustadmobile.core.controller
 
@@ -24,12 +23,11 @@ import org.junit.Test
 import org.kodein.di.DI
 import org.kodein.di.instance
 
-*/
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
  *
  * Note:
- *//*
+ */
 
 class ClazzDetailOverviewPresenterTest {
 
@@ -120,4 +118,4 @@ class ClazzDetailOverviewPresenterTest {
         verify(systemImpl, timeout(5000)).go(eq(ClazzEdit2View.VIEW_NAME),
                 eq(mapOf(ARG_ENTITY_UID to testEntity.clazzUid.toString())), any())
     }
-}*/
+}
