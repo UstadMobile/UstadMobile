@@ -78,7 +78,7 @@ class ClazzAssignmentEditFragmentTest : TestCase() {
                     }
                 }
 
-                clazzAssignemntDescInput {
+                clazzAssignmentDescInput {
                     edit {
                         replaceText(formVals.caDescription!!)
                     }
@@ -98,6 +98,8 @@ class ClazzAssignmentEditFragmentTest : TestCase() {
                                         title = "Math Quiz"
                                     })))
                 }
+
+
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 

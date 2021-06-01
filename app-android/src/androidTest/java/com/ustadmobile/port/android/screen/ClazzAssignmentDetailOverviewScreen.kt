@@ -18,7 +18,7 @@ object  ClazzAssignmentDetailOverviewScreen : KScreen<ClazzAssignmentDetailOverv
         get() = ClazzAssignmentDetailOverviewFragment::class.java
 
     val recycler: KRecyclerView = KRecyclerView({
-        withId(R.id.fragment_list_recyclerview)
+        withId(R.id.fragment_clazz_assignment_detail_overview)
     }, itemTypeBuilder = {
         itemType(::AssignmentDetail)
         itemType(::Content)
