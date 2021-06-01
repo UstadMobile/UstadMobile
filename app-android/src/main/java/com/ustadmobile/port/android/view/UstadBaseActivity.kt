@@ -38,7 +38,7 @@ import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_main.*
 import org.acra.ACRA
 import org.kodein.di.DIAware
-import org.kodein.di.android.di
+import org.kodein.di.android.closestDI
 import org.kodein.di.instance
 import java.util.*
 
@@ -51,7 +51,7 @@ import java.util.*
 abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotifications,
         UstadView, ShakeDetector.Listener, BleNetworkManagerProvider, DIAware {
 
-    override val di by di()
+    override val di by closestDI()
 
     /**
      * Get the toolbar that's used for the support action bar
