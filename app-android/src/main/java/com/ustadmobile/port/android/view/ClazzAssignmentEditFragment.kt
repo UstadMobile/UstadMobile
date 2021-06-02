@@ -76,14 +76,15 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
     }
 
     private var deadlineDateListener: View.OnClickListener? = View.OnClickListener {
-        mBinding?.caDeadlineDateTextinput?.editText?.setText("")
-        mBinding?.caDeadlineDatetimeTextinput?.editText?.setText("")
-        mBinding?.clazzAssignment?.caDeadlineDate = Long.MAX_VALUE
-        mBinding?.clazzAssignment?.caLateSubmissionType = 0
-        mBinding?.lateSubmissionVisibility = View.GONE
-        mBinding?.gracePeriodVisibility = View.GONE
+        val entityVal = entity
+        entityVal?.caDeadlineDate = Long.MAX_VALUE
+        entityVal?.caGracePeriodDate = Long.MAX_VALUE
+        entityVal?.caLateSubmissionType = 0
+        entityVal?.caLateSubmissionPenalty = 0
+        entity = entityVal
     }
 
+    var currentDeadlineDate: String? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
@@ -91,6 +92,13 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             rootView = it.root
             it.activityEventHandler = this
             it.typeSelectionListener = this
+            it.caDeadlineDate.doAfterTextChanged {
+                if(it?.isNullOrEmpty() == true || it.toString() == currentDeadlineDate){
+                    return@doAfterTextChanged
+                }
+                currentDeadlineDate = it.toString()
+                mBinding?.clazzAssignment = entity
+            }
             it.caDeadlineDateTextinput.setEndIconOnClickListener(deadlineDateListener)
         }
 
