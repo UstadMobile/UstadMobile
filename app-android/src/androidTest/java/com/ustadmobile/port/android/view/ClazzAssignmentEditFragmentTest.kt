@@ -161,11 +161,8 @@ class ClazzAssignmentEditFragmentTest : TestCase() {
                     clazzAssignmentTitleInput {
                         edit {
                             hasText(existingClazzAssignment.caTitle!!)
-                            flakySafely {
-                                clearText()
-                                typeText("New Quiz")
-                                hasText("New Quiz")
-                            }
+                            replaceText("New Quiz")
+                            hasText("New Quiz")
                         }
                     }
                 }
