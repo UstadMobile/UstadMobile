@@ -6,6 +6,7 @@
     <data>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
         <import type="android.view.View"/>
+        <import type="java.util.TimeZone"/>
 
         <variable
             name="clazzAssignment"
@@ -14,7 +15,6 @@
         <variable
             name="timeZone"
             type="String" />
-
 
     </data>
 
@@ -64,10 +64,8 @@
             android:layout_marginTop="8dp"
             android:contentDescription="@string/school"
             app:visibleIfDateSet="@{clazzAssignment.caDeadlineDate}"
-            app:dateTimePrepend="@{``}"
-            app:dateTimeLongWithExtra="@{clazzAssignment.caDeadlineDate}"
-            app:dateTimeTimeLongWithExtra="@{clazzAssignment.caDeadlineDate}"
-            app:dateTimeAppend="@{``}"
+            app:textLocalDateTime="@{clazzAssignment.caDeadlineDate}"
+            app:textLocalDateTimeZone="@{TimeZone.getTimeZone(timeZone)}"
             app:layout_constraintStart_toEndOf="@+id/item_ca_detail_description_icon"
             app:layout_constraintTop_toBottomOf="@+id/item_ca_detail_description"
             tools:text="28/Feb/2020 - 8:00 am" />

@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ClazzAssignmentDetailView
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -188,7 +189,7 @@ class ClazzAssignmentEditPresenter(context: Any,
 
             repo.cacheClazzAssignmentDao.deleteCachedInactiveContent()
 
-            onFinish(ClazzAssignmentDetailView.VIEW_NAME, entity.caUid, entity)
+            onFinish(ClazzAssignmentDetailOverviewView.VIEW_NAME, entity.caUid, entity)
 
         }
     }

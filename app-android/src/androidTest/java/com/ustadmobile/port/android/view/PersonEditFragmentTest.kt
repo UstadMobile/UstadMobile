@@ -60,12 +60,8 @@ class PersonEditFragmentTest : TestCase() {
 
     private lateinit var serverUrl: String
 
-    lateinit var impl: UstadMobileSystemImpl
-
     @Before
     fun setUp() {
-        impl = getApplicationDi().direct.instance()
-        impl.messageIdMap = MessageIDMap.ID_MAP
         mockWebServer = MockWebServer()
         mockWebServer.start()
         serverUrl = mockWebServer.url("/").toString()
@@ -89,7 +85,7 @@ class PersonEditFragmentTest : TestCase() {
             PersonEditScreen {
                 launchFragment(false, fillForm = false,
                         serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run, databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
+                        context = context, testContext = this@run, databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
                 scrollToBottom()
                 clazzListRecyclerView {
                     isDisplayed()
@@ -140,7 +136,7 @@ class PersonEditFragmentTest : TestCase() {
                 launchFragment(false, leftOutPassword = true, leftOutUsername = true,
                         fillForm = true, entityRoles = entityRoles,
                         serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run,
+                        context = context, testContext = this@run,
                         databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
                 scrollToBottom()
@@ -202,7 +198,7 @@ class PersonEditFragmentTest : TestCase() {
                 launchFragment(false, leftOutPassword = true, leftOutUsername = true,
                         fillForm = false, entityRoles = entityRoles, personUid = person!!.personUid,
                         serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run,
+                        context = context, testContext = this@run,
                         databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
 
@@ -239,7 +235,7 @@ class PersonEditFragmentTest : TestCase() {
         }.run {
             PersonEditScreen {
                 launchFragment(false, fillForm = false, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run,
+                        context = context, testContext = this@run,
                 databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
                 usernameTextInput {
@@ -267,7 +263,7 @@ class PersonEditFragmentTest : TestCase() {
             PersonEditScreen {
 
                 launchFragment(true, fillForm = false, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run,
+                        context = context, testContext = this@run,
                         databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
                 scrollToBottom()
@@ -293,7 +289,7 @@ class PersonEditFragmentTest : TestCase() {
 
                 launchFragment(registrationMode = true, leftOutPassword = true, leftOutUsername = true,
                         serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run,
+                        context = context, testContext = this@run,
                         databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
 
@@ -322,7 +318,7 @@ class PersonEditFragmentTest : TestCase() {
 
 
                 launchFragment(registrationMode = true, leftOutDateOfBirth = true, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run,
+                        context = context, testContext = this@run,
                         databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
 
@@ -345,7 +341,7 @@ class PersonEditFragmentTest : TestCase() {
 
                 launchFragment(registrationMode = true,
                         selectedDateOfBirth = DateTime(2010, 10, 24).unixMillisLong, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run,
+                        context = context, testContext = this@run,
                         databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
                 birthdayTextInput {
@@ -367,7 +363,7 @@ class PersonEditFragmentTest : TestCase() {
             PersonEditScreen {
 
                 launchFragment(registrationMode = true, misMatchPassword = true, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run,
+                        context = context, testContext = this@run,
                         databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
                 scrollToBottom()
@@ -396,7 +392,7 @@ class PersonEditFragmentTest : TestCase() {
             PersonEditScreen {
 
                 launchFragment(registrationMode = true, misMatchPassword = false, leftOutUsername = false, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run,
+                        context = context, testContext = this@run,
                         databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
                 scrollToBottom()
