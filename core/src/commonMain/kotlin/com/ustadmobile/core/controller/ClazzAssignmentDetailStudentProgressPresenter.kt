@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
@@ -68,9 +69,10 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
     }
 
     override fun onClickContentWithAttempt(contentWithAttemptSummary: ContentWithAttemptSummary) {
-        val args =  mapOf(UstadView.ARG_ENTITY_UID to contentWithAttemptSummary.contentEntryUid.toString(),
-                UstadView.ARG_PARENT_ENTRY_TITLE to contentWithAttemptSummary.contentEntryTitle)
-        systemImpl.go(ContentEntryDetailAttemptsListView.VIEW_NAME, args, context)
+        val args =  mapOf(
+                ARG_CONTENT_ENTRY_UID to contentWithAttemptSummary.contentEntryUid.toString(),
+                ARG_PERSON_UID to selectedPersonUid.toString())
+        systemImpl.go(SessionListView.VIEW_NAME, args, context)
     }
 
 }
