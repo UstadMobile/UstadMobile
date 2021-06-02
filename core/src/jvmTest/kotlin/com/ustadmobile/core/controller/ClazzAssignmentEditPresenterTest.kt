@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.test.waitUntil
+import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ClazzAssignmentDetailView
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -110,7 +111,7 @@ class ClazzAssignmentEditPresenterTest {
 
         presenter.handleClickSave(initialEntity)
 
-        verify(systemImpl, timeout(5000)).go(eq(ClazzAssignmentDetailView.VIEW_NAME),
+        verify(systemImpl, timeout(5000)).go(eq(ClazzAssignmentDetailOverviewView.VIEW_NAME),
                 any(), any(), any())
 
         //TODO: wait until the presenter has saved the entity e.g.
