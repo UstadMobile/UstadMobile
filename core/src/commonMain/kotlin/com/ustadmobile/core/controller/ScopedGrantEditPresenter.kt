@@ -17,10 +17,12 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import org.kodein.di.DI
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ScopedGrantEditView.Companion.ARG_PERMISSION_LIST
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
+import kotlinx.serialization.builtins.ListSerializer
 
 
 class ScopedGrantEditPresenter(context: Any,
@@ -79,7 +81,9 @@ class ScopedGrantEditPresenter(context: Any,
             val permissionsList = view.bitmaskList?.getValue() ?: throw IllegalStateException("No bitmask list")
             entity.sgPermissions = permissionsList.combinedFlagValue
 
-            view.finishWithResult(listOf(entity))
+            val serializedResult = safeStringify(di, ListSerializer(ScopedGrant.serializer()),
+                listOf(entity))
+            finishWithResult(serializedResult)
         }
     }
 

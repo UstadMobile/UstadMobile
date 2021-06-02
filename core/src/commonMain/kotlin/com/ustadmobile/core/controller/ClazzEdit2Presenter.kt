@@ -38,7 +38,10 @@ class ClazzEdit2Presenter(context: Any,
             ARG_SAVEDSTATE_SCHEDULES, ListSerializer(Schedule.serializer()),
             ListSerializer(Schedule.serializer()), this, Schedule::class) {scheduleUid = it}
 
-    val scopedGrantOneToManyHelper = ScopedGrantOneToManyHelper(this)
+    val scopedGrantOneToManyHelper = ScopedGrantOneToManyHelper(this,
+        requireBackStackEntry().savedStateHandle, Clazz.TABLE_ID)
+
+    fun requireBackStackEntry() = ustadNavController.currentBackStackEntry!!
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -130,7 +133,7 @@ class ClazzEdit2Presenter(context: Any,
                 it.scheduleClazzUid = entity.clazzUid
             }
 
-            scopedGrantOneToManyHelper.commitToDatabase(repo, Clazz.TABLE_ID, entity.clazzUid)
+            scopedGrantOneToManyHelper.commitToDatabase(repo, entity.clazzUid)
 
 
             val fromDateTime = DateTime.now().toOffsetByTimezone(entity.effectiveTimeZone).localMidnight

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.ustadmobile.core.util.ScopedGrantOneToManyListener"/>
+
+        <variable
+            name="scopedGrantsOneToManyListener"
+            type="ScopedGrantOneToManyListener" />
+    </data>
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Permissions"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
+            app:icon="@drawable/ic_add_black_24dp"
+            app:iconGravity="start"
+            android:gravity="start|center_vertical"
+            android:text="ADD PERSON OR GROUP"
+            android:onClick="@{() -> scopedGrantsOneToManyListener.onClickAddNewScopedGrant()}"
+            />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/item_scoped_grant_one_to_n_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:listitem="@layout/item_scoped_grant_edit"
+            tools:itemCount="3"
+            />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</layout>

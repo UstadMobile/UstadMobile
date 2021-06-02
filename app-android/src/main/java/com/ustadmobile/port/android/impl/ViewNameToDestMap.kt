@@ -110,7 +110,9 @@ class ViewNameToDestMap: DestinationProvider {
                 hideBottomNavigation = true, hideAccountIcon = true),
             RegisterAgeRedirectView.VIEW_NAME to UstadDestination(R.id.register_age_redirect_dest,
                 hideBottomNavigation = true, hideAccountIcon = true),
-            ParentalConsentManagementView.VIEW_NAME to UstadDestination(R.id.parental_consent_management_dest)
+            ParentalConsentManagementView.VIEW_NAME to UstadDestination(R.id.parental_consent_management_dest),
+            ScopedGrantEditView.VIEW_NAME to UstadDestination(R.id.scoped_grant_edit_dest,
+                hideAccountIcon = true)
     )
 
     override val navControllerViewId: Int
