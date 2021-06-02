@@ -122,23 +122,7 @@ fun getRealValueInt(et: TextView): Int {
 
 @BindingAdapter(value = ["minValue", "setMaxValue"])
 fun EditText.setMinMax(min: Int, max: Int){
-    filters =   arrayOf(InputFilterMinMax(min, max))
-}
-
-
-@InverseBindingAdapter(attribute = "android:text")
-fun EditText.getInteger(): Int {
-    val num = text.toString()
-    return if (num.isEmpty()) 0 else try {
-        num.toInt()
-    } catch (e: NumberFormatException) {
-        0
-    }
-}
-
-@BindingAdapter("android:text")
-fun EditText.setInteger(value: Int){
-    setText(value.toString())
+    filters = arrayOf(InputFilterMinMax(min, max))
 }
 
 

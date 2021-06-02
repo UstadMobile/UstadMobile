@@ -205,6 +205,7 @@
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
                     app:dateTimeLong="@={clazzAssignment.caDeadlineDate}"
+                    app:timeZone="@{timeZone}"
                     app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -292,7 +293,7 @@
                     android:inputType="number"
                     app:minValue="@{0}"
                     app:setMaxValue="@{100}"
-                    android:text="@={clazzAssignment.caLateSubmissionPenalty}"
+                    android:text="@={`` + clazzAssignment.caLateSubmissionPenalty}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
@@ -320,6 +321,7 @@
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
                     app:dateTimeLong="@={clazzAssignment.caGracePeriodDate}"
+                    app:timeZone="@{timeZone}"
                     app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>

@@ -280,7 +280,7 @@
                     android:inputType="number"
                     app:minValue="@{0}"
                     app:setMaxValue="@{100}"
-                    android:text="@={contentEntry.minScore}"
+                    android:text="@={`` + contentEntry.minScore}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
