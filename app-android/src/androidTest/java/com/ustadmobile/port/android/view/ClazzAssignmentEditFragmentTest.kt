@@ -44,7 +44,7 @@ class ClazzAssignmentEditFragmentTest : TestCase() {
     @Test
     fun givenNoClazzAssignmentPresentYet_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
 
-        val testClazz = Clazz().apply{
+        val testClazz = Clazz().apply {
             clazzUid = dbRule.repo.clazzDao.insert(this)
         }
 
@@ -56,7 +56,7 @@ class ClazzAssignmentEditFragmentTest : TestCase() {
 
         init {
 
-            val newClazzAssignment = ClazzAssignment().apply{
+            val newClazzAssignment = ClazzAssignment().apply {
                 caClazzUid = testClazz.clazzUid
             }
             val jsonStr = Gson().toJson(newClazzAssignment)
@@ -120,75 +120,77 @@ class ClazzAssignmentEditFragmentTest : TestCase() {
     }
 
 
-      @AdbScreenRecord("given ClazzAssignment exists when updated then should be updated on database")
-      @Test
-      fun givenClazzAssignmentExists_whenOpenedUpdatedAndSaveClicked_thenShouldBeUpdatedOnDatabase() {
-          val entry = ContentEntry().apply{
-              title = "Quiz"
-              contentEntryUid = dbRule.repo.contentEntryDao.insert(this)
-          }
+    @AdbScreenRecord("given ClazzAssignment exists when updated then should be updated on database")
+    @Test
+    fun givenClazzAssignmentExists_whenOpenedUpdatedAndSaveClicked_thenShouldBeUpdatedOnDatabase() {
+        val entry = ContentEntry().apply {
+            title = "Quiz"
+            contentEntryUid = dbRule.repo.contentEntryDao.insert(this)
+        }
 
-          val existingClazzAssignment = ClazzAssignment().apply {
-              caTitle = "New ClazzAssignment"
-              caStartDate = DateTime(2021, 1, 20).unixMillisLong
-              caDeadlineDate = DateTime(2021, 2, 20).unixMillisLong
-              caUid = dbRule.repo.clazzAssignmentDao.insert(this)
-          }
+        val existingClazzAssignment = ClazzAssignment().apply {
+            caTitle = "New ClazzAssignment"
+            caStartDate = DateTime(2021, 1, 20).unixMillisLong
+            caDeadlineDate = DateTime(2021, 2, 20).unixMillisLong
+            caUid = dbRule.repo.clazzAssignmentDao.insert(this)
+        }
 
-          ClazzAssignmentContentJoin().apply{
-              cacjAssignmentUid = existingClazzAssignment.caUid
-              cacjContentUid = entry.contentEntryUid
-              cacjUid = dbRule.repo.clazzAssignmentContentJoinDao.insert(this)
-          }
-
-
-          init{
-
-              fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                      fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existingClazzAssignment.caUid)) {
-                  ClazzAssignmentEditFragment().also {
-                      it.installNavController(systemImplNavRule.navController)
-                  }
-              }
-
-          }.run{
-
-              ClazzAssignmentEditScreen {
-
-                  fragmentScenario.letOnFragment { it.entity }
-
-                  flakySafely {
-                      clazzAssignmentTitleInput{
-                          edit{
-                              hasText(existingClazzAssignment.caTitle!!)
-                              clearText()
-                              typeText("New Quiz")
-                              hasText("New Quiz")
-                          }
-                      }
-                  }
-
-                  this.nestedScroll.swipeUp()
-
-                  contentList{
-                      isDisplayed()
-                      hasSize(1)
-                  }
+        ClazzAssignmentContentJoin().apply {
+            cacjAssignmentUid = existingClazzAssignment.caUid
+            cacjContentUid = entry.contentEntryUid
+            cacjUid = dbRule.repo.clazzAssignmentContentJoinDao.insert(this)
+        }
 
 
-                  fragmentScenario.clickOptionMenu(R.id.menu_done)
+        init {
+
+            fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                    fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existingClazzAssignment.caUid)) {
+                ClazzAssignmentEditFragment().also {
+                    it.installNavController(systemImplNavRule.navController)
+                }
+            }
+
+        }.run {
+
+            ClazzAssignmentEditScreen {
+
+                fragmentScenario.letOnFragment { it.entity }
+
+                flakySafely {
+                    clazzAssignmentTitleInput {
+                        edit {
+                            hasText(existingClazzAssignment.caTitle!!)
+                            flakySafely {
+                                clearText()
+                                typeText("New Quiz")
+                                hasText("New Quiz")
+                            }
+                        }
+                    }
+                }
+
+                this.nestedScroll.swipeUp()
+
+                contentList {
+                    isDisplayed()
+                    hasSize(1)
+                }
 
 
-                  val updatedEntityFromDb = dbRule.db.clazzAssignmentDao.findByUidLive(existingClazzAssignment.caUid)
-                          .waitUntilWithFragmentScenario(fragmentScenario) { it?.caTitle == "New Quiz" }
-
-                  Assert.assertEquals("ClazzAssignment name is updated", "New Quiz",
-                          updatedEntityFromDb!!.caTitle)
+                fragmentScenario.clickOptionMenu(R.id.menu_done)
 
 
-              }
+                val updatedEntityFromDb = dbRule.db.clazzAssignmentDao.findByUidLive(existingClazzAssignment.caUid)
+                        .waitUntilWithFragmentScenario(fragmentScenario) { it?.caTitle == "New Quiz" }
 
-          }
+                Assert.assertEquals("ClazzAssignment name is updated", "New Quiz",
+                        updatedEntityFromDb!!.caTitle)
 
-      }
+
+            }
+
+        }
+
+    }
 }
