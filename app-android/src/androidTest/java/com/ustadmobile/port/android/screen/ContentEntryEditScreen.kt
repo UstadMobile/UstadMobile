@@ -17,6 +17,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.port.android.view.ContentEntryEdit2Fragment
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
+import com.ustadmobile.test.port.android.KNestedScrollView
 import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.waitUntilWithFragmentScenario
@@ -41,6 +42,8 @@ object ContentEntryEditScreen : KScreen<ContentEntryEditScreen>() {
     val fileSelectedText = KTextView { withId(R.id.content_entry_select_file) }
 
     val descTextInput = KTextInputLayout { withId(R.id.entry_description) }
+
+    val nestedScroll = KNestedScrollView { withId(R.id.fragment_content_entry_edit2_edit_scroll)}
 
     fun createEntryFromFile(fileName: String, titleEntry: String,
                             systemImplNavRule: SystemImplTestNavHostRule,
@@ -71,6 +74,8 @@ object ContentEntryEditScreen : KScreen<ContentEntryEditScreen>() {
         }) {
             onFragment { fragment -> fragment.handleFileSelection() }
         }
+
+        nestedScroll.scrollToStart()
 
         importButton {
             isDisplayed()

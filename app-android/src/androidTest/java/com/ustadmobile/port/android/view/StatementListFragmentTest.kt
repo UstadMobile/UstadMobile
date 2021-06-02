@@ -68,6 +68,8 @@ class StatementListFragmentTest : TestCase()  {
 
                 recycler{
 
+                    scrollToStart()
+
                     childWith<StatementListScreen.PersonWithSessionDetail>{
                         withDescendant { withText("Completed") }
                     }perform {

@@ -84,6 +84,8 @@ class ContentEntryDetailOverviewFragmentTest : TestCase() {
                 statementPersonUid = activeAccount.personUid
                 statementContentEntryUid = testEntry.contentEntryUid
                 contentEntryRoot = true
+                resultCompletion = true
+                extensionProgress = 100
                 statementVerbUid = VerbEntity.VERB_COMPLETED_UID
                 statementUid = dbRule.repo.statementDao.insert(this)
             }
