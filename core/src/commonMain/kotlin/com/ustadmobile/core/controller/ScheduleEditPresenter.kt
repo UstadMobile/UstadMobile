@@ -3,10 +3,12 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Schedule
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
@@ -76,6 +78,7 @@ class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: Sched
             return
         }
 
-        view.finishWithResult(listOf(entity))
+        finishWithResult(
+            safeStringify(di, ListSerializer(Schedule.serializer()), listOf(entity)))
     }
 }

@@ -42,7 +42,7 @@ open class DefaultOneToManyJoinEditHelper<T: Any>(pkGetter: (T) -> Long,
         dao.deactivateByUids(primaryKeysToDeactivate)
     }
 
-    override open fun doesNewEntityRequireFakePk(pk: Long) = (pk == 0L)
+    override fun doesNewEntityRequireFakePk(pk: Long) = (pk == 0L)
 
     override fun onSaveState(outState: MutableMap<String, String>) {
         super.onSaveState(outState)

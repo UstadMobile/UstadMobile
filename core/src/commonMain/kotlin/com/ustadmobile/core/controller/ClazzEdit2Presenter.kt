@@ -4,13 +4,13 @@ import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.schedule.*
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
+import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SCHOOL_UID
@@ -34,9 +34,14 @@ class ClazzEdit2Presenter(context: Any,
          di, lifecycleOwner) {
 
     private val scheduleOneToManyJoinEditHelper
-            = DefaultOneToManyJoinEditHelper<Schedule>(Schedule::scheduleUid,
+            = OneToManyJoinEditHelperMp(Schedule::scheduleUid,
             ARG_SAVEDSTATE_SCHEDULES, ListSerializer(Schedule.serializer()),
-            ListSerializer(Schedule.serializer()), this, Schedule::class) {scheduleUid = it}
+            ListSerializer(Schedule.serializer()), this,
+            requireSavedStateHandle(), Schedule::class) {scheduleUid = it}
+
+    val scheduleOneToManyJoinListener = GoToEditOneToManyJoinEditListener(this,
+        ScheduleEditView.VIEW_NAME, Schedule::class, Schedule.serializer(),
+        scheduleOneToManyJoinEditHelper)
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -142,14 +147,6 @@ class ClazzEdit2Presenter(context: Any,
                 onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity)
             }
         }
-    }
-
-    fun handleAddOrEditSchedule(schedule: Schedule) {
-        scheduleOneToManyJoinEditHelper.onEditResult(schedule)
-    }
-
-    fun handleRemoveSchedule(schedule: Schedule) {
-        scheduleOneToManyJoinEditHelper.onDeactivateEntity(schedule)
     }
 
     companion object {

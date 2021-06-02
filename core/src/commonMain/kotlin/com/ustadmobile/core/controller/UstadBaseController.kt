@@ -32,11 +32,21 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UmLifecycleListener
 import com.ustadmobile.core.impl.UmLifecycleOwner
+import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.putResultDestInfo
+import com.ustadmobile.core.util.safeStringify
+import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
+import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import kotlinx.atomicfu.atomic
+import kotlinx.serialization.SerializationStrategy
 import org.kodein.di.DI
 import org.kodein.di.DIAware
+import org.kodein.di.instance
 import kotlin.js.JsName
+import kotlin.reflect.KClass
 
 /**
  * Base Controller that provides key functionality for any view :
@@ -57,6 +67,8 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
 
     protected var savedState: Map<String, String>? = null
         private set
+
+    protected val ustadNavController: UstadNavController by instance()
 
     /**
      * Handle when the presenter is created. Analogous to Android's onCreate
@@ -158,9 +170,98 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
         lifecycleListeners.remove(listener)
     }
 
+    /**
+     * This is used in roughly the same way as on Android. It can be called by the underlying
+     * platform (e.g. Androids own onSaveInstanceState when the app is being destroyed) or
+     * directly by the presenter e.g. to save the state of the entity before a user navigates away
+     * to pick something.
+     */
     open fun onSaveInstanceState(savedState: MutableMap<String, String>) {
 
     }
+
+    /**
+     * Save state to the nav controller savedStateHandle for the current back stack entry.
+     * This will call onSaveInstanceState and save the resulting string map into the savedstatehandle.
+     */
+    open fun saveStateToNavController() {
+        val stateMap = mutableMapOf<String, String>()
+        onSaveInstanceState(stateMap)
+
+        val stateHandle = ustadNavController.currentBackStackEntry?.savedStateHandle
+        if(stateHandle != null) {
+            stateMap.forEach {
+                stateHandle.set(it.key, it.value)
+            }
+        }
+    }
+
+
+    /**
+     * Save the result to the savedStateHandle on the backstack as directed by the current
+     * arguments. ARG_RESULT_DEST_VIEWNAME and ARG_RESULT_DEST_KEY will specify which entry on
+     * the backstack to lookup, and what key name should be used in the saved state handle once
+     * it has been looked up.
+     */
+    protected fun finishWithResult(result: String) {
+        val saveToViewName = arguments[ARG_RESULT_DEST_VIEWNAME]
+        val saveToKey = arguments[ARG_RESULT_DEST_KEY]
+
+        if(saveToViewName != null && saveToKey != null){
+            val destBackStackEntry = ustadNavController.getBackStackEntry(saveToViewName)
+            destBackStackEntry?.savedStateHandle?.set(saveToKey, result)
+
+            ustadNavController.popBackStack(saveToViewName, false)
+        }
+    }
+
+
+    fun requireSavedStateHandle(): UstadSavedStateHandle {
+        return ustadNavController.currentBackStackEntry?.savedStateHandle
+            ?: throw IllegalStateException("Require saved state handle: no current back stack entry")
+    }
+
+    /**
+     * Navigate to an edit screen with the intent to return the result to the current screen.
+     *
+     * @param entity the current value of the entity, or null if there is none. If provided, the
+     * entity is converted into JSON and passed to the edit view as ARG_ENTITY_JSON
+     * @param destinationViewName the view name to navigate to e.g. SomeEditView.VIEW_NAME
+     * @param entityClass KClass representing the entity (for serialization purposes)
+     * @param serializationStrategy Kotlinx serialization strategy
+     * @param overwriteDestination if true, the return result destination will be replaced with the
+     * current destination. This is normally desired when this is an edit screen (e.g. the user is
+     * editing something and going to pick something else), normally not desired in a list screen
+     * (e.g. selecting from person list, then selected to create a new person)
+     * @param args args to pass to the edit screen
+     */
+    fun <T : Any> navigateToEditEntity(entity: T?,
+                                 destinationViewName: String,
+                                 entityClass: KClass<T>,
+                                 serializationStrategy: SerializationStrategy<T>,
+                                 destinationResultKey: String? = null,
+                                 overwriteDestination: Boolean = (this is UstadEditPresenter<*, *>),
+                                 args: MutableMap<String, String> = mutableMapOf()) {
+
+        saveStateToNavController()
+
+        val currentBackStackEntryVal = ustadNavController.currentBackStackEntry
+        val effectiveResultKey = destinationResultKey ?: entityClass.simpleName
+            ?: throw IllegalArgumentException("navigateToEditEntity: no destination key and no class name")
+
+        if(currentBackStackEntryVal != null) {
+            args.putResultDestInfo(currentBackStackEntryVal, effectiveResultKey, overwriteDestination)
+        }
+
+        if(entity != null) {
+            args.put(
+                UstadEditView.ARG_ENTITY_JSON,
+                safeStringify(di, serializationStrategy, entityClass, entity))
+        }
+
+        ustadNavController.navigate(destinationViewName, args)
+    }
+
 
     companion object {
 

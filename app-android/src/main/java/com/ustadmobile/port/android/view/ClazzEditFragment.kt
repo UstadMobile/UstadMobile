@@ -20,6 +20,7 @@ import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.LongWrapper
+import com.ustadmobile.core.util.OneToManyJoinEditListener
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadView
@@ -82,7 +83,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             mDataBinding?.clazzStartDateError = value
         }
 
-    class ScheduleRecyclerAdapter(val activityEventHandler: ClazzEdit2ActivityEventHandler,
+    class ScheduleRecyclerAdapter(var oneToManyEditListener: OneToManyJoinEditListener<Schedule>?,
                                   var presenter: ClazzEdit2Presenter?): ListAdapter<Schedule, ScheduleRecyclerAdapter.ScheduleViewHolder>(DIFF_CALLBACK_SCHEDULE) {
 
         class ScheduleViewHolder(val binding: ItemScheduleBinding): RecyclerView.ViewHolder(binding.root)
@@ -91,12 +92,19 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             val viewHolder = ScheduleViewHolder(ItemScheduleBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false))
             viewHolder.binding.mPresenter = presenter
-            viewHolder.binding.mActivity = activityEventHandler
+            viewHolder.binding.oneToManyJoinListener = oneToManyEditListener
             return viewHolder
         }
 
         override fun onBindViewHolder(holder: ScheduleViewHolder, position: Int) {
             holder.binding.schedule = getItem(position)
+        }
+
+        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+            super.onDetachedFromRecyclerView(recyclerView)
+
+            oneToManyEditListener = null
+            presenter = null
         }
     }
 
@@ -159,14 +167,18 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             it.featuresBitmaskFlags = BitmaskEditPresenter.FLAGS_AVAILABLE
         }
 
-        scheduleRecyclerAdapter = ScheduleRecyclerAdapter(this, null)
+
+
+        mPresenter = ClazzEdit2Presenter(requireContext(), arguments.toStringMap(), this@ClazzEditFragment,
+                 di, viewLifecycleOwner)
+
+        mDataBinding?.scheduleOneToManyListener = mPresenter?.scheduleOneToManyJoinListener
+        scheduleRecyclerAdapter = ScheduleRecyclerAdapter(
+            mPresenter?.scheduleOneToManyJoinListener, mPresenter)
         scheduleRecyclerView = rootView.findViewById(R.id.activity_clazz_edit_schedule_recyclerview)
         scheduleRecyclerView?.adapter = scheduleRecyclerAdapter
         scheduleRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
-        mPresenter = ClazzEdit2Presenter(requireContext(), arguments.toStringMap(), this@ClazzEditFragment,
-                 di, viewLifecycleOwner)
-        scheduleRecyclerAdapter?.presenter = mPresenter
         return rootView
     }
 
@@ -177,11 +189,6 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         val navController = findNavController()
 
         mPresenter?.onCreate(backStackSavedState)
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                Schedule::class.java) {
-            val schedule = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleAddOrEditSchedule(schedule)
-        }
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 HolidayCalendar::class.java) {
