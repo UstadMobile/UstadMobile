@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
         SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${Comments.TABLE_ID} AS tableId FROM 
         ChangeLog
         JOIN Comments ON ChangeLog.chTableId = ${Comments.TABLE_ID} AND ChangeLog.chEntityPk = Comments.commentsUid
-        JOIN ClazzWork ON Comments.commentsEntityType = ${ClazzWork.CLAZZ_WORK_TABLE_ID} AND Comments.commentsEntityUid = ClazzWork.clazzWorkUid
+        JOIN ClazzWork ON Comments.commentsEntityType = ${ClazzAssignment.TABLE_ID} AND Comments.commentsEntityUid = ClazzWork.clazzWorkUid
         JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
         JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_ASSIGNMENT_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
@@ -19,7 +19,7 @@ import kotlinx.serialization.Serializable
     syncFindAllQuery = """
         SELECT Comments.* FROM
         Comments
-        JOIN ClazzWork ON Comments.commentsEntityType = ${ClazzWork.CLAZZ_WORK_TABLE_ID} AND Comments.commentsEntityUid = ClazzWork.clazzWorkUid
+        JOIN ClazzWork ON Comments.commentsEntityType = ${ClazzAssignment.TABLE_ID} AND Comments.commentsEntityUid = ClazzWork.clazzWorkUid
         JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
         JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_ASSIGNMENT_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid

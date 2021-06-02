@@ -76,11 +76,12 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
     }
 
     private var deadlineDateListener: View.OnClickListener? = View.OnClickListener {
-        entity?.caDeadlineDate = Long.MAX_VALUE
-        entity?.caLateSubmissionType = 0
+        mBinding?.caDeadlineDateTextinput?.editText?.setText("")
+        mBinding?.caDeadlineDatetimeTextinput?.editText?.setText("")
+        mBinding?.clazzAssignment?.caDeadlineDate = Long.MAX_VALUE
+        mBinding?.clazzAssignment?.caLateSubmissionType = 0
         mBinding?.lateSubmissionVisibility = View.GONE
         mBinding?.gracePeriodVisibility = View.GONE
-        mBinding?.clazzAssignment = entity
     }
 
 
@@ -90,9 +91,6 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             rootView = it.root
             it.activityEventHandler = this
             it.typeSelectionListener = this
-            it.caDeadlineDate.doAfterTextChanged {
-                mBinding?.clazzAssignment = entity
-            }
             it.caDeadlineDateTextinput.setEndIconOnClickListener(deadlineDateListener)
         }
 

@@ -120,7 +120,7 @@ fun getRealValueInt(et: TextView): Int {
     return et.text.toString().toInt()?:0
 }
 
-@BindingAdapter(value = ["minValue", "setMaxValue"])
+@BindingAdapter(value = ["minValue", "maxValue"])
 fun EditText.setMinMax(min: Int, max: Int){
     filters = arrayOf(InputFilterMinMax(min, max))
 }

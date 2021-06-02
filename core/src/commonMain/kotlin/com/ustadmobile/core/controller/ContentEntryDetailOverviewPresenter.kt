@@ -112,8 +112,6 @@ class ContentEntryDetailOverviewPresenter(context: Any,
             view.markCompleteVisible = false
         }
 
-
-
         if (db == repo) {
             val containerUid = entity.container?.containerUid ?: 0L
             availabilityRequest = AvailabilityMonitorRequest(listOf(containerUid)) { availableEntries ->
@@ -228,6 +226,11 @@ class ContentEntryDetailOverviewPresenter(context: Any,
             statementEndpoint.storeCompletedStatement(accountManager.activeAccount, contentEntry,
                     contextRegistration ?: "", null)
         }
+        view.markCompleteVisible = false
+        val scoreProgress = view.scoreProgress
+        scoreProgress?.contentComplete = true
+        scoreProgress?.progress = 100
+        view.scoreProgress = scoreProgress
     }
 
 }

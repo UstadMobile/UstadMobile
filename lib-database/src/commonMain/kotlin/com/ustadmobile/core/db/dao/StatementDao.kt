@@ -215,6 +215,10 @@ abstract class StatementDao : BaseDao<StatementEntity> {
           FROM StatementEntity
          WHERE statementPersonUid = :accountPersonUid
            AND statementContentEntryUid = :entryUid
+           AND NOT EXISTS (SELECT * FROM StatementEntity
+                            WHERE statementPersonUid = :accountPersonUid
+                             AND statementContentEntryUid = :entryUid
+                             AND statementVerbUid = ${VerbEntity.VERB_COMPLETED_UID})
       ORDER BY timestamp DESC 
     """)
     abstract suspend fun findLatestRegistrationStatement(accountPersonUid: Long, entryUid: Long): String?
