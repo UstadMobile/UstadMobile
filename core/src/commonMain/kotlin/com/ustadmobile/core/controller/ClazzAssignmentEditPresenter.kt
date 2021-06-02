@@ -10,6 +10,7 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ClazzAssignmentDetailView
 import com.ustadmobile.core.view.ClazzAssignmentEditView
+import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -189,7 +190,8 @@ class ClazzAssignmentEditPresenter(context: Any,
 
             repo.cacheClazzAssignmentDao.deleteCachedInactiveContent()
 
-            onFinish(ClazzAssignmentDetailView.VIEW_NAME, entity.caUid, entity)
+            systemImpl.go(ClazzAssignmentDetailView.VIEW_NAME,
+                    mapOf(ARG_ENTITY_UID to entity.caUid.toString()), context)
 
         }
     }
