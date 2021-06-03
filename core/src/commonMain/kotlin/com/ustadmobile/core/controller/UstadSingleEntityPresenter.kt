@@ -57,6 +57,7 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
             entity = onLoadFromJson(mapWithEntityJson)
             view.entity = entity
             (view as? UstadEditView<*>)?.fieldsEnabled = true
+            onLoadDataComplete()
         }else if(persistenceMode == PersistenceMode.DB) {
             view.loading = true
             (view as? UstadEditView<*>)?.fieldsEnabled = false
@@ -68,10 +69,12 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
 
                 view.loading = false
                 (view as? UstadEditView<*>)?.fieldsEnabled = true
+                onLoadDataComplete()
             }
         }else if(persistenceMode == PersistenceMode.JSON){
             entity = onLoadFromJson(arguments)
             view.entity = entity
+            onLoadDataComplete()
         }else if(persistenceMode == PersistenceMode.LIVEDATA) {
             entityLiveData = onLoadLiveData(repo)
             view.loading = true
@@ -83,9 +86,20 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
                     }
                 }.also {
                     entityLiveData?.observe(lifecycleOwner, it)
+                    onLoadDataComplete()
                 }
             }
         }
+    }
+
+    /**
+     * This function will be called after loading data is completed (whether the data has been
+     * loaded from the database or JSON).
+     *
+     * This is the right place to start observing for incoming results from other screens.
+     */
+    protected open fun onLoadDataComplete() {
+
     }
 
     open suspend fun onLoadEntityFromDb(db: UmAppDatabase): RT? {

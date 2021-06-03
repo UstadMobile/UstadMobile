@@ -9,6 +9,7 @@
         <import type="com.ustadmobile.core.model.BitmaskFlag"/>
         <import type="com.ustadmobile.core.util.OneToManyJoinEditListener"/>
         <import type="com.ustadmobile.lib.db.entities.Schedule"/>
+        <import type="com.ustadmobile.core.controller.ClazzEdit2Presenter"/>
 
         <variable
             name="clazz"
@@ -41,6 +42,10 @@
         <variable
             name="scheduleOneToManyListener"
             type="OneToManyJoinEditListener&lt;Schedule&gt;" />
+
+        <variable
+            name="mPresenter"
+            type="ClazzEdit2Presenter" />
 
     </data>
 
@@ -233,7 +238,6 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/activity_clazz_edit_holiday_calendar_text"
-                    android:onClick="@{() -> activityEventHandler.showHolidayCalendarPicker()}"
                     android:text="@{clazz.holidayCalendar.umCalendarName}"
                     app:runOnClickWhenFocused="@{true}"
                     android:inputType="@{InputType.TYPE_NULL}"
@@ -280,7 +284,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:onClick="@{() -> activityEventHandler.handleClickTimeZone()}"
+                    android:onClick="@{() -> mPresenter.handleClickTimezone()}"
                     android:text="@{clazz.clazzTimeZone}"
                     android:focusable="false"
                     />

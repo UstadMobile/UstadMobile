@@ -26,7 +26,6 @@ import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.view.TimeZoneListFragment.Companion.RESULT_TIMEZONE_KEY
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 
@@ -37,8 +36,6 @@ interface ClazzEdit2ActivityEventHandler {
     fun showEditScheduleDialog(schedule: Schedule)
 
     fun showHolidayCalendarPicker()
-
-    fun handleClickTimeZone()
 
     fun showFeaturePicker()
 
@@ -152,12 +149,6 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
                 LongWrapper::class.java, destinationResultKey = CLAZZ_FEATURES_KEY)
     }
 
-    override fun handleClickTimeZone() {
-        onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(String::class.java, R.id.time_zone_list_dest,
-                destinationResultKey = RESULT_TIMEZONE_KEY)
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
 
@@ -173,6 +164,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
                  di, viewLifecycleOwner)
 
         mDataBinding?.scheduleOneToManyListener = mPresenter?.scheduleOneToManyJoinListener
+        mDataBinding?.mPresenter = mPresenter
         scheduleRecyclerAdapter = ScheduleRecyclerAdapter(
             mPresenter?.scheduleOneToManyJoinListener, mPresenter)
         scheduleRecyclerView = rootView.findViewById(R.id.activity_clazz_edit_schedule_recyclerview)
@@ -206,12 +198,6 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             mDataBinding?.fragmentClazzEditSchoolText?.setText(school.schoolName)
             mDataBinding?.clazz = entity
         }
-
-        navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>(RESULT_TIMEZONE_KEY)
-                ?.observe(viewLifecycleOwner) {
-                    entity?.clazzTimeZone = it
-                    mDataBinding?.clazz = entity
-                }
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 LongWrapper::class.java, CLAZZ_FEATURES_KEY) {

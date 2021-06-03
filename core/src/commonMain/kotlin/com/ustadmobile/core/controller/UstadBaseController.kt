@@ -37,6 +37,7 @@ import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.putResultDestInfo
 import com.ustadmobile.core.util.safeStringify
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
@@ -222,22 +223,25 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
             ?: throw IllegalStateException("Require saved state handle: no current back stack entry")
     }
 
+    private fun <T: Any> NavigateForResultOptions<T>.putPresenterResultDestInfo() {
+        val currentBackStackEntryVal = ustadNavController.currentBackStackEntry
+        val effectiveResultKey = destinationResultKey ?: entityClass.simpleName
+        ?: throw IllegalArgumentException("putPresenterResultDestInfo: no destination key and no class name")
+
+        if(currentBackStackEntryVal != null) {
+            arguments.putResultDestInfo(currentBackStackEntryVal, effectiveResultKey,
+                overwriteDestination)
+        }
+    }
+
     /**
-     * Navigate to an edit screen with the intent to return the result to the current screen.
-     *
+     * Navigate to an edit screen with the intent to return the result to the current screen
+     * or another screen in the backstack as specified by ARG_RESULT_DEST_KEY.
      */
     fun <T : Any> navigateToEditEntity(options: NavigateForResultOptions<T>) {
 
         saveStateToNavController()
-
-        val currentBackStackEntryVal = ustadNavController.currentBackStackEntry
-        val effectiveResultKey = options.destinationResultKey ?: options.entityClass.simpleName
-            ?: throw IllegalArgumentException("navigateToEditEntity: no destination key and no class name")
-
-        if(currentBackStackEntryVal != null) {
-            options.arguments.putResultDestInfo(currentBackStackEntryVal, effectiveResultKey,
-                options.overwriteDestination)
-        }
+        options.putPresenterResultDestInfo()
 
         val currentEntityValue = options.currentEntityValue
         if(currentEntityValue != null) {
@@ -250,21 +254,18 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
         ustadNavController.navigate(options.destinationViewName, options.arguments)
     }
 
-    fun <T: Any> navigateToPickEntityFromList(destinationViewName: String,
-                                              entityClass: KClass<T>,
-                                              serializationStrategy: SerializationStrategy<T>,
-                                              destinationResultKey: String? = null) {
+    /**
+     * Navigate to a list screen with the intent to return the result to the current
+     * screen or another screen in the backstack as specified by ARG_RESULT_DEST_KEY
+     */
+    fun <T: Any> navigateToPickEntityFromList(options: NavigateForResultOptions<T>) {
         saveStateToNavController()
+        options.putPresenterResultDestInfo()
 
-        val currentBackStackEntryVal = ustadNavController.currentBackStackEntry
-        val effectiveResultKey = destinationResultKey ?: entityClass.simpleName
-            ?: throw IllegalArgumentException("navigateToEditEntity: no destination key and no class name")
+        options.arguments[UstadView.ARG_LISTMODE] = ListViewMode.PICKER.toString()
 
-
-
+        ustadNavController.navigate(options.destinationViewName, options.arguments)
     }
-
-
 
     companion object {
 

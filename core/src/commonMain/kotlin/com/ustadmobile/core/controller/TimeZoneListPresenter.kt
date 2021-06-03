@@ -22,4 +22,10 @@ class TimeZoneListPresenter(context: Any, args: Map<String, String>, view: TimeZ
         view.finishWithResult(timeZoneId)
     }
 
+    companion object {
+
+        const val RESULT_TIMEZONE_KEY = "timezone"
+
+    }
+
 }

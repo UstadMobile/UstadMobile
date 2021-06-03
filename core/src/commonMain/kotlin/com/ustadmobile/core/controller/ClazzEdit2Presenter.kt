@@ -1,18 +1,17 @@
 package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
+import com.ustadmobile.core.controller.TimeZoneListPresenter.Companion.RESULT_TIMEZONE_KEY
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.schedule.*
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.view.ClazzDetailView
-import com.ustadmobile.core.view.ClazzEdit2View
-import com.ustadmobile.core.view.ScheduleEditView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SCHOOL_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -23,6 +22,7 @@ import com.ustadmobile.lib.util.getDefaultTimeZoneId
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -51,6 +51,15 @@ class ClazzEdit2Presenter(context: Any,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.clazzSchedules = scheduleOneToManyJoinEditHelper.liveList
+    }
+
+    override fun onLoadDataComplete() {
+        super.onLoadDataComplete()
+
+        requireSavedStateHandle().getLiveData<String?>(RESULT_TIMEZONE_KEY).observe(lifecycleOwner) {
+            entity?.clazzTimeZone = it
+            view.entity = entity
+        }
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWithHolidayCalendarAndSchool? {
@@ -97,7 +106,13 @@ class ClazzEdit2Presenter(context: Any,
     }
 
     fun handleClickTimezone() {
-
+        navigateToPickEntityFromList(NavigateForResultOptions<String>(
+            this,
+            currentEntityValue = entity?.clazzTimeZone,
+            destinationViewName = TimeZoneListView.VIEW_NAME,
+            entityClass = String::class,
+            serializationStrategy = String.serializer(),
+            destinationResultKey = RESULT_TIMEZONE_KEY))
     }
 
     override fun handleClickSave(entity: ClazzWithHolidayCalendarAndSchool) {
