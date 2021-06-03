@@ -35,13 +35,15 @@ class ClazzEdit2Presenter(context: Any,
 
     private val scheduleOneToManyJoinEditHelper
             = OneToManyJoinEditHelperMp(Schedule::scheduleUid,
-            ARG_SAVEDSTATE_SCHEDULES, ListSerializer(Schedule.serializer()),
-            ListSerializer(Schedule.serializer()), this,
-            requireSavedStateHandle(), Schedule::class) {scheduleUid = it}
+            ARG_SAVEDSTATE_SCHEDULES,
+            ListSerializer(Schedule.serializer()),
+            ListSerializer(Schedule.serializer()),
+            this,
+            requireSavedStateHandle(),
+            Schedule::class) {scheduleUid = it}
 
-    val scheduleOneToManyJoinListener = GoToEditOneToManyJoinEditListener(this,
-        ScheduleEditView.VIEW_NAME, Schedule::class, Schedule.serializer(),
-        scheduleOneToManyJoinEditHelper)
+    val scheduleOneToManyJoinListener = scheduleOneToManyJoinEditHelper.createGoToEditListener(
+        ScheduleEditView.VIEW_NAME, Schedule.serializer())
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -92,6 +94,10 @@ class ClazzEdit2Presenter(context: Any,
         val entityVal = entity ?: return
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
                     entityVal)
+    }
+
+    fun handleClickTimezone() {
+
     }
 
     override fun handleClickSave(entity: ClazzWithHolidayCalendarAndSchool) {

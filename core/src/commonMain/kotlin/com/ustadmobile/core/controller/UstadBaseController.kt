@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.UmLifecycleListener
 import com.ustadmobile.core.impl.UmLifecycleOwner
 import com.ustadmobile.core.impl.nav.UstadNavController
@@ -224,43 +225,45 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
     /**
      * Navigate to an edit screen with the intent to return the result to the current screen.
      *
-     * @param entity the current value of the entity, or null if there is none. If provided, the
-     * entity is converted into JSON and passed to the edit view as ARG_ENTITY_JSON
-     * @param destinationViewName the view name to navigate to e.g. SomeEditView.VIEW_NAME
-     * @param entityClass KClass representing the entity (for serialization purposes)
-     * @param serializationStrategy Kotlinx serialization strategy
-     * @param overwriteDestination if true, the return result destination will be replaced with the
-     * current destination. This is normally desired when this is an edit screen (e.g. the user is
-     * editing something and going to pick something else), normally not desired in a list screen
-     * (e.g. selecting from person list, then selected to create a new person)
-     * @param args args to pass to the edit screen
      */
-    fun <T : Any> navigateToEditEntity(entity: T?,
-                                 destinationViewName: String,
-                                 entityClass: KClass<T>,
-                                 serializationStrategy: SerializationStrategy<T>,
-                                 destinationResultKey: String? = null,
-                                 overwriteDestination: Boolean = (this is UstadEditPresenter<*, *>),
-                                 args: MutableMap<String, String> = mutableMapOf()) {
+    fun <T : Any> navigateToEditEntity(options: NavigateForResultOptions<T>) {
 
+        saveStateToNavController()
+
+        val currentBackStackEntryVal = ustadNavController.currentBackStackEntry
+        val effectiveResultKey = options.destinationResultKey ?: options.entityClass.simpleName
+            ?: throw IllegalArgumentException("navigateToEditEntity: no destination key and no class name")
+
+        if(currentBackStackEntryVal != null) {
+            options.arguments.putResultDestInfo(currentBackStackEntryVal, effectiveResultKey,
+                options.overwriteDestination)
+        }
+
+        val currentEntityValue = options.currentEntityValue
+        if(currentEntityValue != null) {
+            options.arguments.put(
+                UstadEditView.ARG_ENTITY_JSON,
+                safeStringify(di, options.serializationStrategy, options.entityClass,
+                    currentEntityValue))
+        }
+
+        ustadNavController.navigate(options.destinationViewName, options.arguments)
+    }
+
+    fun <T: Any> navigateToPickEntityFromList(destinationViewName: String,
+                                              entityClass: KClass<T>,
+                                              serializationStrategy: SerializationStrategy<T>,
+                                              destinationResultKey: String? = null) {
         saveStateToNavController()
 
         val currentBackStackEntryVal = ustadNavController.currentBackStackEntry
         val effectiveResultKey = destinationResultKey ?: entityClass.simpleName
             ?: throw IllegalArgumentException("navigateToEditEntity: no destination key and no class name")
 
-        if(currentBackStackEntryVal != null) {
-            args.putResultDestInfo(currentBackStackEntryVal, effectiveResultKey, overwriteDestination)
-        }
 
-        if(entity != null) {
-            args.put(
-                UstadEditView.ARG_ENTITY_JSON,
-                safeStringify(di, serializationStrategy, entityClass, entity))
-        }
 
-        ustadNavController.navigate(destinationViewName, args)
     }
+
 
 
     companion object {
