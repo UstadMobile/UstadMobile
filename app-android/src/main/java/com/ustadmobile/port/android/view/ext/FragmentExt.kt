@@ -94,8 +94,25 @@ fun <T> Fragment.navigateToEditEntity(entity: T?, destinationId: Int, entityClas
     val backStateEntryVal = navController.currentBackStackEntry
 
     if(backStateEntryVal != null) {
-        argBundle.putResultDestInfo(backStateEntryVal, destinationResultKey,
-            overwriteDest = overwriteDestination ?: (this is UstadEditFragment<*>))
+        //Provide compatibility with multiplatform results
+        val currentDestViewName = backStateEntryVal.arguments
+            ?.getString(UstadView.ARG_RESULT_DEST_VIEWNAME)
+        val currentDestKey = backStateEntryVal.arguments
+            ?.getString(UstadView.ARG_RESULT_DEST_KEY)
+
+        val di: DI by closestDI()
+        val destProvider: DestinationProvider by di.instance()
+        val overwriteDestVal = (this is UstadEditFragment<*>)
+
+        if(!overwriteDestVal && currentDestViewName != null && currentDestKey != null){
+            argBundle.putString(UstadView.ARG_RESULT_DEST_VIEWNAME, currentDestViewName)
+            argBundle.putString(UstadView.ARG_RESULT_DEST_KEY, currentDestKey)
+            val destId = destProvider.lookupDestinationName(currentDestViewName)?.destinationId ?: 0
+            argBundle.putString(UstadView.ARG_RESULT_DEST_ID, destId.toString())
+        }else {
+            argBundle.putResultDestInfo(backStateEntryVal, destinationResultKey,
+                overwriteDest = overwriteDestination ?: (this is UstadEditFragment<*>))
+        }
     }
 
     if(entity != null)

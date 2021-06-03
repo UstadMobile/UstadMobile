@@ -36,11 +36,9 @@ class OneToManyJoinEditHelperMp<T : Any>(pkGetter: (T) -> Long,
 
 
     init {
-        savedStateHandle.getLiveData<String?>(returnSavedStateKey).observe(editPresenter.lifecycleOwner) {
-            if(it == null)
-                return@observe
+        editPresenter.observeSavedStateResult(returnSavedStateKey, deserializationStrategy, entityClass) {
+            val newValue = it.firstOrNull() ?: return@observeSavedStateResult
 
-            val newValue = Json.decodeFromString(deserializationStrategy, it).firstOrNull() ?: return@observe
             onEditResult(newValue)
             savedStateHandle[returnSavedStateKey] = null
         }

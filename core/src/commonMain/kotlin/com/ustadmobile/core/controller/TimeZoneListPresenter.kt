@@ -19,7 +19,7 @@ class TimeZoneListPresenter(context: Any, args: Map<String, String>, view: TimeZ
 
 
     fun handleClickTimeZone(timeZoneId: String) {
-        view.finishWithResult(timeZoneId)
+        finishWithResult(timeZoneId)
     }
 
     companion object {

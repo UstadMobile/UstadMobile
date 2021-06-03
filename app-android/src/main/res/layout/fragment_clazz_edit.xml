@@ -32,10 +32,6 @@
             type="String" />
 
         <variable
-            name="activityEventHandler"
-            type="com.ustadmobile.port.android.view.ClazzEdit2ActivityEventHandler" />
-
-        <variable
             name="featuresBitmaskFlags"
             type="java.util.List&lt;BitmaskFlag&gt;" />
 
@@ -187,7 +183,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/fragment_clazz_edit_school_text"
-                    android:onClick="@{() -> activityEventHandler.handleClickSchool()}"
+                    android:onClick="@{() -> mPresenter.handleClickSchool()}"
                     android:text="@{clazz.school.schoolName}"
                     app:runOnClickWhenFocused="@{true}"
                     android:inputType="@{InputType.TYPE_NULL}"
@@ -239,6 +235,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/activity_clazz_edit_holiday_calendar_text"
                     android:text="@{clazz.holidayCalendar.umCalendarName}"
+                    android:onClick="@{() -> mPresenter.handleClickHolidayCalendar()}"
                     app:runOnClickWhenFocused="@{true}"
                     android:inputType="@{InputType.TYPE_NULL}"
                     android:layout_width="match_parent"
@@ -259,7 +256,7 @@
                 android:hint="@string/features_enabled">
                 <com.google.android.material.textfield.TextInputEditText
                     app:runOnClickWhenFocused="@{true}"
-                    android:onClick="@{() -> activityEventHandler.showFeaturePicker()}"
+                    android:onClick="@{() -> mPresenter.handleClickFeatures()}"
                     android:inputType="@{InputType.TYPE_NULL}"
                     app:textBitmaskFlags="@{featuresBitmaskFlags}"
                     app:textBitmaskValue="@{clazz.clazzFeatures}"

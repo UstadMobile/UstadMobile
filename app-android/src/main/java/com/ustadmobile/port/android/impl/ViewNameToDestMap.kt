@@ -108,6 +108,8 @@ class ViewNameToDestMap: DestinationProvider {
                 hideAccountIcon = true),
             ScheduleEditView.VIEW_NAME to UstadDestination(R.id.schedule_edit_dest,
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
+            BitmaskEditView.VIEW_NAME to UstadDestination(R.id.bitmask_edit_dest,
+                actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
     )
 
     override val navControllerViewId: Int

@@ -16,8 +16,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_SCHOOL_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
-import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
-import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -59,6 +58,33 @@ class ClazzEdit2Presenter(context: Any,
         requireSavedStateHandle().getLiveData<String?>(RESULT_TIMEZONE_KEY).observe(lifecycleOwner) {
             entity?.clazzTimeZone = it
             view.entity = entity
+        }
+
+        observeSavedStateResult(SAVEDSTATE_KEY_SCHOOL, ListSerializer(School.serializer()),
+            School::class) {
+            val school = it.firstOrNull() ?: return@observeSavedStateResult
+            entity?.school = school
+            view.entity = entity
+
+            requireSavedStateHandle()[SAVEDSTATE_KEY_SCHOOL] = null
+        }
+
+        observeSavedStateResult(SAVEDSTATE_KEY_HOLIDAYCALENDAR,
+            ListSerializer(HolidayCalendar.serializer()), HolidayCalendar::class) {
+            val calendar = it.firstOrNull() ?: return@observeSavedStateResult
+            entity?.holidayCalendar = calendar
+            view.entity = entity
+
+            requireSavedStateHandle()[SAVEDSTATE_KEY_HOLIDAYCALENDAR] = null
+        }
+
+        observeSavedStateResult(SAVEDSTATE_KEY_FEATURES,
+            ListSerializer(LongWrapper.serializer()), LongWrapper::class) {
+            val wrapper = it.firstOrNull() ?: return@observeSavedStateResult
+
+            entity?.clazzFeatures = wrapper.longValue
+            view.entity = entity
+            requireSavedStateHandle()[SAVEDSTATE_KEY_FEATURES] = null
         }
     }
 
@@ -113,6 +139,34 @@ class ClazzEdit2Presenter(context: Any,
             entityClass = String::class,
             serializationStrategy = String.serializer(),
             destinationResultKey = RESULT_TIMEZONE_KEY))
+    }
+
+    fun handleClickHolidayCalendar() {
+        navigateToPickEntityFromList(
+            NavigateForResultOptions(this,
+            null, HolidayCalendarListView.VIEW_NAME, HolidayCalendar::class,
+            HolidayCalendar.serializer(), SAVEDSTATE_KEY_HOLIDAYCALENDAR)
+        )
+    }
+
+    fun handleClickSchool() {
+        val args = mutableMapOf(
+            UstadView.ARG_FILTER_BY_PERMISSION to Role.PERMISSION_PERSON_DELEGATE.toString())
+        navigateToPickEntityFromList(
+            NavigateForResultOptions(this,
+            null, SchoolListView.VIEW_NAME, School::class,
+            School.serializer(), SAVEDSTATE_KEY_SCHOOL,
+                arguments = args)
+        )
+    }
+
+    fun handleClickFeatures() {
+        navigateToEditEntity(NavigateForResultOptions(this,
+            LongWrapper(entity?.clazzFeatures ?: 0),
+            BitmaskEditView.VIEW_NAME,
+            LongWrapper::class,
+            LongWrapper.serializer(),
+            SAVEDSTATE_KEY_FEATURES))
     }
 
     override fun handleClickSave(entity: ClazzWithHolidayCalendarAndSchool) {
@@ -173,6 +227,12 @@ class ClazzEdit2Presenter(context: Any,
     companion object {
 
         const val ARG_SAVEDSTATE_SCHEDULES = "schedules"
+
+        const val SAVEDSTATE_KEY_SCHOOL = "School"
+
+        const val SAVEDSTATE_KEY_HOLIDAYCALENDAR = "HolidayCalendar"
+
+        const val SAVEDSTATE_KEY_FEATURES = "ClazzFeatures"
 
     }
 
