@@ -112,7 +112,7 @@ class ClazzAssignmentEditPresenterTest {
         presenter.handleClickSave(initialEntity)
 
         verify(systemImpl, timeout(5000)).go(
-                eq(ClazzAssignmentDetailOverviewView.VIEW_NAME),
+                eq(ClazzAssignmentDetailView.VIEW_NAME),
                 any(), any(), any())
 
         //TODO: wait until the presenter has saved the entity e.g.

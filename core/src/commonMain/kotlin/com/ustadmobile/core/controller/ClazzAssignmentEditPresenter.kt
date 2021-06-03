@@ -190,8 +190,7 @@ class ClazzAssignmentEditPresenter(context: Any,
 
             repo.cacheClazzAssignmentDao.deleteCachedInactiveContent()
 
-            systemImpl.go(ClazzAssignmentDetailView.VIEW_NAME,
-                    mapOf(ARG_ENTITY_UID to entity.caUid.toString()), context)
+            onFinish(ClazzAssignmentDetailView.VIEW_NAME, entity.caUid, entity)
 
         }
     }
