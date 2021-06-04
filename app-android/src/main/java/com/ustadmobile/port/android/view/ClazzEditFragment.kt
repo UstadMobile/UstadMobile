@@ -106,16 +106,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             it.featuresBitmaskFlags = BitmaskEditPresenter.FLAGS_AVAILABLE
         }
 
-        mPresenter = ClazzEdit2Presenter(requireContext(), arguments.toStringMap(), this@ClazzEditFragment,
-                 di, viewLifecycleOwner)
-
-        mDataBinding?.scheduleOneToManyListener = mPresenter?.scheduleOneToManyJoinListener
-        mDataBinding?.mPresenter = mPresenter
-        scheduleRecyclerAdapter = ScheduleRecyclerAdapter(
-            mPresenter?.scheduleOneToManyJoinListener, mPresenter)
         scheduleRecyclerView = rootView.findViewById(R.id.activity_clazz_edit_schedule_recyclerview)
-        scheduleRecyclerView?.adapter = scheduleRecyclerAdapter
-        scheduleRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         return rootView
     }
@@ -124,6 +115,16 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         super.onViewCreated(view, savedInstanceState)
         setEditFragmentTitle(R.string.add_a_new_class, R.string.edit_clazz)
 
+        mPresenter = ClazzEdit2Presenter(requireContext(), arguments.toStringMap(), this@ClazzEditFragment,
+            di, viewLifecycleOwner)
+
+        mDataBinding?.scheduleOneToManyListener = mPresenter?.scheduleOneToManyJoinListener
+        mDataBinding?.mPresenter = mPresenter
+        scheduleRecyclerAdapter = ScheduleRecyclerAdapter(
+            mPresenter?.scheduleOneToManyJoinListener, mPresenter)
+
+        scheduleRecyclerView?.adapter = scheduleRecyclerAdapter
+        scheduleRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         mPresenter?.onCreate(backStackSavedState)
 

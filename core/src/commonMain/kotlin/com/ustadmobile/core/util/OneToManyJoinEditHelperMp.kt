@@ -23,7 +23,7 @@ class OneToManyJoinEditHelperMp<T : Any>(pkGetter: (T) -> Long,
                                          private val editPresenter: UstadEditPresenter<*, *>,
                                          val savedStateHandle: UstadSavedStateHandle,
                                          entityClass: KClass<T>,
-                                         val returnSavedStateKey: String = "${serializationKey}_ret",
+                                         val returnSavedStateKey: String = serializationKey + SUFFIX_RETKEY_DEFAULT,
                                          pkSetter: T.(Long) -> Unit):
     DefaultOneToManyJoinEditHelper<T>(
         pkGetter,
@@ -77,6 +77,12 @@ class OneToManyJoinEditHelperMp<T : Any>(pkGetter: (T) -> Long,
             createNavigateForResultOptions(destinationViewName = editViewName,
                 serializationStrategy = serializationStrategy,
                 arguments = arguments), this)
+    }
+
+    companion object {
+
+        const val SUFFIX_RETKEY_DEFAULT = "_ret"
+
     }
 
 }
