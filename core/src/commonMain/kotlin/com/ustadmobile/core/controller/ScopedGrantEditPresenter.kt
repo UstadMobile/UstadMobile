@@ -53,7 +53,9 @@ class ScopedGrantEditPresenter(context: Any,
         if(entityJsonStr != null) {
             editEntity = safeParse(di, ScopedGrant.serializer(), entityJsonStr)
         }else {
-            editEntity = ScopedGrant()
+            editEntity = ScopedGrant().also {
+                it.sgGroupUid = arguments[ScopedGrantEditView.ARG_GRANT_TO_GROUPUID]?.toLong() ?: 0
+            }
         }
 
         val permissionListKey = arguments[ARG_PERMISSION_LIST]?.toInt()

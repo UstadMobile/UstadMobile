@@ -4,11 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="com.ustadmobile.core.util.ScopedGrantOneToManyListener"/>
+        <import type="com.ustadmobile.core.util.OneToManyJoinEditListener"/>
+        <import type="com.ustadmobile.lib.db.entities.ScopedGrantAndName"/>
 
         <variable
             name="scopedGrantsOneToManyListener"
-            type="ScopedGrantOneToManyListener" />
+            type="OneToManyJoinEditListener&lt;ScopedGrantAndName&gt;" />
     </data>
 
     <androidx.appcompat.widget.LinearLayoutCompat
@@ -30,7 +31,7 @@
             app:iconGravity="start"
             android:gravity="start|center_vertical"
             android:text="ADD PERSON OR GROUP"
-            android:onClick="@{() -> scopedGrantsOneToManyListener.onClickAddNewScopedGrant()}"
+            android:onClick="@{() -> scopedGrantsOneToManyListener.onClickNew()}"
             />
 
         <androidx.recyclerview.widget.RecyclerView

@@ -44,7 +44,7 @@ class ClazzEdit2Presenter(context: Any,
     val scheduleOneToManyJoinListener = scheduleOneToManyJoinEditHelper.createNavigateForResultListener(
         ScheduleEditView.VIEW_NAME, Schedule.serializer())
 
-    val scopedGrantOneToManyHelper = ScopedGrantOneToManyHelper(this,
+    val scopedGrantOneToManyHelper = ScopedGrantOneToManyHelper(repo, this,
         requireBackStackEntry().savedStateHandle, Clazz.TABLE_ID)
 
     fun requireBackStackEntry() = ustadNavController.currentBackStackEntry!!

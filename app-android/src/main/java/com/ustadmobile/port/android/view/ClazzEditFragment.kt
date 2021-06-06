@@ -142,7 +142,8 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         scheduleRecyclerView?.adapter = scheduleRecyclerAdapter
         scheduleRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
-        scopedGrantRecyclerAdapter = ScopedGrantAndNameEditRecyclerViewAdapter()
+        scopedGrantRecyclerAdapter = ScopedGrantAndNameEditRecyclerViewAdapter(
+            mPresenter?.scopedGrantOneToManyHelper)
         mDataBinding?.clazzEditFragmentPermissionsInc?.itemScopedGrantOneToNRecycler?.apply {
             adapter = scopedGrantRecyclerAdapter
             layoutManager = LinearLayoutManager(requireContext())

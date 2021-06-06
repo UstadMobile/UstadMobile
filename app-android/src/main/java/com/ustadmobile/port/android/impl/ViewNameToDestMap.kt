@@ -110,7 +110,6 @@ class ViewNameToDestMap: DestinationProvider {
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             BitmaskEditView.VIEW_NAME to UstadDestination(R.id.bitmask_edit_dest,
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
-                hideAccountIcon = true),
             RegisterMinorWaitForParentView.VIEW_NAME to UstadDestination(R.id.register_minor_wait_for_parent_dest,
                 hideBottomNavigation = true, hideAccountIcon = true),
             RegisterAgeRedirectView.VIEW_NAME to UstadDestination(R.id.register_age_redirect_dest,

@@ -2,6 +2,7 @@ package com.ustadmobile.core.util
 
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.PersonListView
@@ -9,8 +10,11 @@ import com.ustadmobile.core.view.ScopedGrantEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_GO_TO_COMPLETE
 import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ScopedGrant
 import com.ustadmobile.lib.db.entities.ScopedGrantAndName
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 
@@ -20,45 +24,40 @@ import kotlinx.serialization.json.Json
  * @param tableId the table id for which scopedgrants are being created for. This is passed to
  * ScopedGrantEdit to determine which permissions are displayed
  */
-class ScopedGrantOneToManyHelper(val editPresenter: UstadEditPresenter<*, *>,
+class ScopedGrantOneToManyHelper(
+    val repo: UmAppDatabase,
+    val editPresenter: UstadEditPresenter<*, *>,
     val savedStateHandle: UstadSavedStateHandle,
     val entityTableId: Int)
     : DefaultOneToManyJoinEditHelper<ScopedGrantAndName>(
-    pkGetter = {it.scopedGrant?.sgGroupUid ?: 0L},
+    pkGetter = {it.scopedGrant?.sgUid ?: 0L},
     serializationKey = "ScopedGrantAndName",
     serializationStrategy = ListSerializer(ScopedGrantAndName.serializer()),
     deserializationStrategy = ListSerializer(ScopedGrantAndName.serializer()),
     editPresenter = editPresenter,
     entityClass = ScopedGrantAndName::class,
-    pkSetter = {scopedGrant?.sgEntityUid = it}), ScopedGrantOneToManyListener {
+    pkSetter = {scopedGrant?.sgUid = it}), OneToManyJoinEditListener<ScopedGrantAndName> {
 
 
     init {
         //Get the current back stack, then watch / observe for when the result comes back from the edit screen
         // e.g. what we would otherwise be doing in the Android fragment onViewCreated
 
-        onStartObservingResults()
-    }
+        editPresenter.observeSavedStateResult(SAVEDSTATE_KEY_SCOPEDGRANT_RESULTS,
+            ListSerializer(ScopedGrant.serializer()), ScopedGrant::class) {
 
-    /**
-     * This function is responsible to observe for incoming results (e.g. when the user navigates
-     * away to pick something, the other destination will save the picked value in the
-     * savedStateHandle).
-     */
-    fun onStartObservingResults() {
-        savedStateHandle.getLiveData<String?>("ScopedGrant").observe(editPresenter.lifecycleOwner,
-            DoorObserver {
-                if(it == null)
-                    return@DoorObserver
+            val newValue = it.firstOrNull() ?: return@observeSavedStateResult
 
-                val newValue = Json.decodeFromString(ListSerializer(ScopedGrant.serializer()), it)
+            GlobalScope.launch(doorMainDispatcher()) {
+                val groupName = repo.personGroupDao.findNameByGroupUid(newValue.sgGroupUid)
                 onEditResult(ScopedGrantAndName().apply {
-                    scopedGrant = newValue.first()
-                    name = "Name me"
+                    scopedGrant = newValue
+                    name = groupName
                 })
 
-                savedStateHandle["ScopedGrant"] = null
-            })
+                savedStateHandle[SAVEDSTATE_KEY_SCOPEDGRANT_RESULTS] = null
+            }
+        }
     }
 
     suspend fun commitToDatabase(repo: UmAppDatabase, entityUid: Long) {
@@ -82,26 +81,47 @@ class ScopedGrantOneToManyHelper(val editPresenter: UstadEditPresenter<*, *>,
     }
 
 
-    override fun onClickAddNewScopedGrant() {
+    override fun onClickNew() {
         editPresenter.saveStateToNavController()
 
-        editPresenter.navigateToEditEntity(null,
-            PersonListView.VIEW_NAME,
-            ScopedGrant::class,
-            ScopedGrant.serializer(),
-            args = mutableMapOf(
-                ScopedGrantEditView.ARG_PERMISSION_LIST to entityTableId.toString(),
-                ARG_GO_TO_COMPLETE to ScopedGrantEditView.VIEW_NAME,
-                UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString()))
+        val args = mutableMapOf(
+            ScopedGrantEditView.ARG_PERMISSION_LIST to entityTableId.toString(),
+            ARG_GO_TO_COMPLETE to ScopedGrantEditView.VIEW_NAME,
+            UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
+
+        editPresenter.navigateForResult(NavigateForResultOptions(
+            fromPresenter = editPresenter,
+            currentEntityValue = null,
+            destinationViewName = PersonListView.VIEW_NAME,
+            entityClass = ScopedGrant::class,
+            serializationStrategy = ScopedGrant.serializer(),
+            destinationResultKey = SAVEDSTATE_KEY_SCOPEDGRANT_RESULTS,
+            arguments = args))
 
         //TODO("Show the multiplatform based dialog, then navigate accordingly")
     }
 
-    override fun onClickEditScopedGrant(scopedGrantAndName: ScopedGrantAndName) {
-        //TODO("Not yet implemented")
+    override fun onClickEdit(joinedEntity: ScopedGrantAndName) {
+        val args = mutableMapOf(
+            ScopedGrantEditView.ARG_PERMISSION_LIST to entityTableId.toString())
+
+        editPresenter.navigateForResult(
+            NavigateForResultOptions(
+            fromPresenter = editPresenter,
+            currentEntityValue = joinedEntity.scopedGrant,
+            destinationViewName = ScopedGrantEditView.VIEW_NAME,
+            entityClass = ScopedGrant::class,
+            serializationStrategy = ScopedGrant.serializer(),
+            destinationResultKey = SAVEDSTATE_KEY_SCOPEDGRANT_RESULTS,
+            arguments = args
+        ))
     }
 
-    override fun onClickDeleteScopedGrant(scopedGrantAndName: ScopedGrantAndName) {
-        //TODO("Not yet implemented")
+    override fun onClickDelete(joinedEntity: ScopedGrantAndName) {
+        onDeactivateEntity(joinedEntity)
+    }
+
+    companion object {
+        const val SAVEDSTATE_KEY_SCOPEDGRANT_RESULTS = "ScopedGrant_result"
     }
 }

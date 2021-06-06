@@ -5,22 +5,29 @@
 
     <data>
         <import type="com.ustadmobile.lib.db.entities.ScopedGrantAndName"/>
+        <import type="com.ustadmobile.core.util.OneToManyJoinEditListener"/>
 
         <variable
             name="scopedGrant"
             type="ScopedGrantAndName" />
+
+        <variable
+            name="scopedGrantListener"
+            type="OneToManyJoinEditListener&lt;ScopedGrantAndName&gt;" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/selectableItemBackground"
+        android:onClick="@{() -> scopedGrantListener.onClickEdit(scopedGrant)}"
         >
 
         <!-- Line 1-->
         <TextView
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:id="@+id/item_schedule_line1_text"
+            android:text="@{scopedGrant.name}"
             tools:text="Person Name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -47,9 +54,6 @@
             android:layout_marginBottom="@dimen/dimen_16dp" />
 
 
-        <!--
-        android:onClick="@{() -> mPresenter.handleRemoveSchedule(schedule)}"
-        -->
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/item_schedule_secondary_menu_imageview"
             android:layout_width="wrap_content"
@@ -61,6 +65,7 @@
             app:tint="?colorOnIconTint"
             android:contentDescription="@string/delete"
             android:background="?attr/selectableItemBackgroundBorderless"
+            android:onClick="@{() -> scopedGrantListener.onClickDelete(scopedGrant)}"
              />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
