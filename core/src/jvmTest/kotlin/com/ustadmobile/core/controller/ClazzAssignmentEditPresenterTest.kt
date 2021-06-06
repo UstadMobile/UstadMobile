@@ -7,6 +7,7 @@ import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzAssignmentDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
@@ -15,6 +16,7 @@ import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ClazzAssignmentDetailView
 import com.ustadmobile.core.view.ClazzAssignmentEditView
+import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
@@ -27,6 +29,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.mockito.kotlin.*
 
@@ -58,6 +61,9 @@ class ClazzAssignmentEditPresenterTest {
 
     private lateinit var testClazz: Clazz
 
+
+    private lateinit var testNavController: UstadNavController
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -71,6 +77,7 @@ class ClazzAssignmentEditPresenterTest {
         }
 
         val repo: UmAppDatabase by di.activeRepoInstance()
+        testNavController = di.direct.instance()
 
         repoClazzAssignmentDaoSpy = spy(repo.clazzAssignmentDao)
         whenever(repo.clazzAssignmentDao).thenReturn(repoClazzAssignmentDaoSpy)
@@ -99,6 +106,7 @@ class ClazzAssignmentEditPresenterTest {
 
         val presenterArgs = mutableMapOf<String, String>()
         presenterArgs[ARG_ENTITY_JSON] = jsonStr
+        testNavController.navigate(ClazzAssignmentEditView.VIEW_NAME, presenterArgs)
         val presenter = ClazzAssignmentEditPresenter(context,
                 presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
@@ -144,6 +152,7 @@ class ClazzAssignmentEditPresenterTest {
         }
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to clazzAssignment.caUid.toString())
+        testNavController.navigate(ClazzAssignmentEditView.VIEW_NAME, presenterArgs)
         val presenter = ClazzAssignmentEditPresenter(context,
                 presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
