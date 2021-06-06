@@ -235,11 +235,27 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
     }
 
     /**
-     * Navigate to an edit screen with the intent to return the result to the current screen
-     * or another screen in the backstack as specified by ARG_RESULT_DEST_KEY.
+     * Navigate to another screen for purposes of returning a result. This allows the initiator
+     * (e.g. this presenter) to take the user to another screen for picking another entity (e.g.
+     * from a Class Member screen to the Person List screen to pick someone to add to the class.
+     * This process can continue via multiple screens (e.g. in the person list screen, the user
+     * might choose to add a new person, which is then returned to the original initiator).
+     *
+     * This works by:
+     *
+     * 1) The initiator passes arguments UstadView.ARG_RESULT_DEST_VIEWNAME and UstadView.ARG_RESULT_DEST_KEY
+     *    that specify the destination view name for the result and a key name.
+     *
+     * 2) Edit/list screens use the arguments received to lookup the SavedState handle for the
+     *    initiator and then saves the result into the specified key of the saved state handle. The
+     *    edit/list screen then pops the back stack
+     *
+     * 3) The initiator observes the saved state handle to watch the incoming result
+     *
+     * This is roughly modeled on the recommended process for Android NavController as per
+     *  https://developer.android.com/guide/navigation/navigation-programmatic#returning_a_result
      */
-    fun <T : Any> navigateToEditEntity(options: NavigateForResultOptions<T>) {
-
+    fun <T: Any> navigateForResult(options: NavigateForResultOptions<T>) {
         saveStateToNavController()
         options.putPresenterResultDestInfo()
 
@@ -250,19 +266,6 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
                 safeStringify(di, options.serializationStrategy, options.entityClass,
                     currentEntityValue))
         }
-
-        ustadNavController.navigate(options.destinationViewName, options.arguments)
-    }
-
-    /**
-     * Navigate to a list screen with the intent to return the result to the current
-     * screen or another screen in the backstack as specified by ARG_RESULT_DEST_KEY
-     */
-    fun <T: Any> navigateToPickEntityFromList(options: NavigateForResultOptions<T>) {
-        saveStateToNavController()
-        options.putPresenterResultDestInfo()
-
-        options.arguments[UstadView.ARG_LISTMODE] = ListViewMode.PICKER.toString()
 
         ustadNavController.navigate(options.destinationViewName, options.arguments)
     }

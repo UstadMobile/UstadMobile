@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.*
+import com.ustadmobile.core.util.ext.determineListMode
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -22,7 +23,9 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
     : UstadBaseController<V>(context, arguments, view, di), DIAware, OnSortOptionSelected,
         OnSearchSubmitted, OnListFilterOptionSelectedListener {
 
-    protected var mListMode = ListViewMode.BROWSER
+    open val mListMode : ListViewMode by lazy {
+        arguments.determineListMode()
+    }
 
     protected var mLoggedInPersonUid: Long = 0
 
@@ -43,8 +46,6 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        mListMode = ListViewMode.valueOf(
-                arguments[UstadView.ARG_LISTMODE] ?: ListViewMode.BROWSER.toString())
         GlobalScope.launch(doorMainDispatcher()) {
             onLoadFromDb()
         }
