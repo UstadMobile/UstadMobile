@@ -1,19 +1,17 @@
 package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
+import com.ustadmobile.core.controller.TimeZoneListPresenter.Companion.RESULT_TIMEZONE_KEY
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.schedule.*
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
-import com.ustadmobile.core.util.ScopedGrantOneToManyHelper
+import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.view.ClazzDetailView
-import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SCHOOL_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -23,6 +21,7 @@ import com.ustadmobile.lib.util.getDefaultTimeZoneId
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -34,9 +33,16 @@ class ClazzEdit2Presenter(context: Any,
          di, lifecycleOwner) {
 
     private val scheduleOneToManyJoinEditHelper
-            = DefaultOneToManyJoinEditHelper<Schedule>(Schedule::scheduleUid,
-            ARG_SAVEDSTATE_SCHEDULES, ListSerializer(Schedule.serializer()),
-            ListSerializer(Schedule.serializer()), this, Schedule::class) {scheduleUid = it}
+            = OneToManyJoinEditHelperMp(Schedule::scheduleUid,
+            ARG_SAVEDSTATE_SCHEDULES,
+            ListSerializer(Schedule.serializer()),
+            ListSerializer(Schedule.serializer()),
+            this,
+            requireSavedStateHandle(),
+            Schedule::class) {scheduleUid = it}
+
+    val scheduleOneToManyJoinListener = scheduleOneToManyJoinEditHelper.createGoToEditListener(
+        ScheduleEditView.VIEW_NAME, Schedule.serializer())
 
     val scopedGrantOneToManyHelper = ScopedGrantOneToManyHelper(this,
         requireBackStackEntry().savedStateHandle, Clazz.TABLE_ID)
@@ -50,6 +56,42 @@ class ClazzEdit2Presenter(context: Any,
         super.onCreate(savedState)
         view.clazzSchedules = scheduleOneToManyJoinEditHelper.liveList
         view.scopedGrants = scopedGrantOneToManyHelper.liveList
+    }
+
+    override fun onLoadDataComplete() {
+        super.onLoadDataComplete()
+
+        requireSavedStateHandle().getLiveData<String?>(RESULT_TIMEZONE_KEY).observe(lifecycleOwner) {
+            entity?.clazzTimeZone = it
+            view.entity = entity
+        }
+
+        observeSavedStateResult(SAVEDSTATE_KEY_SCHOOL, ListSerializer(School.serializer()),
+            School::class) {
+            val school = it.firstOrNull() ?: return@observeSavedStateResult
+            entity?.school = school
+            view.entity = entity
+
+            requireSavedStateHandle()[SAVEDSTATE_KEY_SCHOOL] = null
+        }
+
+        observeSavedStateResult(SAVEDSTATE_KEY_HOLIDAYCALENDAR,
+            ListSerializer(HolidayCalendar.serializer()), HolidayCalendar::class) {
+            val calendar = it.firstOrNull() ?: return@observeSavedStateResult
+            entity?.holidayCalendar = calendar
+            view.entity = entity
+
+            requireSavedStateHandle()[SAVEDSTATE_KEY_HOLIDAYCALENDAR] = null
+        }
+
+        observeSavedStateResult(SAVEDSTATE_KEY_FEATURES,
+            ListSerializer(LongWrapper.serializer()), LongWrapper::class) {
+            val wrapper = it.firstOrNull() ?: return@observeSavedStateResult
+
+            entity?.clazzFeatures = wrapper.longValue
+            view.entity = entity
+            requireSavedStateHandle()[SAVEDSTATE_KEY_FEATURES] = null
+        }
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWithHolidayCalendarAndSchool? {
@@ -98,6 +140,44 @@ class ClazzEdit2Presenter(context: Any,
         val entityVal = entity ?: return
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
                     entityVal)
+    }
+
+    fun handleClickTimezone() {
+        navigateToPickEntityFromList(NavigateForResultOptions<String>(
+            this,
+            currentEntityValue = entity?.clazzTimeZone,
+            destinationViewName = TimeZoneListView.VIEW_NAME,
+            entityClass = String::class,
+            serializationStrategy = String.serializer(),
+            destinationResultKey = RESULT_TIMEZONE_KEY))
+    }
+
+    fun handleClickHolidayCalendar() {
+        navigateToPickEntityFromList(
+            NavigateForResultOptions(this,
+            null, HolidayCalendarListView.VIEW_NAME, HolidayCalendar::class,
+            HolidayCalendar.serializer(), SAVEDSTATE_KEY_HOLIDAYCALENDAR)
+        )
+    }
+
+    fun handleClickSchool() {
+        val args = mutableMapOf(
+            UstadView.ARG_FILTER_BY_PERMISSION to Role.PERMISSION_PERSON_DELEGATE.toString())
+        navigateToPickEntityFromList(
+            NavigateForResultOptions(this,
+            null, SchoolListView.VIEW_NAME, School::class,
+            School.serializer(), SAVEDSTATE_KEY_SCHOOL,
+                arguments = args)
+        )
+    }
+
+    fun handleClickFeatures() {
+        navigateToEditEntity(NavigateForResultOptions(this,
+            LongWrapper(entity?.clazzFeatures ?: 0),
+            BitmaskEditView.VIEW_NAME,
+            LongWrapper::class,
+            LongWrapper.serializer(),
+            SAVEDSTATE_KEY_FEATURES))
     }
 
     override fun handleClickSave(entity: ClazzWithHolidayCalendarAndSchool) {
@@ -157,26 +237,15 @@ class ClazzEdit2Presenter(context: Any,
         }
     }
 
-    fun handleAddOrEditSchedule(schedule: Schedule) {
-        scheduleOneToManyJoinEditHelper.onEditResult(schedule)
-    }
-
-    fun handleRemoveSchedule(schedule: Schedule) {
-        scheduleOneToManyJoinEditHelper.onDeactivateEntity(schedule)
-    }
-
-    fun handleAddOrEditScopedGrantAndName(scopedGrantAndName: ScopedGrantAndName) {
-        scopedGrantOneToManyHelper.onEditResult(scopedGrantAndName)
-    }
-
-    fun handleRemoveScopedGrantAndName(scopedGrantAndName: ScopedGrantAndName) {
-        scopedGrantOneToManyHelper.onDeactivateEntity(scopedGrantAndName)
-    }
-
-
     companion object {
 
         const val ARG_SAVEDSTATE_SCHEDULES = "schedules"
+
+        const val SAVEDSTATE_KEY_SCHOOL = "School"
+
+        const val SAVEDSTATE_KEY_HOLIDAYCALENDAR = "HolidayCalendar"
+
+        const val SAVEDSTATE_KEY_FEATURES = "ClazzFeatures"
 
     }
 

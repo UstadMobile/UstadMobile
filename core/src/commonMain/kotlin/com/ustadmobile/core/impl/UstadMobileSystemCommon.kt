@@ -41,7 +41,13 @@ abstract class UstadMobileSystemCommon {
             /**
              * If true, then popup include popUpToViewName.
              */
-            val popUpToInclusive: Boolean = false)
+            val popUpToInclusive: Boolean = false) {
+
+        companion object {
+            val Default = UstadGoOptions(null, false)
+        }
+
+    }
 
     /**
      * The last destination that was called via the go method. This is used for testing purposes.

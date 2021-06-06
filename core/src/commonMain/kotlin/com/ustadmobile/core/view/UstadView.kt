@@ -159,7 +159,21 @@ interface UstadView {
          */
         const val ARG_RESULT_DEST_ID = "result_dest"
 
+        /**
+         * When navigating from one screen to another for purposes of returning a result,
+         * this specifies the viewname to which the result should be returned.
+         */
+        const val ARG_RESULT_DEST_VIEWNAME = "result_viewname"
+
         const val ARG_REGISTRATION_ALLOWED = "registration_allowed"
+
+        /**
+         * When navigating from one screen to another for purposes of returning a result,
+         * this specifies the key name in the savedstate of the viewname into which the
+         * result will be saved as JSON.
+         */
+        const val ARG_RESULT_DEST_KEY = "result_key"
+
 
         /**
          * The intent message to display to the user when they open the Login or Account List screen.

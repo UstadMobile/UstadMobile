@@ -52,7 +52,7 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-        //coreLibraryDesugaringEnabled true
+        coreLibraryDesugaringEnabled true
     }
 
     defaultConfig {
@@ -126,7 +126,7 @@ configurations.all {
 
 
 dependencies {
-    //coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
 
     api project(':core')
     api project(':sharedse')

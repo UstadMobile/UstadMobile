@@ -16,6 +16,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSchoolEditBinding
 import com.toughra.ustadmobile.databinding.ItemClazzSimpleEditBinding
 import com.ustadmobile.core.controller.SchoolEditPresenter
+import com.ustadmobile.core.controller.TimeZoneListPresenter.Companion.RESULT_TIMEZONE_KEY
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
@@ -122,7 +123,7 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
         }
 
 
-        navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>(TimeZoneListFragment.RESULT_TIMEZONE_KEY)
+        navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>(RESULT_TIMEZONE_KEY)
                 ?.observe(viewLifecycleOwner) {
                     entity?.schoolTimeZone = it
                     mBinding?.school = entity
@@ -198,7 +199,7 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
     override fun handleClickTimeZone() {
         onSaveStateToBackStackStateHandle()
         navigateToPickEntityFromList(String::class.java, R.id.time_zone_list_dest,
-                destinationResultKey = TimeZoneListFragment.RESULT_TIMEZONE_KEY)
+                destinationResultKey = RESULT_TIMEZONE_KEY)
     }
 
     override fun showHolidayCalendarPicker() {
