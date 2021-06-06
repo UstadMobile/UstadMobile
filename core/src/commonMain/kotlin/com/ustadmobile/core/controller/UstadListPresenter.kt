@@ -43,11 +43,27 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        mListMode = ListViewMode.valueOf(
-                arguments[UstadView.ARG_LISTMODE] ?: ListViewMode.BROWSER.toString())
+        mListMode = arguments.determineListMode()
         GlobalScope.launch(doorMainDispatcher()) {
             onLoadFromDb()
         }
+    }
+
+    /**
+     * Determine if this list is operating in picker mode or browse mode according to arguments.
+     * This can be set explicitly using UstadView.ARG_LISTMODE. If not explicitly set, it will
+     * default to PICKER mode when  there is a result destination key (e.g. a navigateForResult is
+     * in progress), BROWSER otherwise.
+     */
+    private fun Map<String, String>.determineListMode(): ListViewMode {
+        val listModeArg = get(UstadView.ARG_LISTMODE)
+        if(listModeArg != null)
+            return listModeArg.let { ListViewMode.valueOf(it) }
+
+        if(arguments.containsKey(UstadView.ARG_RESULT_DEST_KEY))
+            return ListViewMode.PICKER
+        else
+            return ListViewMode.BROWSER
     }
 
     suspend open fun onLoadFromDb() {
