@@ -2,15 +2,11 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
-import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.impl.NavigateForResultOptions
+import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
-import com.ustadmobile.core.view.ClazzAssignmentDetailView
-import com.ustadmobile.core.view.ClazzAssignmentEditView
-import com.ustadmobile.core.view.ReportDetailView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -43,27 +39,55 @@ class ClazzAssignmentEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    private val contentJoinEditHelper = DefaultOneToManyJoinEditHelper(
-            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::contentEntryUid,
-            "state_ContentEntryWithMetrics_list",
+
+    private val contentOneToManyJoinEditHelper
+            = OneToManyJoinEditHelperMp(ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::contentEntryUid,
+            ARG_SAVEDSTATE_CONTENT,
             ListSerializer(ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer()),
             ListSerializer(ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer()),
-            this, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::class) { contentEntryUid = it }
+            this,
+            requireSavedStateHandle(),
+            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::class) {contentEntryUid = it}
 
-    fun handleAddOrEditContent(entityClass: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
-        contentJoinEditHelper.onEditResult(entityClass)
+
+    val contentOneToManyJoinListener: OneToManyJoinEditListener<
+            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> = object :
+            OneToManyJoinEditListener<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
+
+        override fun onClickNew() {
+            val args = mutableMapOf<String, String>()
+            args[ContentEntryList2View.ARG_CLAZZ_ASSIGNMENT_FILTER] = entity?.caUid.toString()
+            args[ContentEntryList2View.ARG_CONTENT_FILTER] = ContentEntryList2View.ARG_LIBRARIES_CONTENT
+            args[UstadView.ARG_PARENT_ENTRY_UID] to  UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString()
+            args[ContentEntryList2View.ARG_SELECT_FOLDER_VISIBLE] to false.toString()
+
+            navigateToPickEntityFromList(
+                    NavigateForResultOptions(this@ClazzAssignmentEditPresenter,
+                            null, ContentEntryList2View.VIEW_NAME,
+                            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::class,
+                            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer(),
+                            ARG_SAVEDSTATE_CONTENT,
+                            arguments = args)
+            )
+
+        }
+
+        override fun onClickEdit(joinedEntity: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
+            // do nothing, cant edit content here
+        }
+
+        override fun onClickDelete(joinedEntity: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
+            contentOneToManyJoinEditHelper.onDeactivateEntity(joinedEntity)
+        }
+
     }
-
-    fun handleRemoveContent(entityClass: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
-        contentJoinEditHelper.onDeactivateEntity(entityClass)
-    }
-
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.clazzAssignmentContent = contentJoinEditHelper.liveList
+        view.clazzAssignmentContent = contentOneToManyJoinEditHelper.liveList
         view.lateSubmissionOptions = LateSubmissionOptions.values().map { LateSubmissionOptionsMessageIdOption(it, context) }
     }
+
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzAssignment? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
@@ -87,7 +111,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             )
         } ?: listOf()
 
-        contentJoinEditHelper.liveList.sendValue(contentList)
+        contentOneToManyJoinEditHelper.liveList.sendValue(contentList)
 
         return clazzAssignment
     }
@@ -113,7 +137,7 @@ class ClazzAssignmentEditPresenter(context: Any,
 
         }
 
-        contentJoinEditHelper.onLoadFromJsonSavedState(bundle)
+        contentOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
 
 
         return editEntity
@@ -176,8 +200,8 @@ class ClazzAssignmentEditPresenter(context: Any,
 
             repo.cacheClazzAssignmentDao.invalidateCacheByAssignment(entity.caUid)
 
-            val contentToInsert = contentJoinEditHelper.entitiesToInsert
-            val contentToDelete = contentJoinEditHelper.primaryKeysToDeactivate
+            val contentToInsert = contentOneToManyJoinEditHelper.entitiesToInsert
+            val contentToDelete = contentOneToManyJoinEditHelper.primaryKeysToDeactivate
 
             repo.clazzAssignmentContentJoinDao.insertListAsync(contentToInsert.map {
                 ClazzAssignmentContentJoin().apply {
@@ -193,6 +217,15 @@ class ClazzAssignmentEditPresenter(context: Any,
             onFinish(ClazzAssignmentDetailView.VIEW_NAME, entity.caUid, entity)
 
         }
+    }
+
+
+
+
+    companion object {
+
+        const val ARG_SAVEDSTATE_CONTENT = "contents"
+
     }
 
 }

@@ -3,10 +3,8 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.*
 import android.widget.AdapterView
-import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Observer
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -16,25 +14,17 @@ import com.toughra.ustadmobile.databinding.ItemContentEntryBasicTitleListBinding
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.IdOption
-import com.ustadmobile.core.util.ext.observeResult
+import com.ustadmobile.core.util.OneToManyJoinEditListener
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentEditView
-import com.ustadmobile.core.view.ContentEntryList2View
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.port.android.util.ext.*
-import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 
 
-interface ClazzAssignmentEditFragmentEventHandler {
-    fun onClickNewContent()
-    fun onClickDeleteContent(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer)
-}
-
-class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAssignmentEditView, ClazzAssignmentEditFragmentEventHandler, DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption> {
+class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAssignmentEditView, DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption> {
 
     private var mBinding: FragmentClazzAssignmentEditBinding? = null
 
@@ -45,7 +35,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
 
 
     class ContentEntryListAdapterRA(
-            val activityEventHandler: ClazzAssignmentEditFragmentEventHandler)
+            var oneToManyEditListener: OneToManyJoinEditListener<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?)
         : ListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
             ContentEntryListAdapterRA.ContentEntryListAdapterRAViewHolder>(ContentEntryList2Fragment.DIFF_CALLBACK) {
 
@@ -58,7 +48,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             val viewHolder = ContentEntryListAdapterRAViewHolder(
                     ItemContentEntryBasicTitleListBinding.inflate(
                             LayoutInflater.from(parent.context), parent, false)).apply{
-                                this.binding.selectablePagedListAdapter = activityEventHandler
+                                this.binding.oneToManyJoinListener = oneToManyEditListener
             }
             return viewHolder
         }
@@ -90,7 +80,6 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         val rootView: View
         mBinding = FragmentClazzAssignmentEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.activityEventHandler = this
             it.typeSelectionListener = this
             it.caDeadlineDate.doAfterTextChanged {
                 if(it?.isNullOrEmpty() == true || it.toString() == currentDeadlineDate){
@@ -103,13 +92,6 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         }
 
         contentRecyclerView = rootView.findViewById(R.id.ca_recyclerview_content)
-        contentRecyclerAdapter = ContentEntryListAdapterRA(this)
-        contentRecyclerView?.adapter = contentRecyclerAdapter
-        contentRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
-
-
-        mPresenter = ClazzAssignmentEditPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
 
         return rootView
     }
@@ -118,15 +100,16 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         super.onViewCreated(view, savedInstanceState)
         setEditFragmentTitle(R.string.new_assignment, R.string.edit_assignment)
 
+        mPresenter = ClazzAssignmentEditPresenter(requireContext(), arguments.toStringMap(),
+                this, viewLifecycleOwner, di)
+
+        mBinding?.contentOneToManyListener = mPresenter?.contentOneToManyJoinListener
+        contentRecyclerAdapter = ContentEntryListAdapterRA(mPresenter?.contentOneToManyJoinListener)
+        contentRecyclerView?.adapter = contentRecyclerAdapter
+        contentRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+
         mPresenter?.onCreate(backStackSavedState)
 
-        val navController = findNavController()
-
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
-                ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::class.java){
-            val contentEntrySelected = it.firstOrNull()?:return@observeResult
-            mPresenter?.handleAddOrEditContent(contentEntrySelected)
-        }
     }
 
     override fun onDestroyView() {
@@ -215,23 +198,6 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             value?.observeIfFragmentViewIsReady(this, contentObserver)
         }
 
-    override fun onClickNewContent() {
-        onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(
-                ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::class.java,
-                R.id.content_entry_list_dest,
-                bundleOf(ContentEntryList2View.ARG_CLAZZ_ASSIGNMENT_FILTER to
-                        entity?.caUid.toString(),
-                        ContentEntryList2View.ARG_CONTENT_FILTER to
-                                ContentEntryList2View.ARG_LIBRARIES_CONTENT,
-                        UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString(),
-                        ContentEntryList2View.ARG_SELECT_FOLDER_VISIBLE to false.toString()))
-
-    }
-
-    override fun onClickDeleteContent(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
-        mPresenter?.handleRemoveContent(entry)
-    }
 
     override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
         mBinding?.lateSubmissionVisibility = if(

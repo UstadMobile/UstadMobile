@@ -8,7 +8,9 @@
         <import type="android.text.InputType" />
         <import type="android.content.Context" />
         <import type="com.ustadmobile.lib.db.entities.ClazzAssignment"/>
+        <import type="com.ustadmobile.core.util.OneToManyJoinEditListener"/>
         <import type="com.ustadmobile.core.util.IdOption"/>
+        <import type="com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer"/>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener"/>
@@ -62,8 +64,8 @@
             type="int" />
 
         <variable
-            name="activityEventHandler"
-            type="com.ustadmobile.port.android.view.ClazzAssignmentEditFragmentEventHandler" />
+            name="contentOneToManyListener"
+            type="OneToManyJoinEditListener&lt;ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer&gt;" />
 
     </data>
 
@@ -367,7 +369,7 @@
                 android:id="@+id/ca_edit_content_add_new_rv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:onClickNew="@{() -> activityEventHandler.onClickNewContent()}"
+                app:onClickNew="@{() -> contentOneToManyListener.onClickNew()}"
                 app:createNewText="@{@string/add_content}"
                 app:layout_constraintTop_toBottomOf="@+id/ca_edit_content_title"
                 app:layout_constraintStart_toStartOf="parent"
