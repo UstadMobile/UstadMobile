@@ -1,13 +1,13 @@
 package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.nav.UstadBackStackEntry
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMURLEncoder
+import com.ustadmobile.core.view.UstadView
 import io.ktor.client.features.json.defaultSerializer
 import io.ktor.http.content.TextContent
 import kotlinx.serialization.SerializationStrategy
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 
 /**
  * Convert the given String - String map into a query String in the form of key1=value1-url-encoded
@@ -49,4 +49,28 @@ fun <K, V> MutableMap<K, V>.putFromOtherMapIfPresent(otherMap: Map<K, V>, keyVal
 fun <K, V> MutableMap<K, V>.putIfNotAlreadySet(key: K, keyVal: V) {
     if(!containsKey(key))
         put(key, keyVal)
+}
+
+
+
+/**
+ * Save arguments to the bundle to tell the destination view where it should save results. If
+ * these arguments are already in the backState arguments, then they will simply be copied over. If
+ * not the arguments are set so that the data is saved to the SavedStateHandle of the given NavBackStateEntry
+ *
+ * e.g. When the user goes directly from fragment a to b, b saves the result to the backstackentry
+ * of a.
+ * When the user goes from fragment a to b, and then b to c, c saves the result to the backstackentry
+ * of a directly (e.g. when the user is presented with a list, and then chooses to create a new entity).
+ */
+fun MutableMap<String, String>.putResultDestInfo(backState: UstadBackStackEntry,
+                                          destinationResultKey: String,
+                                          overwriteDest: Boolean = false) {
+    val backStateArgs = backState.arguments
+    put(UstadView.ARG_RESULT_DEST_VIEWNAME,
+        backStateArgs.takeIf{ !overwriteDest }?.get(UstadView.ARG_RESULT_DEST_VIEWNAME)
+            ?: backState.viewName)
+    put(UstadView.ARG_RESULT_DEST_KEY,
+        backStateArgs.takeIf{ !overwriteDest }?.get(UstadView.ARG_RESULT_DEST_KEY)
+            ?: destinationResultKey)
 }

@@ -100,7 +100,11 @@ class ViewNameToDestMap: DestinationProvider {
             SiteTermsDetailView.VIEW_NAME to UstadDestination(R.id.site_terms_detail_dest),
             SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS to UstadDestination(R.id.site_terms_detail_accept_dest,
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true,
-                hideAccountIcon = true)
+                hideAccountIcon = true),
+            ScheduleEditView.VIEW_NAME to UstadDestination(R.id.schedule_edit_dest,
+                actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
+            BitmaskEditView.VIEW_NAME to UstadDestination(R.id.bitmask_edit_dest,
+                actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
     )
 
     override val navControllerViewId: Int

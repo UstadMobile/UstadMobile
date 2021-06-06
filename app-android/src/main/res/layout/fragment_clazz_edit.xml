@@ -7,6 +7,9 @@
         <import type="android.view.View"/>
         <import type="android.text.InputType" />
         <import type="com.ustadmobile.core.model.BitmaskFlag"/>
+        <import type="com.ustadmobile.core.util.OneToManyJoinEditListener"/>
+        <import type="com.ustadmobile.lib.db.entities.Schedule"/>
+        <import type="com.ustadmobile.core.controller.ClazzEdit2Presenter"/>
 
         <variable
             name="clazz"
@@ -29,12 +32,16 @@
             type="String" />
 
         <variable
-            name="activityEventHandler"
-            type="com.ustadmobile.port.android.view.ClazzEdit2ActivityEventHandler" />
-
-        <variable
             name="featuresBitmaskFlags"
             type="java.util.List&lt;BitmaskFlag&gt;" />
+
+        <variable
+            name="scheduleOneToManyListener"
+            type="OneToManyJoinEditListener&lt;Schedule&gt;" />
+
+        <variable
+            name="mPresenter"
+            type="ClazzEdit2Presenter" />
 
     </data>
 
@@ -176,7 +183,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/fragment_clazz_edit_school_text"
-                    android:onClick="@{() -> activityEventHandler.handleClickSchool()}"
+                    android:onClick="@{() -> mPresenter.handleClickSchool()}"
                     android:text="@{clazz.school.schoolName}"
                     app:runOnClickWhenFocused="@{true}"
                     android:inputType="@{InputType.TYPE_NULL}"
@@ -200,7 +207,7 @@
             <include layout="@layout/item_createnew"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:onClickNew="@{() -> activityEventHandler.showNewScheduleDialog()}"
+                app:onClickNew="@{() -> scheduleOneToManyListener.onClickNew()}"
                 app:createNewText="@{@string/add_a_schedule}"
                 app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_schedule_heading"
                 app:layout_constraintStart_toStartOf="parent" />
@@ -227,8 +234,8 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/activity_clazz_edit_holiday_calendar_text"
-                    android:onClick="@{() -> activityEventHandler.showHolidayCalendarPicker()}"
                     android:text="@{clazz.holidayCalendar.umCalendarName}"
+                    android:onClick="@{() -> mPresenter.handleClickHolidayCalendar()}"
                     app:runOnClickWhenFocused="@{true}"
                     android:inputType="@{InputType.TYPE_NULL}"
                     android:layout_width="match_parent"
@@ -249,7 +256,7 @@
                 android:hint="@string/features_enabled">
                 <com.google.android.material.textfield.TextInputEditText
                     app:runOnClickWhenFocused="@{true}"
-                    android:onClick="@{() -> activityEventHandler.showFeaturePicker()}"
+                    android:onClick="@{() -> mPresenter.handleClickFeatures()}"
                     android:inputType="@{InputType.TYPE_NULL}"
                     app:textBitmaskFlags="@{featuresBitmaskFlags}"
                     app:textBitmaskValue="@{clazz.clazzFeatures}"
@@ -274,7 +281,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:onClick="@{() -> activityEventHandler.handleClickTimeZone()}"
+                    android:onClick="@{() -> mPresenter.handleClickTimezone()}"
                     android:text="@{clazz.clazzTimeZone}"
                     android:focusable="false"
                     />

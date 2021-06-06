@@ -25,7 +25,7 @@ abstract class ScheduleDao : BaseDao<Schedule>, OneToManyJoinDao<Schedule> {
     @Query("""UPDATE Schedule SET scheduleActive = :active,
             scheduleLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
             WHERE scheduleUid = :scheduleUid""")
-    abstract fun updateScheduleActivated(scheduleUid: Long, active: Boolean)
+    abstract suspend fun updateScheduleActivated(scheduleUid: Long, active: Boolean)
 
     @Query("SELECT * FROM Schedule WHERE scheduleUid = :uid")
     abstract fun findByUid(uid: Long): Schedule?

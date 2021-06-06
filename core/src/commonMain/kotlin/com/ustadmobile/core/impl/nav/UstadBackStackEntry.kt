@@ -6,4 +6,6 @@ interface UstadBackStackEntry {
 
     val savedStateHandle: UstadSavedStateHandle
 
+    val arguments: Map<String, String>
+
 }

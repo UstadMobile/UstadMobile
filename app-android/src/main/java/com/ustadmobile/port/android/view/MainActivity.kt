@@ -86,15 +86,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private lateinit var ustadNavController: UstadNavController
 
-    override val di by DI.lazy {
-        val applicationDi = (applicationContext as DIAware).di
-        extend(applicationDi)
-
-        bind<UstadNavController>() with provider {
-            ustadNavController
-        }
-    }
-
     private val userProfileDrawable: Drawable? by lazy(LazyThreadSafetyMode.NONE) {
         ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_24dp)?.also {
             it.setTint(ContextCompat.getColor(this, R.color.onPrimaryColor))

@@ -1,5 +1,7 @@
 package com.ustadmobile.core.impl.nav
 
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
+
 /**
  * Interface to form the basis of a multiplatform wrapper for Jetpack's NavController. To handle
  * SavedState, navigation.
@@ -17,4 +19,8 @@ interface UstadNavController {
 
     fun getBackStackEntry(viewName: String): UstadBackStackEntry?
 
+    fun popBackStack(viewName: String, inclusive: Boolean)
+
+    fun navigate(viewName: String, args: Map<String, String>,
+                 goOptions: UstadMobileSystemCommon.UstadGoOptions = UstadMobileSystemCommon.UstadGoOptions.Default)
 }
