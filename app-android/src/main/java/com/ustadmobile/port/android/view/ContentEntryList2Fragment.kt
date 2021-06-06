@@ -15,7 +15,9 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
+import com.ustadmobile.core.util.ext.determineListMode
 import com.ustadmobile.core.util.ext.observeResult
+import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_SELECT_FOLDER_VISIBLE
 import com.ustadmobile.core.view.UstadView
@@ -67,7 +69,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                 this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = ContentEntryListRecyclerAdapter(mPresenter,
-                arguments?.get(UstadView.ARG_LISTMODE).toString(),
+                arguments.toStringMap().determineListMode().toString(),
                 arguments?.get(ARG_SELECT_FOLDER_VISIBLE).toString().toBoolean(),
                 viewLifecycleOwner, di)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
