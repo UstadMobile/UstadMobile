@@ -41,7 +41,7 @@ class ClazzEdit2Presenter(context: Any,
             requireSavedStateHandle(),
             Schedule::class) {scheduleUid = it}
 
-    val scheduleOneToManyJoinListener = scheduleOneToManyJoinEditHelper.createGoToEditListener(
+    val scheduleOneToManyJoinListener = scheduleOneToManyJoinEditHelper.createNavigateForResultListener(
         ScheduleEditView.VIEW_NAME, Schedule.serializer())
 
     override val persistenceMode: PersistenceMode
@@ -64,6 +64,7 @@ class ClazzEdit2Presenter(context: Any,
             School::class) {
             val school = it.firstOrNull() ?: return@observeSavedStateResult
             entity?.school = school
+            entity?.clazzSchoolUid = school.schoolUid
             view.entity = entity
 
             requireSavedStateHandle()[SAVEDSTATE_KEY_SCHOOL] = null
@@ -73,6 +74,7 @@ class ClazzEdit2Presenter(context: Any,
             ListSerializer(HolidayCalendar.serializer()), HolidayCalendar::class) {
             val calendar = it.firstOrNull() ?: return@observeSavedStateResult
             entity?.holidayCalendar = calendar
+            entity?.clazzHolidayUMCalendarUid = calendar.umCalendarUid
             view.entity = entity
 
             requireSavedStateHandle()[SAVEDSTATE_KEY_HOLIDAYCALENDAR] = null
@@ -132,7 +134,7 @@ class ClazzEdit2Presenter(context: Any,
     }
 
     fun handleClickTimezone() {
-        navigateToPickEntityFromList(NavigateForResultOptions<String>(
+        navigateForResult(NavigateForResultOptions<String>(
             this,
             currentEntityValue = entity?.clazzTimeZone,
             destinationViewName = TimeZoneListView.VIEW_NAME,
@@ -142,7 +144,7 @@ class ClazzEdit2Presenter(context: Any,
     }
 
     fun handleClickHolidayCalendar() {
-        navigateToPickEntityFromList(
+        navigateForResult(
             NavigateForResultOptions(this,
             null, HolidayCalendarListView.VIEW_NAME, HolidayCalendar::class,
             HolidayCalendar.serializer(), SAVEDSTATE_KEY_HOLIDAYCALENDAR)
@@ -152,7 +154,7 @@ class ClazzEdit2Presenter(context: Any,
     fun handleClickSchool() {
         val args = mutableMapOf(
             UstadView.ARG_FILTER_BY_PERMISSION to Role.PERMISSION_PERSON_DELEGATE.toString())
-        navigateToPickEntityFromList(
+        navigateForResult(
             NavigateForResultOptions(this,
             null, SchoolListView.VIEW_NAME, School::class,
             School.serializer(), SAVEDSTATE_KEY_SCHOOL,
@@ -161,7 +163,7 @@ class ClazzEdit2Presenter(context: Any,
     }
 
     fun handleClickFeatures() {
-        navigateToEditEntity(NavigateForResultOptions(this,
+        navigateForResult(NavigateForResultOptions(this,
             LongWrapper(entity?.clazzFeatures ?: 0),
             BitmaskEditView.VIEW_NAME,
             LongWrapper::class,

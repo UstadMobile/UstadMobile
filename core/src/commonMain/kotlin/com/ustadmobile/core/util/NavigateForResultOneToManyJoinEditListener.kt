@@ -8,18 +8,18 @@ import com.ustadmobile.core.impl.NavigateForResultOptions
  *
  * @see OneToManyJoinEditHelperMp#createGoToEditListener
  */
-open class GoToEditViewOneToManyJoinEditListener<T : Any>(
+open class NavigateForResultOneToManyJoinEditListener<T : Any>(
     private val navigateForResultOptions: NavigateForResultOptions<T>,
     private val joinEditHelper: OneToManyJoinEditHelper<T, *>
 ) : OneToManyJoinEditListener<T> {
 
     override fun onClickNew() {
-        navigateForResultOptions.fromPresenter.navigateToEditEntity(navigateForResultOptions)
+        navigateForResultOptions.fromPresenter.navigateForResult(navigateForResultOptions)
     }
 
     override fun onClickEdit(joinedEntity: T) {
         val navOptions = navigateForResultOptions.copy(newEntityValue = joinedEntity)
-        navOptions.fromPresenter.navigateToEditEntity(navOptions)
+        navOptions.fromPresenter.navigateForResult(navOptions)
     }
 
     override fun onClickDelete(joinedEntity: T) {

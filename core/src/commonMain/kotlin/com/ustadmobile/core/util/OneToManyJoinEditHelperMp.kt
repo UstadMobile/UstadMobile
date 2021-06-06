@@ -5,7 +5,6 @@ import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
-import kotlinx.serialization.json.Json
 import kotlin.reflect.KClass
 
 /**
@@ -66,14 +65,17 @@ class OneToManyJoinEditHelperMp<T : Any>(pkGetter: (T) -> Long,
     }
 
     /**
-     * Create a GoToEditViewOneToManyJoinEditListener linked to this one-many relationship. It will
+     * Create a NavigateForResultOneToManyJoinEditListener linked to this one-many relationship. It will
      * set the destination result key, and it will automatically call this one-many joinedithelper
      * to delete / deactivate the joined entity.
+     *
+     * This is appropriate to use for simple cases when the entity type return is exactly the same
+     * as used by the JoinEditListener (e.g. what is displayed to the user).
      */
-    fun createGoToEditListener(editViewName: String,
-        serializationStrategy: SerializationStrategy<T>,
-        arguments: MutableMap<String, String> = mutableMapOf()) : GoToEditViewOneToManyJoinEditListener<T>{
-        return GoToEditViewOneToManyJoinEditListener(
+    fun createNavigateForResultListener(editViewName: String,
+                                        serializationStrategy: SerializationStrategy<T>,
+                                        arguments: MutableMap<String, String> = mutableMapOf()) : NavigateForResultOneToManyJoinEditListener<T>{
+        return NavigateForResultOneToManyJoinEditListener(
             createNavigateForResultOptions(destinationViewName = editViewName,
                 serializationStrategy = serializationStrategy,
                 arguments = arguments), this)
