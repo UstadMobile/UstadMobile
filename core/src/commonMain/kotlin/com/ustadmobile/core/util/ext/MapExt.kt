@@ -4,6 +4,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.UstadBackStackEntry
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMURLEncoder
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import io.ktor.client.features.json.defaultSerializer
 import io.ktor.http.content.TextContent
@@ -73,4 +74,21 @@ fun MutableMap<String, String>.putResultDestInfo(backState: UstadBackStackEntry,
     put(UstadView.ARG_RESULT_DEST_KEY,
         backStateArgs.takeIf{ !overwriteDest }?.get(UstadView.ARG_RESULT_DEST_KEY)
             ?: destinationResultKey)
+}
+
+/**
+ * Determine if this list is operating in picker mode or browse mode according to arguments.
+ * This can be set explicitly using UstadView.ARG_LISTMODE. If not explicitly set, it will
+ * default to PICKER mode when  there is a result destination key (e.g. a navigateForResult is
+ * in progress), BROWSER otherwise.
+ */
+fun Map<String, String>.determineListMode(): ListViewMode {
+    val listModeArg = get(UstadView.ARG_LISTMODE)
+    if(listModeArg != null)
+        return listModeArg.let { ListViewMode.valueOf(it) }
+
+    if(containsKey(UstadView.ARG_RESULT_DEST_KEY))
+        return ListViewMode.PICKER
+    else
+        return ListViewMode.BROWSER
 }

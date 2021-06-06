@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.*
+import com.ustadmobile.core.util.ext.determineListMode
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -22,7 +23,9 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
     : UstadBaseController<V>(context, arguments, view, di), DIAware, OnSortOptionSelected,
         OnSearchSubmitted, OnListFilterOptionSelectedListener {
 
-    protected var mListMode = ListViewMode.BROWSER
+    open val mListMode : ListViewMode by lazy {
+        arguments.determineListMode()
+    }
 
     protected var mLoggedInPersonUid: Long = 0
 
@@ -43,27 +46,9 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        mListMode = arguments.determineListMode()
         GlobalScope.launch(doorMainDispatcher()) {
             onLoadFromDb()
         }
-    }
-
-    /**
-     * Determine if this list is operating in picker mode or browse mode according to arguments.
-     * This can be set explicitly using UstadView.ARG_LISTMODE. If not explicitly set, it will
-     * default to PICKER mode when  there is a result destination key (e.g. a navigateForResult is
-     * in progress), BROWSER otherwise.
-     */
-    private fun Map<String, String>.determineListMode(): ListViewMode {
-        val listModeArg = get(UstadView.ARG_LISTMODE)
-        if(listModeArg != null)
-            return listModeArg.let { ListViewMode.valueOf(it) }
-
-        if(arguments.containsKey(UstadView.ARG_RESULT_DEST_KEY))
-            return ListViewMode.PICKER
-        else
-            return ListViewMode.BROWSER
     }
 
     suspend open fun onLoadFromDb() {
