@@ -135,9 +135,10 @@ fun openDateTimeZonePicker(et: EditText, context: Context, inverseBindingListene
     builder.setPositiveButton(et.systemImpl.getString(MessageID.ok,
             context)) { dialog, _ ->
 
-        et.calendar[Calendar.DAY_OF_MONTH] = picker.dayOfMonth
-        et.calendar[Calendar.MONTH] = picker.month
-        et.calendar[Calendar.YEAR] = picker.year
+        et.calendar.timeZone = calendar.timeZone
+        et.calendar.set(picker.year, picker.month, picker.dayOfMonth,
+                calendar[Calendar.HOUR_OF_DAY], calendar[Calendar.MINUTE])
+        et.setTag(R.id.tag_calendar, et.calendar)
         et.updateDateWithTimeZone()
         inverseBindingListener.onChange()
     }
@@ -215,14 +216,13 @@ fun EditText.setDateTime(date: Long){
     updateDateWithTimeZone()
 }
 
-@BindingAdapter("timeZone")
-fun EditText.etTimeZone(timeZone: String?){
+@BindingAdapter("timeZoneWithDate")
+fun EditText.setTimeZoneWithDate(timeZone: String?){
     if(timeZone.isNullOrEmpty()){
         return
     }
     calendar.timeZone = TimeZone.getTimeZone(timeZone)
     updateDateWithTimeZone()
-    updateTimeWithTimeZone()
 }
 
 

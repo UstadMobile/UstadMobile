@@ -21,6 +21,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.port.android.util.ext.*
+import com.ustadmobile.port.android.view.binding.isSet
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 
 
@@ -81,14 +82,20 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         mBinding = FragmentClazzAssignmentEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.typeSelectionListener = this
+            it.caDeadlineDateTextinput.setEndIconOnClickListener(deadlineDateListener)
             it.caDeadlineDate.doAfterTextChanged {
-                if(it?.isNullOrEmpty() == true || it.toString() == currentDeadlineDate){
+                if(it?.isNullOrEmpty() == true){
                     return@doAfterTextChanged
                 }
+                if(it.toString() == currentDeadlineDate){
+                    mBinding?.takeIf { bind -> bind.lateSubmissionVisibility == View.GONE }.also {
+                        mBinding?.lateSubmissionVisibility = View.VISIBLE
+                    }
+                    return@doAfterTextChanged
+                }
+                mBinding?.lateSubmissionVisibility = View.VISIBLE
                 currentDeadlineDate = it.toString()
-                mBinding?.clazzAssignment = entity
             }
-            it.caDeadlineDateTextinput.setEndIconOnClickListener(deadlineDateListener)
         }
 
         contentRecyclerView = rootView.findViewById(R.id.ca_recyclerview_content)
@@ -128,7 +135,12 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         set(value) {
             field = value
             mBinding?.clazzAssignment = value
-            mBinding?.lateSubmissionVisibility = if(
+            mBinding?.lateSubmissionVisibility = if(value?.caDeadlineDate?.isSet == true){
+                View.VISIBLE
+            }else{
+                View.GONE
+            }
+            mBinding?.penaltyVisiblity = if(
                     value?.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY){
                 View.VISIBLE
             }else{
@@ -200,7 +212,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
 
 
     override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
-        mBinding?.lateSubmissionVisibility = if(
+        mBinding?.penaltyVisiblity = if(
                 selectedOption.optionId == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY){
             View.VISIBLE
         }else{

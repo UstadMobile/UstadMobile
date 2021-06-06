@@ -50,7 +50,7 @@ fun openTimePicker(et: EditText, context: Context, inverseBindingListener: Inver
         inverseBindingListener.onChange()
     }
 
-    val timePicker = TimePickerDialog(context, timeListener, c.get(Calendar.HOUR),
+    val timePicker = TimePickerDialog(context, timeListener, c.get(Calendar.HOUR_OF_DAY),
             c.get(Calendar.MINUTE), DateFormat.is24HourFormat(context))
     timePicker.show()
 }
@@ -66,13 +66,14 @@ fun openTimePickerWithTimeZone(et: EditText, context: Context, inverseBindingLis
 
     //date listener - opens a new date picker.
     val timeListener = { _: TimePicker, hourOfDay: Int, minute: Int ->
+        et.calendar.timeZone = calendar.timeZone
         et.calendar.set(calendar[Calendar.YEAR], calendar[Calendar.MONTH],
                 calendar[Calendar.DATE], hourOfDay, minute)
         et.updateTimeWithTimeZone()
         inverseBindingListener.onChange()
     }
 
-    val timePicker = TimePickerDialog(context, timeListener, calendar.get(Calendar.HOUR),
+    val timePicker = TimePickerDialog(context, timeListener, calendar.get(Calendar.HOUR_OF_DAY),
             calendar.get(Calendar.MINUTE), DateFormat.is24HourFormat(context))
     timePicker.show()
 }
@@ -106,14 +107,23 @@ fun EditText.setTimeValueWithZone(time: Long) {
     updateTimeWithTimeZone()
 }
 
+@BindingAdapter("timeZoneWithTime")
+fun EditText.setTimeZoneWithTime(timeZone: String?){
+    if(timeZone.isNullOrEmpty()){
+        return
+    }
+    calendar.timeZone = TimeZone.getTimeZone(timeZone)
+    updateTimeWithTimeZone()
+}
+
 fun EditText.updateTimeWithTimeZone() {
     if (!calendar.timeInMillis.isSet) {
         setText("")
         return
     }
+
     val dateFormatter = DateFormat.getTimeFormat(context)
     setText(dateFormatter.format(calendar.time))
-
 }
 
 
