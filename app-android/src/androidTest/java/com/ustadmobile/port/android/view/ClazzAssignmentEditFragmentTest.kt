@@ -50,6 +50,14 @@ class ClazzAssignmentEditFragmentTest : TestCase() {
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
+
     lateinit var gson: Gson
 
     private lateinit var fragmentScenario: FragmentScenario<ClazzAssignmentEditFragment>
@@ -145,7 +153,7 @@ class ClazzAssignmentEditFragmentTest : TestCase() {
 
 
     @AdbScreenRecord("given ClazzAssignment exists when updated then should be updated on database")
-    //@Test race condition on jenkins
+    @Test //race condition on jenkins
     fun givenClazzAssignmentExists_whenOpenedUpdatedAndSaveClicked_thenShouldBeUpdatedOnDatabase() {
         val entry = ContentEntry().apply {
             title = "Quiz"
@@ -176,7 +184,8 @@ class ClazzAssignmentEditFragmentTest : TestCase() {
                             initialDestId = R.id.clazz_assignment_edit_dest,
                             initialArgs = args)
                 }
-            }
+            }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                    .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         }.run {
 
