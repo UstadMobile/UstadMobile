@@ -105,7 +105,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                         WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
                           AND cachePersonUid = :accountPersonUid),'FALSE') AS contentComplete,
                           
-            COALESCE((SELECT SUM(cachePenalty) 
+            COALESCE((SELECT AVG(cachePenalty) 
                         FROM CacheClazzAssignment 
                        WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
                          AND cachePersonUid = :accountPersonUid),0) AS penalty,                      
