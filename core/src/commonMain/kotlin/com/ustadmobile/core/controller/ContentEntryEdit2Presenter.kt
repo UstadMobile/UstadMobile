@@ -103,6 +103,7 @@ class ContentEntryEdit2Presenter(context: Any,
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithLanguage? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0
         val isLeaf = arguments[ARG_LEAF]?.toBoolean()
+        view.showCompletionCriteria = isLeaf ?: false
         return withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.contentEntryDao?.findEntryWithLanguageByEntryIdAsync(entityUid)
         } ?: ContentEntryWithLanguage().apply {

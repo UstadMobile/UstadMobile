@@ -79,6 +79,10 @@
             type="boolean" />
 
         <variable
+            name="showCompletionCriteria"
+            type="boolean" />
+
+        <variable
             name="storageOptions"
             type="java.util.List&lt;UMStorageDir&gt;"/>
 
@@ -240,6 +244,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="@dimen/dimen_16dp"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:visibility="@{showCompletionCriteria ? View.VISIBLE : View.GONE}"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toStartOf="@id/entry_content_min_score"
                 app:layout_constraintTop_toBottomOf="@+id/entry_description">

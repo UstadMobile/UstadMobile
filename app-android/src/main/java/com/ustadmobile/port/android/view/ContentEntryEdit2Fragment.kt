@@ -111,6 +111,13 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             mBinding?.licenceOptions = value
         }
 
+    override var showCompletionCriteria: Boolean = false
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.showCompletionCriteria = value
+        }
+
     override var completionCriteriaOptions: List<ContentEntryEdit2Presenter.CompletionCriteriaMessageIdOption>? = null
         set(value) {
             field = value
