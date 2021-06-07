@@ -3,19 +3,21 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CLAZZ_CONTENT_FILTER
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FILTER
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.CLAZZ_VIEW_NAME
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.*
-import com.ustadmobile.lib.db.entities.Role
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -66,7 +68,11 @@ class ClazzDetailPresenter(context: Any,
         val personUid = accountManager.activeAccount.personUid
         GlobalScope.launch(doorMainDispatcher()) {
             view.tabs = listOf("${ClazzDetailOverviewView.VIEW_NAME}?$ARG_ENTITY_UID=$entityUid",
-                    "${ClazzMemberListView.VIEW_NAME}?$ARG_FILTER_BY_CLAZZUID=$entityUid") +
+                    """${CLAZZ_VIEW_NAME}?$ARG_FILTER_BY_CLAZZUID=$entityUid&
+                       $ARG_CONTENT_FILTER=$ARG_CLAZZ_CONTENT_FILTER""".trimMargin(),
+                    """${ClazzMemberListView.VIEW_NAME}?
+                        $ARG_FILTER_BY_CLAZZUID=$entityUid
+                        """.trimMargin()) +
                     CLAZZ_FEATURES.filter { featureFlag ->
                         (clazz.clazzFeatures and featureFlag) > 0 && db.clazzDao.personHasPermissionWithClazz(personUid, entityUid,
                                 FEATURE_PERMISSION_MAP[featureFlag] ?: -1)
@@ -74,6 +80,20 @@ class ClazzDetailPresenter(context: Any,
                         (VIEWNAME_MAP[it] ?: "INVALID") + "?$ARG_FILTER_BY_CLAZZUID=$entityUid"
                     }
         }
+    }
+
+    override fun onLoadDataComplete() {
+        super.onLoadDataComplete()
+
+        observeSavedStateResult(ContentEntryList2Presenter.SAVEDSTATE_KEY_ENTRY,
+                ListSerializer(ContentEntry.serializer()),
+                ContentEntry::class) {
+            val entry = it.firstOrNull() ?: return@observeSavedStateResult
+
+
+            requireSavedStateHandle()[ContentEntryList2Presenter.SAVEDSTATE_KEY_ENTRY] = null
+        }
+
     }
 
     companion object {
