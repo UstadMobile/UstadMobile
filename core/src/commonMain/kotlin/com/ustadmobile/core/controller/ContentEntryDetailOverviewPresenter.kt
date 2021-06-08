@@ -19,6 +19,7 @@ import com.ustadmobile.core.util.ext.toDeepLink
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -128,7 +129,8 @@ class ContentEntryDetailOverviewPresenter(context: Any,
 
     override fun handleClickEdit() {
         systemImpl.go(ContentEntryEdit2View.VIEW_NAME,
-                mapOf(ARG_ENTITY_UID to entity?.contentEntryUid.toString()), context)
+                mapOf(ARG_ENTITY_UID to entity?.contentEntryUid.toString(),
+                        ARG_LEAF to true.toString()), context)
     }
 
     fun handleOnClickOpenDownloadButton() {
