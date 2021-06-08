@@ -66,7 +66,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         t -> contentRecyclerAdapter?.submitList(t)
     }
 
-    private var deadlineDateListener: View.OnClickListener? = View.OnClickListener {
+    private var deadlineDateListener: View.OnClickListener = View.OnClickListener {
         val entityVal = entity
         entityVal?.caDeadlineDate = Long.MAX_VALUE
         entityVal?.caGracePeriodDate = Long.MAX_VALUE
@@ -127,7 +127,6 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         contentRecyclerView?.adapter = null
         contentRecyclerAdapter = null
         contentRecyclerView = null
-        deadlineDateListener = null
     }
 
     override var entity: ClazzAssignment? = null

@@ -180,6 +180,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
 
         detailMergerRecyclerView?.adapter = null
+        detailMergerRecyclerView = null
         contentHeaderAdapter = null
         contentRecyclerAdapter = null
         contentLiveData = null
