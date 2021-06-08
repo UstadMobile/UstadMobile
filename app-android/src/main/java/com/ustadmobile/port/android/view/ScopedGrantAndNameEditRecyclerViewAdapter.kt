@@ -6,11 +6,13 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemScopedGrantEditBinding
+import com.ustadmobile.core.model.BitmaskMessageId
 import com.ustadmobile.core.util.OneToManyJoinEditListener
 import com.ustadmobile.lib.db.entities.ScopedGrantAndName
 
 
-class ScopedGrantAndNameEditRecyclerViewAdapter(var listener: OneToManyJoinEditListener<ScopedGrantAndName>?)
+class ScopedGrantAndNameEditRecyclerViewAdapter(var listener: OneToManyJoinEditListener<ScopedGrantAndName>?,
+    val permissionList: List<BitmaskMessageId>)
     : ListAdapter<ScopedGrantAndName, ScopedGrantAndNameEditRecyclerViewAdapter.ScopedGrantViewHolder>(DIFFUTIL_SCOPEDGRANTANDNAME){
 
     class ScopedGrantViewHolder(val binding: ItemScopedGrantEditBinding): RecyclerView.ViewHolder(binding.root)
@@ -22,6 +24,7 @@ class ScopedGrantAndNameEditRecyclerViewAdapter(var listener: OneToManyJoinEditL
 
     override fun onBindViewHolder(holder: ScopedGrantViewHolder, position: Int) {
         holder.binding.scopedGrantListener = listener
+        holder.binding.scopedGrantFlagMessageIds = permissionList
         holder.binding.scopedGrant = getItem(position)
     }
 

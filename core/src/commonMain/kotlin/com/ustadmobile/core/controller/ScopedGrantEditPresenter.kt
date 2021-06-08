@@ -1,28 +1,24 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.model.BitmaskFlag
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
+import com.ustadmobile.core.model.BitmaskMessageId
 import com.ustadmobile.core.util.ext.combinedFlagValue
-import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.view.ScopedGrantEditView
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.ScopedGrant
-
-import kotlinx.coroutines.*
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import org.kodein.di.DI
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
+import com.ustadmobile.core.view.ScopedGrantEditView
 import com.ustadmobile.core.view.ScopedGrantEditView.Companion.ARG_PERMISSION_LIST
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.ScopedGrant
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
+import org.kodein.di.DI
 
 
 class ScopedGrantEditPresenter(context: Any,
@@ -45,11 +41,11 @@ class ScopedGrantEditPresenter(context: Any,
     }
 
 
-    override fun onLoadFromJson(bundle: Map<String, String>): ScopedGrant? {
+    override fun onLoadFromJson(bundle: Map<String, String>): ScopedGrant {
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
-        var editEntity: ScopedGrant? = null
+        val editEntity: ScopedGrant?
         if(entityJsonStr != null) {
             editEntity = safeParse(di, ScopedGrant.serializer(), entityJsonStr)
         }else {
@@ -65,7 +61,7 @@ class ScopedGrantEditPresenter(context: Any,
             ?: throw IllegalArgumentException("Invalid permission list key")
 
         view.bitmaskList = DoorMutableLiveData(permissionList.map {
-            BitmaskFlag(it.first, it.second, editEntity.sgPermissions.hasFlag(it.first))
+            it.toBitmaskFlag(editEntity.sgPermissions)
         })
 
         return editEntity
@@ -98,26 +94,26 @@ class ScopedGrantEditPresenter(context: Any,
          * Map of those permissions that are to be shown for a given table:
          * tableId to list of Pairs(permission, messageId for permission)
          */
-        val PERMISSION_LIST_MAP: Map<Int, List<Pair<Long, Int>>> = mapOf(
+        val PERMISSION_LIST_MAP: Map<Int, List<BitmaskMessageId>> = mapOf(
             Clazz.TABLE_ID to listOf(
-                Role.PERMISSION_PERSON_DELEGATE to MessageID.permission_person_delegate,
-                Role.PERMISSION_CLAZZ_SELECT to MessageID.permission_clazz_select,
-                Role.PERMISSION_CLAZZ_UPDATE to MessageID.permission_clazz_update,
-                Role.PERMISSION_CLAZZ_ADD_STUDENT to MessageID.permission_clazz_add_student,
-                Role.PERMISSION_CLAZZ_ADD_TEACHER to MessageID.permission_clazz_add_teacher,
-                Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT to MessageID.permission_attendance_select,
-                Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_UPDATE to MessageID.permission_attendance_update,
-                Role.PERMISSION_CLAZZ_CONTENT_SELECT to MessageID.view_class_content,
-                Role.PERMISSION_CLAZZ_CONTENT_UPDATE to MessageID.edit_class_content,
-                Role.PERMISSION_CLAZZWORK_SELECT to MessageID.permission_clazz_assignment_view,
-                Role.PERMISSION_CLAZZWORK_UPDATE to MessageID.permission_clazz_asignment_edit,
-                Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT to MessageID.view_class_learning_records,
-                Role.PERMISSION_PERSON_SELECT to MessageID.permission_person_select,
-                Role.PERMISSION_PERSON_UPDATE to MessageID.permission_person_update,
-                Role.PERMISSION_PERSONCONTACT_SELECT to MessageID.view_contact_details_of_members,
-                Role.PERMISSION_PERSONCONTACT_UPDATE to MessageID.edit_contact_details_of_members,
-                Role.PERMISSION_PERSONSOCIOECONOMIC_SELECT to MessageID.view_socioeconomic_details_of_members,
-                Role.PERMISSION_PERSONSOCIOECONOMIC_UPDATE to MessageID.edit_socioeconomic_details_of_members)
+                BitmaskMessageId(Role.PERMISSION_PERSON_DELEGATE, MessageID.permission_person_delegate),
+                BitmaskMessageId(Role.PERMISSION_CLAZZ_SELECT, MessageID.permission_clazz_select),
+                BitmaskMessageId(Role.PERMISSION_CLAZZ_UPDATE, MessageID.permission_clazz_update),
+                BitmaskMessageId(Role.PERMISSION_CLAZZ_ADD_STUDENT, MessageID.permission_clazz_add_student),
+                BitmaskMessageId(Role.PERMISSION_CLAZZ_ADD_TEACHER, MessageID.permission_clazz_add_teacher),
+                BitmaskMessageId(Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT, MessageID.permission_attendance_select),
+                BitmaskMessageId(Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_UPDATE, MessageID.permission_attendance_update),
+                BitmaskMessageId(Role.PERMISSION_CLAZZ_CONTENT_SELECT, MessageID.view_class_content),
+                BitmaskMessageId(Role.PERMISSION_CLAZZ_CONTENT_UPDATE, MessageID.edit_class_content),
+                BitmaskMessageId(Role.PERMISSION_CLAZZWORK_SELECT, MessageID.permission_clazz_assignment_view),
+                BitmaskMessageId(Role.PERMISSION_CLAZZWORK_UPDATE, MessageID.permission_clazz_asignment_edit),
+                BitmaskMessageId(Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT, MessageID.view_class_learning_records),
+                BitmaskMessageId(Role.PERMISSION_PERSON_SELECT, MessageID.permission_person_select),
+                BitmaskMessageId(Role.PERMISSION_PERSON_UPDATE, MessageID.permission_person_update),
+                BitmaskMessageId(Role.PERMISSION_PERSONCONTACT_SELECT, MessageID.view_contact_details_of_members),
+                BitmaskMessageId(Role.PERMISSION_PERSONCONTACT_UPDATE, MessageID.edit_contact_details_of_members),
+                BitmaskMessageId(Role.PERMISSION_PERSONSOCIOECONOMIC_SELECT, MessageID.view_socioeconomic_details_of_members),
+                BitmaskMessageId(Role.PERMISSION_PERSONSOCIOECONOMIC_UPDATE, MessageID.edit_socioeconomic_details_of_members))
         )
 
     }

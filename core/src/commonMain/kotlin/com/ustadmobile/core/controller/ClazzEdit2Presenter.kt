@@ -9,14 +9,17 @@ import com.ustadmobile.core.schedule.*
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.effectiveTimeZone
+import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SCHOOL_UID
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -114,11 +117,37 @@ class ClazzEdit2Presenter(context: Any,
         } ?: listOf()
         scheduleOneToManyJoinEditHelper.liveList.sendValue(schedules)
 
-        val scopedGrants = db.onRepoWithFallbackToDb(2000) {
-            it.scopedGrantDao.takeIf {  clazzUid != 0L }?.findByTableIdAndEntityUid(
-                Clazz.TABLE_ID, clazzUid)
-        } ?: listOf() //TODO: Create default ScopedGrants for owner, students, teachers.
-        scopedGrantOneToManyHelper.liveList.sendValue(scopedGrants)
+        if(clazzUid != 0L) {
+            val scopedGrants = db.onRepoWithFallbackToDb(2000) {
+                it.scopedGrantDao.findByTableIdAndEntityUid(Clazz.TABLE_ID, clazzUid)
+            }
+            scopedGrantOneToManyHelper.liveList.setVal(scopedGrants)
+        }else if(db is DoorDatabaseRepository){
+            scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
+                name = "Admins"
+                scopedGrant = ScopedGrant().apply {
+                    sgFlags = ScopedGrant.FLAG_ADMIN_GROUP.or(FLAG_NO_DELETE)
+                    sgPermissions = Long.MAX_VALUE
+                }
+            })
+
+            scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
+                name = "Teachers"
+                scopedGrant = ScopedGrant().apply {
+                    sgFlags = ScopedGrant.FLAG_TEACHER_GROUP.or(FLAG_NO_DELETE)
+                    sgPermissions = Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT
+                }
+            })
+
+            scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
+                name = "Students"
+                scopedGrant = ScopedGrant().apply {
+                    sgFlags = ScopedGrant.FLAG_STUDENT_GROUP.or(FLAG_NO_DELETE)
+                    sgPermissions = Role.ROLE_CLAZZ_STUDENT_PERMISSIONS_DEFAULT
+                }
+            })
+        }
+
 
         return clazz
     }
@@ -215,6 +244,13 @@ class ClazzEdit2Presenter(context: Any,
                 it.scheduleClazzUid = entity.clazzUid
             }
 
+            scopedGrantOneToManyHelper.entitiesToInsert.forEach {
+                it.scopedGrant?.takeIf { it.sgFlags.hasFlag(ScopedGrant.FLAG_TEACHER_GROUP) }
+                    ?.sgGroupUid = entity.clazzTeachersPersonGroupUid
+
+                it.scopedGrant?.takeIf { it.sgFlags.hasFlag(ScopedGrant.FLAG_STUDENT_GROUP) }
+                    ?.sgGroupUid = entity.clazzStudentsPersonGroupUid
+            }
             scopedGrantOneToManyHelper.commitToDatabase(repo, entity.clazzUid)
 
 

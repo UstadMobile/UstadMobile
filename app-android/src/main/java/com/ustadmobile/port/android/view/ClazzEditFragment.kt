@@ -14,6 +14,7 @@ import com.toughra.ustadmobile.databinding.FragmentClazzEditBinding
 import com.toughra.ustadmobile.databinding.ItemScheduleBinding
 import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
+import com.ustadmobile.core.controller.ScopedGrantEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.OneToManyJoinEditListener
 import com.ustadmobile.core.util.ext.*
@@ -142,8 +143,11 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         scheduleRecyclerView?.adapter = scheduleRecyclerAdapter
         scheduleRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
+        val permissionList = ScopedGrantEditPresenter.PERMISSION_LIST_MAP[Clazz.TABLE_ID]
+            ?: throw IllegalStateException("ScopedGrantEdit permission list not found!")
         scopedGrantRecyclerAdapter = ScopedGrantAndNameEditRecyclerViewAdapter(
-            mPresenter?.scopedGrantOneToManyHelper)
+            mPresenter?.scopedGrantOneToManyHelper, permissionList)
+
         mDataBinding?.clazzEditFragmentPermissionsInc?.itemScopedGrantOneToNRecycler?.apply {
             adapter = scopedGrantRecyclerAdapter
             layoutManager = LinearLayoutManager(requireContext())

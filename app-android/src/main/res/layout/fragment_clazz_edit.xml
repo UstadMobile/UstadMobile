@@ -10,6 +10,8 @@
         <import type="com.ustadmobile.core.util.OneToManyJoinEditListener"/>
         <import type="com.ustadmobile.lib.db.entities.Schedule"/>
         <import type="com.ustadmobile.core.controller.ClazzEdit2Presenter"/>
+        <import type="com.ustadmobile.core.model.BitmaskMessageId"/>
+        <import type="java.util.List"/>
 
         <variable
             name="clazz"

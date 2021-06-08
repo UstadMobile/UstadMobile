@@ -572,6 +572,7 @@
     <string name="audit_log_setting_desc"> View and export audit log</string>
     <string name="entry">entry</string>
     <string name="permission">permission</string>
+    <string name="permissions">Permissions</string>
     <string name="role_name">Role name</string>
     <string name="members">members</string>
     <string name="member">member</string>
@@ -1161,5 +1162,7 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
      refugee status, etc.
      -->
     <string name="edit_socioeconomic_details_of_members">Edit socioeconomic details of members</string>
+
+    <string name="add_person_or_group">Add person or group</string>
 
 </resources>

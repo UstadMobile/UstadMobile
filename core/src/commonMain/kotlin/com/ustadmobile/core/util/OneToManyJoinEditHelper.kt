@@ -53,11 +53,11 @@ open class OneToManyJoinEditHelper<T : Any, K>(val pkGetter: (T) -> K,
             pksToInsert += pkGetter(entity)
             val listVal = liveList.getValue() ?: return
             val newList = listVal + entity
-            liveList.sendValue(newList)
+            liveList.setVal(newList)
         }else {
             val newList = currentList.toMutableList()
             newList[entityIndex] = entity
-            liveList.sendValue(newList)
+            liveList.setVal(newList)
         }
     }
 

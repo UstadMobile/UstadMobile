@@ -38,6 +38,11 @@ class ScopedGrant {
     //The group that these permissions are granted to
     var sgGroupUid: Long = 0
 
+    //an index that will determine the order in which it is displayed
+    var sgIndex: Int = 0
+
+    var sgFlags: Int = 0
+
     companion object {
         const val TABLE_ID = 48
 
@@ -48,6 +53,16 @@ class ScopedGrant {
 
 
         const val ALL_ENTITIES = -2L
+
+        const val FLAG_NO_DELETE = 1
+
+        const val FLAG_NO_EDIT = 2
+
+        const val FLAG_ADMIN_GROUP = 4
+
+        const val FLAG_TEACHER_GROUP = 8
+
+        const val FLAG_STUDENT_GROUP = 16
 
     }
 }
