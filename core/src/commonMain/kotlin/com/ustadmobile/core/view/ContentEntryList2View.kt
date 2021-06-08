@@ -40,8 +40,6 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
 
         const val VIEW_NAME = "ContentEntryListView"
 
-        const val CLAZZ_VIEW_NAME = "ClazzContentEntryJoinList"
-
         const val ARG_MOVING_CONTENT = "SelectedItems"
 
         const val ARG_MOVING_COUNT = "moveCount"

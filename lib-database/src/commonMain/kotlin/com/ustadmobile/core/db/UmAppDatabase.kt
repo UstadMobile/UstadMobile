@@ -128,6 +128,10 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("contentEntryRelatedEntryJoinDao")
     abstract val contentEntryRelatedEntryJoinDao: ContentEntryRelatedEntryJoinDao
 
+
+    @JsName("clazzContentJoinDao")
+    abstract val clazzContentJoinDao: ClazzContentJoinDao
+
     // abstract val syncStatusDao: SyncStatusDao
 
     @JsName("contentCategorySchemaDao")

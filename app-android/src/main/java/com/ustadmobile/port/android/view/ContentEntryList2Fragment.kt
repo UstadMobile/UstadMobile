@@ -153,6 +153,8 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
     override fun onClick(view: View?) {
         if (view?.id == R.id.item_createnew_layout)
             mPresenter?.handleClickCreateNewFab()
+        else
+            super.onClick(view)
     }
 
     override fun showMoveEntriesFolderPicker(selectedContentEntryParentChildJoinUids: String) {

@@ -5,7 +5,6 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CLAZZ_CONTENT_FILTER
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FILTER
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.CLAZZ_VIEW_NAME
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
@@ -68,7 +67,7 @@ class ClazzDetailPresenter(context: Any,
         val personUid = accountManager.activeAccount.personUid
         GlobalScope.launch(doorMainDispatcher()) {
             view.tabs = listOf("${ClazzDetailOverviewView.VIEW_NAME}?$ARG_ENTITY_UID=$entityUid",
-                    """${CLAZZ_VIEW_NAME}?$ARG_FILTER_BY_CLAZZUID=$entityUid&
+                    """${ContentEntryList2View.VIEW_NAME}?$ARG_FILTER_BY_CLAZZUID=$entityUid&
                        $ARG_CONTENT_FILTER=$ARG_CLAZZ_CONTENT_FILTER""".trimMargin(),
                     """${ClazzMemberListView.VIEW_NAME}?
                         $ARG_FILTER_BY_CLAZZUID=$entityUid
@@ -89,8 +88,13 @@ class ClazzDetailPresenter(context: Any,
                 ListSerializer(ContentEntry.serializer()),
                 ContentEntry::class) {
             val entry = it.firstOrNull() ?: return@observeSavedStateResult
-
-
+            GlobalScope.launch {
+                ClazzContentJoin().apply {
+                    ccjClazzUid = arguments[ARG_ENTITY_UID]?.toLong() ?: return@apply
+                    ccjContentEntryUid = entry.contentEntryUid
+                    ccjUid = repo.clazzContentJoinDao.insert(this)
+                }
+            }
             requireSavedStateHandle()[ContentEntryList2Presenter.SAVEDSTATE_KEY_ENTRY] = null
         }
 

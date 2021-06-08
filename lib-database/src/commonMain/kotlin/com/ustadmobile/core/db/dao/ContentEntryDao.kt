@@ -200,7 +200,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                  FROM ClazzContentJoin
                           LEFT JOIN ContentEntry  
                           ON ccjContentEntryUid = contentEntryUid
-                          AND ccjClazzUid = :clazzUid
+                         
                             
                           LEFT JOIN ContentEntryParentChildJoin 
                           ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
@@ -218,6 +218,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                                                          FROM Container 
                                                         WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
                                                      ORDER BY cntLastModified DESC LIMIT 1)
+                 WHERE ccjClazzUid = :clazzUid                                        
               ORDER BY CASE(:sortOrder)
                         WHEN $SORT_TITLE_ASC THEN ContentEntry.title
                         ELSE ''
