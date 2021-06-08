@@ -129,7 +129,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "io.ktor:ktor-io:$version_ktor"
                 implementation "io.ktor:ktor-gson:$version_ktor"
-                implementation "com.github.aakira:napier:$version_napier"
+                implementation "io.github.aakira:napier:$version_napier"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
 
 
@@ -238,14 +238,14 @@ kotlin {
                 implementation project(":lib-database")
                 implementation project(":lib-test-common")
 
-                implementation "com.github.aakira:napier:$version_napier"
+                implementation "io.github.aakira:napier:$version_napier"
                 implementation "com.soywiz.korlibs.klock:klock:$version_klock"
 
                 implementation "junit:junit:$version_junit"
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "com.github.aakira:napier-jvm:$version_napier"
+                implementation "io.github.aakira:napier-jvm:$version_napier"
                 implementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
                 implementation "com.soywiz.korlibs.klock:klock-jvm:$version_klock"
 

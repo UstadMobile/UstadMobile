@@ -107,7 +107,7 @@ dependencies {
 
 
     //Logging
-    implementation "com.github.aakira:napier:$version_napier"
+    implementation "io.github.aakira:napier:$version_napier"
 
 
 

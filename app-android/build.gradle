@@ -294,13 +294,13 @@ dependencies {
     implementation project(":lib-database-entities")
     implementation project(':lib-util')
 
-    implementation "com.github.aakira:napier:$version_napier"
+    implementation "io.github.aakira:napier:$version_napier"
     implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
     implementation "androidx.activity:activity:$version_androidx_activity"
     implementation "androidx.activity:activity-ktx:$version_androidx_activity"
     implementation "androidx.fragment:fragment:$version_androidx_fragment"
     implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy_support"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
 
     //ViewModel and LiveData
@@ -328,9 +328,6 @@ dependencies {
     //Klock
     implementation "com.soywiz.korlibs.klock:klock-android:$version_klock"
 
-    //Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-
     //Crash reporting
     implementation "ch.acra:acra-http:$version_android_acra"
 
@@ -343,8 +340,6 @@ dependencies {
     implementation "com.google.android.material:material:$version_android_material"
     implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy"
     implementation "androidx.recyclerview:recyclerview:$version_androidx_recyclerview"
-
-    implementation "com.google.android.gms:play-services-safetynet:$version_android_play_services_safetynet"
 
     //Image loading library
     implementation "com.squareup.picasso:picasso:$version_android_picasso"
@@ -389,8 +384,6 @@ dependencies {
     //image compressor
     implementation "id.zelory:compressor:$version_compressor"
 
-    //Range seekbar by Crystal
-    implementation "com.crystal:crystalrangeseekbar:$version_crystalrangeseekbar"
 
     //Signature pad
     implementation "com.github.gcacace:signature-pad:$version_signaturepad"

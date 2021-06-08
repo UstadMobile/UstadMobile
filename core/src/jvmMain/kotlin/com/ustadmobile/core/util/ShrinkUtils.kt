@@ -1,6 +1,6 @@
 package com.ustadmobile.core.util
 
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.ustadmobile.core.catalog.contenttype.VideoTypePlugin
 import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.util.ext.commandExists
