@@ -7,7 +7,8 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.UmAccount
 
 fun XapiStatementEndpoint.storeProgressStatement(account: UmAccount, entry: ContentEntry,
-                                                 progress: Int, duration: Long, contextRegistration: String) {
+                                                 progress: Int, duration: Long, contextRegistration: String,
+                                                 clazzUid: Long) {
     val statement = Statement().apply {
         this.actor = Actor().apply {
             this.account = Account().apply {
@@ -29,7 +30,7 @@ fun XapiStatementEndpoint.storeProgressStatement(account: UmAccount, entry: Cont
         }
         this.`object` = XObject().apply {
             this.id = entry.entryId ?: UMFileUtil.joinPaths(account.endpointUrl,
-                    "/contentEntryUid/${entry.contentEntryUid}")
+                    "/contentEntryUid/${entry.contentEntryUid}/$clazzUid/")
             this.objectType = "Activity"
             this.definition = Definition().apply {
                 this.name = mapOf("en-US" to (entry.title ?: ""))
@@ -38,5 +39,5 @@ fun XapiStatementEndpoint.storeProgressStatement(account: UmAccount, entry: Cont
         }
     }
 
-    storeStatements(listOf(statement), "", entry.contentEntryUid)
+    storeStatements(listOf(statement), "", entry.contentEntryUid, clazzUid)
 }

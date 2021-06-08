@@ -19,6 +19,7 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.ext.toDoorUri
@@ -63,6 +64,8 @@ class XapiPackageContentPresenterTest {
 
     private lateinit var endpoint: Endpoint
 
+    private lateinit var clazz: Clazz
+
     @JvmField
     @Rule
     val temporaryFolder = TemporaryFolder()
@@ -99,6 +102,12 @@ class XapiPackageContentPresenterTest {
             on { runOnUiThread(any())}.doAnswer{
                 Thread(it.getArgument<Any>(0) as Runnable).start()
             }
+        }
+
+        clazz = Clazz().apply {
+            clazzName = "Test Clazz"
+            clazzUid = 10001L
+            repo.clazzDao.insert(this)
         }
 
         learnerGroup = LearnerGroup().apply {
@@ -145,6 +154,7 @@ class XapiPackageContentPresenterTest {
         Assert.assertNotNull(xapiContainer)
         args.put(UstadView.ARG_CONTAINER_UID, xapiContainer.containerUid.toString())
         args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
+        args[ARG_FILTER_BY_CLAZZUID] = clazz.clazzUid.toString()
 
         val xapiPresenter = XapiPackageContentPresenter(context, args, mockedView, di)
         xapiPresenter.onCreate(null)
@@ -158,8 +168,8 @@ class XapiPackageContentPresenterTest {
             val umAccountActor = Json.decodeFromString(UmAccountActor.serializer(), paramsProvided["actor"]!!)
             Assert.assertEquals("Account actor is as expected",
                     account.username, umAccountActor.account.name)
-            val expectedEndpoint = UMFileUtil.resolveLink(firstValue, "/${UMURLEncoder.encodeUTF8(endpoint.url)}/xapi/$contentEntryUid/")
-            Assert.assertEquals("Received expected Xapi endpoint: /endpoint/xapi/contentEntryUid",
+            val expectedEndpoint = UMFileUtil.resolveLink(firstValue, "/${UMURLEncoder.encodeUTF8(endpoint.url)}/xapi/$contentEntryUid/${clazz.clazzUid}/")
+            Assert.assertEquals("Received expected Xapi endpoint: /endpoint/xapi/contentEntryUid/clazzUid",
                     expectedEndpoint, paramsProvided["endpoint"])
             Assert.assertEquals("Received expected activity id",
                     "http://id.tincanapi.com/activity/tincan-prototypes/tetris",
@@ -177,6 +187,7 @@ class XapiPackageContentPresenterTest {
         args.put(UstadView.ARG_CONTAINER_UID, xapiContainer.containerUid.toString())
         args[ARG_LEARNER_GROUP_UID] = learnerGroup.learnerGroupUid.toString()
         args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
+        args[ARG_FILTER_BY_CLAZZUID] = clazz.clazzUid.toString()
 
         val xapiPresenter = XapiPackageContentPresenter(context, args, mockedView, di)
         xapiPresenter.onCreate(null)
@@ -195,8 +206,8 @@ class XapiPackageContentPresenterTest {
                     "group:${learnerGroup.learnerGroupUid}",   umAccountGroupActor.account.name)
             Assert.assertEquals("Actor member list is 2",
                    2,  umAccountGroupActor.members.size)
-            val expectedEndpoint = UMFileUtil.resolveLink(firstValue, "/${UMURLEncoder.encodeUTF8(endpoint.url)}/xapi/$contentEntryUid/")
-            Assert.assertEquals("Received expected Xapi endpoint: /endpoint/xapi/contentEntryUid",
+            val expectedEndpoint = UMFileUtil.resolveLink(firstValue, "/${UMURLEncoder.encodeUTF8(endpoint.url)}/xapi/$contentEntryUid/${clazz.clazzUid}/")
+            Assert.assertEquals("Received expected Xapi endpoint: /endpoint/xapi/contentEntryUid/clazzUid",
                     expectedEndpoint, paramsProvided["endpoint"])
             Assert.assertEquals("Received expected activity id",
                     "http://id.tincanapi.com/activity/tincan-prototypes/tetris",

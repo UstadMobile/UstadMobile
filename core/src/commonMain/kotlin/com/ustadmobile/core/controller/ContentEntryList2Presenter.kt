@@ -27,7 +27,8 @@ import org.kodein.di.DI
 class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, view: ContentEntryList2View,
                                  di: DI, lifecycleOwner: DoorLifecycleOwner,
                                  val contentEntryListItemListener: DefaultContentEntryListItemListener
-                                 = DefaultContentEntryListItemListener(view = view, context = context, di = di))
+                                 = DefaultContentEntryListItemListener(view = view, context = context,
+                                         di = di, clazzUid = arguments[ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L))
     : UstadListPresenter<ContentEntryList2View, ContentEntry>(context, arguments, view, di, lifecycleOwner),
         ContentEntryListItemListener by contentEntryListItemListener {
 
