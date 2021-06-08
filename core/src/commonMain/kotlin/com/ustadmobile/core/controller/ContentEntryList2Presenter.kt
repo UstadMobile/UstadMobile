@@ -227,7 +227,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     companion object {
 
-        const val SAVEDSTATE_KEY_ENTRY = "ContentEntry"
+        const val SAVEDSTATE_KEY_ENTRY = "Clazz_ContentEntry"
 
         val SORT_OPTIONS = listOf(
                 SortOrderOption(MessageID.title, ContentEntryDao.SORT_TITLE_ASC, true),
