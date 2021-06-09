@@ -17,7 +17,7 @@ import com.ustadmobile.core.util.ext.toDeepLink
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -67,7 +67,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         contentEntryUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        clazzUid = arguments[ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
+        clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
         println(containerDownloadManager)
         containerDownloadManager?.also {
             GlobalScope.launch(doorMainDispatcher()) {
@@ -152,7 +152,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
             try {
                 entity?.contentEntryUid?.also {
                     contentEntryOpener.openEntry(context, it, isDownloadEnabled, false,
-                            arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false, clazzUid)
+                            arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false, clazzUid = clazzUid)
                 }
             } catch (e: Exception) {
                 if (e is NoAppFoundException) {
@@ -169,7 +169,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
 
     fun handleOnTranslationClicked(entryUid: Long) {
         systemImpl.go(ContentEntryDetailView.VIEW_NAME, mapOf(ARG_ENTITY_UID to entryUid.toString(),
-                                            ARG_FILTER_BY_CLAZZUID to clazzUid.toString()), context)
+                                            ARG_CLAZZUID to clazzUid.toString()), context)
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
@@ -204,7 +204,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
             systemImpl.go(LearnerGroupMemberListView.VIEW_NAME,
                     mapOf(ARG_CONTENT_ENTRY_UID to contentEntryUid.toString(),
                             ARG_LEARNER_GROUP_UID to learnerGroup.learnerGroupUid.toString(),
-                            ARG_FILTER_BY_CLAZZUID to clazzUid.toString()),
+                            ARG_CLAZZUID to clazzUid.toString()),
                     context)
         }
     }

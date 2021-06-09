@@ -68,7 +68,7 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
 
         entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
         containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()
-        clazzUid = arguments[UstadView.ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
+        clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0L
 
         view.loading = true
         GlobalScope.launch(doorMainDispatcher()) {

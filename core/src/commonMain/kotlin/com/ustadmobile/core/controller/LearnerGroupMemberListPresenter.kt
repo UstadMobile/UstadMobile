@@ -7,7 +7,7 @@ import com.ustadmobile.core.view.LearnerGroupMemberListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.LearnerGroupMember
@@ -36,7 +36,7 @@ class LearnerGroupMemberListPresenter(context: Any, arguments: Map<String, Strin
         super.onCreate(savedState)
         learnerGroupUid = arguments[ARG_LEARNER_GROUP_UID]?.toLong() ?: 0L
         contentEntryUid = arguments[ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0L
-        clazzUid = arguments[ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
+        clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
         updateList()
 
     }

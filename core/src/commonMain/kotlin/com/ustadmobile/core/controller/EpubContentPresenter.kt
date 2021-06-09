@@ -146,7 +146,7 @@ class EpubContentPresenter(context: Any,
         super.onCreate(savedState)
         val containerUid = arguments[UstadView.ARG_CONTAINER_UID]?.toLong() ?: 100
         contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
-        clazzUid = arguments[UstadView.ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0
+        clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
         contextRegistration = randomUuid().toString()
         view.progressValue = -1
         view.progressVisible = true

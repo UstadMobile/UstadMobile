@@ -1,11 +1,8 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
-import com.ustadmobile.core.util.IdOption
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CLAZZ_CONTENT_FILTER
@@ -13,7 +10,7 @@ import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FIL
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_FOLDER_FILTER
-import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -28,7 +25,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                                  di: DI, lifecycleOwner: DoorLifecycleOwner,
                                  val contentEntryListItemListener: DefaultContentEntryListItemListener
                                  = DefaultContentEntryListItemListener(view = view, context = context,
-                                         di = di, clazzUid = arguments[ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L))
+                                         di = di, clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L))
     : UstadListPresenter<ContentEntryList2View, ContentEntry>(context, arguments, view, di, lifecycleOwner),
         ContentEntryListItemListener by contentEntryListItemListener {
 
@@ -62,7 +59,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         contentFilter = arguments[ARG_CONTENT_FILTER].toString()
         onlyFolderFilter = arguments[ARG_FOLDER_FILTER]?.toBoolean() ?: false
         parentEntryUidStack += arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0L
-        selectedClazzUid = arguments[ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
+        selectedClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
         loggedPersonUid = accountManager.activeAccount.personUid
         showHiddenEntries = false
         getAndSetList()

@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentformats.xapi.Actor
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.tincan.UmAccountActor
@@ -61,7 +60,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
         val containerUid = arguments[UstadView.ARG_CONTAINER_UID]?.toLongOrNull() ?: 0L
         val contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLongOrNull() ?: 0L
         val learnerGroupUid = arguments[UstadView.ARG_LEARNER_GROUP_UID]?.toLongOrNull() ?: 0L
-        val clazzUid = arguments[UstadView.ARG_FILTER_BY_CLAZZUID]?.toLongOrNull() ?: 0L
+        val clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLongOrNull() ?: 0L
         val activeEndpoint = accountManager.activeAccount.endpointUrl.also {
             mountedEndpoint = it
         } ?: return

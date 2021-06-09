@@ -78,7 +78,7 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        clazzUidFilter = arguments[UstadView.ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0
+        clazzUidFilter = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
         updateListOnView()
         view.sortOptions = SortOrder.values().toList().map { ClazzLogListSortOption(it, context) }
         view.graphData = graphDisplayData

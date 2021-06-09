@@ -7,7 +7,7 @@ import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CLAZZ_CONTE
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FILTER
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
@@ -67,16 +67,16 @@ class ClazzDetailPresenter(context: Any,
         val personUid = accountManager.activeAccount.personUid
         GlobalScope.launch(doorMainDispatcher()) {
             view.tabs = listOf("${ClazzDetailOverviewView.VIEW_NAME}?$ARG_ENTITY_UID=$entityUid",
-                    """${ContentEntryList2View.VIEW_NAME}?$ARG_FILTER_BY_CLAZZUID=$entityUid&
+                    """${ContentEntryList2View.VIEW_NAME}?$ARG_CLAZZUID=$entityUid&
                        $ARG_CONTENT_FILTER=$ARG_CLAZZ_CONTENT_FILTER""".trimMargin(),
                     """${ClazzMemberListView.VIEW_NAME}?
-                        $ARG_FILTER_BY_CLAZZUID=$entityUid
+                        $ARG_CLAZZUID=$entityUid
                         """.trimMargin()) +
                     CLAZZ_FEATURES.filter { featureFlag ->
                         (clazz.clazzFeatures and featureFlag) > 0 && db.clazzDao.personHasPermissionWithClazz(personUid, entityUid,
                                 FEATURE_PERMISSION_MAP[featureFlag] ?: -1)
                     }.map {
-                        (VIEWNAME_MAP[it] ?: "INVALID") + "?$ARG_FILTER_BY_CLAZZUID=$entityUid"
+                        (VIEWNAME_MAP[it] ?: "INVALID") + "?$ARG_CLAZZUID=$entityUid"
                     }
         }
     }

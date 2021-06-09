@@ -10,7 +10,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import org.kodein.di.DI
@@ -70,7 +70,7 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware 
                     val args = mapOf(ARG_NO_IFRAMES to noIframe.toString(),
                             ARG_CONTENT_ENTRY_UID to contentEntryUid.toString(),
                             ARG_CONTAINER_UID to containerToOpen.containerUid.toString(),
-                            ARG_FILTER_BY_CLAZZUID to clazzUid.toString(),
+                            ARG_CLAZZUID to clazzUid.toString(),
                             ARG_LEARNER_GROUP_UID to learnerGroupUid.toString())
 
                     systemImpl.go(viewName, args, context, goToOptions)
@@ -91,7 +91,7 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware 
             goToContentEntryDetailViewIfNotDownloaded -> {
                 systemImpl.go(ContentEntryDetailView.VIEW_NAME,
                         mapOf(ARG_ENTITY_UID to contentEntryUid.toString(),
-                        ARG_FILTER_BY_CLAZZUID to clazzUid.toString()), context, goToOptions)
+                        ARG_CLAZZUID to clazzUid.toString()), context, goToOptions)
             }
 
             else -> {

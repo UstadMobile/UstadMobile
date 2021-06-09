@@ -148,7 +148,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
         //3 - Content list
         contentRecyclerAdapter = ContentEntryListRecyclerAdapter(
-                DefaultContentEntryListItemListener(context = requireContext(), di = di),
+                DefaultContentEntryListItemListener(context = requireContext(), di = di, clazzUid = 0L),
                 ListViewMode.BROWSER.toString(), viewLifecycleOwner, di)
 
         //4 - Question heading
