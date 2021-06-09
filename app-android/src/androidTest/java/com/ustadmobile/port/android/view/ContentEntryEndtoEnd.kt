@@ -80,7 +80,7 @@ class ContentEntryEndtoEnd : TestCase() {
                         }
                     }
 
-                    hasSize(4)
+                    hasSize(5)
 
                     openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext)
 
@@ -162,7 +162,7 @@ class ContentEntryEndtoEnd : TestCase() {
                 recycler{
 
                     flakySafely {
-                        hasSize(3)
+                        hasSize(4)
                     }
 
 
@@ -181,7 +181,7 @@ class ContentEntryEndtoEnd : TestCase() {
                     }
 
                     flakySafely {
-                        hasSize(2)
+                        hasSize(3)
                     }
 
                 }
@@ -277,7 +277,7 @@ class ContentEntryEndtoEnd : TestCase() {
 
                 recycler{
 
-                    hasSize(3)
+                    hasSize(4)
 
                     openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext)
 
@@ -287,7 +287,7 @@ class ContentEntryEndtoEnd : TestCase() {
                         click()
                     }
 
-                    hasSize(4)
+                    hasSize(5)
 
                     childWith<ContentEntryListScreen.MainItem> {
                          withDescendant {
@@ -313,7 +313,7 @@ class ContentEntryEndtoEnd : TestCase() {
                         click()
                     }
 
-                    hasSize(4)
+                    hasSize(5)
 
                 }
 
