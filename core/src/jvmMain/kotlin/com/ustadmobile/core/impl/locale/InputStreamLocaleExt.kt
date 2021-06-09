@@ -6,7 +6,7 @@ import org.xmlpull.v1.XmlPullParserFactory
  * Important: when running on JVM 9+, this MUST be called on a Class object representing a class
  * within the core module (such that it can access the given resource).
  */
-internal fun Class<*>.getStringsXmlResource(resourceName: String, xppFactory: XmlPullParserFactory,
+fun Class<*>.getStringsXmlResource(resourceName: String, xppFactory: XmlPullParserFactory,
                                             messageIdMap: Map<String, Int>, fallback: StringsXml? = null): StringsXml {
     val inputStream = getResourceAsStream(resourceName)
         ?: throw IllegalArgumentException("$resourceName not found for loading strings xml")

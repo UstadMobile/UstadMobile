@@ -46,4 +46,8 @@ class StringsXml (xpp: XmlPullParser,
             ?: throw IllegalArgumentException("$stringsXmlName does not contain")
     }
 
+    fun getIdByString(str: String, ignoreCase: Boolean = false): Int {
+        return messageMap.entries.firstOrNull { it.value.equals(str, ignoreCase) }?.key ?: -1
+    }
+
 }
