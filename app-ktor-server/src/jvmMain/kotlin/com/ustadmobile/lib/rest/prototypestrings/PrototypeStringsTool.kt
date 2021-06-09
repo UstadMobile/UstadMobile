@@ -2,24 +2,23 @@ package com.ustadmobile.lib.rest.prototypestrings
 
 import com.ustadmobile.core.generated.locale.MessageIdMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.impl.locale.getStringsXmlResource
-import com.ustadmobile.lib.util.ext.XmlSerializerFilter
 import com.ustadmobile.lib.util.ext.serializeTo
-import com.ustadmobile.xmlpullparserkmp.XmlPullParser
-import com.ustadmobile.xmlpullparserkmp.XmlSerializer
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
-import org.jsoup.parser.Parser
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.*
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
+/**
+ * The PrototypeStringsTool will take the XML in a Pencil prototype file and replace English text
+ * with a foreign translation using values from the Strings XML.
+ *
+ * The Pencil EPGZ file is a .tar.gz file containing multiple xml files.
+ */
 class PrototypeStringsTool {
 
     fun TarArchiveInputStream.extractToDir(dir: File) = use {
@@ -38,16 +37,17 @@ class PrototypeStringsTool {
         }
     }
 
-
-    fun Element.isText() : Boolean {
-        return when {
-            tagName() == "text" && attr("p:name") == "text" -> true
-            tagName() == "p:property" && attr("name") == "label" -> true
-            else -> false
-        }
-    }
-
-    fun substituteStrings(inFile: File, lang: String, outFile: File) {
+    /**
+     * Run the main string substitution on the XML.
+     *
+     * @param inEpgzFile the Pencil EPGZ file containing the prototype in English
+     * @param inCsvFile (reserved for future use) a csv file containing non string xml substitutions
+     *  (e.g. substitutions for names etc)
+     * @param lang the language code of the foreign language to localize the prototype into
+     * @param outEpgzFile File where the new localized Pencil EPGZ file will be written
+     * @param outCsvFile File where a CSV of untranslated terms will be written
+     */
+    fun substituteStrings(inEpgzFile: File, inCsvFile: File, lang: String, outEpgzFile: File, outCsvFile: File) {
         val tmpDir = File.createTempFile("stringsub", "tmp").also {
             it.delete()
             it.mkdir()
@@ -63,10 +63,10 @@ class PrototypeStringsTool {
             "/values-$lang/strings_ui.xml", xppFactory, messageIdMapFlipped,
             englishStrings)
 
-        TarArchiveInputStream(GZIPInputStream(FileInputStream(inFile))).extractToDir(tmpDir)
+        TarArchiveInputStream(GZIPInputStream(FileInputStream(inEpgzFile))).extractToDir(tmpDir)
 
 
-        val stringsNotFound = mutableMapOf<String, Set<String>>()
+        val stringsNotFoundMap = mutableMapOf<String, Set<String>>()
         tmpDir.listFiles().filter { it.name.endsWith(".xml") }.forEach { xmlFile ->
             val xpp = xppFactory.newPullParser()
             xpp.setInput(ByteArrayInputStream(xmlFile.readText().toByteArray()), "UTF-8")
@@ -78,10 +78,10 @@ class PrototypeStringsTool {
             xpp.serializeTo(xs, filter = filter)
             fileOut.flush()
             val pageName = filter.pageName ?: "Untitled"
-            stringsNotFound[pageName] = filter.stringsNotFound
+            stringsNotFoundMap[pageName] = filter.stringsNotFound
         }
 
-        TarArchiveOutputStream(GZIPOutputStream(FileOutputStream(outFile))).use { tarOut ->
+        TarArchiveOutputStream(GZIPOutputStream(FileOutputStream(outEpgzFile))).use { tarOut ->
             tmpDir.walkTopDown().filter { !it.isDirectory }.forEach { file ->
                 val relName = file.toRelativeString(tmpDir)
                 val tarEntry = tarOut.createArchiveEntry(file, relName)
@@ -96,7 +96,28 @@ class PrototypeStringsTool {
         }
 
 
-        println("Extracted to: $tmpDir")
+        //Create a map of the strings that are not found to a list of the page names in which they
+        // are used
+        val missingMap: Map<String, List<String>> = stringsNotFoundMap.flatMap { it.value }.toSet().map { missingString ->
+            missingString to stringsNotFoundMap.entries.filter { missingString in it.value }.map { it.key }
+        }.toMap()
+
+        var csvText = """"String","Substitute","Pages","Xml" ${'\n'}"""
+        val notWordRegex = Regex("\\W")
+        missingMap.forEach { string, pageList ->
+            val spaceRegex = Regex("\\s+")
+
+            //Csv requires us to escape a single quote to being double quote
+            val stringCsvEscaped = string.replace("\"", "\"\"")
+            val stringName = string.lowercase().replace(" ", "_")
+                .replace(notWordRegex, "")
+
+            val xml = """<string name=""$stringName"">$stringCsvEscaped</string>"""
+
+            csvText += """"$stringCsvEscaped","","${pageList.joinToString()}","$xml"${'\n'}"""
+        }
+
+        outCsvFile.writeText(csvText)
 
         tmpDir.deleteRecursively()
     }

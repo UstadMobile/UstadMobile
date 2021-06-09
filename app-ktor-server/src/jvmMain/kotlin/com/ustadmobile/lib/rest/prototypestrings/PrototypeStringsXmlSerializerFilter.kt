@@ -4,8 +4,11 @@ import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.lib.util.ext.XmlSerializerFilter
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlSerializer
-import javax.management.modelmbean.XMLParseException
 
+/**
+ * This is an XmlSerializerFilter that works with the PrototypeStringsTool to replace XML text
+ * elements.
+ */
 class PrototypeStringsXmlSerializerFilter(val englishStrings: StringsXml,
                                           val foreignStrings: StringsXml): XmlSerializerFilter {
 
@@ -38,7 +41,7 @@ class PrototypeStringsXmlSerializerFilter(val englishStrings: StringsXml,
         if(parser.eventType == XmlPullParser.START_TAG && parser.name == "property") {
             val propertyName = parser.getAttributeValue(null, "name")
 
-            if(propertyName == "label" || propertyName == "textContent") {
+            if(propertyName == "label" || propertyName == "textContent" || propertyName == "labelText") {
                 inTextSection = true
             }
 
@@ -55,13 +58,49 @@ class PrototypeStringsXmlSerializerFilter(val englishStrings: StringsXml,
             inTextSection = false
         }
 
-        if(parser.eventType == XmlPullParser.CDSECT && inTextSection) {
+        if((parser.eventType == XmlPullParser.CDSECT || parser.eventType == XmlPullParser.TEXT) &&
+            inTextSection) {
+
             val text: String = parser.text
             val messageId = englishStrings.getIdByString(text, ignoreCase = true)
+
+
+            //Text can be found in a CDSECT or plain text section.
+            fun XmlSerializer.cdSectOrText(writeText: String) {
+                if(parser.eventType == XmlPullParser.CDSECT) {
+                    cdsect(writeText)
+                }else {
+                    text(writeText)
+                }
+            }
+
             if(messageId != -1) {
-                serializer.cdsect(foreignStrings[messageId])
+                serializer.cdSectOrText(foreignStrings[messageId])
                 return false
             }else {
+                //check and see if this is a compilation of something in brackets
+                // e.g. Field name (optional) etc.
+                val bracketEndings = listOf("(optional)", "(ascending)", "(descending)")
+                if(bracketEndings.any { text.endsWith(it, ignoreCase = true) }) {
+                    val splitIndex = text.lastIndexOf("(")
+                    val prefix = text.substring(0, splitIndex).trim()
+                    val prefixMessageId = englishStrings.getIdByString(prefix)
+
+                    if(prefixMessageId != -1) {
+                        val postfix = text.substring(splitIndex + 1)
+                            .replace(")", "")
+                        val postfixMessageId = englishStrings.getIdByString(postfix)
+
+                        val postfixTranslated = if(postfixMessageId != -1)
+                            foreignStrings[postfixMessageId]
+                        else
+                            ""
+                        serializer.cdSectOrText(foreignStrings[prefixMessageId] + " " + postfixTranslated)
+                        return false
+                    }
+                }
+
+
                 notFoundList.takeIf { text.isNotBlank() }?.add(text)
                 return true
             }

@@ -99,11 +99,11 @@ class ScopedGrantEditPresenterTest {
         val initialFlags = bitmaskFlagLiveData!!.getValue()!!
         ScopedGrantEditPresenter.PERMISSION_LIST_MAP[Clazz.TABLE_ID]!!.forEach { flag ->
             Assert.assertTrue("Bitmask flag list contains $flag", initialFlags.any {
-                it.flagVal == flag.first
+                it.flagVal == flag.flagVal
             })
         }
 
-        verify(mockView, timeout(5000 * 1000)).finishWithResult(argWhere {
+        verify(mockView, timeout(5000)).finishWithResult(argWhere {
             it.first().sgPermissions == (Role.PERMISSION_CLAZZWORK_SELECT
                     or Role.PERMISSION_CLAZZ_ADD_STUDENT)
         })
