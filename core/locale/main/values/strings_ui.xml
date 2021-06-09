@@ -15,7 +15,7 @@
     <string name='wrong_user_pass_combo'>Wrong username/password: try again.</string>
     <string name='login_network_error'>Network error: please check you are online.</string>
     <string name="download">Download</string>
-    <string name="downloaded" value="81">Downloaded</string>
+    <string name="downloaded">Downloaded</string>
     <string name="recycled" >Recycled</string>
     <string name="libraries">Libraries</string>
     <string name="pause_download">Pause download</string>
@@ -217,39 +217,39 @@
     <string name="invalid_register_code">Invalid Registration Code</string>
     <string name="enter_register_code">Enter Registration Code</string>
 
-    <string name="bar_chart" value="100">Bar Chart</string>
-    <string name="line_chart" value="101">Line Chart</string>
+    <string name="bar_chart">Bar Chart</string>
+    <string name="line_chart">Line Chart</string>
 
-    <string name="score" value="200">Average Score</string>
-    <string name="content_total_duration" value="200">Content usage - total duration</string>
-    <string name="content_average_duration" value="201">Content usage - average duration per session</string>
-    <string name="count_session" value="202">Content usage - number of sessions</string>
-    <string name="interaction_recorded" value="203">Content usage - number of interactions recorded</string>
-    <string name="number_active_users" value="204">Content usage - number of active users</string>
-    <string name="average_usage_time_per_user"  value="205">Content usage - average usage time per user</string>
-    <string name="number_students_completed" value="206">Content usage - number of students who completed content</string>
-    <string name="percent_students_completed" value="207">Content usage - percentage of students who completed content</string>
-    <string name="total_attendances"  value="208">Attendance - total attendances</string>
-    <string name="total_absences"  value="209">Attendance - total absences</string>
-    <string name="total_lates"  value="210">Attendance - total lates</string>
-    <string name="percent_students_attended"  value="211">Attendance - Percentage of students who attended</string>
-    <string name="percent_students_attended_or_late"  value="212">Attendance - Percentage of students who attended or were late</string>
-    <string name="total_number_of_classes"  value="213">Attendance - Total number of classes</string>
-    <string name="number_unique_students_attending"  value="214">Attendance - Number of unique students attending</string>
+    <string name="score">Average Score</string>
+    <string name="content_total_duration">Content usage - total duration</string>
+    <string name="content_average_duration">Content usage - average duration per session</string>
+    <string name="count_session">Content usage - number of sessions</string>
+    <string name="interaction_recorded">Content usage - number of interactions recorded</string>
+    <string name="number_active_users">Content usage - number of active users</string>
+    <string name="average_usage_time_per_user" >Content usage - average usage time per user</string>
+    <string name="number_students_completed">Content usage - number of students who completed content</string>
+    <string name="percent_students_completed">Content usage - percentage of students who completed content</string>
+    <string name="total_attendances" >Attendance - total attendances</string>
+    <string name="total_absences" >Attendance - total absences</string>
+    <string name="total_lates" >Attendance - total lates</string>
+    <string name="percent_students_attended" >Attendance - Percentage of students who attended</string>
+    <string name="percent_students_attended_or_late" >Attendance - Percentage of students who attended or were late</string>
+    <string name="total_number_of_classes" >Attendance - Total number of classes</string>
+    <string name="number_unique_students_attending" >Attendance - Number of unique students attending</string>
 
 
-    <string name="xapi_day" value="300">Day</string>
-    <string name="xapi_week" value="301">Week</string>
-    <string name="xapi_month" value="302">Month</string>
-    <string name="xapi_custom_date" value="303">Custom Date</string>
-    <string name="xapi_content_entry" value="304">Content Entry</string>
+    <string name="xapi_day">Day</string>
+    <string name="xapi_week">Week</string>
+    <string name="xapi_month">Month</string>
+    <string name="xapi_custom_date">Custom Date</string>
+    <string name="xapi_content_entry">Content Entry</string>
     <string name="xapi_clear" >Clear</string>
 
-    <string name="last_week_date_range" value="800">Last week</string>
-    <string name="last_two_week_date_range" value="801">Last two weeks</string>
-    <string name="last_month_date_range" value="802">Last month</string>
-    <string name="last_three_months_date_range" value="803">Last three months</string>
-    <string name="new_custom_date_range" value="804">New custom date range…</string>
+    <string name="last_week_date_range">Last week</string>
+    <string name="last_two_week_date_range">Last two weeks</string>
+    <string name="last_month_date_range">Last month</string>
+    <string name="last_three_months_date_range">Last three months</string>
+    <string name="new_custom_date_range">New custom date range…</string>
     <string name="selected_custom_range">Custom range:  %1$s%</string>
 
     <string name="time_range">Time Range</string>
@@ -450,7 +450,7 @@
     <string name="thursday">Thursday</string>
     <string name="friday">Friday</string>
     <string name="saturday">Saturday</string>
-    <string name="day" value="300">Day</string>
+    <string name="day">Day</string>
     <string name="toC">To</string>
     <string name="last_month">Last month</string>
     <string name="activity_change">Activity change</string>
@@ -546,7 +546,7 @@
     <string name="nomination">Nomination</string>
     <string name="active">Active</string>
     <string name="class_id">Class ID</string>
-    <string name="gender_literal" value="306">Gender</string>
+    <string name="gender_literal">Gender</string>
     <!--
     SEL = Social Emotional Learning
     -->
@@ -572,6 +572,7 @@
     <string name="audit_log_setting_desc"> View and export audit log</string>
     <string name="entry">entry</string>
     <string name="permission">permission</string>
+    <string name="permissions">Permissions</string>
     <string name="role_name">Role name</string>
     <string name="members">members</string>
     <string name="member">member</string>
@@ -1027,6 +1028,143 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="join_school">Join school</string>
 
+    <string name="what_is_your_date_of_birth">What is your date of birth?</string>
+
+    <string name="parents_email_address">Parents\' email address</string>
+
+    <!--The instructions that are given to children when parental approval is required for them to create an account. %1$s is replaced with the parents email address or phone number -->
+    <string name="we_sent_a_message_to_your_parent">We sent a message to your parent ( %1$s ) so they can approve your registration. You can login using the username and password you set after your parent approves.</string>
+
+    <string name="toggle_visibility">Toggle visibility</string>
+
+    <string name="parental_consent">Parental consent</string>
+
+    <!--
+    When a child registers (without using a link provided by a teacher), then a message is sent to
+    the parent with a link allowing them to approve or reject the request.
+
+    This text provides the subject line of the email. %1$s will be replaced with the app name.
+    -->
+    <string name="parent_child_register_message_subject">Parent - please approve or reject your child&#8216;s registration with %1$s</string>
+
+    <!--
+    When a child registers (without using a link provided by a teacher), then a message is sent to
+    the parent with a link allowing them to approve or reject the request.
+
+    %1$s will be replaced with the name of the child.
+    %2$s will be replaced with the name of the app
+    %3$s will be replaced with the link for the parent to approve or reject registration
+    -->
+    <string name="parent_child_register_message">Dear parent,
+Your child ( %1$s ) has requested to register with %2$s . Please approve or reject the request
+using the link below.
+
+%3$s
+
+If the request has not been accepted within 30 days, then the request (and any personal
+information) will be deleted. You can revoke approval anytime by using the same link.
+
+Thank you,
+
+%2$s
+    </string>
+
+    <!--
+    When a child registers (without using a link provided by a teacher), then a message is sent to
+    the parent with a link allowing them to approve or reject the request.
+
+    When the parent opens the link, they will see this text to explain their choice to either
+    grant or deny consent for their child to use the app.
+    %1$s will be replaced with the name of the child
+    %2$s will be replaced with the date of birth of the child
+    %3$s will be replaced with the name of the app
+    -->
+    <string name="parent_consent_explanation">I confirm that I am the parent or legal guardian of the following child:\n
+        \n
+Name: %1$s\n
+Date of birth: %2$s\n
+\n
+If I consent to my child using %3$s, then the collection of and processing of personally identifiable information will be done in compliance with the privacy policy and terms and conditions below.\n
+\n
+Consent can be revoked anytime by using the link that was emailed. If you choose not to consent, any data provided by your child will be deleted within 24 hours.
+    </string>
+
+
+    <!--
+    Used as the header when asking a parent or legal guardian to select their relationship
+    with a child. Options would be mother, father, other
+    -->
+    <string name="relationship">Relationship</string>
+
+    <string name="i_consent">I consent</string>
+
+    <string name="i_do_not_consent">I do not consent</string>
+
+    <string name="revoke_consent">Revoke consent</string>
+
+    <string name="restore_consent">Restore consent</string>
+
+    <!--
+    This is the parental consent status. This will be shown when the parent has consented to
+    the child using the app. %1$s will be replaced with the date.
+    -->
+    <string name="status_consent_granted">Status: consent granted (%1$s)</string>
+
+    <!--
+    This is the parental consent status. This will be shown when the parent has not consented to
+    the child using the app. %1$s will be replaced with the date.
+    -->
+    <string name="status_consent_denied">Status: consent denied (%1$s)</string>
+
+    <!--
+    This is used in the context of describing the relationship between an adult and a child.
+    Normally this would be 'mother' or 'father'. In cases where someone else (e.g. an uncle, aunt,
+    foster parent, etc) is legally responsible for the child, this is the option to select
+    -->
+    <string name="other_legal_guardian">Other legal guardian</string>
+
+    <!--
+    This is the text for a button that will be available for parents when they are viewing the
+    profile of their child. They can click it to revoke or restore consent for their child to use
+    the app.
+    -->
+    <string name="manage_parental_consent">Manage parental consent</string>
+
+    <!-- Used in the context of permission management -->
+    <string name="view_class_content">View class content</string>
+
+    <!-- Used in the context of permission management -->
+    <string name="edit_class_content">Edit class content</string>
+
+    <!-- Used in the context of permission management -->
+    <string name="view_class_learning_records">View class learning records</string>
+
+    <!-- Used in the context of permission management. Member refers to a member in a class or school (teacher, students, etc) -->
+    <string name="view_contact_details_of_members">View member contact details</string>
+
+    <!-- Used in the context of permission management. Member refers to a member in a class or school (teacher, students, etc) -->
+    <string name="edit_contact_details_of_members">Edit member contact details</string>
+
+    <!--
+    Used in the context of permission management.
+    Member refers to a member in a class or school (teacher, students, etc).
+    Socioeconomic refers to information about social or economic status e.g. level of Internet access,
+    refugee status, etc.
+    -->
+    <string name="view_socioeconomic_details_of_members">View socioeconomic details of members</string>
+
+    <!--
+    Used in the context of permission management.
+    Member refers to a member in a class or school (teacher, students, etc).
+    Socioeconomic refers to information about social or economic status e.g. level of Internet access,
+    refugee status, etc.
+    -->
+    <string name="edit_socioeconomic_details_of_members">Edit socioeconomic details of members</string>
+
+    <string name="add_person_or_group">Add person or group</string>
+
+
+
     <string name="lets_get_started">Let\'s get started</string>
 
     <string name="looks_like_installed_app_from_link">Looks like you just installed the app using a link. What would you like to do?</string>
@@ -1048,16 +1186,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="add_permission_for_a_person">Add permission for a person</string>
 
     <string name="add_permission_for_a_group">Add permission for a group</string>
-
-    <string name="parent_account_landing_confirm">
-I confirm that I am the parent or legal guardian of the following child:
-
-Name: %1$s
-
-Date of birth: %2$s
-
-If I consent to my child using APP and the collection of personally identifiable information in compliance with the privacy policy and terms and conditions below. I understand that I can cancel consent anytime by using the link I was emailed. If you do not consent, any data provided by your child will be deleted within 24 hours.
-    </string>
 
     <string name="add_using_link">Add using link</string>
 
@@ -1164,14 +1292,6 @@ If I consent to my child using APP and the collection of personally identifiable
     <string name="add_from_contacts">Add from contacts</string>
 
     <string name="almost_done">Almost done!</string>
-
-    <!--
-    When a child registers, we have to ask for parental consent. This is the message that the
-    child wil see after they complete the registration form to tell them that we have sent the
-    parent a message and they need to wait for parental approval. %1$s will be replaced with the
-    email or phone number of the parent.
-    -->
-    <string name="we_sent_an">We sent a messgae to your parent ( %1$s ) so they can approve your registration. You can login using the username and password you set after your parent approves.</string>
 
     <string name="your_username">Your username</string>
 
