@@ -19,7 +19,7 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.ext.toDoorUri
@@ -154,7 +154,7 @@ class XapiPackageContentPresenterTest {
         Assert.assertNotNull(xapiContainer)
         args.put(UstadView.ARG_CONTAINER_UID, xapiContainer.containerUid.toString())
         args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
-        args[ARG_FILTER_BY_CLAZZUID] = clazz.clazzUid.toString()
+        args[ARG_CLAZZUID] = clazz.clazzUid.toString()
 
         val xapiPresenter = XapiPackageContentPresenter(context, args, mockedView, di)
         xapiPresenter.onCreate(null)
@@ -187,7 +187,7 @@ class XapiPackageContentPresenterTest {
         args.put(UstadView.ARG_CONTAINER_UID, xapiContainer.containerUid.toString())
         args[ARG_LEARNER_GROUP_UID] = learnerGroup.learnerGroupUid.toString()
         args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
-        args[ARG_FILTER_BY_CLAZZUID] = clazz.clazzUid.toString()
+        args[ARG_CLAZZUID] = clazz.clazzUid.toString()
 
         val xapiPresenter = XapiPackageContentPresenter(context, args, mockedView, di)
         xapiPresenter.onCreate(null)
