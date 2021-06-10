@@ -141,8 +141,10 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
     }
 
 
-    val personPermission = """${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
-        ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+    val personPermission = """
+        FROM PersonGroupMember
+            ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
+                ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
          """
 
     var sqlList = """SELECT  Person.* , XLangMapEntry.* ,StatementEntity.* 
