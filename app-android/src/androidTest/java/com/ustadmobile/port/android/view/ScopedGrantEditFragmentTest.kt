@@ -27,6 +27,7 @@ import org.junit.Rule
 import org.junit.Test
 import com.ustadmobile.core.view.UstadView
 import com.google.gson.Gson
+import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.ScopedGrantEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.lib.db.entities.Clazz
@@ -64,7 +65,7 @@ class ScopedGrantEditFragmentTest : TestCase(){
     private fun launchFragmentInContainer(initalEntity: ScopedGrant? = null): FragmentScenario<ScopedGrantEditFragment> {
         val argBundle = bundleOf(
             ScopedGrantEditView.ARG_PERMISSION_LIST to Clazz.TABLE_ID.toString(),
-            UstadView.ARG_RESULT_DEST_ID to R.id.clazz_edit_dest.toString(),
+            UstadView.ARG_RESULT_DEST_VIEWNAME to ClazzEdit2View.VIEW_NAME,
             UstadBaseFragment.ARG_RESULT_DEST_KEY to "ScopedGrant"
         )
 

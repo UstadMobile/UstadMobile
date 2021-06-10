@@ -123,13 +123,16 @@ class ClazzEdit2Presenter(context: Any,
             }
             scopedGrantOneToManyHelper.liveList.setVal(scopedGrants)
         }else if(db is DoorDatabaseRepository){
+            /*
+            This should be enabled once a field has been added on Clazz for the adminGroupUid
             scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
                 name = "Admins"
                 scopedGrant = ScopedGrant().apply {
                     sgFlags = ScopedGrant.FLAG_ADMIN_GROUP.or(FLAG_NO_DELETE)
-                    sgPermissions = Long.MAX_VALUE
+                    sgPermissions = Role.ALL_PERMISSIONS
                 }
             })
+            */
 
             scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
                 name = "Teachers"
@@ -244,6 +247,7 @@ class ClazzEdit2Presenter(context: Any,
                 it.scheduleClazzUid = entity.clazzUid
             }
 
+            //Set the group uids to match the respective roles.
             scopedGrantOneToManyHelper.entitiesToInsert.forEach {
                 it.scopedGrant?.takeIf { it.sgFlags.hasFlag(ScopedGrant.FLAG_TEACHER_GROUP) }
                     ?.sgGroupUid = entity.clazzTeachersPersonGroupUid

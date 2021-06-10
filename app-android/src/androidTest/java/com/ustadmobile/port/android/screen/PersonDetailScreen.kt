@@ -13,7 +13,7 @@ object PersonDetailScreen : KScreen<PersonDetailScreen>() {
 
     val changePassView: KView = KView {
         withId(R.id.change_account_password_view)
-        withDescendant { withText("Change Password") }
+        withText(R.string.change_password)
     }
 
     val createAccView: KView = KView { withId(R.id.create_account_view) }

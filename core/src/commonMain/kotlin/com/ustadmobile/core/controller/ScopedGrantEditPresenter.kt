@@ -75,14 +75,12 @@ class ScopedGrantEditPresenter(context: Any,
     }
 
     override fun handleClickSave(entity: ScopedGrant) {
-        GlobalScope.launch(doorMainDispatcher()) {
-            val permissionsList = view.bitmaskList?.getValue() ?: throw IllegalStateException("No bitmask list")
-            entity.sgPermissions = permissionsList.combinedFlagValue
+        val permissionsList = view.bitmaskList?.getValue() ?: throw IllegalStateException("No bitmask list")
+        entity.sgPermissions = permissionsList.combinedFlagValue
 
-            val serializedResult = safeStringify(di, ListSerializer(ScopedGrant.serializer()),
-                listOf(entity))
-            finishWithResult(serializedResult)
-        }
+        val serializedResult = safeStringify(di, ListSerializer(ScopedGrant.serializer()),
+            listOf(entity))
+        finishWithResult(serializedResult)
     }
 
     companion object {
