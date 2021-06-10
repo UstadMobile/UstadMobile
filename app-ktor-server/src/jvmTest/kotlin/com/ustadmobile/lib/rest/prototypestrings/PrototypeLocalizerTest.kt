@@ -6,7 +6,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.io.File
 
-class PrototypeStringsToolTest {
+class PrototypeLocalizerTest {
 
     @JvmField
     @Rule
@@ -25,7 +25,7 @@ class PrototypeStringsToolTest {
         val inCsvFile = File("")
         //val outCsvFile = File("/home/mike/hawk.csv")
         val outCsvFile = temporaryFolder.newFile()
-        PrototypeStringsTool().substituteStrings(epgzIn, inCsvFile, "tg", outFile, outCsvFile)
+        PrototypeLocalizer().substituteStrings(epgzIn, inCsvFile, "tg", outFile, outCsvFile)
     }
 
 }

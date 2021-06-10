@@ -129,7 +129,7 @@ class UstadTestRule: TestWatcher() {
             }
 
             bind<UstadNavController>() with singleton {
-                spy(TestUstadNavController())
+                spy(TestUstadNavController(di))
             }
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

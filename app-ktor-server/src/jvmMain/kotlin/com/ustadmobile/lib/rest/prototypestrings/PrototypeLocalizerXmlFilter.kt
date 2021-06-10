@@ -6,11 +6,11 @@ import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlSerializer
 
 /**
- * This is an XmlSerializerFilter that works with the PrototypeStringsTool to replace XML text
+ * This is an XmlSerializerFilter that works for the PrototypeLocalizer to replace XML text
  * elements.
  */
-class PrototypeStringsXmlSerializerFilter(val englishStrings: StringsXml,
-                                          val foreignStrings: StringsXml): XmlSerializerFilter {
+class PrototypeLocalizerXmlFilter(val englishStrings: StringsXml,
+                                  val foreignStrings: StringsXml): XmlSerializerFilter {
 
     var inTextSection: Boolean = false
 

@@ -7,19 +7,33 @@ import com.ustadmobile.lib.util.ext.serializeTo
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
-import org.jsoup.nodes.Element
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.*
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
+fun main(args: Array<String>) {
+    if(args.size != 5) {
+        println("Usage: inEpgzFile inCsvFile lang outEpgzFile outCsvFile")
+        System.exit(1)
+        return
+    }
+
+    PrototypeLocalizer().substituteStrings(
+        inEpgzFile = File(args[0]),
+        inCsvFile = File(args[1]),
+        lang = args[2],
+        outEpgzFile = File(args[3]),
+        outCsvFile = File(args[4]))
+}
+
 /**
- * The PrototypeStringsTool will take the XML in a Pencil prototype file and replace English text
+ * The PrototypeLocalizer will take the XML in a Pencil prototype file and replace English text
  * with a foreign translation using values from the Strings XML.
  *
  * The Pencil EPGZ file is a .tar.gz file containing multiple xml files.
  */
-class PrototypeStringsTool {
+class PrototypeLocalizer {
 
     fun TarArchiveInputStream.extractToDir(dir: File) = use {
         lateinit var tarEntry: TarArchiveEntry
@@ -73,7 +87,7 @@ class PrototypeStringsTool {
             val xs = xppFactory.newSerializer()
             val fileOut = FileOutputStream(xmlFile)
             xs.setOutput(fileOut, "UTF-8")
-            val filter = PrototypeStringsXmlSerializerFilter(englishStrings,
+            val filter = PrototypeLocalizerXmlFilter(englishStrings,
                 foreignStrings)
             xpp.serializeTo(xs, filter = filter)
             fileOut.flush()
