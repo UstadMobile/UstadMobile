@@ -53,15 +53,27 @@ class ParentalConsentManagementPresenter(context: Any,
 
         val personParentJoin = db.onRepoWithFallbackToDb(5000) {
             it.personParentJoinDao.findByUidWithMinorAsync(entityUid)
-        }  ?: throw IllegalArgumentException("Should go to error page")
+        }
 
-        val minorPerson = personParentJoin.minorPerson ?: throw IllegalArgumentException("Go to error page")
+        if(personParentJoin == null && db !is DoorDatabaseRepository) {
+            //Not available in the local db, just return and wait for repo load
+            return null
+        }else if(personParentJoin == null) {
+            throw IllegalArgumentException("1021: PPJ not found for $entityUid")
+        }
+
+        val minorPerson = personParentJoin.minorPerson
+
+        if(minorPerson == null && db is DoorDatabaseRepository) {
+            throw IllegalStateException("1022: Could not find minor for ppj $entityUid")
+        }
+
         view.siteTerms = db.siteTermsDao.findSiteTerms(systemImpl.getDisplayedLocale(context))
 
         if(personParentJoin.ppjParentPersonUid == 0L) {
             view.infoText = systemImpl.getString(MessageID.parent_consent_explanation, context)
-                .replace("%1\$s", minorPerson.fullName())
-                .replace("%2\$s", minorPerson.dateOfBirth.formatDate(context))
+                .replace("%1\$s", minorPerson?.fullName() ?: "")
+                .replace("%2\$s", minorPerson?.dateOfBirth?.formatDate(context) ?: "")
                 .replace("%3\$s", systemImpl.getString(MessageID.app_name, context))
         }else if(db is DoorDatabaseRepository && personParentJoin.ppjParentPersonUid != 0L) {
             if(personParentJoin.ppjParentPersonUid == accountManager.activeAccount.personUid) {
