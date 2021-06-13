@@ -46,7 +46,7 @@ class ErrorReportFragmentTest : TestCase() {
 
         init {
             val args = mapOf(
-                ErrorReportView.ARG_ERR_NUM to "42",
+                ErrorReportView.ARG_ERR_CODE to "42",
                 ErrorReportView.ARG_MESSAGE to "The meaning of life")
 
             fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
@@ -67,7 +67,7 @@ class ErrorReportFragmentTest : TestCase() {
             val errorReportList = dbRule.db.waitUntil2Blocking(setOf("ErrorReport"), 5000,
                 {dbRule.db.errorReportDao.findByErrorCode(42)}) { !it.isNullOrEmpty() }
             Assert.assertEquals("Report list contains expected item", 42,
-                errorReportList?.first()?.errorNum)
+                errorReportList?.first()?.errorCode)
         }
     }
 
