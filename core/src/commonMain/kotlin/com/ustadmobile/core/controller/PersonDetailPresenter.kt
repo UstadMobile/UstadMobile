@@ -42,9 +42,6 @@ class PersonDetailPresenter(context: Any,
                     && (activePersonUid == entityUid || hasAuthPermission)
 
             view.showCreateAccountVisible =  person.username == null && hasAuthPermission
-
-            view.rolesAndPermissions = repo.entityRoleDao.filterByPersonWithExtra(
-                person.personGroupUid?:0L)
         }
         return repo.personDao.findByUidWithDisplayDetailsLive(entityUid, activePersonUid)
     }

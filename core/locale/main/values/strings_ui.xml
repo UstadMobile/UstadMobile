@@ -563,7 +563,6 @@
     <string name="role">Role</string>
     <string name="add_a_new_role">Add a new role</string>
     <string name='edit_role'>Edit role</string>
-    <string name="roles_setting_desc">Manage permissions given to roles</string>
     <string name="rols_assignment">Roles assignment</string>
     <string name="role_assignment_setting_desc">Assign roles to a user or a group</string>
     <string name="locations">Locations</string>

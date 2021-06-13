@@ -4,7 +4,6 @@ package com.ustadmobile.core.controller
 import org.mockito.kotlin.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.EntityRoleDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveRepoInstance
@@ -55,8 +54,6 @@ class PersonDetailPresenterTest {
 
     private lateinit var serverUrl: String
 
-    private lateinit var repoEntityRoleDao: EntityRoleDao
-
     @Before
     fun setup() {
         context = Any()
@@ -78,8 +75,6 @@ class PersonDetailPresenterTest {
 
         repo = di.directActiveRepoInstance()
 
-        repoEntityRoleDao = spy(repo.entityRoleDao)
-        whenever(repo.entityRoleDao).thenReturn(repoEntityRoleDao)
 
     }
 
@@ -100,10 +95,6 @@ class PersonDetailPresenterTest {
         }
 
         repo = di.directActiveRepoInstance()
-
-
-        repoEntityRoleDao = spy(repo.entityRoleDao)
-        whenever(repo.entityRoleDao).thenReturn(repoEntityRoleDao)
 
         val person = Person().apply {
             fatherName = "Doe"
@@ -132,19 +123,6 @@ class PersonDetailPresenterTest {
             }
         }
         return person
-    }
-
-    @Test
-    fun givenPersonDetailsWithRoles_whenLoaded_thenRolesCalled(){
-        val person = createPerson(withUsername = false, isAdmin = false)
-        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
-        val presenter = PersonDetailPresenter(context, args,mockView,di, mockLifecycleOwner)
-        presenter.onCreate(null)
-
-        verify(repoEntityRoleDao, timeout(5000).atLeastOnce()).filterByPersonWithExtra(
-                person.personGroupUid)
-        verify(mockView, timeout(5000).atLeastOnce()).rolesAndPermissions = any()
-
     }
 
     @Test
