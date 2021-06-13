@@ -64,7 +64,7 @@ class ErrorReportPresenterTest {
 
     @Test
     fun givenNewErrorReport_whenCreated_thenShouldSaveToDb() {
-        val presenterArgs = mapOf(ErrorReportView.ARG_ERR_NUM to "42",
+        val presenterArgs = mapOf(ErrorReportView.ARG_ERR_CODE to "42",
             ErrorReportView.ARG_MESSAGE to "The meaning of life")
         navController.navigate(ErrorReportView.VIEW_NAME, presenterArgs)
 
@@ -74,7 +74,7 @@ class ErrorReportPresenterTest {
 
         verifyBlocking(repoErrorReportDaoSpy, timeout(5000)) {
             insertAsync(argWhere {
-                it.errorNum == 42 && it.message == "The meaning of life"
+                it.errorCode == 42 && it.message == "The meaning of life"
             })
         }
 
@@ -84,7 +84,7 @@ class ErrorReportPresenterTest {
     fun givenExistingErrorReport_whenCreated_shouldLoadFromDb() {
         runBlocking {
             repoErrorReportDaoSpy.insertAsync(ErrorReport().also {
-                it.errorNum = 427
+                it.errorCode = 427
                 it.message = "The meaning of life is 6x7"
                 it.errUid = 42
             })

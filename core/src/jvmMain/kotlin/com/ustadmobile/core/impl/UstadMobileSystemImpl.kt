@@ -196,7 +196,7 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory) : 
      * @return String with version number
      */
     actual fun getVersion(context: Any): String{
-        TODO("not implemented")
+        return "JVM"
     }
 
     /**
