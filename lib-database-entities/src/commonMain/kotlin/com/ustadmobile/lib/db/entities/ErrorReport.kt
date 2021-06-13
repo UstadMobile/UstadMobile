@@ -25,13 +25,17 @@ class ErrorReport {
 
     var severity: Int = 0
 
+    var timestamp: Long = 0
+
+    var presenterUri: String? = null
+
     var appVersion: String? = null
 
     var versionCode: Int = 0
 
-    var errorNum: Int = 0
+    var errorCode: Int = 0
 
-    var operatingSys: Int = 0
+    var operatingSys: String? = null
 
     var osVersion: String? = null
 

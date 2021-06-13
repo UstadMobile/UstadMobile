@@ -23,7 +23,7 @@ abstract class ErrorReportDao {
     @Query("""
         SELECT ErrorReport.*
           FROM ErrorReport
-         WHERE errorNum = :errCode  
+         WHERE errorCode = :errCode  
     """)
     abstract suspend fun findByErrorCode(errCode: Int): List<ErrorReport>
 

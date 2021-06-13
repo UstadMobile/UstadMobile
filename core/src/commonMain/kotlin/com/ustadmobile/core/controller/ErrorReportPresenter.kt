@@ -4,11 +4,14 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.getOs
+import com.ustadmobile.core.impl.getOsVersion
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.view.ErrorReportView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ErrorReport
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -44,14 +47,19 @@ class ErrorReportPresenter(
         GlobalScope.launch(doorMainDispatcher()) {
             val errorReport = if(savedErrUid == 0L) {
                 ErrorReport().apply{
-                    errorNum = arguments[ErrorReportView.ARG_ERR_NUM]?.toInt() ?: -1
+                    errorCode = arguments[ErrorReportView.ARG_ERR_CODE]?.toInt() ?: -1
                     message = arguments[ErrorReportView.ARG_MESSAGE]
                     stackTrace = arguments[ErrorReportView.ARG_STACKTRACE_PREFKEY]?.let{ stackTraceKey ->
                         systemImpl.getAppPref(stackTraceKey, context)?.also {
                             systemImpl.setAppPref(stackTraceKey, null, context)
                         }
                     }
+                    presenterUri = arguments[ErrorReportView.ARG_PRESENTER_URI]
 
+                    timestamp = systemTimeInMillis()
+                    appVersion = systemImpl.getVersion(context)
+                    operatingSys = getOs()
+                    osVersion = getOsVersion()
                     errUid = repo.errorReportDao.insertAsync(this)
                     navController.currentBackStackEntry?.savedStateHandle?.set(KEY_ERROR_SAVED,
                         errUid.toString())

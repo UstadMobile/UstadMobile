@@ -84,7 +84,7 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
                     (view as? UstadEditView<*>)?.fieldsEnabled = true
                     onLoadDataComplete()
                 }catch(e: Exception) {
-                    ustadNavController.navigateToErrorScreen(e)
+                    navigateToErrorScreen(e)
                 }
             }
         }else if(persistenceMode == PersistenceMode.JSON){
