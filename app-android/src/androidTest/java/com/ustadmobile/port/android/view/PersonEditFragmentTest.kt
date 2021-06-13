@@ -3,17 +3,11 @@ package com.ustadmobile.port.android.view
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
-import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.view.PersonEditView
-import com.ustadmobile.lib.db.entities.EntityRoleWithNameAndRole
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.port.android.screen.PersonEditScreen
 import com.ustadmobile.test.core.impl.CrudIdlingResource
@@ -23,8 +17,6 @@ import com.ustadmobile.test.port.android.util.getApplicationDi
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.*
@@ -78,157 +70,9 @@ class PersonEditFragmentTest : TestCase() {
     }
 
 
-    @AdbScreenRecord("given person edit opened in normal mode classes should be shown")
-    @Test
-    fun givenPersonEditOpened_whenInNoRegistrationMode_thenClassesShouldBeShown() {
 
 
-        init {
 
-        }.run {
-
-            PersonEditScreen {
-                launchFragment(PersonEditView.REGISTER_MODE_NONE, fillForm = false,
-                        serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run, databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
-                scrollToBottom()
-                clazzListRecyclerView {
-                    isDisplayed()
-                }
-                clazzListHeaderTextView {
-                    isDisplayed()
-                }
-            }
-
-        }
-
-
-    }
-
-
-    // TODO roles have changed here, need to update
-    @AdbScreenRecord("given person edit opened in normal mode and admin, " +
-            "roles and permissions should be shown")
-    //@Test
-    fun givenPersonEditOpenedAsAdmin_whenInNoRegistrationMode_thenRolesShouldBeShown() {
-
-        var entityRoles: List<EntityRoleWithNameAndRole> = listOf()
-        init {
-            val newRole = Role().apply {
-                roleName = "Role A"
-                roleUid = dbRule.repo.roleDao.insert(this)
-            }
-            val schoolA = School().apply {
-                schoolName = "School A"
-                schoolActive = true
-                schoolUid = dbRule.repo.schoolDao.insert(this)
-            }
-            entityRoles = listOf(EntityRoleWithNameAndRole().apply {
-                entityRoleRole = newRole
-                entityRoleScopeName = "Role A @ School A"
-                erGroupUid = 0
-                erEntityUid = schoolA.schoolUid
-                erTableId = School.TABLE_ID
-                erActive = true
-            })
-
-
-        }.run {
-
-            PersonEditScreen {
-
-
-                launchFragment(PersonEditView.REGISTER_MODE_NONE, leftOutPassword = true, leftOutUsername = true,
-                        fillForm = true, entityRoles = entityRoles,
-                        serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run,
-                        databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
-
-                scrollToBottom()
-                rolesList {
-                    isDisplayed()
-                }
-                roleHeaderTextView {
-                    isDisplayed()
-                }
-
-                val allPeople = dbRule.db.personDao.getAllPerson()
-                Assert.assertTrue(allPeople.isNotEmpty())
-            }
-
-        }
-
-    }
-
-    // TODO roles have changed here, need to update
-    @AdbScreenRecord("given person edit for existing opened in normal mode and admin, " +
-            "roles and permissions should be shown")
-    //@Test
-    fun givenPersonEditOpenedDoeExistingAsAdmin_whenInNoRegistrationMode_thenRolesShouldBeShown() {
-
-        var person: Person? = null
-        var entityRoles: List<EntityRoleWithNameAndRole> = listOf()
-        init {
-
-            val newRole = Role().apply {
-                roleName = "Role A"
-                roleUid = dbRule.repo.roleDao.insert(this)
-            }
-            val schoolA = School().apply {
-                schoolName = "School A"
-                schoolActive = true
-                schoolUid = dbRule.repo.schoolDao.insert(this)
-            }
-            entityRoles = listOf(EntityRoleWithNameAndRole().apply {
-                entityRoleRole = newRole
-                entityRoleScopeName = "School A"
-                erGroupUid = 0
-                erEntityUid = schoolA.schoolUid
-                erTableId = School.TABLE_ID
-                erActive = true
-            })
-
-            person = Person().apply {
-                firstNames = "Person"
-                lastName = "One"
-                active = true
-                admin = false
-                personUid = dbRule.repo.insertPersonOnlyAndGroup(this).personUid
-            }
-
-
-        }.run {
-            PersonEditScreen {
-
-                launchFragment(PersonEditView.REGISTER_MODE_NONE, leftOutPassword = true, leftOutUsername = true,
-                        fillForm = false, entityRoles = entityRoles, personUid = person!!.personUid,
-                        serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run,
-                        databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
-
-
-                scrollToBottom()
-                rolesList {
-                    isDisplayed()
-                }
-                roleHeaderTextView {
-                    isDisplayed()
-                }
-
-                val allPeople = dbRule.db.personDao.getAllPerson()
-
-                Assert.assertTrue(allPeople.isNotEmpty())
-                GlobalScope.launch {
-                    val savedRoles = dbRule.db.entityRoleDao.filterByPersonWithExtraAsList(
-                            person!!.personGroupUid)
-                    Assert.assertTrue(savedRoles.isNotEmpty())
-                }
-            }
-
-        }
-
-
-    }
 
     @AdbScreenRecord("given person edit opened in normal mode username and password " +
             "should be hidden")
@@ -258,28 +102,6 @@ class PersonEditFragmentTest : TestCase() {
 
     }
 
-    @AdbScreenRecord("given person edit opened in registration mode classes should be hidden")
-    @Test
-    fun givenPersonEditOpened_whenInRegistrationMode_thenClassesShouldBeHidden() {
-
-        init {
-
-        }.run {
-            PersonEditScreen {
-                launchFragment(PersonEditView.REGISTER_MODE_ENABLED, fillForm = false, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run,
-                        databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
-
-                scrollToBottom()
-                clazzListRecyclerView {
-                    isNotDisplayed()
-                }
-                clazzListHeaderTextView {
-                    isNotDisplayed()
-                }
-            }
-        }
-    }
 
     @AdbScreenRecord("given person edit opened in registration mode when username and " +
             "password are not filled and save is clicked should show errors")

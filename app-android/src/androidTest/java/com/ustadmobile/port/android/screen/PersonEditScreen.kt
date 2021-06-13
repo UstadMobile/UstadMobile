@@ -41,18 +41,6 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
         nestedView.swipeUp()
     }
 
-    val clazzListRecyclerView: KRecyclerView = KRecyclerView({ withId(R.id.clazzlist_recyclerview) },
-            itemTypeBuilder = {
-            })
-
-    val clazzListHeaderTextView: KTextView = KTextView { withId(R.id.clazzlist_header_textview) }
-
-    val rolesList: KRecyclerView = KRecyclerView({ withId(R.id.roles_and_permissions_rv) },
-            itemTypeBuilder = {
-            })
-
-    val roleHeaderTextView: KTextView = KTextView { withId(R.id.roles_and_permissions_header_textview) }
-
     val usernameTextInput = KTextInputLayout { withId(R.id.username_textinputlayout) }
 
     val passwordTextInput = KTextInputLayout { withId(R.id.password_textinputlayout) }

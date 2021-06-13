@@ -17,10 +17,6 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
      */
     var approvalPersonParentJoin: PersonParentJoin?
 
-    var clazzList: DoorLiveData<List<ClazzEnrolmentWithClazz>>?
-
-    var rolesAndPermissionsList: DoorLiveData<List<EntityRoleWithNameAndRole>>?
-
     var registrationMode: Int
 
     var usernameError: String?
@@ -34,8 +30,6 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
     var confirmError: String?
 
     var dateOfBirthError: String?
-
-    var canDelegatePermissions: Boolean?
 
     var parentContactError: String?
 
