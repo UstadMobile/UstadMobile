@@ -29,7 +29,6 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'digital.wup.android-maven-publish'
 apply plugin: 'kotlinx-serialization'
 apply plugin: "kotlin-kapt"
-apply plugin: 'com.google.gms.google-services'
 
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
 def keyStorePropertiesExists = rootProject.file("keystore.properties").exists()

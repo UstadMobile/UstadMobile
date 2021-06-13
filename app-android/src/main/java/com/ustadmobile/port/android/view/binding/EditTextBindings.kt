@@ -121,13 +121,22 @@ fun TextInputEditText.setValueIfZero(value: Int){
     if(value == 0){
         setText("")
     }else{
-        setText(Integer.toString(value))
+        setText(value.toString())
     }
 }
 
 @InverseBindingAdapter(attribute = "dontShowZeroInt")
 fun getRealValueInt(et: TextView): Int {
-    return et.text.toString().toInt()?:0
+    if(et.text != null && et.text.toString().isNotEmpty()) {
+        return et.text.toString().toInt()
+    }else{
+        return 0
+    }
+}
+
+@BindingAdapter("dontShowZeroIntAttrChanged")
+fun EditText.setDontShowZeroIntListener(inverseBindingListener: InverseBindingListener) {
+    addTextChangedListener{inverseBindingListener.onChange() }
 }
 
 

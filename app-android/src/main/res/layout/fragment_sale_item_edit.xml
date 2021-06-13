@@ -94,9 +94,12 @@
 
                     android:hint="@string/quantity">
 
+                    <!--
+                    android:text="@={`` + saleItem.saleItemQuantity}"
+                    -->
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/fragment_sale_item_edit_quantity_tiet"
-                        android:text="@={`` + saleItem.saleItemQuantity}"
+                        app:dontShowZeroInt="@={saleItem.saleItemQuantity}"
                         app:runOnClickWhenFocused="@{true}"
                         android:inputType="@{InputType.TYPE_CLASS_NUMBER}"
                         android:layout_width="match_parent"

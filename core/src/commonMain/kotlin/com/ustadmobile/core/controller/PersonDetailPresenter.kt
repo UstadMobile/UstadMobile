@@ -94,5 +94,9 @@ class PersonDetailPresenter(context: Any,
                 mapOf(ARG_ENTITY_UID to personUid.toString()), context)
     }
 
+    fun handleDeactivateUser(){
+        val personUid = view.entity?.personUid ?: return
+        //TODO:
+    }
 
 }

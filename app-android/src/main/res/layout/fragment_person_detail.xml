@@ -250,6 +250,42 @@
             </LinearLayout>
 
 
+            <LinearLayout
+                android:id="@+id/deactivate_user_view"
+                android:visibility="gone"
+                android:background="@drawable/bg_listitem"
+                android:layout_width="@dimen/dimen_110dp"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="@dimen/dimen_8dp"
+                android:orientation="vertical"
+                android:onClick="@{() -> presenter.handleDeactivateUser()}"
+                app:layout_constraintStart_toEndOf="@+id/change_account_password_view"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_picture_imageview"
+                tools:ignore="UseCompoundDrawables">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginEnd="@dimen/dimen_8dp"
+                    android:id="@+id/deactivate_user_image"
+                    android:layout_width="wrap_content"
+                    android:tint="?colorOnTintPrimary"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/ic_delete_black_24dp" />
+
+                <TextView
+                    android:gravity="center"
+                    android:layout_gravity="center_horizontal"
+                    android:textColor="?colorOnTintPrimary"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    android:id="@+id/deactivate_user_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/deactivate_user" />
+            </LinearLayout>
+
+
             <androidx.constraintlayout.widget.Barrier
                 android:id="@+id/fragment_person_detail_buttonbar_barrier"
                 android:layout_width="wrap_content"

@@ -432,11 +432,10 @@
                 app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
-                android:visibility="@{isAdmin ?  View.VISIBLE: View.GONE}"
+                android:visibility="gone"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/roles_and_permissions_header_textview"
                 android:layout_width="match_parent"
-
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/dimen_16dp"
                 android:text="@string/roles_and_permissions"
@@ -448,7 +447,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dimen_8dp"
-                android:visibility="@{isAdmin ?  View.GONE: View.GONE}"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/roles_and_permissions_header_textview" />
