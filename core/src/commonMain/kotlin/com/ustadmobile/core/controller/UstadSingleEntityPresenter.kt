@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.navigateToErrorScreen
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -73,14 +74,18 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
             view.loading = true
             (view as? UstadEditView<*>)?.fieldsEnabled = false
             GlobalScope.launch(doorMainDispatcher()) {
-                listOf(db, repo).forEach {
-                    entity = onLoadEntityFromDb(it)
-                    view.entity = entity
-                }
+                try {
+                    listOf(db, repo).forEach {
+                        entity = onLoadEntityFromDb(it)
+                        view.entity = entity
+                    }
 
-                view.loading = false
-                (view as? UstadEditView<*>)?.fieldsEnabled = true
-                onLoadDataComplete()
+                    view.loading = false
+                    (view as? UstadEditView<*>)?.fieldsEnabled = true
+                    onLoadDataComplete()
+                }catch(e: Exception) {
+                    ustadNavController.navigateToErrorScreen(e)
+                }
             }
         }else if(persistenceMode == PersistenceMode.JSON){
             entity = onLoadFromJson(arguments)

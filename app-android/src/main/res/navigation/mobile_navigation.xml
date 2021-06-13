@@ -368,5 +368,10 @@
         android:id="@+id/scoped_grant_edit_dest"
         android:name="com.ustadmobile.port.android.view.ScopedGrantEditFragment"/>
 
+    <fragment
+        android:id="@+id/error_report_dest"
+        android:name="com.ustadmobile.port.android.view.ErrorReportFragment"
+        android:label="@string/oops"/>
+
 
 </navigation>

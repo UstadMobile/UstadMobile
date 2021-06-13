@@ -42,6 +42,7 @@ import kotlin.jvm.Volatile
     SiteTerms::class,
     PersonParentJoin::class,
     ScopedGrant::class,
+    ErrorReport::class,
 
     //Door Helper entities
     SqliteChangeSeqNums::class,
@@ -287,6 +288,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val personParentJoinDao: PersonParentJoinDao
 
     abstract val scopedGrantDao: ScopedGrantDao
+
+    abstract val errorReportDao: ErrorReportDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO

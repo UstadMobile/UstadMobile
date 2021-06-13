@@ -1318,4 +1318,20 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <!-- This is an option when we ask users about their connectivity access -->
     <string name="limited_i_avoid_downloading_too_much">Limited - I avoid downloading too much</string>
 
+    <!-- Oops: This is displayed as the title for a screen that appears when an error occurs -->
+    <string name="oops">Oops!</string>
+
+    <string name="sorry_something_went_wrong">Sorry, something went wrong! We have logged it, and we\'ll try to fix it. Please make sure to share the incident ID if you need to contact your system administator about this.</string>
+
+    <string name="incident_id">Incident ID</string>
+
+    <!--
+    If the user is brought to an error screen, we will show the error code here. %1$s will be
+    replaced with the code itself.
+     -->
+    <string name="error_code">Error code: %1$s</string>
+
+    <!-- This text is used on a button that will take the user back to the starting screen -->
+    <string name="take_me_home">Take me home</string>
+
 </resources>

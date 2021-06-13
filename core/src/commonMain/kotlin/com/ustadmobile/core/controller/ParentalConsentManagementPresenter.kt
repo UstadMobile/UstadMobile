@@ -2,6 +2,8 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.AppErrorCode
+import com.ustadmobile.core.impl.ErrorCodeException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.formatDate
@@ -59,7 +61,8 @@ class ParentalConsentManagementPresenter(context: Any,
             //Not available in the local db, just return and wait for repo load
             return null
         }else if(personParentJoin == null) {
-            throw IllegalArgumentException("1021: PPJ not found for $entityUid")
+            throw ErrorCodeException(AppErrorCode.ERROR_PARENT_JOIN_NOT_FOUND,
+                "Child registration not found for $entityUid")
         }
 
         val minorPerson = personParentJoin.minorPerson

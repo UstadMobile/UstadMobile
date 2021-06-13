@@ -117,6 +117,7 @@ class ViewNameToDestMap: DestinationProvider {
             ParentalConsentManagementView.VIEW_NAME to UstadDestination(R.id.parental_consent_management_dest),
             ScopedGrantEditView.VIEW_NAME to UstadDestination(R.id.scoped_grant_edit_dest,
                 hideAccountIcon = true),
+            ErrorReportView.VIEW_NAME to UstadDestination(R.id.error_report_dest),
     )
 
     override val navControllerViewId: Int
