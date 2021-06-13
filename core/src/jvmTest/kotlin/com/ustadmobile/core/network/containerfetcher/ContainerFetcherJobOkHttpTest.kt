@@ -102,8 +102,10 @@ class ContainerFetcherJobOkHttpTest {
                 .writeToFile(epubFile)
         val containerTmpFolder = temporaryFolder.newFolder()
         runBlocking {
-            serverRepo.addEntriesToContainerFromZip(container.containerUid,
-                epubFile.toDoorUri(), ContainerAddOptions(containerTmpFolder.toDoorUri()))
+            serverRepo.addEntriesToContainerFromZip(
+                    container.containerUid,
+                    epubFile.toDoorUri(), ContainerAddOptions(containerTmpFolder.toDoorUri()), Any()
+            )
         }
 
         //Create a mock web server that will serve the concatenated data

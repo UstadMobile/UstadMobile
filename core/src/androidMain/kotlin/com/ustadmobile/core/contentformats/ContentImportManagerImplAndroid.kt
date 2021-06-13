@@ -12,11 +12,11 @@ import org.kodein.di.DI
 
 class ContentImportManagerImplAndroid(contentPlugins: List<ContentTypePlugin>, context: Any, endpoint: Endpoint, di: DI) : ContentImportManagerImpl(contentPlugins, context,endpoint, di) {
 
-    override suspend fun queueImportContentFromFile(filePath: String,
+    override suspend fun queueImportContentFromFile(uri: String,
                                                     metadata: ImportedContentEntryMetaData,
                                                     containerBaseDir: String,
                                                     conversionParams: Map<String, String>): ContainerImportJob {
-        val importJob =  super.queueImportContentFromFile(filePath, metadata, containerBaseDir, conversionParams)
+        val importJob =  super.queueImportContentFromFile(uri, metadata, containerBaseDir, conversionParams)
 
         val androidContext = context as Context
         val importIntent = Intent(androidContext, DownloadNotificationService::class.java)

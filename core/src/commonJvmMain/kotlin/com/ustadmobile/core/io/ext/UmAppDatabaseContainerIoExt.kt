@@ -12,14 +12,12 @@ import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.ByteArrayInputStream
-import java.net.URI
-import java.nio.file.Paths
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
+import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.core.contentformats.har.HarEntry
 import java.util.Base64
 
@@ -201,10 +199,11 @@ suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
 }
 
 actual suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
-                                                              zipUri: DoorUri,
-                                                              addOptions: ContainerAddOptions) {
+                                                              zipUri: com.ustadmobile.door.DoorUri,
+                                                              addOptions: ContainerAddOptions,
+                                                              context: Any) {
     withContext(Dispatchers.IO) {
-        val zipInputStream = ZipInputStream(FileInputStream(zipUri.toFile()))
+        val zipInputStream = ZipInputStream(zipUri.openInputStream(context))
         addEntriesToContainerFromZip(containerUid, zipInputStream, addOptions)
     }
 }

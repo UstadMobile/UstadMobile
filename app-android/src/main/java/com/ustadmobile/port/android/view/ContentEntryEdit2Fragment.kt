@@ -37,8 +37,10 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.util.ext.*
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import kotlinx.android.synthetic.main.fragment_content_entry_edit2.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 
@@ -244,21 +246,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                     loading = true
                     fieldsEnabled = false
                     GlobalScope.launch {
-                        val input = requireContext().contentResolver.openInputStream(uri)
-                        val importFolder = File(requireContext().filesDir, "import")
-                        val importTmpFolder = File(importFolder, "import-${System.currentTimeMillis()}")
-                        importTmpFolder.mkdirs()
-                        findNavController().registerDestinationTempFile(requireContext(),
-                            importTmpFolder)
-
-                        val tmpFile = File(importTmpFolder, requireContext().contentResolver.getFileName(uri))
-                        val output = tmpFile.outputStream()
-                        input?.copyTo(tmpFile.outputStream())
-                        output.flush()
-                        output.close()
-                        input?.close()
-
-                        mPresenter?.handleFileSelection(tmpFile.path)
+                        mPresenter?.handleFileSelection(uri.toString())
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()

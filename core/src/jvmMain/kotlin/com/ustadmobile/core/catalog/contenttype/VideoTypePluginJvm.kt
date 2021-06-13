@@ -18,9 +18,9 @@ class VideoTypePluginJvm: VideoTypePlugin() {
 
     private val VIDEO_JVM = "VideoPluginJVM"
 
-    override suspend fun extractMetadata(filePath: String): ContentEntryWithLanguage? {
+    override suspend fun extractMetadata(uri: String, context: Any): ContentEntryWithLanguage? {
         return withContext(Dispatchers.Default){
-            val file = File(filePath)
+            val file = File(uri)
 
             if(!fileExtensions.any { file.name.endsWith(it, true) }) {
                 return@withContext null
@@ -40,12 +40,12 @@ class VideoTypePluginJvm: VideoTypePlugin() {
         }
     }
 
-    override suspend fun importToContainer(filePath: String, conversionParams: Map<String, String>,
+    override suspend fun importToContainer(uri: String, conversionParams: Map<String, String>,
                                            contentEntryUid: Long, mimeType: String, containerBaseDir: String,
                                            context: Any, db: UmAppDatabase, repo: UmAppDatabase, progressListener: (Int) -> Unit): Container {
         return withContext(Dispatchers.Default) {
 
-            val videoFile = File(filePath.removePrefix("file://"))
+            val videoFile = File(uri.removePrefix("file://"))
             var newVideo = File(videoFile.parentFile, "new${videoFile.nameWithoutExtension}.mp4")
 
             val compressVideo: Boolean = conversionParams["compress"]?.toBoolean() ?: false

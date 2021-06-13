@@ -7,8 +7,6 @@ import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
-import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import com.ustadmobile.sharedse.util.UstadTestRule
@@ -70,7 +68,7 @@ class H5PTypePluginTest {
 
         val h5pPlugin = H5PTypePluginCommonJvm()
         val contentEntry = runBlocking {
-            h5pPlugin.extractMetadata(tempH5pFile.path)
+            h5pPlugin.extractMetadata(tempH5pFile.toURI().toString(), Any())
         }
 //        Assert.assertEquals("Got ContentEntry with expected entryId",
 //                "dialog-cards-620.h5p",
@@ -96,7 +94,7 @@ class H5PTypePluginTest {
         val containerTmpDir = tmpFolder.newFolder("containerTmpDir")
 
         runBlocking {
-            val metadata = contentImportManager.extractMetadata(tempH5pFile.path)!!
+            val metadata = contentImportManager.extractMetadata(tempH5pFile.toURI().toString())!!
             val contentEntry = metadata.contentEntry
             val uid = repo.contentEntryDao.insertAsync(metadata.contentEntry)
             val container = contentImportManager.importFileToContainer(tempH5pFile.path,

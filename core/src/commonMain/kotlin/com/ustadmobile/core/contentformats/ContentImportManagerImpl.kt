@@ -43,7 +43,7 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
                 db.containerImportJobDao.updateStatus(it.cijJobStatus, it.cijUid)
 
                 val runner = ImportJobRunner(it, endpointUrl = endpoint.url, di = di)
-                val isFileImport = it.cijFilePath?.startsWith("file://") == true
+                val isFileImport = it.cijFilePath?.startsWith("content://") == true
                 runner.importContainer(isFileImport)
                 var status = JobStatus.COMPLETE
                 if(isFileImport){
@@ -65,28 +65,28 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
 
     //This can also container the LiveDataWorkQueue and host ImportJobRunner here in core.
     //You can replace the dependency on NetworkManagerBle with a dependency network status livedata
-    override suspend fun extractMetadata(filePath: String): ImportedContentEntryMetaData? {
+    override suspend fun extractMetadata(uri: String): ImportedContentEntryMetaData? {
         contentPlugins.forEach {
-            val pluginResult = it.extractMetadata(filePath)
+            val pluginResult = it.extractMetadata(uri, context)
             val languageCode = pluginResult?.language?.iso_639_1_standard
             if (languageCode != null) {
                 pluginResult.language = db.languageDao.findByTwoCodeAsync(languageCode)
             }
             if (pluginResult != null) {
                 pluginResult.contentFlags = ContentEntry.FLAG_IMPORTED
-                return ImportedContentEntryMetaData(pluginResult, it.mimeTypes[0], "file://$filePath")
+                return ImportedContentEntryMetaData(pluginResult, it.mimeTypes[0], uri)
             }
         }
 
         return null
     }
 
-    override suspend fun queueImportContentFromFile(filePath: String, metadata: ImportedContentEntryMetaData,
+    override suspend fun queueImportContentFromFile(uri: String, metadata: ImportedContentEntryMetaData,
                                                     containerBaseDir: String,
                                                     conversionParams: Map<String, String>): ContainerImportJob {
         return ContainerImportJob().apply {
             cijBytesSoFar = 0
-            this.cijFilePath = filePath
+            this.cijFilePath = uri
             this.cijContentEntryUid = metadata.contentEntry.contentEntryUid
             this.cijMimeType = metadata.mimeType
             this.cijContainerBaseDir = containerBaseDir
@@ -100,7 +100,7 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
         }
     }
 
-    override suspend fun importFileToContainer(filePath: String, mimeType: String,
+    override suspend fun importFileToContainer(uri: String, mimeType: String,
                                                contentEntryUid: Long, containerBaseDir: String,
                                                conversionParams: Map<String, String>,
                                                progressListener: (Int) -> Unit): Container? {
@@ -109,10 +109,10 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
             it.mimeTypes.find { pluginMimeType -> pluginMimeType == mimeType }
                     ?: return@forEach
 
-            Napier.v("Importing $filePath for ContentEntry UID# $contentEntryUid using plugin: $it", tag = LOG_TAG)
-            return it.importToContainer(filePath, conversionParams, contentEntryUid, mimeType,
+            Napier.v("Importing $uri for ContentEntry UID# $contentEntryUid using plugin: $it", tag = LOG_TAG)
+            return it.importToContainer(uri, conversionParams, contentEntryUid, mimeType,
                     containerBaseDir, context, db, repo, progressListener).also {
-                        Napier.v("Importing $filePath for ContentEntry UID# $contentEntryUid completed")
+                        Napier.v("Importing $uri for ContentEntry UID# $contentEntryUid completed")
             }
         }
         return null

@@ -29,7 +29,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
@@ -156,7 +155,7 @@ class ContentEntryEdit2Presenter(context: Any,
                         "dimensions" to "${videoDimensions.first}x${videoDimensions.second}")
                 if (metaData != null && uri != null) {
 
-                    if (uri.startsWith("file://")) {
+                    if (uri.startsWith("content://")) {
 
                         metaData.contentEntry = entity
                         contentImportManager?.queueImportContentFromFile(uri, metaData,
@@ -219,9 +218,9 @@ class ContentEntryEdit2Presenter(context: Any,
                 (entity.contentEntryUid == 0L && view.entryMetaData?.uri != null))
     }
 
-    fun handleFileSelection(filePath: String) {
+    fun handleFileSelection(uri: String) {
         GlobalScope.launch(doorMainDispatcher()) {
-            val metadata = contentImportManager?.extractMetadata(filePath)
+            val metadata = contentImportManager?.extractMetadata(uri)
             view.entryMetaData = metadata
             when (metadata) {
                 null -> {
@@ -236,7 +235,7 @@ class ContentEntryEdit2Presenter(context: Any,
                 view.fileImportErrorVisible = false
                 view.entity = entry
                 if(metadata.mimeType.startsWith("video/")){
-                    view.videoUri = filePath
+                    view.videoUri = uri
                 }
             }
             view.loading = false

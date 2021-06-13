@@ -53,12 +53,7 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
 
     suspend fun importContainer(markContainerAsDownloaded: Boolean = false) {
 
-        val filePathWithoutPrefix = if (markContainerAsDownloaded)
-            containerImportJob.cijFilePath?.removePrefix("file://")
-        else
-            containerImportJob.cijFilePath
-
-        val filePath = filePathWithoutPrefix ?: throw IllegalArgumentException("filePath not given")
+        val uri = containerImportJob.cijFilePath ?: throw IllegalArgumentException("filePath not given")
         val mimeType = containerImportJob.cijMimeType
                 ?: throw IllegalArgumentException("mimeType not given")
         val containerBaseDir = containerImportJob.cijContainerBaseDir
@@ -75,7 +70,7 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
         var container: Container? = null
         try {
             container = contentImportManager.importFileToContainer(
-                    filePath,
+                    uri,
                     mimeType,
                     contentEntryUid,
                     containerBaseDir, conversionParams) {
