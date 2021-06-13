@@ -35,6 +35,8 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.NavControllerAdapter
+import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -51,15 +53,14 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
+import org.kodein.di.*
 import java.util.*
 
 
 class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         UstadActivityWithProgressBar,
-        NavController.OnDestinationChangedListener {
+        NavController.OnDestinationChangedListener,
+        DIAware{
 
     private lateinit var appBarConfiguration: AppBarConfiguration
 
@@ -80,6 +81,10 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     private var searchView: SearchView? = null
 
     private val destinationProvider: DestinationProvider by instance()
+
+    private lateinit var navController: NavController
+
+    private lateinit var ustadNavController: UstadNavController
 
     private val userProfileDrawable: Drawable? by lazy(LazyThreadSafetyMode.NONE) {
         ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_24dp)?.also {
@@ -127,7 +132,8 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
         val host: NavHostFragment = supportFragmentManager
                 .findFragmentById(R.id.activity_main_navhost_fragment) as NavHostFragment? ?: return
-        val navController = host.navController
+        navController = host.navController
+        ustadNavController = NavControllerAdapter(navController, destinationProvider)
         navController.addOnDestinationChangedListener(this)
         navController.addOnDestinationChangedListener(DeleteTempFilesNavigationListener(this))
         val navGraph = navController.graph

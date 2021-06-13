@@ -7,7 +7,7 @@ import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import kotlin.reflect.KClass
 
-class DefaultOneToManyJoinEditHelper<T: Any>(pkGetter: (T) -> Long,
+open class DefaultOneToManyJoinEditHelper<T: Any>(pkGetter: (T) -> Long,
                                              serializationKey: String,
                                              serializationStrategy: SerializationStrategy<List<T>>,
                                              deserializationStrategy: DeserializationStrategy<List<T>>,
@@ -42,7 +42,7 @@ class DefaultOneToManyJoinEditHelper<T: Any>(pkGetter: (T) -> Long,
         dao.deactivateByUids(primaryKeysToDeactivate)
     }
 
-    override open fun doesNewEntityRequireFakePk(pk: Long) = (pk == 0L)
+    override fun doesNewEntityRequireFakePk(pk: Long) = (pk == 0L)
 
     override fun onSaveState(outState: MutableMap<String, String>) {
         super.onSaveState(outState)

@@ -10,7 +10,7 @@ import com.ustadmobile.core.view.*
 @Keep
 class ViewNameToDestMap: DestinationProvider {
 
-    val destinationMap = mapOf(
+    private val destinationMap = mapOf(
             ClazzEdit2View.VIEW_NAME to UstadDestination(R.id.clazz_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             ClazzList2View.VIEW_NAME to UstadDestination(R.id.home_clazzlist_dest),
@@ -105,7 +105,11 @@ class ViewNameToDestMap: DestinationProvider {
             SiteTermsDetailView.VIEW_NAME to UstadDestination(R.id.site_terms_detail_dest),
             SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS to UstadDestination(R.id.site_terms_detail_accept_dest,
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true,
-                hideAccountIcon = true)
+                hideAccountIcon = true),
+            ScheduleEditView.VIEW_NAME to UstadDestination(R.id.schedule_edit_dest,
+                actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
+            BitmaskEditView.VIEW_NAME to UstadDestination(R.id.bitmask_edit_dest,
+                actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
     )
 
     override val navControllerViewId: Int
@@ -113,5 +117,9 @@ class ViewNameToDestMap: DestinationProvider {
 
     override fun lookupDestinationName(viewName: String) = destinationMap[viewName]
 
-    override fun lookupDestinationById(destinationId: Int) = destinationMap.values.firstOrNull { it.destinationId == destinationId }
+    override fun lookupDestinationById(destinationId: Int) = destinationMap.values
+            .firstOrNull { it.destinationId == destinationId }
+
+    override fun lookupViewNameById(destinationId: Int) = destinationMap.entries
+            .firstOrNull { it.value.destinationId == destinationId }?.key
 }

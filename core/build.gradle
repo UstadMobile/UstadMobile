@@ -197,6 +197,7 @@ kotlin {
                 implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"
                 implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
 
+                implementation "com.google.android.material:material:$version_android_material"
             }
         }
 
