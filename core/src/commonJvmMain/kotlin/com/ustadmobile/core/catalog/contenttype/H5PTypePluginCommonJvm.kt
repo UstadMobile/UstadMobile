@@ -78,7 +78,8 @@ class H5PTypePluginCommonJvm(): H5PTypePlugin() {
                                 contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
                                 licenseType = licenseMap[json.jsonObject["license"] ?: ""]
                                         ?: ContentEntry.LICENSE_TYPE_OTHER
-                                title = json.jsonObject["title"]?.jsonPrimitive?.content
+                                title = if(json.jsonObject["title"]?.jsonPrimitive?.content.isNullOrEmpty())
+                                    doorUri.getFileName(context) else json.jsonObject["title"]?.jsonPrimitive?.content
                                 this.author = author
                                 leaf = true
                             }

@@ -316,7 +316,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                 if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
                 fileImportErrorVisible = false
                 entity = entry
-                videoUri = metadata.uri
             }
             loading = false
         }

@@ -44,8 +44,8 @@ class XapiTypePluginCommonJvm : XapiPackageTypePlugin() {
                             contentEntry = ContentEntryWithLanguage().apply {
                                 contentFlags = ContentEntry.FLAG_IMPORTED
                                 licenseType = ContentEntry.LICENSE_TYPE_OTHER
-                                title = /*if (activity.name.isNullOrEmpty())
-                                    file.nameWithoutExtension else*/ activity.name
+                                title =  if(activity.name.isNullOrEmpty())
+                                    doorUri.getFileName(context) else activity.name
                                 contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
                                 description = activity.desc
                                 leaf = true

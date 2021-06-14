@@ -59,7 +59,8 @@ class EpubTypePluginCommonJvm() : EpubTypePlugin() {
                         contentFlags = ContentEntry.FLAG_IMPORTED
                         contentTypeFlag = ContentEntry.TYPE_EBOOK
                         licenseType = ContentEntry.LICENSE_TYPE_OTHER
-                        title = opfDocument.title
+                        title = if(opfDocument.title.isNullOrEmpty()) doorUri.getFileName(context)
+                                else opfDocument.title
                         author = opfDocument.getCreator(0)?.creator
                         description = opfDocument.description
                         leaf = true
