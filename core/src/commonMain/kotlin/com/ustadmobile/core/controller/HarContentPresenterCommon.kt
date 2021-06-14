@@ -28,6 +28,7 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
                                          val localHttp: String, di: DI) :
         UstadBaseController<HarView>(context, arguments, view, di) {
 
+    private var clazzUid: Long = 0L
     lateinit var harContainer: HarContainer
     var containerUid: Long = 0
     val containerDeferred = CompletableDeferred<HarContainer>()
@@ -47,6 +48,7 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
 
         val entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
         containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()
+        clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0L
 
         GlobalScope.launch {
             try {
@@ -86,7 +88,7 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
                     val entry = dbRepo.contentEntryDao.findBySourceUrlWithContentEntryStatusAsync(params.getValue("sourceUrl"))
                             ?: throw IllegalArgumentException("No File found")
                     contentEntryOpener.openEntry(context, entry.contentEntryUid, downloadRequired = true, goToContentEntryDetailViewIfNotDownloaded = true,
-                            noIframe = arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false)
+                            noIframe = arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false, clazzUid = clazzUid)
                 } catch (e: Exception) {
                     if (e is NoAppFoundException) {
                         view.showErrorWithAction(systemImpl.getString(MessageID.no_app_found, context),

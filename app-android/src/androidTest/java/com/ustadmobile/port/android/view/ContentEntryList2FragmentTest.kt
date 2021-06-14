@@ -69,8 +69,8 @@ class ContentEntryList2FragmentTest : TestCase() {
         ContentEntryListScreen {
             recycler {
                 isVisible()
-                hasSize(4)
-                childAt<ContentEntryListScreen.MainItem>(0) {
+                hasSize(5)
+                childAt<ContentEntryListScreen.MainItem>(1) {
                     title.hasText("Dummy  entry title 1")
                     click()
                 }
@@ -154,7 +154,7 @@ class ContentEntryList2FragmentTest : TestCase() {
                 emptyChildAt(3) {
                     click()
                 }
-                childAt<ContentEntryListScreen.MainItem>(1) {
+                childAt<ContentEntryListScreen.MainItem>(2) {
                     selectButton {
                         click()
                     }
@@ -196,7 +196,7 @@ class ContentEntryList2FragmentTest : TestCase() {
                 GlobalScope.launch(doorMainDispatcher()) {
                     list2Fragment?.onHostBackPressed()
                 }
-                hasSize(createdEntries.size + 1)
+                hasSize(createdEntries.size + 2)
 
             }
 
