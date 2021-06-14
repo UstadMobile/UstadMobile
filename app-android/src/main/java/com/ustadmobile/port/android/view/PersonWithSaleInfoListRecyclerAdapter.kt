@@ -24,6 +24,7 @@ class PersonWithSaleInfoListRecyclerAdapter(var itemListener: PersonWithSaleInfo
         val itemBinding = ItemPersonWithSaleInfoListBinding.inflate(LayoutInflater.from(parent.context),
                 parent, false)
         itemBinding.listener = itemListener
+        itemBinding.selectablePagedListAdapter = this
         return PersonWithSaleInfoListViewHolder(itemBinding)
     }
 

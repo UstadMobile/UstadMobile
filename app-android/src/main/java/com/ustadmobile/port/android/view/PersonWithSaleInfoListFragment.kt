@@ -51,7 +51,6 @@ class PersonWithSaleInfoListFragment(): UstadListViewFragment<PersonWithSaleInfo
                     BottomSheetOption(R.drawable.ic_add_black_24dp, requireContext().getString(R.string.new_customer), NEW_CUSTOMER))
         }
 
-
         fabManager?.onClickListener = {
             val sheet = OptionsBottomSheetFragment(optionList, this)
             sheet.show(childFragmentManager, sheet.tag)

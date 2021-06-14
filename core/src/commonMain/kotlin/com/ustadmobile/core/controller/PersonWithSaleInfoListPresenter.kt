@@ -1,26 +1,26 @@
     package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.SaleDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toListFilterOptions
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.util.ext.toQueryLikeParam
+import com.ustadmobile.core.view.PersonDetailView
+import com.ustadmobile.core.view.PersonEditView
+import com.ustadmobile.core.view.PersonWithSaleInfoListView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithSaleInfo
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.core.db.dao.SaleDao
-import com.ustadmobile.core.util.ListFilterIdOption
-import com.ustadmobile.core.util.ext.toQueryLikeParam
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
 
-class PersonWithSaleInfoListPresenter(context: Any, arguments: Map<String, String>,
+    class PersonWithSaleInfoListPresenter(context: Any, arguments: Map<String, String>,
                                       view: PersonWithSaleInfoListView,
                                       di: DI, lifecycleOwner: DoorLifecycleOwner)
     : UstadListPresenter<PersonWithSaleInfoListView, PersonWithSaleInfo>(context, arguments, view,
@@ -94,7 +94,6 @@ class PersonWithSaleInfoListPresenter(context: Any, arguments: Map<String, Strin
     }
 
     fun handleClickAddLE(){
-
         systemImpl.go(PersonEditView.VIEW_NAME, mapOf(UstadView.ARG_FILTER_PERSON_LE to "true"),
                 context)
     }

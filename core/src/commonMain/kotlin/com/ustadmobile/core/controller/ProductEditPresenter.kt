@@ -18,7 +18,6 @@ import com.ustadmobile.lib.db.entities.ProductCategoryJoin
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import kotlinx.serialization.builtins.ListSerializer
@@ -37,8 +36,8 @@ class ProductEditPresenter(context: Any,
             "state_Category_list", ListSerializer(Category.serializer()),
                 ListSerializer(Category.serializer()), this, Category::class) { categoryUid = it }
 
-    fun handleAddOrEditCategory(categogy: Category) {
-        categoryEditHelper.onEditResult(categogy)
+    fun handleAddOrEditCategory(category: Category) {
+        categoryEditHelper.onEditResult(category)
     }
 
     fun handleRemoveCategory(category: Category) {
@@ -59,7 +58,7 @@ class ProductEditPresenter(context: Any,
             db.productDao.findByUidAsync(entityUid)
         }?: Product()
 
-        view .productPicture = db.onDbThenRepoWithTimeout(2000) {dbToUse, _ ->
+        view.productPicture = db.onDbThenRepoWithTimeout(2000) {dbToUse, _ ->
             dbToUse.takeIf { entityUid != 0L }?.productPictureDao?.findByProductUidAsync(entityUid)
         } ?: ProductPicture()
 

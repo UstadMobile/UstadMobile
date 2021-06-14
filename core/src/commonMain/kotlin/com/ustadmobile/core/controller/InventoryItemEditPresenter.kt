@@ -16,9 +16,7 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
-
 
 class InventoryItemEditPresenter(context: Any,
                                  arguments: Map<String, String>, view: InventoryItemEditView, di: DI,
@@ -29,8 +27,7 @@ class InventoryItemEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-
-    val producerSelectionEditHelper = DefaultOneToManyJoinEditHelper<PersonWithInventoryItemAndStock>(
+    val producerSelectionEditHelper = DefaultOneToManyJoinEditHelper(
             PersonWithInventoryItemAndStock::personUid,
             "PersonWithInventoryItemAndStockKey", ListSerializer(PersonWithInventoryItemAndStock.serializer()),
         ListSerializer(PersonWithInventoryItemAndStock.serializer()), this,
@@ -51,19 +48,18 @@ class InventoryItemEditPresenter(context: Any,
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): InventoryItem? {
-
         val loggedInPersonUid = accountManager.activeAccount.personUid
         val productUid = arguments[ARG_PRODUCT_UID]?.toLong()?: 0L
 
-       val producers = withTimeout(2000){
+        val producers = withTimeout(2000){
             db.inventoryItemDao.getAllWeWithNewInventoryItem(loggedInPersonUid, productUid)
-       }
+        }
         producerSelectionEditHelper.liveList.sendValue(producers)
 
         return InventoryItem()
     }
 
-    public fun loadList(){
+    fun loadList(){
         val loggedInPersonUid = accountManager.activeAccount.personUid
         val productUid = arguments[ARG_PRODUCT_UID]?.toLong()?: 0L
 

@@ -5,6 +5,7 @@
 
     <data>
         <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
+        <import type="com.ustadmobile.port.android.view.PersonWithSaleInfoListRecyclerAdapter"/>
 
         <variable
             name="person"
@@ -14,13 +15,19 @@
             name="listener"
             type="com.ustadmobile.core.controller.PersonWithSaleInfoListItemListener" />
 
+        <variable
+            name="selectablePagedListAdapter"
+            type="PersonWithSaleInfoListRecyclerAdapter"/>
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{() -> listener.onClickPersonWithSaleInfo(person)}"
         android:background="?attr/selectableItemBackground"
+        app:onSelectableItemClicked="@{() -> listener.onClickPersonWithSaleInfo(person)}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, person)}"
+        app:selectableViewHelper="@{selectablePagedListAdapter}"
         >
 
         <ImageView

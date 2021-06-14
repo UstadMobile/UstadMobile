@@ -11,26 +11,24 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentInventoryItemEditBinding
 import com.ustadmobile.core.controller.InventoryItemEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeResult
-import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.InventoryItemEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.Category
 import com.ustadmobile.lib.db.entities.InventoryItem
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithInventoryItemAndStock
 import com.ustadmobile.port.android.util.ext.*
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 
-
 interface InventoryItemEditFragmentEventHandler {
-
     fun addWE()
 }
 
+/**
+ * Used majorly in Receive inventory screen
+ */
 class InventoryItemEditFragment: UstadEditFragment<InventoryItem>(), InventoryItemEditView,
         InventoryItemEditFragmentEventHandler {
 
@@ -50,7 +48,8 @@ class InventoryItemEditFragment: UstadEditFragment<InventoryItem>(), InventoryIt
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         val rootView: View
         mBinding = FragmentInventoryItemEditBinding.inflate(inflater, container,
                 false).also {
@@ -96,11 +95,10 @@ class InventoryItemEditFragment: UstadEditFragment<InventoryItem>(), InventoryIt
     override fun onResume() {
         super.onResume()
         setEditFragmentTitle(R.string.receive_inventory, R.string.receive_inventory)
-        mPresenter?.loadList()
+        //mPresenter?.loadList()
     }
 
     override var entity: InventoryItem? = null
-        get() = field
         set(value) {
             field = value
             mBinding?.inventoryItem = value
@@ -114,7 +112,6 @@ class InventoryItemEditFragment: UstadEditFragment<InventoryItem>(), InventoryIt
         }
 
     override var fieldsEnabled: Boolean = false
-        get() = field
         set(value) {
             field = value
             mBinding?.fieldsEnabled = value

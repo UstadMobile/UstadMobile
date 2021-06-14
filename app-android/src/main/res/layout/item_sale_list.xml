@@ -5,7 +5,6 @@
 
     <data>
         <import type="com.ustadmobile.lib.db.entities.SaleListDetail"/>
-        <import type="com.ustadmobile.port.android.view.SaleListFragment"/>
         <import type="com.ustadmobile.port.android.view.SaleListRecyclerAdapter"/>
 
         <variable

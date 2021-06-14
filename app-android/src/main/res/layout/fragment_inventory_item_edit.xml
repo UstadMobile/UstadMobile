@@ -11,11 +11,11 @@
             type="com.ustadmobile.lib.db.entities.InventoryItem" />
 
         <variable
-            name="loading"
+            name="fieldsEnabled"
             type="boolean" />
 
         <variable
-            name="fieldsEnabled"
+            name="loading"
             type="boolean" />
 
         <variable
@@ -23,8 +23,6 @@
             type="com.ustadmobile.port.android.view.InventoryItemEditFragmentEventHandler" />
 
     </data>
-
-
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/fragment_inventory_item_edit_edit_scroll"
@@ -46,7 +44,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
-
             <androidx.recyclerview.widget.RecyclerView
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
@@ -58,10 +55,8 @@
                 app:layout_constraintTop_toBottomOf="@+id/fragment_inventory_item_edit_new_we"
                 app:layout_constraintStart_toStartOf="parent" />
 
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.core.widget.NestedScrollView>
-
 
 </layout>
