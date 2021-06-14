@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 64,
-    "identityHash": "a578966279e85e4257f6981166b9868b",
+    "version": 65,
+    "identityHash": "aa9c51ea06b68e2f5afecb9b62513073",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -2062,8 +2062,26 @@
       },
       {
         "tableName": "ContentEntryParentChildJoin",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cepcjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cepcjLocalChangeSeqNum` INTEGER NOT NULL, `cepcjMasterChangeSeqNum` INTEGER NOT NULL, `cepcjLastChangedBy` INTEGER NOT NULL, `cepcjLct` INTEGER NOT NULL, `cepcjParentContentEntryUid` INTEGER NOT NULL, `cepcjChildContentEntryUid` INTEGER NOT NULL, `childIndex` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cepcjParentContentEntryUid` INTEGER NOT NULL, `cepcjChildContentEntryUid` INTEGER NOT NULL, `childIndex` INTEGER NOT NULL, `cepcjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cepcjLocalChangeSeqNum` INTEGER NOT NULL, `cepcjMasterChangeSeqNum` INTEGER NOT NULL, `cepcjLastChangedBy` INTEGER NOT NULL, `cepcjLct` INTEGER NOT NULL)",
         "fields": [
+          {
+            "fieldPath": "cepcjParentContentEntryUid",
+            "columnName": "cepcjParentContentEntryUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cepcjChildContentEntryUid",
+            "columnName": "cepcjChildContentEntryUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "childIndex",
+            "columnName": "childIndex",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
           {
             "fieldPath": "cepcjUid",
             "columnName": "cepcjUid",
@@ -2091,24 +2109,6 @@
           {
             "fieldPath": "cepcjLct",
             "columnName": "cepcjLct",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cepcjParentContentEntryUid",
-            "columnName": "cepcjParentContentEntryUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cepcjChildContentEntryUid",
-            "columnName": "cepcjChildContentEntryUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "childIndex",
-            "columnName": "childIndex",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -4078,14 +4078,8 @@
       },
       {
         "tableName": "XLangMapEntry",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementLangMapUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `verbLangMapUid` INTEGER NOT NULL, `objectLangMapUid` INTEGER NOT NULL, `languageLangMapUid` INTEGER NOT NULL, `languageVariantLangMapUid` INTEGER NOT NULL, `valueLangMap` TEXT NOT NULL, `statementLangMapMasterCsn` INTEGER NOT NULL, `statementLangMapLocalCsn` INTEGER NOT NULL, `statementLangMapLcb` INTEGER NOT NULL, `statementLangMapLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`verbLangMapUid` INTEGER NOT NULL, `objectLangMapUid` INTEGER NOT NULL, `languageLangMapUid` INTEGER NOT NULL, `languageVariantLangMapUid` INTEGER NOT NULL, `valueLangMap` TEXT NOT NULL, `statementLangMapMasterCsn` INTEGER NOT NULL, `statementLangMapLocalCsn` INTEGER NOT NULL, `statementLangMapLcb` INTEGER NOT NULL, `statementLangMapLct` INTEGER NOT NULL, `statementLangMapUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)",
         "fields": [
-          {
-            "fieldPath": "statementLangMapUid",
-            "columnName": "statementLangMapUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
           {
             "fieldPath": "verbLangMapUid",
             "columnName": "verbLangMapUid",
@@ -4137,6 +4131,12 @@
           {
             "fieldPath": "statementLangMapLct",
             "columnName": "statementLangMapLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statementLangMapUid",
+            "columnName": "statementLangMapUid",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -5248,7 +5248,7 @@
       },
       {
         "tableName": "Report",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reportUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `reportOwnerUid` INTEGER NOT NULL, `xAxis` INTEGER NOT NULL, `reportDateRangeSelection` INTEGER NOT NULL, `fromDate` INTEGER NOT NULL, `fromRelTo` INTEGER NOT NULL, `fromRelOffSet` INTEGER NOT NULL, `fromRelUnit` INTEGER NOT NULL, `toDate` INTEGER NOT NULL, `toRelTo` INTEGER NOT NULL, `toRelOffSet` INTEGER NOT NULL, `toRelUnit` INTEGER NOT NULL, `reportTitle` TEXT, `reportDescription` TEXT, `reportSeries` TEXT, `reportInactive` INTEGER NOT NULL, `isTemplate` INTEGER NOT NULL, `priority` INTEGER NOT NULL, `reportMasterChangeSeqNum` INTEGER NOT NULL, `reportLocalChangeSeqNum` INTEGER NOT NULL, `reportLastChangedBy` INTEGER NOT NULL, `reportLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reportUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `reportOwnerUid` INTEGER NOT NULL, `xAxis` INTEGER NOT NULL, `reportDateRangeSelection` INTEGER NOT NULL, `fromDate` INTEGER NOT NULL, `fromRelTo` INTEGER NOT NULL, `fromRelOffSet` INTEGER NOT NULL, `fromRelUnit` INTEGER NOT NULL, `toDate` INTEGER NOT NULL, `toRelTo` INTEGER NOT NULL, `toRelOffSet` INTEGER NOT NULL, `toRelUnit` INTEGER NOT NULL, `reportTitle` TEXT, `reportDescription` TEXT, `reportSeries` TEXT, `reportInactive` INTEGER NOT NULL, `isTemplate` INTEGER NOT NULL, `priority` INTEGER NOT NULL, `reportTitleId` INTEGER NOT NULL, `reportDescId` INTEGER NOT NULL, `reportMasterChangeSeqNum` INTEGER NOT NULL, `reportLocalChangeSeqNum` INTEGER NOT NULL, `reportLastChangedBy` INTEGER NOT NULL, `reportLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "reportUid",
@@ -5355,6 +5355,18 @@
           {
             "fieldPath": "priority",
             "columnName": "priority",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportTitleId",
+            "columnName": "reportTitleId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportDescId",
+            "columnName": "reportDescId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -10172,7 +10184,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a578966279e85e4257f6981166b9868b')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'aa9c51ea06b68e2f5afecb9b62513073')"
     ]
   }
 }
