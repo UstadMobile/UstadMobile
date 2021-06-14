@@ -64,7 +64,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         showHiddenEntries = false
         getAndSetList()
         GlobalScope.launch(doorMainDispatcher()) {
-            if (contentFilter == ARG_LIBRARIES_CONTENT) {
+            if (contentFilter == ARG_LIBRARIES_CONTENT || contentFilter == ARG_CLAZZ_CONTENT_FILTER) {
                 view.editOptionVisible = onCheckUpdatePermission()
                 editVisible.complete(view.editOptionVisible)
             }
@@ -115,7 +115,18 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     override suspend fun onCheckListSelectionOptions(account: UmAccount?): List<SelectionOption> {
         val isVisible = editVisible.await()
-        return if (isVisible) listOf(SelectionOption.MOVE, SelectionOption.HIDE) else listOf()
+        return when(contentFilter) {
+            ARG_LIBRARIES_CONTENT -> {
+                if (isVisible) listOf(SelectionOption.MOVE, SelectionOption.HIDE) else listOf()
+            }
+            ARG_CLAZZ_CONTENT_FILTER -> {
+                if(isVisible) listOf(SelectionOption.HIDE) else listOf()
+
+            }
+            else -> {
+                listOf()
+            }
+        }
     }
 
     override fun handleSelectionOptionChanged(t: List<ContentEntry>) {
@@ -123,10 +134,21 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
             return
         }
 
-        view.selectionOptions = if (t.all { it.ceInactive })
-            listOf(SelectionOption.MOVE, SelectionOption.UNHIDE)
-        else
-            listOf(SelectionOption.MOVE, SelectionOption.HIDE)
+       when(contentFilter){
+
+            ARG_LIBRARIES_CONTENT ->{
+                view.selectionOptions = if (t.all { it.ceInactive })
+                    listOf(SelectionOption.MOVE, SelectionOption.UNHIDE)
+                else
+                    listOf(SelectionOption.MOVE, SelectionOption.HIDE)
+            }
+            ARG_CLAZZ_CONTENT_FILTER ->{
+                view.selectionOptions = listOf(SelectionOption.HIDE)
+            }
+
+        }
+
+
 
     }
 
@@ -140,7 +162,14 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                     view.showMoveEntriesFolderPicker(listOfSelectedEntries)
                 }
                 SelectionOption.HIDE -> {
-                    repo.contentEntryDao.toggleVisibilityContentEntryItems(true, selectedItem.map { it.contentEntryUid })
+                    when(contentFilter){
+                        ARG_LIBRARIES_CONTENT ->{
+                            repo.contentEntryDao.toggleVisibilityContentEntryItems(true, selectedItem.map { it.contentEntryUid })
+                        }
+                        ARG_CLAZZ_CONTENT_FILTER ->{
+                            repo.clazzContentJoinDao.toggleVisibilityClazzContent(false, selectedItem.map { it.contentEntryUid })
+                        }
+                    }
                 }
                 SelectionOption.UNHIDE -> {
                     repo.contentEntryDao.toggleVisibilityContentEntryItems(false, selectedItem.map { it.contentEntryUid })
