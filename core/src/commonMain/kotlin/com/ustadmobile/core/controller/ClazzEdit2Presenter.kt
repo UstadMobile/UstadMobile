@@ -218,7 +218,7 @@ class ClazzEdit2Presenter(context: Any,
             // ClazzEdit, EnrolmentEdit
             if(arguments.containsKey(UstadView.ARG_GO_TO_COMPLETE)) {
                 systemImpl.go(arguments[UstadView.ARG_GO_TO_COMPLETE].toString(),
-                        arguments.plus(UstadView.ARG_FILTER_BY_CLAZZUID to entity.clazzUid.toString()),
+                        arguments.plus(UstadView.ARG_CLAZZUID to entity.clazzUid.toString()),
                         context)
             }else{
                 onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity)

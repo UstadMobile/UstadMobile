@@ -96,13 +96,11 @@ interface UstadView {
 
         const val ARG_FILTER_BY_PERMISSION = "filterByPermission"
 
-        const val ARG_FILTER_BY_CLAZZUID = "filterByClazzUid"
+        const val ARG_CLAZZUID = "clazzUid"
 
         const val ARG_FILTER_BY_PERSONGROUPUID = "filterByPersonGroupUid"
 
         const val ARG_FILTER_BY_ENROLMENT_ROLE = "filterByEnrolmentRole"
-
-        const val ARG_CLAZZWORK_UID = "clazzworkUid"
 
         const val ARG_CLAZZ_ASSIGNMENT_UID = "clazzAssignmentUid"
 

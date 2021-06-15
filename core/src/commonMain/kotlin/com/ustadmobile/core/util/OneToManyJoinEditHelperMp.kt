@@ -15,7 +15,7 @@ import kotlin.reflect.KClass
  * For this to work, whenever the user is being directed to edit/pick an entity, ARG_RESULT_DEST_KEY
  * should be set to the returnSavedStateKey val so that it gets picked up and handled as expected.
  */
-class OneToManyJoinEditHelperMp<T : Any>(pkGetter: (T) -> Long,
+open class OneToManyJoinEditHelperMp<T : Any>(pkGetter: (T) -> Long,
                                          serializationKey: String,
                                          serializationStrategy: SerializationStrategy<List<T>>,
                                          deserializationStrategy: DeserializationStrategy<List<T>>,

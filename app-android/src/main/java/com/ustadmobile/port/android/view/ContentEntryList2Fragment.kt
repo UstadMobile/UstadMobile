@@ -65,21 +65,25 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         if(mTitle != null){
             ustadFragmentTitle = mTitle.toString()
         }
-        mPresenter = ContentEntryList2Presenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di, viewLifecycleOwner)
 
-        mDataRecyclerViewAdapter = ContentEntryListRecyclerAdapter(mPresenter,
-                arguments.toStringMap().determineListMode().toString(),
-                arguments?.get(ARG_SELECT_FOLDER_VISIBLE).toString().toBoolean(),
-                viewLifecycleOwner, di)
-        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
-            requireContext().getString(R.string.add_new_content))
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val accountManager: UstadAccountManager by di.instance()
         val localAvailabilityManager: LocalAvailabilityManager by di.on(accountManager.activeAccount).instance()
+
+
+        mPresenter = ContentEntryList2Presenter(requireContext(), arguments.toStringMap(),
+                this, di, viewLifecycleOwner)
+
+        mDataRecyclerViewAdapter = ContentEntryListRecyclerAdapter(mPresenter,
+                arguments?.toStringMap()?.determineListMode().toString(),
+                arguments?.get(ARG_SELECT_FOLDER_VISIBLE).toString().toBoolean(),
+                viewLifecycleOwner, di)
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
+                requireContext().getString(R.string.add_new_content), onClickSort = this,
+                sortOrderOption = mPresenter?.sortOptions?.get(0))
 
         val navController = findNavController()
 
@@ -147,6 +151,8 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
     override fun onClick(view: View?) {
         if (view?.id == R.id.item_createnew_layout)
             mPresenter?.handleClickCreateNewFab()
+        else
+            super.onClick(view)
     }
 
     override fun showMoveEntriesFolderPicker(selectedContentEntryParentChildJoinUids: String) {

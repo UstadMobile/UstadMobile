@@ -12,7 +12,7 @@ import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ClazzEnrolmentListView
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -38,7 +38,7 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     var searchText: String? = null
 
     override fun onCreate(savedState: Map<String, String>?) {
-        filterByClazzUid = arguments[ARG_FILTER_BY_CLAZZUID]?.toLong() ?: -1
+        filterByClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: -1
         super.onCreate(savedState)
 
     }
@@ -88,7 +88,7 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     override fun handleClickEntry(entry: PersonWithClazzEnrolmentDetails) {
         systemImpl.go(ClazzEnrolmentListView.VIEW_NAME,
                 mapOf(UstadView.ARG_PERSON_UID to entry.personUid.toString(),
-                        ARG_FILTER_BY_CLAZZUID to filterByClazzUid.toString(),
+                        ARG_CLAZZUID to filterByClazzUid.toString(),
                         ARG_FILTER_BY_ENROLMENT_ROLE to entry.enrolmentRole.toString()), context)
     }
 

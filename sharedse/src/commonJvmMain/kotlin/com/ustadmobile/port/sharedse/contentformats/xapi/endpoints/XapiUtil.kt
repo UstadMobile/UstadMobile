@@ -281,7 +281,8 @@ object XapiUtil {
                                       instructorUid: Long, agentUid: Long, authorityUid: Long, teamUid: Long,
                                       subActorUid: Long, subVerbUid: Long, subObjectUid: Long,
                                       contentEntryUid: Long = 0L,
-                                      learnerGroupUid: Long, contentEntryRoot: Boolean = false): StatementEntity {
+                                      learnerGroupUid: Long, contentEntryRoot: Boolean = false
+                                      ,clazzUid: Long = 0L): StatementEntity {
 
         val statementId = statement.id
                 ?: throw IllegalArgumentException("Statement $statement to be stored has no id!")
@@ -306,6 +307,7 @@ object XapiUtil {
                 it.statementContentEntryUid = contentEntryUid
                 it.statementLearnerGroupUid = learnerGroupUid
                 it.contentEntryRoot = contentEntryRoot
+                it.statementClazzUid = clazzUid
                 it.fullStatement = gson.toJson(statement)
             }
 

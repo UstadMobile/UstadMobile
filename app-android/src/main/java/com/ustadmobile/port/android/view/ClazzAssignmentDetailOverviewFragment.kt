@@ -22,6 +22,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
@@ -106,7 +107,8 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
         //3
         contentRecyclerAdapter = ContentEntryListRecyclerAdapter(
-                DefaultContentEntryListItemListener(context = requireContext(), di = di),
+                DefaultContentEntryListItemListener(context = requireContext(), di = di,
+                        clazzUid = arguments.toStringMap()[UstadView.ARG_CLAZZUID]?.toLong() ?: 0L),
                 ListViewMode.BROWSER.toString(), false, viewLifecycleOwner, di)
 
         // 4 score

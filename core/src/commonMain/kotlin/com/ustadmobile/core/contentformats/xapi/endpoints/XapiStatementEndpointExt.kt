@@ -9,7 +9,8 @@ import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 import com.ustadmobile.lib.db.entities.UmAccount
 
 fun XapiStatementEndpoint.storeProgressStatement(account: UmAccount, entry: ContentEntry,
-                                                 progress: Int, duration: Long, contextRegistration: String) {
+                                                 progress: Int, duration: Long, contextRegistration: String,
+                                                 clazzUid: Long) {
     val statement = Statement().apply {
         this.actor = Actor().apply {
             this.account = Account().apply {
@@ -40,13 +41,14 @@ fun XapiStatementEndpoint.storeProgressStatement(account: UmAccount, entry: Cont
         }
     }
 
-    storeStatements(listOf(statement), "", entry.contentEntryUid)
+    storeStatements(listOf(statement), "", entry.contentEntryUid, clazzUid)
 }
 
 
 fun XapiStatementEndpoint.storeCompletedStatement(account: UmAccount, entry: ContentEntry,
                                                   contextRegistration: String,
-                                                  scoreProgress: ContentEntryStatementScoreProgress?){
+                                                  scoreProgress: ContentEntryStatementScoreProgress?,
+                                                  clazzUid: Long){
 
 
     val statement = Statement().apply {
@@ -88,5 +90,5 @@ fun XapiStatementEndpoint.storeCompletedStatement(account: UmAccount, entry: Con
         }
     }
 
-    storeStatements(listOf(statement), "", entry.contentEntryUid)
+    storeStatements(listOf(statement), "", entry.contentEntryUid, clazzUid)
 }

@@ -85,8 +85,8 @@ class ContentEntryList2PresenterTest {
         presenter.onCreate(null)
 
         val accountManager: UstadAccountManager by di.instance()
-        verify(repoContentEntrySpyDao, timeout(defaultTimeout)).getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
-                eq(parentEntryUid), eq(0), eq(0), eq(accountManager.activeAccount.personUid), eq(false), eq(false))
+        verify(repoContentEntrySpyDao, timeout(defaultTimeout)).getChildrenByParentUidWithCategoryFilterOrderByName(
+                eq(parentEntryUid), eq(0), eq(0), eq(accountManager.activeAccount.personUid), eq(false), eq(false), any())
 
         verify(mockView, timeout(defaultTimeout)).list = any()
     }
@@ -145,8 +145,8 @@ class ContentEntryList2PresenterTest {
         createdEntries?.get(0)?.let { presenter.onClickContentEntry(it) }
 
         argumentCaptor<Long>().apply{
-            verify(repoContentEntrySpyDao, timeout(defaultTimeout).times(2)).getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
-                    capture(), eq(0), eq(0), eq(accountManager.activeAccount.personUid), eq(false), eq(false))
+            verify(repoContentEntrySpyDao, timeout(defaultTimeout).times(2)).getChildrenByParentUidWithCategoryFilterOrderByName(
+                    capture(), eq(0), eq(0), eq(accountManager.activeAccount.personUid), eq(false), eq(false), any())
             assertEquals("Expected folder was opened", secondValue, createdEntries?.get(0)?.contentEntryUid)
         }
     }
@@ -205,8 +205,8 @@ class ContentEntryList2PresenterTest {
         assertTrue("Can go back to the previous folder", canGoBack)
 
         argumentCaptor<Long>().apply{
-            verify(repoContentEntrySpyDao, timeout(defaultTimeout).times(3)).getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
-                    capture(), eq(0), eq(0), eq(accountManager.activeAccount.personUid), eq(false), eq(false))
+            verify(repoContentEntrySpyDao, timeout(defaultTimeout).times(3)).getChildrenByParentUidWithCategoryFilterOrderByName(
+                    capture(), eq(0), eq(0), eq(accountManager.activeAccount.personUid), eq(false), eq(false), any())
             assertEquals("Went back to the expected folder", thirdValue, parentEntryUid)
         }
     }
