@@ -5,7 +5,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CLAZZ_CONTENT_FILTER
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_CLAZZ
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_OPTION
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_DOWNLOADED
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_PARENT
@@ -64,7 +64,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         showHiddenEntries = false
         getAndSetList()
         GlobalScope.launch(doorMainDispatcher()) {
-            if (contentFilter == ARG_DISPLAY_CONTENT_BY_PARENT || contentFilter == ARG_CLAZZ_CONTENT_FILTER) {
+            if (contentFilter == ARG_DISPLAY_CONTENT_BY_PARENT || contentFilter == ARG_DISPLAY_CONTENT_BY_CLAZZ) {
                 view.editOptionVisible = onCheckUpdatePermission()
                 editVisible.complete(view.editOptionVisible)
             }
@@ -99,7 +99,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 db.contentEntryDao.downloadedRootItems(loggedPersonUid,
                         selectedSortOption?.flag ?: ContentEntryDao.SORT_TITLE_ASC)
             }
-            ARG_CLAZZ_CONTENT_FILTER -> {
+            ARG_DISPLAY_CONTENT_BY_CLAZZ -> {
                 repo.contentEntryDao.getClazzContent(selectedClazzUid, loggedPersonUid,
                         selectedSortOption?.flag ?: ContentEntryDao.SORT_TITLE_ASC)
             }
@@ -119,7 +119,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
             ARG_DISPLAY_CONTENT_BY_PARENT -> {
                 if (isVisible) listOf(SelectionOption.MOVE, SelectionOption.HIDE) else listOf()
             }
-            ARG_CLAZZ_CONTENT_FILTER -> {
+            ARG_DISPLAY_CONTENT_BY_CLAZZ -> {
                 if(isVisible) listOf(SelectionOption.HIDE) else listOf()
 
             }
@@ -142,7 +142,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 else
                     listOf(SelectionOption.MOVE, SelectionOption.HIDE)
             }
-            ARG_CLAZZ_CONTENT_FILTER ->{
+           ARG_DISPLAY_CONTENT_BY_CLAZZ ->{
                 view.selectionOptions = listOf(SelectionOption.HIDE)
             }
 
@@ -166,7 +166,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                         ARG_DISPLAY_CONTENT_BY_PARENT ->{
                             repo.contentEntryDao.toggleVisibilityContentEntryItems(true, selectedItem.map { it.contentEntryUid })
                         }
-                        ARG_CLAZZ_CONTENT_FILTER ->{
+                        ARG_DISPLAY_CONTENT_BY_CLAZZ ->{
                             repo.clazzContentJoinDao.toggleVisibilityClazzContent(false, selectedItem.map { it.contentEntryUid })
                         }
                     }
@@ -218,7 +218,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     override fun handleClickCreateNewFab() {
         when (contentFilter) {
-            ARG_CLAZZ_CONTENT_FILTER -> {
+            ARG_DISPLAY_CONTENT_BY_CLAZZ -> {
 
                 val args = mutableMapOf(
                         ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_PARENT,
