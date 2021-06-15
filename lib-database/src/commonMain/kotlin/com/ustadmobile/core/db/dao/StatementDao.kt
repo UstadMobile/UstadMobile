@@ -88,7 +88,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                         AND statementContentEntryUid = :contentEntryUid
                         AND Person.firstNames || ' ' || Person.lastName LIKE :searchText              
                    GROUP BY StatementEntity.statementUid 
-                   ORDER BY resultScoreScaled DESC, extensionProgress DESC) AS ResultSource 
+                   ORDER BY resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC) AS ResultSource 
          GROUP BY ResultSource.personUid 
          ORDER BY CASE(:sortOrder) 
                 WHEN $SORT_FIRST_NAME_ASC THEN ResultSource.firstNames
@@ -131,7 +131,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                                   WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
 							        AND StatementEntity.statementPersonUid = :accountPersonUid
 							        AND contentEntryRoot 
-                               ORDER BY resultScoreScaled DESC, extensionProgress DESC LIMIT 1)
+                               ORDER BY resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC LIMIT 1)
                                
        WHERE contentEntryUid = :contentEntryUid
     """)
@@ -164,7 +164,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             AND :accountPersonUid 
                 IN (${PersonDao.ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION}) 
         GROUP BY StatementEntity.contextRegistration 
-        ORDER BY startDate DESC, resultScoreScaled DESC, extensionProgress DESC
+        ORDER BY startDate DESC, resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC
          """)
     abstract fun findSessionsForPerson(contentEntryUid: Long, accountPersonUid: Long, personUid: Long)
             : DataSource.Factory<Int, PersonWithSessionsDisplay>
@@ -205,10 +205,10 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                'FALSE' as contentComplete
          FROM StatementEntity
         WHERE contextRegistration = :contextRegistration
-          AND NOT contentEntryRoot
+          AND contentEntryRoot = :checkOnlyRoot
           AND statementVerbUid = ${VerbEntity.VERB_ANSWERED_UID}
     """)
-    abstract fun findScoreForSession(contextRegistration: String): ContentEntryStatementScoreProgress?
+    abstract fun findScoreForSession(contextRegistration: String, checkOnlyRoot: Boolean): ContentEntryStatementScoreProgress?
 
     @Query("""
         SELECT contextRegistration 

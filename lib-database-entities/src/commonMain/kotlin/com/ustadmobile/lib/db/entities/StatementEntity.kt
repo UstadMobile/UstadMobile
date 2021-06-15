@@ -123,9 +123,9 @@ open class StatementEntity {
 
         const val RESULT_UNSET = 0.toByte()
 
-        const val RESULT_SUCCESS = 1.toByte()
+        const val RESULT_SUCCESS = 2.toByte()
 
-        const val RESULT_FAILURE = 2.toByte()
+        const val RESULT_FAILURE = 1.toByte()
 
         const val CONTENT_COMPLETE = 100
 

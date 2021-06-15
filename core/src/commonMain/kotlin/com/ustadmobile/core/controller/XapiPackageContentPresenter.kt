@@ -125,7 +125,11 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
         GlobalScope.launch {
             val contentEntry = db.contentEntryDao.findByUid(contentEntryUid) ?: return@launch
             if(contentEntry.completionCriteria != ContentEntry.COMPLETION_CRITERIA_MIN_SCORE) return@launch
-            val score = db.statementDao.findScoreForSession(contextRegistration) ?: return@launch
+            var score = db.statementDao.findScoreForSession(contextRegistration, false) ?: return@launch
+            // if content only had 1 exercise, there wont be any statements with contentEntryRoot = false so need to check again
+            if(score.resultMax == 0){
+                score = db.statementDao.findScoreForSession(contextRegistration, true) ?: return@launch
+            }
             val scoreTotal = (score.resultScore.toFloat() / score.resultMax) * 100
             if(scoreTotal > contentEntry.minScore){
                 statementEndpoint.storeCompletedStatement(accountManager.activeAccount,
