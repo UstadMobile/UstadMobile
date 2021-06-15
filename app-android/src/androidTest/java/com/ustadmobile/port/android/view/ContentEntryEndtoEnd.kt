@@ -151,7 +151,7 @@ class ContentEntryEndtoEnd : TestCase() {
             val launchIntent = Intent(context, MainActivity::class.java).also {
                 it.putExtra(UstadView.ARG_NEXT,
                         "${ContentEntryList2View.VIEW_NAME}?${UstadView.ARG_PARENT_ENTRY_UID}=-4103245208651563007" +
-                                "&${ContentEntryList2View.ARG_CONTENT_FILTER}=${ContentEntryList2View.ARG_LIBRARIES_CONTENT}")
+                                "&${ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION}=${ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT}")
             }
             launchActivity<MainActivity>(launchIntent)
 
@@ -214,7 +214,7 @@ class ContentEntryEndtoEnd : TestCase() {
             val launchIntent = Intent(context, MainActivity::class.java).also {
                 it.putExtra(UstadView.ARG_NEXT,
                         "${ContentEntryList2View.VIEW_NAME}?${UstadView.ARG_PARENT_ENTRY_UID}=-4103245208651563007" +
-                                "&${ContentEntryList2View.ARG_CONTENT_FILTER}=${ContentEntryList2View.ARG_LIBRARIES_CONTENT}")
+                                "&${ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION}=${ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT}")
             }
 
             launchActivity<MainActivity>(launchIntent)
@@ -266,7 +266,7 @@ class ContentEntryEndtoEnd : TestCase() {
             val launchIntent = Intent(context, MainActivity::class.java).also {
                 it.putExtra(UstadView.ARG_NEXT,
                         "${ContentEntryList2View.VIEW_NAME}?${UstadView.ARG_PARENT_ENTRY_UID}=-4103245208651563007" +
-                                "&${ContentEntryList2View.ARG_CONTENT_FILTER}=${ContentEntryList2View.ARG_LIBRARIES_CONTENT}")
+                                "&${ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION}=${ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT}")
             }
 
             launchActivity<MainActivity>(launchIntent)
@@ -346,7 +346,7 @@ class ContentEntryEndtoEnd : TestCase() {
             val launchIntent = Intent(context, MainActivity::class.java).also {
                 it.putExtra(UstadView.ARG_NEXT,
                         "${ContentEntryList2View.VIEW_NAME}?${UstadView.ARG_PARENT_ENTRY_UID}=-4103245208651563007" +
-                                "&${ContentEntryList2View.ARG_CONTENT_FILTER}=${ContentEntryList2View.ARG_LIBRARIES_CONTENT}")
+                                "&${ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION}=${ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT}")
             }
 
             launchActivity<MainActivity>(launchIntent)
