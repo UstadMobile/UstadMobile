@@ -12,6 +12,8 @@ interface PersonDetailView: UstadDetailView<PersonWithDisplayDetails> {
 
     var changePasswordVisible: Boolean
 
+    var isAdmin: Boolean
+
     var showCreateAccountVisible: Boolean
 
     var rolesAndPermissions: DataSource.Factory<Int, EntityRoleWithNameAndRole>?

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.core.view.PersonDetailView
@@ -11,9 +12,7 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.*
 import org.kodein.di.DI
 
 class PersonDetailPresenter(context: Any,
@@ -47,6 +46,8 @@ class PersonDetailPresenter(context: Any,
                     && (activePersonUid == entityUid || hasAuthPermission)
 
             view.showCreateAccountVisible =  person.username == null && hasAuthPermission
+
+            view.isAdmin = activePerson.admin
 
             view.rolesAndPermissions = repo.entityRoleDao.filterByPersonWithExtra(
                     person.personGroupUid?:0L)
@@ -96,7 +97,27 @@ class PersonDetailPresenter(context: Any,
 
     fun handleDeactivateUser(){
         val personUid = view.entity?.personUid ?: return
-        //TODO:
+        GlobalScope.launch(doorMainDispatcher()){
+            val activePersonUid = accountManager.activeAccount.personUid
+            val activePerson = withTimeoutOrNull(2000) {
+                db.personDao.findByUid(activePersonUid)
+            } ?: Person()
+            val person = repo.personDao.findByUid(personUid)
+            if(person!=null && activePerson.admin){
+                person.active = false
+                repo.personDao.updateAsync(person)
+                view.runOnUiThread(Runnable {
+                    finishWithResult("")
+                    view.showSnackBar(systemImpl.getString(MessageID.user_deactivated, context))
+                })
+
+            }else{
+                view.runOnUiThread(
+                    Runnable {
+                        view.showSnackBar(systemImpl.getString(MessageID.failed, context))
+                    })
+            }
+        }
     }
 
 }

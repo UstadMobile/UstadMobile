@@ -8,12 +8,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPersonDetailBinding
 import com.toughra.ustadmobile.databinding.ItemClazzEnrolmentWithClazzDetailBinding
@@ -24,18 +26,25 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.defaultGson
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
+interface PersonDetailFragmentListener {
+
+    fun deactivateUser()
+}
+
 class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), PersonDetailView,
-        EntityRoleItemHandler{
+        EntityRoleItemHandler, PersonDetailFragmentListener{
 
     private var mBinding: FragmentPersonDetailBinding? = null
 
@@ -93,6 +102,12 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
             mBinding?.changePasswordVisibility = if(value) View.VISIBLE else View.GONE
         }
 
+    override var isAdmin: Boolean = false
+        set(value) {
+            field = value
+            mBinding?.isAdmin = value
+        }
+
     override var showCreateAccountVisible: Boolean = false
         set(value) {
             field = value
@@ -139,6 +154,7 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
         clazzEnrolmentWithClazzRecyclerAdapter?.presenter = mPresenter
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
         mBinding?.presenter = mPresenter
+        mBinding?.activityEventHandler = this
         return rootView
     }
 
@@ -173,6 +189,15 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
                         value?.firstNames + " " + value?.lastName
         }
 
+
+        override fun deactivateUser() {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.confirm)
+                .setPositiveButton(R.string.delete) { _, _ -> mPresenter?.handleDeactivateUser() }
+                .setNegativeButton(R.string.cancel) { dialog, _ ->  dialog.cancel() }
+                .setMessage(R.string.confirm_deactivate_user)
+                .show()
+    }
 
     companion object {
 
