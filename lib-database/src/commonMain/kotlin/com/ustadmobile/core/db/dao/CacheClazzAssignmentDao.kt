@@ -49,8 +49,8 @@ abstract class CacheClazzAssignmentDao: BaseDao<CacheClazzAssignment> {
                                   ORDER BY CASE WHEN timestamp > ClazzAssignment.caDeadlineDate 
                                                 THEN resultScoreScaled * (1 - (caLateSubmissionPenalty/100))
                                                 ELSE resultScoreScaled END DESC, 
-                                            extensionProgress DESC LIMIT 1)
-	     WHERE clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT} 
+                                            extensionProgress DESC, resultSuccess DESC LIMIT 1)
+	     WHERE clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
            AND clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}
            AND clazzEnrolmentActive
            AND caActive

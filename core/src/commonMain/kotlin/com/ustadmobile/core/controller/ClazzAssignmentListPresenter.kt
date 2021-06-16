@@ -34,7 +34,7 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        clazzUid = arguments[UstadView.ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
+        clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0L
         assignmentItemListener.listViewMode = mListMode
         selectedSortOption = SORT_OPTIONS[0]
         GlobalScope.launch(doorMainDispatcher()) {
@@ -58,7 +58,7 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
     }
 
     override fun handleClickCreateNewFab() {
-        val clazzUid = arguments[UstadView.ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
+        val clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0L
 
         val clazzAssignment: ClazzAssignment = ClazzAssignment().apply {
             caClazzUid = clazzUid

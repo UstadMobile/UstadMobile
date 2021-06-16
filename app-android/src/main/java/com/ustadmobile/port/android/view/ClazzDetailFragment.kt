@@ -72,16 +72,16 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
             it.root.tabs.tabGravity = TabLayout.GRAVITY_FILL
         }
 
-        mPresenter = ClazzDetailPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
-
         return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
+        mPresenter = ClazzDetailPresenter(requireContext(), arguments.toStringMap(), this,
+                di, viewLifecycleOwner)
+
+        mPresenter?.onCreate(backStackSavedState)
     }
 
     override fun onDestroyView() {
@@ -105,6 +105,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
     companion object {
         val viewNameToFragmentMap = mapOf<String, Class<out Fragment>>(
                 ClazzDetailOverviewView.VIEW_NAME to ClazzDetailOverviewFragment::class.java,
+                ContentEntryList2View.VIEW_NAME to ContentEntryList2Fragment::class.java,
                 ClazzMemberListView.VIEW_NAME to ClazzMemberListFragment::class.java,
                 ClazzLogListAttendanceView.VIEW_NAME to ClazzLogListAttendanceFragment::class.java,
                 ClazzAssignmentListView.VIEW_NAME to ClazzAssignmentListFragment::class.java
@@ -113,6 +114,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
         val viewNameToTitleMap = mapOf(
                 ClazzDetailOverviewView.VIEW_NAME to R.string.overview,
+                ContentEntryList2View.VIEW_NAME to R.string.content,
                 ClazzMemberListView.VIEW_NAME to R.string.members,
                 ClazzLogListAttendanceView.VIEW_NAME to R.string.attendance,
                 ClazzAssignmentListView.VIEW_NAME to R.string.assignments

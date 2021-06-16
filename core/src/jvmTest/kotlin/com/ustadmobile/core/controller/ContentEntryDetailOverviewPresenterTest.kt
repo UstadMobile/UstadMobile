@@ -128,7 +128,7 @@ class ContentEntryDetailOverviewPresenterTest {
 
         verify(systemImpl).go(eq(ContentEntryEdit2View.VIEW_NAME),
                 eq(mapOf(ARG_ENTITY_UID to createdEntry?.contentEntryUid.toString(),
-                        UstadView.ARG_LEAF to true.toString())), any())
+                UstadView.ARG_LEAF to true.toString())), any())
     }
 
 }

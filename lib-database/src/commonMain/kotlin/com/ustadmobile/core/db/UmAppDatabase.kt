@@ -39,7 +39,8 @@ import kotlin.jvm.Volatile
     DeviceSession::class, Site::class, ContainerImportJob::class,
     LearnerGroup::class, LearnerGroupMember::class,
     GroupLearningSession::class,
-    SiteTerms::class, ClazzAssignment::class, ClazzAssignmentContentJoin::class,
+    SiteTerms::class, ClazzContentJoin::class,
+    ClazzAssignment::class, ClazzAssignmentContentJoin::class,
     CacheClazzAssignment::class,
 
     //Door Helper entities
@@ -128,6 +129,10 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("contentEntryRelatedEntryJoinDao")
     abstract val contentEntryRelatedEntryJoinDao: ContentEntryRelatedEntryJoinDao
+
+
+    @JsName("clazzContentJoinDao")
+    abstract val clazzContentJoinDao: ClazzContentJoinDao
 
     // abstract val syncStatusDao: SyncStatusDao
 
@@ -4288,6 +4293,145 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_64_65 = object: DoorMigration(64, 65) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                if (database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("ALTER TABLE StatementEntity ADD COLUMN statementClazzUid BIGINT DEFAULT 0 NOT NULL")
+
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzContentJoin (  ccjContentEntryUid  BIGINT  NOT NULL , ccjClazzUid  BIGINT  NOT NULL , ccjActive  BOOL  NOT NULL , ccjLocalChangeSeqNum  BIGINT  NOT NULL , ccjMasterChangeSeqNum  BIGINT  NOT NULL , ccjLastChangedBy  INTEGER  NOT NULL , ccjLct  BIGINT  NOT NULL , ccjUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE INDEX index_ClazzContentJoin_ccjContentEntryUid ON ClazzContentJoin (ccjContentEntryUid)")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzContentJoin_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzContentJoin_lcsn_seq")
+                    database.execSQL("""
+          |CREATE OR REPLACE FUNCTION 
+          | inccsn_134_fn() RETURNS trigger AS ${'$'}${'$'}
+          | BEGIN  
+          | UPDATE ClazzContentJoin SET ccjLocalChangeSeqNum =
+          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.ccjLocalChangeSeqNum 
+          | ELSE NEXTVAL('ClazzContentJoin_lcsn_seq') END),
+          | ccjMasterChangeSeqNum = 
+          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+          | THEN NEXTVAL('ClazzContentJoin_mcsn_seq') 
+          | ELSE NEW.ccjMasterChangeSeqNum END)
+          | WHERE ccjUid = NEW.ccjUid;
+          | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+          | SELECT 134, NEW.ccjUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+          | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+          | RETURN null;
+          | END ${'$'}${'$'}
+          | LANGUAGE plpgsql
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER inccsn_134_trig 
+          |AFTER UPDATE OR INSERT ON ClazzContentJoin 
+          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+          |EXECUTE PROCEDURE inccsn_134_fn()
+          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzContentJoin_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+          |CREATE 
+          | INDEX index_ClazzContentJoin_trk_clientId_epk_csn 
+          |ON ClazzContentJoin_trk (clientId, epk, csn)
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE 
+          |UNIQUE INDEX index_ClazzContentJoin_trk_epk_clientId 
+          |ON ClazzContentJoin_trk (epk, clientId)
+          """.trimMargin())
+
+
+                }else{
+
+                    database.execSQL("ALTER TABLE StatementEntity ADD COLUMN statementClazzUid INTEGER DEFAULT 0 NOT NULL")
+
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzContentJoin (`ccjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ccjContentEntryUid` INTEGER NOT NULL, `ccjClazzUid` INTEGER NOT NULL, `ccjActive` INTEGER NOT NULL, `ccjLocalChangeSeqNum` INTEGER NOT NULL, `ccjMasterChangeSeqNum` INTEGER NOT NULL, `ccjLastChangedBy` INTEGER NOT NULL, `ccjLct` INTEGER NOT NULL)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzContentJoin_ccjContentEntryUid` ON ClazzContentJoin (`ccjContentEntryUid`)")
+
+                    database.execSQL("""
+          |CREATE TRIGGER INS_LOC_134
+          |AFTER INSERT ON ClazzContentJoin
+          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
+          |    NEW.ccjLocalChangeSeqNum = 0)
+          |BEGIN
+          |    UPDATE ClazzContentJoin
+          |    SET ccjMasterChangeSeqNum = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 134)
+          |    WHERE ccjUid = NEW.ccjUid;
+          |    
+          |    UPDATE SqliteChangeSeqNums
+          |    SET sCsnNextPrimary = sCsnNextPrimary + 1
+          |    WHERE sCsnTableId = 134;
+          |END
+          """.trimMargin())
+                    database.execSQL("""
+          |            CREATE TRIGGER INS_PRI_134
+          |            AFTER INSERT ON ClazzContentJoin
+          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
+          |                NEW.ccjMasterChangeSeqNum = 0)
+          |            BEGIN
+          |                UPDATE ClazzContentJoin
+          |                SET ccjMasterChangeSeqNum = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 134)
+          |                WHERE ccjUid = NEW.ccjUid;
+          |                
+          |                UPDATE SqliteChangeSeqNums
+          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+          |                WHERE sCsnTableId = 134;
+          |                
+          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+          |SELECT 134, NEW.ccjUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+          |            END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_LOC_134
+          |AFTER UPDATE ON ClazzContentJoin
+          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
+          |    AND (NEW.ccjLocalChangeSeqNum == OLD.ccjLocalChangeSeqNum OR
+          |        NEW.ccjLocalChangeSeqNum == 0))
+          |BEGIN
+          |    UPDATE ClazzContentJoin
+          |    SET ccjLocalChangeSeqNum = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = 134) 
+          |    WHERE ccjUid = NEW.ccjUid;
+          |    
+          |    UPDATE SqliteChangeSeqNums 
+          |    SET sCsnNextLocal = sCsnNextLocal + 1
+          |    WHERE sCsnTableId = 134;
+          |END
+          """.trimMargin())
+                    database.execSQL("""
+          |            CREATE TRIGGER UPD_PRI_134
+          |            AFTER UPDATE ON ClazzContentJoin
+          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
+          |                AND (NEW.ccjMasterChangeSeqNum == OLD.ccjMasterChangeSeqNum OR
+          |                    NEW.ccjMasterChangeSeqNum == 0))
+          |            BEGIN
+          |                UPDATE ClazzContentJoin
+          |                SET ccjMasterChangeSeqNum = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 134)
+          |                WHERE ccjUid = NEW.ccjUid;
+          |                
+          |                UPDATE SqliteChangeSeqNums
+          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+          |                WHERE sCsnTableId = 134;
+          |                
+          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+          |SELECT 134, NEW.ccjUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+          |            END
+          """.trimMargin())
+
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzContentJoin_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzContentJoin_trk_clientId_epk_csn` ON ClazzContentJoin_trk (`clientId`, `epk`, `csn`)")
+
+                    database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzContentJoin_trk_epk_clientId` ON ClazzContentJoin_trk (`epk`, `clientId`)")
+
+
+                }
+
+            }
+        }
+
 
         val MIGRATION_66_67 = object: DoorMigration(66, 67) {
             override fun migrate(database: DoorSqlDatabase) {
@@ -4591,7 +4735,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
                     MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
                     MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
-                    MIGRATION_63_64, MIGRATION_66_67, MIGRATION_67_68, MIGRATION_68_69)
+                    MIGRATION_63_64, MIGRATION_64_65, MIGRATION_66_67, MIGRATION_67_68,
+                    MIGRATION_68_69)
 
 
 

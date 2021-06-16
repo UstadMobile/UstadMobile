@@ -59,7 +59,7 @@ class ClazzAssignmentDetailPresenter(context: Any,
             val hasPermission = db.clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
                     assignment.caClazzUid, Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)
             if(hasPermission){
-                view.tabs = listOf("${ClazzAssignmentDetailOverviewView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid",
+                view.tabs = listOf("${ClazzAssignmentDetailOverviewView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid&${UstadView.ARG_CLAZZUID}=${assignment.caClazzUid}",
                         "${ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid")
             }else{
                 view.tabs = listOf("${ClazzAssignmentDetailOverviewView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid")
