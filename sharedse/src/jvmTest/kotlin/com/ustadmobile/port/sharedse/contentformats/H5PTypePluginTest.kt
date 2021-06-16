@@ -97,7 +97,7 @@ class H5PTypePluginTest {
             val metadata = contentImportManager.extractMetadata(tempH5pFile.toURI().toString())!!
             val contentEntry = metadata.contentEntry
             val uid = repo.contentEntryDao.insertAsync(metadata.contentEntry)
-            val container = contentImportManager.importFileToContainer(tempH5pFile.path,
+            val container = contentImportManager.importFileToContainer(tempH5pFile.toURI().toString(),
                     metadata.mimeType, uid, containerTmpDir.absolutePath, mapOf()){
 
             }!!

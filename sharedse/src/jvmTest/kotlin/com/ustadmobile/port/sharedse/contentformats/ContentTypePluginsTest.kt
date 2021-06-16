@@ -80,8 +80,8 @@ class ContentTypePluginsTest {
 
         runBlocking {
             //TODO: Make this more rigorous
-            val metadata = contentImportManager.extractMetadata(tempEpubFile.path)!!
-            val container = contentImportManager.importFileToContainer(tempEpubFile.path,
+            val metadata = contentImportManager.extractMetadata(tempEpubFile.toURI().toString())!!
+            val container = contentImportManager.importFileToContainer(tempEpubFile.toURI().toString(),
                     metadata.mimeType, 0, containerTmpDir.absolutePath, mapOf()){
 
             }
@@ -102,7 +102,7 @@ class ContentTypePluginsTest {
         db.clearAllTables()
 
         val contentEntry =  runBlocking {
-           contentImportManager.extractMetadata(emptyFile.path)?.contentEntry
+           contentImportManager.extractMetadata(emptyFile.toURI().toString())?.contentEntry
         }
 
         Assert.assertNull("Given unsupported file, extractContentEntryMetaData returns null",
