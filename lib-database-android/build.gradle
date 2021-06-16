@@ -5,7 +5,7 @@ apply plugin: 'kotlin-kapt'
 
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
     }
 
     dependencies {

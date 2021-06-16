@@ -2,9 +2,9 @@
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         maven {
-            url "https://dl.bintray.com/ustadmobile/adbscreenrecord"
+            url "https://devserver3.ustadmobile.com/maven"
         }
     }
 
@@ -17,7 +17,7 @@ buildscript {
 }
 
 plugins {
-    id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha05"
+    id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha06"
 }
 
 apply plugin: 'com.android.library'

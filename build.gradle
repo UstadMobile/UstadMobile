@@ -9,7 +9,6 @@ buildscript {
 
     repositories {
         google()
-        jcenter()
         mavenCentral()
         maven {
             url 'https://plugins.gradle.org/m2/'
@@ -18,7 +17,7 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:4.2.1'
-        classpath 'com.google.gms:google-services:4.3.7'
+        classpath 'com.google.gms:google-services:4.3.8'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
         classpath "org.jetbrains.kotlinx:atomicfu-gradle-plugin:$atomicfu_version"
@@ -38,7 +37,7 @@ apply plugin: "com.github.ben-manes.versions"
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
 
         maven {
             url "https://devserver3.ustadmobile.com/maven"
@@ -49,17 +48,8 @@ allprojects {
         }
 
         maven {
-            url "https://dl.bintray.com/ustadmobile/adbscreenrecord"
+            url "https://jitpack.io"
         }
-
-        maven {
-            url "https://kotlin.bintray.com/kotlinx"
-        }
-        maven {
-            url "https://dl.bintray.com/soywiz/soywiz"
-        }
-
-        maven { url "https://jitpack.io" }
     }
 }
 
@@ -185,7 +175,7 @@ ext {
     version_android_leakcanary = "2.7"
     version_android_play_services_safetynet = "17.0.0"
     version_android_circleimageview = "3.1.0"
-    version_android_adbscreenrecorder = "0.1-alpha03"
+    version_android_adbscreenrecorder = "0.1-alpha06"
     version_androidx_viewpager2 = "1.1.0-rc01"
     version_android_aztec = "v1.3.45"
 

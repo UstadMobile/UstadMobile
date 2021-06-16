@@ -5,9 +5,6 @@ buildscript {
         }
 
         mavenCentral()
-        maven {
-            url "https://kotlin.bintray.com/kotlinx"
-        }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
