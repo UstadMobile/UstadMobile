@@ -28,7 +28,9 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
                                            
         COALESCE(CacheClazzAssignment.cacheMaxScore,0) AS resultMax,
                                                          
-        COALESCE(CacheClazzAssignment.cacheProgress,0) AS progress,                            
+        COALESCE(CacheClazzAssignment.cacheProgress,0) AS progress,                   
+                 
+        0 as resultScaled,
                             
         COALESCE(CacheClazzAssignment.cacheContentComplete,'FALSE') AS contentComplete,
         

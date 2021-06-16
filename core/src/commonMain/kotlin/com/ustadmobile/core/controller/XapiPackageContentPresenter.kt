@@ -125,15 +125,20 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
         GlobalScope.launch {
             val contentEntry = db.contentEntryDao.findByUid(contentEntryUid) ?: return@launch
             if(contentEntry.completionCriteria != ContentEntry.COMPLETION_CRITERIA_MIN_SCORE) return@launch
-            var score = db.statementDao.findScoreForSession(contextRegistration, false) ?: return@launch
-            // if content only had 1 exercise, there wont be any statements with contentEntryRoot = false so need to check again
-            if(score.resultMax == 0){
-                score = db.statementDao.findScoreForSession(contextRegistration, true) ?: return@launch
+            val completedScore = db.statementDao.findCompletedScoreForSession(contextRegistration)
+            var scoreTotal = (completedScore?.resultScaled ?: 0f) * 100
+            val scoreForSession = if((completedScore?.resultScaled ?: 0f) == 0f) {
+                // no completed statement found, calculate the score from the session and set the new scoreTotal
+               val score = db.statementDao.calculateScoreForSession(contextRegistration) ?: return@launch
+                scoreTotal = (score.resultScore.toFloat() / score.resultMax) * 100
+                score.resultScaled = (score.resultScore.toFloat() / score.resultMax)
+                score
+            }else{
+                completedScore
             }
-            val scoreTotal = (score.resultScore.toFloat() / score.resultMax) * 100
             if(scoreTotal > contentEntry.minScore){
                 statementEndpoint.storeCompletedStatement(accountManager.activeAccount,
-                        contentEntry, contextRegistration, score, clazzUid)
+                        contentEntry, contextRegistration, scoreForSession, clazzUid)
             }
         }
     }

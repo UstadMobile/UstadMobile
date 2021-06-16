@@ -111,7 +111,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                          AND cachePersonUid = :accountPersonUid),0) AS penalty,                      
                           
              0 as success,           
-                 
+             0 as resultScaled,    
               
               0 as progress
              
@@ -150,6 +150,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
     @Query("""
         SELECT COALESCE(SUM(ResultSource.cacheMaxScore),0) AS resultMax, 
                COALESCE(SUM(ResultSource.cacheStudentScore),0) AS resultScore, 
+               0 as resultScaled,
                'FALSE' as contentComplete, 0 as progress, 0 as success,
                COALESCE(AVG(ResultSource.cachePenalty),0) AS penalty
      	  FROM (SELECT CacheClazzAssignment.cacheStudentScore, CacheClazzAssignment.cacheMaxScore,
@@ -184,6 +185,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                 ) AS progress,
                 
                 0 as success, 
+                0 as resultScaled,
                 
                 'FALSE' as contentComplete,
                 

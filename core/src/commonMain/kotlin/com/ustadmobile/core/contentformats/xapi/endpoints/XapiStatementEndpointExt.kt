@@ -74,7 +74,7 @@ fun XapiStatementEndpoint.storeCompletedStatement(account: UmAccount, entry: Con
                 this.score = Score().apply {
                     raw = scoreProgress.resultScore.toLong()
                     max = scoreProgress.resultMax.toLong()
-                    scaled = raw.toFloat() / max
+                    scaled = scoreProgress.resultScaled
                 }
             }
         }

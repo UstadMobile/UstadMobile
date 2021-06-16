@@ -23,6 +23,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                0 AS cepcjLastChangedBy, 0 as cepcjLct, 
                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
                COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
+               COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
                COALESCE(StatementEntity.extensionProgress,0) AS progress,  
                COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
                COALESCE(StatementEntity.resultSuccess, 0) AS success,
@@ -164,6 +165,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             SELECT ContentEntry.*, ContentEntryParentChildJoin.*, Container.*,
                 COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
                 COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
+                COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
                 COALESCE(StatementEntity.extensionProgress,0) AS progress, 
                 COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
                 COALESCE(StatementEntity.resultSuccess, 0) AS success,
@@ -223,6 +225,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                       COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
                       COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
                       COALESCE(StatementEntity.extensionProgress,0) AS progress, 
+                      COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
                       COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
                       COALESCE(StatementEntity.resultSuccess, 0) AS success,
                       0 as penalty

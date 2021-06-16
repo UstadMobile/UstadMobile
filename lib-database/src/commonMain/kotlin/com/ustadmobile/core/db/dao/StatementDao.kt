@@ -66,7 +66,10 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                 ELSE 0 END) AS resultScore, 
             MAX(CASE WHEN ResultSource.contentEntryRoot 
                 THEN resultScoreMax
-                ELSE 0 END) AS resultMax,     
+                ELSE 0 END) AS resultMax,   
+            MAX(CASE WHEN ResultSource.contentEntryRoot 
+                THEN resultScoreScaled
+                ELSE 0 END) AS resultScaled, 
             MAX(ResultSource.extensionProgress) AS progress,
             0 as penalty,
             'FALSE' as contentComplete,
@@ -77,7 +80,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
          FROM (SELECT Person.personUid, Person.firstNames, Person.lastName, 
             StatementEntity.contextRegistration, StatementEntity.timestamp, 
             StatementEntity.resultDuration, StatementEntity.resultScoreRaw, 
-            StatementEntity.resultScoreMax,
+            StatementEntity.resultScoreMax, StatementEntity.resultScoreScaled,
             StatementEntity.contentEntryRoot, StatementEntity.extensionProgress
         
          ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
@@ -118,6 +121,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
         SELECT 
                 COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
                 COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
+                COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
                 COALESCE(StatementEntity.extensionProgress,0) AS progress, 
                 COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
                 COALESCE(StatementEntity.resultSuccess, 0) AS success,
@@ -198,17 +202,39 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     @Query("""
         SELECT SUM(resultScoreRaw) AS resultScore, 
                SUM(resultScoreMax) AS resultMax,
-               SUM(extensionProgress) As progress,
-               0 as progress,
+               MAX(extensionProgress) AS progress,
                0 as penalty,
                0 as success,
-               'FALSE' as contentComplete
-         FROM StatementEntity
-        WHERE contextRegistration = :contextRegistration
-          AND contentEntryRoot = :checkOnlyRoot
-          AND statementVerbUid = ${VerbEntity.VERB_ANSWERED_UID}
+               'FALSE' as contentComplete,
+               0 AS resultScaled
+         FROM (SELECT * FROM StatementEntity 
+                WHERE contextRegistration = :contextRegistration
+                  AND NOT contentEntryRoot
+                  AND statementVerbUid = ${VerbEntity.VERB_ANSWERED_UID} 
+             GROUP BY xObjectUid)
     """)
-    abstract fun findScoreForSession(contextRegistration: String, checkOnlyRoot: Boolean): ContentEntryStatementScoreProgress?
+    abstract fun calculateScoreForSession(contextRegistration: String): ContentEntryStatementScoreProgress?
+
+
+    @Query("""
+        SELECT resultScoreRaw AS resultScore, 
+               resultScoreMax AS resultMax,
+               extensionProgress AS progress,
+               0 AS penalty,
+               resultSuccess AS success,
+               resultCompletion AS contentComplete, 
+               resultScoreScaled AS resultScaled
+          FROM StatementEntity
+         WHERE resultCompletion
+          AND contextRegistration = :contextRegistration
+          AND contentEntryRoot
+     ORDER BY resultScoreScaled DESC, 
+              extensionProgress DESC, 
+              resultSuccess DESC 
+              LIMIT 1
+    """)
+    abstract fun findCompletedScoreForSession(contextRegistration: String): ContentEntryStatementScoreProgress?
+
 
     @Query("""
         SELECT contextRegistration 
