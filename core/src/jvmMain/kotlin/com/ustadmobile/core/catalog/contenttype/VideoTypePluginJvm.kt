@@ -6,7 +6,9 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.util.ShrinkUtils
 import com.ustadmobile.core.util.ext.fitWithin
+import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
@@ -20,7 +22,7 @@ class VideoTypePluginJvm: VideoTypePlugin() {
 
     override suspend fun extractMetadata(uri: String, context: Any): ContentEntryWithLanguage? {
         return withContext(Dispatchers.Default){
-            val file = File(uri)
+            val file = DoorUri.parse(uri).toFile()
 
             if(!fileExtensions.any { file.name.endsWith(it, true) }) {
                 return@withContext null
@@ -45,7 +47,7 @@ class VideoTypePluginJvm: VideoTypePlugin() {
                                            context: Any, db: UmAppDatabase, repo: UmAppDatabase, progressListener: (Int) -> Unit): Container {
         return withContext(Dispatchers.Default) {
 
-            val videoFile = File(uri.removePrefix("file://"))
+            val videoFile = DoorUri.parse(uri).toFile()
             var newVideo = File(videoFile.parentFile, "new${videoFile.nameWithoutExtension}.mp4")
 
             val compressVideo: Boolean = conversionParams["compress"]?.toBoolean() ?: false

@@ -167,6 +167,26 @@ private suspend fun UmAppDatabase.insertOrLookupContainerEntryFile(src: InputStr
     return containerFile
 }
 
+suspend fun UmAppDatabase.addContainerFromUri(containerUid: Long, uri: com.ustadmobile.door.DoorUri,
+                                              context: Any, nameInContainer: String,
+                                              addOptions: ContainerAddOptions){
+    val inputStream = uri.openInputStream(context) ?: throw IOException("resource not found: ${uri.getFileName(context)}")
+    val size = uri.getSize(context)
+    val repo = this as? DoorDatabaseRepository
+            ?: throw IllegalStateException("Must use repo for addFileToContainer")
+    val db = repo.db as UmAppDatabase
+    val containerFile = db.insertOrLookupContainerEntryFile(inputStream, size, nameInContainer, addOptions)
+
+    ContainerEntry().apply {
+        this.cePath = nameInContainer
+        this.ceContainerUid = containerUid
+        this.ceCefUid = containerFile.cefUid
+        this.ceUid = db.containerEntryDao.insert(this)
+    }
+
+    containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
+}
+
 suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
     zipInputStream: ZipInputStream, addOptions: ContainerAddOptions) {
 
