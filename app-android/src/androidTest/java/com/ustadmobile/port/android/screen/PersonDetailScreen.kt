@@ -1,6 +1,6 @@
 package com.ustadmobile.port.android.screen
 
-import com.agoda.kakao.common.views.KView
+import io.github.kakaocup.kakao.common.views.KView
 import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.PersonDetailFragment

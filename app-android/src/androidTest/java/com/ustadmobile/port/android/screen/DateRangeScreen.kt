@@ -3,9 +3,9 @@ package com.ustadmobile.port.android.screen
 import android.content.Context
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.navigation.fragment.findNavController
-import com.agoda.kakao.common.views.KView
-import com.agoda.kakao.edit.KTextInputLayout
-import com.agoda.kakao.text.KTextView
+import io.github.kakaocup.kakao.common.views.KView
+import io.github.kakaocup.kakao.edit.KTextInputLayout
+import io.github.kakaocup.kakao.text.KTextView
 import com.kaspersky.kaspresso.screens.KScreen
 import com.kaspersky.kaspresso.testcases.core.testcontext.TestContext
 import com.toughra.ustadmobile.R
