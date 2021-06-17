@@ -54,7 +54,7 @@ class DefaultClazzListItemListener(var view: ClazzList2View?,
 
             if(arguments.containsKey(UstadView.ARG_GO_TO_COMPLETE)) {
                 systemImpl.go(arguments[UstadView.ARG_GO_TO_COMPLETE].toString(),
-                        arguments.plus(UstadView.ARG_FILTER_BY_CLAZZUID to clazz.clazzUid.toString()),
+                        arguments.plus(UstadView.ARG_CLAZZUID to clazz.clazzUid.toString()),
                         context)
             }else {
                 view?.finishWithResult(listOf(clazz))

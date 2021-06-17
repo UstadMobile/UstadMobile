@@ -191,7 +191,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-android:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
 
-                implementation 'com.linkedin.android.litr:litr:1.4.3'
+                implementation "com.linkedin.android.litr:litr:$version_android_litr"
 
                 //dependency injection
                 implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"

@@ -49,6 +49,7 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
 
     : UstadBaseController<WebChunkView>(context, arguments, view, di) {
 
+    private var clazzUid: Long = 0L
     internal var containerUid: Long? = null
 
     private val contentEntryOpener: ContentEntryOpener by di.instance()
@@ -69,6 +70,7 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
 
         val entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
         containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()
+        clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0L
 
         GlobalScope.launch {
             try {
@@ -102,7 +104,7 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
                     val entry = repo.contentEntryDao.findBySourceUrlWithContentEntryStatusAsync(params.getValue("sourceUrl"))
                             ?: throw IllegalArgumentException("No File found")
                     contentEntryOpener.openEntry(context, entry.contentEntryUid, true,
-                        true, arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false)
+                        true, arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false, clazzUid = clazzUid)
                 } catch (e: Exception) {
                     if (e is NoAppFoundException) {
                         view.showNoAppFoundError(systemImpl.getString(MessageID.no_app_found, context),

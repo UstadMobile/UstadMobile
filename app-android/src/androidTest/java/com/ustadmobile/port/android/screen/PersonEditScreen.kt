@@ -3,10 +3,10 @@ package com.ustadmobile.port.android.screen
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.fragment.findNavController
-import com.agoda.kakao.common.views.KSwipeView
-import com.agoda.kakao.edit.KTextInputLayout
-import com.agoda.kakao.recycler.KRecyclerView
-import com.agoda.kakao.text.KTextView
+import io.github.kakaocup.kakao.common.views.KSwipeView
+import io.github.kakaocup.kakao.edit.KTextInputLayout
+import io.github.kakaocup.kakao.recycler.KRecyclerView
+import io.github.kakaocup.kakao.text.KTextView
 import com.kaspersky.kaspresso.screens.KScreen
 import com.kaspersky.kaspresso.testcases.core.testcontext.TestContext
 import com.soywiz.klock.DateTime

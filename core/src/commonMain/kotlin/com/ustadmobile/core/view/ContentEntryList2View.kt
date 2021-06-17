@@ -32,6 +32,8 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
 
         const val ARG_FOLDER_FILTER = "folder"
 
+        const val ARG_CLAZZ_CONTENT_FILTER = "clazzContent"
+
         const val ARG_LIBRARIES_CONTENT = "libraries"
 
         const val ARG_CLAZZWORK_FILTER = "clazzworkFilter"

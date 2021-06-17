@@ -6,7 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
-import com.agoda.kakao.common.views.KView
+import io.github.kakaocup.kakao.common.views.KView
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
@@ -80,7 +80,7 @@ class ContentEntryEndtoEnd : TestCase() {
                         }
                     }
 
-                    hasSize(4)
+                    hasSize(5)
 
                     openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext)
 
@@ -162,7 +162,7 @@ class ContentEntryEndtoEnd : TestCase() {
                 recycler{
 
                     flakySafely {
-                        hasSize(3)
+                        hasSize(4)
                     }
 
 
@@ -181,7 +181,7 @@ class ContentEntryEndtoEnd : TestCase() {
                     }
 
                     flakySafely {
-                        hasSize(2)
+                        hasSize(3)
                     }
 
                 }
@@ -277,7 +277,7 @@ class ContentEntryEndtoEnd : TestCase() {
 
                 recycler{
 
-                    hasSize(3)
+                    hasSize(4)
 
                     openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext)
 
@@ -287,7 +287,7 @@ class ContentEntryEndtoEnd : TestCase() {
                         click()
                     }
 
-                    hasSize(4)
+                    hasSize(5)
 
                     childWith<ContentEntryListScreen.MainItem> {
                          withDescendant {
@@ -313,7 +313,7 @@ class ContentEntryEndtoEnd : TestCase() {
                         click()
                     }
 
-                    hasSize(4)
+                    hasSize(5)
 
                 }
 

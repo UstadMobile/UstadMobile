@@ -10,7 +10,7 @@ import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.core.view.ClazzEnrolmentListView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -84,7 +84,7 @@ class ClazzEnrolmentListPresenterTest {
 
         val presenterArgs = mapOf<String,String>(
                 ARG_PERSON_UID to activePerson.personUid.toString(),
-                ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString())
+                ARG_CLAZZUID to testClazz.clazzUid.toString())
         val presenter = ClazzEnrolmentListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
@@ -108,7 +108,7 @@ class ClazzEnrolmentListPresenterTest {
 
         val presenterArgs = mapOf<String,String>(
                 ARG_PERSON_UID to activePerson.personUid.toString(),
-                ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString())
+                ARG_CLAZZUID to testClazz.clazzUid.toString())
         val presenter = ClazzEnrolmentListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
