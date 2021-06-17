@@ -40,7 +40,6 @@ import kotlin.jvm.Volatile
     LearnerGroup::class, LearnerGroupMember::class,
     GroupLearningSession::class,
     SiteTerms::class, ClazzContentJoin::class,
-    SiteTerms::class,
     PersonParentJoin::class,
     ScopedGrant::class,
     ErrorReport::class,

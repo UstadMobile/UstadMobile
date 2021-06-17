@@ -8,7 +8,8 @@ class EndpointScope: Scope<Endpoint> {
 
     private val activeEndpoints = mutableMapOf<String, ScopeRegistry>()
 
-    val activeEndpointUrls: Set<String> = activeEndpoints.keys
+    val activeEndpointUrls: Set<String>
+        get() = activeEndpoints.keys
 
     override fun getRegistry(context: Endpoint): ScopeRegistry = activeEndpoints.getOrPut(context.url) { StandardScopeRegistry() }
 
