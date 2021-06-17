@@ -1,10 +1,10 @@
 package com.ustadmobile.port.android.screen
 
 import android.view.View
-import com.agoda.kakao.common.builders.ViewBuilder
-import com.agoda.kakao.recycler.KRecyclerItem
-import com.agoda.kakao.recycler.KRecyclerView
-import com.agoda.kakao.switch.KSwitch
+import io.github.kakaocup.kakao.common.builders.ViewBuilder
+import io.github.kakaocup.kakao.recycler.KRecyclerItem
+import io.github.kakaocup.kakao.recycler.KRecyclerView
+import io.github.kakaocup.kakao.switch.KSwitch
 import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.ScopedGrantEditFragment

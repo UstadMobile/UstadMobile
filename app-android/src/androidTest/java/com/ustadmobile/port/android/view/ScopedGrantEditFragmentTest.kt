@@ -6,7 +6,7 @@ import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
-import com.agoda.kakao.switch.KSwitch
+import io.github.kakaocup.kakao.switch.KSwitch
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
