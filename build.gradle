@@ -2,7 +2,7 @@
 import org.apache.tools.ant.filters.*
 
 buildscript {
-    ext.version_kotlin = '1.5.0'
+    ext.version_kotlin = '1.5.10'
     ext.version_shadow = "5.2.0"
     ext.version_gradle_versions_plugin = "0.28.0"
     ext.atomicfu_version = '0.16.1'
@@ -85,7 +85,7 @@ ext {
     version_kotlin_jvmTarget = "1.8"
     version_kotlinx_serialization = "1.2.1"
     version_klock = "2.0.7"
-    version_ktor = "1.5.4"
+    version_ktor = "1.6.0"
     version_coroutines = "1.5.0"
     version_atomicfu = "0.16.1"
 
@@ -181,7 +181,7 @@ ext {
     version_android_leakcanary = "2.7"
     version_android_play_services_safetynet = "17.0.0"
     version_android_circleimageview = "3.1.0"
-    version_android_adbscreenrecorder = "0.1-alpha06"
+    version_android_adbscreenrecorder = "0.1-alpha07"
     version_androidx_viewpager2 = "1.1.0-rc01"
     version_android_aztec = "v1.3.45"
     version_android_wordpress_utils = "2.0.0"

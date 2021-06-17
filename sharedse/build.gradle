@@ -20,14 +20,6 @@ apply plugin: 'com.android.library'
 apply plugin: 'jacoco'
 apply plugin: "maven-publish"
 
-
-repositories {
-    mavenCentral()
-    maven {
-        url "http://devserver2.ustadmobile.com/repo-mvn"
-    }
-}
-
 android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
     buildToolsVersion rootProject.ext.version_android_buildtools

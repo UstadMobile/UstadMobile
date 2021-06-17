@@ -28,5 +28,4 @@ include ':app-android',
         ':lib-content-scrapers'
 
 rootProject.name = "UstadMobile"
-enableFeaturePreview("GRADLE_METADATA")
 
