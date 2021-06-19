@@ -59,11 +59,14 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private lateinit var appBarConfiguration: AppBarConfiguration
 
-    override val activityFloatingActionButton: ExtendedFloatingActionButton
-        get() = mBinding.activityListfragmelayoutBehaviorntFab
+    override val activityFloatingActionButton: ExtendedFloatingActionButton?
+        //Note: do not use mBinding here because it might not be ready for the first fragment
+        get() = findViewById(R.id.activity_main_extendedfab)
 
-    override val activityProgressBar: ProgressBar
-        get() = mBinding.mainCollapsingToolbar.mainProgressBar
+
+    override val activityProgressBar: ProgressBar?
+        //Note: do not use mBinding here because it might not be ready for the first fragment
+        get() = findViewById(R.id.main_progress_bar)
 
     private lateinit var mBinding: ActivityMainBinding
 

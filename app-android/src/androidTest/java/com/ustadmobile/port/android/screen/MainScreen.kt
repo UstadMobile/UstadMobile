@@ -14,7 +14,7 @@ object MainScreen : KScreen<MainScreen>() {
         get() = MainActivity::class.java
 
     val fab: KView = KView {
-        withId(R.id.activity_listfragmelayout_behaviornt_fab)
+        withId(R.id.activity_main_extendedfab)
     }
 
     val toolBarTitle: KView = KView { withId(R.id.toolbar)}
