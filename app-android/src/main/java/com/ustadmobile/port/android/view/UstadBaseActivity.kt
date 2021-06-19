@@ -35,7 +35,6 @@ import com.ustadmobile.port.android.impl.UserFeedbackException
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
 import com.ustadmobile.port.android.util.ext.getUstadLocaleSetting
 import com.ustadmobile.sharedse.network.NetworkManagerBle
-import kotlinx.android.synthetic.main.activity_main.*
 import org.acra.ACRA
 import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
@@ -231,12 +230,13 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotificatio
     }
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
-        val snackBar = Snackbar.make(coordinator_layout, message, Snackbar.LENGTH_LONG)
+        val snackBar = Snackbar.make(findViewById(R.id.coordinator_layout), message, Snackbar.LENGTH_LONG)
         if (actionMessageId != 0) {
             snackBar.setAction(systemImpl.getString(actionMessageId, this)) { action() }
             snackBar.setActionTextColor(ContextCompat.getColor(this, R.color.secondaryColor))
         }
-        snackBar.anchorView = bottom_nav_view
+
+        snackBar.anchorView = findViewById(R.id.bottom_nav_view)
         snackBar.show()
     }
 

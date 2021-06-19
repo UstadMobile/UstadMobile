@@ -8,7 +8,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
@@ -46,15 +45,11 @@ import com.ustadmobile.port.android.view.binding.setImageForeignKey
 import com.ustadmobile.port.android.view.binding.setImageForeignKeyAdapter
 import com.ustadmobile.port.android.view.util.UstadActivityWithProgressBar
 import com.ustadmobile.sharedse.network.NetworkManagerBle
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.appbar_material_collapsing.*
-import kotlinx.android.synthetic.main.appbar_material_collapsing.view.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.*
-import java.util.*
 
 
 class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
@@ -64,11 +59,11 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private lateinit var appBarConfiguration: AppBarConfiguration
 
-    override val activityFloatingActionButton: ExtendedFloatingActionButton?
-        get() = activity_listfragmelayout_behaviornt_fab
+    override val activityFloatingActionButton: ExtendedFloatingActionButton
+        get() = mBinding.activityListfragmelayoutBehaviorntFab
 
-    override val activityProgressBar: ProgressBar?
-        get() = main_progress_bar
+    override val activityProgressBar: ProgressBar
+        get() = mBinding.mainCollapsingToolbar.mainProgressBar
 
     private lateinit var mBinding: ActivityMainBinding
 
@@ -101,7 +96,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     //This is actually managed by the underlying fragments.
     override var loading: Boolean
         get() = false
-        set(value) {}
+        set(@Suppress("UNUSED_PARAMETER") value) {}
 
     //Observe the active account to show/hide the settings based on whether or not the user is admin
     private val mActiveUserObserver = Observer<UmAccount> {account ->
@@ -128,7 +123,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        setSupportActionBar(mBinding.root.toolbar)
+        setSupportActionBar(mBinding.mainCollapsingToolbar.toolbar)
 
         val host: NavHostFragment = supportFragmentManager
                 .findFragmentById(R.id.activity_main_navhost_fragment) as NavHostFragment? ?: return
@@ -155,7 +150,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val ustadDestination = destinationProvider.lookupDestinationById(destination.id)
         val scrollFlags = ustadDestination?.actionBarScrollBehavior ?:
             (AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL)
-        (mBinding.root.collapsing_toolbar.layoutParams as? AppBarLayout.LayoutParams)?.scrollFlags = scrollFlags
+        (mBinding.mainCollapsingToolbar.collapsingToolbar.layoutParams as? AppBarLayout.LayoutParams)?.scrollFlags = scrollFlags
 
         val userHasBottomNav = !contentOnlyForNonAdmin || accountManager.activeAccount.admin
         mBinding.bottomNavView.visibility = if(!userHasBottomNav || ustadDestination?.hideBottomNavigation == true) {
@@ -167,7 +162,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     }
 
     fun onAppBarExpand(expand: Boolean){
-        mBinding.root.appbar.setExpanded(expand)
+        mBinding.mainCollapsingToolbar.appbar.setExpanded(expand)
     }
 
     fun slideBottomNavigation(visible: Boolean) {
