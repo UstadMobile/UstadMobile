@@ -19,7 +19,6 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
-import kotlinx.android.synthetic.main.appbar_material_tabs_scrollable.view.*
 
 class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetailView{
 
@@ -40,7 +39,7 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
         mBinding = FragmentClazzWorkDetailBinding.inflate(inflater, container,
                 false).also {
             rootView = it.root
-            mTabLayout = it.root.tabs
+            mTabLayout = it.fragmentClazzWorkDetailAppbarTabs.tabs
         }
 
         mPager = mBinding?.fragmentClazzworkDetailViewpager
@@ -84,15 +83,14 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
 
     private fun setTabs(){
         if(progressOverviewVisible) {
-            mBinding?.root?.tabs?.visibility = View.VISIBLE
+            mBinding?.fragmentClazzWorkDetailAppbarTabs?.tabs?.visibility = View.VISIBLE
         }else{
-            mBinding?.root?.tabs?.visibility = View.GONE
+            mBinding?.fragmentClazzWorkDetailAppbarTabs?.tabs?.visibility = View.GONE
         }
 
         val entityUidValue : String = arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"
 
-        val tabs: List<String>
-        tabs = if(progressOverviewVisible){
+        val tabs: List<String> = if(progressOverviewVisible){
 
             listOf(
                     ClazzWorkDetailOverviewView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +

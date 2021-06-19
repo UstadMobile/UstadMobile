@@ -36,7 +36,6 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.util.ext.*
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
-import kotlinx.android.synthetic.main.fragment_content_entry_edit2.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
@@ -115,7 +114,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     override var titleErrorEnabled: Boolean = false
         set(value) {
-            entry_title.error = getString(R.string.field_required_prompt)
+            mBinding?.entryTitle?.error = getString(R.string.field_required_prompt)
             mBinding?.titleErrorEnabled = value
             field = value
         }
