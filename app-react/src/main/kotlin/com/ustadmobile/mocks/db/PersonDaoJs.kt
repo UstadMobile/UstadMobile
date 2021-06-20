@@ -132,10 +132,13 @@ class PersonDaoJs: PersonDao() {
         TODO("Not yet implemented")
     }
 
-    override fun findByUidWithDisplayDetailsLive(mPersonUid: Long): DoorLiveData<PersonWithDisplayDetails?> {
-       return DoorLiveDataJs(person?.apply {
+    override fun findByUidWithDisplayDetailsLive(
+        mPersonUid: Long,
+        activeUserPersonUid: Long
+    ): DoorLiveData<PersonWithPersonParentJoin?> {
+        return DoorLiveDataJs(person?.apply {
             personUid = mPersonUid
-        }) as DoorLiveData<PersonWithDisplayDetails?>
+        }) as DoorLiveData<PersonWithPersonParentJoin?>
     }
 
     override fun insertAuditLog(entity: AuditLog): Long {

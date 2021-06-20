@@ -10,6 +10,7 @@ import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.EntityRoleWithNameAndRole
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
+import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import com.ustadmobile.util.CssStyleManager
 import com.ustadmobile.util.CssStyleManager.alignTextToStart
 import com.ustadmobile.util.CssStyleManager.defaultFullWidth
@@ -29,7 +30,8 @@ import react.setState
 import styled.css
 import kotlin.js.Date
 
-class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithDisplayDetails>(mProps), PersonDetailView {
+class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPersonParentJoin>(mProps),
+    PersonDetailView {
 
     private lateinit var mPresenter: PersonDetailPresenter
 
@@ -67,8 +69,7 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithDisp
         set(value) {
             setState { field = value }
         }
-
-    override var entity: PersonWithDisplayDetails? = null
+    override var entity: PersonWithPersonParentJoin? = null
         get() = field
         set(value) {
             title = value?.firstNames +" "+ value?.lastName
