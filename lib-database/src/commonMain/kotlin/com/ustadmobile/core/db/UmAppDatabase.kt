@@ -10,6 +10,9 @@ import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.util.DoorSqlGenerator
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
+import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_STUDENT_GROUP
+import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_TEACHER_GROUP
 import kotlin.js.JsName
 import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
@@ -4509,7 +4512,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                         primaryCsnFieldName = "sgPcsn").forEach {
                         database.execSQL(it)
                     }
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ScopedGrant_trk (  epk  BIGINT  NOT NULL DEFAULT 0 , clientId  INTEGER  NOT NULL DEFAULT 0 , csn  INTEGER  NOT NULL DEFAULT 0 , rx  BOOL  NOT NULL DEFAULT 0 , reqId  INTEGER  NOT NULL DEFAULT 0 , ts  BIGINT  NOT NULL DEFAULT 0 , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ScopedGrant_trk (  epk  BIGINT  NOT NULL DEFAULT 0 , clientId  INTEGER  NOT NULL DEFAULT 0 , csn  INTEGER  NOT NULL DEFAULT 0 , rx  BOOL  NOT NULL DEFAULT false , reqId  INTEGER  NOT NULL DEFAULT 0 , ts  BIGINT  NOT NULL DEFAULT 0 , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("CREATE  INDEX index_ScopedGrant_trk_clientId_epk_csn ON ScopedGrant_trk (clientId, epk, csn)")
                     database.execSQL("CREATE UNIQUE INDEX index_ScopedGrant_trk_epk_clientId ON ScopedGrant_trk (epk, clientId)")
 
@@ -4523,6 +4526,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     ).forEach {
                         database.execSQL(it)
                     }
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonParentJoin_trk (  epk  BIGINT  NOT NULL DEFAULT 0 , clientId  INTEGER  NOT NULL DEFAULT 0 , csn  INTEGER  NOT NULL DEFAULT 0 , rx  BOOL  NOT NULL DEFAULT false , reqId  INTEGER  NOT NULL DEFAULT 0 , ts  BIGINT  NOT NULL DEFAULT 0 , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE  INDEX index_PersonParentJoin_trk_clientId_epk_csn ON PersonParentJoin_trk (clientId, epk, csn)")
+                    database.execSQL("CREATE UNIQUE INDEX index_PersonParentJoin_trk_epk_clientId ON PersonParentJoin_trk (epk, clientId)")
 
                     //ErrorReport
                     database.execSQL("CREATE TABLE IF NOT EXISTS ErrorReport (  errPcsn  BIGINT  NOT NULL , errLcsn  BIGINT  NOT NULL , errLcb  INTEGER  NOT NULL , errLct  BIGINT  NOT NULL , severity  INTEGER  NOT NULL , timestamp  BIGINT  NOT NULL , presenterUri  TEXT , appVersion  TEXT , versionCode  INTEGER  NOT NULL , errorCode  INTEGER  NOT NULL , operatingSys  TEXT , osVersion  TEXT , stackTrace  TEXT , message  TEXT , errUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
@@ -4534,6 +4540,47 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     ).forEach {
                         database.execSQL(it)
                     }
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ErrorReport_trk (  epk  BIGINT  NOT NULL DEFAULT 0 , clientId  INTEGER  NOT NULL DEFAULT 0 , csn  INTEGER  NOT NULL DEFAULT 0 , rx  BOOL  NOT NULL DEFAULT false , reqId  INTEGER  NOT NULL DEFAULT 0 , ts  BIGINT  NOT NULL DEFAULT 0 , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE  INDEX index_ErrorReport_trk_clientId_epk_csn ON ErrorReport_trk (clientId, epk, csn)")
+                    database.execSQL("CREATE UNIQUE INDEX index_ErrorReport_trk_epk_clientId ON ErrorReport_trk (epk, clientId)")
+
+                    database.execSQL("""
+                        UPDATE Role
+                           SET rolePermissions = (rolePermissions | ${Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT})
+                         WHERE roleUid = ${Role.ROLE_CLAZZ_TEACHER_UID}   
+                    """.trimIndent())
+
+                    database.execSQL("""
+                        UPDATE Role
+                           SET rolePermissions = (rolePermissions | ${Role.ROLE_SCHOOL_STAFF_PERMISSIONS_DEFAULT})
+                         WHERE roleUid = ${Role.ROLE_SCHOOL_STAFF_UID}  
+                    """.trimIndent())
+
+                    //For each preexisting role-entityrole assignment, make a ScopedGrant to give
+                    // the same permissions
+                    val updateTime = systemTimeInMillis()
+                    database.execSQL("""
+                        INSERT INTO ScopedGrant(sgUid, sgPcsn, sgLcsn, sgLcb, sgLct, sgTableId, 
+                                    sgEntityUid, sgPermissions, sgGroupUid, sgIndex, sgFlags)
+                             SELECT EntityRole.erUid AS sgUid, 0 AS sgPcsn, 0 AS sgLcsn, 0 AS sgLcb, 
+                                    $updateTime AS sgLct, EntityRole.erTableId AS sgTableId, 
+                                    EntityRole.erEntityUid AS sgEntityUid,
+                                    Role.rolePermissions AS sgPermissions, 
+                                    EntityRole.erGroupUid AS sgGroupUid, 0 AS sgIndex, 
+                                    CASE 
+                                         WHEN Role.roleUid = ${Role.ROLE_CLAZZ_TEACHER_UID} 
+                                              THEN ${FLAG_TEACHER_GROUP.or(FLAG_NO_DELETE)}
+                                         WHEN Role.roleUid = ${Role.ROLE_SCHOOL_STAFF_UID} 
+                                              THEN ${FLAG_TEACHER_GROUP.or(FLAG_NO_DELETE)}
+                                         WHEN Role.roleUid = ${Role.ROLE_CLAZZ_STUDENT_UID} 
+                                              THEN ${FLAG_STUDENT_GROUP.or(FLAG_NO_DELETE)}
+                                         WHEN Role.roleUid = ${Role.ROLE_SCHOOL_STUDENT_UID} 
+                                              THEN ${FLAG_STUDENT_GROUP.or(FLAG_NO_DELETE)}
+                                         ELSE 0
+                                    END AS sgFlags
+                               FROM EntityRole
+                                    JOIN Role ON EntityRole.erRoleUid = Role.roleUid     
+                    """.trimIndent())
                 }
             }
         }
@@ -4548,7 +4595,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
                     MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
                     MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
-                    MIGRATION_63_64, MIGRATION_64_65)
+                    MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66)
 
 
 
