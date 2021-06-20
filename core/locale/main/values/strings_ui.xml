@@ -350,7 +350,7 @@
     <string name="licence_type_cc_by">CC BY</string>
     <!--
     The Creative Commons CC BY SA license as per https://creativecommons.org/licenses/by-sa/4.0/
-    Please see the bottom of the link for some of the official translations available for this title.
+        Please see the bottom of the link for some of the official translations available for this title.
     -->
     <string name="licence_type_cc_by_sa">CC BY SA</string>
 
@@ -985,6 +985,13 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="video">Video</string>
 
     <string name="content_editor_create_new_category">New folder</string>
+    <string name="add_using_link">Add using link</string>
+    <string name="add_from_gallery">Add from gallery</string>
+    <string name="add_file">Add file</string>
+
+    <string name="add_link_description">Add educational content using web link, then use it offline</string>
+    <string name="add_gallery_description">Add video or audio from the device gallery</string>
+    <string name="add_file_description">Add educational content using supported formats e.g. PDF, xAPI, H5P, EPUB</string>
 
     <string name="manage_download">Manage download</string>
 
