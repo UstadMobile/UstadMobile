@@ -1,7 +1,7 @@
 package com.ustadmobile.port.android.screen
 
 import androidx.fragment.app.testing.FragmentScenario
-import com.agoda.kakao.edit.KTextInputLayout
+import io.github.kakaocup.kakao.edit.KTextInputLayout
 import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
 import com.ustadmobile.lib.db.entities.Role

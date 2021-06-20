@@ -1,7 +1,7 @@
 package com.ustadmobile.port.android.screen
 
 import com.kaspersky.kaspresso.screens.KScreen
-import com.agoda.kakao.text.KTextView
+import io.github.kakaocup.kakao.text.KTextView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.@BaseFileName@Fragment
 

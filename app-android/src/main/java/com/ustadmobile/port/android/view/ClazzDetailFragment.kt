@@ -12,12 +12,10 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzDetailBinding
 import com.ustadmobile.core.controller.ClazzDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
-import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
-import kotlinx.android.synthetic.main.appbar_material_tabs_fixed.view.*
 
 
 interface ClazzDetailFragmentEventHandler {
@@ -33,7 +31,6 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
     private var mPagerAdapter: ViewNameListFragmentPagerAdapter? = null
 
     override var tabs: List<String>? = null
-        get() = field
         set(value) {
             if(field == value)
                 return
@@ -53,7 +50,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
                         return@also
 
                     it.fragmentClazzDetailViewpager.adapter = mPagerAdapter
-                    it.root.tabs.setupWithViewPager(it.fragmentClazzDetailViewpager)
+                    it.fragmentClazzTabs.tabs.setupWithViewPager(it.fragmentClazzDetailViewpager)
                 }
             }
         }
@@ -61,7 +58,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val rootView: View
 
         //The fab will be managed by the underlying tabs
@@ -69,7 +66,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
         mBinding = FragmentClazzDetailBinding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.root.tabs.tabGravity = TabLayout.GRAVITY_FILL
+            it.fragmentClazzTabs.tabs.tabGravity = TabLayout.GRAVITY_FILL
         }
 
         return rootView
@@ -95,7 +92,6 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
     }
 
     override var entity: Clazz? = null
-        get() = field
         set(value) {
             field = value
             ustadFragmentTitle = value?.clazzName
