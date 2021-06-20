@@ -4,19 +4,18 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.ScopedGrantEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_GO_TO_COMPLETE
-import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ScopedGrant
 import com.ustadmobile.lib.db.entities.ScopedGrantAndName
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
 
 /**
  * @param editPresenter The editpresenter that this helper is working for - used to listen for json
@@ -60,24 +59,43 @@ class ScopedGrantOneToManyHelper(
         }
     }
 
-    suspend fun commitToDatabase(repo: UmAppDatabase, entityUid: Long) {
-        //function to set the table and entity uid on scopedgrants
-        val scopedGrantForeignKeyFn : (ScopedGrant) -> Unit = {
-            it.sgTableId = entityTableId
-            it.sgEntityUid = entityUid
+    /**
+     * Commit the ScopedGrants to the database
+     *
+     * @param repo DatabaseRepository to save to
+     * @param entityUid the ID that these scoped grants are related to e.g. the class uid or school uid
+     * @param flagToGroupMap a map of scopedGrant flags to group uids. When a class or school etc. is
+     * first created, the groups for teachers, students etc are not created yet. This map should be
+     * provided to map the ScopedGrant flag (e.g. FLAG_TEACHER_GROUP ) to the actual group uid for
+     * the related PersonGroup
+     */
+    suspend fun commitToDatabase(repo: UmAppDatabase, entityUid: Long,
+        flagToGroupMap: Map<Int, Long> = mapOf()) {
 
-            //TODO here: replace special values for teacher/student groups to use correct persongroupuid
+        val entitiesToInsertVal = entitiesToInsert
+
+        entitiesToInsertVal.forEach { grant ->
+            grant.scopedGrant?.apply {
+                if(sgGroupUid == 0L)
+                    //Set the group uid to the first one that matches in flagToGroupMap
+                    sgGroupUid = flagToGroupMap.entries.firstOrNull { sgFlags.hasFlag(it.key) }?.value ?: 0L
+            }
+
+            val groupToAssign: Long = flagToGroupMap[grant.scopedGrant?.sgFlags ?: 0] ?: -1
+            grant.scopedGrant?.takeIf { it.sgGroupUid == 0L && groupToAssign != -1L  }?.sgGroupUid = groupToAssign
+
+            //Set the primary key of the new ScopedGrant to zero so it can insert as expected
+            grant.scopedGrant?.sgUid = 0
+
+            grant.scopedGrant?.apply {
+                sgTableId = entityTableId
+                sgEntityUid = entityUid
+            }
         }
 
-        repo.scopedGrantDao.insertListAsync(
-            entitiesToInsert.mapNotNull {
-                it.scopedGrant?.also(scopedGrantForeignKeyFn)
-            })
+        repo.scopedGrantDao.insertListAsync(entitiesToInsertVal.mapNotNull { it.scopedGrant })
 
-        repo.scopedGrantDao.updateListAsync(
-            entitiesToUpdate.mapNotNull {
-                it.scopedGrant?.also(scopedGrantForeignKeyFn)
-            })
+        repo.scopedGrantDao.updateListAsync(entitiesToUpdate.mapNotNull { it.scopedGrant })
     }
 
 

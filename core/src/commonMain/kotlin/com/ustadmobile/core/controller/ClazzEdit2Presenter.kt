@@ -20,6 +20,8 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
+import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_STUDENT_GROUP
+import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_TEACHER_GROUP
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -49,8 +51,6 @@ class ClazzEdit2Presenter(context: Any,
 
     val scopedGrantOneToManyHelper = ScopedGrantOneToManyHelper(repo, this,
         requireBackStackEntry().savedStateHandle, Clazz.TABLE_ID)
-
-    fun requireBackStackEntry() = ustadNavController.currentBackStackEntry!!
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -247,15 +247,10 @@ class ClazzEdit2Presenter(context: Any,
                 it.scheduleClazzUid = entity.clazzUid
             }
 
-            //Set the group uids to match the respective roles.
-            scopedGrantOneToManyHelper.entitiesToInsert.forEach {
-                it.scopedGrant?.takeIf { it.sgFlags.hasFlag(ScopedGrant.FLAG_TEACHER_GROUP) }
-                    ?.sgGroupUid = entity.clazzTeachersPersonGroupUid
-
-                it.scopedGrant?.takeIf { it.sgFlags.hasFlag(ScopedGrant.FLAG_STUDENT_GROUP) }
-                    ?.sgGroupUid = entity.clazzStudentsPersonGroupUid
-            }
-            scopedGrantOneToManyHelper.commitToDatabase(repo, entity.clazzUid)
+            scopedGrantOneToManyHelper.commitToDatabase(repo, entity.clazzUid, flagToGroupMap = mapOf(
+                FLAG_TEACHER_GROUP to entity.clazzTeachersPersonGroupUid,
+                FLAG_STUDENT_GROUP to entity.clazzStudentsPersonGroupUid
+            ))
 
 
             val fromDateTime = DateTime.now().toOffsetByTimezone(entity.effectiveTimeZone).localMidnight

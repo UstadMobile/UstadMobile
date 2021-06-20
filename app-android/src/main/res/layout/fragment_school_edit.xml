@@ -9,6 +9,7 @@
         <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener"/>
+        <import type="com.ustadmobile.core.controller.SchoolEditPresenter"/>
 
 
         <variable
@@ -24,12 +25,12 @@
             type="boolean" />
 
         <variable
-            name="genderOptions"
-            type="java.util.List&lt;IdOption&gt;"/>
-
-        <variable
             name="activityEventHandler"
             type="com.ustadmobile.port.android.view.SchoolEditFragmentEventHandler" />
+
+        <variable
+            name="mPresenter"
+            type="SchoolEditPresenter" />
 
     </data>
 
@@ -190,6 +191,15 @@
                     android:text="@={school.schoolEmailAddress}"
                     tools:text="info@schoola.com" />
             </com.google.android.material.textfield.TextInputLayout>
+
+
+            <include layout="@layout/item_scoped_grant_one_to_many_list"
+                android:id="@+id/school_edit_fragment_permissions_inc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_email_tip"
+                app:scopedGrantsOneToManyListener="@{mPresenter.scopedGrantOneToManyHelper}"
+                />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -14,6 +14,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.ScopedGrant
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -85,9 +86,6 @@ class ScopedGrantEditPresenter(context: Any,
 
     companion object {
 
-        //TODO: Add constants for keys that would be used for any One To Many Join helpers
-
-
         /*
          * Map of those permissions that are to be shown for a given table:
          * tableId to list of Pairs(permission, messageId for permission)
@@ -111,8 +109,29 @@ class ScopedGrantEditPresenter(context: Any,
                 BitmaskMessageId(Role.PERMISSION_PERSONCONTACT_SELECT, MessageID.view_contact_details_of_members),
                 BitmaskMessageId(Role.PERMISSION_PERSONCONTACT_UPDATE, MessageID.edit_contact_details_of_members),
                 BitmaskMessageId(Role.PERMISSION_PERSONSOCIOECONOMIC_SELECT, MessageID.view_socioeconomic_details_of_members),
-                BitmaskMessageId(Role.PERMISSION_PERSONSOCIOECONOMIC_UPDATE, MessageID.edit_socioeconomic_details_of_members))
-        )
+                BitmaskMessageId(Role.PERMISSION_PERSONSOCIOECONOMIC_UPDATE, MessageID.edit_socioeconomic_details_of_members)),
+            School.TABLE_ID to listOf(
+                BitmaskMessageId(Role.PERMISSION_PERSON_DELEGATE, MessageID.permission_person_delegate),
+                BitmaskMessageId(Role.PERMISSION_SCHOOL_SELECT, MessageID.permission_school_select),
+                BitmaskMessageId(Role.PERMISSION_SCHOOL_UPDATE, MessageID.permission_school_update),
+                BitmaskMessageId(Role.PERMISSION_CLAZZ_SELECT, MessageID.permission_clazz_select),
+                BitmaskMessageId(Role.PERMISSION_CLAZZ_UPDATE, MessageID.permission_clazz_update),
+                BitmaskMessageId(Role.PERMISSION_CLAZZ_ADD_STUDENT, MessageID.permission_clazz_add_student),
+                BitmaskMessageId(Role.PERMISSION_CLAZZ_ADD_TEACHER, MessageID.permission_clazz_add_teacher),
+                BitmaskMessageId(Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT, MessageID.permission_attendance_select),
+                BitmaskMessageId(Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_UPDATE, MessageID.permission_attendance_update),
+                BitmaskMessageId(Role.PERMISSION_CLAZZ_CONTENT_SELECT, MessageID.view_class_content),
+                BitmaskMessageId(Role.PERMISSION_CLAZZ_CONTENT_UPDATE, MessageID.edit_class_content),
+                BitmaskMessageId(Role.PERMISSION_CLAZZWORK_SELECT, MessageID.permission_clazz_assignment_view),
+                BitmaskMessageId(Role.PERMISSION_CLAZZWORK_UPDATE, MessageID.permission_clazz_asignment_edit),
+                BitmaskMessageId(Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT, MessageID.view_class_learning_records),
+                BitmaskMessageId(Role.PERMISSION_PERSON_SELECT, MessageID.permission_person_select),
+                BitmaskMessageId(Role.PERMISSION_PERSON_UPDATE, MessageID.permission_person_update),
+                BitmaskMessageId(Role.PERMISSION_PERSONCONTACT_SELECT, MessageID.view_contact_details_of_members),
+                BitmaskMessageId(Role.PERMISSION_PERSONCONTACT_UPDATE, MessageID.edit_contact_details_of_members),
+                BitmaskMessageId(Role.PERMISSION_PERSONSOCIOECONOMIC_SELECT, MessageID.view_socioeconomic_details_of_members),
+                BitmaskMessageId(Role.PERMISSION_PERSONSOCIOECONOMIC_UPDATE, MessageID.edit_socioeconomic_details_of_members)),
+            )
 
     }
 
