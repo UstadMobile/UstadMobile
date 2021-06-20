@@ -985,9 +985,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="video">Video</string>
 
     <string name="content_editor_create_new_category">New folder</string>
-    <string name="add_using_link">Add using link</string>
-    <string name="add_from_gallery">Add from gallery</string>
-    <string name="add_file">Add file</string>
 
     <string name="add_link_description">Add educational content using web link, then use it offline</string>
     <string name="add_gallery_description">Add video or audio from the device gallery</string>
