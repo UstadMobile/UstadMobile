@@ -192,6 +192,8 @@ open class Role() {
 
         const val PERMISSION_PERSONSOCIOECONOMIC_UPDATE: Long = 140737488355328L
 
+        const val PERMISSION_ADD_CLASS_TO_SCHOOL: Long = 281474976710656L
+
         //Predefined roles that are added by the system
         const val ROLE_CLAZZ_TEACHER_NAME = "Teacher"
 

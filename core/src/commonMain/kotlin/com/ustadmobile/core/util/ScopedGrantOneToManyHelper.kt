@@ -27,16 +27,23 @@ class ScopedGrantOneToManyHelper(
     val repo: UmAppDatabase,
     val editPresenter: UstadEditPresenter<*, *>,
     val savedStateHandle: UstadSavedStateHandle,
-    val entityTableId: Int)
-    : DefaultOneToManyJoinEditHelper<ScopedGrantAndName>(
+    val entityTableId: Int
+) : DefaultOneToManyJoinEditHelper<ScopedGrantAndName>(
     pkGetter = {it.scopedGrant?.sgUid ?: 0L},
     serializationKey = "ScopedGrantAndName",
     serializationStrategy = ListSerializer(ScopedGrantAndName.serializer()),
     deserializationStrategy = ListSerializer(ScopedGrantAndName.serializer()),
     editPresenter = editPresenter,
     entityClass = ScopedGrantAndName::class,
-    pkSetter = {scopedGrant?.sgUid = it}), OneToManyJoinEditListener<ScopedGrantAndName> {
+    pkSetter = {scopedGrant?.sgUid = it}
+), OneToManyJoinEditListener<ScopedGrantAndName> {
 
+    val ScopedGrant.defaultNameByFlag: String?
+        get() = when{
+            sgFlags.hasFlag(ScopedGrant.FLAG_TEACHER_GROUP) -> "Teachers"
+            sgFlags.hasFlag(ScopedGrant.FLAG_STUDENT_GROUP) -> "Students"
+            else -> null
+        }
 
     init {
         //Get the current back stack, then watch / observe for when the result comes back from the edit screen
@@ -51,7 +58,7 @@ class ScopedGrantOneToManyHelper(
                 val groupName = repo.personGroupDao.findNameByGroupUid(newValue.sgGroupUid)
                 onEditResult(ScopedGrantAndName().apply {
                     scopedGrant = newValue
-                    name = groupName
+                    name = groupName ?: scopedGrant?.defaultNameByFlag
                 })
 
                 savedStateHandle[SAVEDSTATE_KEY_SCOPEDGRANT_RESULTS] = null
