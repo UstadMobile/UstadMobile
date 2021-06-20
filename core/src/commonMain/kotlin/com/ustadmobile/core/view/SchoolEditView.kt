@@ -8,12 +8,9 @@ import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 
 interface SchoolEditView: UstadEditView<SchoolWithHolidayCalendar> {
 
-    var schoolClazzes : DoorMutableLiveData<List<Clazz>>?
-    var genderOptions: List<SchoolEditPresenter.GenderTypeMessageIdOption>?
-
     companion object {
 
-        const val VIEW_NAME = "SchoolEditView"
+        const val VIEW_NAME = "SchoolEdit"
 
     }
 

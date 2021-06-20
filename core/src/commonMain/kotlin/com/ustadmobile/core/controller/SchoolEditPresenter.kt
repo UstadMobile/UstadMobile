@@ -28,18 +28,6 @@ class SchoolEditPresenter(context: Any,
                           lifecycleOwner: DoorLifecycleOwner)
     : UstadEditPresenter<SchoolEditView, SchoolWithHolidayCalendar>(context, arguments, view, di, lifecycleOwner) {
 
-    enum class GenderOptions(val optionVal: Int, val messageId: Int){
-        MIXED(School.SCHOOL_GENDER_MIXED,
-                MessageID.mixed),
-        FEMALE(School.SCHOOL_GENDER_FEMALE,
-                MessageID.female),
-        MALE(School.SCHOOL_GENDER_MALE,
-                MessageID.male)
-    }
-
-    class GenderTypeMessageIdOption(day: GenderOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
-
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
@@ -48,18 +36,12 @@ class SchoolEditPresenter(context: Any,
             ListSerializer(Clazz.serializer()),
             ListSerializer(Clazz.serializer()), this, Clazz::class) { clazzUid = it }
 
-    fun handleAddOrEditClazz(clazz: Clazz) {
-        clazzOneToManyJoinEditHelper.onEditResult(clazz)
-    }
-
     fun handleRemoveSchedule(clazz: Clazz) {
         clazzOneToManyJoinEditHelper.onDeactivateEntity(clazz)
     }
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.genderOptions = GenderOptions.values().map { GenderTypeMessageIdOption(it, context) }
-        view.schoolClazzes = clazzOneToManyJoinEditHelper.liveList
 
     }
 
@@ -70,14 +52,8 @@ class SchoolEditPresenter(context: Any,
             db.schoolDao.findByUidWithHolidayCalendarAsync(entityUid)
         } ?: SchoolWithHolidayCalendar()
 
-        val clazzes = withTimeoutOrNull(2000){
-            db.takeIf { entityUid != 0L }?.clazzDao?.findAllClazzesBySchool(entityUid)
-        }?: listOf()
-
-        clazzOneToManyJoinEditHelper.liveList.sendValue(clazzes)
 
         return school
-
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): SchoolWithHolidayCalendar? {
@@ -110,12 +86,6 @@ class SchoolEditPresenter(context: Any,
             }else {
                 repo.schoolDao.updateAsync(entity)
             }
-
-            val allClazzes = clazzOneToManyJoinEditHelper.liveList.getValue() ?: listOf()
-            val clazzesToAssign = allClazzes.filter { it.clazzSchoolUid != entity.schoolUid}
-            repo.clazzDao.assignClassesToSchool(clazzesToAssign.map { it.clazzUid }, entity.schoolUid)
-            repo.clazzDao.assignClassesToSchool(
-                    clazzOneToManyJoinEditHelper.primaryKeysToDeactivate, 0L)
 
             onFinish(SchoolDetailView.VIEW_NAME, entity.schoolUid, entity)
         }
