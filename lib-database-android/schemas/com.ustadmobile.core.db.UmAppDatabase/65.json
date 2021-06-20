@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 65,
-    "identityHash": "621c63eb04ec6b044c72917e540db6d6",
+    "identityHash": "2a873738cc1cc7bb8c5ef4574fca29db",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5846,7 +5846,7 @@
       },
       {
         "tableName": "PersonParentJoin",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ppjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ppjPcsn` INTEGER NOT NULL, `ppjLcsn` INTEGER NOT NULL, `ppjLcb` INTEGER NOT NULL, `ppjLct` INTEGER NOT NULL, `ppjParentPersonUid` INTEGER NOT NULL, `ppjMinorPersonUid` INTEGER NOT NULL, `ppjRelationship` INTEGER NOT NULL, `ppjEmail` TEXT, `ppjPhone` TEXT, `ppjInactive` INTEGER NOT NULL, `ppjApprovalTiemstamp` INTEGER NOT NULL, `ppjApprovalIpAddr` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ppjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ppjPcsn` INTEGER NOT NULL, `ppjLcsn` INTEGER NOT NULL, `ppjLcb` INTEGER NOT NULL, `ppjLct` INTEGER NOT NULL, `ppjParentPersonUid` INTEGER NOT NULL, `ppjMinorPersonUid` INTEGER NOT NULL, `ppjRelationship` INTEGER NOT NULL, `ppjEmail` TEXT, `ppjPhone` TEXT, `ppjInactive` INTEGER NOT NULL, `ppjStatus` INTEGER NOT NULL, `ppjApprovalTiemstamp` INTEGER NOT NULL, `ppjApprovalIpAddr` TEXT)",
         "fields": [
           {
             "fieldPath": "ppjUid",
@@ -5911,6 +5911,12 @@
           {
             "fieldPath": "ppjInactive",
             "columnName": "ppjInactive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppjStatus",
+            "columnName": "ppjStatus",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -10340,7 +10346,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '621c63eb04ec6b044c72917e540db6d6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2a873738cc1cc7bb8c5ef4574fca29db')"
     ]
   }
 }

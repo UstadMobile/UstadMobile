@@ -222,7 +222,7 @@ class PersonEditPresenter(context: Any,
 
             //Email validation
             val email = entity.emailAddr?:""
-            if(email.isNotEmpty() && !Regex("^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$").matches(email)){
+            if(email.isNotEmpty() && !EMAIL_VALIDATION_REGEX.matches(email)){
                 view.emailError = formatError
             }
 
@@ -237,14 +237,20 @@ class PersonEditPresenter(context: Any,
             }
 
             if(registrationModeFlags.hasFlag(PersonEditView.REGISTER_MODE_ENABLED)) {
-                val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
-
                 view.takeIf { entity.username.isNullOrEmpty() }?.usernameError = requiredFieldMessage
                 view.takeIf { entity.newPassword.isNullOrEmpty() }?.passwordError = requiredFieldMessage
                 view.takeIf { entity.confirmedPassword.isNullOrEmpty() }?.confirmError = requiredFieldMessage
 
-                view.takeIf { registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)  && view.approvalPersonParentJoin?.ppjEmail.isNullOrBlank()}
-                    ?.parentContactError = requiredFieldMessage
+                val parentEmailError = when {
+                    !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR) -> 0
+                    view.approvalPersonParentJoin?.ppjEmail.isNullOrBlank() -> MessageID.field_required_prompt
+                    view.approvalPersonParentJoin?.ppjEmail?.let { EMAIL_VALIDATION_REGEX.matches(it) } != true ->
+                        MessageID.invalid_email
+                    else -> 0
+                }
+
+                view.takeIf { parentEmailError != 0 }?.parentContactError = systemImpl.getString(
+                    parentEmailError, context)
 
                 view.takeIf { entity.dateOfBirth == 0L }?.dateOfBirthError = requiredFieldMessage
                 view.takeIf { entity.confirmedPassword != entity.newPassword }?.noMatchPasswordError =
@@ -263,7 +269,6 @@ class PersonEditPresenter(context: Any,
                     ))
 
                     val popUpToViewName = arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.CURRENT_DEST
-                    accountManager.activeAccount = umAccount
 
                     if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)) {
                         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
@@ -281,6 +286,7 @@ class PersonEditPresenter(context: Any,
 
                         impl.go(RegisterMinorWaitForParentView.VIEW_NAME, args, context, goOptions)
                     }else {
+                        accountManager.activeAccount = umAccount
                         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
                             popUpToViewName, true)
                         accountManager.activeAccount = umAccount
@@ -301,7 +307,7 @@ class PersonEditPresenter(context: Any,
             } else {
                 //Create/Update person group
                 if(entity.personUid == 0L) {
-                    val personWithGroup = repo.insertPersonAndGroup(entity, loggedInPerson)
+                    val personWithGroup = repo.insertPersonAndGroup(entity)
                     entity.personGroupUid = personWithGroup.personGroupUid
                     entity.personUid = personWithGroup.personUid
                 }else {
@@ -361,6 +367,13 @@ class PersonEditPresenter(context: Any,
                     onFinish(PersonDetailView.VIEW_NAME, entity.personUid, entity)
                 }
             }
+        }
+    }
+
+    companion object {
+
+        val EMAIL_VALIDATION_REGEX: Regex by lazy(LazyThreadSafetyMode.NONE) {
+            Regex("^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$")
         }
     }
 }

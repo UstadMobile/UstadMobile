@@ -1038,6 +1038,8 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="join_school">Join school</string>
 
+    <string name="parental_consent">Parental consent</string>
+
     <!--
     When a child registers (without using a link provided by a teacher), then a message is sent to
     the parent with a link allowing them to approve or reject the request.
@@ -1055,19 +1057,79 @@ Content is provided under license by external content providers. Ustad Mobile, u
     %3$s will be replaced with the link for the parent to approve or reject registration
     -->
     <string name="parent_child_register_message">Dear parent,
-    Your child ( %1$s ) has requested to register with %2$s . Please approve or reject the request
-    using the link below.
+Your child ( %1$s ) has requested to register with %2$s . Please approve or reject the request
+using the link below.
 
-    %3$s
+%3$s
 
-    If the request has not been accepted within 30 days, then the request (and any personal
-    information) will be deleted. You can revoke approval anytime by using the same link.
+If the request has not been accepted within 30 days, then the request (and any personal
+information) will be deleted. You can revoke approval anytime by using the same link.
 
-    Thank you,
+Thank you,
 
-     %2$s
+%2$s
     </string>
 
+    <!--
+    When a child registers (without using a link provided by a teacher), then a message is sent to
+    the parent with a link allowing them to approve or reject the request.
+
+    When the parent opens the link, they will see this text to explain their choice to either
+    grant or deny consent for their child to use the app.
+    %1$s will be replaced with the name of the child
+    %2$s will be replaced with the date of birth of the child
+    %3$s will be replaced with the name of the app
+    -->
+    <string name="parent_consent_explanation">I confirm that I am the parent or legal guardian of the following child:\n
+        \n
+Name: %1$s\n
+Date of birth: %2$s\n
+\n
+If I consent to my child using %3$s, then the collection of and processing of personally identifiable information will be done in compliance with the privacy policy and terms and conditions below.\n
+\n
+Consent can be revoked anytime by using the link that was emailed. If you choose not to consent, any data provided by your child will be deleted within 24 hours.
+    </string>
+
+
+    <!--
+    Used as the header when asking a parent or legal guardian to select their relationship
+    with a child. Options would be mother, father, other
+    -->
+    <string name="relationship">Relationship</string>
+
+    <string name="i_consent">I consent</string>
+
+    <string name="i_do_not_consent">I do not consent</string>
+
+    <string name="revoke_consent">Revoke consent</string>
+
+    <string name="restore_consent">Restore consent</string>
+
+    <!--
+    This is the parental consent status. This will be shown when the parent has consented to
+    the child using the app. %1$s will be replaced with the date.
+    -->
+    <string name="status_consent_granted">Status: consent granted (%1$s)</string>
+
+    <!--
+    This is the parental consent status. This will be shown when the parent has not consented to
+    the child using the app. %1$s will be replaced with the date.
+    -->
+    <string name="status_consent_denied">Status: consent denied (%1$s)</string>
+
+    <!--
+    This is used in the context of describing the relationship between an adult and a child.
+    Normally this would be 'mother' or 'father'. In cases where someone else (e.g. an uncle, aunt,
+    foster parent, etc) is legally responsible for the child, this is the option to select
+    -->
+    <string name="other_legal_guardian">Other legal guardian</string>
+
+    <!--
+    This is the text for a button that will be available for parents when they are viewing the
+    profile of their child. They can click it to revoke or restore consent for their child to use
+    the app.
+    -->
+    <string name="manage_parental_consent">Manage parental consent</string>
 
 
 </resources>

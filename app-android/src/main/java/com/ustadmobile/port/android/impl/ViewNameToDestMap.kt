@@ -107,9 +107,10 @@ class ViewNameToDestMap: DestinationProvider {
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true,
                 hideAccountIcon = true),
             RegisterMinorWaitForParentView.VIEW_NAME to UstadDestination(R.id.register_minor_wait_for_parent_dest,
-                hideBottomNavigation = true),
+                hideBottomNavigation = true, hideAccountIcon = true),
             RegisterAgeRedirectView.VIEW_NAME to UstadDestination(R.id.register_age_redirect_dest,
-                hideBottomNavigation = true)
+                hideBottomNavigation = true, hideAccountIcon = true),
+            ParentalConsentManagementView.VIEW_NAME to UstadDestination(R.id.parental_consent_management_dest)
     )
 
     override val navControllerViewId: Int

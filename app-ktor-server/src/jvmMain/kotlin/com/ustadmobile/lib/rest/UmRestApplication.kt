@@ -58,6 +58,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.naming.InitialContext
 import io.ktor.client.features.json.JsonFeature
+import io.ktor.http.content.*
 import jakarta.mail.Authenticator
 import jakarta.mail.PasswordAuthentication
 import org.xmlpull.v1.XmlPullParserFactory
@@ -273,6 +274,18 @@ fun Application.umRestApplication(dbModeOverride: String? = null,
         UmAppDatabase_KtorRoute(true)
         SiteRoute()
         ContentEntryLinkImporter()
+        /*
+          This is a temporary redirect approach for users who open an app link but don't
+          have the app installed. Because the uri scheme of views is #ViewName?args, this
+          won't be included in the referrer header when the user goes to get the app.
+
+          The static route will redirect /umapp/#ViewName?args to
+          /getapp/?uri=(encoded full uri including #ViewName?args)
+         */
+        static("umapp") {
+            resource("/", "/static/getappredirect/index.html")
+        }
+        GetAppRoute()
         if (devMode) {
             DevModeRoute()
         }

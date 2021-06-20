@@ -46,6 +46,7 @@ kotlin {
                 implementation "io.ktor:ktor-gson:$version_ktor"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "io.ktor:ktor-html-builder:$version_ktor"
                 implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
                 implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
                 implementation "io.github.bonigarcia:webdrivermanager:$version_chrome_manager"

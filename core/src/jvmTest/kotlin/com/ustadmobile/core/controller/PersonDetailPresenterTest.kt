@@ -13,14 +13,15 @@ import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.util.test.ext.insertPersonWithRole
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Before
 import org.junit.Rule
@@ -62,7 +63,9 @@ class PersonDetailPresenterTest {
     @Before
     fun setup() {
         context = Any()
-        mockLifecycleOwner = mock { }
+        mockLifecycleOwner = mock {
+            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
+        }
 
         mockView = mock{}
         impl = mock()
@@ -186,5 +189,58 @@ class PersonDetailPresenterTest {
 
         verify(mockView, timeout(defaultTimeout).atLeastOnce()).changePasswordVisible = eq(true)
         verify(mockView, timeout(defaultTimeout).atLeastOnce()).showCreateAccountVisible = eq(false)
+    }
+
+    @Test
+    fun givenActiveUserIsParent_whenOpenChildProfile_thenShouldShowManageParentalConsent() {
+        val person = createPerson(isAdmin = false, sameUser = true)
+
+        val child = runBlocking {
+            repo.insertPersonAndGroup(Person().apply {
+                firstNames = "Bob"
+                lastName = "Young"
+                dateOfBirth = systemTimeInMillis() - (10 * 365 * 24 * 60 * 60 * 1000L)
+                username = "young"
+            })
+        }
+
+        runBlocking {
+            repo.personParentJoinDao.insertAsync(PersonParentJoin().apply {
+                ppjMinorPersonUid = child.personUid
+                ppjParentPersonUid = person.personUid
+                ppjRelationship = PersonParentJoin.RELATIONSHIP_MOTHER
+            })
+        }
+
+        val args = mapOf(UstadView.ARG_ENTITY_UID to child.personUid.toString())
+        val presenter = PersonDetailPresenter(context, args ,mockView,di, mockLifecycleOwner)
+        presenter.onCreate(null)
+
+        verify(mockView, timeout(5000).atLeastOnce()).entity = argWhere {
+            it.parentJoin != null
+        }
+    }
+
+    @Test
+    fun givenActiveUserIsNotParent_whenOpenChildProfile_thenShouldShowManageParentalConsent() {
+        val person = createPerson(isAdmin = false, sameUser = true)
+
+        val child = runBlocking {
+            repo.insertPersonAndGroup(Person().apply {
+                firstNames = "Bob"
+                lastName = "Young"
+                dateOfBirth = systemTimeInMillis() - (10 * 365 * 24 * 60 * 60 * 1000L)
+                username = "young"
+            })
+        }
+
+
+        val args = mapOf(UstadView.ARG_ENTITY_UID to child.personUid.toString())
+        val presenter = PersonDetailPresenter(context, args ,mockView,di, mockLifecycleOwner)
+        presenter.onCreate(null)
+
+        verify(mockView, timeout(5000).atLeastOnce()).entity = argWhere {
+            it.parentJoin == null
+        }
     }
 }

@@ -359,5 +359,10 @@
         android:name="com.ustadmobile.port.android.view.RegisterAgeRedirectFragment"
         android:label="@string/register"/>
 
+    <fragment
+        android:id="@+id/parental_consent_management_dest"
+        android:name="com.ustadmobile.port.android.view.ParentalConsentManagementFragment"
+        android:label="@string/parental_consent"/>
+
 
 </navigation>

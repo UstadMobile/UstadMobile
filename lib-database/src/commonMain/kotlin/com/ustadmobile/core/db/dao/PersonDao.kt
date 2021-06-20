@@ -4,6 +4,7 @@ import androidx.paging.DataSource
 import androidx.room.*
 import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
@@ -249,8 +250,19 @@ abstract class PersonDao : BaseDao<Person> {
 
 
 
-    @Query("SELECT Person.* FROM Person WHERE Person.personUid = :personUid")
-    abstract fun findByUidWithDisplayDetailsLive(personUid: Long): DoorLiveData<PersonWithDisplayDetails?>
+    @Query("""
+        SELECT Person.*, PersonParentJoin.* 
+          FROM Person
+     LEFT JOIN PersonParentJoin on ppjUid = (
+                SELECT ppjUid 
+                  FROM PersonParentJoin
+                 WHERE ppjMinorPersonUid = :personUid 
+                       AND ppjParentPersonUid = :activeUserPersonUid 
+                LIMIT 1)     
+         WHERE Person.personUid = :personUid
+        """)
+    @QueryLiveTables(["Person", "PersonParentJoin"])
+    abstract fun findByUidWithDisplayDetailsLive(personUid: Long, activeUserPersonUid: Long): DoorLiveData<PersonWithPersonParentJoin?>
 
     private fun createAuditLog(toPersonUid: Long, fromPersonUid: Long) {
         if(fromPersonUid != 0L) {
