@@ -17,13 +17,11 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
+import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.DownloadJobItem
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.screen.*
 import com.ustadmobile.test.port.android.util.waitUntilWithActivityScenario
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
@@ -53,12 +51,18 @@ class LearnerGroupEndToEndTest : TestCase() {
 
     @Before
     fun setup() {
-        dbRule.insertPersonForActiveUser(Person().apply {
+        val adminPerson = Person().apply {
             admin = true
             firstNames = "Test"
             lastName = "Teacher"
             username = "Ms Teach"
-        })
+        }
+        dbRule.insertPersonForActiveUser(adminPerson)
+
+        runBlocking {
+            dbRule.repo.grantScopedPermission(adminPerson, Role.ALL_PERMISSIONS,
+                ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
+        }
 
         Person().apply {
             firstNames = "New"

@@ -14,6 +14,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultGson
+import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
@@ -40,25 +41,15 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
         nestedView.swipeUp()
     }
 
-    val clazzListRecyclerView: KRecyclerView = KRecyclerView({ withId(R.id.clazzlist_recyclerview) },
-            itemTypeBuilder = {
-            })
-
-    val clazzListHeaderTextView: KTextView = KTextView { withId(R.id.clazzlist_header_textview) }
-
-    val rolesList: KRecyclerView = KRecyclerView({ withId(R.id.roles_and_permissions_rv) },
-            itemTypeBuilder = {
-            })
-
-    val roleHeaderTextView: KTextView = KTextView { withId(R.id.roles_and_permissions_header_textview) }
-
     val usernameTextInput = KTextInputLayout { withId(R.id.username_textinputlayout) }
 
-    val passwordTextInput = KTextInputLayout { withId(R.id.username_textinputlayout) }
+    val passwordTextInput = KTextInputLayout { withId(R.id.password_textinputlayout) }
 
     val firstNameTextInput = KTextInputLayout { withId(R.id.firstnames_textinputlayout) }
 
     val lastNameTextInput = KTextInputLayout { withId(R.id.lastname_textInputLayout) }
+
+    val parentsContactsInput = KTextInputLayout { withId(R.id.parent_contact_textInputLayout) }
 
     val confirmPassTextInput = KTextInputLayout { withId(R.id.confirm_password_textinputlayout) }
 
@@ -72,7 +63,8 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
 
     val genderValue = KTextView { withId(R.id.gender_value) }
 
-    fun launchFragment(registrationMode: Boolean = false, misMatchPassword: Boolean = false,
+    fun launchFragment(registrationMode: Int = PersonEditView.REGISTER_MODE_NONE,
+                       misMatchPassword: Boolean = false,
                        leftOutPassword: Boolean = false, leftOutUsername: Boolean = false,
                        fillForm: Boolean = true,
                        entityRoles: List<EntityRoleWithNameAndRole> = listOf(),
@@ -173,7 +165,7 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
                 }
             }
 
-            if (!leftOutDateOfBirth) {
+            if (!leftOutDateOfBirth && !registrationMode.hasFlag(PersonEditView.REGISTER_MODE_ENABLED)) {
                 person.dateOfBirth.takeIf { it != personOnForm?.dateOfBirth }?.also {
                     birthdayTextInput{
                         edit{

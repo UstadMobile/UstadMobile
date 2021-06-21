@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.ustadmobile.core.util.OneToManyJoinEditListener"/>
+        <import type="com.ustadmobile.lib.db.entities.ScopedGrantAndName"/>
+
+        <variable
+            name="scopedGrantsOneToManyListener"
+            type="OneToManyJoinEditListener&lt;ScopedGrantAndName&gt;" />
+    </data>
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_16dp"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:text="@string/permissions"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            android:layout_marginBottom="@dimen/dimen_8dp"
+            style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
+            app:icon="@drawable/ic_add_black_24dp"
+            app:iconGravity="start"
+            android:gravity="start|center_vertical"
+            android:text="@string/add_person_or_group"
+            android:onClick="@{() -> scopedGrantsOneToManyListener.onClickNew()}"
+            />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/item_scoped_grant_one_to_n_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:listitem="@layout/item_scoped_grant_edit"
+            tools:itemCount="3"
+            />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</layout>

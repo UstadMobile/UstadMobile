@@ -62,16 +62,13 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
-import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 
 import org.kodein.di.*
-import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
-
-import java.util.concurrent.TimeUnit
+import com.ustadmobile.core.impl.di.commonJvmDiModule
 
 /**
  * Note: BaseUstadApp extends MultidexApplication on the multidex variant, but extends the
@@ -80,6 +77,8 @@ import java.util.concurrent.TimeUnit
 open class UstadApp : BaseUstadApp(), DIAware {
 
     val diModule = DI.Module("UstadApp-Android") {
+        import(commonJvmDiModule)
+
         bind<UstadMobileSystemImpl>() with singleton {
             UstadMobileSystemImpl.instance
         }
@@ -211,34 +210,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<XmlSerializer>() with provider {
             instance<XmlPullParserFactory>().newSerializer()
-        }
-
-        bind<OkHttpClient>() with singleton {
-            OkHttpClient.Builder()
-                    .dispatcher(Dispatcher().also {
-                        it.maxRequests = 30
-                        it.maxRequestsPerHost = 10
-                    })
-                    .build()
-        }
-
-        bind<HttpClient>() with singleton {
-            HttpClient(OkHttp) {
-
-                install(JsonFeature) {
-                    serializer = GsonSerializer()
-                }
-                install(HttpTimeout)
-
-                val dispatcher = Dispatcher()
-                dispatcher.maxRequests = 30
-                dispatcher.maxRequestsPerHost = 10
-
-                engine {
-                    preconfigured = instance()
-                }
-
-            }
         }
 
         bind<DestinationProvider>() with singleton {

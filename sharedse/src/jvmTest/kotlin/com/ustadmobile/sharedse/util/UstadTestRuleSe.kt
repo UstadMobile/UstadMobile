@@ -32,6 +32,7 @@ import okhttp3.OkHttpClient
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.kodein.di.*
+import org.xmlpull.v1.XmlPullParserFactory
 import javax.naming.InitialContext
 
 fun DI.onActiveAccount(): DI {
@@ -69,7 +70,7 @@ class UstadTestRule: TestWatcher() {
 
     override fun starting(description: Description?) {
         endpointScope = EndpointScope()
-        systemImplSpy = spy(UstadMobileSystemImpl())
+        systemImplSpy = spy(UstadMobileSystemImpl(XmlPullParserFactory.newInstance()))
         okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp) {
             install(JsonFeature)

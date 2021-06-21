@@ -115,13 +115,6 @@
         android:id="@+id/settings_list_dest"
         android:name="com.ustadmobile.port.android.view.SettingsFragment"
         android:label="@string/settings" />
-    <fragment
-        android:id="@+id/role_list_dest"
-        android:name="com.ustadmobile.port.android.view.RoleListFragment"
-        android:label="@string/roles" />
-    <fragment
-        android:id="@+id/role_edit_dest"
-        android:name="com.ustadmobile.port.android.view.RoleEditFragment" />
 
     <fragment
         android:id="@+id/school_edit_dest"
@@ -295,11 +288,6 @@
         android:label="" />
 
     <fragment
-        android:id="@+id/entityrole_edit_dest"
-        android:name="com.ustadmobile.port.android.view.EntityRoleEditFragment"
-        android:label="" />
-
-    <fragment
         android:id="@+id/join_with_code_dest"
         android:name="com.ustadmobile.port.android.view.JoinWithCodeFragment"
         android:label=""/>
@@ -348,6 +336,30 @@
         android:id="@+id/site_terms_edit_dest"
         android:name="com.ustadmobile.port.android.view.SiteTermsEditFragment"
         android:label="@string/edit_terms_and_policies"/>
+
+    <fragment
+        android:id="@+id/register_minor_wait_for_parent_dest"
+        android:name="com.ustadmobile.port.android.view.RegisterMinorWaitForParentFragment"
+        android:label="@string/almost_done"/>
+
+    <fragment
+        android:id="@+id/register_age_redirect_dest"
+        android:name="com.ustadmobile.port.android.view.RegisterAgeRedirectFragment"
+        android:label="@string/register"/>
+
+    <fragment
+        android:id="@+id/parental_consent_management_dest"
+        android:name="com.ustadmobile.port.android.view.ParentalConsentManagementFragment"
+        android:label="@string/parental_consent"/>
+
+    <fragment
+        android:id="@+id/scoped_grant_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ScopedGrantEditFragment"/>
+
+    <fragment
+        android:id="@+id/error_report_dest"
+        android:name="com.ustadmobile.port.android.view.ErrorReportFragment"
+        android:label="@string/oops"/>
 
 
 </navigation>
