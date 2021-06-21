@@ -43,11 +43,11 @@ allprojects {
         mavenLocal()
 
         maven {
-            url "https://devserver3.ustadmobile.com/repo-mvn"
+            url "https://devserver3.ustadmobile.com/maven"
         }
 
         maven {
-            url "https://dl.bintray.com/ustadmobile/adbscreenrecord"
+            url "https://devserver3.ustadmobile.com/repo-mvn"
         }
 
         maven {

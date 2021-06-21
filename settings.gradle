@@ -1,8 +1,8 @@
 pluginManagement {
     repositories {
-        /*maven {
-            url "https://dl.bintray.com/ustadmobile/adbscreenrecord"
-        }*/
+        maven {
+            url "https://devserver3.ustadmobile.com/maven"
+        }
 
         jcenter()
         mavenCentral()
