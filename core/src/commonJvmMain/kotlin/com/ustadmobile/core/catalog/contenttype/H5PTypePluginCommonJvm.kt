@@ -119,7 +119,7 @@ class H5PTypePluginCommonJvm(): H5PTypePlugin() {
                         fileNamer = PrefixContainerFileNamer("workspace/")), context)
 
         val h5pDistTmpFile = File.createTempFile("h5p-dist", "zip")
-        val h5pDistIn = getAssetFromResource("/com/ustadmobile/sharedse/h5p/dist.zip", context)
+        val h5pDistIn = getAssetFromResource("/com/ustadmobile/core/h5p/dist.zip", context, this::class)
                 ?: throw IllegalStateException("Could not find h5p dist file")
         h5pDistIn.writeToFile(h5pDistTmpFile)
         repo.addEntriesToContainerFromZip(container.containerUid, h5pDistTmpFile.toDoorUri(),
@@ -149,10 +149,19 @@ class H5PTypePluginCommonJvm(): H5PTypePlugin() {
 
 
         // generate index.html
+        val index = """
+            <html>
+            <head>
+                <meta charset="utf-8" />
+                <script type="text/javascript" src="dist/main.bundle.js"></script>
+            </head>
+            <body>
+            <div id="h5p-container" data-workspace="workspace"></div>
+            </body>
+            </html>
+        """.trimIndent()
         val tmpIndexHtmlFile = File.createTempFile("h5p-index", "html")
-        val h5pIndexIn = getAssetFromResource("/com/ustadmobile/sharedse/h5p/index.html", context)
-                ?: throw IllegalStateException("Could not open h5p index.html file")
-        h5pIndexIn.writeToFile(tmpIndexHtmlFile)
+        tmpIndexHtmlFile.writeText(index)
         repo.addFileToContainer(container.containerUid, tmpIndexHtmlFile.toDoorUri(),
                 "index.html", containerAddOptions)
         tmpIndexHtmlFile.delete()

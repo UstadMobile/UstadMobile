@@ -1,17 +1,13 @@
-package com.ustadmobile.port.sharedse.contentformats
+package com.ustadmobile.core.catalog.contenttype
 
-import org.mockito.kotlin.mock
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
-import com.ustadmobile.sharedse.util.UstadTestRule
 import io.ktor.client.*
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
@@ -21,7 +17,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
-import java.nio.file.Files
 
 class ContentTypePluginsTest {
 
@@ -65,7 +60,7 @@ class ContentTypePluginsTest {
     @Test
     fun givenValidEpubFormatFile_whenImportContentEntryFromFile_thenContentEntryAndContainerShouldExist() {
         val inputStream = this::class.java.getResourceAsStream(
-                "/com/ustadmobile/port/sharedse/contentformats/childrens-literature.epub")
+                "/com/ustadmobile/core/contenttype/childrens-literature.epub")
         val tempEpubFile = temporaryFolder.newFile("imported.epub")
         tempEpubFile.copyInputStreamToFile(inputStream)
 

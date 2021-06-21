@@ -1,6 +1,5 @@
-package com.ustadmobile.port.sharedse.contentformats
+package com.ustadmobile.core.catalog.contenttype
 
-import com.ustadmobile.core.catalog.contenttype.XapiTypePluginCommonJvm
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Rule
@@ -17,7 +16,7 @@ class XapiContentTypePluginTest {
     @Test
     fun givenValidTinCanFormatFile_whenGetContentEntryCalled_thenShouldReadMetaData() {
         val inputStream = this::class.java.getResourceAsStream(
-                "/com/ustadmobile/port/sharedse/contentformats/ustad-tincan.zip")
+                "/com/ustadmobile/core/contenttype/ustad-tincan.zip")
         val tempFile = temporaryFolder.newFile("tincan.zip")
         inputStream.use {inStream ->
             FileOutputStream(tempFile).use {

@@ -1,15 +1,13 @@
-package com.ustadmobile.port.sharedse.contentformats
+package com.ustadmobile.core.catalog.contenttype
 
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
-import com.ustadmobile.core.catalog.contenttype.H5PTypePluginCommonJvm
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
+import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
-import com.ustadmobile.sharedse.util.UstadTestRule
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
@@ -62,7 +60,7 @@ class H5PTypePluginTest {
     fun givenValidH5PFile_whenExtractEntryMetaDataFromFile_thenDataShouldMatch() {
         val tempFolder = tmpFolder.newFolder()
         val inputStream = this::class.java.getResourceAsStream(
-                "/com/ustadmobile/port/sharedse/contentformats/dialog-cards-620.h5p")
+                "/com/ustadmobile/core/contenttype/dialog-cards-620.h5p")
         val tempH5pFile = File(tempFolder, "dialog-cards-620.h5p")
         tempH5pFile.copyInputStreamToFile(inputStream)
 
@@ -87,7 +85,7 @@ class H5PTypePluginTest {
     fun givenValidH5PFile_whenImportContentEntryFromFile_thenContentEntryAndContainerShouldExist() {
         val tempFolder = tmpFolder.newFolder()
         val inputStream = this::class.java.getResourceAsStream(
-                "/com/ustadmobile/port/sharedse/contentformats/dialog-cards-620.h5p")
+                "/com/ustadmobile/core/contenttype/dialog-cards-620.h5p")
         val tempH5pFile = File(tempFolder, "dialog-cards-620.h5p")
         tempH5pFile.copyInputStreamToFile(inputStream)
 

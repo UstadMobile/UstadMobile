@@ -1,6 +1,5 @@
-package com.ustadmobile.port.sharedse.contentformats
+package com.ustadmobile.core.catalog.contenttype
 
-import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
@@ -17,7 +16,7 @@ class EpubFileTypePluginTest {
     @Test
     fun givenValidEpubFormatFile_whenExtractEntryMetaDataFromFile_thenDataShouldMatch() {
         val inputStream = this::class.java.getResourceAsStream(
-                "/com/ustadmobile/port/sharedse/contentformats/childrens-literature.epub")
+                "/com/ustadmobile/core/contenttype/childrens-literature.epub")
         val tempEpubFile = tmpFolder.newFile()
         tempEpubFile.copyInputStreamToFile(inputStream)
         val epubPlugin = EpubTypePluginCommonJvm()
