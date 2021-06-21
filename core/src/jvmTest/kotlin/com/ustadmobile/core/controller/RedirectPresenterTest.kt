@@ -5,7 +5,6 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.kodein.di.DI
@@ -43,25 +42,25 @@ class RedirectPresenterTest {
         mPresenter = RedirectPresenter(context, mapOf(),
                 mockedView, di)
         mPresenter.onCreate(null)
-        verify(mockedView).showNextScreen(eq(SiteEnterLinkView.VIEW_NAME), any())
+        verify(impl).goToViewLink(eq(SiteEnterLinkView.VIEW_NAME), any(), any())
     }
 
     @Test
-    fun givenAppLaunched_whenUserHasLoggedInBefore_thenShouldNavigateContentList() {
+    fun givenAppLaunched_whenUserHasLoggedInBefore_thenShouldNavigateFeedList() {
         whenever(impl.getAppPref(eq(Login2Presenter.PREFKEY_USER_LOGGED_IN), eq("false"), any())).thenReturn("true")
         mPresenter = RedirectPresenter(context, mapOf(),
                 mockedView, di)
         mPresenter.onCreate(null)
-        verify(mockedView).showNextScreen(eq(ContentEntryListTabsView.VIEW_NAME), any())
+        verify(impl).goToViewLink(eq(ContentEntryListTabsView.VIEW_NAME), any(), any())
     }
 
     @Test
     fun givenNextArgProvied_whenOnCreateCalled_thenShouldGoToNextDest() {
-        mPresenter = RedirectPresenter(context, mapOf(ARG_NEXT to "${ContentEntryDetailView.VIEW_NAME}?entityUid=42"),
+        val viewLink = "${ContentEntryDetailView.VIEW_NAME}?entityUid=42"
+        mPresenter = RedirectPresenter(context, mapOf(ARG_NEXT to viewLink),
                 mockedView, di)
         mPresenter.onCreate(null)
-        verify(mockedView).showNextScreen(eq(ContentEntryDetailView.VIEW_NAME),
-            eq(mapOf("entityUid" to "42")))
+        verify(impl).goToViewLink(eq(viewLink), any(), any())
     }
 
 }

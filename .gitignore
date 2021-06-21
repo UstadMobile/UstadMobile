@@ -48,6 +48,7 @@ core/libs/downloads/
 core/dist/*.jar
 core/lib/
 core/build/
+core/data
 
 #Scraper files
 lib-content-scrapers/src/main/java/com/ustadmobile/lib/contentscrapers/buildconfig/*

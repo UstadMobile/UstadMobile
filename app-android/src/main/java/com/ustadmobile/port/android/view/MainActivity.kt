@@ -1,14 +1,16 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ImageView
 import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
@@ -32,37 +34,39 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.NavControllerAdapter
+import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
-import com.ustadmobile.port.android.util.ext.getActivityContext
+import com.ustadmobile.port.android.view.binding.imageForeignKeyPlaceholder
+import com.ustadmobile.port.android.view.binding.setImageForeignKey
+import com.ustadmobile.port.android.view.binding.setImageForeignKeyAdapter
 import com.ustadmobile.port.android.view.util.UstadActivityWithProgressBar
 import com.ustadmobile.sharedse.network.NetworkManagerBle
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.appbar_material_collapsing.*
-import kotlinx.android.synthetic.main.appbar_material_collapsing.view.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
-import java.util.*
+import org.kodein.di.*
 
 
 class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         UstadActivityWithProgressBar,
-        NavController.OnDestinationChangedListener {
+        NavController.OnDestinationChangedListener,
+        DIAware{
 
     private lateinit var appBarConfiguration: AppBarConfiguration
 
     override val activityFloatingActionButton: ExtendedFloatingActionButton?
-        get() = activity_listfragmelayout_behaviornt_fab
+        //Note: do not use mBinding here because it might not be ready for the first fragment
+        get() = findViewById(R.id.activity_main_extendedfab)
+
 
     override val activityProgressBar: ProgressBar?
-        get() = main_progress_bar
+        //Note: do not use mBinding here because it might not be ready for the first fragment
+        get() = findViewById(R.id.main_progress_bar)
 
     private lateinit var mBinding: ActivityMainBinding
 
@@ -76,6 +80,16 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private val destinationProvider: DestinationProvider by instance()
 
+    private lateinit var navController: NavController
+
+    private lateinit var ustadNavController: UstadNavController
+
+    private val userProfileDrawable: Drawable? by lazy(LazyThreadSafetyMode.NONE) {
+        ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_24dp)?.also {
+            it.setTint(ContextCompat.getColor(this, R.color.onPrimaryColor))
+        }
+    }
+
     //Check contentonly mode. See appconfig.properties for details. When enabled, the bottom nav
     // is only visible as admin (e.g. normal users only see content)
     private val contentOnlyForNonAdmin: Boolean by lazy {
@@ -85,7 +99,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     //This is actually managed by the underlying fragments.
     override var loading: Boolean
         get() = false
-        set(value) {}
+        set(@Suppress("UNUSED_PARAMETER") value) {}
 
     //Observe the active account to show/hide the settings based on whether or not the user is admin
     private val mActiveUserObserver = Observer<UmAccount> {account ->
@@ -105,18 +119,19 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val uri = intent?.data?.toString()
 
         if(uri != null){
-            impl.goDeepLink(uri, accountManager, this)
+            impl.goToDeepLink(uri, accountManager, this)
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        setSupportActionBar(mBinding.root.toolbar)
+        setSupportActionBar(mBinding.mainCollapsingToolbar.toolbar)
 
         val host: NavHostFragment = supportFragmentManager
                 .findFragmentById(R.id.activity_main_navhost_fragment) as NavHostFragment? ?: return
-        val navController = host.navController
+        navController = host.navController
+        ustadNavController = NavControllerAdapter(navController, destinationProvider)
         navController.addOnDestinationChangedListener(this)
         navController.addOnDestinationChangedListener(DeleteTempFilesNavigationListener(this))
         val navGraph = navController.graph
@@ -138,7 +153,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val ustadDestination = destinationProvider.lookupDestinationById(destination.id)
         val scrollFlags = ustadDestination?.actionBarScrollBehavior ?:
             (AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL)
-        (mBinding.root.collapsing_toolbar.layoutParams as? AppBarLayout.LayoutParams)?.scrollFlags = scrollFlags
+        (mBinding.mainCollapsingToolbar.collapsingToolbar.layoutParams as? AppBarLayout.LayoutParams)?.scrollFlags = scrollFlags
 
         val userHasBottomNav = !contentOnlyForNonAdmin || accountManager.activeAccount.admin
         mBinding.bottomNavView.visibility = if(!userHasBottomNav || ustadDestination?.hideBottomNavigation == true) {
@@ -150,7 +165,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     }
 
     fun onAppBarExpand(expand: Boolean){
-        mBinding.root.appbar.setExpanded(expand)
+        mBinding.mainCollapsingToolbar.appbar.setExpanded(expand)
     }
 
     fun slideBottomNavigation(visible: Boolean) {
@@ -174,12 +189,15 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val currentFrag = navController.currentDestination?.id ?: 0
         val mainScreenItemsVisible = BOTTOM_NAV_DEST.contains(currentFrag)
         menu.findItem(R.id.menu_main_settings).isVisible = (mainScreenItemsVisible && mIsAdmin == true)
-        menu.findItem(R.id.menu_main_profile).isVisible = mainScreenItemsVisible
+
+        //Should be hidden when they are on the accounts page (only)
+        val currentDestination = destinationProvider.lookupDestinationById(currentFrag)
+        menu.findItem(R.id.menu_main_profile).isVisible = currentDestination?.hideAccountIcon != true
+
         searchView = menu.findItem(R.id.menu_search).actionView as SearchView
 
-        if (mainScreenItemsVisible) {
-            setUserProfile(menu.findItem(R.id.menu_main_profile))
-        }
+        setUserProfile(menu.findItem(R.id.menu_main_profile))
+
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -226,10 +244,12 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private fun setUserProfile(menuItem: MenuItem) {
         val accountManager: UstadAccountManager by instance()
-        val profileIconLetter = accountManager.activeAccount.firstName?.first().toString()
-        val profileLetterView: TextView = menuItem.actionView.findViewById(R.id.person_name_letter)
-        profileLetterView.text = profileIconLetter.toUpperCase(Locale.ROOT)
-        profileLetterView.setOnClickListener { impl.go(AccountListView.VIEW_NAME, mapOf(), this) }
+
+        val profileImgView: ImageView = menuItem.actionView.findViewById(R.id.person_name_profilepic)
+        userProfileDrawable?.also { profileImgView.imageForeignKeyPlaceholder(it) }
+        profileImgView.setImageForeignKeyAdapter(PersonDetailFragment.FOREIGNKEYADAPTER_PERSON)
+        profileImgView.setImageForeignKey(accountManager.activeAccount.personUid)
+        profileImgView.setOnClickListener { impl.go(AccountListView.VIEW_NAME, mapOf(), this) }
     }
 
     companion object {

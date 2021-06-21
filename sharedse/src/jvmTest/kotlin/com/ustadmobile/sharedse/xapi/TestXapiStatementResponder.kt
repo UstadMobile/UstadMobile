@@ -43,6 +43,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
+import org.xmlpull.v1.XmlPullParserFactory
 import java.io.IOException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -70,7 +71,9 @@ class TestXapiStatementResponder {
         checkJndiSetup()
         val endpointScope = EndpointScope()
         di = DI {
-            bind<UstadMobileSystemImpl>() with singleton { spy(UstadMobileSystemImpl()) }
+            bind<UstadMobileSystemImpl>() with singleton {
+                spy(UstadMobileSystemImpl(XmlPullParserFactory.newInstance()))
+            }
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()
@@ -134,9 +137,11 @@ class TestXapiStatementResponder {
 
         val contentEntryUid = 1234L
 
+        val clazzUid = 10001L
+
         mockSession = mock {
             on { method }.thenReturn(NanoHTTPD.Method.POST)
-            on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.activeAccount.endpointUrl)}/xapi/$contentEntryUid")
+            on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.activeAccount.endpointUrl)}/xapi/$contentEntryUid/$clazzUid")
             on { parseBody(any()) }.doAnswer {
                 val map = it.arguments[0] as MutableMap<String, String>
                 map["postData"] = tmpFile.absolutePath
@@ -147,7 +152,8 @@ class TestXapiStatementResponder {
         val responder = XapiStatementResponder()
         val response = responder.post(mockUriResource,
                 mutableMapOf(URI_PARAM_ENDPOINT to accountManager.activeAccount.endpointUrl,
-                        XapiStatementResponder.URLPARAM_CONTENTENTRYUID to contentEntryUid.toString()), mockSession)
+                        XapiStatementResponder.URLPARAM_CONTENTENTRYUID to contentEntryUid.toString(),
+                        XapiStatementResponder.URLPARAM_CLAZZUID to clazzUid.toString()), mockSession)
 
         Assert.assertEquals(NanoHTTPD.Response.Status.OK, response.status)
         val statement = db!!.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
@@ -156,6 +162,8 @@ class TestXapiStatementResponder {
         Assert.assertNotNull("Joined XObject is not null", xObject)
         Assert.assertEquals("Statement is associated with expected contentEntryUid",
                 contentEntryUid, xObject!!.objectContentEntryUid)
+        Assert.assertEquals("Statement is associated with expected clazzUid",
+                clazzUid, statement.statementClazzUid)
         Assert.assertEquals("ContentEntry itself has contentEntryUid set", contentEntryUid,
                 statement?.statementContentEntryUid)
     }
@@ -170,9 +178,11 @@ class TestXapiStatementResponder {
 
         val contentEntryUid = 1234L
 
+        val clazzUid = 10002L
+
         mockSession = mock {
             on { method }.thenReturn(NanoHTTPD.Method.PUT)
-            on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.activeAccount.endpointUrl)}/xapi/$contentEntryUid")
+            on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.activeAccount.endpointUrl)}/xapi/$contentEntryUid/${clazzUid}")
             on { parseBody(any()) }.doAnswer {
                 val map = it.arguments[0] as MutableMap<String, String>
                 map["content"] = tmpFile.absolutePath
@@ -183,7 +193,8 @@ class TestXapiStatementResponder {
         val responder = XapiStatementResponder()
         val response = responder.put(mockUriResource,
                 mutableMapOf(URI_PARAM_ENDPOINT to accountManager.activeAccount.endpointUrl,
-                        XapiStatementResponder.URLPARAM_CONTENTENTRYUID to contentEntryUid.toString()), mockSession)
+                        XapiStatementResponder.URLPARAM_CONTENTENTRYUID to contentEntryUid.toString(),
+                        XapiStatementResponder.URLPARAM_CLAZZUID to clazzUid.toString()), mockSession)
 
         Assert.assertEquals(NanoHTTPD.Response.Status.NO_CONTENT, response.status)
         val statement = db!!.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
@@ -193,6 +204,8 @@ class TestXapiStatementResponder {
         Assert.assertNotNull("Joined XObject is not null", xObject)
         Assert.assertEquals("Statement is associated with expected contentEntryUid",
                 1234L, xObject!!.objectContentEntryUid)
+        Assert.assertEquals("Statement is associated with expected clazzUid",
+                clazzUid, statement.statementClazzUid)
     }
 
     @Test
@@ -205,9 +218,11 @@ class TestXapiStatementResponder {
 
         val contentEntryUid = 1234L
 
+        val clazzUid = 1023L
+
         mockSession = mock {
             on { method }.thenReturn(NanoHTTPD.Method.PUT)
-            on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.activeAccount.endpointUrl)}/xapi/$contentEntryUid")
+            on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.activeAccount.endpointUrl)}/xapi/$contentEntryUid/$clazzUid/")
             on { parameters }.thenReturn(mapOf("statementId"  to listOf(URLEncoder.encode("6690e6c9-3ef0-4ed3-8b37-7f3964730bee", StandardCharsets.UTF_8.toString()))))
             on { parseBody(any()) }.doAnswer {
                 val map = it.arguments[0] as MutableMap<String, String>
@@ -219,7 +234,8 @@ class TestXapiStatementResponder {
         val responder = XapiStatementResponder()
         val response = responder.put(mockUriResource,
                 mutableMapOf(URI_PARAM_ENDPOINT to accountManager.activeAccount.endpointUrl,
-                        XapiStatementResponder.URLPARAM_CONTENTENTRYUID to contentEntryUid.toString()), mockSession)
+                        XapiStatementResponder.URLPARAM_CONTENTENTRYUID to contentEntryUid.toString(),
+                        XapiStatementResponder.URLPARAM_CLAZZUID to clazzUid.toString()), mockSession)
 
         Assert.assertEquals(NanoHTTPD.Response.Status.NO_CONTENT, response.status)
         val statement = db!!.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")

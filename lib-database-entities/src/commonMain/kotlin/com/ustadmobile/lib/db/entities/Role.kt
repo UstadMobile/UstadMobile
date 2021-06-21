@@ -179,6 +179,21 @@ open class Role() {
 
         const val PERMISSION_PERSON_LEARNINGRECORD_UPDATE: Long = 2199023255552L
 
+        //Note: to create further constants, use the Tools - Kotlin - REPL to double each value
+        const val PERMISSION_CLAZZ_CONTENT_SELECT: Long = 4398046511104L
+
+        const val PERMISSION_CLAZZ_CONTENT_UPDATE: Long = 8796093022208L
+
+        const val PERMISSION_PERSONCONTACT_SELECT: Long = 17592186044416L
+
+        const val PERMISSION_PERSONCONTACT_UPDATE: Long = 35184372088832L
+
+        const val PERMISSION_PERSONSOCIOECONOMIC_SELECT: Long = 70368744177664L
+
+        const val PERMISSION_PERSONSOCIOECONOMIC_UPDATE: Long = 140737488355328L
+
+        const val PERMISSION_ADD_CLASS_TO_SCHOOL: Long = 281474976710656L
+
         //Predefined roles that are added by the system
         const val ROLE_CLAZZ_TEACHER_NAME = "Teacher"
 
@@ -300,6 +315,9 @@ open class Role() {
                         PERMISSION_RESET_PASSWORD or
                         PERMISSION_SCHOOL_ADD_STAFF or
                         PERMISSION_SCHOOL_ADD_STUDENT
+
+        const val ALL_PERMISSIONS = Long.MAX_VALUE
+
 
     }
 }

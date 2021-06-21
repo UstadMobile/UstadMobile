@@ -1,6 +1,6 @@
 package com.ustadmobile.sharedse.network
 
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.google.gson.Gson
 import org.mockito.kotlin.*
 import com.ustadmobile.core.account.Endpoint
@@ -55,6 +55,7 @@ import okhttp3.mockwebserver.*
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
+import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
@@ -240,7 +241,9 @@ class DownloadJobItemRunnerTest {
         }
 
         clientDi = DI {
-            bind<UstadMobileSystemImpl>() with singleton { UstadMobileSystemImpl() }
+            bind<UstadMobileSystemImpl>() with singleton {
+                UstadMobileSystemImpl(XmlPullParserFactory.newInstance())
+            }
 
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {

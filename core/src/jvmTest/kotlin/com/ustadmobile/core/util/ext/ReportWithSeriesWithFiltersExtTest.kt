@@ -51,12 +51,16 @@ class ReportWithSeriesWithFiltersExtTest {
         repo = di.directActiveRepoInstance()
 
         runBlocking {
-            repo.insertPersonAndGroup(Person().apply{
+            val person = repo.insertPersonAndGroup(Person().apply{
                 personUid = loggedPersonUid
                 admin = true
                 firstNames = "Bob"
                 lastName = "Jones"
             })
+
+            repo.grantScopedPermission(person, Role.ALL_PERMISSIONS,
+                ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
+
             repo.insertTestStatementsForReports()
         }
     }

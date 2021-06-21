@@ -41,6 +41,7 @@ class @BaseFileName@Fragment: UstadDetailFragment<@DisplayEntity@>(), @Entity@De
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onCreate(view, savedInstanceState)
         mPresenter = @Entity@DetailPresenter(requireContext(), arguments.toStringMap(), this,
                 viewLifecycleOwner, di)
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())

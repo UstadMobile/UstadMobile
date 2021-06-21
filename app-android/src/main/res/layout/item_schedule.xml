@@ -4,24 +4,27 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="com.ustadmobile.core.util.OneToManyJoinEditListener"/>
+        <import type="com.ustadmobile.lib.db.entities.Schedule"/>
+
         <variable
             name="schedule"
-            type="com.ustadmobile.lib.db.entities.Schedule" />
+            type="Schedule" />
 
         <variable
             name="mPresenter"
             type="com.ustadmobile.core.controller.ClazzEdit2Presenter" />
 
         <variable
-            name="mActivity"
-            type="com.ustadmobile.port.android.view.ClazzEdit2ActivityEventHandler" />
+            name="oneToManyJoinListener"
+            type="OneToManyJoinEditListener&lt;Schedule&gt;" />
 
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{() -> mActivity.showEditScheduleDialog(schedule)}"
+        android:onClick="@{() -> oneToManyJoinListener.onClickEdit(schedule)}"
         android:background="?attr/selectableItemBackground"
         >
 
@@ -65,9 +68,9 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_delete_black_24dp"
             app:tint="?colorOnIconTint"
-            android:contentDescription="@string/edit"
+            android:contentDescription="@string/delete"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:onClick="@{() -> mPresenter.handleRemoveSchedule(schedule)}" />
+            android:onClick="@{() -> oneToManyJoinListener.onClickDelete(schedule)}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

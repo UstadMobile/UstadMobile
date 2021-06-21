@@ -20,7 +20,6 @@ import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
-import kotlinx.android.synthetic.main.appbar_material_tabs_fixed.view.*
 
 
 class CustomViewNameListFragmentPageAdapter(fm: FragmentManager, behavior: Int,
@@ -108,8 +107,7 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
 
         Handler().post {
             mPager?.adapter = mPagerAdapter
-            mBinding?.root?.tabs?.setupWithViewPager(mPager)
-
+            mBinding?.fragmentSchoolTabsFixed?.tabs?.setupWithViewPager(mPager)
         }
     }
 

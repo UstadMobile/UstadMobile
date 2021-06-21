@@ -12,12 +12,10 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzDetailBinding
 import com.ustadmobile.core.controller.ClazzDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
-import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
-import kotlinx.android.synthetic.main.appbar_material_tabs_fixed.view.*
 
 
 interface ClazzDetailFragmentEventHandler {
@@ -33,7 +31,6 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
     private var mPagerAdapter: ViewNameListFragmentPagerAdapter? = null
 
     override var tabs: List<String>? = null
-        get() = field
         set(value) {
             if(field == value)
                 return
@@ -53,7 +50,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
                         return@also
 
                     it.fragmentClazzDetailViewpager.adapter = mPagerAdapter
-                    it.root.tabs.setupWithViewPager(it.fragmentClazzDetailViewpager)
+                    it.fragmentClazzTabs.tabs.setupWithViewPager(it.fragmentClazzDetailViewpager)
                 }
             }
         }
@@ -61,7 +58,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val rootView: View
 
         //The fab will be managed by the underlying tabs
@@ -69,11 +66,8 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
         mBinding = FragmentClazzDetailBinding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.root.tabs.tabGravity = TabLayout.GRAVITY_FILL
+            it.fragmentClazzTabs.tabs.tabGravity = TabLayout.GRAVITY_FILL
         }
-
-        mPresenter = ClazzDetailPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
 
         return rootView
     }
@@ -81,7 +75,10 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
+        mPresenter = ClazzDetailPresenter(requireContext(), arguments.toStringMap(), this,
+                di, viewLifecycleOwner)
+
+        mPresenter?.onCreate(backStackSavedState)
     }
 
     override fun onDestroyView() {
@@ -95,7 +92,6 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
     }
 
     override var entity: Clazz? = null
-        get() = field
         set(value) {
             field = value
             ustadFragmentTitle = value?.clazzName
@@ -105,6 +101,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
     companion object {
         val viewNameToFragmentMap = mapOf<String, Class<out Fragment>>(
                 ClazzDetailOverviewView.VIEW_NAME to ClazzDetailOverviewFragment::class.java,
+                ContentEntryList2View.VIEW_NAME to ContentEntryList2Fragment::class.java,
                 ClazzMemberListView.VIEW_NAME to ClazzMemberListFragment::class.java,
                 ClazzLogListAttendanceView.VIEW_NAME to ClazzLogListAttendanceFragment::class.java,
                 ClazzWorkListView.VIEW_NAME to ClazzWorkListFragment::class.java
@@ -113,6 +110,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
         val viewNameToTitleMap = mapOf(
                 ClazzDetailOverviewView.VIEW_NAME to R.string.overview,
+                ContentEntryList2View.VIEW_NAME to R.string.content,
                 ClazzMemberListView.VIEW_NAME to R.string.members,
                 ClazzLogListAttendanceView.VIEW_NAME to R.string.attendance,
                 ClazzWorkListView.VIEW_NAME to R.string.clazz_work

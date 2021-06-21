@@ -4,7 +4,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.*
@@ -53,7 +52,8 @@ class ContentEntryDetailPresenter(context: Any,
 
     private fun setupTabs() {
         val entityUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
-        view.tabs = listOf("${ContentEntryDetailOverviewView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid",
+        view.tabs = listOf("${ContentEntryDetailOverviewView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid" +
+                "&${UstadView.ARG_CLAZZUID}=${arguments[UstadView.ARG_CLAZZUID]}",
                 "${ContentEntryDetailAttemptsListView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid")
     }
 

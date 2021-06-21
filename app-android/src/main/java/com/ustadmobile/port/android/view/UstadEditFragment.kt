@@ -8,6 +8,7 @@ import android.view.View
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.controller.UstadSingleEntityPresenter
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -30,6 +31,12 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_done, menu)
+
+        menu.findItem(R.id.menu_done).title = if(mEditPresenter?.persistenceMode == UstadSingleEntityPresenter.PersistenceMode.DB) {
+            requireContext().getString(R.string.save)
+        }else {
+            requireContext().getString(R.string.done)
+        }
     }
 
     protected fun setEditFragmentTitle(newTitleId: Int, editStringId: Int) {

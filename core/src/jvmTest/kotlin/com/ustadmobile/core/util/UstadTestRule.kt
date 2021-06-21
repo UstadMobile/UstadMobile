@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
@@ -18,6 +19,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import com.ustadmobile.util.test.nav.TestUstadNavController
 import com.ustadmobile.xmlpullparserkmp.XmlPullParser
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
@@ -63,9 +65,13 @@ class UstadTestRule: TestWatcher() {
 
     lateinit var okHttpClient: OkHttpClient
 
+    val xppFactory = XmlPullParserFactory.newInstance().also {
+        it.isNamespaceAware = true
+    }
+
     override fun starting(description: Description?) {
         endpointScope = EndpointScope()
-        systemImplSpy = spy(UstadMobileSystemImpl())
+        systemImplSpy = spy(UstadMobileSystemImpl(xppFactory))
 
         okHttpClient = OkHttpClient.Builder().build()
 
@@ -94,7 +100,11 @@ class UstadTestRule: TestWatcher() {
                     Any(), context.url, instance(), instance())))
             }
 
-            bind<NetworkManagerBle>() with singleton { mock<NetworkManagerBle> { } }
+            bind<NetworkManagerBle>() with singleton {
+                mock<NetworkManagerBle> {
+                    on { connectivityStatus }.thenReturn(mock {})
+                }
+            }
 
             bind<ContainerMounter>() with singleton { EmbeddedHTTPD(0, di).also { it.start() } }
 
@@ -111,13 +121,15 @@ class UstadTestRule: TestWatcher() {
             }
 
             bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
-                XmlPullParserFactory.newInstance().also {
-                    it.isNamespaceAware = true
-                }
+                xppFactory
             }
 
             bind<XmlPullParserFactory>(tag = DiTag.XPP_FACTORY_NSUNAWARE) with singleton {
                 XmlPullParserFactory.newInstance()
+            }
+
+            bind<UstadNavController>() with singleton {
+                spy(TestUstadNavController(di))
             }
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

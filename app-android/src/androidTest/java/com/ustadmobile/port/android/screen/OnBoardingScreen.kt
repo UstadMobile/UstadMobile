@@ -1,7 +1,7 @@
 package com.ustadmobile.port.android.screen
 
-import com.agoda.kakao.edit.KTextInputLayout
-import com.agoda.kakao.text.KButton
+import io.github.kakaocup.kakao.edit.KTextInputLayout
+import io.github.kakaocup.kakao.text.KButton
 import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.OnBoardingActivity

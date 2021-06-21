@@ -12,8 +12,6 @@ import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
-import com.rd.PageIndicatorView
-import com.rd.animation.type.AnimationType
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.OnBoardingPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
@@ -25,8 +23,6 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 
 class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnItemClickListener {
-
-    private var pageIndicatorView: PageIndicatorView? = null
 
     override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
 
@@ -41,9 +37,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
     private lateinit var screenList: List<OnBoardScreen>
 
     //Do nothing - there isn't really any loading of this
-    override var loading: Boolean
-        get() = false
-        set(value) {}
+    override var loading: Boolean = false
 
     /**
      * Model for the the onboarding screen
@@ -62,7 +56,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
     /**
      * Custom pager adapter for the screen
      */
-    private inner class OnBoardingPagerAdapter internal constructor(private val context: Context)
+    private inner class OnBoardingPagerAdapter constructor(private val context: Context)
         : RecyclerView.Adapter<OnBoardingPagerAdapter.BoardScreenHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BoardScreenHolder {
@@ -101,10 +95,8 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
         setContentView(R.layout.activity_on_boarding)
         viewPager = findViewById(R.id.onBoardPagerView)
         getStartedBtn = findViewById(R.id.get_started_btn)
-        pageIndicatorView = findViewById(R.id.pageIndicatorView)
         languageOptions = findViewById(R.id.language_options_autocomplete_textview)
 
-        pageIndicatorView?.setAnimationType(AnimationType.WORM)
 
         //We have to put this here because there is no VIEW_NAME for MainActivity. This will
         // have to be resolved by RedirectFragment
@@ -117,7 +109,6 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
         }
 
         screenList =  OnBoardScreen.values().toList()
-        pageIndicatorView?.count = screenList.size
 
         if (Build.VERSION.SDK_INT <= 19) {
             getStartedBtn?.setBackgroundResource(R.drawable.pre_lollipop_btn_selector_bg_onboarding)
@@ -126,23 +117,6 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
         }
 
         viewPager.adapter = OnBoardingPagerAdapter(this)
-
-        if (pageIndicatorView != null) {
-            viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-
-                override fun onPageScrolled(position: Int, positionOffset: Float,
-                                            positionOffsetPixels: Int) {
-                }
-
-                override fun onPageSelected(position: Int) {
-                    pageIndicatorView?.setSelected(position)
-
-                }
-
-                override fun onPageScrollStateChanged(state: Int) {}
-            })
-        }
-
 
 
         presenter = OnBoardingPresenter(this,

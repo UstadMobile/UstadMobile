@@ -17,6 +17,7 @@ import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
@@ -34,6 +35,7 @@ import okhttp3.OkHttpClient
 import org.junit.Before
 import org.junit.Test
 import org.kodein.di.*
+import org.xmlpull.v1.XmlPullParserFactory
 import java.io.IOException
 import javax.naming.InitialContext
 
@@ -51,6 +53,8 @@ class VideoContentPresenterTest {
 
     var container: Container? = null
 
+    var selectedClazzUid = 10001L
+
     @Before
     @Throws(IOException::class)
     fun setup() {
@@ -58,7 +62,8 @@ class VideoContentPresenterTest {
         mockEndpoint = mock {}
         val endpointScope = EndpointScope()
         di = DI {
-            bind<UstadMobileSystemImpl>() with singleton { spy(UstadMobileSystemImpl()) }
+            bind<UstadMobileSystemImpl>() with singleton { spy(UstadMobileSystemImpl(
+                XmlPullParserFactory.newInstance())) }
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()
@@ -108,6 +113,10 @@ class VideoContentPresenterTest {
 
         runBlocking {
             container = repo.insertVideoContent()
+            Clazz().apply{
+                this.clazzUid = selectedClazzUid
+                repo.clazzDao.insert(this)
+            }
         }
 
 
@@ -118,6 +127,7 @@ class VideoContentPresenterTest {
 
         val presenterArgs = mapOf(UstadView.ARG_CONTENT_ENTRY_UID to
                 container!!.containerContentEntryUid.toString(),
+                UstadView.ARG_CLAZZUID to selectedClazzUid.toString(),
                 UstadView.ARG_CONTAINER_UID to container!!.containerUid.toString())
         
         val presenter = VideoContentPresenter(context,
@@ -126,7 +136,8 @@ class VideoContentPresenterTest {
 
         presenter.updateProgress(0, 100, true)
 
-        verify(mockEndpoint, timeout(5000)).storeStatements(any(), eq(""), eq(container!!.containerContentEntryUid))
+        verify(mockEndpoint, timeout(5000)).storeStatements(any(),
+                eq(""), eq(container!!.containerContentEntryUid), eq(selectedClazzUid))
 
     }
 

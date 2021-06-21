@@ -46,3 +46,21 @@ fun String.requireHttpPrefix(defaultProtocol: String = "https"): String {
     else
         return "$defaultProtocol://$this"
 }
+
+/**
+ * Where this string is a URI of some kind, append query arguments to it. If the string
+ * already contains a ?, then the arguments will be appended after an &amp;
+ * Otherwise, a ? will be added and then the query args
+ */
+fun String.appendQueryArgs(queryArgs: String): String {
+    var retVal = this
+    if(this.contains("?"))
+        retVal += "&"
+    else
+        retVal += "?"
+
+    retVal += queryArgs
+
+    return retVal
+}
+

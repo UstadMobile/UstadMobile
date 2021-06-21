@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.rest
 
-import com.github.aakira.napier.DebugAntilog
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
@@ -10,7 +10,10 @@ import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.io.UploadSessionManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
@@ -19,8 +22,9 @@ import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
-import com.ustadmobile.lib.rest.ext.bindHostDatabase
-import com.ustadmobile.lib.rest.ext.ktorInitDbWithRepo
+import com.ustadmobile.lib.rest.ext.*
+import com.ustadmobile.lib.rest.messaging.MailProperties
+import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
@@ -42,12 +46,23 @@ import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
+import org.quartz.Job
+import org.quartz.JobExecutionContext
+import org.quartz.Scheduler
+import org.quartz.SchedulerFactory
+import org.quartz.impl.StdScheduler
+import org.quartz.impl.StdSchedulerFactory
 import java.io.File
 import java.nio.file.Files
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.naming.InitialContext
 import io.ktor.client.features.json.JsonFeature
+import io.ktor.http.content.*
+import jakarta.mail.Authenticator
+import jakarta.mail.PasswordAuthentication
+import org.xmlpull.v1.XmlPullParserFactory
+import javax.sql.DataSource
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -95,15 +110,17 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
     }
 
     val tmpRootDir = Files.createTempDirectory("upload").toFile()
+    val appConfig = environment.config
 
     val dbMode = dbModeOverride ?:
-        environment.config.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
+        appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
     val dataDirPath = File(environment.config.propertyOrNull("ktor.ustad.datadir")?.getString() ?: "data")
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
 
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 
     install(DIFeature) {
+        import(commonJvmDiModule)
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {
             File(tmpRootDir, context.identifier(dbMode)).also {
                 it.takeIf { !it.exists() }?.mkdirs()
@@ -141,47 +158,14 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
             val dbHostName = context.identifier(dbMode, singletonDbName)
-            val appConfig = environment.config
-            InitialContext().bindHostDatabase(dbHostName, Properties().apply {
-                setProperty("driver",
-                    appConfig.propertyOrNull("ktor.database.driver")?.getString() ?: "org.sqlite.JDBC")
-                setProperty("url",
-                    appConfig.propertyOrNull("ktor.database.url")?.getString()
-                        ?: "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
-                setProperty("user",
-                    appConfig.propertyOrNull("ktor.database.user")?.getString() ?: "")
-                setProperty("password",
-                    appConfig.propertyOrNull("ktor.database.password")?.getString() ?: "")
-            })
-
+            val dbProperties = appConfig.databasePropertiesFromSection("ktor.database",
+                defaultUrl = "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
+            InitialContext().bindDataSourceIfNotExisting(dbHostName, dbProperties)
             UmAppDatabase.getInstance(Any(), dbHostName)
         }
 
         bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {
             ServerUpdateNotificationManagerImpl()
-        }
-
-        bind<OkHttpClient>() with singleton {
-            OkHttpClient.Builder()
-                .dispatcher(Dispatcher().also {
-                    it.maxRequests = 30
-                    it.maxRequestsPerHost = 10
-                })
-                .connectTimeout(45, TimeUnit.SECONDS)
-                .readTimeout(45, TimeUnit.SECONDS)
-                .build()
-        }
-
-
-        bind<HttpClient>() with singleton {
-            HttpClient(OkHttp){
-                install(JsonFeature)
-                install(HttpTimeout)
-
-                engine {
-                    preconfigured = instance()
-                }
-            }
         }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
@@ -213,6 +197,53 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             UploadSessionManager(context, di)
         }
 
+        bind<Scheduler>() with singleton {
+            val dbProperties = environment.config.databasePropertiesFromSection("quartz",
+                "jdbc:sqlite:data/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
+            InitialContext().apply {
+                bindDataSourceIfNotExisting("quartzds", dbProperties)
+                initQuartzDb("java:/comp/env/jdbc/quartzds")
+            }
+            StdSchedulerFactory.getDefaultScheduler().also {
+                it.context.put("di", di)
+            }
+        }
+
+        bind<UstadMobileSystemImpl>() with singleton {
+            UstadMobileSystemImpl(instance(tag  = DiTag.XPP_FACTORY_NSAWARE))
+        }
+
+        bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
+            XmlPullParserFactory.newInstance().also {
+                it.isNamespaceAware = true
+            }
+        }
+
+        try {
+            appConfig.config("mail")
+
+            bind<MailProperties>() with singleton {
+                MailProperties(appConfig.property("mail.from").getString(),
+                    appConfig.toProperties(MailProperties.SMTP_PROPS))
+            }
+
+            bind<NotificationSender>() with singleton {
+                NotificationSender(di)
+            }
+
+            bind<Authenticator>() with singleton {
+                object: Authenticator() {
+                    override fun getPasswordAuthentication(): PasswordAuthentication {
+                        return PasswordAuthentication(
+                            appConfig.property("mail.user").getString(),
+                            appConfig.property("mail.auth").getString())
+                    }
+                }
+            }
+        }catch(e: Exception) {
+            Napier.w("WARNING: Email sending not configured")
+        }
+
         registerContextTranslator { call: ApplicationCall ->
             if(dbMode == CONF_DBMODE_SINGLETON) {
                 Endpoint("localhost")
@@ -226,6 +257,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 //Get the container dir so that any old directories (build/storage etc) are moved if required
                 di.on(Endpoint("localhost")).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
             }
+
+            instance<Scheduler>().start()
         }
     }
 
@@ -237,6 +270,18 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         UmAppDatabase_KtorRoute(true)
         SiteRoute()
         ContentEntryLinkImporter()
+        /*
+          This is a temporary redirect approach for users who open an app link but don't
+          have the app installed. Because the uri scheme of views is #ViewName?args, this
+          won't be included in the referrer header when the user goes to get the app.
+
+          The static route will redirect /umapp/#ViewName?args to
+          /getapp/?uri=(encoded full uri including #ViewName?args)
+         */
+        static("umapp") {
+            resource("/", "/static/getappredirect/index.html")
+        }
+        GetAppRoute()
         if (devMode) {
             DevModeRoute()
         }

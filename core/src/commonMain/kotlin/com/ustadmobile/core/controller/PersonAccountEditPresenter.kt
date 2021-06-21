@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
-import com.github.aakira.napier.Napier
+import com.ustadmobile.core.account.AccountRegisterOptions
+import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
@@ -19,7 +20,6 @@ import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -54,8 +54,10 @@ class PersonAccountEditPresenter(context: Any,
         } ?: Person()
 
         activeUserHasPasswordResetPermission = withTimeoutOrNull(2000) {
-            db.personDao.personHasPermissionAsync(activePersonUid, entityUid,
-                Role.PERMISSION_RESET_PASSWORD, 0)
+            db.personDao.personHasPermissionAsync(
+                activePersonUid, entityUid,
+                Role.PERMISSION_RESET_PASSWORD
+            )
         } ?: false
 
         view.currentPasswordVisible = !activeUserHasPasswordResetPermission
@@ -96,21 +98,26 @@ class PersonAccountEditPresenter(context: Any,
 
                 view.usernameError = if(entity.username.isNullOrEmpty())
                     requiredFieldMessage else null
+                view.noPasswordMatchError = if(entity.confirmedPassword != entity.newPassword
+                    && !entity.confirmedPassword.isNullOrEmpty() && !entity.newPassword.isNullOrEmpty())
+                    impl.getString(MessageID.filed_password_no_match, context) else null
+
                 view.currentPasswordError = if(entity.currentPassword.isNullOrEmpty()
                         && !activeUserHasPasswordResetPermission && !createAccount)
                     requiredFieldMessage else null
                 view.newPasswordError = if(entity.newPassword.isNullOrEmpty())
-                    requiredFieldMessage else null
+                    requiredFieldMessage else view.newPasswordError
                 view.confirmedPasswordError = if(entity.confirmedPassword.isNullOrEmpty())
-                    requiredFieldMessage else null
-                view.noPasswordMatchError = if(entity.confirmedPassword != entity.newPassword)
-                    impl.getString(MessageID.filed_password_no_match, context) else null
+                    requiredFieldMessage else view.confirmedPasswordError
+
+
                 return@launch
             }
             try{
                 if(createAccount && !entity.newPassword.isNullOrEmpty()
                         && !entity.confirmedPassword.isNullOrEmpty()){
-                    val umAccount = accountManager.register(entity,serverUrl, false)
+                    val umAccount = accountManager.register(entity,serverUrl,
+                        AccountRegisterOptions(makeAccountActive = false))
                     if(umAccount.username != null){
                         repo.personDao.updateAsync(entity)
                     }
