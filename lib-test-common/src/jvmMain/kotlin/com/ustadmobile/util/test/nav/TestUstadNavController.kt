@@ -3,9 +3,11 @@ package com.ustadmobile.util.test.nav
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.UstadBackStackEntry
 import com.ustadmobile.core.impl.nav.UstadNavController
+import org.kodein.di.DI
+import org.kodein.di.DIAware
 import java.util.concurrent.CopyOnWriteArrayList
 
-class TestUstadNavController : UstadNavController{
+class TestUstadNavController(override val di: DI) : UstadNavController, DIAware{
 
     private val navStack: MutableList<TestUstadBackStackEntry> = CopyOnWriteArrayList()
 

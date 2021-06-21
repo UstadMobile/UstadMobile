@@ -68,7 +68,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_delete_black_24dp"
             app:tint="?colorOnIconTint"
-            android:contentDescription="@string/edit"
+            android:contentDescription="@string/delete"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:onClick="@{() -> oneToManyJoinListener.onClickDelete(schedule)}" />
 

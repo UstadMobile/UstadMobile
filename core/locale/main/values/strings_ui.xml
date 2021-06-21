@@ -563,7 +563,6 @@
     <string name="role">Role</string>
     <string name="add_a_new_role">Add a new role</string>
     <string name='edit_role'>Edit role</string>
-    <string name="roles_setting_desc">Manage permissions given to roles</string>
     <string name="rols_assignment">Roles assignment</string>
     <string name="role_assignment_setting_desc">Assign roles to a user or a group</string>
     <string name="locations">Locations</string>
@@ -1317,5 +1316,43 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <!-- This is an option when we ask users about their connectivity access -->
     <string name="limited_i_avoid_downloading_too_much">Limited - I avoid downloading too much</string>
+
+    <!-- Oops: This is displayed as the title for a screen that appears when an error occurs -->
+    <string name="oops">Oops!</string>
+
+    <string name="sorry_something_went_wrong">Sorry, something went wrong! We have logged it, and we\'ll try to fix it. Please make sure to share the incident ID if you need to contact your system administator about this.</string>
+
+    <string name="incident_id">Incident ID</string>
+
+    <!--
+    If the user is brought to an error screen, we will show the error code here. %1$s will be
+    replaced with the code itself.
+     -->
+    <string name="error_code">Error code: %1$s</string>
+
+    <!-- This text is used on a button that will take the user back to the starting screen -->
+    <string name="take_me_home">Take me home</string>
+
+    <string name="view_clazz">View class</string>
+
+    <string name="view_clazzes">View classes</string>
+
+    <string name="enrol_and_unenrol_students">Enrol and unenrol students</string>
+
+    <string name="enrol_and_unenrol_teachers">Enrol and unenrol teachers</string>
+
+    <string name="view_assignments">View assignments</string>
+
+    <string name="add_or_edit_assignment">Add or edit assignments</string>
+
+    <string name="view_basic_profile_of_members">View basic profile of members</string>
+
+    <string name="edit_basic_profile_of_members">Edit basic profile of members</string>
+
+    <string name="view_school">View school</string>
+
+    <string name="edit_clazzes">Edit classes</string>
+
+    <string name="add_new_clazz_to_school">Add new class to school</string>
 
 </resources>

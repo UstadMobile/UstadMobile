@@ -30,6 +30,8 @@ abstract class UstadEditPresenter<V: UstadEditView<RT>, RT: Any>(context: Any,
 
     fun removeJsonLoadListener(loadListener: JsonLoadListener) = jsonLoadListeners.remove(loadListener)
 
+    fun requireBackStackEntry() = ustadNavController.currentBackStackEntry ?: throw IllegalStateException("requirebackstackentry: no currentbackstackentry!")
+
     override fun onLoadFromJson(bundle: Map<String, String>): RT? {
         jsonLoadListeners.forEach { it.onLoadFromJsonSavedState(bundle) }
         return super.onLoadFromJson(bundle)

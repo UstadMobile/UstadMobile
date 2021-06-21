@@ -7,19 +7,29 @@ import kotlinx.serialization.Serializable
 
 @SyncableEntity(tableId = Schedule.TABLE_ID,
     notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${Schedule.TABLE_ID} AS tableId FROM 
-        ChangeLog
-        JOIN Schedule ON ChangeLog.chTableId = ${Schedule.TABLE_ID} AND CAST(ChangeLog.dispatched AS INTEGER) = 0 AND Schedule.scheduleUid = ChangeLog.chEntityPk
-        JOIN Clazz ON Clazz.clazzUid = Schedule.scheduleClazzUid 
-        JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_CLAZZ_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid"""],
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+               ${Schedule.TABLE_ID} AS tableId 
+          FROM ChangeLog
+               JOIN Schedule 
+               ON ChangeLog.chTableId = ${Schedule.TABLE_ID} 
+                    AND Schedule.scheduleUid = ChangeLog.chEntityPk
+               JOIN Clazz 
+                    ON Clazz.clazzUid = Schedule.scheduleClazzUid 
+               ${Clazz.JOIN_FROM_CLAZZ_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_CLAZZ_SELECT}
+                    ${Clazz.JOIN_FROM_CLAZZ_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}     
+                   """],
     syncFindAllQuery = """
-        SELECT Schedule.* FROM
-        Schedule
-        JOIN Clazz ON Clazz.clazzUid = Schedule.scheduleClazzUid
-        JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_CLAZZ_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
-        WHERE DeviceSession.dsDeviceId = :clientId"""
+        SELECT Schedule.*
+          FROM DeviceSession
+               JOIN PersonGroupMember
+                    ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+               ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_CLAZZ_SELECT}
+                    ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
+               JOIN Schedule
+                    ON Schedule.scheduleClazzUid = Clazz.clazzUid
+         WHERE DeviceSession.dsDeviceId = :clientId"""
 )
 @Entity
 @Serializable
