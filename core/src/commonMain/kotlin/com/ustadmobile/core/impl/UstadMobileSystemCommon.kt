@@ -240,9 +240,9 @@ abstract class UstadMobileSystemCommon {
                 availableLangs.map { it to (LANGUAGE_NAMES[it] ?: it) }
     }
 
-    open fun isRTLSupported(context: Any): Boolean {
-        val languages = getAppPref(AppConfig.KEY_RTL_LANGUAGES, context)
-        return languages?.split(",")?.firstOrNull{it == getDisplayedLocale(context)} != null
+    open fun isRtlActive(): Boolean {
+        val languages = getAppPref(AppConfig.KEY_RTL_LANGUAGES, this)
+        return languages?.split(",")?.firstOrNull{it == getDisplayedLocale(this)} != null
     }
 
     abstract suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?>
@@ -322,8 +322,7 @@ abstract class UstadMobileSystemCommon {
      */
     open fun hasDisplayedLocaleChanged(oldLocale: String?, context: Any): Boolean {
         val currentlyDisplayedLocale = getDisplayedLocale(context)
-        return !(currentlyDisplayedLocale != null && oldLocale != null
-                && oldLocale.substring(0, 2) == currentlyDisplayedLocale.substring(0, 2))
+        return !(oldLocale != null && oldLocale.substring(0, 2) == currentlyDisplayedLocale.substring(0, 2))
     }
 
     protected fun getContentDirName(context: Any): String? {

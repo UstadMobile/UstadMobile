@@ -5,8 +5,6 @@ import com.ustadmobile.core.db.dao.EntityRoleDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.EntityRole
 import com.ustadmobile.lib.db.entities.EntityRoleWithNameAndRole
-import com.ustadmobile.mocks.db.ReactDatabase.Companion.ALLOW_ACCESS
-import kotlinx.serialization.builtins.ListSerializer
 
 class ReactEntityRoleDao: EntityRoleDao() {
     override suspend fun updateEntityRoleActive(uid: Long, active: Boolean) {
@@ -17,7 +15,7 @@ class ReactEntityRoleDao: EntityRoleDao() {
         accountPersonUid: Long,
         permission: Long
     ): Boolean {
-        return ALLOW_ACCESS
+        return false
     }
 
     override suspend fun userHasAnySinglePermission(
@@ -37,13 +35,11 @@ class ReactEntityRoleDao: EntityRoleDao() {
     }
 
     override fun filterByPersonWithExtra(personGroupUid: Long): DataSource.Factory<Int, EntityRoleWithNameAndRole> {
-        return DataSourceFactoryJs<Int,EntityRoleWithNameAndRole, Any>(null,personGroupUid,"",
-            ListSerializer(EntityRoleWithNameAndRole.serializer()),null,null,null)
+        TODO("Not yet implemented")
     }
 
     override suspend fun filterByPersonWithExtraAsList(personGroupUid: Long): List<EntityRoleWithNameAndRole> {
-        return DataSourceFactoryJs<Int,EntityRoleWithNameAndRole, Any>(null,personGroupUid,"",
-            ListSerializer(EntityRoleWithNameAndRole.serializer()),null,null,null).getData(0,0)
+        TODO("Not yet implemented")
     }
 
     override suspend fun findByUidAsync(uid: Long): EntityRole? {

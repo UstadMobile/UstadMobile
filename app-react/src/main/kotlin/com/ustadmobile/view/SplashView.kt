@@ -6,11 +6,12 @@ interface SplashView: SplashScreenView {
 
     var appName: String?
 
-    var rtlSupported: Boolean
-
     fun showMainComponent()
 
     companion object {
+
+        const val VIEW_NAME = "SplashView"
+
         const val LOADED_TAG = "app.loaded"
     }
 }

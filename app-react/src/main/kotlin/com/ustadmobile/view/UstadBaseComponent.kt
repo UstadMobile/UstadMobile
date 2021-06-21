@@ -7,14 +7,14 @@ import com.ustadmobile.core.view.UstadView.Companion.KEY_IFRAME_HEIGHTS
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.concurrentSafeListOf
-import com.ustadmobile.model.statemanager.FabState
-import com.ustadmobile.model.statemanager.SnackBarState
-import com.ustadmobile.model.statemanager.ToolbarTitle
+import com.ustadmobile.redux.ReduxAppStateManager
+import com.ustadmobile.redux.ReduxAppStateManager.dispatch
+import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
+import com.ustadmobile.redux.ReduxFabState
+import com.ustadmobile.redux.ReduxThemeState
 import com.ustadmobile.util.ProgressBarManager
-import com.ustadmobile.util.RouteManager.getPathName
 import com.ustadmobile.util.SearchManager
-import com.ustadmobile.util.StateManager
-import com.ustadmobile.util.StateManager.getCurrentState
+import com.ustadmobile.util.getViewNameFromUrl
 import kotlinx.atomicfu.atomic
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
@@ -34,79 +34,83 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
 
     private val lifecycleObservers: MutableList<DoorLifecycleObserver> = concurrentSafeListOf()
 
-    val systemImpl : UstadMobileSystemImpl by instance()
-
-    var isRTLSupported: Boolean = false
+    protected val systemImpl : UstadMobileSystemImpl by instance()
 
     protected val accountManager: UstadAccountManager by instance()
 
-    val umTheme : StateManager.UmTheme by instance()
+    val umTheme : ReduxThemeState by instance()
 
-    private val lifecycleStatus = atomic(0)
+    private lateinit var progressBarManager: ProgressBarManager
 
-    protected var searchManager: SearchManager? = null
-
-    private var progressBarManager: ProgressBarManager? = null
+    private lateinit var searchManager: SearchManager
 
     protected abstract val viewName: String?
 
-    protected var fabState: FabState = FabState(icon = "add", onClick = ::onFabClick, visible = false)
-    set(value) {
-        window.setTimeout({StateManager.dispatch(value)}, 100)
-        field = value
-    }
+    private val lifecycleStatus = atomic(0)
 
-    private var hashChangeListener:(Event) -> Unit = { (it as HashChangeEvent)
-        onViewChanged(getPathName(it.newURL))
-    }
+    private val defaultFabState = ReduxFabState(icon = "add",visible = false, onClick = ::handleFabClick)
 
-    var title: String? = null
-        get() = field
+    protected var fabState: ReduxFabState = defaultFabState
         set(value) {
             field = value
             window.setTimeout({
-                value?.let { StateManager.dispatch(ToolbarTitle(it)) }
-            },200)
+                dispatch(value)
+            },STATE_CHANGE_DELAY)
+        }
+
+    private var hashChangeListener:(Event) -> Unit = { (it as HashChangeEvent)
+        if(viewName == getViewNameFromUrl(it.newURL)){
+            onComponentReady()
+        }
+    }
+
+    var title: String? = null
+        set(value) {
+            field = value
+            window.setTimeout({
+
+            }, STATE_CHANGE_DELAY)
         }
 
     override var loading: Boolean = false
-        get() = field
         set(value) {
-            progressBarManager?.progressBarVisibility = value
             field = value
+            progressBarManager.progressBarVisibility = value
         }
 
-    abstract fun onComponentReady()
+    override val currentState: Int
+        get() = lifecycleStatus.value
+
+    open fun onComponentReady(){
+        for(observer in lifecycleObservers){
+            observer.onStart(this)
+        }
+        lifecycleStatus.value = DoorLifecycleObserver.STARTED
+    }
+
+    override fun componentWillMount() {
+        window.addEventListener("hashchange",hashChangeListener)
+    }
 
     override fun componentDidMount() {
         for(observer in lifecycleObservers){
             observer.onStart(this)
         }
-        lifecycleStatus.value = DoorLifecycleObserver.STARTED
-        searchManager = SearchManager("um-search")
-        progressBarManager = ProgressBarManager()
-        window.addEventListener("hashchange",hashChangeListener)
-        isRTLSupported = systemImpl.isRTLSupported(this)
         localStorage.removeItem(KEY_IFRAME_HEIGHTS)
-        StateManager.dispatch(fabState)
+        dispatch(fabState)
+        progressBarManager = ProgressBarManager()
+        searchManager = SearchManager()
         onComponentReady()
     }
 
-    override fun RBuilder.render() {
-        lifecycleStatus.value = DoorLifecycleObserver.CREATED
-    }
+    override fun RBuilder.render() {}
 
-    open fun onViewChanged(newView: String?) {
-       if(newView != null && viewName != null && newView == viewName){
 
-       }
-    }
-
-    open fun onFabClick(event: Event){}
+    open fun handleFabClick(event: Event){}
 
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
-        StateManager.dispatch(SnackBarState(message, getString(actionMessageId)) { action() })
+        //snack bar
     }
 
     override fun runOnUiThread(r: Runnable?) {
@@ -114,10 +118,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
     }
 
     override val di: DI
-        get() = getCurrentState().di
-
-    override val currentState: Int
-        get() = lifecycleStatus.value
+        get() = getCurrentState().appDi.di
 
     override fun addObserver(observer: DoorLifecycleObserver) {
         lifecycleObservers.add(observer)
@@ -136,8 +137,14 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
             observer.onStop(this)
         }
         lifecycleStatus.value = DoorLifecycleObserver.STOPPED
-        searchManager?.onDestroy()
-        progressBarManager?.onDestroy()
         window.removeEventListener("hashchange",hashChangeListener)
+        progressBarManager.onDestroy()
+        searchManager.onDestroy()
+    }
+
+    companion object {
+
+        const val STATE_CHANGE_DELAY = 100
+
     }
 }

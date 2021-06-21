@@ -8,7 +8,6 @@ import com.ustadmobile.door.daos.ISyncHelperEntitiesDao
 import kotlin.reflect.KClass
 
 class ReactDatabase: UmAppDatabase() , DoorDatabaseSyncRepository{
-
     override val networkNodeDao: NetworkNodeDao
         get() = TODO("Not yet implemented")
     override val downloadJobDao: DownloadJobDao
@@ -24,7 +23,7 @@ class ReactDatabase: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val clazzDao: ClazzDao
         get() = TODO("Not yet implemented")
     override val clazzEnrolmentDao: ClazzEnrolmentDao
-        get() = ClazzEnrolmentDaoJs()
+        get() = TODO("Not yet implemented")
     override val leavingReasonDao: LeavingReasonDao
         get() = TODO("Not yet implemented")
     override val contentEntryDao: ContentEntryDao
@@ -57,10 +56,8 @@ class ReactDatabase: UmAppDatabase() , DoorDatabaseSyncRepository{
         get() = TODO("Not yet implemented")
     override val entityRoleDao: EntityRoleDao
         get() = ReactEntityRoleDao()
-
     override val personPictureDao: PersonPictureDao
-        get() = PersonPictureDaoJS()
-
+        get() = TODO("Not yet implemented")
     override val scrapeRunDao: ScrapeRunDao
         get() = TODO("Not yet implemented")
     override val contentEntryStatusDao: ContentEntryStatusDao

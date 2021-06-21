@@ -3,7 +3,7 @@ package com.ustadmobile.util
 import com.ccfraser.muirwik.components.styles.Theme
 import com.ccfraser.muirwik.components.styles.ThemeOptions
 import com.ccfraser.muirwik.components.styles.createMuiTheme
-import com.ustadmobile.util.UmReactUtil.isDarkModeEnabled
+import kotlinx.browser.window
 
 /**
  * Responsible for styling the app by customizing theme colors.
@@ -24,13 +24,21 @@ object ThemeManager {
     private const val secondaryColor = "#ff9800"
 
     /**
-     * Create a theme to be used applied to the app
+     * Check if the device theme setting is current on dark mode.
+     * @return TRUE if is in dark mode otherwise FALSE.
+     */
+    val isDarkModeActive:()-> Boolean = {
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+    }
+
+    /**
+     * Create a theme to be applied to the app
      */
     fun createAppTheme(): Theme {
-        themeOptions.palette?.type = if (isDarkModeEnabled()) "dark" else "light"
-        themeOptions.palette?.primary.light = if(isDarkModeEnabled()) primaryLightColor else primaryLightColor
-        themeOptions.palette?.primary.main = if(isDarkModeEnabled()) primaryColor else primaryColor
-        themeOptions.palette?.primary.dark = if(isDarkModeEnabled()) primaryDarkColor else primaryDarkColor
+        themeOptions.palette?.type = if (isDarkModeActive()) "dark" else "light"
+        themeOptions.palette?.primary.light = if(isDarkModeActive()) primaryLightColor else primaryLightColor
+        themeOptions.palette?.primary.main = if(isDarkModeActive()) primaryColor else primaryColor
+        themeOptions.palette?.primary.dark = if(isDarkModeActive()) primaryDarkColor else primaryDarkColor
         themeOptions.palette?.secondary.main = secondaryColor
         return createMuiTheme(themeOptions)
     }

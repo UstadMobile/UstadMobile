@@ -2,12 +2,13 @@ package com.ustadmobile.view
 
 import com.ccfraser.muirwik.components.*
 import com.ustadmobile.controller.SplashPresenter
-import com.ustadmobile.model.UmReactDestination
-import com.ustadmobile.util.CssStyleManager.appContainer
-import com.ustadmobile.util.CssStyleManager.splashComponentPreloadDiv
-import com.ustadmobile.util.CssStyleManager.splashComponentCenteredImage
-import com.ustadmobile.util.CssStyleManager.splashComponentProgressBar
-import com.ustadmobile.util.UmReactUtil.isDarkModeEnabled
+import com.ustadmobile.redux.ReduxAppStateManager
+import com.ustadmobile.redux.ReduxThemeState
+import com.ustadmobile.util.StyleManager.splashMainComponentContainer
+import com.ustadmobile.util.StyleManager.splashLoadingImage
+import com.ustadmobile.util.StyleManager.splashPreloadContainer
+import com.ustadmobile.util.StyleManager.splashPreloadProgressBar
+import com.ustadmobile.util.ThemeManager.isDarkModeActive
 import kotlinx.browser.document
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -20,22 +21,20 @@ import styled.css
 import styled.styledDiv
 import styled.styledImg
 
-interface SplashProps: RProps {
-    var nextDestination: UmReactDestination
 
-    var nextArgs: MutableMap<String,String>
-}
-
-class SplashComponent (props: SplashProps): UstadBaseComponent<SplashProps, RState>(props), SplashView {
+class SplashComponent (props: RProps): UstadBaseComponent<RProps, RState>(props), SplashView {
 
     private lateinit var mPresenter: SplashPresenter
 
     private var showMainComponent: Boolean = false
 
-    override var viewName: String? = null
+    override val viewName: String
+        get() = SplashView.VIEW_NAME
 
     override fun onComponentReady() {
         mPresenter = SplashPresenter(this)
+        mPresenter.onCreate()
+
         GlobalScope.launch(Dispatchers.Main) {
             mPresenter.handleResourceLoading()
         }
@@ -43,15 +42,8 @@ class SplashComponent (props: SplashProps): UstadBaseComponent<SplashProps, RSta
 
     override var appName: String? = null
         set(value) {
+            field = value
             document.title = value.toString()
-            field = value
-        }
-    override var rtlSupported: Boolean = false
-        get() = field
-        set(value) {
-            field = value
-            document.getElementById("root")?.setAttribute(
-                "dir",if(value) "rtl" else "ltr")
         }
 
     override fun showMainComponent() {
@@ -62,25 +54,24 @@ class SplashComponent (props: SplashProps): UstadBaseComponent<SplashProps, RSta
 
     override fun RBuilder.render() {
         mCssBaseline()
-        themeContext.Consumer { _ ->
+        themeContext.Consumer { theme ->
+            ReduxAppStateManager.dispatch(ReduxThemeState(theme))
             styledDiv {
-                css (appContainer)
+                css (splashMainComponentContainer)
                 if (showMainComponent) {
-                    mainScreen(props.nextDestination, props.nextArgs)
+                    +"Main Component"
                 } else {
                     styledDiv {
-                        css{ +splashComponentPreloadDiv }
+                        css(splashPreloadContainer)
                         styledImg {
-                            css (splashComponentCenteredImage)
-                            attrs{
-                                src = "assets/${if(isDarkModeEnabled()) "logo.png" else "logo.png"}"
-                            }
+                            css (splashLoadingImage)
+                            attrs.src = "assets/logo.png"
                         }
                         mLinearProgress {
-                            css(splashComponentProgressBar)
-                            attrs {
-                                color = if(isDarkModeEnabled()) MLinearProgressColor.secondary
-                                else MLinearProgressColor.primary
+                            css(splashPreloadProgressBar)
+                            attrs.color = when {
+                                isDarkModeActive() -> MLinearProgressColor.secondary
+                                else -> MLinearProgressColor.primary
                             }
                         }
                     }
@@ -94,7 +85,4 @@ class SplashComponent (props: SplashProps): UstadBaseComponent<SplashProps, RSta
         mPresenter.onDestroy()
     }
 }
-fun RBuilder.splashScreen(destination: UmReactDestination, args: Map<String,String>) = child(SplashComponent::class) {
-    attrs.nextDestination = destination
-    attrs.nextArgs = args.toMutableMap()
-}
+fun RBuilder.splashScreen() = child(SplashComponent::class) {}

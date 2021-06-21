@@ -4,9 +4,8 @@ import androidx.paging.DataSource
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.mocks.db.ReactDatabase.Companion.ALLOW_ACCESS
 import com.ustadmobile.util.DummyDataPreload.Companion.TAG_ENTRIES
-import com.ustadmobile.util.UmReactUtil.loadList
+import com.ustadmobile.util.Util.loadDataAsList
 import kotlinx.serialization.builtins.ListSerializer
 
 class ReactContentEntryDao: ContentEntryDao() {
@@ -30,7 +29,7 @@ class ReactContentEntryDao: ContentEntryDao() {
     }
 
     override suspend fun findEntryWithContainerByEntryId(entryUuid: Long): ContentEntryWithMostRecentContainer? {
-        val data = loadList(sourcePath,
+        val data = loadDataAsList(sourcePath,
             ListSerializer(ContentEntryWithMostRecentContainer.serializer()))
         return (data.firstOrNull { it.contentEntryUid == entryUuid } as ContentEntryWithMostRecentContainer).apply {
             container = Container()
@@ -42,7 +41,7 @@ class ReactContentEntryDao: ContentEntryDao() {
     }
 
     override suspend fun findTitleByUidAsync(contentEntryUid: Long): String? {
-        val data = loadList(sourcePath,
+        val data = loadDataAsList(sourcePath,
             ListSerializer(ContentEntry.serializer()))
         return data.firstOrNull { it.contentEntryUid == contentEntryUid }?.title
     }
@@ -60,7 +59,7 @@ class ReactContentEntryDao: ContentEntryDao() {
     }
 
     override suspend fun getContentByUuidAsync(parentUid: Long): ContentEntry? {
-        val data = loadList(sourcePath,
+        val data = loadDataAsList(sourcePath,
             ListSerializer(ContentEntry.serializer()))
         return data.firstOrNull { it.contentEntryUid == parentUid}
     }
@@ -86,7 +85,7 @@ class ReactContentEntryDao: ContentEntryDao() {
     }
 
     override suspend fun findByUidAsync(entryUid: Long): ContentEntry? {
-        val data = loadList(sourcePath, ListSerializer(ContentEntry.serializer()))
+        val data = loadDataAsList(sourcePath, ListSerializer(ContentEntry.serializer()))
         return data.firstOrNull { it.contentEntryUid == entryUid }
     }
 
@@ -186,7 +185,7 @@ class ReactContentEntryDao: ContentEntryDao() {
         contentEntryUid: Long,
         permission: Long
     ): Boolean {
-        return ALLOW_ACCESS
+        TODO("Not yet implemented")
     }
 
     override suspend fun toggleVisibilityContentEntryItems(
