@@ -13,6 +13,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addContainerFromUri
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.io.ext.extractVideoResolutionMetadata
+import com.ustadmobile.core.io.ext.guessMimeType
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
@@ -34,7 +35,7 @@ class VideoTypePluginAndroid : VideoTypePlugin() {
         return withContext(Dispatchers.Default) {
             val doorUri = DoorUri.parse(uri)
 
-            if (!fileExtensions.any { doorUri.uri.toString().endsWith(it, true) }) {
+            if (!fileExtensions.any { doorUri.getFileName(context).endsWith(it, true) }) {
                 return@withContext null
             }
             
