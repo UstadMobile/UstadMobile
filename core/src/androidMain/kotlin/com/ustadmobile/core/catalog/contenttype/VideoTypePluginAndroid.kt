@@ -35,7 +35,9 @@ class VideoTypePluginAndroid : VideoTypePlugin() {
         return withContext(Dispatchers.Default) {
             val doorUri = DoorUri.parse(uri)
 
-            if (!fileExtensions.any { doorUri.getFileName(context).endsWith(it, true) }) {
+            val fileName = doorUri.getFileName(context)
+
+            if (!fileExtensions.any { fileName.endsWith(it, true) }) {
                 return@withContext null
             }
             
@@ -46,7 +48,7 @@ class VideoTypePluginAndroid : VideoTypePlugin() {
             }
 
             ContentEntryWithLanguage().apply {
-                this.title = doorUri.getFileName(context)
+                this.title = fileName
                 this.leaf = true
                 this.contentTypeFlag = ContentEntry.TYPE_VIDEO
             }
