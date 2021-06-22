@@ -4,14 +4,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.view.ContentEntryAddOptionsView
 import com.toughra.ustadmobile.databinding.FragmentContentEntryAddOptionsBinding
+import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.util.ext.toBundle
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_GO_TO_COMPLETE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
+import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 
 /**
  * Fragment class responsible for content creation selection, you can create content by one of the following
@@ -55,9 +61,32 @@ class ContentEntryAddOptionsBottomSheetFragment : BottomSheetDialogFragment(), C
             else -> -1
         }
 
-        findNavController().navigate(R.id.content_entry_edit_dest, UMAndroidUtil.mapToBundle(mapOf(
+        val args = mutableMapOf(
                 ARG_PARENT_ENTRY_UID to arguments?.get(ARG_PARENT_ENTRY_UID).toString(),
-                ARG_LEAF to contentType.toString())))
+                ARG_LEAF to contentType.toString())
+
+
+        when(view?.id){
+
+            R.id.content_add_link -> {
+                findNavController().navigate(R.id.import_link_view, args.toBundle())
+            }
+            R.id.content_add_gallery ->{
+                args[SelectFileView.ARG_SELECT_FILE] = SelectFileView.SELECT_GALLERY
+                findNavController().navigate(R.id.select_file_view, args.toBundle())
+            }
+            R.id.content_add_file ->{
+                args[SelectFileView.ARG_SELECT_FILE] = SelectFileView.SELECT_FILE
+                findNavController().navigate(R.id.select_file_view, args.toBundle())
+            }
+            R.id.content_create_folder ->{
+                findNavController().navigate(R.id.content_entry_edit_dest, args.toBundle())
+            }
+
+        }
+
+
+
         if (isShowing != null && isShowing) {
             dismiss()
         }

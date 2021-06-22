@@ -34,6 +34,8 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
 
         const val ARG_IMPORTED_METADATA = "metadata"
 
+        const val ARG_URI = "uri"
+
     }
 
 }

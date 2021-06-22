@@ -2,10 +2,15 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryImportLinkView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_ID
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.lib.db.entities.ContentEntry
 import io.ktor.client.*
 import io.ktor.client.call.receive
 import io.ktor.client.features.*
@@ -23,6 +28,8 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
         UstadBaseController<ContentEntryImportLinkView>(context, arguments, view, di) {
 
     val accountManager: UstadAccountManager by instance()
+
+    val systemImpl: UstadMobileSystemImpl by instance()
 
     private val currentHttpClient: HttpClient by instance()
 
@@ -47,11 +54,21 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
                     val data = it.receive<ImportedContentEntryMetaData>()
                     view.showHideProgress(true)
-                    view.finishWithResult(data)
+
+                    if (arguments.containsKey(ARG_RESULT_DEST_ID)) {
+                        view.finishWithResult(data)
+                    } else {
+                        val args = mutableMapOf<String, String>()
+                        args.putEntityAsJson(ContentEntryEdit2View.ARG_IMPORTED_METADATA,
+                                ImportedContentEntryMetaData.serializer(), data)
+                        systemImpl.go(ContentEntryEdit2View.VIEW_NAME,
+                                args, context)
+                    }
+
 
                 }
 
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 view.showHideProgress(true)
                 dumpException(e)
             }

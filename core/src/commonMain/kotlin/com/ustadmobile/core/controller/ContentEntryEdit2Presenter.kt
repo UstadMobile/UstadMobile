@@ -10,6 +10,7 @@ import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_IMPORTED_METADATA
+import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
@@ -87,6 +88,16 @@ class ContentEntryEdit2Presenter(context: Any,
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithLanguage? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0
         val isLeaf = arguments[ARG_LEAF]?.toBoolean()
+        val metaData = arguments[ARG_IMPORTED_METADATA]
+        val uri = arguments[ARG_URI]
+        if(uri != null){
+            handleFileSelection(uri)
+            return null
+        }
+        if(metaData != null){
+            view.entryMetaData = safeParse(di, ImportedContentEntryMetaData.serializer(), metaData)
+            return view.entryMetaData?.contentEntry
+        }
         return withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.contentEntryDao?.findEntryWithLanguageByEntryIdAsync(entityUid)
         } ?: ContentEntryWithLanguage().apply {

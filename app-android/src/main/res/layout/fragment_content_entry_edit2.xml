@@ -102,12 +102,12 @@
                 android:textColor="?colorOnSecondary"
                 android:onClick="@{()-> activityEventHandler.onClickContentImportSourceSelection()}"
                 android:padding="@dimen/dimen_20dp"
-                android:text="@{contentEntry.contentEntryUid == 0 ? @string/import_content: @string/update_content}"
+                android:text="@string/update_content"
                 android:visibility="@{(contentEntry.leaf || importedMetadata.uri != null) ? View.VISIBLE: View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="@string/import_content" />
+                tools:text="@string/update_content" />
 
             <TextView
                 android:textAppearance="@style/UmTheme.TextAppearance.Body2"

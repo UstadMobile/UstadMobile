@@ -316,6 +316,24 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             }
             loading = false
         }
+
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                Uri::class.java){
+            val uri = it.firstOrNull() ?: return@observeResult
+            try {
+                loading = true
+                fieldsEnabled = false
+                GlobalScope.launch {
+                    mPresenter?.handleFileSelection(uri.toString())
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                loading = false
+                fieldsEnabled = true
+            }
+
+        }
+
         viewLifecycleOwner.lifecycle.addObserver(viewLifecycleObserver)
 
     }
