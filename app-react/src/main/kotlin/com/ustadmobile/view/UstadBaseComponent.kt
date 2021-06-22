@@ -7,10 +7,10 @@ import com.ustadmobile.core.view.UstadView.Companion.KEY_IFRAME_HEIGHTS
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.concurrentSafeListOf
-import com.ustadmobile.redux.ReduxAppStateManager
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.redux.ReduxFabState
+import com.ustadmobile.redux.ReduxSnackBarState
 import com.ustadmobile.redux.ReduxThemeState
 import com.ustadmobile.util.ProgressBarManager
 import com.ustadmobile.util.SearchManager
@@ -36,7 +36,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
 
     protected val systemImpl : UstadMobileSystemImpl by instance()
 
-    protected val accountManager: UstadAccountManager by instance()
+    val accountManager: UstadAccountManager by instance()
 
     val umTheme : ReduxThemeState by instance()
 
@@ -110,7 +110,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
 
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
-        //snack bar
+        dispatch(ReduxSnackBarState(message, getString(actionMessageId), action))
     }
 
     override fun runOnUiThread(r: Runnable?) {

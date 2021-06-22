@@ -2,12 +2,10 @@ package com.ustadmobile.view
 
 import com.ccfraser.muirwik.components.*
 import com.ustadmobile.controller.SplashPresenter
-import com.ustadmobile.redux.ReduxAppStateManager
-import com.ustadmobile.redux.ReduxThemeState
-import com.ustadmobile.util.StyleManager.splashMainComponentContainer
-import com.ustadmobile.util.StyleManager.splashLoadingImage
-import com.ustadmobile.util.StyleManager.splashPreloadContainer
-import com.ustadmobile.util.StyleManager.splashPreloadProgressBar
+import com.ustadmobile.util.StyleManager.splashComponentContainer
+import com.ustadmobile.util.StyleManager.splashComponentLoadingImage
+import com.ustadmobile.util.StyleManager.splashComponentPreloadContainer
+import com.ustadmobile.util.StyleManager.splashComponentPreloadProgressBar
 import com.ustadmobile.util.ThemeManager.isDarkModeActive
 import kotlinx.browser.document
 import kotlinx.coroutines.Dispatchers
@@ -54,21 +52,21 @@ class SplashComponent (props: RProps): UstadBaseComponent<RProps, RState>(props)
 
     override fun RBuilder.render() {
         mCssBaseline()
-        themeContext.Consumer { theme ->
-            ReduxAppStateManager.dispatch(ReduxThemeState(theme))
+        themeContext.Consumer { _ ->
+
             styledDiv {
-                css (splashMainComponentContainer)
+                css (splashComponentContainer)
                 if (showMainComponent) {
-                    +"Main Component"
+                    mainComponent()
                 } else {
                     styledDiv {
-                        css(splashPreloadContainer)
+                        css(splashComponentPreloadContainer)
                         styledImg {
-                            css (splashLoadingImage)
+                            css (splashComponentLoadingImage)
                             attrs.src = "assets/logo.png"
                         }
                         mLinearProgress {
-                            css(splashPreloadProgressBar)
+                            css(splashComponentPreloadProgressBar)
                             attrs.color = when {
                                 isDarkModeActive() -> MLinearProgressColor.secondary
                                 else -> MLinearProgressColor.primary
@@ -85,4 +83,4 @@ class SplashComponent (props: RProps): UstadBaseComponent<RProps, RState>(props)
         mPresenter.onDestroy()
     }
 }
-fun RBuilder.splashScreen() = child(SplashComponent::class) {}
+fun RBuilder.splashComponent() = child(SplashComponent::class) {}

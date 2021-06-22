@@ -14,12 +14,12 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.mocks.container.ContainerMounterJs
 import com.ustadmobile.mocks.db.ReactDatabase
-import com.ustadmobile.redux.ReduxAppStateManager
+import com.ustadmobile.redux.ReduxAppStateManager.createStore
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.redux.ReduxDiState
 import com.ustadmobile.redux.ReduxThemeState
-import com.ustadmobile.util.ThemeManager
-import com.ustadmobile.view.splashScreen
+import com.ustadmobile.util.ThemeManager.createAppTheme
+import com.ustadmobile.view.splashComponent
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.XmlSerializer
 import io.ktor.client.*
@@ -45,9 +45,11 @@ fun main() {
                 }
             )
 
-            provider(ReduxAppStateManager.createStore(diState)){
-                mThemeProvider(ThemeManager.createAppTheme()) {
-                    splashScreen()
+            val theme = createAppTheme()
+
+            provider(createStore(diState, ReduxThemeState(theme))){
+                mThemeProvider(theme) {
+                    splashComponent()
                 }
             }
         }

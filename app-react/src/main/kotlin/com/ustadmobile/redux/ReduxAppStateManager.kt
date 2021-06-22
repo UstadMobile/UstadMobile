@@ -20,7 +20,6 @@ object ReduxAppStateManager {
 
     private lateinit var storeState: Store<ReduxStore, RAction, WrapperAction>
 
-
     private fun <S, A, R> combineReducersInferred(reducers: Map<KProperty1<S, R>, Reducer<*, A>>): Reducer<S, A> {
         return combineReducers(reducers.mapKeys { it.key.name})
     }
@@ -30,6 +29,8 @@ object ReduxAppStateManager {
             is ReduxThemeState -> state.copy(appTheme = action)
             is ReduxDiState -> state.copy(appDi = action)
             is ReduxFabState -> state.copy(appFab = action)
+            is ReduxToolbarState -> state.copy(appToolbar = action)
+            is ReduxSnackBarState -> state.copy(appSnackBar = action)
             else -> state
         }
     }
@@ -58,7 +59,7 @@ object ReduxAppStateManager {
     /**
      * Create a redux app store where the states will be managed
      */
-    fun createStore(diState: ReduxDiState) : Store<ReduxStore, RAction, WrapperAction> {
+    fun createStore(diState: ReduxDiState, theme: ReduxThemeState) : Store<ReduxStore, RAction, WrapperAction> {
       storeState = createStore(
           combineReducersInferred(
               mapOf(ReduxStore::appState to ReduxAppStateManager::reducer)
@@ -67,6 +68,7 @@ object ReduxAppStateManager {
           rEnhancer()
         )
         dispatch(diState)
+        dispatch(theme)
         return storeState
     }
 }
