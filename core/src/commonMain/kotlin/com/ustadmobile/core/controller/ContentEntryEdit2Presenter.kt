@@ -4,16 +4,21 @@ import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_IMPORTED_METADATA
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
+import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
+import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -44,6 +49,8 @@ class ContentEntryEdit2Presenter(context: Any,
 
     private val contentImportManager: ContentImportManager?
             by on(accountManager.activeAccount).instanceOrNull<ContentImportManager>()
+
+    private lateinit var destinationOnFinish: String
 
     private val httpClient: HttpClient by di.instance()
 
@@ -80,6 +87,8 @@ class ContentEntryEdit2Presenter(context: Any,
         super.onCreate(savedState)
         view.licenceOptions = LicenceOptions.values().map { LicenceMessageIdOptions(it, context) }
         parentEntryUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0
+        destinationOnFinish = if((arguments[ARG_ENTITY_UID]?.toLong() ?:0L) == 0L)
+            ContentEntryList2View.VIEW_NAME else ContentEntryDetailView.VIEW_NAME
         GlobalScope.launch(doorMainDispatcher()) {
             view.storageOptions = systemImpl.getStorageDirsAsync(context)
         }
@@ -173,7 +182,7 @@ class ContentEntryEdit2Presenter(context: Any,
                                 view.storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(),
                                 conversionParams)
 
-                        view.finishWithResult(listOf(entity))
+                        systemImpl.popBack(destinationOnFinish, popUpInclusive = false, context)
                         return@launch
 
 
@@ -208,13 +217,13 @@ class ContentEntryEdit2Presenter(context: Any,
                             return@launch
                         }
 
-                        view.finishWithResult(listOf(entity))
+                        systemImpl.popBack(destinationOnFinish, popUpInclusive = false, context)
                         return@launch
 
                     }
                 }
 
-                view.finishWithResult(listOf(entity))
+                systemImpl.popBack(destinationOnFinish, popUpInclusive = false, context)
 
             } else {
                 view.titleErrorEnabled = entity.title == null

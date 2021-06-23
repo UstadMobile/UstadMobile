@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +12,10 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.toughra.ustadmobile.databinding.FragmentContentEntryAddOptionsBinding
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
+import com.ustadmobile.core.util.ext.putResultDestInfo
 import com.ustadmobile.core.util.ext.toBundle
+import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_GO_TO_COMPLETE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
@@ -26,7 +30,7 @@ import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
  * CONTENT_CREATE_CONTENT = create content from out content editor
  */
 
-class ContentEntryAddOptionsBottomSheetFragment : BottomSheetDialogFragment(), ContentEntryAddOptionsView, View.OnClickListener {
+class ContentEntryAddOptionsBottomSheetFragment(val showFolderOption: Boolean = true) : BottomSheetDialogFragment(), ContentEntryAddOptionsView, View.OnClickListener {
 
 
     private var createFolderOptionView: View? = null
@@ -44,6 +48,7 @@ class ContentEntryAddOptionsBottomSheetFragment : BottomSheetDialogFragment(), C
             addLinkOptionView = it.contentAddLink
             addGalleryOptionView = it.contentAddGallery
             addFileOptionView = it.contentAddFile
+            it.showFolder = showFolderOption
             createFolderOptionView?.setOnClickListener(this)
             addLinkOptionView?.setOnClickListener(this)
             addFileOptionView?.setOnClickListener(this)
@@ -53,38 +58,44 @@ class ContentEntryAddOptionsBottomSheetFragment : BottomSheetDialogFragment(), C
 
     override fun onClick(view: View?) {
         val isShowing = this.dialog?.isShowing
-        val contentType = when (view?.id) {
-            R.id.content_create_folder -> false
-            R.id.content_add_file -> true
-            R.id.content_add_link -> true
-            R.id.content_add_gallery -> true
-            else -> -1
-        }
 
-        val args = mutableMapOf(
-                ARG_PARENT_ENTRY_UID to arguments?.get(ARG_PARENT_ENTRY_UID).toString(),
-                ARG_LEAF to contentType.toString())
-
+        val args = mutableMapOf(ARG_LEAF to true.toString())
+        args.putFromOtherMapIfPresent(arguments.toStringMap(), ARG_PARENT_ENTRY_UID)
 
         when(view?.id){
 
             R.id.content_add_link -> {
-                findNavController().navigate(R.id.import_link_view, args.toBundle())
+                if(showFolderOption){
+                    findNavController().navigate(R.id.import_link_view, args.toBundle())
+                }else{
+                   navigateToPickEntityFromList(ImportedContentEntryMetaData::class.java,
+                   R.id.import_link_view, args.toBundle())
+                }
             }
             R.id.content_add_gallery ->{
                 args[SelectFileView.ARG_SELECT_FILE] = SelectFileView.SELECT_GALLERY
-                findNavController().navigate(R.id.select_file_view, args.toBundle())
+
+                if(showFolderOption){
+                    findNavController().navigate(R.id.select_file_view, args.toBundle())
+                }else{
+                    navigateToPickEntityFromList(String::class.java,
+                            R.id.select_file_view, args.toBundle())
+                }
             }
             R.id.content_add_file ->{
                 args[SelectFileView.ARG_SELECT_FILE] = SelectFileView.SELECT_FILE
-                findNavController().navigate(R.id.select_file_view, args.toBundle())
+                if(showFolderOption){
+                    findNavController().navigate(R.id.select_file_view, args.toBundle())
+                }else{
+                    navigateToPickEntityFromList(String::class.java,
+                            R.id.select_file_view, args.toBundle())
+                }
             }
             R.id.content_create_folder ->{
+                args[ARG_LEAF] = false.toString()
                 findNavController().navigate(R.id.content_entry_edit_dest, args.toBundle())
             }
-
         }
-
 
 
         if (isShowing != null && isShowing) {

@@ -27,10 +27,14 @@ import com.toughra.ustadmobile.databinding.FragmentContentEntryEdit2Binding
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.util.ext.observeResult
+import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
+import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
@@ -43,7 +47,7 @@ import java.io.File
 
 interface ContentEntryEdit2FragmentEventHandler {
 
-    fun onClickContentImportSourceSelection()
+    fun onClickUpdateContent()
 
     fun handleClickLanguage()
 
@@ -188,43 +192,20 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             field = value
         }
 
-    override fun onClickContentImportSourceSelection() {
+    override fun onClickUpdateContent() {
         onSaveStateToBackStackStateHandle()
-        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
-        builder.setItems(R.array.content_source_option) { dialog, which ->
-            when (which) {
-                0 -> handleFileSelection()
-                1 -> handleLinkSelection()
-            }
-            dialog.dismiss()
+        val entryAddOption = ContentEntryAddOptionsBottomSheetFragment(false)
+        if(arguments?.containsKey(UstadView.ARG_PARENT_ENTRY_UID) == true){
+            entryAddOption.arguments = mapOf(UstadView.ARG_PARENT_ENTRY_UID
+                            to arguments?.get(UstadView.ARG_PARENT_ENTRY_UID)?.toString())
+                    .toBundleWithNullableValues()
         }
-        builder.show()
-
-    }
-
-    /**
-     * removes the temp folder from being deleted in the backstack
-     */
-    private fun unregisterFileFromTemp() {
-        if (entryMetaData?.uri?.startsWith("file://") == true) {
-            findNavController().unregisterDestinationTempFile(requireContext(), File(entryMetaData?.uri?.removePrefix("file://")).parentFile)
-        }
-    }
-
-
-    internal fun handleFileSelection() {
-            activityResultLauncher?.launch("*/*")
-            //.launch("*/*")
+        entryAddOption.show(childFragmentManager, entryAddOption.tag)
     }
 
     override fun handleClickLanguage() {
         onSaveStateToBackStackStateHandle()
         navigateToPickEntityFromList(Language::class.java, R.id.language_list_dest)
-    }
-
-    private fun handleLinkSelection() {
-        onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(ImportedContentEntryMetaData::class.java, R.id.import_link_view)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -312,13 +293,13 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         }
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                Uri::class.java){
+                String::class.java){
             val uri = it.firstOrNull() ?: return@observeResult
             try {
                 loading = true
                 fieldsEnabled = false
                 GlobalScope.launch {
-                    mPresenter?.handleFileSelection(uri.toString())
+                    mPresenter?.handleFileSelection(uri)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -337,15 +318,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         playerView?.player = player
         player?.playWhenReady = playWhenReady
         player?.seekTo(currentWindow, playbackPosition)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.menu_done) {
-            if (entity?.let { mPresenter?.isImportValid(it) } == true) {
-                unregisterFileFromTemp()
-            }
-        }
-        return super.onOptionsItemSelected(item)
     }
 
     private val viewLifecycleObserver = object : DefaultLifecycleObserver {

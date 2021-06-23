@@ -7,9 +7,9 @@ import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts
-import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
+import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
 import com.ustadmobile.core.view.SelectFileView.Companion.ARG_SELECT_FILE
@@ -30,10 +30,13 @@ class SelectFileFragment(private val registry: ActivityResultRegistry? = null) :
                 registry ?: requireActivity().activityResultRegistry) {
 
             if (arguments?.containsKey(UstadView.ARG_RESULT_DEST_ID) == true) {
-                saveResultToBackStackSavedStateHandle(listOf(it))
+                saveResultToBackStackSavedStateHandle(listOf(it.toString()))
             } else {
+                val map = arguments.toStringMap()
                 val args = mutableMapOf<String, String>()
                 args[ARG_URI] = it.toString()
+                args.putFromOtherMapIfPresent(map, UstadView.ARG_LEAF)
+                args.putFromOtherMapIfPresent(map, UstadView.ARG_PARENT_ENTRY_UID)
                 systemImpl.go(ContentEntryEdit2View.VIEW_NAME,
                         args, requireContext())
             }

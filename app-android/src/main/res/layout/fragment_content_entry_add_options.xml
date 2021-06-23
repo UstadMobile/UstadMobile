@@ -5,6 +5,11 @@
 
     <data>
 
+        <import type="android.view.View" />
+
+        <variable
+            name="showFolder"
+            type="boolean" />
 
     </data>
 
@@ -28,6 +33,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_listitem"
+            android:visibility="@{showFolder ? View.VISIBLE : View.GONE}"
             android:drawablePadding="@dimen/dimen_16dp"
             android:padding="@dimen/dimen_16dp"
             android:text="@string/content_editor_create_new_category"

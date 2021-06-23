@@ -100,7 +100,7 @@
                 android:enabled="@{fieldsEnabled}"
                 android:backgroundTint="?colorSecondary"
                 android:textColor="?colorOnSecondary"
-                android:onClick="@{()-> activityEventHandler.onClickContentImportSourceSelection()}"
+                android:onClick="@{()-> activityEventHandler.onClickUpdateContent()}"
                 android:padding="@dimen/dimen_20dp"
                 android:text="@string/update_content"
                 android:visibility="@{(contentEntry.leaf || importedMetadata.uri != null) ? View.VISIBLE: View.GONE}"
