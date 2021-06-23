@@ -35,6 +35,7 @@ import com.ustadmobile.core.impl.UmLifecycleListener
 import com.ustadmobile.core.impl.UmLifecycleOwner
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.impl.nav.navigateToErrorScreen
 import com.ustadmobile.core.util.ext.putResultDestInfo
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ListViewMode
@@ -268,6 +269,14 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
         }
 
         ustadNavController.navigate(options.destinationViewName, options.arguments)
+    }
+
+    /**
+     * Navigate to the error screen. Pass details of the exception so it is recorded and displayed
+     * to the user accordingly.
+     */
+    fun navigateToErrorScreen(exception: Exception) {
+        ustadNavController.navigateToErrorScreen(exception, di, context)
     }
 
     companion object {

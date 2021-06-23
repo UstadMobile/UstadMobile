@@ -135,8 +135,8 @@ class Login2FragmentTest : TestCase(){
                 createAccount {
                     click()
                 }
-                assertEquals("It navigated to account creation screen",
-                        R.id.site_terms_detail_accept_dest, systemImplNavRule.navController.currentDestination?.id)
+                assertEquals("It navigated to register age redirect",
+                        R.id.register_age_redirect_dest, systemImplNavRule.navController.currentDestination?.id)
             }
         }
 

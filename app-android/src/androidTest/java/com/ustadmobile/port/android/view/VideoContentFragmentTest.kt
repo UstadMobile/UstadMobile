@@ -4,7 +4,9 @@ import android.content.res.Configuration
 import android.media.session.PlaybackState.STATE_BUFFERING
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
+import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player.STATE_READY
+import com.google.android.exoplayer2.ui.PlayerView
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
@@ -22,7 +24,6 @@ import com.ustadmobile.test.port.android.util.letOnFragment
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.util.test.ext.insertVideoContent
-import kotlinx.android.synthetic.main.fragment_video_content.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
@@ -89,7 +90,8 @@ class VideoContentFragmentTest : TestCase() {
                     click()
                 }
                 fragmentScenario.onFragment {
-                    val playState = it.activity_video_player_view.player?.playbackState
+                    val videoPlayer = it.view?.findViewById<PlayerView>(R.id.activity_video_player_view)
+                    val playState = videoPlayer?.player?.playbackState
                     Assert.assertTrue("player is playing", playState == STATE_BUFFERING || playState == STATE_READY)
                 }
 

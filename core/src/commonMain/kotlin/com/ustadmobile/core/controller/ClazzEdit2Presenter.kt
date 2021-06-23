@@ -9,14 +9,19 @@ import com.ustadmobile.core.schedule.*
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.effectiveTimeZone
+import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SCHOOL_UID
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
+import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_STUDENT_GROUP
+import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_TEACHER_GROUP
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -44,12 +49,16 @@ class ClazzEdit2Presenter(context: Any,
     val scheduleOneToManyJoinListener = scheduleOneToManyJoinEditHelper.createNavigateForResultListener(
         ScheduleEditView.VIEW_NAME, Schedule.serializer())
 
+    val scopedGrantOneToManyHelper = ScopedGrantOneToManyHelper(repo, this,
+        requireBackStackEntry().savedStateHandle, Clazz.TABLE_ID)
+
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.clazzSchedules = scheduleOneToManyJoinEditHelper.liveList
+        view.scopedGrants = scopedGrantOneToManyHelper.liveList
     }
 
     override fun onLoadDataComplete() {
@@ -106,8 +115,43 @@ class ClazzEdit2Presenter(context: Any,
         val schedules = db.onRepoWithFallbackToDb(2000) {
             it.scheduleDao.takeIf { clazzUid != 0L }?.findAllSchedulesByClazzUidAsync(clazzUid)
         } ?: listOf()
-
         scheduleOneToManyJoinEditHelper.liveList.sendValue(schedules)
+
+        if(clazzUid != 0L) {
+            val scopedGrants = db.onRepoWithFallbackToDb(2000) {
+                it.scopedGrantDao.findByTableIdAndEntityUid(Clazz.TABLE_ID, clazzUid)
+            }
+            scopedGrantOneToManyHelper.liveList.setVal(scopedGrants)
+        }else if(db is DoorDatabaseRepository){
+            /*
+            This should be enabled once a field has been added on Clazz for the adminGroupUid
+            scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
+                name = "Admins"
+                scopedGrant = ScopedGrant().apply {
+                    sgFlags = ScopedGrant.FLAG_ADMIN_GROUP.or(FLAG_NO_DELETE)
+                    sgPermissions = Role.ALL_PERMISSIONS
+                }
+            })
+            */
+
+            scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
+                name = "Teachers"
+                scopedGrant = ScopedGrant().apply {
+                    sgFlags = ScopedGrant.FLAG_TEACHER_GROUP.or(FLAG_NO_DELETE)
+                    sgPermissions = Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT
+                }
+            })
+
+            scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
+                name = "Students"
+                scopedGrant = ScopedGrant().apply {
+                    sgFlags = ScopedGrant.FLAG_STUDENT_GROUP.or(FLAG_NO_DELETE)
+                    sgPermissions = Role.ROLE_CLAZZ_STUDENT_PERMISSIONS_DEFAULT
+                }
+            })
+        }
+
+
         return clazz
     }
 
@@ -122,7 +166,6 @@ class ClazzEdit2Presenter(context: Any,
         }
 
         scheduleOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
-
         return clazz
     }
 
@@ -203,6 +246,11 @@ class ClazzEdit2Presenter(context: Any,
             scheduleOneToManyJoinEditHelper.commitToDatabase(repo.scheduleDao) {
                 it.scheduleClazzUid = entity.clazzUid
             }
+
+            scopedGrantOneToManyHelper.commitToDatabase(repo, entity.clazzUid, flagToGroupMap = mapOf(
+                FLAG_TEACHER_GROUP to entity.clazzTeachersPersonGroupUid,
+                FLAG_STUDENT_GROUP to entity.clazzStudentsPersonGroupUid
+            ))
 
 
             val fromDateTime = DateTime.now().toOffsetByTimezone(entity.effectiveTimeZone).localMidnight

@@ -6,24 +6,7 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = ClazzWorkSubmission.TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClazzWorkSubmission.TABLE_ID} AS tableId FROM 
-        ChangeLog
-        JOIN ClazzWorkSubmission ON ChangeLog.chTableId = ${ClazzWorkSubmission.TABLE_ID} AND ChangeLog.chEntityPk = ClazzWorkSubmission.clazzWorkSubmissionUid
-        JOIN Person ON Person.personUid = ClazzWorkSubmission.clazzWorkSubmissionPersonUid
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid"""],
-    syncFindAllQuery = """
-        SELECT ClazzWorkSubmission.* FROM
-        ClazzWorkSubmission
-        JOIN Person ON Person.personUid = ClazzWorkSubmission.clazzWorkSubmissionPersonUid
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
-        WHERE DeviceSession.dsDeviceId = :clientId
-    """)
+@SyncableEntity(tableId = ClazzWorkSubmission.TABLE_ID)
 @Serializable
 open class ClazzWorkSubmission() {
 
