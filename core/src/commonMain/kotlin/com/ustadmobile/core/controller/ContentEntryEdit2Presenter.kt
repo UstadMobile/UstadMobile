@@ -234,7 +234,8 @@ class ContentEntryEdit2Presenter(context: Any,
                 if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
                 view.fileImportErrorVisible = false
                 view.entity = entry
-                if(metadata.mimeType.startsWith("video/") && !metadata.uri.contains("google")){
+                if(metadata.mimeType.startsWith("video/") &&
+                        !metadata.uri.lowercase().startsWith("https://drive.google.com")){
                     view.videoUri = uri
                 }
             }
