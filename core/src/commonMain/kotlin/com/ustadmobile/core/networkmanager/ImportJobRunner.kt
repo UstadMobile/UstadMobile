@@ -51,9 +51,10 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
         }
     }
 
-    suspend fun importContainer(markContainerAsDownloaded: Boolean = false) {
+    suspend fun importContainer() {
 
-        val uri = containerImportJob.cijFilePath ?: throw IllegalArgumentException("filePath not given")
+        val markContainerAsDownloaded = containerImportJob.cijImportMode == ContainerImportJob.CLIENT_IMPORT_MODE
+        val uri = containerImportJob.cijUri ?: throw IllegalArgumentException("uri not given")
         val mimeType = containerImportJob.cijMimeType
                 ?: throw IllegalArgumentException("mimeType not given")
         val containerBaseDir = containerImportJob.cijContainerBaseDir
