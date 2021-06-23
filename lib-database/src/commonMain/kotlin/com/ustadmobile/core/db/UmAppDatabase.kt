@@ -58,7 +58,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 66)
+], version = 67)
 @MinSyncVersion(60)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -4585,6 +4585,28 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_66_67 = object : DoorMigration(66, 67) {
+
+            override fun migrate(database: DoorSqlDatabase) {
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("ALTER TABLE ContainerImportJob RENAME to ContainerImportJob_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerImportJob (  cijContainerUid  INTEGER  NOT NULL , cijUri  TEXT , cijImportMode  INTEGER  NOT NULL , cijContainerBaseDir  TEXT , cijContentEntryUid  INTEGER  NOT NULL , cijMimeType  TEXT , cijSessionId  TEXT , cijJobStatus  INTEGER  NOT NULL , cijBytesSoFar  INTEGER  NOT NULL , cijImportCompleted  INTEGER  NOT NULL , cijContentLength  INTEGER  NOT NULL , cijContainerEntryFileUids  TEXT , cijConversionParams  TEXT , cijUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("INSERT INTO ContainerImportJob (cijUid, cijContainerUid, cijUri, cijImportMode, cijContainerBaseDir, cijContentEntryUid, cijMimeType, cijSessionId, cijJobStatus, cijBytesSoFar, cijImportCompleted, cijContentLength, cijContainerEntryFileUids, cijConversionParams) SELECT cijUid, cijContainerUid, cijFilePath, 0, cijContainerBaseDir, cijContentEntryUid, cijMimeType, cijSessionId, cijJobStatus, cijBytesSoFar, cijImportCompleted, cijContentLength, cijContainerEntryFileUids, cijConversionParams FROM ContainerImportJob_OLD")
+                    database.execSQL("DROP TABLE ContainerImportJob_OLD")
+
+
+                } else {
+
+                    database.execSQL("""ALTER TABLE ContainerImportJob RENAME COLUMN cijFilePath to cijUri""".trimMargin())
+                    database.execSQL("""ALTER TABLE ADD COLUMN cijImportMode INTEGER DEFAULT 0 NOT NULL""")
+
+                }
+            }
+
+        }
+
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
@@ -4595,7 +4617,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
                     MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
                     MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
-                    MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66)
+                    MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67)
 
 
 

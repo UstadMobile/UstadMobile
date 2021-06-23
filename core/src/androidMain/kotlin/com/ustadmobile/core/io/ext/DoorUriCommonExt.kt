@@ -12,7 +12,7 @@ actual suspend fun DoorUri.guessMimeType(): String? {
 }
 
 actual suspend fun DoorUri.getSize(context: Any): Long {
-    return (context as Context).contentResolver.openAssetFileDescriptor(uri, "r")?.length ?: 0
+    return (context as Context).contentResolver.openAssetFileDescriptor(uri, "r")?.length ?: -1
 }
 
 fun DoorUri.extractVideoResolutionMetadata(context: Context): Pair<Int, Int>{

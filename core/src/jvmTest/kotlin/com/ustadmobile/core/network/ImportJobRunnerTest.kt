@@ -179,7 +179,8 @@ class ImportJobRunnerTest {
         return runBlocking {
             ContainerImportJob().apply {
                 cijBytesSoFar = 0
-                this.cijFilePath = fileToUpload.toURI().toString()
+                this.cijUri = fileToUpload.toURI().toString()
+                this.cijImportMode = ContainerImportJob.SERVER_IMPORT_MODE
                 this.cijContentEntryUid = metadata.contentEntry.contentEntryUid
                 this.cijMimeType = metadata.mimeType
                 this.cijContainerBaseDir = clientFolder.absolutePath

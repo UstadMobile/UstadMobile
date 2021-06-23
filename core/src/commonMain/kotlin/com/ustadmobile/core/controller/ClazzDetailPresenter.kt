@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_CLAZZ
@@ -66,9 +67,14 @@ class ClazzDetailPresenter(context: Any,
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         val personUid = accountManager.activeAccount.personUid
         GlobalScope.launch(doorMainDispatcher()) {
+
+            val contentEntryListParams = mapOf(
+                    ARG_CLAZZUID to entityUid.toString(),
+                    ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_CLAZZ)
+                    .toQueryString()
+
             view.tabs = listOf("${ClazzDetailOverviewView.VIEW_NAME}?$ARG_ENTITY_UID=$entityUid",
-                    """${ContentEntryList2View.VIEW_NAME}?$ARG_CLAZZUID=$entityUid&
-                       $ARG_DISPLAY_CONTENT_BY_OPTION=$ARG_DISPLAY_CONTENT_BY_CLAZZ""".trimMargin(),
+                    """${ContentEntryList2View.VIEW_NAME}?$contentEntryListParams""",
                     """${ClazzMemberListView.VIEW_NAME}?
                         $ARG_CLAZZUID=$entityUid
                         """.trimMargin()) +

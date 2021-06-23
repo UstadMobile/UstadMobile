@@ -43,10 +43,9 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
                 db.containerImportJobDao.updateStatus(it.cijJobStatus, it.cijUid)
 
                 val runner = ImportJobRunner(it, endpointUrl = endpoint.url, di = di)
-                val isFileImport = it.cijFilePath?.startsWith("content://") == true
-                runner.importContainer(isFileImport)
+                runner.importContainer()
                 var status = JobStatus.COMPLETE
-                if(isFileImport){
+                if(it.cijImportMode == ContainerImportJob.CLIENT_IMPORT_MODE){
                    status = runner.upload()
                 }
 
@@ -86,7 +85,7 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
                                                     conversionParams: Map<String, String>): ContainerImportJob {
         return ContainerImportJob().apply {
             cijBytesSoFar = 0
-            this.cijFilePath = uri
+            this.cijUri = uri
             this.cijContentEntryUid = metadata.contentEntry.contentEntryUid
             this.cijMimeType = metadata.mimeType
             this.cijContainerBaseDir = containerBaseDir
