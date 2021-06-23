@@ -47,8 +47,6 @@ interface ContentEntryEdit2FragmentEventHandler {
 
     fun handleClickLanguage()
 
-    fun handleToggleCompress(checked: Boolean)
-
 }
 
 class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = null) : UstadEditFragment<ContentEntryWithLanguage>(), ContentEntryEdit2View, ContentEntryEdit2FragmentEventHandler {
@@ -202,10 +200,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         }
         builder.show()
 
-    }
-
-    override fun handleToggleCompress(checked: Boolean) {
-        compressionEnabled = checked
     }
 
     /**
