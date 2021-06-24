@@ -32,8 +32,6 @@ import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.rest.ContainerUploadRoute2
 import com.ustadmobile.lib.rest.TAG_UPLOAD_DIR
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.sharedse.io.extractResourceToFile
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploadManagerCommonJvm
 import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
 import org.kodein.di.ktor.DIFeature
@@ -106,7 +104,7 @@ class ImportJobRunnerTest {
             }
             bind<ContentImportManager>() with scoped(endpointScope).singleton {
                 ContentImportManagerImpl(listOf(H5PTypePluginCommonJvm(), XapiTypePluginCommonJvm()),
-                        context, this.context, di)
+                    ContainerImportJob.CLIENT_IMPORT_MODE, context, this.context, di)
             }
         }
 
@@ -181,7 +179,8 @@ class ImportJobRunnerTest {
         return runBlocking {
             ContainerImportJob().apply {
                 cijBytesSoFar = 0
-                this.cijFilePath = fileToUpload.absolutePath
+                this.cijUri = fileToUpload.toURI().toString()
+                this.cijImportMode = ContainerImportJob.SERVER_IMPORT_MODE
                 this.cijContentEntryUid = metadata.contentEntry.contentEntryUid
                 this.cijMimeType = metadata.mimeType
                 this.cijContainerBaseDir = clientFolder.absolutePath
@@ -211,7 +210,7 @@ class ImportJobRunnerTest {
             .writeToFile(fileToUpload)
 
         metadata = runBlocking {
-            contentImportManager.extractMetadata(fileToUpload.path)!!
+            contentImportManager.extractMetadata(fileToUpload.toURI().toString())!!
         }
 
         metadata.contentEntry.contentEntryUid = runBlocking {

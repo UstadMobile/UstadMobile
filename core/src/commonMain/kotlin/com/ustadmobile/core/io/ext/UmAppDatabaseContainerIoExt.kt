@@ -6,7 +6,8 @@ import com.ustadmobile.door.DoorUri
 
 expect suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
                                                               zipUri: DoorUri,
-                                                              addOptions: ContainerAddOptions)
+                                                              addOptions: ContainerAddOptions,
+                                                              context: Any)
 
 expect suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: DoorUri,
                                                    recursive: Boolean = true,

@@ -243,21 +243,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                     loading = true
                     fieldsEnabled = false
                     GlobalScope.launch {
-                        val input = requireContext().contentResolver.openInputStream(uri)
-                        val importFolder = File(requireContext().filesDir, "import")
-                        val importTmpFolder = File(importFolder, "import-${System.currentTimeMillis()}")
-                        importTmpFolder.mkdirs()
-                        findNavController().registerDestinationTempFile(requireContext(),
-                            importTmpFolder)
-
-                        val tmpFile = File(importTmpFolder, requireContext().contentResolver.getFileName(uri))
-                        val output = tmpFile.outputStream()
-                        input?.copyTo(tmpFile.outputStream())
-                        output.flush()
-                        output.close()
-                        input?.close()
-
-                        mPresenter?.handleFileSelection(tmpFile.path)
+                        mPresenter?.handleFileSelection(uri.toString())
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -327,7 +313,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                 if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
                 fileImportErrorVisible = false
                 entity = entry
-                videoUri = metadata.uri
             }
             loading = false
         }

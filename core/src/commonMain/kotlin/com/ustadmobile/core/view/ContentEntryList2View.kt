@@ -26,15 +26,15 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
 
     companion object {
 
-        const val ARG_DOWNLOADED_CONTENT = "downloaded"
+        const val ARG_SHOW_ONLY_FOLDER_FILTER = "folder"
 
-        const val ARG_CONTENT_FILTER = "filter"
+        const val ARG_DISPLAY_CONTENT_BY_OPTION = "displayOption"
 
-        const val ARG_FOLDER_FILTER = "folder"
+        const val ARG_DISPLAY_CONTENT_BY_CLAZZ = "displayContentByClazz"
 
-        const val ARG_CLAZZ_CONTENT_FILTER = "clazzContent"
+        const val ARG_DISPLAY_CONTENT_BY_PARENT = "displayContentByParent"
 
-        const val ARG_LIBRARIES_CONTENT = "libraries"
+        const val ARG_DISPLAY_CONTENT_BY_DOWNLOADED = "displayContentByDownloaded"
 
         const val ARG_CLAZZWORK_FILTER = "clazzworkFilter"
 

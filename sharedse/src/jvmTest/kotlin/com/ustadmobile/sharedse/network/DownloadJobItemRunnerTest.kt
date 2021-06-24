@@ -39,7 +39,6 @@ import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
 import com.ustadmobile.util.commontest.ext.mockResponseForConcatenatedFiles2Request
 import com.ustadmobile.util.test.ReverseProxyDispatcher
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
-import com.ustadmobile.util.test.extractTestResourceToFile
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
@@ -355,9 +354,11 @@ class DownloadJobItemRunnerTest {
         container = Container(contentEntry)
         container.containerUid = serverRepo.containerDao.insert(container)
         runBlocking {
-            serverRepo.addEntriesToContainerFromZip(container.containerUid,
-                webServerTmpContentEntryFile.toDoorUri(),
-                ContainerAddOptions(webServerTmpDir.toDoorUri()))
+            serverRepo.addEntriesToContainerFromZip(
+                    container.containerUid,
+                    webServerTmpContentEntryFile.toDoorUri(),
+                    ContainerAddOptions(webServerTmpDir.toDoorUri()), Any()
+            )
         }
 
         //add the container itself to the client database (would normally happen via sync/preload)

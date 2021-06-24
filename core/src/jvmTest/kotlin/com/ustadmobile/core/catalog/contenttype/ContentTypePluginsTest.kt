@@ -1,17 +1,14 @@
-package com.ustadmobile.port.sharedse.contentformats
+package com.ustadmobile.core.catalog.contenttype
 
-import org.mockito.kotlin.mock
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
-import com.ustadmobile.sharedse.util.UstadTestRule
 import io.ktor.client.*
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
@@ -21,7 +18,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
-import java.nio.file.Files
 
 class ContentTypePluginsTest {
 
@@ -49,7 +45,8 @@ class ContentTypePluginsTest {
         di = DI {
             import(ustadTestRule.diModule)
             bind<ContentImportManager>() with scoped(ustadTestRule.endpointScope!!).singleton {
-                ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm()), context, this.context, di)
+                ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm()),
+                    ContainerImportJob.CLIENT_IMPORT_MODE, context, this.context, di)
             }
         }
 
@@ -65,7 +62,7 @@ class ContentTypePluginsTest {
     @Test
     fun givenValidEpubFormatFile_whenImportContentEntryFromFile_thenContentEntryAndContainerShouldExist() {
         val inputStream = this::class.java.getResourceAsStream(
-                "/com/ustadmobile/port/sharedse/contentformats/childrens-literature.epub")
+                "/com/ustadmobile/core/contenttype/childrens-literature.epub")
         val tempEpubFile = temporaryFolder.newFile("imported.epub")
         tempEpubFile.copyInputStreamToFile(inputStream)
 
@@ -80,8 +77,8 @@ class ContentTypePluginsTest {
 
         runBlocking {
             //TODO: Make this more rigorous
-            val metadata = contentImportManager.extractMetadata(tempEpubFile.path)!!
-            val container = contentImportManager.importFileToContainer(tempEpubFile.path,
+            val metadata = contentImportManager.extractMetadata(tempEpubFile.toURI().toString())!!
+            val container = contentImportManager.importFileToContainer(tempEpubFile.toURI().toString(),
                     metadata.mimeType, 0, containerTmpDir.absolutePath, mapOf()){
 
             }
@@ -102,7 +99,7 @@ class ContentTypePluginsTest {
         db.clearAllTables()
 
         val contentEntry =  runBlocking {
-           contentImportManager.extractMetadata(emptyFile.path)?.contentEntry
+           contentImportManager.extractMetadata(emptyFile.toURI().toString())?.contentEntry
         }
 
         Assert.assertNull("Given unsupported file, extractContentEntryMetaData returns null",
