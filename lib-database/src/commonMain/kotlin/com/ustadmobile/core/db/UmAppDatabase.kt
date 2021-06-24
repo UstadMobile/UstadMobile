@@ -8,6 +8,7 @@ import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.ext.doorDatabaseMetadata
+import com.ustadmobile.door.ext.syncableTableIdMap
 import com.ustadmobile.door.util.DoorSqlGenerator
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -60,7 +61,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 67)
+], version = 68)
 @MinSyncVersion(60)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -345,8 +346,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         @JsName("getInstance")
-        fun getInstance(context: Any, nodeIdAndAuth: NodeIdAndAuth) = lazy {
-            getInstance(context, "UmAppDatabase", nodeIdAndAuth)
+        fun getInstance(context: Any, nodeIdAndAuth: NodeIdAndAuth, primary: Boolean = false) = lazy {
+            getInstance(context, "UmAppDatabase", nodeIdAndAuth, primary)
         }.value
 
         @JsName("getInstanceWithDbName")
@@ -359,8 +360,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 var builder = DatabaseBuilder.databaseBuilder(
                         context, UmAppDatabase::class, dbName)
                 builder = addMigrations(builder)
+                    .addMigrations(Migrate67To68(nodeIdAndAuth.nodeId))
                     .addCallback(DoorSyncableDatabaseCallback2(nodeIdAndAuth.nodeId,
-                        UmAppDatabase::class.doorDatabaseMetadata().syncableTableIdMap, primary))
+                        UmAppDatabase::class.syncableTableIdMap, primary))
                 db = builder.build()
                 namedInstances[dbName] = db
             }
@@ -4612,6 +4614,27 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
 
         }
+
+        /**
+         * This migration must update the SyncNode to set a new clientId, so we need to take a parameter here
+         */
+        class Migrate67To68(private val nodeId: Int): DoorMigration(67, 68) {
+
+            override fun migrate(database: DoorSqlDatabase) {
+                if(database.dbType() == DoorDbType.SQLITE) {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                }else {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  SERIAL  PRIMARY KEY  NOT NULL )")
+                }
+
+                database.execSQL("""
+                    UPDATE SyncNode
+                       SET nodeClientId = $nodeId
+                """.trimIndent())
+            }
+
+        }
+
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 

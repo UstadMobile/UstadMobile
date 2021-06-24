@@ -24,10 +24,12 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag.Companion.TAG_DB
 import com.ustadmobile.door.ext.DoorTag.Companion.TAG_REPO
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.rest.ContainerUploadRoute2
@@ -56,6 +58,7 @@ import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
 import java.io.File
 import java.util.*
+import kotlin.random.Random.Default.nextInt
 
 class ImportJobRunnerTest {
 
@@ -109,10 +112,13 @@ class ImportJobRunnerTest {
         }
 
         val httpClient: HttpClient = di.direct.instance()
-        serverDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase").build()
+        serverDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class,
+            "UmAppDatabase").build()
         serverDb.clearAllTables()
+
+        val serverNodeIdAndAuth = NodeIdAndAuth(nextInt(), randomUuid().toString())
         serverRepo = spy(serverDb.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
-            httpClient, di.direct.instance())))
+            serverNodeIdAndAuth.nodeId, serverNodeIdAndAuth.auth, httpClient, di.direct.instance())))
 
         server = embeddedServer(Netty, port = defaultPort) {
             install(ContentNegotiation) {

@@ -6,6 +6,9 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
@@ -17,6 +20,7 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import kotlin.random.Random
 
 class UmAppDatabaseExtTest {
 
@@ -35,8 +39,9 @@ class UmAppDatabaseExtTest {
 
     @Before
     fun setup() {
-        db = UmAppDatabase.getInstance(context).also {
-            it.clearAllTables()
+        val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
+        db = UmAppDatabase.getInstance(context, nodeIdAndAuth).also {
+            it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, false)
         }
 
         okHttpClient = OkHttpClient()
@@ -50,7 +55,7 @@ class UmAppDatabaseExtTest {
         }
 
         repo = db.asRepository(repositoryConfig(context, "http://localhost/dummy/",
-            httpClient, okHttpClient))
+            nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))
 
         mockSystemImpl = mock {
             on { getString(any(), any())}.thenAnswer {

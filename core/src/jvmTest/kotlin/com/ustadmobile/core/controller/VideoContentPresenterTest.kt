@@ -12,10 +12,12 @@ import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.activeRepoInstance
+import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Container
@@ -33,7 +35,9 @@ import io.ktor.client.features.json.*
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.IOException
@@ -55,6 +59,10 @@ class VideoContentPresenterTest {
 
     var selectedClazzUid = 10001L
 
+    @JvmField
+    @Rule
+    val temporaryFolder = TemporaryFolder()
+
     @Before
     @Throws(IOException::class)
     fun setup() {
@@ -63,7 +71,7 @@ class VideoContentPresenterTest {
         val endpointScope = EndpointScope()
         di = DI {
             bind<UstadMobileSystemImpl>() with singleton { spy(UstadMobileSystemImpl(
-                XmlPullParserFactory.newInstance())) }
+                XmlPullParserFactory.newInstance(), temporaryFolder.newFolder())) }
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()
@@ -72,10 +80,17 @@ class VideoContentPresenterTest {
                 builder.registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
                 builder.create()
             }
+
+            bind<NodeIdAndAuth>() with scoped(endpointScope!!).singleton {
+                val systemImpl: UstadMobileSystemImpl = instance()
+                val contextIdentifier: String = sanitizeDbNameFromUrl(context.url)
+                systemImpl.getOrGenerateNodeIdAndAuth(contextPrefix = contextIdentifier, Any())
+            }
+
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope!!).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName).also {
+                spy(UmAppDatabase.getInstance(Any(), dbName, instance()).also {
                     it.clearAllTables()
                     it.preload()
                 })
@@ -96,8 +111,10 @@ class VideoContentPresenterTest {
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope!!).singleton {
+                val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository(
-                    repositoryConfig(Any(), context.url, instance(), instance())))
+                    repositoryConfig(Any(), context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
+                        instance(), instance())))
             }
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
 
