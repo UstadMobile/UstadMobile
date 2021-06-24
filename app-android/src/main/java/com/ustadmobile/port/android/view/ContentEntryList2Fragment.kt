@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.Manifest
 import android.os.Bundle
 import android.view.*
 import androidx.core.os.bundleOf
@@ -163,8 +162,8 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         navigateToPickEntityFromList(ContentEntry::class.java,
                 R.id.content_entry_list_select_folder,
                 bundleOf(UstadView.ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
-                        ContentEntryList2View.ARG_CONTENT_FILTER to ContentEntryList2View.ARG_LIBRARIES_CONTENT,
-                        ContentEntryList2View.ARG_FOLDER_FILTER to true.toString()))
+                        ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
+                        ContentEntryList2View.ARG_SHOW_ONLY_FOLDER_FILTER to true.toString()))
     }
 
 

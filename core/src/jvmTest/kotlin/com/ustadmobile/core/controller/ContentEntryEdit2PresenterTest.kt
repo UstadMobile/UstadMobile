@@ -124,7 +124,7 @@ class ContentEntryEdit2PresenterTest {
             on { storageOptions }.thenAnswer { runBlocking { systemImpl.getStorageDirsAsync(context) } }
             on { entryMetaData }.thenAnswer {
                 if (isUriNull) null else
-                    ImportedContentEntryMetaData(ContentEntryWithLanguage(), "application/epub+zip", "file://Dummy")
+                    ImportedContentEntryMetaData(ContentEntryWithLanguage(), "application/epub+zip", "content://Dummy")
             }
         }
     }
@@ -169,7 +169,7 @@ class ContentEntryEdit2PresenterTest {
         }
 
         verifyBlocking(contentImportManager, timeout(timeoutInMill)) {
-            queueImportContentFromFile(eq("file://Dummy"), any(), any(), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
+            queueImportContentFromFile(eq("content://Dummy"), any(), any(), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
         }
 
 
@@ -194,7 +194,7 @@ class ContentEntryEdit2PresenterTest {
         }
 
         verifyBlocking(contentImportManager, times(0)) {
-            queueImportContentFromFile(eq("file://Dummy"), any(), any(), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
+            queueImportContentFromFile(eq("content://Dummy"), any(), any(), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
         }
     }
 
@@ -220,7 +220,7 @@ class ContentEntryEdit2PresenterTest {
         }
 
         verifyBlocking(contentImportManager, timeout(timeoutInMill)) {
-            queueImportContentFromFile(eq("file://Dummy"), any(), any(), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
+            queueImportContentFromFile(eq("content://Dummy"), any(), any(), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
         }
 
     }

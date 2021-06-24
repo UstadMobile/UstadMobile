@@ -30,7 +30,7 @@ fun XapiStatementEndpoint.storeProgressStatement(account: UmAccount, entry: Cont
         }
         this.`object` = XObject().apply {
             this.id = entry.entryId ?: UMFileUtil.joinPaths(account.endpointUrl,
-                    "/contentEntryUid/${entry.contentEntryUid}/$clazzUid/")
+                    "/contentEntryUid/${entry.contentEntryUid}")
             this.objectType = "Activity"
             this.definition = Definition().apply {
                 this.name = mapOf("en-US" to (entry.title ?: ""))
