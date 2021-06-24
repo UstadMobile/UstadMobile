@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.container.ContainerAddOptions
@@ -5,7 +7,9 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Container
 import io.ktor.application.install
 import io.ktor.client.HttpClient
@@ -29,6 +33,7 @@ import io.netty.handler.codec.http.HttpResponseStatus
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.junit.Assert
+import kotlin.random.Random
 
 /**
  * This test is BROKEN 16/Dec/2020
@@ -40,6 +45,8 @@ class TestContainerMountRoute {
     lateinit var db: UmAppDatabase
 
     lateinit var repo: UmAppDatabase
+
+    private lateinit var nodeIdAndAuth: NodeIdAndAuth
 
     lateinit var container: Container
 
@@ -66,12 +73,15 @@ class TestContainerMountRoute {
                 preconfigured = okHttpClient
             }
         }
+        nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
+            randomUuid().toString())
 
-        db = UmAppDatabase.getInstance(Any(), "UmAppDatabase")
+        db = UmAppDatabase.getInstance(Any(), "UmAppDatabase",
+            nodeIdAndAuth, true)
         db.clearAllTables()
 
         repo = db.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
-            httpClient, okHttpClient))
+            nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))
         server = embeddedServer(Netty, port = defaultPort) {
             install(ContentNegotiation) {
                 gson {
