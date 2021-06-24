@@ -1,0 +1,70 @@
+package com.ustadmobile.view
+
+import com.ustadmobile.core.controller.ContentEntryDetailPresenter
+import com.ustadmobile.core.controller.UstadDetailPresenter
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.view.ContentEntryDetailAttemptsListView
+import com.ustadmobile.core.view.ContentEntryDetailOverviewView
+import com.ustadmobile.core.view.ContentEntryDetailView
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.util.urlSearchParamsToMap
+import react.RBuilder
+import react.RProps
+import react.setState
+
+class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentEntry>(mProps), ContentEntryDetailView {
+
+    private lateinit var mPresenter: ContentEntryDetailPresenter
+
+    override val detailPresenter: UstadDetailPresenter<*, *>
+        get() = mPresenter
+
+    override val viewName: String
+        get() = ContentEntryDetailView.VIEW_NAME
+
+    override var tabs: List<String>? = null
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
+    override var entity: ContentEntry? = null
+        get() = field
+        set(value) {
+            field = value
+            title = value?.title
+        }
+
+    override fun onComponentReady() {
+        super.onComponentReady()
+        mPresenter = ContentEntryDetailPresenter(this, arguments, this, di, this)
+        mPresenter.onCreate(mapOf())
+    }
+
+    override fun RBuilder.render() {
+        val detailTabs = tabs
+        if(detailTabs != null){
+            val tabsToRender = detailTabs.map {
+                UstadTab(it.substringBefore("?"),
+                    urlSearchParamsToMap(it.substringAfter("?")),
+                    getString(viewNameToTitleMap[it.substringBefore("?")] ?: 0))
+            }
+            renderTabs(tabsToRender)
+        }
+    }
+
+    override fun componentWillUnmount() {
+        super.componentWillUnmount()
+        mPresenter.onDestroy()
+    }
+
+    companion object{
+        val viewNameToTitleMap = mapOf(
+            ContentEntryDetailOverviewView.VIEW_NAME to MessageID.overview,
+            ContentEntryDetailAttemptsListView.VIEW_NAME to MessageID.attempts
+        )
+    }
+
+}

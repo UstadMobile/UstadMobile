@@ -4,6 +4,7 @@ import androidx.paging.DataSource
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.mocks.db.ReactDatabase.Companion.ALLOW_ACCESS
 import com.ustadmobile.util.DummyDataPreload.Companion.TAG_ENTRIES
 import com.ustadmobile.util.Util.loadDataAsList
 import kotlinx.serialization.builtins.ListSerializer
@@ -29,9 +30,10 @@ class ReactContentEntryDao: ContentEntryDao() {
     }
 
     override suspend fun findEntryWithContainerByEntryId(entryUuid: Long): ContentEntryWithMostRecentContainer? {
-        val data = loadDataAsList(sourcePath,
-            ListSerializer(ContentEntryWithMostRecentContainer.serializer()))
-        return (data.firstOrNull { it.contentEntryUid == entryUuid } as ContentEntryWithMostRecentContainer).apply {
+        val data = loadDataAsList(sourcePath, ListSerializer(ContentEntryWithMostRecentContainer.serializer()))
+        return (data.firstOrNull {
+            it.contentEntryUid == entryUuid
+        } as ContentEntryWithMostRecentContainer).apply {
             container = Container()
         }
     }
@@ -61,7 +63,9 @@ class ReactContentEntryDao: ContentEntryDao() {
     override suspend fun getContentByUuidAsync(parentUid: Long): ContentEntry? {
         val data = loadDataAsList(sourcePath,
             ListSerializer(ContentEntry.serializer()))
-        return data.firstOrNull { it.contentEntryUid == parentUid}
+        return data.firstOrNull {
+            it.contentEntryUid == parentUid
+        }
     }
 
     override suspend fun findAllLanguageRelatedEntriesAsync(entryUuid: Long): List<ContentEntry> {
@@ -185,7 +189,7 @@ class ReactContentEntryDao: ContentEntryDao() {
         contentEntryUid: Long,
         permission: Long
     ): Boolean {
-        TODO("Not yet implemented")
+        return ALLOW_ACCESS
     }
 
     override suspend fun toggleVisibilityContentEntryItems(

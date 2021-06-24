@@ -30,6 +30,7 @@ class SplashComponent (props: RProps): UstadBaseComponent<RProps, RState>(props)
         get() = SplashView.VIEW_NAME
 
     override fun onComponentReady() {
+        super.onComponentReady()
         mPresenter = SplashPresenter(this)
         mPresenter.onCreate()
 

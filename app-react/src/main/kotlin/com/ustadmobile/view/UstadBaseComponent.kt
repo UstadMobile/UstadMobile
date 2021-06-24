@@ -12,9 +12,11 @@ import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.redux.ReduxFabState
 import com.ustadmobile.redux.ReduxSnackBarState
 import com.ustadmobile.redux.ReduxThemeState
+import com.ustadmobile.redux.ReduxToolbarState
 import com.ustadmobile.util.ProgressBarManager
 import com.ustadmobile.util.SearchManager
 import com.ustadmobile.util.getViewNameFromUrl
+import com.ustadmobile.util.urlSearchParamsToMap
 import kotlinx.atomicfu.atomic
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
@@ -42,13 +44,15 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
 
     private lateinit var progressBarManager: ProgressBarManager
 
-    private lateinit var searchManager: SearchManager
+    var searchManager: SearchManager? = null
 
     protected abstract val viewName: String?
 
     private val lifecycleStatus = atomic(0)
 
-    private val defaultFabState = ReduxFabState(icon = "add",visible = false, onClick = ::handleFabClick)
+    private val defaultFabState = ReduxFabState(icon = "add",visible = false, onClick = ::onFabClicked)
+
+    lateinit var arguments: Map<String, String>
 
     protected var fabState: ReduxFabState = defaultFabState
         set(value) {
@@ -60,6 +64,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
 
     private var hashChangeListener:(Event) -> Unit = { (it as HashChangeEvent)
         if(viewName == getViewNameFromUrl(it.newURL)){
+            arguments = urlSearchParamsToMap()
             onComponentReady()
         }
     }
@@ -68,7 +73,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         set(value) {
             field = value
             window.setTimeout({
-
+               dispatch(ReduxToolbarState(title = title))
             }, STATE_CHANGE_DELAY)
         }
 
@@ -85,6 +90,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         for(observer in lifecycleObservers){
             observer.onStart(this)
         }
+        title = ""
         lifecycleStatus.value = DoorLifecycleObserver.STARTED
     }
 
@@ -100,14 +106,33 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         dispatch(fabState)
         progressBarManager = ProgressBarManager()
         searchManager = SearchManager()
+
+        //Handle both arguments from URL and the ones passed during component rendering
+        arguments = if(props.asDynamic().arguments != js("undefined")){
+            props.asDynamic().arguments as Map<String, String>
+        }else {
+            urlSearchParamsToMap()
+        }
+
         onComponentReady()
+    }
+
+    override fun componentDidUpdate(prevProps: P, prevState: S, snapshot: Any) {
+        val componentDidChange = props.asDynamic().arguments != js("undefined")
+                && !props.asDynamic().arguments.values.equals(prevProps.asDynamic().arguments.values)
+
+        //Handles tabs behaviour when changing from one tab to another, react components
+        //are mounted once and when trying to re-mount it componentDidUpdate is triggered.
+        //This will check and make sure the component has changed by checking if the props has changed
+        if(componentDidChange){
+            arguments = props.asDynamic().arguments as Map<String, String>
+            onComponentReady()
+        }
     }
 
     override fun RBuilder.render() {}
 
-
-    open fun handleFabClick(event: Event){}
-
+    open fun onFabClicked(event: Event){}
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
         dispatch(ReduxSnackBarState(message, getString(actionMessageId), action))
@@ -139,12 +164,11 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         lifecycleStatus.value = DoorLifecycleObserver.STOPPED
         window.removeEventListener("hashchange",hashChangeListener)
         progressBarManager.onDestroy()
-        searchManager.onDestroy()
+        searchManager?.onDestroy()
+        searchManager = null
     }
 
     companion object {
-
         const val STATE_CHANGE_DELAY = 100
-
     }
 }

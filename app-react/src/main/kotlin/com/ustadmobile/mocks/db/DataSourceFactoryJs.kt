@@ -1,6 +1,7 @@
 package com.ustadmobile.mocks.db
 
 import androidx.paging.DataSource
+import com.ustadmobile.lib.db.entities.EntityRoleWithNameAndRole
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.util.Util.loadDataAsList
 import kotlinx.serialization.DeserializationStrategy
@@ -26,6 +27,11 @@ class DataSourceFactoryJs<Key,Value, EXtra>(private val key:String? = null,
                 firstNames = "Admin"
                 admin = true
                 lastName = "Users"
+            } as Value)
+        }
+
+        if(sourcePath == "roles"){
+            return listOf(EntityRoleWithNameAndRole().apply {
             } as Value)
         }
 

@@ -12,27 +12,28 @@ import kotlin.reflect.KClass
  */
 object RouteManager {
 
-    val defaultRoute: KClass<out Component<RProps, *>> = PlaceHolderComponent::class
+    val defaultRoute: KClass<out Component<RProps, *>> = ContentEntryListTabsComponent::class
 
     val destinationList = listOf(
         UstadDestination("library_books", MessageID.content, ContentEntryListTabsView.VIEW_NAME,
-            PlaceHolderComponent::class, true),
+            ContentEntryListTabsComponent::class, true),
         UstadDestination("school", MessageID.schools,SchoolListView.VIEW_NAME, PlaceHolderComponent::class),
         UstadDestination("people", MessageID.classes,ClazzList2View.VIEW_NAME, PlaceHolderComponent::class),
-        UstadDestination("person", MessageID.people, PersonListView.VIEW_NAME, PlaceHolderComponent::class),
+        UstadDestination("person", MessageID.people, PersonListView.VIEW_NAME, PersonListComponent::class),
         UstadDestination("pie_chart", MessageID.reports, ReportListView.VIEW_NAME, PlaceHolderComponent::class, divider = true),
         UstadDestination("settings", MessageID.settings, SettingsView.VIEW_NAME, PlaceHolderComponent::class),
-        /*Destination(view = Login2View.VIEW_NAME, labelId = MessageID.login, component = LoginComponent::class, showNavigation = false),
-        Destination( labelId= MessageID.accounts, view = AccountListView.VIEW_NAME, component = PlaceHolderComponent::class),
-        Destination(view = ContentEntryDetailView.VIEW_NAME, component = ContentEntryDetailComponent::class),
-        Destination(view = XapiPackageContentView.VIEW_NAME, component = XapiPackageContentComponent::class),
-        Destination(view = EpubContentView.VIEW_NAME, component = EpubContentComponent::class),
-        Destination(view = ContentEntryList2View.VIEW_NAME, component = ContentEntryListComponent::class),
-        Destination(view = VideoContentView.VIEW_NAME, component = VideoContentComponent::class),
-        Destination(view = WebChunkView.VIEW_NAME, component = WebChunkComponent::class),
-        Destination(view = PersonDetailView.VIEW_NAME, component = PersonDetailComponent::class),
-        Destination(view = PersonAccountEditView.VIEW_NAME, component = PersonAccountEditComponent::class),
-        Destination(view = PersonEditView.VIEW_NAME, component = PersonEditComponent::class),*/
+        UstadDestination(view = ContentEntryList2View.VIEW_NAME, component = ContentEntryListComponent::class),
+        UstadDestination(view = Login2View.VIEW_NAME, labelId = MessageID.login, component = LoginComponent::class, showNavigation = false),
+        UstadDestination(view = ContentEntryDetailView.VIEW_NAME, component = ContentEntryDetailComponent::class),
+        UstadDestination(view = ContentEntryDetailOverviewView.VIEW_NAME, component = ContentEntryDetailOverviewComponent::class),
+        UstadDestination(view = EpubContentView.VIEW_NAME, component = EpubContentComponent::class),
+        UstadDestination(view = PersonDetailView.VIEW_NAME, component = PersonDetailComponent::class),
+        UstadDestination(view = PersonAccountEditView.VIEW_NAME, component = PersonAccountEditComponent::class),
+        UstadDestination(view = PersonEditView.VIEW_NAME, component = PersonEditComponent::class),
+        UstadDestination(view = XapiPackageContentView.VIEW_NAME, component = XapiPackageContentComponent::class),
+        UstadDestination(view = VideoContentView.VIEW_NAME, component = VideoContentComponent::class),
+        UstadDestination(view = WebChunkView.VIEW_NAME, component = WebChunkComponent::class),
+        UstadDestination(labelId= MessageID.accounts, view = AccountListView.VIEW_NAME, component = PlaceHolderComponent::class)
     )
 
     /**

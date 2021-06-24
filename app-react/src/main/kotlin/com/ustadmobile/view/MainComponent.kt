@@ -99,10 +99,10 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
             activeAccountObserver)
 
         window.addEventListener("hashchange", {
-            handleDestinationChanged()
+            onDestinationChanged()
         })
 
-        handleDestinationChanged()
+        onDestinationChanged()
     }
 
 
@@ -111,7 +111,7 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
      * this trigger change on state to update visibility of frame items
      * i.e Side Nav, Bottom nav e.tc
       */
-    private fun handleDestinationChanged() {
+    private fun onDestinationChanged() {
         val destination = findDestination(getViewNameFromUrl()) ?: defaultDestination
 
         destination.takeIf { it.labelId != 0 && it.labelId != MessageID.content}?.apply {
@@ -156,7 +156,7 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
 
                                     umItem(MGridSize.cells10, MGridSize.cells5){
                                         css{marginTop = 4.px}
-                                        mToolbarTitle(appState.appToolbar.title ?: "Argentina vs Paraguay")
+                                        mToolbarTitle(appState.appToolbar.title ?: "")
                                     }
 
                                     mHidden(xsDown = true) {
@@ -241,7 +241,7 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
                             color = MColor.secondary,
                             onClick = appState.appFab.onClick) {
                             css{
-                                //display = displayProperty(appState.appFab.visible, true)
+                                display = displayProperty(appState.appFab.visible, true)
                                 +mainComponentFab
                             }
                         }

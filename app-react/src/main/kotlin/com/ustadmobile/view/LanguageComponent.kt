@@ -17,10 +17,7 @@ import kotlinx.css.LinearDimension
 import kotlinx.css.px
 import kotlinx.css.width
 import org.w3c.dom.events.Event
-import react.RBuilder
-import react.RProps
-import react.RState
-import react.setState
+import react.*
 import styled.css
 
 interface LanguageProps: RProps {
@@ -31,7 +28,7 @@ interface LanguageProps: RProps {
 }
 
 
-class  LanguageComponent(mProps: LanguageProps): UstadBaseComponent<LanguageProps,RState>(mProps){
+class  LanguageComponent(mProps: LanguageProps): RComponent<LanguageProps,RState>(mProps){
 
     private lateinit var languageOptions: List<Pair<String, String>>
 
@@ -47,13 +44,18 @@ class  LanguageComponent(mProps: LanguageProps): UstadBaseComponent<LanguageProp
     override fun RBuilder.render() {
         mFormControl(variant = MFormControlVariant.outlined) {
             css(languageComponentLanguageSelectorFormControl)
-            mInputLabel(props.label?:getString(MessageID.language), htmlFor = "language", variant = MFormControlVariant.outlined) {
+
+            val text = props.label ?: props.systemImpl.getString(MessageID.language, this)
+            mInputLabel(text, htmlFor = "language", variant = MFormControlVariant.outlined) {
                 css(alignTextToStart)
             }
+            val input = mOutlinedInput(name = "language", id = "language", addAsChild = false, labelWidth = 100)
+
             mSelect(selectedLanguage, native = false,
-                input = mOutlinedInput(name = "language", id = "language", addAsChild = false,
-                    labelWidth = 100), onChange = { event, _ -> handleOnLanguageChange(event)}) {
-                css { width = props.width}
+                input = input, onChange = { event, _ -> handleOnLanguageChange(event)}) {
+                css {
+                    width = props.width
+                }
                 languageOptions.forEach {
                     mMenuItem(it.second, value = it.first){
                         css(alignTextToStart)
@@ -72,11 +74,6 @@ class  LanguageComponent(mProps: LanguageProps): UstadBaseComponent<LanguageProp
         setState { selectedLanguage = value }
         window.location.reload()
     }
-
-    override val viewName: String?
-        get() = null
-
-    override fun onComponentReady() {}
 }
 
 fun RBuilder.renderLanguages(systemImpl: UstadMobileSystemImpl, width: LinearDimension = 200.px,

@@ -36,8 +36,22 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         textAlign = TextAlign.start
     }
 
+    val alignTextCenter by css{
+        textAlign = TextAlign.center
+    }
+
     val defaultFullWidth by css {
         width = LinearDimension("100%")
+    }
+
+    val defaultMarginTop  by css{
+        marginTop = 2.spacingUnits
+    }
+
+    val errorTextClass by css{
+        color = Color(theme.palette.error.main)
+        marginLeft = LinearDimension("${if(systemImpl.isRtlActive()) 0 else 16}px")
+        marginRight= LinearDimension("${if(systemImpl.isRtlActive()) 16 else 0}px")
     }
 
     val splashComponentContainer by css {
@@ -159,12 +173,13 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         cursor = Cursor.pointer
         margin = "0px ${if(systemImpl.isRtlActive()) 40 else 0 }% 0 ${if(systemImpl.isRtlActive()) 0 else 40 }%"
         backgroundColor = Color(theme.palette.primary.light)
+        alignItems = Align.center
+        alignContent = Align.center
     }
 
     val mainComponentProfileInnerAvatar by css {
         width = 36.px
         height = 36.px
-        margin = "2px ${if(systemImpl.isRtlActive()) 2.4 else 0 }px 0 ${if(systemImpl.isRtlActive()) 0 else 2 }px"
         color = Color.white
         backgroundColor = Color(theme.palette.primary.dark)
     }
@@ -244,8 +259,167 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
     fun displayProperty(visible:Boolean, isFlexLayout:Boolean = false): Display {
        return if(visible)
-           if(isFlexLayout) Display.block else Display.flex
+           if(isFlexLayout) Display.flex else Display.block
        else Display.none
+    }
+
+    val tabsContainer by css {
+        flexGrow = 1.0
+        height = LinearDimension("100%")
+        +defaultFullWidth
+    }
+
+    val contentContainer by css {
+        marginLeft = 2.spacingUnits
+        marginRight = 2.spacingUnits
+        height = LinearDimension("100vh")
+        overflow = Overflow.scroll
+        paddingBottom = 16.spacingUnits
+        width = LinearDimension("92.5%")
+        media(theme.breakpoints.up(tabletAndHighEnd)){
+            width = LinearDimension("96.5%")
+        }
+    }
+
+
+    val listComponentContainer by css {
+        display = Display.inlineFlex
+        flexDirection = FlexDirection.column
+    }
+
+    val entryListItemContainer by css {
+        width = LinearDimension("100%")
+        display = Display.flex
+        flexDirection = FlexDirection.row
+    }
+
+    val listCreateNewContainer by css {
+        padding = "10px"
+    }
+
+    val contentEntryListContentAvatarClass by css {
+        height = 3.spacingUnits
+        width = 3.spacingUnits
+    }
+
+    val contentEntryListContentTyeIconClass by css {
+        fontSize = LinearDimension("0.65em")
+        marginBottom = 4.px
+    }
+
+    val horizontalList by css {
+        width = LinearDimension("100%")
+        backgroundColor = Color(theme.palette.background.paper)
+    }
+
+    val listItemCreateNewDiv by css {
+        display = Display.inlineFlex
+        marginLeft = 16.px
+    }
+
+    val listCreateNewIconClass by css {
+        fontSize = LinearDimension("2.5em")
+        marginTop = 5.px
+    }
+
+    val chipSetFilter by css{
+        display = Display.flex
+        justifyContent = JustifyContent.start
+        flexWrap = FlexWrap.wrap
+    }
+
+    val selectionContainer by css{
+        paddingTop = 12.px
+        paddingBottom = 12.px
+        backgroundColor = Color(theme.palette.background.default)
+    }
+
+    val entityImageClass by css {
+        textAlign = TextAlign.center
+        position = Position.relative
+        width = LinearDimension("98%")
+        height = LinearDimension("300px")
+    }
+
+    val entityThumbnailClass by css {
+        textAlign = TextAlign.center
+        position = Position.relative
+        width = LinearDimension("98%")
+        height = LinearDimension("120px")
+    }
+
+    val entityImageIconClass by css {
+        fontSize = LinearDimension("3em")
+    }
+
+    val entryItemImageContainer by css {
+        width = LinearDimension("100%")
+        margin = "1.5%"
+        textAlign = TextAlign.center
+    }
+
+    val fallBackAvatarClass by css {
+        fontSize = LinearDimension("1em")
+        marginBottom = 4.px
+    }
+
+    val personListItemAvatar by css {
+        width = 50.px
+        height = 50.px
+        margin = "2px ${if(systemImpl.isRtlActive()) 2.4 else 0 }px 0 ${if(systemImpl.isRtlActive()) 0 else 2.4 }px"
+        color = Color(theme.palette.background.paper)
+        backgroundColor = Color(theme.palette.action.disabled)
+    }
+
+    val contentEntryDetailOverviewComponentOpenBtn by css {
+        margin = "2% 1.5% 0% 1.5%"
+        width = LinearDimension("98%")
+    }
+
+    val contentEntryDetailOverviewExtraInfo by css {
+        width = LinearDimension("100%")
+        flexDirection = FlexDirection.column
+        margin = "0 2% 0 2%"
+        paddingBottom = 10.spacingUnits
+    }
+
+    val detailIconClass by css {
+        fontSize = LinearDimension("2em")
+        marginTop = 3.px
+    }
+
+    val iframeComponentResponsiveIframe by css{
+        overflow = Overflow.hidden
+        width = LinearDimension("100%")
+        minHeight = LinearDimension("100%")
+        backgroundColor = Color.transparent
+        border = "0px"
+    }
+
+    val personDetailComponentActions by css{
+        display = Display.flex
+        flexDirection = FlexDirection.column
+        alignContent = Align.center
+        alignItems = Align.center
+        paddingBottom = 16.px
+        padding = "16px 30px 16px 30px"
+        cursor = Cursor.pointer
+        width = LinearDimension("100%")
+        hover {
+            backgroundColor = Color(theme.palette.action.selected)
+        }
+    }
+
+    val personDetailComponentActionIcon by css{
+        marginBottom = 10.px
+    }
+
+    val videoComponentResponsiveMedia by css{
+        overflow = Overflow.hidden
+        width = LinearDimension("100%")
+        minHeight = LinearDimension("100%")
+        height = LinearDimension("100%")
+        backgroundColor = Color.transparent
     }
 
     override val di: DI

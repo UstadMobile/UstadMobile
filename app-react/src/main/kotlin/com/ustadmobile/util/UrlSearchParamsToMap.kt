@@ -1,5 +1,6 @@
 package com.ustadmobile.util
 
+import kotlinext.js.Object
 import kotlinx.browser.window
 import org.w3c.dom.url.URLSearchParams
 
@@ -9,11 +10,16 @@ import org.w3c.dom.url.URLSearchParams
  *
  * NOTE: This was supposed to be an extension function but external functions can't be extended
  */
-//params is used by js code
+//queryParts is used by js code
 @Suppress("UNUSED_VARIABLE")
-fun urlSearchParamsToMap(): Map<String,String> {
-    val params = URLSearchParams(window.location.href.substringAfter("?"))
-    return (js("Object.entries") as (dynamic) -> Array<Array<Any?>>)
-        .invoke(js("Object.fromEntries(params)"))
-        .map { entry -> entry[0] as String to entry[1] as String }.toMap()
+fun urlSearchParamsToMap(href: String? = null): Map<String,String> {
+    val url = (href ?: window.location.href)
+    val queryParts = if(url.indexOf("?") != -1) url.substringAfter("?") else null
+    return when(queryParts){
+        null -> mapOf()
+        else -> (js("Object.entries") as (dynamic) -> Array<Array<Any?>>)
+            .invoke(js("Object.fromEntries(new URLSearchParams(queryParts))"))
+            .map { entry -> entry[0] as String to entry[1] as String }
+            .toMap()
+    }
 }

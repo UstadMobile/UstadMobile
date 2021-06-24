@@ -70,9 +70,8 @@ class PersonDaoJs: PersonDao() {
     }
 
     override suspend fun findByUid(uid: Long): Person? {
-        return Person().apply {
+        return person?.apply {
             personUid = uid
-
         }
     }
 
