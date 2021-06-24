@@ -20,6 +20,7 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.staging.contentscrapers.edraakK12.EdraakK12ContentScraper
 import com.ustadmobile.core.util.LiveDataWorkQueue
+import com.ustadmobile.lib.staging.contentscrapers.replaceMeWithDi
 import io.ktor.utils.io.charsets.Charset
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -90,7 +91,7 @@ class IndexEdraakK12Content {
         destinationDirectory = destinationDir
         runId = runIdscrape
 
-        val db = UmAppDatabase.getInstance(Any())
+        val db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
         val repository = db //db.getRepository("https://localhost", "");
         contentEntryDao = repository.contentEntryDao
         contentParentChildJoinDao = repository.contentEntryParentChildJoinDao
@@ -232,7 +233,7 @@ class IndexEdraakK12Content {
             ContentScraperUtil.checkIfPathsToDriversExist()
 
             try {
-                val runDao = UmAppDatabase.getInstance(Any()).scrapeRunDao
+                val runDao = UmAppDatabase.getInstance(Any(), replaceMeWithDi()).scrapeRunDao
 
 
                 val index = IndexEdraakK12Content()

@@ -11,6 +11,7 @@ import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
 import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.staging.contentscrapers.replaceMeWithDi
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
@@ -66,7 +67,7 @@ class IndexPhetContentScraper {
         containerDir.mkdirs()
         this.containerDir = destinationDir
 
-        db = UmAppDatabase.getInstance(Any())
+        db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
         repository = db //db!!.getRepository("https://localhost", "")
         contentEntryDao = repository!!.contentEntryDao
         contentParentChildJoinDao = repository!!.contentEntryParentChildJoinDao

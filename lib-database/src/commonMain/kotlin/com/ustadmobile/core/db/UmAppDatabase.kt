@@ -7,6 +7,7 @@ import com.ustadmobile.door.annotation.MinSyncVersion
 import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
+import com.ustadmobile.door.ext.doorDatabaseMetadata
 import com.ustadmobile.door.util.DoorSqlGenerator
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -53,12 +54,13 @@ import kotlin.jvm.Volatile
     UpdateNotification::class,
     TableSyncStatus::class,
     ChangeLog::class,
-    ZombieAttachmentData::class
+    ZombieAttachmentData::class,
+    DoorNode::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 66)
+], version = 67)
 @MinSyncVersion(60)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -343,18 +345,22 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         @JsName("getInstance")
-        fun getInstance(context: Any) = lazy { getInstance(context, "UmAppDatabase") }.value
+        fun getInstance(context: Any, nodeIdAndAuth: NodeIdAndAuth) = lazy {
+            getInstance(context, "UmAppDatabase", nodeIdAndAuth)
+        }.value
 
         @JsName("getInstanceWithDbName")
         @Synchronized
-        fun getInstance(context: Any, dbName: String): UmAppDatabase {
+        fun getInstance(context: Any, dbName: String,
+                        nodeIdAndAuth: NodeIdAndAuth, primary: Boolean = false): UmAppDatabase {
             var db = namedInstances[dbName]
 
             if (db == null) {
                 var builder = DatabaseBuilder.databaseBuilder(
                         context, UmAppDatabase::class, dbName)
                 builder = addMigrations(builder)
-                //db = addCallbacks(builder).build()
+                    .addCallback(DoorSyncableDatabaseCallback2(nodeIdAndAuth.nodeId,
+                        UmAppDatabase::class.doorDatabaseMetadata().syncableTableIdMap, primary))
                 db = builder.build()
                 namedInstances[dbName] = db
             }

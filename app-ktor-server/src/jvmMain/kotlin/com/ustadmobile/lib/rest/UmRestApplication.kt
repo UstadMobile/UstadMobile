@@ -20,6 +20,7 @@ import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
+import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
 import com.ustadmobile.lib.rest.ext.*
@@ -63,6 +64,7 @@ import jakarta.mail.Authenticator
 import jakarta.mail.PasswordAuthentication
 import org.xmlpull.v1.XmlPullParserFactory
 import javax.sql.DataSource
+import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -133,6 +135,11 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             }
         }
 
+        bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
+            val systemImpl: UstadMobileSystemImpl = instance()
+            val contextIdentifier: String = context.identifier(dbMode)
+            systemImpl.getOrGenerateNodeIdAndAuth(contextIdentifier, Any())
+        }
 
         bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
             val containerDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), "container")
@@ -161,7 +168,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             val dbProperties = appConfig.databasePropertiesFromSection("ktor.database",
                 defaultUrl = "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
             InitialContext().bindDataSourceIfNotExisting(dbHostName, dbProperties)
-            UmAppDatabase.getInstance(Any(), dbHostName)
+            UmAppDatabase.getInstance(Any(), dbHostName, instance<NodeIdAndAuth>(), primary = true)
         }
 
         bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {
@@ -170,8 +177,9 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+            val doorNode = instance<NodeIdAndAuth>()
             val repo = db.asRepository(repositoryConfig(Any(), "http://localhost/",
-                instance(), instance()) {
+                doorNode.nodeId, doorNode.auth, instance(), instance()) {
                 attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT),
                     UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME).absolutePath
                 updateNotificationManager = instance()
@@ -210,7 +218,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         }
 
         bind<UstadMobileSystemImpl>() with singleton {
-            UstadMobileSystemImpl(instance(tag  = DiTag.XPP_FACTORY_NSAWARE))
+            UstadMobileSystemImpl(instance(tag  = DiTag.XPP_FACTORY_NSAWARE), dataDirPath)
         }
 
         bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
