@@ -168,8 +168,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
      	  ) AS ResultSource
     """)
     abstract suspend fun getStatementScoreProgressForAssignment(caUid: Long, personUid: Long): ContentEntryStatementScoreProgress?
-
-
+    
     @Query("""
          SELECT ResultSource.personUid, ResultSource.firstNames, ResultSource.lastName,
             COUNT(DISTINCT(ResultSource.contextRegistration)) AS attempts, 
@@ -208,9 +207,9 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
         
          FROM (SELECT Person.personUid, Person.firstNames, Person.lastName, 
             StatementEntity.contextRegistration, StatementEntity.timestamp, 
-            StatementEntity.resultDuration
-        
-         ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
+            StatementEntity.resultDuration 
+                FROM PersonGroupMember
+         ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
              LEFT JOIN ClazzEnrolment
              ON ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid 
                 AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid

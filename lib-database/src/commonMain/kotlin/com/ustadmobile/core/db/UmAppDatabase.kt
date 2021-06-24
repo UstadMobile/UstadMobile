@@ -36,9 +36,7 @@ import kotlin.jvm.Volatile
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
     SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
     SyncResult::class, School::class,
-    SchoolMember::class, ClazzWork::class, ClazzWorkContentJoin::class, Comments::class,
-    ClazzWorkQuestion::class, ClazzWorkQuestionOption::class, ClazzWorkSubmission::class,
-    ClazzWorkQuestionResponse::class, ContentEntryProgress::class,
+    SchoolMember::class, Comments::class,
     Report::class,
     DeviceSession::class, Site::class, ContainerImportJob::class,
     LearnerGroup::class, LearnerGroupMember::class,
@@ -60,7 +58,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 69)
+], version = 70)
 @MinSyncVersion(60)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -4866,6 +4864,33 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
 
+        val MIGRATION_69_70 = object: DoorMigration(69, 70) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                database.execSQL("DROP TABLE IF EXISTS ClazzWork")
+                database.execSQL("DROP TABLE IF EXISTS ClazzWorkContentJoin")
+                database.execSQL("DROP TABLE IF EXISTS ClazzWorkQuestion")
+                database.execSQL("DROP TABLE IF EXISTS ClazzWorkQuestionOption")
+                database.execSQL("DROP TABLE IF EXISTS ClazzWorkQuestionResponse")
+                database.execSQL("DROP TABLE IF EXISTS ClazzWorkSubmission")
+                database.execSQL("DROP TABLE IF EXISTS ContentEntryProgress")
+                database.execSQL("DROP TABLE IF EXISTS SelQuestionSetResponse")
+                database.execSQL("DROP TABLE IF EXISTS ClazzWork_trk")
+                database.execSQL("DROP TABLE IF EXISTS ClazzWorkContentJoin_trk")
+                database.execSQL("DROP TABLE IF EXISTS ClazzWorkQuestion_trk")
+                database.execSQL("DROP TABLE IF EXISTS ClazzWorkQuestionOption_trk")
+                database.execSQL("DROP TABLE IF EXISTS ClazzWorkQuestionResponse_trk")
+                database.execSQL("DROP TABLE IF EXISTS ClazzWorkSubmission_trk")
+                database.execSQL("DROP TABLE IF EXISTS ContentEntryProgress_trk")
+
+            }
+
+
+        }
+
+
+
+
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
@@ -4878,7 +4903,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
                     MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
                     MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67,
-                    MIGRATION_67_68, MIGRATION_68_69)
+                    MIGRATION_67_68, MIGRATION_68_69, MIGRATION_69_70)
 
 
 

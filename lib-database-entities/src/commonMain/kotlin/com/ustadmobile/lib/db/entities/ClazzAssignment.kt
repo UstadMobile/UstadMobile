@@ -7,8 +7,17 @@ import com.ustadmobile.lib.db.entities.ClazzAssignment.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID,
-        notifyOnUpdate = [
+@SyncableEntity(tableId = TABLE_ID)
+      /*  notifyOnUpdate =  [
+            """
+     
+        """
+        ],
+        syncFindAllQuery = """
+          
+          
+        """)*/
+/*        notifyOnUpdate = [
             """
         SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, $TABLE_ID AS tableId FROM 
         ChangeLog
@@ -25,7 +34,7 @@ import kotlinx.serialization.Serializable
         JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_ASSIGNMENT_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
         WHERE DeviceSession.dsDeviceId = :clientId  
-    """)
+    """)*/
 @Serializable
 open class ClazzAssignment {
 
