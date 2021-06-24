@@ -22,6 +22,7 @@ import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
+import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.rest.ext.*
 import com.ustadmobile.lib.rest.messaging.MailProperties
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
@@ -189,7 +190,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
             ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm(),
                     XapiTypePluginCommonJvm(), VideoTypePluginJvm(),
-                    H5PTypePluginCommonJvm()),
+                    H5PTypePluginCommonJvm()), ContainerImportJob.SERVER_IMPORT_MODE,
                     Any(), context, di)
         }
 
