@@ -2,6 +2,8 @@ package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
 import com.soywiz.klock.DateTime
+import com.ustadmobile.core.account.Pbkdf2Params
+import com.ustadmobile.core.account.RegisterRequest
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.core.generated.locale.MessageID
@@ -11,16 +13,13 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.LINK_ENDPOINT
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.age
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.ext.appendQueryArgs
-import com.ustadmobile.core.util.ext.insertPersonAndGroup
-import com.ustadmobile.core.util.ext.toQueryString
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.authenticateEncryptedPassword
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
-import io.ktor.request.header
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.post
@@ -28,9 +27,12 @@ import io.ktor.routing.route
 import org.kodein.di.instance
 import org.kodein.di.ktor.di
 import org.kodein.di.on
-import com.ustadmobile.core.util.ext.toUmAccount
 import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.core.view.UstadView
+import io.ktor.request.*
+import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.ktor.closestDI
 import kotlin.IllegalStateException
 
 private const val DEFAULT_SESSION_LENGTH = (1000L * 60 * 60 * 24 * 365)//One year
@@ -66,32 +68,21 @@ fun Route.PersonAuthRegisterRoute() {
         }
 
         post("register"){
-            val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
-            val repo: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_REPO)
-            val gson: Gson by di().instance()
+            val di: DI by closestDI()
+            val db: UmAppDatabase by di.on(call).instance(tag = DoorTag.TAG_DB)
+            val repo: UmAppDatabase by di.on(call).instance(tag = DoorTag.TAG_REPO)
 
-            val mPerson = call.request.queryParameters["person"]?.let {
-                gson.fromJson(it, PersonWithAccount::class.java)
-            }
+            val registerRequest: RegisterRequest = call.receive()
 
-            if(mPerson == null) {
-                call.respond(HttpStatusCode.BadRequest, "No person information provided")
-                return@post
-            }
-
-            val mParentJoin = call.request.queryParameters["parent"]?.let {
-                gson.fromJson(it, PersonParentJoin::class.java)
-            }
+            val mPerson = registerRequest.person
 
             val mLangCode = call.request.queryParameters["locale"] ?: "en"
 
-            val mParentContact = mParentJoin?.ppjEmail
-
-            val mEndpointUrl = call.request.queryParameters["endpoint"]
+            val mParentContact = registerRequest.parent?.ppjEmail
 
             //Check to make sure if the person being registered is a minor that there is a parental contact
             if(DateTime(mPerson.dateOfBirth).age() < UstadMobileConstants.MINOR_AGE_THRESHOLD
-                && (mParentContact == null || mEndpointUrl == null)) {
+                && (mParentContact == null)) {
                 call.respond(HttpStatusCode.BadRequest,
                     "Person registering is minor and no parental contact provided or no endpoint for link")
                 return@post
@@ -116,18 +107,17 @@ fun Route.PersonAuthRegisterRoute() {
             }
 
             if(DateTime(mPerson.dateOfBirth).age() < UstadMobileConstants.MINOR_AGE_THRESHOLD) {
-                val mParentJoinVal = mParentJoin ?: throw IllegalStateException("Minor without parent join!")
-                val mEndpointVal = mEndpointUrl ?: throw IllegalStateException("Minor without endpoint val")
+                val mParentJoinVal = registerRequest.parent ?: throw IllegalStateException("Minor without parent join!")
                 val mParentContactVal = mParentContact ?: throw IllegalStateException("Minor without parent contact")
 
-                mParentJoin.ppjMinorPersonUid = mPerson.personUid
+                mParentJoinVal.ppjMinorPersonUid = mPerson.personUid
                 mParentJoinVal.ppjUid = repo.personParentJoinDao.insertAsync(mParentJoinVal)
 
                 val systemImpl: UstadMobileSystemImpl by di().instance()
                 val appName = systemImpl.getString(mLangCode, MessageID.app_name, Any())
                 val linkArgs : Map<String, String> = mapOf(UstadView.ARG_ENTITY_UID to
-                        mParentJoin.ppjUid.toString())
-                val linkUrl = (UMFileUtil.joinPaths(mEndpointVal,
+                        mParentJoinVal.ppjUid.toString())
+                val linkUrl = (UMFileUtil.joinPaths(registerRequest.endpointUrl,
                     LINK_ENDPOINT_VIEWNAME_DIVIDER) + ParentalConsentManagementView.VIEW_NAME)
                     .appendQueryArgs(linkArgs.toQueryString())
 
@@ -143,21 +133,17 @@ fun Route.PersonAuthRegisterRoute() {
                 notificationSender.sendEmail(mParentContactVal, subjectText, emailText)
             }
 
-            val personAuth = PersonAuth(mPerson.personUid,
-                    PersonAuthDao.PLAIN_PASS_PREFIX+mPerson.newPassword)
-            val aUid = db.personAuthDao.insert(personAuth)
+            val salt = db.siteDao.getSiteAsync()?.authSalt ?: throw IllegalStateException("No auth salt!")
+            val authParams: Pbkdf2Params = di.direct.instance()
 
-            if(aUid != -1L){
-                val username = mPerson.username
-                if(username != null){
-                    val createdPerson = db.personAuthDao.findPersonByUsername(username)
-                    if(createdPerson != null){
-                        call.respond(HttpStatusCode.OK, createdPerson.toUmAccount(""))
-                    }
-                }
-            }else{
-                call.respond(HttpStatusCode.BadRequest, "Failed to register a person")
-            }
+            repo.personAuth2Dao.insertListAsync(listOf(PersonAuth2().apply {
+                pauthUid = mPerson.personUid
+                pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2
+                pauthAuth = mPerson.newPassword?.encryptWithPbkdf2(salt, authParams)
+                    ?.encryptWithPbkdf2(salt, authParams)
+            }))
+
+            call.respond(HttpStatusCode.OK, mPerson.toUmAccount(""))
         }
     }
 

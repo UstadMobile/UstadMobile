@@ -11,10 +11,13 @@ import org.junit.Test
 import org.kodein.di.ktor.DIFeature
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.Pbkdf2Params
+import com.ustadmobile.core.account.RegisterRequest
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.appendQueryArgs
+import com.ustadmobile.core.util.ext.encryptWithPbkdf2
 import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.door.RepositoryConfig
@@ -34,8 +37,16 @@ import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.clearAllTablesAndResetSync
 import com.ustadmobile.door.util.randomUuid
+import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.rest.ext.insertDefaultSite
+import io.ktor.features.*
+import io.ktor.gson.*
+import io.ktor.util.*
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import org.kodein.di.ktor.closestDI
 import kotlin.random.Random
 
 class PersonAuthRegisterRouteTest {
@@ -50,6 +61,13 @@ class PersonAuthRegisterRouteTest {
         val endpointScope = EndpointScope()
         mockNotificationSender = mock { }
         withTestApplication({
+            install(ContentNegotiation) {
+                gson {
+                    register(ContentType.Application.Json, GsonConverter())
+                    register(ContentType.Any, GsonConverter())
+                }
+            }
+
             install(DIFeature) {
                 import(commonJvmDiModule)
 
@@ -92,6 +110,10 @@ class PersonAuthRegisterRouteTest {
                             nodeIdAndAuth.auth, instance(), instance()))
                 }
 
+                bind<Pbkdf2Params>() with singleton {
+                    Pbkdf2Params()
+                }
+
                 registerContextTranslator { _: ApplicationCall ->
                     Endpoint("localhost")
                 }
@@ -100,30 +122,36 @@ class PersonAuthRegisterRouteTest {
             routing {
                 PersonAuthRegisterRoute()
             }
-        }, testFn)
+        }) {
+            val di: DI by closestDI { this.application }
+            val repo: UmAppDatabase by di.on(Endpoint("localhost")).instance(tag = DoorTag.TAG_REPO)
+            repo.insertDefaultSite()
+
+            testFn()
+        }
     }
 
     @Test
-    fun givenRegisterRequestFromMinor_whenGetCalled_thenShouldSendEmailAndReply() = withTestRegister{
+    fun givenRegisterRequestFromMinor_whenGetCalled_thenShouldSendEmailAndReply() = withTestRegister {
         val registerPerson = PersonWithAccount().apply {
             this.newPassword = "test"
             firstNames = "Bob"
             lastName = "Jones"
+            username = "bobjones"
             dateOfBirth = systemTimeInMillis() - 1000
         }
         val registerParent = PersonParentJoin().apply {
             this.ppjEmail = "parent@email.com"
         }
 
-        val registerArgs = mapOf(
-            "person" to Json.encodeToString(PersonWithAccount.serializer(), registerPerson),
-            "parent" to Json.encodeToString(PersonParentJoin.serializer(), registerParent),
-            "endpoint" to "https://org.ustadmobile.app/")
-
-        handleRequest(HttpMethod.Post, "/auth/register".appendQueryArgs(registerArgs.toQueryString())) {
-
+        handleRequest(HttpMethod.Post, "/auth/register") {
+            setBody(Json.encodeToString(RegisterRequest.serializer(), RegisterRequest(
+                person = registerPerson,
+                parent = registerParent,
+                endpointUrl = "https://org.ustadmobile.app/"
+            )))
+            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
         }.apply {
-            //val response = response.content!!
             verifyBlocking(mockNotificationSender) {
                 sendEmail(eq("parent@email.com"), any(), argWhere {
                     it.contains("https://org.ustadmobile.app/umapp/#${ParentalConsentManagementView.VIEW_NAME}")
@@ -131,4 +159,42 @@ class PersonAuthRegisterRouteTest {
             }
         }
     }
+
+    @Test
+    fun givenRegisterPersonWithAuth_whenGetCalled_thenShouldGenerateAuth() = withTestRegister {
+        val registerPerson = PersonWithAccount().apply {
+            this.newPassword = "test"
+            firstNames = "Bob"
+            lastName = "Jones"
+            username = "bobjones"
+            dateOfBirth = systemTimeInMillis() - (20 * 365 * 24 * 60 * 60 * 1000L) //approx 20 years
+            newPassword = "secret23"
+            confirmedPassword = "secret23"
+        }
+
+        handleRequest(HttpMethod.Post, "/auth/register") {
+            setBody(Json.encodeToString(RegisterRequest.serializer(), RegisterRequest(
+                person = registerPerson,
+                parent = null,
+                endpointUrl = "https://org.ustadmobile.app/"
+            )))
+
+        }.apply {
+            val response = response.content!!
+            val createdAccount : UmAccount = Json.decodeFromString(UmAccount.serializer(), response)
+            val di: DI by closestDI()
+
+            val pbkdf2Params: Pbkdf2Params = di.direct.instance()
+
+            runBlocking {
+                val db: UmAppDatabase = di.direct.on(Endpoint("localhost")).instance(tag = DoorTag.TAG_DB)
+                val personAuth2 = db.personAuth2Dao.findByPersonUid(createdAccount.personUid)
+                val salt = db.siteDao.getSite()?.authSalt ?: throw IllegalStateException("No auth salt!")
+                Assert.assertEquals("PersonAuth2 created with valid hashed password",
+                    "secret23".encryptWithPbkdf2(salt, pbkdf2Params).encryptWithPbkdf2(salt, pbkdf2Params),
+                    personAuth2?.pauthAuth)
+            }
+        }
+    }
+
 }

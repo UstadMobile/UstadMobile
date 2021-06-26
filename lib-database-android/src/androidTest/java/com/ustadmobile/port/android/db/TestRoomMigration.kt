@@ -391,4 +391,14 @@ class TestRoomMigration {
             com.ustadmobile.core.db.UmAppDatabase.Companion.Migrate67To68(42))
     }
 
+    @Test
+    fun migrate68to69() {
+        helper.createDatabase(TEST_DB, 68).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 69, true,
+            UmAppDatabase.MIGRATION_68_69)
+    }
+
 }
