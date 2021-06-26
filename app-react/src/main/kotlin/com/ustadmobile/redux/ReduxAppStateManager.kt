@@ -48,7 +48,9 @@ object ReduxAppStateManager {
      * @param listener listening part of he app (e.g component)
      */
     fun subscribe(listener: (ReduxStore)-> Unit){
-        storeState.subscribe { listener(storeState.getState()) }
+        storeState.subscribe {
+            listener(storeState.getState())
+        }
     }
 
     /**
@@ -65,8 +67,7 @@ object ReduxAppStateManager {
               mapOf(ReduxStore::appState to ReduxAppStateManager::reducer)
           ),
           ReduxStore(),
-          rEnhancer()
-        )
+          rEnhancer())
         dispatch(diState)
         dispatch(theme)
         return storeState

@@ -5,7 +5,7 @@ import com.ustadmobile.lib.db.entities.ContainerEntry
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 
-class ReactContainerEntryDao: ContainerEntryDao() {
+class ContainerEntryDaoJs: ContainerEntryDao() {
     override suspend fun insertListAsync(containerEntryList: List<ContainerEntry>) {
         TODO("Not yet implemented")
     }

@@ -21,10 +21,14 @@ class  ScrollManager(private val viewToObserve: String, private val triggerThres
 
     private var lastScrollPercentage = 0
 
-    private var scrollHandler:(Int) -> Unit = {
-        val shouldTrigger = (if(triggerOnDownScroll) it > lastScrollPercentage else lastScrollPercentage > it)
-        scrollListener?.let { listener -> listener(shouldTrigger && it >= triggerThreshold, it) }
-        lastScrollPercentage = it
+    private var scrollHandler:(Int) -> Unit = { scrollPercentage ->
+        val triggerPageChangeEvent = when {
+            triggerOnDownScroll -> scrollPercentage > lastScrollPercentage
+            else -> lastScrollPercentage > scrollPercentage
+        }
+        scrollListener?.invoke(triggerPageChangeEvent
+                && scrollPercentage >= triggerThreshold, scrollPercentage)
+        lastScrollPercentage = scrollPercentage
     }
 
     var scrollListener: ((Boolean, Int) -> Unit?)? = null
@@ -36,8 +40,10 @@ class  ScrollManager(private val viewToObserve: String, private val triggerThres
             field = value
         }
 
-    private var scrollEventCallback :(Event) -> Unit = {
-        val target = it.target.asDynamic()
+    //target is used by js code
+    @Suppress("UNUSED_VARIABLE")
+    private var scrollEventCallback :(Event) -> Unit = {scrollEvent ->
+        val target = scrollEvent.target.asDynamic()
         val scrollPercentage = js("Math.ceil((target.scrollTop/target.scrollHeight) * 100)")
             .toString().toInt()
         if(scrollHandlerTimeOutId != -1) window.clearTimeout(scrollHandlerTimeOutId)

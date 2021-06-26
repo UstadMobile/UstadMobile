@@ -5,7 +5,7 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.mocks.DoorLiveDataJs
 
-class PersonPictureDaoJS: PersonPictureDao() {
+class PictureDaoJs: PersonPictureDao() {
 
     val profileImage = "https://littleconstruction.net/wp-content/uploads/2019/04/person-placeholder-male-5-768x768.jpg"
     override suspend fun findByPersonUidAsync(personUid: Long): PersonPicture? {

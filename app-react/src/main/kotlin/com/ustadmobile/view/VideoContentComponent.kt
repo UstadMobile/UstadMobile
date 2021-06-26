@@ -48,7 +48,7 @@ class VideoContentComponent(mProps:RProps):UstadBaseComponent<RProps, RState>(mP
     override fun onComponentReady() {
         super.onComponentReady()
         db = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
-        containerUid = arguments[ARG_CONTAINER_UID]?.toLong()?:0L
+        containerUid = arguments[ARG_CONTAINER_UID]?.toLong() ?: 0L
         mPresenter = VideoContentPresenter(this, arguments, this, di)
         mPresenter?.onCreate(mapOf())
     }
@@ -56,7 +56,7 @@ class VideoContentComponent(mProps:RProps):UstadBaseComponent<RProps, RState>(mP
     override fun RBuilder.render() {
         styledVideo {
             css(videoComponentResponsiveMedia)
-            attrs.src = videoParams?.videoPath?:""
+            attrs.src = videoParams?.videoPath ?: ""
             attrs.autoPlay = false
             attrs.autoBuffer = true
             attrs.controls = true

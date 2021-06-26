@@ -115,21 +115,18 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         backgroundColor = Color(theme.palette.background.paper)
     }
 
-    val mainComponentAppBarRtlSideNav by css {
-        position = Position.absolute
-        marginLeft = drawerWidth.px
-        width = fullWidth
-    }
-
     val mainComponentAppBar by css{
         position = Position.absolute
-        marginLeft = drawerWidth.px
-        media(theme.breakpoints.up(Breakpoint.md)) {
-            width = fullWidth - drawerWidth.px
+        marginLeft = when {
+            systemImpl.isRtlActive() -> 0.px
+            else -> drawerWidth.px
         }
-
-        media(theme.breakpoints.down(Breakpoint.sm)) {
-            width = fullWidth
+        width = fullWidth
+        media(theme.breakpoints.up(Breakpoint.md)) {
+            width = fullWidth - when {
+                systemImpl.isRtlActive() -> 0.px
+                else -> drawerWidth.px
+            }
         }
     }
 
@@ -181,6 +178,12 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         width = 36.px
         height = 36.px
         color = Color.white
+        if(systemImpl.isRtlActive()){
+            marginRight = (2.5).px
+        }else{
+            marginLeft = (2.5).px
+        }
+        marginTop = 2.px
         backgroundColor = Color(theme.palette.primary.dark)
     }
 
@@ -391,9 +394,12 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     val iframeComponentResponsiveIframe by css{
         overflow = Overflow.hidden
         width = LinearDimension("100%")
-        minHeight = LinearDimension("100%")
         backgroundColor = Color.transparent
         border = "0px"
+        minHeight = LinearDimension("75%")
+        media(theme.breakpoints.up(tabletAndHighEnd)){
+            minHeight = LinearDimension("100%")
+        }
     }
 
     val personDetailComponentActions by css{

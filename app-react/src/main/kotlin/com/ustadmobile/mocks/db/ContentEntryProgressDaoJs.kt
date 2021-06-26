@@ -3,7 +3,7 @@ package com.ustadmobile.mocks.db
 import com.ustadmobile.core.db.dao.ContentEntryProgressDao
 import com.ustadmobile.lib.db.entities.ContentEntryProgress
 
-class ReactContentEntryProgressDao: ContentEntryProgressDao() {
+class ContentEntryProgressDaoJs: ContentEntryProgressDao() {
     override suspend fun updateAsync(contentEntryProgress: ContentEntryProgress): Int {
         TODO("Not yet implemented")
     }

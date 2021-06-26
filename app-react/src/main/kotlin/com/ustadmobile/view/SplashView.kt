@@ -12,6 +12,6 @@ interface SplashView: SplashScreenView {
 
         const val VIEW_NAME = "SplashView"
 
-        const val LOADED_TAG = "app.loaded"
+        const val TAG_LOADED = "app.loaded"
     }
 }

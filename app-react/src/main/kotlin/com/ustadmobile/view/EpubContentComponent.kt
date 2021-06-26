@@ -29,7 +29,9 @@ class EpubContentComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(m
         get() = field
         set(value) {
             loading = value == null
-            setState { field = value }
+            setState {
+                field = value
+            }
         }
 
     override var tableOfContents: EpubNavItem? = null

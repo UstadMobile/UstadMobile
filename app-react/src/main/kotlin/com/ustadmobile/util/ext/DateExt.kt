@@ -7,6 +7,8 @@ fun Date.getUtcTime(): Long {
     return this.getTime().toLong() - getLocalOffset()
 }
 
+//date is used by js code
+@Suppress("UNUSED_VARIABLE")
 fun Date.getDateFormat(): String {
     val date = this
     val timezoneName = js("Intl.DateTimeFormat().resolvedOptions().timeZone")

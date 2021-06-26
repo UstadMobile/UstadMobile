@@ -5,7 +5,7 @@ import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mocks.DoorLiveDataJs
-import com.ustadmobile.mocks.db.ReactDatabase.Companion.ALLOW_ACCESS
+import com.ustadmobile.mocks.db.DatabaseJs.Companion.ALLOW_ACCESS
 import kotlinx.serialization.builtins.ListSerializer
 
 class PersonDaoJs: PersonDao() {

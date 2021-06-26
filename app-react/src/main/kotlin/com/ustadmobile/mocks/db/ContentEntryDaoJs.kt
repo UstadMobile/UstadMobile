@@ -4,12 +4,12 @@ import androidx.paging.DataSource
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.mocks.db.ReactDatabase.Companion.ALLOW_ACCESS
-import com.ustadmobile.util.DummyDataPreload.Companion.TAG_ENTRIES
+import com.ustadmobile.mocks.db.DatabaseJs.Companion.ALLOW_ACCESS
+import com.ustadmobile.mocks.DummyDataPreload.Companion.TAG_ENTRIES
 import com.ustadmobile.util.Util.loadDataAsList
 import kotlinx.serialization.builtins.ListSerializer
 
-class ReactContentEntryDao: ContentEntryDao() {
+class ContentEntryDaoJs: ContentEntryDao() {
 
     private val sourcePath = TAG_ENTRIES
 
@@ -31,9 +31,9 @@ class ReactContentEntryDao: ContentEntryDao() {
 
     override suspend fun findEntryWithContainerByEntryId(entryUuid: Long): ContentEntryWithMostRecentContainer? {
         val data = loadDataAsList(sourcePath, ListSerializer(ContentEntryWithMostRecentContainer.serializer()))
-        return (data.firstOrNull {
+        return data.first {
             it.contentEntryUid == entryUuid
-        } as ContentEntryWithMostRecentContainer).apply {
+        }.apply {
             container = Container()
         }
     }

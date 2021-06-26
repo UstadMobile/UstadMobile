@@ -47,11 +47,14 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
         val detailTabs = tabs
         if(detailTabs != null){
             val tabsToRender = detailTabs.map {
-                UstadTab(it.substringBefore("?"),
-                    urlSearchParamsToMap(it.substringAfter("?")),
-                    getString(viewNameToTitleMap[it.substringBefore("?")] ?: 0))
+                val messageId = viewNameToTitleMap[it.substringBefore("?",)] ?: 0
+                UstadTab(
+                    it.substringBefore("?"),
+                    urlSearchParamsToMap(it.substring(it.lastIndexOf("?"))),
+                    getString( messageId)
+                )
             }
-            renderTabs(tabsToRender)
+            renderTabs(tabsToRender, false)
         }
     }
 

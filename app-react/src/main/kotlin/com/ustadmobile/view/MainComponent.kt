@@ -30,7 +30,6 @@ import com.ustadmobile.util.StyleManager.drawerWidth
 import com.ustadmobile.util.StyleManager.mainComponentBrandIcon
 import com.ustadmobile.util.StyleManager.mainComponentBrandIconContainer
 import com.ustadmobile.util.StyleManager.mainComponentAppBar
-import com.ustadmobile.util.StyleManager.mainComponentAppBarRtlSideNav
 import com.ustadmobile.util.StyleManager.mainComponentBottomNav
 import com.ustadmobile.util.StyleManager.mainComponentProfileOuterAvatar
 import com.ustadmobile.util.StyleManager.mainComponentProfileInnerAvatar
@@ -144,9 +143,7 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
                         css(mainComponentContainer)
 
                         mAppBar(position = MAppBarPosition.fixed) {
-                            val mCss = if(systemImpl.isRtlActive() || currentDestination.showNavigation)
-                                mainComponentAppBarRtlSideNav else mainComponentAppBar
-                            css (mCss)
+                            css (mainComponentAppBar)
 
                             mToolbar {
                                 attrs.asDynamic().id = "um-toolbar"
@@ -254,7 +251,7 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
     }
 
     private fun RBuilder.renderBottomNavigation(){
-        mHidden(mdUp = true) {
+        mHidden(smUp = true) {
             mBottomNavigation(currentDestination, true,
                 onChange = { _, value -> setState {
                 val destination = value as UstadDestination

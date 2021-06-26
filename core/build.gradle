@@ -337,10 +337,8 @@ task prepareAppConfigs{
             String line = scanner.nextLine()
             if(!line.startsWith("#") && !line.isEmpty()){
                 def keyValue = line.replace(" ","").split("=")
-                if(keyValue.length > 1 && keyValue[0] != "first_dest"){
+                if(keyValue.length > 1){
                     configContent.put(keyValue[0],keyValue[1])
-                }else{
-                    configContent.put(keyValue[0],"ContentEntryListView")
                 }
             }
         }

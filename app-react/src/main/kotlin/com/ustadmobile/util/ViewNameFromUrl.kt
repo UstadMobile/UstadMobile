@@ -9,12 +9,8 @@ import kotlinx.browser.window
  */
 fun getViewNameFromUrl(url: String? = null): String? {
     val href = url ?: window.location.href
-    val hashIndex = href.lastIndexOf("#")
-    var viewName = if (hashIndex != -1)
-        href.substring(hashIndex + 1).substringAfter("/") else ""
-
-    if (viewName.indexOf("?") != -1)
-        viewName = viewName.substringBefore("?")
-
+    val viewName = href.substringAfterLast("#/", "")
+        .substringBeforeLast("?")
+    console.log(viewName)
     return if (viewName.isEmpty() || viewName.startsWith("http")) null else viewName
 }

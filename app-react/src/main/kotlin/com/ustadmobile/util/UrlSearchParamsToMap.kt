@@ -13,13 +13,13 @@ import org.w3c.dom.url.URLSearchParams
 //queryParts is used by js code
 @Suppress("UNUSED_VARIABLE")
 fun urlSearchParamsToMap(href: String? = null): Map<String,String> {
-    val url = (href ?: window.location.href)
-    val queryParts = if(url.indexOf("?") != -1) url.substringAfter("?") else null
-    return when(queryParts){
-        null -> mapOf()
+    val queryParts = (href ?: window.location.href).substringAfter("?", "")
+    return when(queryParts.isEmpty()){
+        true -> mapOf()
         else -> (js("Object.entries") as (dynamic) -> Array<Array<Any?>>)
             .invoke(js("Object.fromEntries(new URLSearchParams(queryParts))"))
-            .map { entry -> entry[0] as String to entry[1] as String }
-            .toMap()
+            .map {
+                entry -> entry[0] as String to entry[1] as String
+            }.toMap()
     }
 }

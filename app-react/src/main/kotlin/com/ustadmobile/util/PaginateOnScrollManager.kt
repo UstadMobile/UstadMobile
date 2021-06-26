@@ -24,7 +24,7 @@ class  PaginateOnScrollManager(private val totalItems: Int, private val pageSize
             else (pageNumber - 1) * pageSize
             val endIndex = if((pageNumber * pageSize) < totalItems) pageNumber * pageSize
             else totalItems - 1
-            onScrollPageChanged?.let { it(pageNumber,startIndex, endIndex)}
+            onScrollPageChanged?.invoke(pageNumber,startIndex, endIndex)
         }
     }
 

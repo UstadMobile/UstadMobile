@@ -5,11 +5,11 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerUidAndMimeType
 import com.ustadmobile.lib.db.entities.ContainerWithContentEntry
-import com.ustadmobile.util.DummyDataPreload.Companion.TAG_CONTAINERS
+import com.ustadmobile.mocks.DummyDataPreload.Companion.TAG_CONTAINERS
 import com.ustadmobile.util.Util.loadDataAsList
 import kotlinx.serialization.builtins.ListSerializer
 
-class ReactContainerDao: ContainerDao() {
+class ContainerDaoJs: ContainerDao() {
     override suspend fun insertListAsync(containerList: List<Container>) {
         TODO("Not yet implemented")
     }
@@ -93,9 +93,11 @@ class ReactContainerDao: ContainerDao() {
     override suspend fun getMostRecentContaineUidAndMimeType(contentEntry: Long): ContainerUidAndMimeType? {
 
         val data = loadDataAsList(TAG_CONTAINERS, ListSerializer(Container.serializer()))
-        val container = (data.first { it.containerContentEntryUid == contentEntry })
+        val container = (data.first {
+            it.containerContentEntryUid == contentEntry
+        })
         return ContainerUidAndMimeType().apply {
-            mimeType = container.mimeType?:""
+            mimeType = container.mimeType ?: ""
             containerUid = container.containerUid
         }
     }

@@ -178,6 +178,8 @@ interface UstadView {
 
         const val ARG_TITLE = "title"
 
+        const val ARG_API_URL = "apiUrl"
+
         const val KEY_IFRAME_HEIGHTS = "iframe_heights"
 
         @JsName("MASTER_SERVER_ROOT_ENTRY_UID")

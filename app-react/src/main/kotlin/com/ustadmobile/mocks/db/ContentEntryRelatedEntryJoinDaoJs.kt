@@ -5,7 +5,7 @@ import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.serialization.builtins.ListSerializer
 
-class ReactContentEntryRelatedEntryJoinDao: ContentEntryRelatedEntryJoinDao() {
+class ContentEntryRelatedEntryJoinDaoJs: ContentEntryRelatedEntryJoinDao() {
 
     private val relationPath = ""
 

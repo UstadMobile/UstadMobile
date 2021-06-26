@@ -64,7 +64,6 @@ class ContentEntryDetailOverviewPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         contentEntryUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        println(containerDownloadManager)
         containerDownloadManager?.also {
             GlobalScope.launch(doorMainDispatcher()) {
                 downloadJobItemLiveData = it.getDownloadJobItemByContentEntryUid(contentEntryUid).apply {

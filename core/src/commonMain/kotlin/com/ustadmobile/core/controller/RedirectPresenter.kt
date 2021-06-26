@@ -3,8 +3,10 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.toQueryString
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryListTabsView
+import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.core.view.RedirectView
+import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CURRENT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_DEEPLINK
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
@@ -43,17 +45,7 @@ class RedirectPresenter(context: Any, arguments: Map<String, String>, view: Redi
             } else {
                 ContentEntryListTabsView.VIEW_NAME
             }
-            val nextDestination = nextDestination(destination,isWebPlatform, arguments.toMutableMap())
-            systemImpl.goToViewLink(nextDestination, context)
+            systemImpl.goToViewLink(destination, context)
         }
-    }
-
-    private fun nextDestination(destination: String, isWeb:Boolean, args: MutableMap<String, String>): String {
-        var nextDest = destination
-        if(destination == Login2View.VIEW_NAME && isWeb && !args.containsKey(ARG_NEXT)){
-            args[ARG_NEXT] = ContentEntryListTabsView.VIEW_NAME
-            nextDest = destination + "?" + args.toQueryString()
-        }
-        return nextDest
     }
 }

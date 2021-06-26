@@ -31,9 +31,9 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,RState>(mP
     override val viewName: String?
         get() = null
 
-    private val tabChangeListener:(String)-> Unit = {
+    private val tabChangeListener:(Any)-> Unit = {
         setState {
-            selectedView = it
+            selectedView = it.toString()
         }
     }
 
@@ -48,7 +48,7 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,RState>(mP
             }
             mTabs(selectedView,
                 onChange = { _, value ->
-                    tabChangeListener((value as UstadTab).title)
+                    tabChangeListener(value)
                 }) {
                 attrs.asDynamic().id = "um-tabs"
                 props.tabs.forEachIndexed { _, it ->

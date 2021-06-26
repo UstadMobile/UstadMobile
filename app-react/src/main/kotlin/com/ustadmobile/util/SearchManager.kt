@@ -25,10 +25,10 @@ class  SearchManager(private val viewId: String = "um-search") {
             field = value
         }
 
-    private var searchHandler:(Event) -> Unit = {
+    private var searchHandler:(Event) -> Unit = { event ->
         window.clearTimeout(searchHandlerId)
         searchHandlerId = window.setTimeout({
-           searchListener?.onSearchSubmitted(it.targetInputValue)
+           searchListener?.onSearchSubmitted(event.targetInputValue)
         }, 500)
     }
 

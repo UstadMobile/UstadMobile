@@ -3,13 +3,12 @@ package com.ustadmobile.mocks.db
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.dao.EntityRoleDao
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.lib.db.entities.EntityRole
 import com.ustadmobile.lib.db.entities.EntityRoleWithNameAndRole
-import com.ustadmobile.mocks.db.ReactDatabase.Companion.ALLOW_ACCESS
+import com.ustadmobile.mocks.db.DatabaseJs.Companion.ALLOW_ACCESS
 import kotlinx.serialization.builtins.ListSerializer
 
-class ReactEntityRoleDao: EntityRoleDao() {
+class EntityRoleDaoJs: EntityRoleDao() {
     override suspend fun updateEntityRoleActive(uid: Long, active: Boolean) {
         TODO("Not yet implemented")
     }

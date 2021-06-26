@@ -4,14 +4,15 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.redux.ReduxAppStateManager
+import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
-import com.ustadmobile.util.DummyDataPreload
-import com.ustadmobile.util.DummyDataPreload.Companion.TAG_ENTRIES
+import com.ustadmobile.mocks.DummyDataPreload
+import com.ustadmobile.mocks.DummyDataPreload.Companion.TAG_ENTRIES
 import com.ustadmobile.util.Util.loadAssetsAsText
 import com.ustadmobile.util.Util.loadFileContentAsMap
+import com.ustadmobile.util.urlSearchParamsToMap
 import com.ustadmobile.view.SplashView
-import com.ustadmobile.view.SplashView.Companion.LOADED_TAG
+import com.ustadmobile.view.SplashView.Companion.TAG_LOADED
 import kotlinx.browser.document
 import kotlinx.browser.window
 import org.kodein.di.DI
@@ -36,9 +37,17 @@ class SplashPresenter(private val view: SplashView): DIAware{
         val localeCode = impl.getDisplayedLocale(this)
         val defaultLocale = impl.getAppPref(AppConfig.KEY_DEFAULT_LANGUAGE, this)
 
+        val hasUmApp = window.location.href.indexOf("umapp/") != -1
+        val apiUrl = urlSearchParamsToMap()[ARG_API_URL]
+            ?: window.location.href.substringBefore(if(hasUmApp) "umapp/" else "#/")
+
         val appConfigs = loadFileContentAsMap<HashMap<String, String>>("appconfig.json")
         appConfigs.forEach {
-            impl.setAppPref(it.key, it.value, this)
+            val value = when(it.key){
+                ARG_API_URL -> "${apiUrl}api/"
+                else -> it.value
+            }
+            impl.setAppPref(it.key, value, this)
         }
 
 
@@ -53,14 +62,16 @@ class SplashPresenter(private val view: SplashView): DIAware{
             impl.currentTranslations = Pair(currentAssetPath, currentStrings)
         }
 
-        val launchedBefore = (impl.getAppPref(LOADED_TAG, this)?:"false").toBoolean()
+        val launchedBefore = (impl.getAppPref(TAG_LOADED, this)?:"false").toBoolean()
 
         view.appName = impl.getString(MessageID.app_name,this)
 
         val dataPreload = DummyDataPreload(accountManager.activeAccount.endpointUrl, di)
+
         if(!launchedBefore || impl.getAppPref(TAG_ENTRIES, this) == null){
             dataPreload.verifyAndImportEntries(::showMainComponent)
         }
+
         if(launchedBefore){
             timerId = window.setTimeout({
                 showMainComponent()
@@ -70,7 +81,7 @@ class SplashPresenter(private val view: SplashView): DIAware{
 
     private fun showMainComponent(){
         window.clearTimeout(timerId)
-        impl.setAppPref(LOADED_TAG,"true", this)
+        impl.setAppPref(TAG_LOADED,"true", this)
         view.showMainComponent()
     }
 

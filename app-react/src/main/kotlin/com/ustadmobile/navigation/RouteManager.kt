@@ -12,7 +12,7 @@ import kotlin.reflect.KClass
  */
 object RouteManager {
 
-    val defaultRoute: KClass<out Component<RProps, *>> = ContentEntryListTabsComponent::class
+    val defaultRoute: KClass<out Component<RProps, *>> = RedirectComponent::class
 
     val destinationList = listOf(
         UstadDestination("library_books", MessageID.content, ContentEntryListTabsView.VIEW_NAME,
@@ -33,6 +33,7 @@ object RouteManager {
         UstadDestination(view = XapiPackageContentView.VIEW_NAME, component = XapiPackageContentComponent::class),
         UstadDestination(view = VideoContentView.VIEW_NAME, component = VideoContentComponent::class),
         UstadDestination(view = WebChunkView.VIEW_NAME, component = WebChunkComponent::class),
+        UstadDestination(view = RedirectView.VIEW_NAME, component = RedirectComponent::class),
         UstadDestination(labelId= MessageID.accounts, view = AccountListView.VIEW_NAME, component = PlaceHolderComponent::class)
     )
 
@@ -40,7 +41,7 @@ object RouteManager {
      * Default destination to navigate to when destination is not specified
      */
     val defaultDestination: UstadDestination = destinationList.first {
-        it.view == ContentEntryListTabsView.VIEW_NAME
+        it.view == RedirectView.VIEW_NAME
     }
 
     /**

@@ -7,7 +7,7 @@ import com.ustadmobile.door.*
 import com.ustadmobile.door.daos.ISyncHelperEntitiesDao
 import kotlin.reflect.KClass
 
-class ReactDatabase: UmAppDatabase() , DoorDatabaseSyncRepository{
+class DatabaseJs: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val networkNodeDao: NetworkNodeDao
         get() = TODO("Not yet implemented")
     override val downloadJobDao: DownloadJobDao
@@ -27,13 +27,13 @@ class ReactDatabase: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val leavingReasonDao: LeavingReasonDao
         get() = TODO("Not yet implemented")
     override val contentEntryDao: ContentEntryDao
-        get() = ReactContentEntryDao()
+        get() = ContentEntryDaoJs()
     override val contentEntryContentCategoryJoinDao: ContentEntryContentCategoryJoinDao
         get() = TODO("Not yet implemented")
     override val contentEntryParentChildJoinDao: ContentEntryParentChildJoinDao
         get() = TODO("Not yet implemented")
     override val contentEntryRelatedEntryJoinDao: ContentEntryRelatedEntryJoinDao
-        get() = ReactContentEntryRelatedEntryJoinDao()
+        get() = ContentEntryRelatedEntryJoinDaoJs()
     override val contentCategorySchemaDao: ContentCategorySchemaDao
         get() = TODO("Not yet implemented")
     override val contentCategoryDao: ContentCategoryDao
@@ -55,7 +55,7 @@ class ReactDatabase: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val personGroupMemberDao: PersonGroupMemberDao
         get() = TODO("Not yet implemented")
     override val entityRoleDao: EntityRoleDao
-        get() = ReactEntityRoleDao()
+        get() = EntityRoleDaoJs()
     override val personPictureDao: PersonPictureDao
         get() = TODO("Not yet implemented")
     override val scrapeRunDao: ScrapeRunDao
@@ -65,9 +65,9 @@ class ReactDatabase: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val connectivityStatusDao: ConnectivityStatusDao
         get() = TODO("Not yet implemented")
     override val containerDao: ContainerDao
-        get() = ReactContainerDao()
+        get() = ContainerDaoJs()
     override val containerEntryDao: ContainerEntryDao
-        get() = ReactContainerEntryDao()
+        get() = ContainerEntryDaoJs()
     override val containerEntryFileDao: ContainerEntryFileDao
         get() = TODO("Not yet implemented")
     override val containerETagDao: ContainerETagDao
@@ -97,7 +97,7 @@ class ReactDatabase: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val groupLearningSessionDao: GroupLearningSessionDao
         get() = TODO("Not yet implemented")
     override val contentEntryProgressDao: ContentEntryProgressDao
-        get() = ReactContentEntryProgressDao()
+        get() = ContentEntryProgressDaoJs()
     override val syncresultDao: SyncResultDao
         get() = TODO("Not yet implemented")
     override val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
@@ -250,8 +250,8 @@ class ReactDatabase: UmAppDatabase() , DoorDatabaseSyncRepository{
 
         const val ALLOW_ACCESS = true
 
-        fun getInstance(context: Any, dbName: String): ReactDatabase {
-            return ReactDatabase()
+        fun getInstance(context: Any, dbName: String): DatabaseJs {
+            return DatabaseJs()
         }
     }
 }

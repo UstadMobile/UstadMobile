@@ -89,8 +89,7 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
 
     override fun onComponentReady() {
         super.onComponentReady()
-        mPresenter = ContentEntryDetailOverviewPresenter(this,arguments,
-            this,di,this)
+        mPresenter = ContentEntryDetailOverviewPresenter(this,arguments, this,di,this)
         mPresenter.onCreate(mapOf())
     }
 

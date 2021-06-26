@@ -13,7 +13,7 @@ import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.mocks.container.ContainerMounterJs
-import com.ustadmobile.mocks.db.ReactDatabase
+import com.ustadmobile.mocks.db.DatabaseJs
 import com.ustadmobile.redux.ReduxAppStateManager.createStore
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.redux.ReduxDiState
@@ -67,7 +67,7 @@ private val diModule = DI.Module("UstadApp-React"){
 
     bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(EndpointScope.Default).singleton {
         val dbName = sanitizeDbNameFromUrl(context.url)
-        ReactDatabase.getInstance(this, dbName)
+        DatabaseJs.getInstance(this, dbName)
     }
 
     bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(EndpointScope.Default).singleton {

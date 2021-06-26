@@ -8,9 +8,9 @@
     "app.no_iframe_domans": "KhanAcademy",
     "app.register_allowed": "true",
     "app.ui_default_language": "en",
-    "first_dest": "ContentEntryListView",
+    "first_dest": "ContentEntryListTabsView",
     "app.guest_allowed": "true",
-    "apiUrl": "http://localhost:8090/",
+    "apiUrl": "http://localhost:8090",
     "doordb.endpoint.url": "http://localhost:8087/",
     "app.content_only_mode": "false",
     "app.register_before_open": "true"

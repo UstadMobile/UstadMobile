@@ -330,7 +330,7 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
                                 mInputLabel("${genderLabel.text}", htmlFor = "gender", variant = MFormControlVariant.outlined) {
                                     css(alignTextToStart)
                                 }
-                                mSelect(entity?.gender ?: 0, native = false,
+                                mSelect("${entity?.gender ?: 0}", native = false,
                                     input = mOutlinedInput(name = "gender", id = "gender", addAsChild = false,
                                         labelWidth = genderLabel.width),
                                     onChange = { it, _ ->

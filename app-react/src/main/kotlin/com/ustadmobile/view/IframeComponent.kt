@@ -1,14 +1,15 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.view.UstadView.Companion.KEY_IFRAME_HEIGHTS
 import com.ustadmobile.util.PaginateOnScrollManager
+import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.iframeComponentResponsiveIframe
 import kotlinx.browser.document
-import kotlinx.browser.window
+import kotlinx.css.LinearDimension
 import kotlinx.html.id
 import kotlinx.html.js.onLoadFunction
 import react.*
 import styled.css
+import styled.styledDiv
 import styled.styledIframe
 
 interface IframeProps: RProps {
@@ -25,27 +26,27 @@ class  IframeComponent(mProps: IframeProps): RComponent<IframeProps,RState>(mPro
 
     private var paginateOnScrollManager: PaginateOnScrollManager? = null
 
+    //iframeHeight is used by js code
+    @Suppress("UNUSED_VARIABLE")
     override fun RBuilder.render() {
-        sourceToLoad.forEach {
-            val iframeId = js("it.split('/').pop().split('#')[0].split('?')[0];").toString()
-            styledIframe{
-                css(iframeComponentResponsiveIframe)
-
-                attrs.src = it
-                attrs.id = iframeId
-                attrs.onLoadFunction = {
-                    window.setTimeout({
-                        val storageKey = KEY_IFRAME_HEIGHTS
-                        val heightsMap = js("var stringMap = localStorage.getItem(storageKey); stringMap ? JSON.parse(stringMap): {}")
-                        val iframeElement = document.getElementById(iframeId)
-                        val iframeHeight = iframeElement?.getBoundingClientRect()?.height?.toInt()?:600
-                        var contentHeight = heightsMap[iframeId]
-                        val computedHeight = js("contentHeight?contentHeight:iframeHeight").toString()
-                        iframeElement.asDynamic().style.height = "${computedHeight}px"
-                    },200)
-                }
-            }
-        }
+       styledDiv{
+           css(contentContainer)
+           sourceToLoad.forEach {
+               val iframeId = js("it.split('/').pop().split('#')[0].split('?')[0];").toString()
+               styledIframe{
+                   css(iframeComponentResponsiveIframe)
+                   attrs.src = it
+                   attrs.id = iframeId
+                   attrs.onLoadFunction = { loadEvent ->
+                       val contentWindow = loadEvent.target.asDynamic().contentWindow
+                       val iframe = document.getElementById(iframeId)
+                       val iframeDoc = js("iframe.contentDocument || iframe.contentWindow.document")
+                       val scrollHeight = iframeDoc.body.scrollHeight.toString().toInt()
+                       iframe.asDynamic().style.height = "${scrollHeight + (scrollHeight * 0.1)}px"
+                   }
+               }
+           }
+       }
     }
 
     override fun componentDidUpdate(prevProps: IframeProps, prevState: RState, snapshot: Any) {
