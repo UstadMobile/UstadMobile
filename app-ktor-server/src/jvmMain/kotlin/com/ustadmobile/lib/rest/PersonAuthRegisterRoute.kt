@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.rest
 
-import com.google.gson.Gson
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.RegisterRequest
@@ -8,7 +7,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.LINK_ENDPOINT_VIEWNAME_DIVIDER
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.age
@@ -17,7 +15,6 @@ import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.authenticateEncryptedPassword
-import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
@@ -29,6 +26,7 @@ import org.kodein.di.ktor.di
 import org.kodein.di.on
 import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.ktor.request.*
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -41,7 +39,10 @@ fun Route.PersonAuthRegisterRoute() {
 
     route("auth") {
         post("login") {
-            val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
+            val di: DI by closestDI()
+            val db: UmAppDatabase by di.on(call).instance(tag = DoorTag.TAG_DB)
+            val repo: UmAppDatabase by di.on(call).instance(tag = DoorTag.TAG_REPO)
+
             val username = call.request.queryParameters["username"]
             val password = call.request.queryParameters["password"]
             val deviceId = call.request.header("X-nid")?.toInt()
@@ -50,18 +51,43 @@ fun Route.PersonAuthRegisterRoute() {
                 return@post
             }
 
-            val person = db.personDao.findUidAndPasswordHashAsync(username)
-            if(person != null
+            val site: Site = db.siteDao.getSiteAsync() ?: throw IllegalStateException("No site!")
+            val authSalt = site.authSalt ?: throw IllegalStateException("No auth salt!")
+
+            val pbkdf2Params: Pbkdf2Params = di.direct.instance()
+
+            val passwordDoubleHashed = password.encryptWithPbkdf2(authSalt, pbkdf2Params)
+                .encryptWithPbkdf2(authSalt, pbkdf2Params)
+
+            var authorizedPerson = db.personDao.findByUsernameAndPasswordHash2(username,
+                passwordDoubleHashed)
+
+            if(authorizedPerson == null) {
+                //try the old way in case this user does not yet have a PersonAuth2 object
+                val person = db.personDao.findUidAndPasswordHashAsync(username)
+                if(person != null
                     && ((person.passwordHash.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX)
                             && person.passwordHash.substring(2) == password)
                             ||(person.passwordHash.startsWith(PersonAuthDao.ENCRYPTED_PASS_PREFIX) &&
-                            authenticateEncryptedPassword(password, person.passwordHash.substring(2))))){
+                            authenticateEncryptedPassword(password, person.passwordHash.substring(2))))) {
+                    authorizedPerson = db.personDao.findByUid(0L)
 
+                    //Create the auth object
+                    repo.personAuth2Dao.insertAsync(PersonAuth2().apply {
+                        pauthUid = person.personUid
+                        pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
+                        pauthAuth = password.encryptWithPbkdf2(authSalt, pbkdf2Params)
+                            .encryptWithPbkdf2(authSalt, pbkdf2Params)
+                    })
+                }
+            }
+
+            if(authorizedPerson != null) {
                 db.deviceSessionDao.insert(DeviceSession(dsDeviceId = deviceId,
-                        dsPersonUid = person.personUid, expires = getSystemTimeInMillis() + DEFAULT_SESSION_LENGTH))
+                    dsPersonUid = authorizedPerson.personUid,
+                    expires = getSystemTimeInMillis() + DEFAULT_SESSION_LENGTH))
 
-                call.respond(HttpStatusCode.OK, person.toUmAccount(endpointUrl = "",
-                    username = username))
+                call.respond(HttpStatusCode.OK, authorizedPerson.toUmAccount(""))
             }else {
                 call.respond(HttpStatusCode.Forbidden, "")
             }
@@ -75,6 +101,8 @@ fun Route.PersonAuthRegisterRoute() {
             val registerRequest: RegisterRequest = call.receive()
 
             val mPerson = registerRequest.person
+            val newPassword = registerRequest.person.newPassword
+                ?: throw IllegalArgumentException("register request with no password!")
 
             val mLangCode = call.request.queryParameters["locale"] ?: "en"
 
@@ -133,15 +161,9 @@ fun Route.PersonAuthRegisterRoute() {
                 notificationSender.sendEmail(mParentContactVal, subjectText, emailText)
             }
 
-            val salt = db.siteDao.getSiteAsync()?.authSalt ?: throw IllegalStateException("No auth salt!")
             val authParams: Pbkdf2Params = di.direct.instance()
 
-            repo.personAuth2Dao.insertListAsync(listOf(PersonAuth2().apply {
-                pauthUid = mPerson.personUid
-                pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2
-                pauthAuth = mPerson.newPassword?.encryptWithPbkdf2(salt, authParams)
-                    ?.encryptWithPbkdf2(salt, authParams)
-            }))
+            repo.insertPersonAuthCredentials2(mPerson.personUid, newPassword, authParams)
 
             call.respond(HttpStatusCode.OK, mPerson.toUmAccount(""))
         }

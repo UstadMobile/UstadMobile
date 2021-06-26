@@ -1,12 +1,9 @@
 package com.ustadmobile.core.impl
 
 import com.google.gson.Gson
+import com.ustadmobile.core.account.*
 import org.mockito.kotlin.*
-import com.ustadmobile.core.account.EndpointScope
-import com.ustadmobile.core.account.UnauthorizedException
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_PREFKEY
-import com.ustadmobile.core.account.UstadAccounts
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.userAtServer
 import com.ustadmobile.door.DoorDatabaseSyncRepository
@@ -27,6 +24,7 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.scoped
 import org.kodein.di.singleton
+import java.io.ByteArrayOutputStream
 
 class UstadAccountManagerTest {
 
@@ -287,6 +285,14 @@ class UstadAccountManagerTest {
         Assert.assertEquals("Active account is the account registered",
                 "mary@$mockServerUrl", accountManager.activeAccount.userAtServer)
 
+        val request = mockWebServer.takeRequest()
+        val byteArrayOut = ByteArrayOutputStream()
+        request.body.writeTo(byteArrayOut)
+        val bodyStr = byteArrayOut.toByteArray().decodeToString()
+
+        val registerRequest = Gson().fromJson(bodyStr, RegisterRequest::class.java)
+        Assert.assertEquals("Got expected register request", "mary",
+            registerRequest.person.username)
     }
 
 

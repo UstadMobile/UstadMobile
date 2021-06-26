@@ -19,6 +19,7 @@ import io.ktor.client.call.*
 import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.*
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Dispatchers
@@ -105,10 +106,8 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         val parentVal = accountRegisterOptions.parentJoin
         val httpStmt = httpClient.post<HttpStatement>() {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
-            parameter("person",  safeStringify(di, PersonWithAccount.serializer(), person))
-            parameter("endpoint", endpointUrl)
-            if(parentVal != null)
-                parameter("parent", safeStringify(di, PersonParentJoin.serializer(), parentVal))
+            contentType(ContentType.Application.Json)
+            body = RegisterRequest(person, parentVal, endpointUrl)
         }
 
         val (account: UmAccount?, status: Int) = httpStmt.execute { response ->

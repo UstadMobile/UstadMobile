@@ -16,9 +16,7 @@ import com.ustadmobile.core.account.RegisterRequest
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.ext.appendQueryArgs
-import com.ustadmobile.core.util.ext.encryptWithPbkdf2
-import com.ustadmobile.core.util.ext.toQueryString
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.ext.DoorTag
@@ -28,8 +26,6 @@ import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import org.kodein.di.*
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.PersonParentJoin
-import com.ustadmobile.lib.db.entities.PersonWithAccount
 import kotlinx.serialization.json.Json
 import org.mockito.kotlin.*
 import org.xmlpull.v1.XmlPullParserFactory
@@ -37,10 +33,11 @@ import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.clearAllTablesAndResetSync
 import com.ustadmobile.door.util.randomUuid
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.rest.ext.insertDefaultSite
 import io.ktor.features.*
 import io.ktor.gson.*
+import io.ktor.request.*
 import io.ktor.util.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
@@ -132,7 +129,7 @@ class PersonAuthRegisterRouteTest {
     }
 
     @Test
-    fun givenRegisterRequestFromMinor_whenGetCalled_thenShouldSendEmailAndReply() = withTestRegister {
+    fun givenRegisterRequestFromMinor_whenRegisterCalled_thenShouldSendEmailAndReply() = withTestRegister {
         val registerPerson = PersonWithAccount().apply {
             this.newPassword = "test"
             firstNames = "Bob"
@@ -161,7 +158,7 @@ class PersonAuthRegisterRouteTest {
     }
 
     @Test
-    fun givenRegisterPersonWithAuth_whenGetCalled_thenShouldGenerateAuth() = withTestRegister {
+    fun givenRegisterPersonWithAuth_whenRegisterCalled_thenShouldGenerateAuth() = withTestRegister {
         val registerPerson = PersonWithAccount().apply {
             this.newPassword = "test"
             firstNames = "Bob"
@@ -194,6 +191,58 @@ class PersonAuthRegisterRouteTest {
                     "secret23".encryptWithPbkdf2(salt, pbkdf2Params).encryptWithPbkdf2(salt, pbkdf2Params),
                     personAuth2?.pauthAuth)
             }
+        }
+    }
+
+    @Test
+    fun givenValidCredentials_whenLoginCalled_thenShouldReturnAccount()  = withTestRegister {
+        val di: DI by closestDI { application }
+        val repo: UmAppDatabase by di.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
+        val pbkdf2Params: Pbkdf2Params by di.instance()
+
+        val person = runBlocking {
+            repo.insertPersonAndGroup(Person().apply {
+                username = "mary"
+                dateOfBirth = systemTimeInMillis() - (20 * 365 * 24 * 60 * 60 * 1000L)
+            })
+        }
+
+        runBlocking {
+            repo.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params)
+        }
+
+        handleRequest(HttpMethod.Post, "/auth/login?username=mary&password=secret23") {
+            addHeader("X-nid", "123")
+        }.apply {
+            Assert.assertEquals("Response is 200 OK", HttpStatusCode.OK, response.status())
+            val bodyStr = this.response.content!!
+            val umAccount = Gson().fromJson(bodyStr, UmAccount::class.java)
+            Assert.assertEquals("Received expected account object",
+                "mary", umAccount.username)
+        }
+    }
+
+    @Test
+    fun givenInvalidCredentials_whenLoginCalled_thenShouldRespondForbidden()  = withTestRegister {
+        val di: DI by closestDI { application }
+        val repo: UmAppDatabase by di.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
+        val pbkdf2Params: Pbkdf2Params by di.instance()
+
+        val person = runBlocking {
+            repo.insertPersonAndGroup(Person().apply {
+                username = "mary"
+                dateOfBirth = systemTimeInMillis() - (20 * 365 * 24 * 60 * 60 * 1000L)
+            })
+        }
+
+        runBlocking {
+            repo.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params)
+        }
+
+        handleRequest(HttpMethod.Post, "/auth/login?username=mary&password=wrong") {
+            addHeader("X-nid", "123")
+        }.apply {
+            Assert.assertEquals("Response is Forbidden", HttpStatusCode.Forbidden, response.status())
         }
     }
 

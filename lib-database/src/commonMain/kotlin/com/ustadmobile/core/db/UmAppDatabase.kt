@@ -15,6 +15,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_STUDENT_GROUP
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_TEACHER_GROUP
+import com.ustadmobile.lib.util.randomString
 import kotlin.js.JsName
 import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
@@ -4638,6 +4639,14 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("CREATE  INDEX index_PersonAuth2_trk_clientId_epk_csn ON PersonAuth2_trk (clientId, epk, csn)")
                     database.execSQL("CREATE UNIQUE INDEX index_PersonAuth2_trk_epk_clientId ON PersonAuth2_trk (epk, clientId)")
                 }else {
+                    database.execSQL("""
+                        UPDATE Site
+                           SET authSalt = '${randomString(20)}',
+                               siteLcb = (SELECT COALESCE(
+                                                 (SELECT nodeClientId 
+                                                    FROM SyncNode
+                                                   LIMIT 1), 0)
+                    """)
                     database.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth2 (  pauthUid  BIGINT  PRIMARY KEY  NOT NULL , pauthMechanism  TEXT , pauthAuth  TEXT , pauthLcsn  BIGINT  NOT NULL , pauthPcsn  BIGINT  NOT NULL , pauthLcb  INTEGER  NOT NULL , pauthLct  BIGINT  NOT NULL )")
                     database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonAuth2_mcsn_seq")
                     database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonAuth2_lcsn_seq")

@@ -65,7 +65,12 @@ class PersonAuth2 {
 
     companion object {
 
-        const val AUTH_MECH_PBKDF2 = "PBKDF2"
+        /**
+         * The password will be hashed using PBKDF2 twice. When a session is created, the password
+         * supplied by the user can be verified, and the session object authentication will be
+         * encrypted using a single hash.
+         */
+        const val AUTH_MECH_PBKDF2_DOUBLE = "PBKDF2x2"
 
         const val TABLE_ID = 678
 
