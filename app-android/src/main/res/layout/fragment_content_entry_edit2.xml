@@ -269,7 +269,7 @@
                 android:hint="@string/min_score"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:hintEnabled="true"
-                app:suffixText="%"
+                app:suffixText="@string/points"
                 app:suffixTextAppearance="@style/UmTheme.TextAppearance.Body2"
                 android:enabled="@{fieldsEnabled}"
                 android:visibility="@{minScoreVisible ? View.VISIBLE : View.GONE}"
