@@ -38,6 +38,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        mavenLocal()
 
         maven {
             url "https://devserver3.ustadmobile.com/maven"
@@ -82,7 +83,7 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 214
 
-    version_door = "0.0.18"
+    version_door = "0.0.20"
     version_xmlpullparserkmp = '0.0.18'
 
     version_gradle_buildconfig_plugin = "1.1.7"

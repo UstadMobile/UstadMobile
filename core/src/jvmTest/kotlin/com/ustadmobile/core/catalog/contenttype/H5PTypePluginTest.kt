@@ -1,17 +1,14 @@
-package com.ustadmobile.port.sharedse.contentformats
+package com.ustadmobile.core.catalog.contenttype
 
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
-import com.ustadmobile.core.catalog.contenttype.H5PTypePluginCommonJvm
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
-import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.door.asRepository
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
-import com.ustadmobile.sharedse.util.UstadTestRule
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
@@ -50,7 +47,8 @@ class H5PTypePluginTest {
         di = DI {
             import(ustadTestRule.diModule)
             bind<ContentImportManager>() with scoped(ustadTestRule.endpointScope!!).singleton {
-                ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm(), H5PTypePluginCommonJvm()), context, this.context, di)
+                ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm(), H5PTypePluginCommonJvm()),
+                    ContainerImportJob.CLIENT_IMPORT_MODE, context, this.context, di)
             }
         }
         val accountManager: UstadAccountManager by di.instance()
@@ -64,13 +62,13 @@ class H5PTypePluginTest {
     fun givenValidH5PFile_whenExtractEntryMetaDataFromFile_thenDataShouldMatch() {
         val tempFolder = tmpFolder.newFolder()
         val inputStream = this::class.java.getResourceAsStream(
-                "/com/ustadmobile/port/sharedse/contentformats/dialog-cards-620.h5p")
+                "/com/ustadmobile/core/contenttype/dialog-cards-620.h5p")
         val tempH5pFile = File(tempFolder, "dialog-cards-620.h5p")
         tempH5pFile.copyInputStreamToFile(inputStream)
 
         val h5pPlugin = H5PTypePluginCommonJvm()
         val contentEntry = runBlocking {
-            h5pPlugin.extractMetadata(tempH5pFile.path)
+            h5pPlugin.extractMetadata(tempH5pFile.toURI().toString(), Any())
         }
 //        Assert.assertEquals("Got ContentEntry with expected entryId",
 //                "dialog-cards-620.h5p",
@@ -89,17 +87,17 @@ class H5PTypePluginTest {
     fun givenValidH5PFile_whenImportContentEntryFromFile_thenContentEntryAndContainerShouldExist() {
         val tempFolder = tmpFolder.newFolder()
         val inputStream = this::class.java.getResourceAsStream(
-                "/com/ustadmobile/port/sharedse/contentformats/dialog-cards-620.h5p")
+                "/com/ustadmobile/core/contenttype/dialog-cards-620.h5p")
         val tempH5pFile = File(tempFolder, "dialog-cards-620.h5p")
         tempH5pFile.copyInputStreamToFile(inputStream)
 
         val containerTmpDir = tmpFolder.newFolder("containerTmpDir")
 
         runBlocking {
-            val metadata = contentImportManager.extractMetadata(tempH5pFile.path)!!
+            val metadata = contentImportManager.extractMetadata(tempH5pFile.toURI().toString())!!
             val contentEntry = metadata.contentEntry
             val uid = repo.contentEntryDao.insertAsync(metadata.contentEntry)
-            val container = contentImportManager.importFileToContainer(tempH5pFile.path,
+            val container = contentImportManager.importFileToContainer(tempH5pFile.toURI().toString(),
                     metadata.mimeType, uid, containerTmpDir.absolutePath, mapOf()){
 
             }!!

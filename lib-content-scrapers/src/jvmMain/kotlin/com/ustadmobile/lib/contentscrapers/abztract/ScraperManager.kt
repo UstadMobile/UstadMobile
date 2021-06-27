@@ -16,7 +16,6 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.SCRAPER_TAG
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Scraper.Companion.ERROR_TYPE_TIMEOUT
 import com.ustadmobile.lib.contentscrapers.googledrive.GoogleFile
-import com.ustadmobile.lib.contentscrapers.util.downloadToFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
@@ -31,7 +30,6 @@ import okhttp3.Request
 import org.apache.commons.cli.*
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
-import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -40,7 +38,6 @@ import org.kodein.di.on
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLDecoder
 import java.nio.file.Files
@@ -208,17 +205,17 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                     parameter("fields", "id,modifiedTime,name,mimeType,description,thumbnailLink")
                 }.execute()
 
-                val file = statement.receive<GoogleFile>()
+                val googleFileResponse = statement.receive<GoogleFile>()
 
-                if (file.mimeType.isNullOrEmpty()) {
+                if (googleFileResponse.mimeType.isNullOrEmpty()) {
                     Napier.e("$logPrefix no mimetype found in googleDriveLink", tag = SCRAPER_TAG)
                     return null
                 }
 
-                contentImportManager.getMimeTypeSupported().find { fileMimeType -> fileMimeType == file.mimeType }
+                contentImportManager.getMimeTypeSupported().find { fileMimeType -> fileMimeType == googleFileResponse.mimeType }
                         ?: return null
 
-                Napier.d("$logPrefix mimetype found for google drive link: ${file.mimeType}", tag = SCRAPER_TAG)
+                Napier.d("$logPrefix mimetype found for google drive link: ${googleFileResponse.mimeType}", tag = SCRAPER_TAG)
 
                 val dataStatement = httpClient.get<HttpStatement>(apiCall) {
                     parameter("alt", "media")
@@ -230,14 +227,14 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                 var metadata: ImportedContentEntryMetaData?
                 withContext(Dispatchers.IO){
                     val googleStream = dataStatement.receive<InputStream>()
-                    val googleFile = File(tempDir, file.name ?: file.id ?: fileId)
+                    val googleFile = File(tempDir, googleFileResponse.name
+                            ?: googleFileResponse.id ?: fileId)
 
                     FileOutputStream(googleFile).use {
                         googleStream.copyTo(it)
                         it.flush()
                     }
-                    //stream.close()
-                    metadata = contentImportManager.extractMetadata(googleFile.path)
+                    metadata = contentImportManager.extractMetadata(googleFile.toURI().toString())
                 }
 
                 metadata?.scraperType = ScraperTypes.GOOGLE_DRIVE_SCRAPE
@@ -277,7 +274,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
 
             else -> {
                 Napier.i("$logPrefix extracting metadata for $urlString from ${contentFile.path}")
-                val metaData = contentImportManager.extractMetadata(contentFile.path)
+                val metaData = contentImportManager.extractMetadata(contentFile.toURI().toString())
                 metaData?.scraperType = ScraperTypes.URL_SCRAPER
                 metaData?.uri = urlString
                 metaData?.contentEntry?.sourceUrl = urlString

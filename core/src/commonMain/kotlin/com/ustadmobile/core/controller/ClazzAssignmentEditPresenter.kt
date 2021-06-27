@@ -55,7 +55,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             ContentEntryList2View.VIEW_NAME,
             ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer(),
             mutableMapOf(ContentEntryList2View.ARG_CLAZZ_ASSIGNMENT_FILTER to entity?.caUid.toString(),
-                    ContentEntryList2View.ARG_CONTENT_FILTER to ContentEntryList2View.ARG_LIBRARIES_CONTENT,
+                    ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
                     UstadView.ARG_PARENT_ENTRY_UID to  UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString(),
                     ContentEntryList2View.ARG_SELECT_FOLDER_VISIBLE to false.toString()))
 

@@ -11,7 +11,10 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
@@ -28,6 +31,7 @@ import org.junit.Before
 import org.junit.Test
 import org.kodein.di.*
 import javax.naming.InitialContext
+import kotlin.random.Random
 
 
 fun <T> DoorLiveData<T>.deferredUntil(block: (T) -> Boolean): Deferred<T> {
@@ -64,11 +68,15 @@ class ContainerDownloadManagerTest {
 
         val endpointScope = EndpointScope()
         di = DI {
+            bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
+                NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
+            }
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
+                val nodeIdAndAuth: NodeIdAndAuth = instance()
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName).also {
-                    it.clearAllTables()
+                spy(UmAppDatabase.getInstance(Any(), dbName, nodeIdAndAuth).also {
+                    it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, false)
                 })
             }
 
@@ -80,8 +88,10 @@ class ContainerDownloadManagerTest {
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
+                val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository(
-                    repositoryConfig(Any(), context.url, instance(), instance())))
+                    repositoryConfig(Any(), context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
+                        instance(), instance())))
             }
 
             bind<ContainerDownloadRunner>() with factory {

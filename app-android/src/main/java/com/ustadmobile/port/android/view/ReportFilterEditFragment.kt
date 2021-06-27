@@ -264,8 +264,8 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
         onSaveStateToBackStackStateHandle()
         if(entity?.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY) {
             navigateToPickEntityFromList(ContentEntry::class.java, R.id.content_entry_list_dest,
-                    bundleOf(ContentEntryList2View.ARG_CONTENT_FILTER to
-                                    ContentEntryList2View.ARG_LIBRARIES_CONTENT,
+                    bundleOf(ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to
+                                    ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
                             UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString()))
         }else if(entity?.reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON){
             navigateToPickEntityFromList(LeavingReason::class.java, R.id.leaving_reason_list)

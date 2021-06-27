@@ -1,10 +1,11 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CLAZZ_CONTENT_FILTER
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FILTER
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_CLAZZ
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_OPTION
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
@@ -66,9 +67,14 @@ class ClazzDetailPresenter(context: Any,
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         val personUid = accountManager.activeAccount.personUid
         GlobalScope.launch(doorMainDispatcher()) {
+
+            val contentEntryListParams = mapOf(
+                    ARG_CLAZZUID to entityUid.toString(),
+                    ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_CLAZZ)
+                    .toQueryString()
+
             view.tabs = listOf("${ClazzDetailOverviewView.VIEW_NAME}?$ARG_ENTITY_UID=$entityUid",
-                    """${ContentEntryList2View.VIEW_NAME}?$ARG_CLAZZUID=$entityUid&
-                       $ARG_CONTENT_FILTER=$ARG_CLAZZ_CONTENT_FILTER""".trimMargin(),
+                    """${ContentEntryList2View.VIEW_NAME}?$contentEntryListParams""",
                     """${ClazzMemberListView.VIEW_NAME}?
                         $ARG_CLAZZUID=$entityUid
                         """.trimMargin()) +

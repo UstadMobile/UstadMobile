@@ -1,48 +1,24 @@
 package com.ustadmobile.core.controller
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import org.mockito.kotlin.*
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentformats.xapi.ContextActivity
-import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
-import com.ustadmobile.core.contentformats.xapi.endpoints.storeProgressStatement
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.util.activeDbInstance
-import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.VideoPlayerView
-import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.door.asRepository
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
-import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.ext.insertVideoContent
-import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
 import kotlinx.coroutines.runBlocking
-import okhttp3.OkHttpClient
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
-import org.mockito.ArgumentMatchers
-import java.io.IOException
-import javax.naming.InitialContext
+import org.mockito.kotlin.*
 
 class VideoContentPresenterTest {
 
@@ -68,6 +44,10 @@ class VideoContentPresenterTest {
     private lateinit var endpoint: Endpoint
 
     var selectedClazzUid = 10001L
+
+    @JvmField
+    @Rule
+    val temporaryFolder = TemporaryFolder()
 
     @Before
     fun setup() {

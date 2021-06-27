@@ -12,27 +12,28 @@ import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParserException
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
 import java.util.*
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.io.ext.skipToEntry
+import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.openInputStream
 import org.xmlpull.v1.XmlPullParserFactory
-import java.util.zip.ZipFile
 
 class EpubTypePluginCommonJvm() : EpubTypePlugin() {
 
-    override suspend fun extractMetadata(filePath: String): ContentEntryWithLanguage? {
+    override suspend fun extractMetadata(uri: String, context: Any): ContentEntryWithLanguage? {
         return withContext(Dispatchers.Default) {
             val xppFactory = XmlPullParserFactory.newInstance()
-
             try {
-                val file = File(filePath.removePrefix("file://"))
 
-                val opfPath: String = ZipInputStream(FileInputStream(file)).use {
+                val doorUri = DoorUri.parse(uri)
+                val inputStream = doorUri.openInputStream(context)
+
+                val opfPath: String = ZipInputStream(inputStream).use {
                     val metaDataEntry = it.skipToEntry { it.name == "META-INF/container.xml" }
                     if(metaDataEntry != null) {
                         val ocfContainer = OcfDocument()
@@ -46,7 +47,7 @@ class EpubTypePluginCommonJvm() : EpubTypePlugin() {
                     }
                 } ?: return@withContext null
 
-                return@withContext ZipInputStream(FileInputStream(file)).use {
+                return@withContext ZipInputStream(doorUri.openInputStream(context)).use {
                     val entry = it.skipToEntry { it.name == opfPath } ?: return@use null
 
                     val xpp = xppFactory.newPullParser()
@@ -58,7 +59,8 @@ class EpubTypePluginCommonJvm() : EpubTypePlugin() {
                         contentFlags = ContentEntry.FLAG_IMPORTED
                         contentTypeFlag = ContentEntry.TYPE_EBOOK
                         licenseType = ContentEntry.LICENSE_TYPE_OTHER
-                        title = if(opfDocument.title.isNullOrEmpty()) file.nameWithoutExtension else opfDocument.title
+                        title = if(opfDocument.title.isNullOrEmpty()) doorUri.getFileName(context)
+                                else opfDocument.title
                         author = opfDocument.getCreator(0)?.creator
                         description = opfDocument.description
                         leaf = true
@@ -81,7 +83,7 @@ class EpubTypePluginCommonJvm() : EpubTypePlugin() {
         }
     }
 
-    override suspend fun importToContainer(filePath: String, conversionParams: Map<String, String>,
+    override suspend fun importToContainer(uri: String, conversionParams: Map<String, String>,
                                            contentEntryUid: Long, mimeType: String,
                                            containerBaseDir: String, context: Any,
                                            db: UmAppDatabase, repo: UmAppDatabase,
@@ -89,20 +91,21 @@ class EpubTypePluginCommonJvm() : EpubTypePlugin() {
 
         return withContext(Dispatchers.Default) {
 
-            val file = File(filePath)
+            val doorUri = DoorUri.parse(uri)
             val container = Container().apply {
                 containerContentEntryUid = contentEntryUid
                 cntLastModified = System.currentTimeMillis()
-                fileSize = file.length()
                 this.mimeType = mimeType
                 containerUid = repo.containerDao.insert(this)
             }
 
             repo.addEntriesToContainerFromZip(container.containerUid,
-                    File(filePath).toDoorUri(),
-                    ContainerAddOptions(storageDirUri = File(containerBaseDir).toDoorUri()))
+                    doorUri,
+                    ContainerAddOptions(storageDirUri = File(containerBaseDir).toDoorUri()), context)
 
-            container
+            val containerWithSize = repo.containerDao.findByUid(container.containerUid) ?: container
+
+            containerWithSize
         }
     }
 }

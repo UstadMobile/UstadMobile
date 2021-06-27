@@ -1,7 +1,6 @@
 package com.ustadmobile.core.contentformats.xapi.endpoints
 
 import com.ustadmobile.core.contentformats.xapi.*
-import com.ustadmobile.core.tincan.Registration
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.lib.db.entities.ContentEntry

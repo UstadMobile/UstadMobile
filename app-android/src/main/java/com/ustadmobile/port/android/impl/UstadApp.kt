@@ -22,7 +22,6 @@ import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
-import com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
@@ -70,6 +69,9 @@ import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import com.ustadmobile.core.impl.di.commonJvmDiModule
+import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
+import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.lib.db.entities.ContainerImportJob
 
 /**
  * Note: BaseUstadApp extends MultidexApplication on the multidex variant, but extends the
@@ -88,17 +90,27 @@ open class UstadApp : BaseUstadApp(), DIAware {
             UstadAccountManager(instance(), applicationContext, di)
         }
 
+        bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
+            val systemImpl: UstadMobileSystemImpl = instance()
+            val contextIdentifier: String = sanitizeDbNameFromUrl(context.url)
+            systemImpl.getOrGenerateNodeIdAndAuth(contextPrefix = contextIdentifier, applicationContext)
+        }
+
         bind<UmAppDatabase>(tag = TAG_DB) with scoped(EndpointScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
-            getInstance(applicationContext, dbName).also {
+            UmAppDatabase.getInstance(context = applicationContext, dbName = dbName,
+                nodeIdAndAuth = instance()
+            ).also {
                 val networkManager: NetworkManagerBle = di.direct.instance()
                 it.connectivityStatusDao.commitLiveConnectivityStatus(networkManager.connectivityStatus)
             }
         }
 
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
-            instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(applicationContext, context.url,
-                instance(), instance()) {
+            val nodeIdAndAuth: NodeIdAndAuth = instance()
+            instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(applicationContext,
+                context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, instance(), instance()
+            ) {
                 attachmentsDir = File(applicationContext.filesDir.siteDataSubDir(this@singleton.context),
                     UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME).absolutePath
                 useClientSyncManager = true
@@ -172,7 +184,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
             ContentImportManagerImplAndroid(listOf(EpubTypePluginCommonJvm(),
                     XapiTypePluginCommonJvm(), VideoTypePluginAndroid(),
-                    H5PTypePluginCommonJvm()),
+                    H5PTypePluginCommonJvm()), ContainerImportJob.CLIENT_IMPORT_MODE,
                     applicationContext, context, di)
         }
 

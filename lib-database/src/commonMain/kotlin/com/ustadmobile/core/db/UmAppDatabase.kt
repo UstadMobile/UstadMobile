@@ -7,6 +7,8 @@ import com.ustadmobile.door.annotation.MinSyncVersion
 import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
+import com.ustadmobile.door.ext.doorDatabaseMetadata
+import com.ustadmobile.door.ext.syncableTableIdMap
 import com.ustadmobile.door.util.DoorSqlGenerator
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -53,12 +55,13 @@ import kotlin.jvm.Volatile
     UpdateNotification::class,
     TableSyncStatus::class,
     ChangeLog::class,
-    ZombieAttachmentData::class
+    ZombieAttachmentData::class,
+    DoorNode::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 70)
+], version = 74)
 @MinSyncVersion(60)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -330,18 +333,23 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         @JsName("getInstance")
-        fun getInstance(context: Any) = lazy { getInstance(context, "UmAppDatabase") }.value
+        fun getInstance(context: Any, nodeIdAndAuth: NodeIdAndAuth, primary: Boolean = false) = lazy {
+            getInstance(context, "UmAppDatabase", nodeIdAndAuth, primary)
+        }.value
 
         @JsName("getInstanceWithDbName")
         @Synchronized
-        fun getInstance(context: Any, dbName: String): UmAppDatabase {
+        fun getInstance(context: Any, dbName: String,
+                        nodeIdAndAuth: NodeIdAndAuth, primary: Boolean = false): UmAppDatabase {
             var db = namedInstances[dbName]
 
             if (db == null) {
                 var builder = DatabaseBuilder.databaseBuilder(
                         context, UmAppDatabase::class, dbName)
                 builder = addMigrations(builder)
-                //db = addCallbacks(builder).build()
+                    .addMigrations(Migrate67To68(nodeIdAndAuth.nodeId))
+                    .addCallback(DoorSyncableDatabaseCallback2(nodeIdAndAuth.nodeId,
+                        UmAppDatabase::class.syncableTableIdMap, primary))
                 db = builder.build()
                 namedInstances[dbName] = db
             }
@@ -4572,8 +4580,76 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_66_67 = object : DoorMigration(66, 67) {
 
-        val MIGRATION_66_67 = object: DoorMigration(66, 67) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("ALTER TABLE ContainerImportJob RENAME to ContainerImportJob_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerImportJob (  cijContainerUid  INTEGER  NOT NULL , cijUri  TEXT , cijImportMode  INTEGER  NOT NULL , cijContainerBaseDir  TEXT , cijContentEntryUid  INTEGER  NOT NULL , cijMimeType  TEXT , cijSessionId  TEXT , cijJobStatus  INTEGER  NOT NULL , cijBytesSoFar  INTEGER  NOT NULL , cijImportCompleted  INTEGER  NOT NULL , cijContentLength  INTEGER  NOT NULL , cijContainerEntryFileUids  TEXT , cijConversionParams  TEXT , cijUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("INSERT INTO ContainerImportJob (cijUid, cijContainerUid, cijUri, cijImportMode, cijContainerBaseDir, cijContentEntryUid, cijMimeType, cijSessionId, cijJobStatus, cijBytesSoFar, cijImportCompleted, cijContentLength, cijContainerEntryFileUids, cijConversionParams) SELECT cijUid, cijContainerUid, cijFilePath, 0, cijContainerBaseDir, cijContentEntryUid, cijMimeType, cijSessionId, cijJobStatus, cijBytesSoFar, cijImportCompleted, cijContentLength, cijContainerEntryFileUids, cijConversionParams FROM ContainerImportJob_OLD")
+                    database.execSQL("DROP TABLE ContainerImportJob_OLD")
+
+
+                } else {
+
+                    database.execSQL("""ALTER TABLE ContainerImportJob RENAME COLUMN cijFilePath to cijUri""".trimMargin())
+                    database.execSQL("""ALTER TABLE ContainerImportJob ADD COLUMN cijImportMode INTEGER DEFAULT 0 NOT NULL""")
+
+                }
+            }
+
+        }
+
+        /**
+         * This migration must update the SyncNode to set a new clientId, so we need to take a parameter here
+         */
+        class Migrate67To68(private val nodeId: Int): DoorMigration(67, 68) {
+
+            override fun migrate(database: DoorSqlDatabase) {
+                if(database.dbType() == DoorDbType.SQLITE) {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                }else {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  SERIAL  PRIMARY KEY  NOT NULL )")
+                }
+
+                database.execSQL("""
+                    UPDATE SyncNode
+                       SET nodeClientId = $nodeId
+                """.trimIndent())
+            }
+
+        }
+
+        val MIGRATION_68_69 = object : DoorMigration(68, 69) {
+
+            override fun migrate(database: DoorSqlDatabase) {
+
+
+                if (database.dbType() == DoorDbType.POSTGRES) {
+                    database.execSQL("""ALTER TABLE ContentEntry ADD COLUMN contentOwner BIGINT DEFAULT 0 NOT NULL""")
+                    database.execSQL("""UPDATE ContentEntry 
+                                           SET contentOwner = (SELECT personUid 
+                                                                 FROM Person 
+                                                                WHERE admin LIMIT 1),
+                                              contentEntryLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) """)
+
+
+                }else{
+
+                    database.execSQL("""ALTER TABLE ContentEntry ADD COLUMN contentOwner INTEGER DEFAULT 0 NOT NULL""")
+
+
+
+                }
+            }
+
+        }
+
+
+
+        val MIGRATION_70_71 = object: DoorMigration(70, 71) {
             override fun migrate(database: DoorSqlDatabase) {
 
                 if(database.dbType() == DoorDbType.SQLITE) {
@@ -4822,7 +4898,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
-        val MIGRATION_67_68 = object: DoorMigration(67, 68) {
+        val MIGRATION_71_72 = object: DoorMigration(71, 72) {
             override fun migrate(database: DoorSqlDatabase) {
 
 
@@ -4842,7 +4918,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
-        val MIGRATION_68_69 = object: DoorMigration(68, 69) {
+        val MIGRATION_72_73 = object: DoorMigration(72, 73) {
             override fun migrate(database: DoorSqlDatabase) {
 
                 database.execSQL("ALTER TABLE ContentEntry ADD COLUMN completionCriteria INTEGER NOT NULL DEFAULT 0")
@@ -4864,7 +4940,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
 
-        val MIGRATION_69_70 = object: DoorMigration(69, 70) {
+        val MIGRATION_73_74 = object: DoorMigration(73, 74) {
             override fun migrate(database: DoorSqlDatabase) {
 
                 database.execSQL("DROP TABLE IF EXISTS ClazzWork")
@@ -4903,7 +4979,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
                     MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
                     MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67,
-                    MIGRATION_67_68, MIGRATION_68_69, MIGRATION_69_70)
+                    MIGRATION_68_69, MIGRATION_70_71, MIGRATION_71_72, MIGRATION_72_73,
+                    MIGRATION_73_74)
 
 
 

@@ -64,7 +64,7 @@ class ContentEntryList2FragmentTest : TestCase() {
         }
 
         launchFragment(bundleOf(UstadView.ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
-                ContentEntryList2View.ARG_CONTENT_FILTER to ContentEntryList2View.ARG_LIBRARIES_CONTENT))
+                ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT))
 
         ContentEntryListScreen {
             recycler {
@@ -205,7 +205,7 @@ class ContentEntryList2FragmentTest : TestCase() {
 
 
     private fun launchFragment(bundle: Bundle = bundleOf(UstadView.ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
-            ContentEntryList2View.ARG_CONTENT_FILTER to ContentEntryList2View.ARG_LIBRARIES_CONTENT,
+            ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
             UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())): FragmentScenario<ContentEntryList2Fragment> {
         return launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundle) {

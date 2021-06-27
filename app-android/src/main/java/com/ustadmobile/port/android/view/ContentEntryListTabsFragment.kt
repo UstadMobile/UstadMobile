@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,9 +9,9 @@ import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.view.ContentEntryList2View
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FILTER
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DOWNLOADED_CONTENT
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_OPTION
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_DOWNLOADED
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_PARENT
 import com.ustadmobile.core.view.ContentEntryListTabsView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
@@ -46,10 +45,10 @@ class ContentEntryListTabsFragment : UstadBaseFragment(), ContentEntryListTabsVi
         //As of Kotlin1.4, this actually seems to cause a crash.
         //Handler().post {
         val defArgs = "${ContentEntryList2View.VIEW_NAME}?${ARG_PARENT_ENTRY_UID}=" +
-                "${arguments?.get(ARG_PARENT_ENTRY_UID).toString()}&$ARG_CONTENT_FILTER="
+                "${arguments?.get(ARG_PARENT_ENTRY_UID).toString()}&$ARG_DISPLAY_CONTENT_BY_OPTION="
 
         mPager.adapter = ContentEntryTabsPagerAdapter(childFragmentManager,
-            listOf("$defArgs$ARG_LIBRARIES_CONTENT", "$defArgs$ARG_DOWNLOADED_CONTENT"),
+            listOf("$defArgs$ARG_DISPLAY_CONTENT_BY_PARENT", "$defArgs$ARG_DISPLAY_CONTENT_BY_DOWNLOADED"),
             listOf(getString(R.string.libraries), getString(R.string.downloaded)))
         mTabLayout.setupWithViewPager(mPager)
         //}

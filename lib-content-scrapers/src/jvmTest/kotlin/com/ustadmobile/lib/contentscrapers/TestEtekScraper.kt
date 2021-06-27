@@ -1,6 +1,9 @@
 package com.ustadmobile.lib.contentscrapers
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.checkIfPathsToDriversExist
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ETAG_TXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
@@ -20,6 +23,7 @@ import org.junit.Test
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
+import kotlin.random.Random
 
 
 class TestEtekScraper {
@@ -75,8 +79,11 @@ class TestEtekScraper {
 
     @Before
     fun clearDb() {
-        val db = UmAppDatabase.getInstance(Any())
-        db.clearAllTables()
+        val nodeIdAndAuth = NodeIdAndAuth(
+            Random.nextInt(0, Int.MAX_VALUE),
+            randomUuid().toString())
+        val db = UmAppDatabase.getInstance(Any(), nodeIdAndAuth, true)
+        db.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
         checkIfPathsToDriversExist()
     }
 

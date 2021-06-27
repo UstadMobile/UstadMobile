@@ -368,7 +368,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 66, true,
-                UmAppDatabase.MIGRATION_65_66)
+            UmAppDatabase.MIGRATION_65_66)
     }
 
     @Test
@@ -388,7 +388,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 68, true,
-                UmAppDatabase.MIGRATION_67_68)
+            com.ustadmobile.core.db.UmAppDatabase.Companion.Migrate67To68(42))
     }
 
     @Test
@@ -401,15 +401,48 @@ class TestRoomMigration {
                 UmAppDatabase.MIGRATION_68_69)
     }
 
+
     @Test
-    fun migrate69to70() {
+    fun migrate70to71() {
         helper.createDatabase(TEST_DB, 69).apply {
             close()
         }
 
-        helper.runMigrationsAndValidate(TEST_DB, 70, true,
-                UmAppDatabase.MIGRATION_69_70)
+        helper.runMigrationsAndValidate(TEST_DB, 71, true,
+                UmAppDatabase.MIGRATION_70_71)
     }
 
+
+    @Test
+    fun migrate71to72() {
+        helper.createDatabase(TEST_DB, 71).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 72, true,
+                UmAppDatabase.MIGRATION_71_72)
+    }
+
+
+    @Test
+    fun migrate72to73() {
+        helper.createDatabase(TEST_DB, 72).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 73, true,
+                UmAppDatabase.MIGRATION_72_73)
+    }
+
+
+    @Test
+    fun migrate73to74() {
+        helper.createDatabase(TEST_DB, 73).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 74, true,
+                UmAppDatabase.MIGRATION_73_74)
+    }
 
 }
