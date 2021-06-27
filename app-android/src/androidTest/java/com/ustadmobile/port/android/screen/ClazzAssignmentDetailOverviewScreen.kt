@@ -1,16 +1,16 @@
 package com.ustadmobile.port.android.screen
 
 import android.view.View
-import com.agoda.kakao.edit.KEditText
-import com.agoda.kakao.recycler.KRecyclerItem
-import com.agoda.kakao.recycler.KRecyclerView
+import io.github.kakaocup.kakao.edit.KEditText
+import io.github.kakaocup.kakao.recycler.KRecyclerItem
+import io.github.kakaocup.kakao.recycler.KRecyclerView
 import com.kaspersky.kaspresso.screens.KScreen
-import com.agoda.kakao.text.KTextView
+import io.github.kakaocup.kakao.text.KTextView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment
 import org.hamcrest.Matcher
 
-object  ClazzAssignmentDetailOverviewScreen : KScreen<ClazzAssignmentDetailOverviewScreen>() {
+object ClazzAssignmentDetailOverviewScreen : KScreen<ClazzAssignmentDetailOverviewScreen>() {
 
     override val layoutId: Int?
         get() = R.layout.fragment_clazz_assignment_detail_overview

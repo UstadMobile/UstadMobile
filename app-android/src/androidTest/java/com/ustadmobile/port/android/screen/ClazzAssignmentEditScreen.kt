@@ -1,8 +1,8 @@
 package com.ustadmobile.port.android.screen
 
-import com.agoda.kakao.common.views.KSwipeView
-import com.agoda.kakao.edit.KTextInputLayout
-import com.agoda.kakao.recycler.KRecyclerView
+import io.github.kakaocup.kakao.common.views.KSwipeView
+import io.github.kakaocup.kakao.edit.KTextInputLayout
+import io.github.kakaocup.kakao.recycler.KRecyclerView
 import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.ClazzAssignmentEditFragment
