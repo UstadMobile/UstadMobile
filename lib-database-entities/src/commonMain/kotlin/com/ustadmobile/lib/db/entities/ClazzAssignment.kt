@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
         """
         ],
         syncFindAllQuery = """
-           SELECT ClazzLog.* 
+           SELECT ClazzAssignment.* 
           FROM DeviceSession
                JOIN PersonGroupMember 
                     ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid

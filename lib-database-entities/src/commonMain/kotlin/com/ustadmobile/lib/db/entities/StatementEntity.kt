@@ -24,14 +24,14 @@ import kotlinx.serialization.Serializable
                  ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid   
                 """],
     syncFindAllQuery = """
-       SELECT ClazzLogAttendanceRecord.*
+       SELECT StatementEntity.*
               FROM DeviceSession
                    JOIN PersonGroupMember 
                         ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
                    JOIN ScopedGrant 
                         ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
                             AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
-                   JOIN ClazzLogAttendanceRecord 
+                   JOIN StatementEntity 
                         ON ${StatementEntity.FROM_SCOPEDGRANT_TO_STATEMENT_JOIN_ON_CLAUSE}
              WHERE DeviceSession.dsDeviceId = :clientId
           """
