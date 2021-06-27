@@ -4608,7 +4608,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 } else {
 
                     database.execSQL("""ALTER TABLE ContainerImportJob RENAME COLUMN cijFilePath to cijUri""".trimMargin())
-                    database.execSQL("""ALTER TABLE ADD COLUMN cijImportMode INTEGER DEFAULT 0 NOT NULL""")
+                    database.execSQL("""ALTER TABLE ContainerImportJob ADD COLUMN cijImportMode INTEGER DEFAULT 0 NOT NULL""")
 
                 }
             }
@@ -4635,6 +4635,32 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         }
 
+        val MIGRATION_68_69 = object : DoorMigration(68, 69) {
+
+            override fun migrate(database: DoorSqlDatabase) {
+
+
+                if (database.dbType() == DoorDbType.POSTGRES) {
+                    database.execSQL("""ALTER TABLE ContentEntry ADD COLUMN contentOwner BIGINT DEFAULT 0 NOT NULL""")
+                    database.execSQL("""UPDATE ContentEntry 
+                                           SET contentOwner = (SELECT personUid 
+                                                                 FROM Person 
+                                                                WHERE firstNames = 'Admin' 
+                                                                  AND lastName = 'User'
+                                                                  AND admin LIMIT 1)""".trimMargin())
+
+
+                }else{
+
+                    database.execSQL("""ALTER TABLE ContentEntry ADD COLUMN contentOwner INTEGER DEFAULT 0 NOT NULL""")
+
+
+
+                }
+            }
+
+        }
+
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
@@ -4646,7 +4672,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
                     MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
                     MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
-                    MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67)
+                    MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67,
+                    MIGRATION_68_69)
 
 
 
