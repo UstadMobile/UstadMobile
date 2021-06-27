@@ -4,12 +4,15 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
+import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.db.entities.ContentEntry
 import org.junit.Before
 import org.junit.Test
 import java.io.File
 import java.nio.file.Files
+import kotlin.random.Random
 
 class TestYoutubeDownload {
 
@@ -23,7 +26,10 @@ class TestYoutubeDownload {
     @Before
     fun setup() {
         ContentScraperUtil.checkIfPathsToDriversExist()
-        db = UmAppDatabase.getInstance(Any())
+        val nodeIdAndAuth = NodeIdAndAuth(
+            Random.nextInt(0, Int.MAX_VALUE),
+            randomUuid().toString())
+        db = UmAppDatabase.getInstance(Any(), nodeIdAndAuth, true)
        // db.clearAllTables()
 
         containerDao = db.containerDao

@@ -31,21 +31,36 @@ import kotlinx.serialization.json.Json
 import org.mockito.kotlin.*
 import org.xmlpull.v1.XmlPullParserFactory
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.util.randomUuid
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import kotlin.random.Random
 
 class PersonAuthRegisterRouteTest {
 
-    lateinit var mockNotificationSender: NotificationSender
+    private lateinit var mockNotificationSender: NotificationSender
 
-    fun <R> withTestRegister(testFn: TestApplicationEngine.() -> R) {
+    @JvmField
+    @Rule
+    val temporaryFolder = TemporaryFolder()
+
+    private fun <R> withTestRegister(testFn: TestApplicationEngine.() -> R) {
         val endpointScope = EndpointScope()
         mockNotificationSender = mock { }
         withTestApplication({
             install(DIFeature) {
                 import(commonJvmDiModule)
 
+                bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
+                    NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
+                }
+
                 bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
-                    UmAppDatabase.getInstance(Any()).also {
-                        it.clearAllTables()
+                    val nodeIdAndAuth : NodeIdAndAuth = instance()
+                    UmAppDatabase.getInstance(Any(), nodeIdAndAuth, primary = true).also {
+                        it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, isPrimary = true)
                     }
                 }
 
@@ -64,18 +79,20 @@ class PersonAuthRegisterRouteTest {
                 }
 
                 bind<UstadMobileSystemImpl>() with singleton {
-                    UstadMobileSystemImpl(instance(tag = DiTag.XPP_FACTORY_NSAWARE))
+                    UstadMobileSystemImpl(instance(tag = DiTag.XPP_FACTORY_NSAWARE),
+                        temporaryFolder.newFolder())
                 }
 
                 bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
                     val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+                    val nodeIdAndAuth: NodeIdAndAuth = instance()
                     db.asRepository(
                         RepositoryConfig.repositoryConfig(
-                            Any(), "http://localhost/",
-                            instance(), instance()))
+                            Any(), "http://localhost/", nodeIdAndAuth.nodeId,
+                            nodeIdAndAuth.auth, instance(), instance()))
                 }
 
-                registerContextTranslator { call: ApplicationCall ->
+                registerContextTranslator { _: ApplicationCall ->
                     Endpoint("localhost")
                 }
             }

@@ -14,7 +14,11 @@ import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.util.randomUuid
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
@@ -30,7 +34,10 @@ import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
+import java.io.File
+import java.nio.file.Files
 import javax.naming.InitialContext
+import kotlin.random.Random
 
 fun DI.onActiveAccount(): DI {
     val accountManager: UstadAccountManager by instance()
@@ -65,13 +72,23 @@ class UstadTestRule: TestWatcher() {
 
     lateinit var okHttpClient: OkHttpClient
 
+    lateinit var tempFolder: File
+
+    lateinit var nodeIdAndAuth: NodeIdAndAuth
+
     val xppFactory = XmlPullParserFactory.newInstance().also {
         it.isNamespaceAware = true
     }
 
+
     override fun starting(description: Description?) {
+        val startTime = systemTimeInMillis()
+        tempFolder = Files.createTempDirectory("ustadtestrule").toFile()
+
+        nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
+
         endpointScope = EndpointScope()
-        systemImplSpy = spy(UstadMobileSystemImpl(xppFactory))
+        systemImplSpy = spy(UstadMobileSystemImpl(xppFactory, tempFolder))
 
         okHttpClient = OkHttpClient.Builder().build()
 
@@ -90,14 +107,15 @@ class UstadTestRule: TestWatcher() {
             bind<UmAppDatabase>(tag = TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName).also {
-                    it.clearAllTables()
+                spy(UmAppDatabase.getInstance(Any(), dbName, nodeIdAndAuth).also {
+                    it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, isPrimary = false)
                 })
             }
 
             bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope).singleton {
                 spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(
-                    Any(), context.url, instance(), instance())))
+                    Any(), context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
+                    instance(), instance())))
             }
 
             bind<NetworkManagerBle>() with singleton {
@@ -138,6 +156,7 @@ class UstadTestRule: TestWatcher() {
 
     override fun finished(description: Description?) {
         httpClient.close()
+        tempFolder.deleteRecursively()
     }
 
 }

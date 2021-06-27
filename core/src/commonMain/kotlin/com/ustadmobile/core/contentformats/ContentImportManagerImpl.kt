@@ -22,7 +22,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
 
-open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>, val context: Any, val endpoint: Endpoint,
+open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>, val importMode: Int, val context: Any, val endpoint: Endpoint,
                                     final override val di: DI) : ContentImportManager, DIAware {
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
@@ -90,6 +90,7 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
             this.cijMimeType = metadata.mimeType
             this.cijContainerBaseDir = containerBaseDir
             this.cijJobStatus = JobStatus.QUEUED
+            this.cijImportMode = importMode
             //This used to use encodeToString(JsonObject), but there is a bug that makes this crash
             //when obfuscation is enabled.
             //Previously: Json.encodeToString(JsonObject.serializer(), conversionParams.convertToJsonObject())

@@ -7,6 +7,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.util.randomUuid
+import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import io.ktor.client.*
 import kotlinx.coroutines.runBlocking
@@ -17,6 +19,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
+import kotlin.random.Random
+import com.ustadmobile.door.entities.NodeIdAndAuth
 
 class ContentTypePluginsTest {
 
@@ -44,7 +48,8 @@ class ContentTypePluginsTest {
         di = DI {
             import(ustadTestRule.diModule)
             bind<ContentImportManager>() with scoped(ustadTestRule.endpointScope!!).singleton {
-                ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm()), context, this.context, di)
+                ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm()),
+                    ContainerImportJob.CLIENT_IMPORT_MODE, context, this.context, di)
             }
         }
 
@@ -66,10 +71,12 @@ class ContentTypePluginsTest {
 
         val containerTmpDir = temporaryFolder.newFolder("containerTmpDir")
 
-        val db = UmAppDatabase.getInstance(context)
+        val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
+        val db = UmAppDatabase.getInstance(context, nodeIdAndAuth)
         db.clearAllTables()
-        val dbRepo = db.asRepository(repositoryConfig(context, "http://localhost/dummy", httpClient,
-            okHttpClient){
+        val dbRepo = db.asRepository(repositoryConfig(context, "http://localhost/dummy",
+            nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient
+        ){
             attachmentsDir = containerTmpDir.absolutePath
         })
 
@@ -93,7 +100,8 @@ class ContentTypePluginsTest {
     fun givenUnsupportedFileFormat_whenImported_shouldReturnNull(){
         val emptyFile = temporaryFolder.newFile("empty.zip")
 
-        val db = UmAppDatabase.getInstance(context)
+        val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
+        val db = UmAppDatabase.getInstance(context, nodeIdAndAuth)
         db.clearAllTables()
 
         val contentEntry =  runBlocking {

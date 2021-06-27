@@ -21,10 +21,13 @@ import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag.Companion.TAG_REPO
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import com.ustadmobile.door.ext.clearAllTablesAndResetSync
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_CONNECTED_LOCAL
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_CONNECTING_LOCAL
@@ -63,6 +66,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import javax.naming.InitialContext
+import kotlin.random.Random
 
 
 class DownloadJobItemRunnerTest {
@@ -92,6 +96,8 @@ class DownloadJobItemRunnerTest {
     private lateinit var serverDb: UmAppDatabase
 
     private lateinit var serverRepo: UmAppDatabase
+
+    private lateinit var serverNodeIdAndAuth: NodeIdAndAuth
 
     private lateinit var cloudEndPoint: String
 
@@ -144,6 +150,8 @@ class DownloadJobItemRunnerTest {
     lateinit var mockNetworkManager: NetworkManagerBle
 
     private lateinit var mockLocalAvailabilityManager: LocalAvailabilityManager
+
+    private lateinit var nodeIdAndAuth: NodeIdAndAuth
 
     @JvmField
     @Rule
@@ -241,21 +249,27 @@ class DownloadJobItemRunnerTest {
 
         clientDi = DI {
             bind<UstadMobileSystemImpl>() with singleton {
-                UstadMobileSystemImpl(XmlPullParserFactory.newInstance())
+                UstadMobileSystemImpl(XmlPullParserFactory.newInstance(), temporaryFolder.newFolder())
+            }
+
+            bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
+                NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
             }
 
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
+                val nodeIdAndAuth: NodeIdAndAuth = instance()
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName).also {
-                    it.clearAllTables()
+                spy(UmAppDatabase.getInstance(Any(), dbName, nodeIdAndAuth).also {
+                    it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId)
                 })
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
+                val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(Any(), context.url,
-                    instance(), instance())))
+                    nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, instance(), instance())))
             }
 
             bind<ContainerDownloadManager>() with scoped(endpointScope).singleton {
@@ -322,14 +336,16 @@ class DownloadJobItemRunnerTest {
         clientRepo = clientDi.on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
         containerDownloadManager = clientDi.on(accountManager.activeAccount).direct.instance()
 
-        serverDb = UmAppDatabase.getInstance(context).also {
-            it.clearAllTables()
+        serverNodeIdAndAuth = NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
+        serverDb = UmAppDatabase.getInstance(context, serverNodeIdAndAuth).also {
+            it.clearAllTablesAndResetSync(serverNodeIdAndAuth.nodeId)
         }
 
         //this can be shared as needed
         val httpClient: HttpClient= clientDi.direct.instance()
         serverRepo = serverDb.asRepository(repositoryConfig(context, "http://localhost/dummy",
-            httpClient, clientDi.direct.instance()))
+            serverNodeIdAndAuth.nodeId, serverNodeIdAndAuth.auth, httpClient,
+            clientDi.direct.instance()))
 
         mockLocalAvailabilityManager = clientDi.on(accountManager.activeAccount).direct.instance()
 

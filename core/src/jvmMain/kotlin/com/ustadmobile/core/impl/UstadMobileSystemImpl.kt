@@ -51,7 +51,9 @@ import java.util.concurrent.ConcurrentHashMap
  * @author mike, kileha3
  * @param xppFactory - XmlPullParser factory that
  */
-actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory) : UstadMobileSystemCommon(){
+actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
+                                        private val dataRoot: File
+) : UstadMobileSystemCommon(){
 
     private val appConfig: Properties by lazy {
         Properties().also { props ->
@@ -72,7 +74,17 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory) : 
 
     private val foreignStringsXml: MutableMap<String, StringsXml> = ConcurrentHashMap()
 
-    private var tmpPrefs = mutableMapOf<String, String>()
+    private val appPrefs : Properties by lazy {
+        Properties().apply {
+            val propFile = File(dataRoot, PREFS_FILENAME)
+            if(propFile.exists()) {
+                FileReader(propFile).use { fileReader ->
+                    load(fileReader)
+                }
+            }
+
+        }
+    }
 
     /**
      * The main method used to go to a new view. This is implemented at the platform level. On
@@ -167,7 +179,7 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory) : 
      * @return value of that preference
      */
     actual override fun getAppPref(key: String, context: Any): String?{
-        return tmpPrefs[key]
+        return appPrefs.getProperty(key)
     }
 
 
@@ -178,14 +190,18 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory) : 
      */
     actual override fun setAppPref(key: String, value: String?, context: Any){
         if(value != null) {
-            tmpPrefs[key] = value
+            appPrefs[key] = value
         }else {
-            tmpPrefs.remove(key)
+            appPrefs.remove(key)
+        }
+
+        FileWriter(File(dataRoot, PREFS_FILENAME)).use {
+            appPrefs.store(it, "UTF-8")
         }
     }
 
     fun clearPrefs() {
-        tmpPrefs.clear()
+        appPrefs.clear()
     }
 
 
@@ -285,11 +301,15 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory) : 
          *
          * @return A singleton instance
          */
+        @Deprecated("Don't use this! Use this class via DI")
         @JvmStatic
         actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl(
-            XmlPullParserFactory.newInstance())
+            XmlPullParserFactory.newInstance(), File("."))
 
         const val APPCONFIG_PROPERTIES_PATH = "/com/ustadmobile/core/appconfig.properties"
+
+        const val PREFS_FILENAME = "prefs.properties"
+
     }
 
 }

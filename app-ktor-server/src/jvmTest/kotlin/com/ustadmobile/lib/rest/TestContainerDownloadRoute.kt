@@ -6,10 +6,15 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.DoorSyncableDatabaseCallback2
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.ext.syncableTableIdMap
 import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import io.ktor.application.*
@@ -34,6 +39,7 @@ import org.kodein.di.registerContextTranslator
 import org.kodein.di.scoped
 import org.kodein.di.singleton
 import java.io.File
+import kotlin.random.Random
 
 /**
  * Needs updated to include the Download itself. This is mostly just an adapter for
@@ -41,23 +47,25 @@ import java.io.File
  */
 class TestContainerDownloadRoute {
 
-    lateinit var server: ApplicationEngine
+    private lateinit var server: ApplicationEngine
 
-    lateinit var db: UmAppDatabase
+    private lateinit var db: UmAppDatabase
 
-    lateinit var repo: UmAppDatabase
+    private lateinit var repo: UmAppDatabase
 
-    lateinit var container: Container
+    private lateinit var nodeIdAndAuth: NodeIdAndAuth
 
-    lateinit var containerTmpDir: File
+    private lateinit var container: Container
+
+    private lateinit var containerTmpDir: File
 
     @JvmField
     @Rule
     val temporaryFolder = TemporaryFolder()
 
-    lateinit var httpClient: HttpClient
+    private lateinit var httpClient: HttpClient
 
-    lateinit var okHttpClient: OkHttpClient
+    private lateinit var okHttpClient: OkHttpClient
 
     @Before
     fun setup() {
@@ -67,8 +75,13 @@ class TestContainerDownloadRoute {
 
         singletonDataDir.takeIf { !it.exists() }?.mkdirs()
 
-        db = DatabaseBuilder.databaseBuilder(Any() ,UmAppDatabase::class, "UmAppDatabase").build()
-        db.clearAllTables()
+        nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
+
+        db = DatabaseBuilder.databaseBuilder(Any() ,UmAppDatabase::class, "UmAppDatabase")
+            .addCallback(DoorSyncableDatabaseCallback2(nodeIdAndAuth.nodeId,
+                UmAppDatabase::class.syncableTableIdMap, primary = true))
+            .build()
+        db.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
         val attachmentsDir = temporaryFolder.newFolder()
 
         okHttpClient = OkHttpClient()
@@ -81,8 +94,9 @@ class TestContainerDownloadRoute {
             }
         }
 
-        repo = db.asRepository(repositoryConfig(Any(), "http://localhost/", httpClient,
-            okHttpClient) {
+        repo = db.asRepository(repositoryConfig(Any(), "http://localhost/",
+            nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient
+        ) {
             this.attachmentsDir = attachmentsDir.absolutePath
         })
 
@@ -103,7 +117,7 @@ class TestContainerDownloadRoute {
                     repo
                 }
 
-                registerContextTranslator { call: ApplicationCall ->
+                registerContextTranslator { _: ApplicationCall ->
                     Endpoint("localhost")
                 }
             }
@@ -133,7 +147,7 @@ class TestContainerDownloadRoute {
     @Test
     fun givenContainer_WhenEntryListRequestIsMade_shouldGiveListWIthMd5s() {
         runBlocking {
-            val httpClient = HttpClient(){
+            val httpClient = HttpClient {
                 install(JsonFeature)
             }
 
