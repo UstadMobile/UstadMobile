@@ -55,8 +55,7 @@ class PersonDaoJs: PersonDao() {
     override suspend fun personHasPermissionAsync(
         accountPersonUid: Long,
         personUid: Long,
-        permission: Long,
-        checkPermissionForSelf: Int
+        permission: Long
     ): Boolean {
         return ALLOW_ACCESS
     }

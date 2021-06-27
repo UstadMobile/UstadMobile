@@ -19,13 +19,13 @@ actual class WebChunkPresenter actual constructor(context: Any, arguments: Map<S
     private val mountHandler: ContainerMounter by instance()
 
     actual override suspend fun handleMountChunk() {
-        val container = repo.containerDao.findByUidAsync(containerUid)
+        val container = repo.containerDao.findByUidAsync(containerUid ?: 0L)
         if (container == null) {
             view.showSnackBar(UstadMobileSystemImpl.instance
                     .getString(MessageID.error_opening_file, this))
             return
         }
-        val baseMountUrl = mountHandler.mountContainer(accountManager.activeAccount.endpointUrl,containerUid)
+        val baseMountUrl = mountHandler.mountContainer(accountManager.activeAccount.endpointUrl,containerUid ?: 0)
         val indexContent = httpClient.get<String>(UMFileUtil.joinPaths(baseMountUrl,"index.json"))
         val indexLog:IndexLog = JSON.parse(indexContent)
         view.url = indexLog.entries?.get(0)?.url?:""

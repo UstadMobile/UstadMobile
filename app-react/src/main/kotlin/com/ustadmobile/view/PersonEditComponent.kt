@@ -17,17 +17,19 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.view.PersonEditView
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.PersonParentJoin
+import com.ustadmobile.lib.db.entities.PersonPicture
+import com.ustadmobile.lib.db.entities.PersonWithAccount
+import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.errorTextClass
+import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
-import com.ustadmobile.view.ext.umEntityAvatar
 import kotlinx.css.Display
 import kotlinx.css.display
 import kotlinx.css.marginTop
@@ -80,22 +82,6 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
         }
 
     override var approvalPersonParentJoin: PersonParentJoin? = null
-        get() = field
-        set(value) {
-            setState{
-                field = value
-            }
-        }
-
-    override var clazzList: DoorLiveData<List<ClazzEnrolmentWithClazz>>? = null
-        get() = field
-        set(value) {
-            setState{
-                field = value
-            }
-        }
-
-    override var rolesAndPermissionsList: DoorLiveData<List<EntityRoleWithNameAndRole>>? = null
         get() = field
         set(value) {
             setState{
@@ -169,14 +155,6 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
                 dobLabel = dobLabel.copy(errorText = value )
             }
             field = value
-        }
-
-    override var canDelegatePermissions: Boolean? = null
-        get() = field
-        set(value) {
-            setState {
-                field = value
-            }
         }
 
     override var parentContactError: String?  = null

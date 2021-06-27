@@ -5,6 +5,9 @@ import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.io.ext.readString
+import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.checkIfPathsToDriversExist
 import com.ustadmobile.port.sharedse.util.UmZipUtils
 
@@ -30,6 +33,7 @@ import java.util.zip.ZipFile
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import org.xmlpull.v1.XmlPullParserFactory
 import java.util.function.Consumer
+import kotlin.random.Random
 
 
 class TestShrinkerUtils {
@@ -54,8 +58,10 @@ class TestShrinkerUtils {
 
     @Throws(IOException::class)
     fun initDb() {
-        val db = UmAppDatabase.getInstance(Any())
-        db.clearAllTables()
+        val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
+            randomUuid().toString())
+        val db = UmAppDatabase.getInstance(Any(), nodeIdAndAuth, true)
+        db.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
 
         val `is` = javaClass.getResourceAsStream("/com/ustadmobile/lib/contentscrapers/test.epub")
         tmpDir = Files.createTempDirectory("testShrinkerUtils").toFile()

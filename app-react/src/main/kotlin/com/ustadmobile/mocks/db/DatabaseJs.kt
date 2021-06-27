@@ -34,6 +34,8 @@ class DatabaseJs: UmAppDatabase() , DoorDatabaseSyncRepository{
         get() = TODO("Not yet implemented")
     override val contentEntryRelatedEntryJoinDao: ContentEntryRelatedEntryJoinDao
         get() = ContentEntryRelatedEntryJoinDaoJs()
+    override val clazzContentJoinDao: ClazzContentJoinDao
+        get() = TODO("Not yet implemented")
     override val contentCategorySchemaDao: ContentCategorySchemaDao
         get() = TODO("Not yet implemented")
     override val contentCategoryDao: ContentCategoryDao
@@ -149,6 +151,10 @@ class DatabaseJs: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val siteTermsDao: SiteTermsDao
         get() = TODO("Not yet implemented")
     override val personParentJoinDao: PersonParentJoinDao
+        get() = TODO("Not yet implemented")
+    override val scopedGrantDao: ScopedGrantDao
+        get() = TODO("Not yet implemented")
+    override val errorReportDao: ErrorReportDao
         get() = TODO("Not yet implemented")
     override val dbVersion: Int
         get() = TODO("Not yet implemented")

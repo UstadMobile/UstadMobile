@@ -1,8 +1,6 @@
 package com.ustadmobile.util
 
-import kotlinext.js.Object
 import kotlinx.browser.window
-import org.w3c.dom.url.URLSearchParams
 
 /**
  * Converting Url search parameters to a map,

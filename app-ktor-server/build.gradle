@@ -67,7 +67,7 @@ kotlin {
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
 
-                implementation "com.github.aakira:napier-jvm:$version_napier"
+                implementation "io.github.aakira:napier-jvm:$version_napier"
 
                 implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
                 implementation "net.sf.kxml:kxml2:$version_kxml"
@@ -89,6 +89,7 @@ kotlin {
                 implementation "io.netty:netty-tcnative-boringssl-static:$version_netty_tcnative"
 
                 implementation "com.sun.mail:jakarta.mail:$version_jakartamail"
+                implementation "org.apache.commons:commons-compress:$version_apache_commons_compress"
             }
         }
 

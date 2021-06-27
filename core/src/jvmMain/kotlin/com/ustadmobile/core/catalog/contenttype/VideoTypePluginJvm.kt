@@ -1,12 +1,14 @@
 package com.ustadmobile.core.catalog.contenttype
 
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.util.ShrinkUtils
 import com.ustadmobile.core.util.ext.fitWithin
+import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
@@ -18,9 +20,9 @@ class VideoTypePluginJvm: VideoTypePlugin() {
 
     private val VIDEO_JVM = "VideoPluginJVM"
 
-    override suspend fun extractMetadata(filePath: String): ContentEntryWithLanguage? {
+    override suspend fun extractMetadata(uri: String, context: Any): ContentEntryWithLanguage? {
         return withContext(Dispatchers.Default){
-            val file = File(filePath)
+            val file = DoorUri.parse(uri).toFile()
 
             if(!fileExtensions.any { file.name.endsWith(it, true) }) {
                 return@withContext null
@@ -40,12 +42,12 @@ class VideoTypePluginJvm: VideoTypePlugin() {
         }
     }
 
-    override suspend fun importToContainer(filePath: String, conversionParams: Map<String, String>,
+    override suspend fun importToContainer(uri: String, conversionParams: Map<String, String>,
                                            contentEntryUid: Long, mimeType: String, containerBaseDir: String,
                                            context: Any, db: UmAppDatabase, repo: UmAppDatabase, progressListener: (Int) -> Unit): Container {
         return withContext(Dispatchers.Default) {
 
-            val videoFile = File(filePath.removePrefix("file://"))
+            val videoFile = DoorUri.parse(uri).toFile()
             var newVideo = File(videoFile.parentFile, "new${videoFile.nameWithoutExtension}.mp4")
 
             val compressVideo: Boolean = conversionParams["compress"]?.toBoolean() ?: false

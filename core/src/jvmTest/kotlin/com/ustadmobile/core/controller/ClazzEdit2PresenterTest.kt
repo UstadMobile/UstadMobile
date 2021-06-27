@@ -8,6 +8,7 @@ import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.db.waitUntil
+import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
@@ -23,10 +24,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.scoped
-import org.kodein.di.singleton
+import org.kodein.di.*
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -49,6 +47,8 @@ class ClazzEdit2PresenterTest {
 
     private lateinit var di: DI
 
+    private lateinit var testNavController: UstadNavController
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -68,6 +68,8 @@ class ClazzEdit2PresenterTest {
 
         repoClazzDaoSpy = spy(repo.clazzDao)
         whenever(repo.clazzDao).thenReturn(repoClazzDaoSpy)
+
+        testNavController = di.direct.instance()
     }
 
 
@@ -78,6 +80,7 @@ class ClazzEdit2PresenterTest {
         val db: UmAppDatabase by di.activeDbInstance()
         val repo: UmAppDatabase by di.activeRepoInstance()
 
+        testNavController.navigate(ClazzEdit2View.VIEW_NAME, presenterArgs)
         val presenter = ClazzEdit2Presenter(context, presenterArgs, mockView, di, mockLifecycleOwner)
 
         presenter.onCreate(null)
@@ -111,6 +114,8 @@ class ClazzEdit2PresenterTest {
         }
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.clazzUid.toString())
+        testNavController.navigate(ClazzEdit2View.VIEW_NAME, presenterArgs)
+
         val presenter = ClazzEdit2Presenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)

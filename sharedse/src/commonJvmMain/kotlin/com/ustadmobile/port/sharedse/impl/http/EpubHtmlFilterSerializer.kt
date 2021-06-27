@@ -9,7 +9,6 @@ import org.xmlpull.v1.XmlSerializer
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import org.xmlpull.v1.XmlPullParserFactory
-import com.ustadmobile.core.view.UstadView.Companion.KEY_IFRAME_HEIGHTS
 
 /**
  * Performs some minor tweaks on HTML being served to enable EPUB pagination and handling html
@@ -59,20 +58,6 @@ class EpubHtmlFilterSerializer(override val di: DI) : DIAware {
                             }
                         """.trimIndent())
                 serializer.endTag(parser.getNamespace(), "style")
-            } else if (evtType == XmlPullParser.END_TAG && parser.getName() == "body" && onLiveWebServer){
-                serializer.startTag(parser.getNamespace(), "script")
-                serializer.attribute("", "type", "text/javascript")
-                serializer.text("""
-                            window.onload = function () { 
-                                var heights = localStorage.getItem("$KEY_IFRAME_HEIGHTS");
-                                heights = heights ? JSON.parse(heights) : {};
-                                const height = document.querySelector("body").scrollHeight,
-                                page = window.location.href.split('/').pop().split('#')[0].split('?')[0];
-                                heights[page] = height;
-                                localStorage.setItem("$KEY_IFRAME_HEIGHTS", JSON.stringify(heights));
-                            }
-                        """.trimIndent())
-                serializer.endTag(parser.getNamespace(), "script")
             }
             return true
         }

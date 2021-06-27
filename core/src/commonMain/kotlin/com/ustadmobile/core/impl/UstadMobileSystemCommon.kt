@@ -40,7 +40,13 @@ abstract class UstadMobileSystemCommon {
             /**
              * If true, then popup include popUpToViewName.
              */
-            val popUpToInclusive: Boolean = false)
+            val popUpToInclusive: Boolean = false) {
+
+        companion object {
+            val Default = UstadGoOptions(null, false)
+        }
+
+    }
 
     /**
      * The last destination that was called via the go method. This is used for testing purposes.
@@ -182,6 +188,12 @@ abstract class UstadMobileSystemCommon {
     open fun getAppPref(key: String, defaultVal: String, context: Any): String {
         val valFound = getAppPref(key, context)
         return valFound ?: defaultVal
+    }
+
+    open fun getOrPutAppPref(key: String, context: Any, block: () -> String): String {
+        return getAppPref(key, context) ?: block().also { newValue ->
+            setAppPref(key, newValue, context)
+        }
     }
 
     /**

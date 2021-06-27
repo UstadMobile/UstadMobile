@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.abztract
 
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.util.ext.alternative
@@ -58,7 +58,7 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
 
         runBlocking {
 
-            val metadata = contentImportManager.extractMetadata(file.path)
+            val metadata = contentImportManager.extractMetadata(file.toURI().toString())
 
             if (metadata == null) {
                 Napier.i("$logPrefix with sourceUrl $sourceUrl had no metadata found, not supported", tag = SCRAPER_TAG)
@@ -97,7 +97,7 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
             if(params != null){
                 conversionParams = Json.decodeFromString(MapSerializer(String.serializer(), String.serializer()), params)
             }
-            val container = contentImportManager.importFileToContainer(file.path, metadata.mimeType,
+            val container = contentImportManager.importFileToContainer(file.toURI().toString(), metadata.mimeType,
                     fileEntry.contentEntryUid, containerFolder.path, conversionParams){
 
             }

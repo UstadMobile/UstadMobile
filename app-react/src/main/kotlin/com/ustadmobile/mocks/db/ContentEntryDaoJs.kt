@@ -17,11 +17,10 @@ class ContentEntryDaoJs: ContentEntryDao() {
         TODO("Not yet implemented")
     }
 
-    override fun downloadedRootItemsAsc(personUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
-        TODO("Not yet implemented")
-    }
-
-    override fun downloadedRootItemsDesc(personUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
+    override fun downloadedRootItems(
+        personUid: Long,
+        sortOrder: Int
+    ): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
         TODO("Not yet implemented")
     }
 
@@ -105,25 +104,23 @@ class ContentEntryDaoJs: ContentEntryDao() {
         TODO("Not yet implemented")
     }
 
-    override fun getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
+    override fun getChildrenByParentUidWithCategoryFilterOrderByName(
         parentUid: Long,
         langParam: Long,
         categoryParam0: Long,
         personUid: Long,
         showHidden: Boolean,
-        onlyFolder: Boolean
+        onlyFolder: Boolean,
+        sortOrder: Int
     ): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
         return DataSourceFactoryJs<Int,ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, Any>("entryId",parentUid,sourcePath,
             ListSerializer(ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer()))
     }
 
-    override fun getChildrenByParentUidWithCategoryFilterOrderByNameDesc(
-        parentUid: Long,
-        langParam: Long,
-        categoryParam0: Long,
+    override fun getClazzContent(
+        clazzUid: Long,
         personUid: Long,
-        showHidden: Boolean,
-        onlyFolder: Boolean
+        sortOrder: Int
     ): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
         TODO("Not yet implemented")
     }

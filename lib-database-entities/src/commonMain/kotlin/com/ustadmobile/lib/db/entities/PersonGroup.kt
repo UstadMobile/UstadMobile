@@ -9,31 +9,31 @@ import kotlinx.serialization.Serializable
 @Entity
 @SyncableEntity(tableId = PersonGroup.TABLE_ID,
     notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${PersonGroup.TABLE_ID} AS tableId FROM 
-        ChangeLog
-        JOIN PersonGroup ON ChangeLog.chTableId = ${PersonGroup.TABLE_ID} AND ChangeLog.chEntityPk = PersonGroup.groupUid
-        JOIN PersonGroupMember ON PersonGroupMember.groupMemberGroupUid = PersonGroup.groupUid
-        JOIN Person ON Person.personUid = PersonGroupMember.groupMemberPersonUid
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid""",
-
-        """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClientSyncManager.TABLEID_SYNC_ALL_TABLES} AS tableId FROM 
-        ChangeLog
-        JOIN PersonGroupMember ON ChangeLog.chTableId = ${PersonGroup.TABLE_ID} AND PersonGroupMember.groupMemberUid = ChangeLog.chEntityPk
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
-        """
-    ],
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+               ${PersonGroup.TABLE_ID} AS tableId 
+          FROM ChangeLog
+               JOIN PersonGroup 
+                    ON ChangeLog.chTableId = ${PersonGroup.TABLE_ID} 
+                           AND ChangeLog.chEntityPk = PersonGroup.groupUid
+               JOIN PersonGroupMember 
+                    ON PersonGroupMember.groupMemberGroupUid = PersonGroup.groupUid
+               JOIN Person
+                    ON PersonGroupMember.groupMemberPersonUid = Person.personUid
+               ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_PERSON_SELECT}
+                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}     
+        """],
     syncFindAllQuery = """
-        SELECT PersonGroup.* FROM 
-        PersonGroup
-        JOIN PersonGroupMember ON PersonGroupMember.groupMemberGroupUid = PersonGroup.groupUid
-        JOIN Person ON Person.personUid = PersonGroupMember.groupMemberPersonUid
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
-        WHERE DeviceSession.dsDeviceId = :clientId
+        SELECT PersonGroup.*
+          FROM DeviceSession
+               JOIN PersonGroupMember
+                    ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+               ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_PERSON_SELECT}
+                    ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+               JOIN PersonGroup 
+                    ON PersonGroup.groupUid = PersonGroupMember.groupMemberGroupUid
+         WHERE DeviceSession.dsDeviceId = :clientId
         """)
 @Serializable
 open class PersonGroup() {
@@ -75,6 +75,11 @@ open class PersonGroup() {
         const val PERSONGROUP_FLAG_PERSONGROUP = 1
 
         const val PERSONGROUP_FLAG_PARENT_GROUP = 2
+
+        const val PERSONGROUP_FLAG_STUDENTGROUP = 4
+
+        const val PERSONGROUP_FLAG_TEACHERGROUP = 8
+
 
     }
 }

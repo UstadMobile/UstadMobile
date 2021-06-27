@@ -81,8 +81,11 @@ fun XmlPullParser.serializeTo(xmlSerializer: XmlSerializer, inclusive: Boolean =
         evtType = nextToken()
 
     do {
-        if (filter != null && !filter.beforePassthrough(evtType, this, xmlSerializer))
-            return
+        if (filter != null && !filter.beforePassthrough(evtType, this, xmlSerializer)) {
+            lastEvent = evtType
+            evtType = nextToken()
+            continue
+        }
 
         when (evtType) {
             XmlPullParserConstants.DOCDECL -> {

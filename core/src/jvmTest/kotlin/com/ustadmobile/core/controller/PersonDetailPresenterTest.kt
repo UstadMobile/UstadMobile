@@ -4,11 +4,10 @@ package com.ustadmobile.core.controller
 import org.mockito.kotlin.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.CommentsDao
-import com.ustadmobile.core.db.dao.EntityRoleDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveRepoInstance
+import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.view.PersonDetailView
@@ -17,10 +16,7 @@ import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.ClazzWork
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonParentJoin
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Before
@@ -58,8 +54,6 @@ class PersonDetailPresenterTest {
 
     private lateinit var serverUrl: String
 
-    private lateinit var repoEntityRoleDao: EntityRoleDao
-
     @Before
     fun setup() {
         context = Any()
@@ -81,8 +75,6 @@ class PersonDetailPresenterTest {
 
         repo = di.directActiveRepoInstance()
 
-        repoEntityRoleDao = spy(repo.entityRoleDao)
-        whenever(repo.entityRoleDao).thenReturn(repoEntityRoleDao)
 
     }
 
@@ -104,10 +96,6 @@ class PersonDetailPresenterTest {
 
         repo = di.directActiveRepoInstance()
 
-
-        repoEntityRoleDao = spy(repo.entityRoleDao)
-        whenever(repo.entityRoleDao).thenReturn(repoEntityRoleDao)
-
         val person = Person().apply {
             fatherName = "Doe"
             firstNames = "Jane"
@@ -115,36 +103,26 @@ class PersonDetailPresenterTest {
             username = if(withUsername) "jane.Doe" else null
             personUid = mPersonUid
 
-            //repo.personDao.insert(this)
         }
 
-        //GlobalScope.launch {
-            repo.insertPersonOnlyAndGroup(person)
-        //}
+        repo.insertPersonOnlyAndGroup(person)
 
         if(!sameUser){
-            Person().apply {
-                admin = isAdmin
-                username = "Admin"
-                lastName = "User"
-                personUid = activeAccountUid
-                repo.personDao.insert(this)
+            runBlocking {
+                val loggedInPerson = repo.insertPersonAndGroup(Person().apply {
+                    admin = isAdmin
+                    username = "Admin"
+                    lastName = "User"
+                    personUid = activeAccountUid
+                })
+
+                if(isAdmin) {
+                    repo.grantScopedPermission(loggedInPerson, Role.ALL_PERMISSIONS,
+                        ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
+                }
             }
         }
         return person
-    }
-
-    @Test
-    fun givenPersonDetailsWithRoles_whenLoaded_thenRolesCalled(){
-        val person = createPerson(withUsername = false, isAdmin = false)
-        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
-        val presenter = PersonDetailPresenter(context, args,mockView,di, mockLifecycleOwner)
-        presenter.onCreate(null)
-
-        verify(repoEntityRoleDao, timeout(5000).atLeastOnce()).filterByPersonWithExtra(
-                person.personGroupUid)
-        verify(mockView, timeout(5000).atLeastOnce()).rolesAndPermissions = any()
-
     }
 
     @Test
@@ -223,7 +201,7 @@ class PersonDetailPresenterTest {
 
     @Test
     fun givenActiveUserIsNotParent_whenOpenChildProfile_thenShouldShowManageParentalConsent() {
-        val person = createPerson(isAdmin = false, sameUser = true)
+        createPerson(isAdmin = false, sameUser = true)
 
         val child = runBlocking {
             repo.insertPersonAndGroup(Person().apply {

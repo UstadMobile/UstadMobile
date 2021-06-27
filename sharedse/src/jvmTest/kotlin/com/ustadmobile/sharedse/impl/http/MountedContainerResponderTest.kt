@@ -7,8 +7,10 @@ import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.io.ext.openEntryInputStream
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.sharedse.ext.dataInflatedIfRequired
 import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder
@@ -29,12 +31,15 @@ import org.junit.*
 import org.junit.rules.TemporaryFolder
 import java.io.File
 import java.io.IOException
+import kotlin.random.Random
 
 class MountedContainerResponderTest {
 
     private lateinit var containerTmpDir: File
 
     private lateinit var db: UmAppDatabase
+
+    private lateinit var nodeIdAndAuth: NodeIdAndAuth
 
     private lateinit var repo: UmAppDatabase
 
@@ -54,8 +59,10 @@ class MountedContainerResponderTest {
     @Throws(IOException::class)
     fun setup() {
         containerTmpDir = temporaryFolder.newFolder("TestMountedContainerResponder-containerTmp")
+        nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
+            randomUuid().toString())
 
-        db = UmAppDatabase.getInstance(Any())
+        db = UmAppDatabase.getInstance(Any(), nodeIdAndAuth)
         okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp) {
             install(JsonFeature)
@@ -66,7 +73,7 @@ class MountedContainerResponderTest {
         }
 
         repo = db.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
-            httpClient, okHttpClient))
+            nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))
         db.clearAllTables()
 
         container = Container()

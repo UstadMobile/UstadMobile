@@ -66,13 +66,6 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
             }
         }
 
-    override var rolesAndPermissions: DataSource.Factory<Int, EntityRoleWithNameAndRole>? = null
-        get() = field
-        set(value) {
-            setState {
-                field = value
-            }
-        }
     override var entity: PersonWithPersonParentJoin? = null
         get() = field
         set(value) {

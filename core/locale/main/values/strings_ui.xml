@@ -563,7 +563,6 @@
     <string name="role">Role</string>
     <string name="add_a_new_role">Add a new role</string>
     <string name='edit_role'>Edit role</string>
-    <string name="roles_setting_desc">Manage permissions given to roles</string>
     <string name="rols_assignment">Roles assignment</string>
     <string name="role_assignment_setting_desc">Assign roles to a user or a group</string>
     <string name="locations">Locations</string>
@@ -572,6 +571,7 @@
     <string name="audit_log_setting_desc"> View and export audit log</string>
     <string name="entry">entry</string>
     <string name="permission">permission</string>
+    <string name="permissions">Permissions</string>
     <string name="role_name">Role name</string>
     <string name="members">members</string>
     <string name="member">member</string>
@@ -994,17 +994,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="powered_by">Powered by</string>
     <string name="invalid_email">Please enter a valid email</string>
 
-    <string name="what_is_your_date_of_birth">What is your date of birth?</string>
-
-    <string name="parents_email_address">Parents\' email address</string>
-
-    <!--The instructions that are given to children when parental approval is required for them to create an account. %1$s is replaced with the parents email address or phone number -->
-    <string name="we_sent_a_message_to_your_parent">We sent a message to your parent ( %1$s ) so they can approve your registration. You can login using the username and password you set after your parent approves.</string>
-
-    <string name="toggle_visibility">Toggle visibility</string>
-
-    <string name="almost_done">Almost done</string>
-
     <!--
     Shown to users when we ask them to choose an account
     -->
@@ -1037,6 +1026,15 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="join_class">Join class</string>
 
     <string name="join_school">Join school</string>
+
+    <string name="what_is_your_date_of_birth">What is your date of birth?</string>
+
+    <string name="parents_email_address">Parents\' email address</string>
+
+    <!--The instructions that are given to children when parental approval is required for them to create an account. %1$s is replaced with the parents email address or phone number -->
+    <string name="we_sent_a_message_to_your_parent">We sent a message to your parent ( %1$s ) so they can approve your registration. You can login using the username and password you set after your parent approves.</string>
+
+    <string name="toggle_visibility">Toggle visibility</string>
 
     <string name="parental_consent">Parental consent</string>
 
@@ -1131,5 +1129,230 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     -->
     <string name="manage_parental_consent">Manage parental consent</string>
 
+    <!-- Used in the context of permission management -->
+    <string name="view_class_content">View class content</string>
+
+    <!-- Used in the context of permission management -->
+    <string name="edit_class_content">Edit class content</string>
+
+    <!-- Used in the context of permission management -->
+    <string name="view_class_learning_records">View class learning records</string>
+
+    <!-- Used in the context of permission management. Member refers to a member in a class or school (teacher, students, etc) -->
+    <string name="view_contact_details_of_members">View member contact details</string>
+
+    <!-- Used in the context of permission management. Member refers to a member in a class or school (teacher, students, etc) -->
+    <string name="edit_contact_details_of_members">Edit member contact details</string>
+
+    <!--
+    Used in the context of permission management.
+    Member refers to a member in a class or school (teacher, students, etc).
+    Socioeconomic refers to information about social or economic status e.g. level of Internet access,
+    refugee status, etc.
+    -->
+    <string name="view_socioeconomic_details_of_members">View socioeconomic details of members</string>
+
+    <!--
+    Used in the context of permission management.
+    Member refers to a member in a class or school (teacher, students, etc).
+    Socioeconomic refers to information about social or economic status e.g. level of Internet access,
+    refugee status, etc.
+    -->
+    <string name="edit_socioeconomic_details_of_members">Edit socioeconomic details of members</string>
+
+    <string name="add_person_or_group">Add person or group</string>
+
+
+
+    <string name="lets_get_started">Let\'s get started</string>
+
+    <string name="looks_like_installed_app_from_link">Looks like you just installed the app using a link. What would you like to do?</string>
+
+    <!-- This is an option is shown when the user is asked
+    "Looks like you just installed the app using a link. What would you like to do?"
+    -->
+    <string name="continue_using_link_recommended">Continue using link (recommended)</string>
+
+    <string name="continue_using_the_link">Continue using the link provided to join a class or school.</string>
+
+    <!-- This is an option is shown when the user is asked
+    "Looks like you just installed the app using a link. What would you like to do?"
+    -->
+    <string name="start_from_scratch">Start from scratch</string>
+
+    <string name="ignore_the_link">Ignore the link and continue to the default login</string>
+
+    <string name="add_permission_for_a_person">Add permission for a person</string>
+
+    <string name="add_permission_for_a_group">Add permission for a group</string>
+
+    <string name="add_using_link">Add using link</string>
+
+    <string name="add_using_a_web_link_then">Add educational content using a web link, then use it offline</string>
+
+    <string name="add_from_gallery">Add from gallery</string>
+
+    <string name="add_video_or_audio_from_the_device_gallery">Add video or audio from the device gallery</string>
+
+    <string name="add_file">Add file</string>
+
+    <string name="add_educational_content_using_supported_formats_eg_pdf_xapi_h5p">Add educational content using supported formats e.g. PDF, xAPI, H5P</string>
+
+    <string name="current_status_consent_granted">Current status: Consent granted %1$s</string>
+
+    <string name="select_country">Select country</string>
+
+    <string name="enter_link">Enter Link</string>
+
+    <string name="add_subject">Add subject</string>
+
+    <!-- This is a title that is used when giving the user a list of options for sharing the app -->
+    <string name="share_via">Share via…</string>
+
+    <!-- This option allows advanced users to get the app APK file so they can share it with others -->
+    <string name="share_apk_file">Share APK file</string>
+
+    <string name="recommended_for_advanced_users">Recommended for advanced users</string>
+
+    <!-- This option allows the user to use Androids Nearby Share feature to share content and/or the app -->
+    <string name="nearby_share">Nearby share</string>
+
+    <string name="recommended_for_offline_installation">Recommended for offline installation</string>
+
+    <string name="app_store_link">App store link</string>
+
+    <string name="everything_works_offline">Everything works offline.</string>
+
+    <string name="swipe_to_next">SWIPE TO NEXT</string>
+
+    <string name="content_entries_completed">Content entries completed</string>
+
+    <string name="content_usage_time">Content usage time</string>
+
+    <!-- Indicates that the given user or group has been granted all available permissions -->
+    <string name="all_permissions">All permissions</string>
+
+    <string name="folder">Folder</string>
+
+    <string name="create_a_new_learning_env">Create a new Learning Environment</string>
+
+    <string name="add_educational_content_to_new_learning_env">Add educational content (ebooks, videos, interactive exercises, and more) of your own, or import it from other websites using a link. Setup schools, classes, and groups. Then invite your students, teachers, and staff to access it: online or offline.</string>
+
+    <string name="connect_to_an_existing_learning_environment">Connect to an existing Learning Environment</string>
+
+    <string name="does_your_class_already_have_learning_env">Does your class, school, or organization already have a Learning Environment setup? Great! </string>
+
+    <string name="use_the_public_lib_env">Use the public library Learning Environment</string>
+
+    <string name="just_want_to_browse">Just want to browse and use educational content offline without managing schools and classes? No problem! Our public library has over 100,000 open educational resources (OERs) ready to use offline.</string>
+
+    <string name="revoking_consent_will">Revoking consent will lead to deletion of child\'s personal data within 24 hours</string>
+
+    <string name="you_must_comply_with_license">You must ensure that you comply content license conditions</string>
+
+    <string name="you_can_copypaste_a_link">You can copy/paste a link from various educational websites.</string>
+
+    <!-- Allows the user to see a list of supported educational websites for importing educational content via a link -->
+    <string name="see_supported_sites">See supported sites</string>
+
+    <string name="total_score">Total score</string>
+
+    <!-- A section of the class edit screen that allows users to choose what features are enabled
+    and what permissions users will have -->
+    <string name="class_setup">Class setup</string>
+
+    <string name="anyone_with_this_can_join_school">Anyone with this link can apply to join the school. You can approve or reject their request to join</string>
+
+    <string name="this_class">This class</string>
+
+    <string name="from_my_classes">From my classes</string>
+
+    <string name="my_content">My content</string>
+
+    <string name="learning_environment">Learning environment</string>
+
+    <!-- Grades (classes by age bracket) - e.g. Kindergarten, First Grade, etc. -->
+    <string name="grades_class_age">Grades</string>
+
+    <string name="add_remove_and_modify_grades">Add, remove, and modify grades e.g. Kindergarten, Grade 1, etc.</string>
+
+    <string name="subjects">Subjects</string>
+
+    <string name="add_remove_and_modify_subjects">Add, remove, and modify subjects</string>
+
+    <string name="create_my_account">Create my account</string>
+
+    <!-- When a user is recommending something (e.g. a piece of content) -->
+    <string name="recommend_it">Recommend it</string>
+
+    <string name="edit_permissions">Edit permissions</string>
+
+    <!-- Button that allows a user to select someone to invite using their contacts (address book) -->
+    <string name="add_from_contacts">Add from contacts</string>
+
+    <string name="almost_done">Almost done!</string>
+
+    <string name="your_username">Your username</string>
+
+    <string name="select_content">Select content</string>
+
+    <string name="search_in">Search in</string>
+
+    <!-- Used to allow the user to select what type of content they want to find e.g. ebooks, video, interactive, etc -->
+    <string name="type">Type</string>
+
+    <string name="please_download_the_app">Please download the app</string>
+
+    <string name="alternatively_you_can_download_the_apk">Alternatively, you can download the APK file for manual installation if you want.</string>
+
+    <string name="connectivity">Connectivity</string>
+
+    <string name="home_internet_access">Home Internet access</string>
+
+    <string name="mobile_internet_access">Mobile Internet access</string>
+
+    <!-- This is an option when we ask users about their connectivity access -->
+    <string name="full_i_can_download_as_much_as_i_like">Full - I can download as much as I like</string>
+
+    <!-- This is an option when we ask users about their connectivity access -->
+    <string name="limited_i_avoid_downloading_too_much">Limited - I avoid downloading too much</string>
+
+    <!-- Oops: This is displayed as the title for a screen that appears when an error occurs -->
+    <string name="oops">Oops!</string>
+
+    <string name="sorry_something_went_wrong">Sorry, something went wrong! We have logged it, and we\'ll try to fix it. Please make sure to share the incident ID if you need to contact your system administator about this.</string>
+
+    <string name="incident_id">Incident ID</string>
+
+    <!--
+    If the user is brought to an error screen, we will show the error code here. %1$s will be
+    replaced with the code itself.
+     -->
+    <string name="error_code">Error code: %1$s</string>
+
+    <!-- This text is used on a button that will take the user back to the starting screen -->
+    <string name="take_me_home">Take me home</string>
+
+    <string name="view_clazz">View class</string>
+
+    <string name="view_clazzes">View classes</string>
+
+    <string name="enrol_and_unenrol_students">Enrol and unenrol students</string>
+
+    <string name="enrol_and_unenrol_teachers">Enrol and unenrol teachers</string>
+
+    <string name="view_assignments">View assignments</string>
+
+    <string name="add_or_edit_assignment">Add or edit assignments</string>
+
+    <string name="view_basic_profile_of_members">View basic profile of members</string>
+
+    <string name="edit_basic_profile_of_members">Edit basic profile of members</string>
+
+    <string name="view_school">View school</string>
+
+    <string name="edit_clazzes">Edit classes</string>
+
+    <string name="add_new_clazz_to_school">Add new class to school</string>
 
 </resources>

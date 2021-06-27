@@ -7,12 +7,11 @@ import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.toughra.ustadmobile.R
+import com.toughra.ustadmobile.databinding.FragmentContentEntryAddOptionsBinding
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ContentEntryAddOptionsView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
-import kotlinx.android.synthetic.main.fragment_content_entry_add_options.*
-import kotlinx.android.synthetic.main.fragment_content_entry_add_options.view.*
 
 /**
  * Fragment class responsible for content creation selection, you can create content by one of the following
@@ -29,13 +28,13 @@ class ContentEntryAddOptionsBottomSheetFragment : BottomSheetDialogFragment(), C
     private var importContentOptionView: View? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_content_entry_add_options, container, false)
-        createFolderOptionView = rootView.content_create_folder
-        importContentOptionView = rootView.content_import_content
-        createFolderOptionView?.setOnClickListener(this)
-        importContentOptionView?.setOnClickListener(this)
-        return rootView
+                              savedInstanceState: Bundle?): View {
+        return FragmentContentEntryAddOptionsBinding.inflate(inflater, container, false).also {
+            createFolderOptionView = it.contentCreateFolder
+            importContentOptionView = it.contentImportContent
+            createFolderOptionView?.setOnClickListener(this)
+            importContentOptionView?.setOnClickListener(this)
+        }.root
     }
 
     override fun onClick(view: View?) {

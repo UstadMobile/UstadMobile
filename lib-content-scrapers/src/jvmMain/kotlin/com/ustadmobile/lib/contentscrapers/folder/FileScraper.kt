@@ -32,7 +32,7 @@ class FileScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Lon
 
             try {
 
-                val metadata = contentImportManager.extractMetadata(file.path)
+                val metadata = contentImportManager.extractMetadata(file.toURI().toString())
 
                 if (metadata == null) {
                     hideContentEntry()
@@ -65,7 +65,7 @@ class FileScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Lon
                     conversionParams = Json.decodeFromString(
                         MapSerializer(String.serializer(), String.serializer()), params)
                 }
-                contentImportManager.importFileToContainer(file.path, metadata.mimeType,
+                contentImportManager.importFileToContainer(file.toURI().toString(), metadata.mimeType,
                         fileEntry.contentEntryUid, containerFolder.path, conversionParams){
 
                 }

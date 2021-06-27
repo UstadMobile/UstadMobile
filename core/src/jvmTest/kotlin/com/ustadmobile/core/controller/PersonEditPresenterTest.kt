@@ -146,20 +146,6 @@ class PersonEditPresenterTest  {
     }
 
     @Test
-    fun givenPersonEditExistingWithRoles_whenLoaded_thenRolesCalled(){
-
-        val person = createPersonAndInsert(leftOutPassword = true)
-
-        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
-        val presenter = PersonEditPresenter(context, args,mockView, di,mockLifecycleOwner)
-
-        presenter.onCreate(null)
-        
-        verify(mockView, timeout(5000).atLeastOnce()).rolesAndPermissionsList = any()
-
-    }
-
-    @Test
     fun givenPresenterCreatedInRegistrationMode_whenUsernameAndPasswordNotFilledClickSave_shouldShowErrors() {
         val args = mapOf(PersonEditView.ARG_REGISTRATION_MODE to PersonEditView.REGISTER_MODE_ENABLED.toString())
 

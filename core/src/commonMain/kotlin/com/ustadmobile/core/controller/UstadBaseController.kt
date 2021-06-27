@@ -30,13 +30,26 @@
  */
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.UmLifecycleListener
 import com.ustadmobile.core.impl.UmLifecycleOwner
+import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.impl.nav.navigateToErrorScreen
+import com.ustadmobile.core.util.ext.putResultDestInfo
+import com.ustadmobile.core.util.safeStringify
+import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
+import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import kotlinx.atomicfu.atomic
+import kotlinx.serialization.SerializationStrategy
 import org.kodein.di.DI
 import org.kodein.di.DIAware
+import org.kodein.di.instance
 import kotlin.js.JsName
+import kotlin.reflect.KClass
 
 /**
  * Base Controller that provides key functionality for any view :
@@ -57,6 +70,8 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
 
     protected var savedState: Map<String, String>? = null
         private set
+
+    protected val ustadNavController: UstadNavController by instance()
 
     /**
      * Handle when the presenter is created. Analogous to Android's onCreate
@@ -158,8 +173,110 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
         lifecycleListeners.remove(listener)
     }
 
+    /**
+     * This is used in roughly the same way as on Android. It can be called by the underlying
+     * platform (e.g. Androids own onSaveInstanceState when the app is being destroyed) or
+     * directly by the presenter e.g. to save the state of the entity before a user navigates away
+     * to pick something.
+     */
     open fun onSaveInstanceState(savedState: MutableMap<String, String>) {
 
+    }
+
+    /**
+     * Save state to the nav controller savedStateHandle for the current back stack entry.
+     * This will call onSaveInstanceState and save the resulting string map into the savedstatehandle.
+     */
+    open fun saveStateToNavController() {
+        val stateMap = mutableMapOf<String, String>()
+        onSaveInstanceState(stateMap)
+
+        val stateHandle = ustadNavController.currentBackStackEntry?.savedStateHandle
+        if(stateHandle != null) {
+            stateMap.forEach {
+                stateHandle.set(it.key, it.value)
+            }
+        }
+    }
+
+
+    /**
+     * Save the result to the savedStateHandle on the backstack as directed by the current
+     * arguments. ARG_RESULT_DEST_VIEWNAME and ARG_RESULT_DEST_KEY will specify which entry on
+     * the backstack to lookup, and what key name should be used in the saved state handle once
+     * it has been looked up.
+     */
+    protected fun finishWithResult(result: String) {
+        val saveToViewName = arguments[ARG_RESULT_DEST_VIEWNAME]
+        val saveToKey = arguments[ARG_RESULT_DEST_KEY]
+
+        if(saveToViewName != null && saveToKey != null){
+            val destBackStackEntry = ustadNavController.getBackStackEntry(saveToViewName)
+            destBackStackEntry?.savedStateHandle?.set(saveToKey, result)
+
+            ustadNavController.popBackStack(saveToViewName, false)
+        }
+    }
+
+
+    fun requireSavedStateHandle(): UstadSavedStateHandle {
+        return ustadNavController.currentBackStackEntry?.savedStateHandle
+            ?: throw IllegalStateException("Require saved state handle: no current back stack entry")
+    }
+
+    private fun <T: Any> NavigateForResultOptions<T>.putPresenterResultDestInfo() {
+        val currentBackStackEntryVal = ustadNavController.currentBackStackEntry
+        val effectiveResultKey = destinationResultKey ?: entityClass.simpleName
+        ?: throw IllegalArgumentException("putPresenterResultDestInfo: no destination key and no class name")
+
+        if(currentBackStackEntryVal != null) {
+            arguments.putResultDestInfo(currentBackStackEntryVal, effectiveResultKey,
+                overwriteDestination)
+        }
+    }
+
+    /**
+     * Navigate to another screen for purposes of returning a result. This allows the initiator
+     * (e.g. this presenter) to take the user to another screen for picking another entity (e.g.
+     * from a Class Member screen to the Person List screen to pick someone to add to the class.
+     * This process can continue via multiple screens (e.g. in the person list screen, the user
+     * might choose to add a new person, which is then returned to the original initiator).
+     *
+     * This works by:
+     *
+     * 1) The initiator passes arguments UstadView.ARG_RESULT_DEST_VIEWNAME and UstadView.ARG_RESULT_DEST_KEY
+     *    that specify the destination view name for the result and a key name.
+     *
+     * 2) Edit/list screens use the arguments received to lookup the SavedState handle for the
+     *    initiator and then saves the result into the specified key of the saved state handle. The
+     *    edit/list screen then pops the back stack
+     *
+     * 3) The initiator observes the saved state handle to watch the incoming result
+     *
+     * This is roughly modeled on the recommended process for Android NavController as per
+     *  https://developer.android.com/guide/navigation/navigation-programmatic#returning_a_result
+     */
+    fun <T: Any> navigateForResult(options: NavigateForResultOptions<T>) {
+        saveStateToNavController()
+        options.putPresenterResultDestInfo()
+
+        val currentEntityValue = options.currentEntityValue
+        if(currentEntityValue != null) {
+            options.arguments.put(
+                UstadEditView.ARG_ENTITY_JSON,
+                safeStringify(di, options.serializationStrategy, options.entityClass,
+                    currentEntityValue))
+        }
+
+        ustadNavController.navigate(options.destinationViewName, options.arguments)
+    }
+
+    /**
+     * Navigate to the error screen. Pass details of the exception so it is recorded and displayed
+     * to the user accordingly.
+     */
+    fun navigateToErrorScreen(exception: Exception) {
+        ustadNavController.navigateToErrorScreen(exception, di, context)
     }
 
     companion object {

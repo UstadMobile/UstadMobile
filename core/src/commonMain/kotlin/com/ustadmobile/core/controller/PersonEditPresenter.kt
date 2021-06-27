@@ -51,42 +51,11 @@ class PersonEditPresenter(context: Any,
 
     private var regViaLink: Boolean = false
 
-    private val clazzEnrolmentWithClazzJoinEditHelper =
-            DefaultOneToManyJoinEditHelper(ClazzEnrolmentWithClazz::clazzEnrolmentUid,
-            "state_ClazzMemberWithClazz_list",
-                ListSerializer(ClazzEnrolmentWithClazz.serializer()),
-            ListSerializer(ClazzEnrolmentWithClazz.serializer()), this, ClazzEnrolmentWithClazz::class) { clazzEnrolmentUid = it }
-
-    fun handleAddOrEditClazzMemberWithClazz(clazzEnrolmentWithClazz: ClazzEnrolmentWithClazz) {
-        GlobalScope.launch(doorMainDispatcher()) {
-            clazzEnrolmentWithClazz.clazz = repo.clazzDao.findByUidAsync(clazzEnrolmentWithClazz.clazzEnrolmentClazzUid)
-            clazzEnrolmentWithClazzJoinEditHelper.onEditResult(clazzEnrolmentWithClazz)
-        }
-    }
-
-    private val rolesAndPermissionEditHelper = DefaultOneToManyJoinEditHelper<EntityRoleWithNameAndRole>(
-            EntityRoleWithNameAndRole::erUid,
-            "state_EntityRoleWithNameAndRole_list",
-            ListSerializer(EntityRoleWithNameAndRole.serializer()),
-        ListSerializer(EntityRoleWithNameAndRole.serializer()), this, EntityRoleWithNameAndRole::class) { erUid = it }
-
-    fun handleAddOrEditRoleAndPermission(entityRoleWithNameAndRole: EntityRoleWithNameAndRole) {
-        rolesAndPermissionEditHelper.onEditResult(entityRoleWithNameAndRole)
-    }
-
-    fun handleRemoveRoleAndPermission(entityRoleWithNameAndRole: EntityRoleWithNameAndRole) {
-        rolesAndPermissionEditHelper.onDeactivateEntity(entityRoleWithNameAndRole)
-    }
-
-
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.genderOptions = listOf(MessageIdOption(MessageID.female, context, Person.GENDER_FEMALE),
                 MessageIdOption(MessageID.male, context, Person.GENDER_MALE),
                 MessageIdOption(MessageID.other, context, Person.GENDER_OTHER))
-        view.clazzList = clazzEnrolmentWithClazzJoinEditHelper.liveList
-
-        view.rolesAndPermissionsList = rolesAndPermissionEditHelper.liveList
 
         registrationModeFlags = arguments[PersonEditView.ARG_REGISTRATION_MODE]?.toInt() ?: PersonEditView.REGISTER_MODE_NONE
 
@@ -122,37 +91,11 @@ class PersonEditPresenter(context: Any,
             view.approvalPersonParentJoin = PersonParentJoin()
         }
 
-
-        val clazzMemberWithClazzList = withTimeoutOrNull(2000) {
-            db.takeIf { entityUid != 0L }?.clazzEnrolmentDao?.findAllClazzesByPersonWithClazzAsListAsync(entityUid)
-        } ?: listOf()
-        clazzEnrolmentWithClazzJoinEditHelper.liveList.sendValue(clazzMemberWithClazzList)
-
-
-        val rolesAndPermissionList = withTimeoutOrNull(2000){
-            db.takeIf{entityUid != 0L}?.entityRoleDao?.filterByPersonWithExtraAsList(
-                    entity?.personGroupUid?:0L)
-        }?:listOf()
-        rolesAndPermissionEditHelper.liveList.sendValue(rolesAndPermissionList)
-
         val loggedInPersonUid = accountManager.activeAccount.personUid
         loggedInPerson = withTimeoutOrNull(2000){
             db.personDao.findByUidAsync(loggedInPersonUid)
         }
 
-        val canDelegate = if(loggedInPersonUid != 0L) {
-            repo.personDao.personHasPermissionAsync(loggedInPersonUid?: 0,
-                    arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
-                    Role.PERMISSION_PERSON_DELEGATE, checkPermissionForSelf = 1)
-        }else {
-            false
-        }
-
-        if(loggedInPerson != null && loggedInPerson?.admin == false){
-            view.canDelegatePermissions = canDelegate
-        }else {
-            view.canDelegatePermissions = loggedInPerson != null && loggedInPerson?.admin == true
-        }
 
         return person
     }
@@ -312,38 +255,6 @@ class PersonEditPresenter(context: Any,
                     entity.personUid = personWithGroup.personUid
                 }else {
                     repo.personDao.updateAsync(entity)
-                }
-
-                //Insert any roles and permissions
-                repo.entityRoleDao.insertListAsync(
-                        rolesAndPermissionEditHelper.entitiesToInsert.also {
-                            it.forEach {
-                                it.erUid = 0
-                                it.erGroupUid = entity.personGroupUid
-                                it.erActive = true
-                            }
-                        }
-                )
-                //Update any roles and permissions
-                repo.entityRoleDao.updateListAsync(
-                        rolesAndPermissionEditHelper.entitiesToUpdate.also {
-                            it.forEach{
-                                it.erGroupUid = entity.personGroupUid
-                            }
-                        }
-                )
-
-                //Remove any roles and permissions
-                repo.entityRoleDao.deactivateByUids(
-                        rolesAndPermissionEditHelper.primaryKeysToDeactivate)
-
-                //Insert any Clazz Enrolments
-                clazzEnrolmentWithClazzJoinEditHelper.entitiesToInsert.forEach {
-                    // if new person, add the personUid
-                    it.clazzEnrolmentPersonUid = entity.personUid
-                    // remove fake pk
-                    it.clazzEnrolmentUid = 0
-                    repo.createPersonGroupAndMemberWithEnrolment(it)
                 }
 
                 val personPictureVal = view.personPicture

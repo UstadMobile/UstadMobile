@@ -3,10 +3,10 @@ package com.ustadmobile.port.android.screen
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.fragment.findNavController
-import com.agoda.kakao.common.views.KSwipeView
-import com.agoda.kakao.edit.KTextInputLayout
-import com.agoda.kakao.recycler.KRecyclerView
-import com.agoda.kakao.text.KTextView
+import io.github.kakaocup.kakao.common.views.KSwipeView
+import io.github.kakaocup.kakao.edit.KTextInputLayout
+import io.github.kakaocup.kakao.recycler.KRecyclerView
+import io.github.kakaocup.kakao.text.KTextView
 import com.kaspersky.kaspresso.screens.KScreen
 import com.kaspersky.kaspresso.testcases.core.testcontext.TestContext
 import com.soywiz.klock.DateTime
@@ -40,18 +40,6 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
     fun scrollToBottom() {
         nestedView.swipeUp()
     }
-
-    val clazzListRecyclerView: KRecyclerView = KRecyclerView({ withId(R.id.clazzlist_recyclerview) },
-            itemTypeBuilder = {
-            })
-
-    val clazzListHeaderTextView: KTextView = KTextView { withId(R.id.clazzlist_header_textview) }
-
-    val rolesList: KRecyclerView = KRecyclerView({ withId(R.id.roles_and_permissions_rv) },
-            itemTypeBuilder = {
-            })
-
-    val roleHeaderTextView: KTextView = KTextView { withId(R.id.roles_and_permissions_header_textview) }
 
     val usernameTextInput = KTextInputLayout { withId(R.id.username_textinputlayout) }
 

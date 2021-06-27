@@ -11,8 +11,6 @@ interface PersonDetailView: UstadDetailView<PersonWithPersonParentJoin> {
 
     var showCreateAccountVisible: Boolean
 
-    var rolesAndPermissions: DataSource.Factory<Int, EntityRoleWithNameAndRole>?
-
     companion object {
 
         const val VIEW_NAME = "PersonDetailView"

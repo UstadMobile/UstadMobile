@@ -102,6 +102,7 @@
                     android:id="@+id/relationship_value"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:enabled="@{fieldsEnabled}"
                     android:hint="@string/relationship"
                     app:messageIdOptions="@{relationshipFieldOptions}"
                     app:selectedMessageIdOption="@={personParentJoin.ppjRelationship}" />

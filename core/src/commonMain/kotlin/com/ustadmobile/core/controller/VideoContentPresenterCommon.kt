@@ -28,6 +28,7 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
     private var entry: ContentEntry? = null
     private var entryUuid: Long = 0
     internal var containerUid: Long = 0
+    var clazzUid: Long = 0L
 
     val accountManager: UstadAccountManager by instance()
 
@@ -67,6 +68,7 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
 
         entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
         containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()
+        clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0L
 
         view.loading = true
         GlobalScope.launch(doorMainDispatcher()) {
@@ -112,7 +114,7 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
             entry?.also {
                 statementEndpoint.storeProgressStatement(
                         accountManager.activeAccount, it, progress,
-                        playerPlayedVideoDuration,contextRegistration)
+                        playerPlayedVideoDuration,contextRegistration, clazzUid)
             }
         }
     }

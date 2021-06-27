@@ -1,6 +1,6 @@
 package com.ustadmobile.core.contentformats
 
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
@@ -22,7 +22,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
 
-open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>, val context: Any, val endpoint: Endpoint,
+open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>, val importMode: Int, val context: Any, val endpoint: Endpoint,
                                     final override val di: DI) : ContentImportManager, DIAware {
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
@@ -43,10 +43,9 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
                 db.containerImportJobDao.updateStatus(it.cijJobStatus, it.cijUid)
 
                 val runner = ImportJobRunner(it, endpointUrl = endpoint.url, di = di)
-                val isFileImport = it.cijFilePath?.startsWith("file://") == true
-                runner.importContainer(isFileImport)
+                runner.importContainer()
                 var status = JobStatus.COMPLETE
-                if(isFileImport){
+                if(it.cijImportMode == ContainerImportJob.CLIENT_IMPORT_MODE){
                    status = runner.upload()
                 }
 
@@ -65,32 +64,33 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
 
     //This can also container the LiveDataWorkQueue and host ImportJobRunner here in core.
     //You can replace the dependency on NetworkManagerBle with a dependency network status livedata
-    override suspend fun extractMetadata(filePath: String): ImportedContentEntryMetaData? {
+    override suspend fun extractMetadata(uri: String): ImportedContentEntryMetaData? {
         contentPlugins.forEach {
-            val pluginResult = it.extractMetadata(filePath)
+            val pluginResult = it.extractMetadata(uri, context)
             val languageCode = pluginResult?.language?.iso_639_1_standard
             if (languageCode != null) {
                 pluginResult.language = db.languageDao.findByTwoCodeAsync(languageCode)
             }
             if (pluginResult != null) {
                 pluginResult.contentFlags = ContentEntry.FLAG_IMPORTED
-                return ImportedContentEntryMetaData(pluginResult, it.mimeTypes[0], "file://$filePath")
+                return ImportedContentEntryMetaData(pluginResult, it.mimeTypes[0], uri)
             }
         }
 
         return null
     }
 
-    override suspend fun queueImportContentFromFile(filePath: String, metadata: ImportedContentEntryMetaData,
+    override suspend fun queueImportContentFromFile(uri: String, metadata: ImportedContentEntryMetaData,
                                                     containerBaseDir: String,
                                                     conversionParams: Map<String, String>): ContainerImportJob {
         return ContainerImportJob().apply {
             cijBytesSoFar = 0
-            this.cijFilePath = filePath
+            this.cijUri = uri
             this.cijContentEntryUid = metadata.contentEntry.contentEntryUid
             this.cijMimeType = metadata.mimeType
             this.cijContainerBaseDir = containerBaseDir
             this.cijJobStatus = JobStatus.QUEUED
+            this.cijImportMode = importMode
             //This used to use encodeToString(JsonObject), but there is a bug that makes this crash
             //when obfuscation is enabled.
             //Previously: Json.encodeToString(JsonObject.serializer(), conversionParams.convertToJsonObject())
@@ -100,7 +100,7 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
         }
     }
 
-    override suspend fun importFileToContainer(filePath: String, mimeType: String,
+    override suspend fun importFileToContainer(uri: String, mimeType: String,
                                                contentEntryUid: Long, containerBaseDir: String,
                                                conversionParams: Map<String, String>,
                                                progressListener: (Int) -> Unit): Container? {
@@ -109,10 +109,10 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
             it.mimeTypes.find { pluginMimeType -> pluginMimeType == mimeType }
                     ?: return@forEach
 
-            Napier.v("Importing $filePath for ContentEntry UID# $contentEntryUid using plugin: $it", tag = LOG_TAG)
-            return it.importToContainer(filePath, conversionParams, contentEntryUid, mimeType,
+            Napier.v("Importing $uri for ContentEntry UID# $contentEntryUid using plugin: $it", tag = LOG_TAG)
+            return it.importToContainer(uri, conversionParams, contentEntryUid, mimeType,
                     containerBaseDir, context, db, repo, progressListener).also {
-                        Napier.v("Importing $filePath for ContentEntry UID# $contentEntryUid completed")
+                        Napier.v("Importing $uri for ContentEntry UID# $contentEntryUid completed")
             }
         }
         return null

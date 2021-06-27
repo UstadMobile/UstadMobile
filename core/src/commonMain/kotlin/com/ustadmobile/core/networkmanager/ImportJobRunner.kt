@@ -1,6 +1,6 @@
 package com.ustadmobile.core.networkmanager
 
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.db.JobStatus
@@ -51,14 +51,10 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
         }
     }
 
-    suspend fun importContainer(markContainerAsDownloaded: Boolean = false) {
+    suspend fun importContainer() {
 
-        val filePathWithoutPrefix = if (markContainerAsDownloaded)
-            containerImportJob.cijFilePath?.removePrefix("file://")
-        else
-            containerImportJob.cijFilePath
-
-        val filePath = filePathWithoutPrefix ?: throw IllegalArgumentException("filePath not given")
+        val markContainerAsDownloaded = containerImportJob.cijImportMode == ContainerImportJob.CLIENT_IMPORT_MODE
+        val uri = containerImportJob.cijUri ?: throw IllegalArgumentException("uri not given")
         val mimeType = containerImportJob.cijMimeType
                 ?: throw IllegalArgumentException("mimeType not given")
         val containerBaseDir = containerImportJob.cijContainerBaseDir
@@ -75,7 +71,7 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
         var container: Container? = null
         try {
             container = contentImportManager.importFileToContainer(
-                    filePath,
+                    uri,
                     mimeType,
                     contentEntryUid,
                     containerBaseDir, conversionParams) {

@@ -215,10 +215,10 @@ class ReportEditPresenter(context: Any,
             reportSeriesList = safeParseList(di,
                 ListSerializer(ReportSeries.serializer()), ReportSeries::class, reportSeries)
             // set the series counter with an existing series
-            val maxSeries = reportSeriesList.maxBy { it.reportSeriesUid }
+            val maxSeries = reportSeriesList.maxByOrNull { it.reportSeriesUid }
             var currentMaxFilter = 0
             reportSeriesList.forEach {
-                val maxFilter = it.reportSeriesFilters?.maxBy { it.reportFilterUid }?.reportFilterUid
+                val maxFilter = it.reportSeriesFilters?.maxByOrNull { it.reportFilterUid }?.reportFilterUid
                         ?: 0
                 currentMaxFilter = max(currentMaxFilter, maxFilter)
             }
@@ -259,12 +259,12 @@ class ReportEditPresenter(context: Any,
             reportSeriesList = safeParseList(di, ListSerializer(ReportSeries.serializer()),
                 ReportSeries::class, reportSeries)
             // set the series counter with an existing series
-            val max = reportSeriesList.maxBy { it.reportSeriesUid }
+            val max = reportSeriesList.maxByOrNull { it.reportSeriesUid }
             val nextSeries = ((max?.reportSeriesUid ?: 0) + 1)
             seriesCounter.value = nextSeries
             var currentMaxFilter = 0
             reportSeriesList.forEach {
-                val maxFilter = it.reportSeriesFilters?.maxBy { it.reportFilterUid }?.reportFilterUid
+                val maxFilter = it.reportSeriesFilters?.maxByOrNull { it.reportFilterUid }?.reportFilterUid
                         ?: 0
                 currentMaxFilter = max(currentMaxFilter, maxFilter)
             }

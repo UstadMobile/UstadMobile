@@ -8,6 +8,7 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
@@ -70,18 +71,23 @@ class ParentalConsentManagementFragmentTest : TestCase(){
 
         dbRule.insertPersonForActiveUser(parent)
 
-        childPerson = Person().apply {
-            firstNames = "Pit"
-            lastName = "The Younger"
-            dateOfBirth = System.currentTimeMillis() - (10 * 365 * 24 * 60 * 60 * 100L)
-            gender = Person.GENDER_MALE
-            personUid = dbRule.repo.personDao.insert(this)
+        runBlocking {
+            childPerson = dbRule.repo.insertPersonAndGroup(Person().apply {
+                firstNames = "Pit"
+                lastName = "The Younger"
+                dateOfBirth = System.currentTimeMillis() - (10 * 365 * 24 * 60 * 60 * 100L)
+                gender = Person.GENDER_MALE
+                //personUid = dbRule.repo.personDao.insert(this)
+            })
+
+
+            existingPersonParentJoin = PersonParentJoin().apply {
+                ppjMinorPersonUid = childPerson.personUid
+                ppjUid = runBlocking { dbRule.repo.personParentJoinDao.insertAsync(this@apply) }
+            }
         }
 
-        existingPersonParentJoin = PersonParentJoin().apply {
-            ppjMinorPersonUid = childPerson.personUid
-            ppjUid = runBlocking { dbRule.repo.personParentJoinDao.insertAsync(this@apply) }
-        }
+
 
         runBlocking {
             dbRule.repo.siteTermsDao.insertAsync(SiteTerms().apply {
@@ -201,6 +207,7 @@ class ParentalConsentManagementFragmentTest : TestCase(){
     fun givenPersonParentJoinConsented_whenClickRevokeConsent_thenSHouldBeSavedWithConsentNotGranted() {
         existingPersonParentJoin.apply {
             ppjParentPersonUid = parent.personUid
+            ppjRelationship = PersonParentJoin.RELATIONSHIP_MOTHER
             ppjStatus = PersonParentJoin.STATUS_APPROVED
         }
 
@@ -221,7 +228,7 @@ class ParentalConsentManagementFragmentTest : TestCase(){
             }
 
             val resultSaved = waitUntilPersonParentJoinBlocking {
-                it?.ppjParentPersonUid != 0L
+                it?.ppjParentPersonUid != 0L && it?.ppjStatus == PersonParentJoin.STATUS_REJECTED
             }
 
             Assert.assertEquals("After clicking do not consent, status is marked as rejected",
@@ -234,6 +241,7 @@ class ParentalConsentManagementFragmentTest : TestCase(){
     fun givenPersonParentJoinConsented_whenClickRestoreConsent_thenSHouldBeSavedWithConsentRestored() {
         existingPersonParentJoin.apply {
             ppjParentPersonUid = parent.personUid
+            ppjRelationship = PersonParentJoin.RELATIONSHIP_MOTHER
             ppjApprovalTiemstamp = System.currentTimeMillis()
             ppjStatus = PersonParentJoin.STATUS_REJECTED
         }
@@ -255,7 +263,7 @@ class ParentalConsentManagementFragmentTest : TestCase(){
             }
 
             val resultSaved = waitUntilPersonParentJoinBlocking {
-                it?.ppjParentPersonUid != 0L
+                it?.ppjParentPersonUid != 0L && it?.ppjStatus == PersonParentJoin.STATUS_APPROVED
             }
 
             Assert.assertEquals("After clicking do not consent, status is marked as rejected",

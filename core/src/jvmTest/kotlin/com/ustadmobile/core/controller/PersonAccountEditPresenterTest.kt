@@ -9,12 +9,17 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveRepoInstance
+import com.ustadmobile.core.util.ext.grantScopedPermission
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.PersonWithAccount
+import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.ScopedGrant
 import com.ustadmobile.lib.db.entities.UmAccount
 import junit.framework.Assert.assertEquals
+import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
@@ -50,7 +55,7 @@ class PersonAccountEditPresenterTest  {
 
     private val mPersonUid: Long = 234567
 
-    private val loggedPersonUid:Long = 234568
+    private val loggedInPersonUid:Long = 234568
 
     private lateinit var accountManager: UstadAccountManager
 
@@ -70,7 +75,7 @@ class PersonAccountEditPresenterTest  {
         serverUrl = mockWebServer.url("/").toString()
 
         accountManager = mock{
-            on{activeAccount}.thenReturn(UmAccount(loggedPersonUid,"","",serverUrl))
+            on{activeAccount}.thenReturn(UmAccount(loggedInPersonUid,"","",serverUrl))
         }
 
         di = DI {
@@ -103,6 +108,7 @@ class PersonAccountEditPresenterTest  {
                              matchPassword: Boolean = false): PersonWithAccount {
         val password = "password"
         val confirmPassword = if(matchPassword) password else "password1"
+
         val person =  PersonWithAccount().apply {
             fatherName = "Doe"
             firstNames = "Jane"
@@ -113,15 +119,24 @@ class PersonAccountEditPresenterTest  {
             personUid = mPersonUid
             newPassword = password
             confirmedPassword = confirmPassword
-            repo.personDao.insert(this)
+            runBlocking { repo.insertPersonAndGroup(this@apply) }
         }
 
-        PersonWithAccount().apply {
+
+        //Create an person object for the logged in person
+        val loggedInPerson = PersonWithAccount().apply {
             admin = isAdmin
             username = "First"
             lastName = "User"
-            personUid = loggedPersonUid
-            repo.personDao.insert(this)
+            personUid = loggedInPersonUid
+            runBlocking { repo.insertPersonAndGroup(this@apply)}
+        }
+
+        if(isAdmin) {
+            runBlocking {
+                repo.grantScopedPermission(loggedInPerson.personGroupUid, Role.ALL_PERMISSIONS,
+                    ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
+            }
         }
 
         return person

@@ -49,6 +49,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.navigation.*
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.nav.toNavOptions
 import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
@@ -195,28 +196,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             val navController = navController ?: (context as Activity).findNavController(destinationProvider.navControllerViewId)
 
             //Note: default could be set using style as per https://stackoverflow.com/questions/50482095/how-do-i-define-default-animations-for-navigation-actions
-            val options = navOptions {
-                anim {
-                    enter = android.R.anim.slide_in_left
-                    exit = android.R.anim.slide_out_right
-                    popEnter = android.R.anim.slide_in_left
-                    popExit = android.R.anim.slide_out_right
-                }
-
-                val popUpToViewName = ustadGoOptions.popUpToViewName
-                if(popUpToViewName != null) {
-                    val popUpToDestId = if(popUpToViewName == UstadView.CURRENT_DEST) {
-                        navController.currentDestination?.id ?: 0
-                    }else if(popUpToViewName == UstadView.ROOT_DEST) {
-                        navController.graph.startDestination
-                    }else {
-                        destinationProvider.lookupDestinationName(popUpToViewName)
-                                ?.destinationId ?: 0
-                    }
-
-                    popUpTo(popUpToDestId) { inclusive = ustadGoOptions.popUpToInclusive }
-                }
-            }
+            val options = ustadGoOptions.toNavOptions(navController, destinationProvider)
 
             navController.navigate(ustadDestination.destinationId,
                     allArgs.toBundleWithNullableValues(), options)

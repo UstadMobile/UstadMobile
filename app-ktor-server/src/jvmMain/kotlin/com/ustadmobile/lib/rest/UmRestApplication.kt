@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.rest
 
-import com.github.aakira.napier.DebugAntilog
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
@@ -20,8 +20,10 @@ import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
+import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
+import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.rest.ext.*
 import com.ustadmobile.lib.rest.messaging.MailProperties
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
@@ -63,6 +65,7 @@ import jakarta.mail.Authenticator
 import jakarta.mail.PasswordAuthentication
 import org.xmlpull.v1.XmlPullParserFactory
 import javax.sql.DataSource
+import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -137,6 +140,11 @@ fun Application.umRestApplication(dbModeOverride: String? = null,
             }
         }
 
+        bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
+            val systemImpl: UstadMobileSystemImpl = instance()
+            val contextIdentifier: String = context.identifier(dbMode)
+            systemImpl.getOrGenerateNodeIdAndAuth(contextIdentifier, Any())
+        }
 
         bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
             val containerDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), "container")
@@ -165,7 +173,7 @@ fun Application.umRestApplication(dbModeOverride: String? = null,
             val dbProperties = appConfig.databasePropertiesFromSection("ktor.database",
                 defaultUrl = "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
             InitialContext().bindDataSourceIfNotExisting(dbHostName, dbProperties)
-            UmAppDatabase.getInstance(Any(), dbHostName)
+            UmAppDatabase.getInstance(Any(), dbHostName, instance<NodeIdAndAuth>(), primary = true)
         }
 
         bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {
@@ -174,8 +182,9 @@ fun Application.umRestApplication(dbModeOverride: String? = null,
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+            val doorNode = instance<NodeIdAndAuth>()
             val repo = db.asRepository(repositoryConfig(Any(), "http://localhost/",
-                instance(), instance()) {
+                doorNode.nodeId, doorNode.auth, instance(), instance()) {
                 attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT),
                     UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME).absolutePath
                 updateNotificationManager = instance()
@@ -193,7 +202,7 @@ fun Application.umRestApplication(dbModeOverride: String? = null,
         bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
             ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm(),
                     XapiTypePluginCommonJvm(), VideoTypePluginJvm(),
-                    H5PTypePluginCommonJvm()),
+                    H5PTypePluginCommonJvm()), ContainerImportJob.SERVER_IMPORT_MODE,
                     Any(), context, di)
         }
 
@@ -206,15 +215,15 @@ fun Application.umRestApplication(dbModeOverride: String? = null,
                 "jdbc:sqlite:data/quartz.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
             InitialContext().apply {
                 bindDataSourceIfNotExisting("quartzds", dbProperties)
+                initQuartzDb("java:/comp/env/jdbc/quartzds")
             }
-            InitialContext().initQuartzDb("java:/comp/env/jdbc/quartzds")
             StdSchedulerFactory.getDefaultScheduler().also {
                 it.context.put("di", di)
             }
         }
 
         bind<UstadMobileSystemImpl>() with singleton {
-            UstadMobileSystemImpl(instance(tag  = DiTag.XPP_FACTORY_NSAWARE))
+            UstadMobileSystemImpl(instance(tag  = DiTag.XPP_FACTORY_NSAWARE), dataDirPath)
         }
 
         bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 65,
-    "identityHash": "2a873738cc1cc7bb8c5ef4574fca29db",
+    "identityHash": "7175de3885b93dc12ff6bad7c21ec2f7",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -2062,8 +2062,26 @@
       },
       {
         "tableName": "ContentEntryParentChildJoin",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cepcjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cepcjLocalChangeSeqNum` INTEGER NOT NULL, `cepcjMasterChangeSeqNum` INTEGER NOT NULL, `cepcjLastChangedBy` INTEGER NOT NULL, `cepcjLct` INTEGER NOT NULL, `cepcjParentContentEntryUid` INTEGER NOT NULL, `cepcjChildContentEntryUid` INTEGER NOT NULL, `childIndex` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cepcjParentContentEntryUid` INTEGER NOT NULL, `cepcjChildContentEntryUid` INTEGER NOT NULL, `childIndex` INTEGER NOT NULL, `cepcjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cepcjLocalChangeSeqNum` INTEGER NOT NULL, `cepcjMasterChangeSeqNum` INTEGER NOT NULL, `cepcjLastChangedBy` INTEGER NOT NULL, `cepcjLct` INTEGER NOT NULL)",
         "fields": [
+          {
+            "fieldPath": "cepcjParentContentEntryUid",
+            "columnName": "cepcjParentContentEntryUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cepcjChildContentEntryUid",
+            "columnName": "cepcjChildContentEntryUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "childIndex",
+            "columnName": "childIndex",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
           {
             "fieldPath": "cepcjUid",
             "columnName": "cepcjUid",
@@ -2091,24 +2109,6 @@
           {
             "fieldPath": "cepcjLct",
             "columnName": "cepcjLct",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cepcjParentContentEntryUid",
-            "columnName": "cepcjParentContentEntryUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cepcjChildContentEntryUid",
-            "columnName": "cepcjChildContentEntryUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "childIndex",
-            "columnName": "childIndex",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -3561,7 +3561,7 @@
       },
       {
         "tableName": "StatementEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `statementId` TEXT, `statementPersonUid` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `xObjectUid` INTEGER NOT NULL, `subStatementActorUid` INTEGER NOT NULL, `substatementVerbUid` INTEGER NOT NULL, `subStatementObjectUid` INTEGER NOT NULL, `agentUid` INTEGER NOT NULL, `instructorUid` INTEGER NOT NULL, `authorityUid` INTEGER NOT NULL, `teamUid` INTEGER NOT NULL, `resultCompletion` INTEGER NOT NULL, `resultSuccess` INTEGER NOT NULL, `resultScoreScaled` REAL NOT NULL, `resultScoreRaw` INTEGER NOT NULL, `resultScoreMin` INTEGER NOT NULL, `resultScoreMax` INTEGER NOT NULL, `resultDuration` INTEGER NOT NULL, `resultResponse` TEXT, `timestamp` INTEGER NOT NULL, `stored` INTEGER NOT NULL, `contextRegistration` TEXT, `contextPlatform` TEXT, `contextStatementId` TEXT, `fullStatement` TEXT, `statementMasterChangeSeqNum` INTEGER NOT NULL, `statementLocalChangeSeqNum` INTEGER NOT NULL, `statementLastChangedBy` INTEGER NOT NULL, `statementLct` INTEGER NOT NULL, `extensionProgress` INTEGER NOT NULL, `contentEntryRoot` INTEGER NOT NULL, `statementContentEntryUid` INTEGER NOT NULL, `statementLearnerGroupUid` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `statementId` TEXT, `statementPersonUid` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `xObjectUid` INTEGER NOT NULL, `subStatementActorUid` INTEGER NOT NULL, `substatementVerbUid` INTEGER NOT NULL, `subStatementObjectUid` INTEGER NOT NULL, `agentUid` INTEGER NOT NULL, `instructorUid` INTEGER NOT NULL, `authorityUid` INTEGER NOT NULL, `teamUid` INTEGER NOT NULL, `resultCompletion` INTEGER NOT NULL, `resultSuccess` INTEGER NOT NULL, `resultScoreScaled` REAL NOT NULL, `resultScoreRaw` INTEGER NOT NULL, `resultScoreMin` INTEGER NOT NULL, `resultScoreMax` INTEGER NOT NULL, `resultDuration` INTEGER NOT NULL, `resultResponse` TEXT, `timestamp` INTEGER NOT NULL, `stored` INTEGER NOT NULL, `contextRegistration` TEXT, `contextPlatform` TEXT, `contextStatementId` TEXT, `fullStatement` TEXT, `statementMasterChangeSeqNum` INTEGER NOT NULL, `statementLocalChangeSeqNum` INTEGER NOT NULL, `statementLastChangedBy` INTEGER NOT NULL, `statementLct` INTEGER NOT NULL, `extensionProgress` INTEGER NOT NULL, `contentEntryRoot` INTEGER NOT NULL, `statementContentEntryUid` INTEGER NOT NULL, `statementLearnerGroupUid` INTEGER NOT NULL, `statementClazzUid` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "statementUid",
@@ -3764,6 +3764,12 @@
           {
             "fieldPath": "statementLearnerGroupUid",
             "columnName": "statementLearnerGroupUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statementClazzUid",
+            "columnName": "statementClazzUid",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -4078,14 +4084,8 @@
       },
       {
         "tableName": "XLangMapEntry",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementLangMapUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `verbLangMapUid` INTEGER NOT NULL, `objectLangMapUid` INTEGER NOT NULL, `languageLangMapUid` INTEGER NOT NULL, `languageVariantLangMapUid` INTEGER NOT NULL, `valueLangMap` TEXT NOT NULL, `statementLangMapMasterCsn` INTEGER NOT NULL, `statementLangMapLocalCsn` INTEGER NOT NULL, `statementLangMapLcb` INTEGER NOT NULL, `statementLangMapLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`verbLangMapUid` INTEGER NOT NULL, `objectLangMapUid` INTEGER NOT NULL, `languageLangMapUid` INTEGER NOT NULL, `languageVariantLangMapUid` INTEGER NOT NULL, `valueLangMap` TEXT NOT NULL, `statementLangMapMasterCsn` INTEGER NOT NULL, `statementLangMapLocalCsn` INTEGER NOT NULL, `statementLangMapLcb` INTEGER NOT NULL, `statementLangMapLct` INTEGER NOT NULL, `statementLangMapUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)",
         "fields": [
-          {
-            "fieldPath": "statementLangMapUid",
-            "columnName": "statementLangMapUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
           {
             "fieldPath": "verbLangMapUid",
             "columnName": "verbLangMapUid",
@@ -4137,6 +4137,12 @@
           {
             "fieldPath": "statementLangMapLct",
             "columnName": "statementLangMapLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statementLangMapUid",
+            "columnName": "statementLangMapUid",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -5845,101 +5851,74 @@
         "foreignKeys": []
       },
       {
-        "tableName": "PersonParentJoin",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ppjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ppjPcsn` INTEGER NOT NULL, `ppjLcsn` INTEGER NOT NULL, `ppjLcb` INTEGER NOT NULL, `ppjLct` INTEGER NOT NULL, `ppjParentPersonUid` INTEGER NOT NULL, `ppjMinorPersonUid` INTEGER NOT NULL, `ppjRelationship` INTEGER NOT NULL, `ppjEmail` TEXT, `ppjPhone` TEXT, `ppjInactive` INTEGER NOT NULL, `ppjStatus` INTEGER NOT NULL, `ppjApprovalTiemstamp` INTEGER NOT NULL, `ppjApprovalIpAddr` TEXT)",
+        "tableName": "ClazzContentJoin",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ccjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ccjContentEntryUid` INTEGER NOT NULL, `ccjClazzUid` INTEGER NOT NULL, `ccjActive` INTEGER NOT NULL, `ccjLocalChangeSeqNum` INTEGER NOT NULL, `ccjMasterChangeSeqNum` INTEGER NOT NULL, `ccjLastChangedBy` INTEGER NOT NULL, `ccjLct` INTEGER NOT NULL)",
         "fields": [
           {
-            "fieldPath": "ppjUid",
-            "columnName": "ppjUid",
+            "fieldPath": "ccjUid",
+            "columnName": "ccjUid",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "ppjPcsn",
-            "columnName": "ppjPcsn",
+            "fieldPath": "ccjContentEntryUid",
+            "columnName": "ccjContentEntryUid",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "ppjLcsn",
-            "columnName": "ppjLcsn",
+            "fieldPath": "ccjClazzUid",
+            "columnName": "ccjClazzUid",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "ppjLcb",
-            "columnName": "ppjLcb",
+            "fieldPath": "ccjActive",
+            "columnName": "ccjActive",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "ppjLct",
-            "columnName": "ppjLct",
+            "fieldPath": "ccjLocalChangeSeqNum",
+            "columnName": "ccjLocalChangeSeqNum",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "ppjParentPersonUid",
-            "columnName": "ppjParentPersonUid",
+            "fieldPath": "ccjMasterChangeSeqNum",
+            "columnName": "ccjMasterChangeSeqNum",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "ppjMinorPersonUid",
-            "columnName": "ppjMinorPersonUid",
+            "fieldPath": "ccjLastChangedBy",
+            "columnName": "ccjLastChangedBy",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "ppjRelationship",
-            "columnName": "ppjRelationship",
+            "fieldPath": "ccjLct",
+            "columnName": "ccjLct",
             "affinity": "INTEGER",
             "notNull": true
-          },
-          {
-            "fieldPath": "ppjEmail",
-            "columnName": "ppjEmail",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "ppjPhone",
-            "columnName": "ppjPhone",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "ppjInactive",
-            "columnName": "ppjInactive",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ppjStatus",
-            "columnName": "ppjStatus",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ppjApprovalTiemstamp",
-            "columnName": "ppjApprovalTiemstamp",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ppjApprovalIpAddr",
-            "columnName": "ppjApprovalIpAddr",
-            "affinity": "TEXT",
-            "notNull": false
           }
         ],
         "primaryKey": {
           "columnNames": [
-            "ppjUid"
+            "ccjUid"
           ],
           "autoGenerate": true
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_ClazzContentJoin_ccjContentEntryUid",
+            "unique": false,
+            "columnNames": [
+              "ccjContentEntryUid"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzContentJoin_ccjContentEntryUid` ON `${TABLE_NAME}` (`ccjContentEntryUid`)"
+          }
+        ],
         "foreignKeys": []
       },
       {
@@ -10267,7 +10246,7 @@
         "foreignKeys": []
       },
       {
-        "tableName": "PersonParentJoin_trk",
+        "tableName": "ClazzContentJoin_trk",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
         "fields": [
           {
@@ -10321,23 +10300,23 @@
         },
         "indices": [
           {
-            "name": "index_PersonParentJoin_trk_clientId_epk_csn",
+            "name": "index_ClazzContentJoin_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonParentJoin_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzContentJoin_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
           },
           {
-            "name": "index_PersonParentJoin_trk_epk_clientId",
+            "name": "index_ClazzContentJoin_trk_epk_clientId",
             "unique": true,
             "columnNames": [
               "epk",
               "clientId"
             ],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_PersonParentJoin_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzContentJoin_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -10346,7 +10325,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2a873738cc1cc7bb8c5ef4574fca29db')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7175de3885b93dc12ff6bad7c21ec2f7')"
     ]
   }
 }

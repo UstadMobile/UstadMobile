@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.googledrive
 
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.soywiz.klock.DateFormat
 import com.soywiz.klock.parse
 import com.ustadmobile.core.account.Endpoint
@@ -61,13 +61,13 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                 parameter("fields", "id,modifiedTime,name,mimeType,description,thumbnailLink")
             }.execute() { fileResponse ->
 
-                val file = fileResponse.receive<GoogleFile>()
+                val googleFileResponse = fileResponse.receive<GoogleFile>()
 
-                contentImportManager.getMimeTypeSupported().find { fileMimeType -> fileMimeType == file.mimeType }
+                contentImportManager.getMimeTypeSupported().find { fileMimeType -> fileMimeType == googleFileResponse.mimeType }
                         ?: return@execute
 
                 val recentContainer = db.containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
-                val googleModifiedTime = file.modifiedTime
+                val googleModifiedTime = googleFileResponse.modifiedTime
                 val parsedModifiedTime: Long = if (googleModifiedTime != null) googleDriveFormat.parse(googleModifiedTime).local.unixMillisLong else 1
                 val isUpdated = parsedModifiedTime > recentContainer?.cntLastModified ?: 0
                 if (!isUpdated) {
@@ -83,7 +83,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                     parameter("key", googleApiKey)
                 }.execute() {
 
-                    val contentFile = File(tempDir, file.name ?: file.id!!)
+                    val contentFile = File(tempDir, googleFileResponse.name ?: googleFileResponse.id!!)
                     val stream = it.receive<InputStream>()
                     FileOutputStream(contentFile).use { fileOut ->
                         stream.copyTo(fileOut)
@@ -91,7 +91,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                     }
                     stream.close()
 
-                    val metadata = contentImportManager.extractMetadata(contentFile.path)
+                    val metadata = contentImportManager.extractMetadata(contentFile.toURI().toString())
 
                     if (metadata == null) {
                         Napier.i("$logPrefix with sourceUrl $sourceUrl had no metadata found, not supported", tag = SCRAPER_TAG)
@@ -109,9 +109,9 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                         fileEntry = dbEntry
                     } else {
                         fileEntry = ContentScraperUtil.createOrUpdateContentEntry(
-                                metadataContentEntry.entryId ?: contentEntry?.entryId ?: file.id,
-                                metadataContentEntry.title ?: contentEntry?.title ?: file.name,
-                                "https://www.googleapis.com/drive/v3/files/${file.id}",
+                                metadataContentEntry.entryId ?: contentEntry?.entryId ?: googleFileResponse.id,
+                                metadataContentEntry.title ?: contentEntry?.title ?: googleFileResponse.name,
+                                "https://www.googleapis.com/drive/v3/files/${googleFileResponse.id}",
                                 metadataContentEntry.publisher ?: contentEntry?.publisher ?: "",
                                 metadataContentEntry.licenseType.alternative(contentEntry?.licenseType
                                         ?: ContentEntry.LICENSE_TYPE_OTHER),
@@ -120,14 +120,14 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                                 metadataContentEntry.languageVariantUid.alternative(contentEntry?.languageVariantUid
                                         ?: 0),
                                 metadataContentEntry.description.alternative(contentEntry?.description
-                                        ?: file.description ?: "")
+                                        ?: googleFileResponse.description ?: "")
                                 , true, metadataContentEntry.author.alternative(contentEntry?.author
                                 ?: ""),
                                 metadataContentEntry.thumbnailUrl.alternative(contentEntry?.thumbnailUrl
-                                        ?: file.thumbnailLink ?: ""),
+                                        ?: googleFileResponse.thumbnailLink ?: ""),
                                 "", "",
                                 metadataContentEntry.contentTypeFlag, repo.contentEntryDao)
-                        Napier.d("$logPrefix new entry created/updated with entryUid ${fileEntry.contentEntryUid} with title ${file.name}", tag = SCRAPER_TAG)
+                        Napier.d("$logPrefix new entry created/updated with entryUid ${fileEntry.contentEntryUid} with title ${googleFileResponse.name}", tag = SCRAPER_TAG)
                         ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(repo.contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
                     }
                     metadata.contentEntry.contentEntryUid = fileEntry.contentEntryUid
@@ -138,7 +138,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                         conversionParams = Json.decodeFromString(
                             MapSerializer(String.serializer(), String.serializer()), params)
                     }
-                    contentImportManager.importFileToContainer(contentFile.path, metadata.mimeType,
+                    contentImportManager.importFileToContainer(contentFile.toURI().toString(), metadata.mimeType,
                             fileEntry.contentEntryUid, containerFolder.path, conversionParams){
                     }
                     Napier.d("$logPrefix finished Scraping", tag = SCRAPER_TAG)

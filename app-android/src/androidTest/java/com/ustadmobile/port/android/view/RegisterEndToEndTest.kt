@@ -5,7 +5,7 @@ import android.content.Intent
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
-import com.agoda.kakao.common.views.KView
+import io.github.kakaocup.kakao.common.views.KView
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.years

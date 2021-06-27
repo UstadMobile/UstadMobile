@@ -9,3 +9,7 @@ import com.ustadmobile.door.DoorUri
 actual suspend fun DoorUri.guessMimeType(): String? {
     TODO("Not yet implemented")
 }
+
+actual suspend fun DoorUri.getSize(context: Any): Long {
+    TODO("Not yet implemented")
+}

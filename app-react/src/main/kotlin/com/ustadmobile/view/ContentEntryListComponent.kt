@@ -17,8 +17,6 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryList2View
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FILTER
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_WEB_PLATFORM
@@ -76,9 +74,7 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
         super.onComponentReady()
         fabState = fabState.copy(title = getString(MessageID.content))
         arguments.toMutableMap().putAll(mapOf(
-            ARG_WEB_PLATFORM to true.toString(),
-            ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT
-        ))
+            ARG_WEB_PLATFORM to true.toString()))
         mPresenter = ContentEntryList2Presenter(this, arguments, this,di,this)
         mPresenter.onCreate(mapOf())
     }
