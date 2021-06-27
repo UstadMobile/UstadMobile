@@ -161,12 +161,14 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             MAX(CASE WHEN contentEntryRoot 
                      THEN resultScoreScaled ELSE 0 END) AS resultScoreScaled  
         FROM StatementEntity 
-            LEFT JOIN Person 
-                ON Person.personUid = StatementEntity.statementPersonUid 
+             JOIN ScopedGrant 
+                 ON ${StatementEntity.FROM_STATEMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE}
+                 AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
+             JOIN PersonGroupMember 
+                 ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid  
+                AND PersonGroupMember.groupMemberPersonUid = :accountPersonUid
         WHERE statementContentEntryUid = :contentEntryUid   
-            AND statementPersonUid = :personUid 
-            AND :accountPersonUid 
-                IN (${PersonDao.ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION}) 
+          AND statementPersonUid = :personUid 
         GROUP BY StatementEntity.contextRegistration 
         ORDER BY startDate DESC, resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC
          """)
@@ -179,8 +181,12 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             verbLangMap.valueLangMap AS verbDisplay, 
             xobjectMap.valueLangMap AS objectDisplay 
         FROM StatementEntity
-                LEFT JOIN Person 
-                    ON StatementEntity.statementPersonUid = Person.personUid 
+                 JOIN ScopedGrant 
+                    ON ${StatementEntity.FROM_STATEMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE}
+                    AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
+                 JOIN PersonGroupMember 
+                    ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid  
+                AND PersonGroupMember.groupMemberPersonUid = :accountPersonUid
                 LEFT JOIN VerbEntity 
                     ON VerbEntity.verbUid = StatementEntity.statementVerbUid 
                 LEFT JOIN XLangMapEntry verbLangMap 
@@ -190,8 +196,6 @@ abstract class StatementDao : BaseDao<StatementEntity> {
          WHERE statementContentEntryUid = :contentEntryUid 
             AND statementPersonUid = :personUid 
             AND contextRegistration = :contextRegistration 
-            AND :accountPersonUid 
-                IN (${PersonDao.ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION}) 
          ORDER BY StatementEntity.timestamp DESC
          """)
     abstract fun findSessionDetailForPerson(contentEntryUid: Long, accountPersonUid: Long,
