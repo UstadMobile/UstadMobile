@@ -4645,9 +4645,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("""UPDATE ContentEntry 
                                            SET contentOwner = (SELECT personUid 
                                                                  FROM Person 
-                                                                WHERE firstNames = 'Admin' 
-                                                                  AND lastName = 'User'
-                                                                  AND admin LIMIT 1)""".trimMargin())
+                                                                WHERE admin LIMIT 1),
+                                              contentEntryLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) """)
 
 
                 }else{
