@@ -819,7 +819,8 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="allow_class_comments">Allow class comments from students</string>
     <string name="after_deadline_date_error">Must be after deadline date</string>
 
-    <string name="minimum_score">Minimum score %</string>
+    <string name="points">Pts</string>
+    <string name="minimum_score">Minimum score</string>
     <string name="min_score">Min score</string>
     <string name="managed_by_content">Managed by content</string>
     <string name="student_marks_content">Student marks themselves</string>
