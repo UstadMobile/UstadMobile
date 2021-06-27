@@ -68,9 +68,7 @@ object ContentEntryEditScreen : KScreen<ContentEntryEditScreen>() {
             ContentEntryEdit2Fragment(registry).also {
                 it.installNavController(systemImplNavRule.navController)
             }
-        }) {
-            onFragment { fragment -> fragment.handleFileSelection() }
-        }
+        })
 
         importButton {
             isDisplayed()
