@@ -7,34 +7,34 @@ import com.ustadmobile.lib.db.entities.ClazzAssignment.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID)
-      /*  notifyOnUpdate =  [
+@SyncableEntity(tableId = TABLE_ID,
+        notifyOnUpdate =  [
             """
-     
+           SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+                  $TABLE_ID AS tableId 
+            FROM ChangeLog
+                 JOIN ClazzAssignment
+                     ON ChangeLog.chTableId = $TABLE_ID 
+                            AND ClazzAssignment.caUid = ChangeLog.chEntityPk
+                 JOIN Clazz 
+                    ON Clazz.clazzUid = ClazzAssignment.caClazzUid 
+               ${Clazz.JOIN_FROM_CLAZZ_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_ASSIGNMENT_SELECT}
+                    ${Clazz.JOIN_FROM_CLAZZ_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}                           
         """
         ],
         syncFindAllQuery = """
-          
-          
-        """)*/
-/*        notifyOnUpdate = [
-            """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, $TABLE_ID AS tableId FROM 
-        ChangeLog
-        JOIN ClazzAssignment ON ChangeLog.chTableId = $TABLE_ID AND ClazzAssignment.caUid = ChangeLog.chEntityPk
-        JOIN Clazz ON Clazz.clazzUid = ClazzAssignment.caClazzUid 
-        JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_ASSIGNMENT_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
-        """
-        ],
-        syncFindAllQuery = """
-        SELECT ClazzAssignment.* FROM
-        ClazzAssignment
-        JOIN Clazz ON Clazz.clazzUid = ClazzAssignment.caClazzUid
-        JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_ASSIGNMENT_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
-        WHERE DeviceSession.dsDeviceId = :clientId  
-    """)*/
+           SELECT ClazzLog.* 
+          FROM DeviceSession
+               JOIN PersonGroupMember 
+                    ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+               ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_ASSIGNMENT_SELECT} 
+                    ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
+               JOIN ClazzAssignment
+                    ON ClazzAssignment.caClazzUid = Clazz.clazzUid
+         WHERE DeviceSession.dsDeviceId = :clientId
+        """)
 @Serializable
 open class ClazzAssignment {
 
@@ -82,6 +82,10 @@ open class ClazzAssignment {
         const val ASSIGNMENT_LATE_SUBMISSION_REJECT = 1
         const val ASSIGNMENT_LATE_SUBMISSION_PENALTY = 2
         const val ASSIGNMENT_LATE_SUBMISSION_ACCEPT = 3
+
+
+
+
     }
 
 

@@ -9,29 +9,32 @@ import kotlinx.serialization.Serializable
 @Entity
 @SyncableEntity(tableId = StatementEntity.TABLE_ID,
     notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+         SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
                ${StatementEntity.TABLE_ID} AS tableId 
           FROM ChangeLog
-               JOIN StatementEntity 
-                    ON ChangeLog.chTableId = ${StatementEntity.TABLE_ID} 
-                        AND ChangeLog.chEntityPk = StatementEntity.statementUid
-               JOIN Person 
-                    ON Person.personUid = StatementEntity.statementPersonUid
-               ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}
+            JOIN StatementEntity 
+                 ON ChangeLog.chTableId = ${StatementEntity.TABLE_ID} 
+                    AND ChangeLog.chEntityPk = StatementEntity.statementUid
+            JOIN ScopedGrant 
+                 ON ${StatementEntity.FROM_STATEMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE}
+                    AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
+            JOIN PersonGroupMember 
+                 ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+            JOIN DeviceSession
+                 ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid   
                 """],
     syncFindAllQuery = """
-        SELECT StatementEntity.* 
-          FROM DeviceSession
-               JOIN PersonGroupMember 
-                    ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
-               ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
-                    ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
-               JOIN StatementEntity
-                    ON StatementEntity.statementPersonUid = Person.personUid
-         WHERE DeviceSession.dsDeviceId = :clientId"""
+       SELECT ClazzLogAttendanceRecord.*
+              FROM DeviceSession
+                   JOIN PersonGroupMember 
+                        ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+                   JOIN ScopedGrant 
+                        ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+                            AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
+                   JOIN ClazzLogAttendanceRecord 
+                        ON ${StatementEntity.FROM_SCOPEDGRANT_TO_STATEMENT_JOIN_ON_CLAUSE}
+             WHERE DeviceSession.dsDeviceId = :clientId
+          """
 )
 @Serializable
 open class StatementEntity {
@@ -139,5 +142,39 @@ open class StatementEntity {
         const val CONTENT_PASSED = 102
 
         const val CONTENT_FAILED = 103
+
+
+        const val FROM_STATEMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE = """
+            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+             OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = StatementEntity.statementPersonUid)
+             OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = StatementEntity.statementClazzUid)
+             OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = (
+                    SELECT clazzSchoolUid
+                      FROM Clazz
+                     WHERE clazzUid = StatementEntity.statementClazzUid))
+             )
+        """
+
+
+        const val FROM_SCOPEDGRANT_TO_STATEMENT_JOIN_ON_CLAUSE = """
+            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+             OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = StatementEntity.statementPersonUid)
+             OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = StatementEntity.statementClazzUid)
+             OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = (
+                    SELECT clazzSchoolUid
+                      FROM Clazz 
+                     WHERE clazzUid = StatementEntity.statementClazzUid))
+            )         
+        """
+
+
     }
 }
