@@ -4649,7 +4649,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
 
 
-        val MIGRATION_70_71 = object: DoorMigration(70, 71) {
+        val MIGRATION_70_71 = object: DoorMigration(69, 71) {
             override fun migrate(database: DoorSqlDatabase) {
 
                 if(database.dbType() == DoorDbType.SQLITE) {
