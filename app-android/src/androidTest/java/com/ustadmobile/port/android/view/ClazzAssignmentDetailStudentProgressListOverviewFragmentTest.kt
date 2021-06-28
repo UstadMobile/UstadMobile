@@ -8,6 +8,7 @@ import com.ustadmobile.port.android.screen.ClazzAssignmentDetailStudentProgressL
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
@@ -39,12 +40,15 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragmentTest : TestCase() 
     @Before
     fun setup() {
         runBlocking {
-            dbRule.insertPersonForActiveUser(Person().apply {
+            val admin = Person().apply {
                 firstNames = "Bob"
                 lastName = "Jones"
                 admin = true
                 personUid = 42
-            })
+            }
+            dbRule.insertPersonForActiveUser(admin)
+            dbRule.repo.grantScopedPermission(admin, Role.ALL_PERMISSIONS,
+                    ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
         }
     }
 
