@@ -136,7 +136,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
             }else{
                 completedScore
             }
-            if(scoreTotal > contentEntry.minScore){
+            if(scoreTotal >= contentEntry.minScore){
                 statementEndpoint.storeCompletedStatement(accountManager.activeAccount,
                         contentEntry, contextRegistration, scoreForSession, clazzUid)
             }
