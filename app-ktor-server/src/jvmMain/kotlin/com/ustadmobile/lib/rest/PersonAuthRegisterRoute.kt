@@ -26,6 +26,7 @@ import org.kodein.di.ktor.di
 import org.kodein.di.on
 import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.ktor.request.*
 import org.kodein.di.DI
@@ -86,6 +87,14 @@ fun Route.PersonAuthRegisterRoute() {
                 db.deviceSessionDao.insert(DeviceSession(dsDeviceId = deviceId,
                     dsPersonUid = authorizedPerson.personUid,
                     expires = getSystemTimeInMillis() + DEFAULT_SESSION_LENGTH))
+
+                repo.userSessionDao.insertSession(UserSession().apply {
+                    usClientNodeId = deviceId
+                    usPersonUid = authorizedPerson.personUid
+                    usStartTime = systemTimeInMillis()
+                    usSessionType = UserSession.TYPE_STANDARD
+                    usStatus = UserSession.STATUS_ACTIVE
+                })
 
                 call.respond(HttpStatusCode.OK, authorizedPerson.toUmAccount(""))
             }else {

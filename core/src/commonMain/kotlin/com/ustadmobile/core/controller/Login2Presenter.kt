@@ -159,8 +159,8 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
     }
 
     fun handleConnectAsGuest(){
-        accountManager.activeAccount = UmAccount(0L,"guest",
-                "",serverUrl,"Guest","User")
+//        accountManager.activeAccount = UmAccount(0L,"guest",
+//                "",serverUrl,"Guest","User")
         goToNextDestAfterLoginOrGuestSelected()
     }
 

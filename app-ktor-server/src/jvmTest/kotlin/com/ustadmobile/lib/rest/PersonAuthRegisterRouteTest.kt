@@ -5,7 +5,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.routing.*
-import io.ktor.server.engine.*
 import io.ktor.server.testing.*
 import org.junit.Test
 import org.kodein.di.ktor.DIFeature
@@ -20,10 +19,6 @@ import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.ext.DoorTag
-import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
 import org.kodein.di.*
 import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.serialization.json.Json
@@ -37,8 +32,6 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.rest.ext.insertDefaultSite
 import io.ktor.features.*
 import io.ktor.gson.*
-import io.ktor.request.*
-import io.ktor.util.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Rule
@@ -198,6 +191,7 @@ class PersonAuthRegisterRouteTest {
     fun givenValidCredentials_whenLoginCalled_thenShouldReturnAccount()  = withTestRegister {
         val di: DI by closestDI { application }
         val repo: UmAppDatabase by di.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
+        val db: UmAppDatabase by di.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_DB)
         val pbkdf2Params: Pbkdf2Params by di.instance()
 
         val person = runBlocking {
@@ -219,6 +213,11 @@ class PersonAuthRegisterRouteTest {
             val umAccount = Gson().fromJson(bodyStr, UmAccount::class.java)
             Assert.assertEquals("Received expected account object",
                 "mary", umAccount.username)
+
+            val userSessions = runBlocking { db.userSessionDao.findSessionsByPerson(umAccount.personUid)}
+            Assert.assertEquals("User session created for user",
+                umAccount.personUid, userSessions[0].usPersonUid)
+            Assert.assertEquals("One session created", 1, userSessions.size)
         }
     }
 

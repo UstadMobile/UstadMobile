@@ -3,17 +3,15 @@ package com.ustadmobile.core.account
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.userAtServer
+import com.ustadmobile.core.util.ext.encryptWithPbkdf2
+import com.ustadmobile.core.util.ext.toUmAccount
+import com.ustadmobile.core.util.ext.withEndpoint
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
-import com.ustadmobile.door.DoorDatabaseSyncRepository
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.PersonParentJoin
-import com.ustadmobile.lib.db.entities.PersonWithAccount
-import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.lib.util.copyOnWriteListOf
-import com.ustadmobile.lib.util.getSystemTimeInMillis
+import com.ustadmobile.door.*
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.*
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.features.*
@@ -23,12 +21,14 @@ import io.ktor.http.*
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import kotlin.jvm.Synchronized
 
 @Serializable
 data class UstadAccounts(var currentAccount: String,
@@ -36,69 +36,107 @@ data class UstadAccounts(var currentAccount: String,
                          val lastUsed: Map<String, Long> = mapOf())
 
 class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext: Any,
+                          val endpointScope: EndpointScope,
                           val di: DI) {
 
     data class ResponseWithAccount(val statusCode: Int, val umAccount: UmAccount?)
 
-    private val _activeAccount: AtomicRef<UmAccount>
+    private inner class UserSessionMediator: DoorMediatorLiveData<List<UserSessionWithPersonAndEndpoint>>() {
 
-    private val _storedAccounts: MutableList<UmAccount>
+        private val endpointSessionsListMap = mutableMapOf<Endpoint, List<UserSessionWithPersonAndEndpoint>>()
 
-    private val _storedAccountsLive: DoorMutableLiveData<List<UmAccount>>
+        private val endpointSessionsLiveDataMap = mutableMapOf<Endpoint, DoorLiveData<List<UserSessionAndPerson>>>()
 
-    private val _activeAccountLive: DoorMutableLiveData<UmAccount>
+        fun addEndpoint(endpoint: Endpoint) {
+            val db: UmAppDatabase = di.direct.on(endpoint).instance(tag = DoorTag.TAG_DB)
+            val liveData = db.userSessionDao.findAllLocalSessions()
+            endpointSessionsLiveDataMap[endpoint] = liveData
 
-    private var accountLastUsedTimeMap = mutableMapOf<String, Long>()
+            addSource(liveData) { endpointSessionList ->
+                endpointSessionsListMap[endpoint] = endpointSessionList.map { it.withEndpoint(endpoint) }
+                setVal(endpointSessionsListMap.values.flatten())
+            }
+        }
+
+        @Suppress("unused")
+        fun removeEndpoint(endpoint: Endpoint) {
+            val liveData = endpointSessionsLiveDataMap[endpoint] ?: return
+            removeSource(liveData)
+        }
+    }
+
+    private val userSessionLiveDataMediator = UserSessionMediator()
+
+    private val _activeUserSession: AtomicRef<UserSessionWithPersonAndEndpoint?>
+
+    private val _activeEndpoint: AtomicRef<Endpoint>
+
+    private val _activeAccountLive = DoorMutableLiveData<UmAccount>()
 
     val httpClient: HttpClient by di.instance()
 
     init {
-        val accounts: UstadAccounts = systemImpl.getAppPref(ACCOUNTS_PREFKEY, appContext)?.let {
-            safeParse(di, UstadAccounts.serializer(), it)
-        } ?: defaultAccount.let { defAccount ->
-            UstadAccounts(defAccount.userAtServer, listOf(defAccount))
+        GlobalScope.launch(doorMainDispatcher()) {
+            endpointScope.activeEndpointUrls.forEach { endpointUrl ->
+                userSessionLiveDataMediator.addEndpoint(Endpoint(endpointUrl))
+            }
         }
 
-        _storedAccounts = copyOnWriteListOf(*accounts.storedAccounts.toTypedArray())
-        _storedAccountsLive = DoorMutableLiveData(_storedAccounts)
-        val activeAccountVal = accounts.storedAccounts.first { it.userAtServer == accounts.currentAccount }
-        _activeAccount = atomic(activeAccountVal)
-        _activeAccountLive = DoorMutableLiveData(activeAccountVal)
+        val activeUserSessionFromJson = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, appContext)?.let {
+            safeParse(di, UserSessionWithPersonAndEndpoint.serializer(), it)
+        }
 
-        accountLastUsedTimeMap.putAll(accounts.lastUsed)
+        _activeUserSession = atomic(activeUserSessionFromJson)
+
+
+        val activeEndpointStr = systemImpl.getAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY, appContext)
+            ?: systemImpl.getAppConfigString(AppConfig.KEY_API_URL, MANIFEST_URL_FALLBACK, appContext)
+            ?: MANIFEST_URL_FALLBACK
+
+        _activeEndpoint = atomic(Endpoint(activeEndpointStr))
+
+        _activeAccountLive.sendValue(_activeUserSession.value?.toUmAccount()
+            ?: GUEST_PERSON.toUmAccount(activeEndpointStr))
     }
 
-    private val defaultAccount: UmAccount
-        get() = UmAccount(0L, "guest", "",
-                systemImpl.getAppConfigString(AppConfig.KEY_API_URL, MANIFEST_URL_FALLBACK, appContext) ?: MANIFEST_URL_FALLBACK,
-                "Guest", "User")
+    //This is the older way of doing things now.
+    val activeAccount: UmAccount
+        get() = _activeUserSession.value?.toUmAccount()
+            ?: GUEST_PERSON.toUmAccount(_activeEndpoint.value.url)
 
-
-
-    var activeAccount: UmAccount
-        get() = _activeAccount.value
-
-        @Synchronized
+    var activeSession: UserSessionWithPersonAndEndpoint?
+        get() = _activeUserSession.value
         set(value) {
-            val activeUserAtServer = value.userAtServer
-            if(!_storedAccounts.any { it. userAtServer == activeUserAtServer}) {
-                addAccount(value)
+            _activeUserSession.value = value
+
+            val activeAccountJson = value?.let {
+                safeStringify(di, UserSessionWithPersonAndEndpoint.serializer(), value)
             }
 
-            accountLastUsedTimeMap[activeAccount.userAtServer] = getSystemTimeInMillis()
-            _activeAccount.value = value
-            _activeAccountLive.sendValue(value)
-            commit()
+            systemImpl.setAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, activeAccountJson, appContext)
+
+            if(value != null)
+                activeEndpoint = value.endpoint
+        }
+
+    var activeEndpoint: Endpoint
+        get() = _activeEndpoint.value
+        set(value){
+            _activeEndpoint.value = value
+            systemImpl.setAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY, value.url, appContext)
         }
 
     val activeAccountLive: DoorLiveData<UmAccount>
         get() = _activeAccountLive
 
     val storedAccounts: List<UmAccount>
-        get() = _storedAccounts.toList()
+        get() = userSessionLiveDataMediator.getValue()?.map { it.toUmAccount() } ?: listOf()
 
-    val storedAccountsLive: DoorLiveData<List<UmAccount>>
-        get() = _storedAccountsLive
+    val storedAccountsLive: DoorLiveData<List<UmAccount>> = DoorMediatorLiveData<List<UmAccount>>().apply {
+        addSource(userSessionLiveDataMediator) { userSessionList ->
+            setVal(userSessionList.map { it.toUmAccount() })
+        }
+    }
 
 
     suspend fun register(person: PersonWithAccount, endpointUrl: String,
@@ -118,11 +156,14 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
             }
         }
 
-        if(status == 200 && account != null) {
+        val newPassword = person.newPassword
+        if(status == 200 && account != null && newPassword != null) {
             account.endpointUrl = endpointUrl
+            val session = addSession(person, endpointUrl, newPassword)
             if(accountRegisterOptions.makeAccountActive){
-                activeAccount = account
+                activeSession = session
             }
+
             account
         }else if(status == 409){
             throw IllegalStateException("Conflict: username already taken")
@@ -131,38 +172,37 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         }
     }
 
-    @Synchronized
-    private fun addAccount(account: UmAccount, autoCommit: Boolean = true) {
-        _storedAccounts += account
-        _storedAccountsLive.sendValue(_storedAccounts.toList())
-        takeIf { autoCommit }?.commit()
-    }
+    suspend fun addSession(person: Person, endpointUrl: String, password: String) : UserSessionWithPersonAndEndpoint{
+        val endpoint = Endpoint(endpointUrl)
+        val endpointRepo: UmAppDatabase = di.on(endpoint).direct
+            .instance(tag = DoorTag.TAG_REPO)
+        val pbkdf2Params: Pbkdf2Params = di.direct.instance()
 
+        val authSalt = endpointRepo.siteDao.getSiteAsync()?.authSalt
+            ?: throw IllegalStateException("addSession: No auth salt!")
 
-    @Synchronized
-    fun removeAccount(account: UmAccount, autoFallback: Boolean = true, autoCommit: Boolean = true) {
-        _storedAccounts.removeAll { it.userAtServer == account.userAtServer }
-
-        if(autoFallback && activeAccount.userAtServer == account.userAtServer) {
-            val nextAccount = accountLastUsedTimeMap.entries.sortedBy { it.value }.lastOrNull()?.let {lastUsedUserAtServer ->
-                _storedAccounts.firstOrNull { it.userAtServer == lastUsedUserAtServer.key }
-            } ?: defaultAccount
-
-            activeAccount = nextAccount
+        val userSession = UserSession().apply {
+            usClientNodeId = (endpointRepo as DoorDatabaseSyncRepository).clientId
+            usPersonUid = person.personUid
+            usStartTime = systemTimeInMillis()
+            usSessionType = UserSession.TYPE_STANDARD
+            usStatus = UserSession.STATUS_ACTIVE
+            usAuth = password.encryptWithPbkdf2(authSalt, pbkdf2Params)
+            usUid = endpointRepo.userSessionDao.insertSession(this)
         }
 
-        _storedAccountsLive.sendValue(_storedAccounts.toList())
-        takeIf { autoCommit }?.commit()
+        return UserSessionWithPersonAndEndpoint(userSession, person, endpoint)
     }
 
-    @Synchronized
-    fun commit() {
-        val ustadAccounts = UstadAccounts(activeAccount.userAtServer,
-            _storedAccounts, accountLastUsedTimeMap)
-        systemImpl.setAppPref(ACCOUNTS_PREFKEY,
-                safeStringify(di, UstadAccounts.serializer(), ustadAccounts), appContext)
+    suspend fun endSession(userSessionWithPersonAndEndpoint: UserSessionWithPersonAndEndpoint,
+        endStatus: Int = UserSession.STATUS_LOGGED_OUT,
+        endReason: Int = UserSession.REASON_LOGGED_OUT
+    ) {
+        val endpointRepo: UmAppDatabase = di.on(userSessionWithPersonAndEndpoint.endpoint)
+            .direct.instance(tag = DoorTag.TAG_REPO)
+        endpointRepo.userSessionDao.endSession(
+            userSessionWithPersonAndEndpoint.userSession.usUid, endStatus, endReason)
     }
-
 
     suspend fun login(username: String, password: String, endpointUrl: String, replaceActiveAccount: Boolean = false): UmAccount = withContext(Dispatchers.Default){
         val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_REPO)
@@ -186,19 +226,18 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         val responseAccount = loginResponse.receive<UmAccount>()
 
         responseAccount.endpointUrl = endpointUrl
-        addAccount(responseAccount, autoCommit = false)
+        val person = repo.personDao.findByUid(responseAccount.personUid)
+            ?: throw IllegalStateException("Internal error: could not get person object")
+        val newSession = addSession(person, endpointUrl, password)
 
-        if(replaceActiveAccount) {
-            removeAccount(activeAccount, autoFallback = false, autoCommit = false)
-        }
-
-        activeAccount = responseAccount
+        activeEndpoint = Endpoint(endpointUrl)
+        activeSession = newSession
 
         //This should not be needed - as responseAccount can be smartcast, but will not otherwise compile
         responseAccount
     }
 
-    suspend fun changePassword(username: String, currentPassword: String?, newPassword: String, endpointUrl: String): UmAccount? = withContext(Dispatchers.Default){
+    suspend fun changePassword(username: String, currentPassword: String?, newPassword: String, endpointUrl: String): UmAccount = withContext(Dispatchers.Default){
         val httpStmt = httpClient.post<HttpStatement> {
             url("${endpointUrl.removeSuffix("/")}/password/change")
             parameter("username", username)
@@ -232,7 +271,15 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
     companion object {
 
-        const val ACCOUNTS_PREFKEY = "um.accounts"
+        val GUEST_PERSON = Person().apply {
+            personUid = 0
+            firstNames = "Guest"
+            lastName = "User"
+        }
+
+        const val ACCOUNTS_ACTIVE_SESSION_PREFKEY = "accountmgr.activesession"
+
+        const val ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY = "accountmgr.activeendpoint"
 
         const val MANIFEST_URL_FALLBACK = "http://localhost/"
 

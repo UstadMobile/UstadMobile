@@ -110,7 +110,7 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
     }
 
     fun handleClickDeleteAccount(account: UmAccount){
-        accountManager.removeAccount(account)
+        //accountManager.removeAccount(account)
     }
 
     fun handleClickProfile(personUid: Long){
@@ -124,7 +124,7 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
 
     fun handleClickLogout(account: UmAccount){
         //TODO: Fix this - the if condition can never be satisifed
-        accountManager.removeAccount(account)
+        //accountManager.removeAccount(account)
         if(accountManager.storedAccounts.size == 1
                 && accountManager.storedAccounts.contains(account)){
             //view.showGetStarted()
@@ -132,7 +132,7 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
     }
 
     fun handleClickAccount(account: UmAccount){
-        accountManager.activeAccount = account
+        //accountManager.activeAccount = account
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
             arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.ROOT_DEST,
             false)

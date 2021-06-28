@@ -51,6 +51,7 @@ import kotlin.jvm.Volatile
     ScopedGrant::class,
     ErrorReport::class,
     PersonAuth2::class,
+    UserSession::class,
 
     //Door Helper entities
     SqliteChangeSeqNums::class,
@@ -305,6 +306,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val errorReportDao: ErrorReportDao
 
     abstract val personAuth2Dao: PersonAuth2Dao
+
+    abstract val userSessionDao: UserSessionDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO

@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder
 import org.mockito.kotlin.*
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
@@ -13,21 +14,21 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
-import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.ext.insertVideoContent
+import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
@@ -64,15 +65,19 @@ class VideoContentPresenterTest {
     val temporaryFolder = TemporaryFolder()
 
     @Before
-    @Throws(IOException::class)
     fun setup() {
         mockView = mock { }
         mockEndpoint = mock {}
         val endpointScope = EndpointScope()
         di = DI {
-            bind<UstadMobileSystemImpl>() with singleton { spy(UstadMobileSystemImpl(
-                XmlPullParserFactory.newInstance(), temporaryFolder.newFolder())) }
-            bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
+            bind<UstadMobileSystemImpl>() with singleton {
+                spy(UstadMobileSystemImpl(XmlPullParserFactory.newInstance(),
+                    temporaryFolder.newFolder()))
+            }
+
+            bind<UstadAccountManager>() with singleton {
+                UstadAccountManager(instance(), Any(), endpointScope, di)
+            }
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()
                 builder.registerTypeAdapter(Statement::class.java, StatementSerializer())
@@ -81,13 +86,13 @@ class VideoContentPresenterTest {
                 builder.create()
             }
 
-            bind<NodeIdAndAuth>() with scoped(endpointScope!!).singleton {
+            bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
                 val systemImpl: UstadMobileSystemImpl = instance()
                 val contextIdentifier: String = sanitizeDbNameFromUrl(context.url)
                 systemImpl.getOrGenerateNodeIdAndAuth(contextPrefix = contextIdentifier, Any())
             }
 
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope!!).singleton {
+            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 spy(UmAppDatabase.getInstance(Any(), dbName, instance()).also {
@@ -110,23 +115,42 @@ class VideoContentPresenterTest {
                 OkHttpClient()
             }
 
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope!!).singleton {
+            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository(
                     repositoryConfig(Any(), context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
-                        instance(), instance())))
+                        instance(), instance()))
+                ).also {
+                    it.siteDao.insert(Site().apply {
+                        siteName = "Test"
+                        authSalt = randomString(16)
+                    })
+                }
             }
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
 
             bind<XapiStatementEndpoint>() with scoped(endpointScope).singleton {
                 mockEndpoint
             }
+
+            bind<Pbkdf2Params>() with singleton {
+                Pbkdf2Params(10000, 512)
+            }
         }
 
         val repo: UmAppDatabase by di.activeRepoInstance()
 
         accountManager = di.direct.instance()
-        accountManager.activeAccount.personUid = 42
+        val userPerson = runBlocking {
+            repo.insertPersonAndGroup(Person().apply {
+                personUid = 42
+                firstNames = "Jane"
+                lastName = "Doe"
+                username = "janedoe"
+            })
+        }
+
+        accountManager.startLocalTestSessionBlocking(userPerson, accountManager.activeEndpoint.url)
 
         runBlocking {
             container = repo.insertVideoContent()
