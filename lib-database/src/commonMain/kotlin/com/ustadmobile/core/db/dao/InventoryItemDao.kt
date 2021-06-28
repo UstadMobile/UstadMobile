@@ -14,7 +14,7 @@ import com.ustadmobile.door.annotation.Repository
 @Dao
 abstract class InventoryItemDao : BaseDao<InventoryItem> {
 
-    @Query(QUERY_GET_WE_NEW_INVENTORY)
+    @Query(QUERY_GET_WE_NEW_INVENTORY2)
     abstract suspend fun getAllWeWithNewInventoryItem(leUid: Long, productUid: Long)
             : List<PersonWithInventoryItemAndStock>
 
@@ -40,6 +40,37 @@ abstract class InventoryItemDao : BaseDao<InventoryItem> {
                                                             count: Long): Int
 
     companion object{
+
+        const val QUERY_GET_WE_NEW_INVENTORY2 = """
+        SELECT 
+            MEMBER.*,
+            InventoryItem.*, 
+            (
+                SELECT SUM(inventoryItemQuantity) FROM InventoryItem WHERE      
+                InventoryItem.inventoryItemProductUid = :productUid
+                AND InventoryItem.inventoryItemWeUid = MEMBER.personUid
+                AND (
+                    InventoryItem.inventoryItemLeUid = MLE.personUid
+                    OR
+                    CAST(MLE.admin AS INTEGER) = 1
+                    )
+                
+                AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+            )  as stock , 
+            0 as selectedStock
+		FROM PersonGroupMember
+			LEFT JOIN Person AS MEMBER ON MEMBER.personUid = PersonGroupMember.groupMemberPersonUid
+	        LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid
+	        LEFT JOIN InventoryItem ON InventoryItem.inventoryItemUid = 0
+        WHERE
+            CAST(PersonGroupMember.groupMemberActive AS INTEGER) = 1 
+			AND MEMBER.personGoldoziType = 2
+			AND CAST(MEMBER.admin AS INTEGER) = 0
+			AND CAST(MEMBER.active AS INTEGER) = 1
+			AND 
+			(PersonGroupMember.groupMemberUid = MLE.personWeGroupUid OR CAST(MEMBER.admin AS INTEGER) = 1)
+			OR (CAST(MLE.admin AS INTEGER) = 1 AND MEMBER.personGoldoziType = 2)
+        """
 
         const val QUERY_GET_WE_NEW_INVENTORY = """
         SELECT 
