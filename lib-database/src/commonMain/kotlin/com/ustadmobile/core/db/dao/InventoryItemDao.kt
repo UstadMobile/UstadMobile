@@ -68,48 +68,8 @@ abstract class InventoryItemDao : BaseDao<InventoryItem> {
 			AND CAST(MEMBER.admin AS INTEGER) = 0
 			AND CAST(MEMBER.active AS INTEGER) = 1
 			AND 
-			(PersonGroupMember.groupMemberUid = MLE.personWeGroupUid OR CAST(MEMBER.admin AS INTEGER) = 1)
+			(PersonGroupMember.groupMemberGroupUid = MLE.personWeGroupUid OR CAST(MEMBER.admin AS INTEGER) = 1)
 			OR (CAST(MLE.admin AS INTEGER) = 1 AND MEMBER.personGoldoziType = 2)
-        """
-
-        const val QUERY_GET_WE_NEW_INVENTORY = """
-        SELECT 
-            Person.*,
-            InventoryItem.*, 
-            (
-                SELECT SUM(inventoryItemQuantity) FROM InventoryItem WHERE      
-                InventoryItem.inventoryItemProductUid = :productUid
-                AND InventoryItem.inventoryItemWeUid = Person.personUid
-                AND (
-                    InventoryItem.inventoryItemLeUid = MLE.personUid
-                    OR
-                    CAST(MLE.admin AS INTEGER) = 1
-                    )
-                
-                AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
-            )  as stock , 
-            0 as selectedStock
-        FROM Person
-        LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid
-        LEFT JOIN InventoryItem ON InventoryItem.inventoryItemUid = 0
-        WHERE
-            CAST(Person.admin AS INTEGER) = 0 AND
-            CAST(Person.active AS INTEGER) = 1 AND
-            (Person.personUid IN (
-                SELECT MEMBER.personUid FROM PersonGroupMember 
-                LEFT JOIN PERSON AS MEMBER ON MEMBER.personUid = PersonGroupMember.groupMemberPersonUid
-                 WHERE 
-                ( 
-                    groupMemberGroupUid = MLE.personWeGroupUid
-                    OR CAST(MEMBER.admin AS INTEGER) = 1   
-                 )
-                AND CAST(groupMemberActive  AS INTEGER) = 1 
-                AND MEMBER.personGoldoziType = 2
-                )
-                OR 
-				(CAST(MLE.admin AS INTEGER) = 1 AND Person.personGoldoziType = 2)
-            ) 
-                
         """
 
         const val QUERY_GET_STOCK_LIST_BY_PRODUCT_AND_DELIVERY = """
