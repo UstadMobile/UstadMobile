@@ -1,5 +1,9 @@
 package com.ustadmobile.core.view
 
+import com.ustadmobile.core.catalog.contenttype.EpubTypePlugin
+import com.ustadmobile.core.catalog.contenttype.H5PTypePlugin
+import com.ustadmobile.core.catalog.contenttype.XapiPackageTypePlugin
+
 interface SelectFileView : UstadView {
 
     companion object {
@@ -10,7 +14,10 @@ interface SelectFileView : UstadView {
 
         const val SELECT_GALLERY = "video/*;audio/*"
 
-        const val SELECT_FILE = "*/*"
+        val SELECT_FILE = listOf(
+                EpubTypePlugin.MIME_TYPES,
+                XapiPackageTypePlugin.MIME_TYPES,
+                H5PTypePlugin.MIME_TYPES).joinToString(";")
 
     }
 }
