@@ -106,7 +106,7 @@ open class ContentEntry() {
     /**
      *  Represents if the entry is marked as completed by the content, student or min score
      */
-    var completionCriteria: Int = COMPLETION_CRITERIA_MANAGED_BY_CONTENT
+    var completionCriteria: Int = COMPLETION_CRITERIA_AUTOMATIC
 
     /**
      * Minimum score for content to mark as complete if completion criteria is set to min score
@@ -187,7 +187,7 @@ open class ContentEntry() {
 
         const val FLAG_SCRAPPED = 4
 
-        const val COMPLETION_CRITERIA_MANAGED_BY_CONTENT = 0
+        const val COMPLETION_CRITERIA_AUTOMATIC = 0
         const val COMPLETION_CRITERIA_MIN_SCORE = 1
         const val COMPLETION_CRITERIA_MARKED_BY_STUDENT = 2
     }

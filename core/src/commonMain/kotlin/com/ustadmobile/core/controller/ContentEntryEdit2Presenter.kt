@@ -17,7 +17,6 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.randomUuid
-import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
@@ -60,8 +59,8 @@ class ContentEntryEdit2Presenter(context: Any,
     }
 
     enum class CompletionCriteriaOptions(val optionVal: Int, val messageId: Int) {
-        MANAGED_BY_CONTENT(ContentEntry.COMPLETION_CRITERIA_MANAGED_BY_CONTENT,
-                MessageID.managed_by_content),
+        AUTOMATIC(ContentEntry.COMPLETION_CRITERIA_AUTOMATIC,
+                MessageID.automatic),
         MIN_SCORE(ContentEntry.COMPLETION_CRITERIA_MIN_SCORE,
                 MessageID.minimum_score),
         STUDENTS_MARKS_COMPLETE(ContentEntry.COMPLETION_CRITERIA_MARKED_BY_STUDENT,
