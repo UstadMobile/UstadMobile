@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.DiffUtil
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ContentEntryList2Presenter
+import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.SAVEDSTATE_KEY_FOLDER
+import com.ustadmobile.core.controller.TimeZoneListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -98,7 +100,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         setHasOptionsMenu(true)
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
-            ContentEntry::class.java) {
+            ContentEntry::class.java, SAVEDSTATE_KEY_FOLDER) {
             val selectedParentChildJoinUids = navController.currentBackStackEntry?.savedStateHandle
                     ?.get<String>(KEY_SELECTED_ITEMS)?.split(",")?.map { it.trim().toLong() } ?: return@observeResult
             mPresenter?.handleMoveContentEntries(selectedParentChildJoinUids, it.first().contentEntryUid )
@@ -163,7 +165,8 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                 R.id.content_entry_list_select_folder,
                 bundleOf(UstadView.ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
                         ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
-                        ContentEntryList2View.ARG_SHOW_ONLY_FOLDER_FILTER to true.toString()))
+                        ContentEntryList2View.ARG_SHOW_ONLY_FOLDER_FILTER to true.toString()),
+                destinationResultKey = SAVEDSTATE_KEY_FOLDER, overwriteDestination = true)
     }
 
 
