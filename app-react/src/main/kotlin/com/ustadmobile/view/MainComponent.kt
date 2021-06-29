@@ -234,7 +234,7 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
                         }
 
                         mFab(appState.appFab.icon ?: "",
-                            appState.appFab.title?.toUpperCase() ?: "",
+                            appState.appFab.title?.uppercase() ?: "",
                             color = MColor.secondary,
                             onClick = appState.appFab.onClick) {
                             css{
@@ -242,7 +242,6 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
                                 +mainComponentFab
                             }
                         }
-
                     }
                     renderSnackBar()
                 }

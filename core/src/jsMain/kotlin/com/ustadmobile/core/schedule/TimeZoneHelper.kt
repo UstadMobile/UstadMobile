@@ -1,12 +1,16 @@
 package com.ustadmobile.core.schedule
 
 import kotlin.js.Date
-
+//date is used by js code
+@Suppress("UNUSED_VARIABLE")
 actual fun getTimezoneOffset(timezoneName: String, timeUtc: Long): Int {
     val date = Date(timeUtc)
     val format = js("new Intl.DateTimeFormat('en-US',{timeStyle: 'long',timeZone: timezoneName}).format(date)").toString()
     return getOffset(format)
 }
+
+//date is used by js code
+@Suppress("UNUSED_VARIABLE")
 actual fun getRawTimezoneOffset(timezoneName: String): Int {
     val date = Date()
     val format = js("new Intl.DateTimeFormat('en-US',{timeStyle: 'long',timeZone: timezoneName}).format(date)").toString()

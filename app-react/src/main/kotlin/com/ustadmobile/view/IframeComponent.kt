@@ -4,7 +4,6 @@ import com.ustadmobile.util.PaginateOnScrollManager
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.iframeComponentResponsiveIframe
 import kotlinx.browser.document
-import kotlinx.css.LinearDimension
 import kotlinx.html.id
 import kotlinx.html.js.onLoadFunction
 import react.*
@@ -35,14 +34,16 @@ class  IframeComponent(mProps: IframeProps): RComponent<IframeProps,RState>(mPro
                val iframeId = js("it.split('/').pop().split('#')[0].split('?')[0];").toString()
                styledIframe{
                    css(iframeComponentResponsiveIframe)
-                   attrs.src = it
-                   attrs.id = iframeId
-                   attrs.onLoadFunction = { loadEvent ->
-                       val contentWindow = loadEvent.target.asDynamic().contentWindow
-                       val iframe = document.getElementById(iframeId)
-                       val iframeDoc = js("iframe.contentDocument || iframe.contentWindow.document")
-                       val scrollHeight = iframeDoc.body.scrollHeight.toString().toInt()
-                       iframe.asDynamic().style.height = "${scrollHeight + (scrollHeight * 0.1)}px"
+                   attrs {
+                       src = it
+                       id = iframeId
+                       onLoadFunction = { loadEvent ->
+                           val contentWindow = loadEvent.target.asDynamic().contentWindow
+                           val iframe = document.getElementById(iframeId)
+                           val iframeDoc = js("iframe.contentDocument || iframe.contentWindow.document")
+                           val scrollHeight = iframeDoc.body.scrollHeight.toString().toInt()
+                           iframe.asDynamic().style.height = "${scrollHeight + (scrollHeight * 0.1)}px"
+                       }
                    }
                }
            }
