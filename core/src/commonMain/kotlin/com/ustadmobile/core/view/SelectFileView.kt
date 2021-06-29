@@ -14,10 +14,11 @@ interface SelectFileView : UstadView {
 
         const val SELECT_GALLERY = "video/*;audio/*"
 
-        val SELECT_FILE = listOf(
-                EpubTypePlugin.MIME_TYPES,
-                XapiPackageTypePlugin.MIME_TYPES,
-                H5PTypePlugin.MIME_TYPES).joinToString(";")
+        val SELECT_FILE =
+                (EpubTypePlugin.MIME_TYPES +
+                XapiPackageTypePlugin.MIME_TYPES +
+                H5PTypePlugin.MIME_TYPES +
+                        "application/octet-stream").joinToString(";")
 
     }
 }

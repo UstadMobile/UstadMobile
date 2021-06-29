@@ -49,7 +49,8 @@ class SelectFileFragment(private val registry: ActivityResultRegistry? = null) :
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        activityResultLauncher?.launch(arguments?.get(ARG_SELECT_FILE)?.toString()?.split(";")?.toTypedArray())
+        val mimeTypeList = arguments?.get(ARG_SELECT_FILE)?.toString()?.split(";")?.toTypedArray()
+        activityResultLauncher?.launch(mimeTypeList)
         return null
     }
 
