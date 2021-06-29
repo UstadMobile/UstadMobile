@@ -126,7 +126,9 @@
 
     <string name="underRegistrationAgeError">Self-registration of children under 13 is not allowed. Please ask your teacher to register you.</string>
 
-
+    <string name="add_link_description">Add educational content using web link, then use it offline</string>
+    <string name="add_gallery_description">Add video or audio from the device gallery</string>
+    <string name="add_file_description">Add educational content using supported formats e.g. PDF, xAPI, H5P, EPUB</string>
 
     <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>
 
