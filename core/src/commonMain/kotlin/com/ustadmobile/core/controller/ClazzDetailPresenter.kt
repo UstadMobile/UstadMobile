@@ -95,6 +95,12 @@ class ClazzDetailPresenter(context: Any,
                 ContentEntry::class) {
             val entry = it.firstOrNull() ?: return@observeSavedStateResult
             GlobalScope.launch {
+                val entriesInClazz = repo.clazzContentJoinDao.listOfEntriesInClazz(arguments[ARG_ENTITY_UID]?.toLong() ?: 0)
+
+                if(entriesInClazz.contains(entry.contentEntryUid)) {
+                    return@launch
+                }
+
                 ClazzContentJoin().apply {
                     ccjClazzUid = arguments[ARG_ENTITY_UID]?.toLong() ?: return@apply
                     ccjContentEntryUid = entry.contentEntryUid
