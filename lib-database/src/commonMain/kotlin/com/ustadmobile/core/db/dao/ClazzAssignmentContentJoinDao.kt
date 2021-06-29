@@ -57,7 +57,7 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
                     StatementEntity.statementContentEntryUid, 
                     StatementEntity.contextRegistration, StatementEntity.resultDuration 
                          FROM PersonGroupMember
-                 ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}
+                 ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
                            LEFT JOIN StatementEntity 
                            ON StatementEntity.statementPersonUid = :personUid 
                             AND StatementEntity.statementContentEntryUid IN (SELECT cacjContentUid
