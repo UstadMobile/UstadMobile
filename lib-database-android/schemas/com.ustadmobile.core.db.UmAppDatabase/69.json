@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 69,
-    "identityHash": "8ddcb2550f088f2b3e462a8fc811c1d6",
+    "identityHash": "c9dbf0b4d68489909237c52d337f5255",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -1836,7 +1836,7 @@
       },
       {
         "tableName": "ContentEntry",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contentEntryUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT, `description` TEXT, `entryId` TEXT, `author` TEXT, `publisher` TEXT, `licenseType` INTEGER NOT NULL, `licenseName` TEXT, `licenseUrl` TEXT, `sourceUrl` TEXT, `thumbnailUrl` TEXT, `lastModified` INTEGER NOT NULL, `primaryLanguageUid` INTEGER NOT NULL, `languageVariantUid` INTEGER NOT NULL, `contentFlags` INTEGER NOT NULL, `leaf` INTEGER NOT NULL, `publik` INTEGER NOT NULL, `ceInactive` INTEGER NOT NULL, `contentTypeFlag` INTEGER NOT NULL, `contentEntryLocalChangeSeqNum` INTEGER NOT NULL, `contentEntryMasterChangeSeqNum` INTEGER NOT NULL, `contentEntryLastChangedBy` INTEGER NOT NULL, `contentEntryLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contentEntryUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT, `description` TEXT, `entryId` TEXT, `author` TEXT, `publisher` TEXT, `licenseType` INTEGER NOT NULL, `licenseName` TEXT, `licenseUrl` TEXT, `sourceUrl` TEXT, `thumbnailUrl` TEXT, `lastModified` INTEGER NOT NULL, `primaryLanguageUid` INTEGER NOT NULL, `languageVariantUid` INTEGER NOT NULL, `contentFlags` INTEGER NOT NULL, `leaf` INTEGER NOT NULL, `publik` INTEGER NOT NULL, `ceInactive` INTEGER NOT NULL, `contentTypeFlag` INTEGER NOT NULL, `contentOwner` INTEGER NOT NULL, `contentEntryLocalChangeSeqNum` INTEGER NOT NULL, `contentEntryMasterChangeSeqNum` INTEGER NOT NULL, `contentEntryLastChangedBy` INTEGER NOT NULL, `contentEntryLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "contentEntryUid",
@@ -1949,6 +1949,12 @@
           {
             "fieldPath": "contentTypeFlag",
             "columnName": "contentTypeFlag",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentOwner",
+            "columnName": "contentOwner",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -5438,7 +5444,7 @@
       },
       {
         "tableName": "Site",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`siteUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sitePcsn` INTEGER NOT NULL, `siteLcsn` INTEGER NOT NULL, `siteLcb` INTEGER NOT NULL, `siteLct` INTEGER NOT NULL, `siteName` TEXT, `guestLogin` INTEGER NOT NULL, `registrationAllowed` INTEGER NOT NULL, `authSalt` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`siteUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sitePcsn` INTEGER NOT NULL, `siteLcsn` INTEGER NOT NULL, `siteLcb` INTEGER NOT NULL, `siteLct` INTEGER NOT NULL, `siteName` TEXT, `guestLogin` INTEGER NOT NULL, `registrationAllowed` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "siteUid",
@@ -5487,12 +5493,6 @@
             "columnName": "registrationAllowed",
             "affinity": "INTEGER",
             "notNull": true
-          },
-          {
-            "fieldPath": "authSalt",
-            "columnName": "authSalt",
-            "affinity": "TEXT",
-            "notNull": false
           }
         ],
         "primaryKey": {
@@ -6211,62 +6211,6 @@
             "errUid"
           ],
           "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "PersonAuth2",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pauthUid` INTEGER NOT NULL, `pauthMechanism` TEXT, `pauthAuth` TEXT, `pauthLcsn` INTEGER NOT NULL, `pauthPcsn` INTEGER NOT NULL, `pauthLcb` INTEGER NOT NULL, `pauthLct` INTEGER NOT NULL, PRIMARY KEY(`pauthUid`))",
-        "fields": [
-          {
-            "fieldPath": "pauthUid",
-            "columnName": "pauthUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "pauthMechanism",
-            "columnName": "pauthMechanism",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "pauthAuth",
-            "columnName": "pauthAuth",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "pauthLcsn",
-            "columnName": "pauthLcsn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "pauthPcsn",
-            "columnName": "pauthPcsn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "pauthLcb",
-            "columnName": "pauthLcb",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "pauthLct",
-            "columnName": "pauthLct",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pauthUid"
-          ],
-          "autoGenerate": false
         },
         "indices": [],
         "foreignKeys": []
@@ -10924,88 +10868,12 @@
           }
         ],
         "foreignKeys": []
-      },
-      {
-        "tableName": "PersonAuth2_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_PersonAuth2_trk_clientId_epk_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonAuth2_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
-          },
-          {
-            "name": "index_PersonAuth2_trk_epk_clientId",
-            "unique": true,
-            "columnNames": [
-              "epk",
-              "clientId"
-            ],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_PersonAuth2_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
-          }
-        ],
-        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8ddcb2550f088f2b3e462a8fc811c1d6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c9dbf0b4d68489909237c52d337f5255')"
     ]
   }
 }
