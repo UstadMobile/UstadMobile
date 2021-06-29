@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.impl
 
 import android.content.Context
-import android.os.Build
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import com.google.gson.Gson
@@ -70,7 +69,6 @@ import java.io.File
 import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.lib.db.entities.ContainerImportJob
 
 /**
  * Note: BaseUstadApp extends MultidexApplication on the multidex variant, but extends the
@@ -182,8 +180,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
             ContentImportManagerImplAndroid(listOf(EpubTypePluginCommonJvm(),
                     XapiTypePluginCommonJvm(), VideoTypePluginAndroid(),
-                    H5PTypePluginCommonJvm()), ContainerImportJob.CLIENT_IMPORT_MODE,
-                    applicationContext, context, di)
+                    H5PTypePluginCommonJvm()), applicationContext,
+                    context, di)
         }
 
 

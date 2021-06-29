@@ -23,6 +23,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.randomUuid
+import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
@@ -180,7 +181,7 @@ class ContentEntryEdit2Presenter(context: Any,
                         metaData.contentEntry = entity
                         contentImportManager?.queueImportContentFromFile(uri, metaData,
                                 view.storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(),
-                                conversionParams)
+                                ContainerImportJob.CLIENT_IMPORT_MODE, conversionParams)
 
                         systemImpl.popBack(destinationOnFinish, popUpInclusive = false, context)
                         return@launch
