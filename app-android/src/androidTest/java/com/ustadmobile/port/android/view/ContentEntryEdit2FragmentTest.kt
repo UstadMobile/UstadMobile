@@ -101,26 +101,6 @@ class ContentEntryEdit2FragmentTest : TestCase() {
         }
 
     }
-    
-
-    @AdbScreenRecord("Given content entry does not exist, when user fills in form and selects non zipped file, should save to database")
-    //@Test
-    fun givenNoEntryYet_whenFormFilledNonZippedFileSelectedAndSaveClicked_thenShouldSaveToDatabase() {
-        init {
-
-        }.run {
-
-            ContentEntryEditScreen {
-
-                val entry = createEntryFromFile("video.mp4", "Dummy Title",
-                        systemImplNavRule = systemImplNavRule, dbRule = dbRule)
-                flakySafely {
-                    Assert.assertEquals("Entry's data set", "Dummy Title",entry.title)
-                }
-            }
-
-        }
-    }
 
 
 }
