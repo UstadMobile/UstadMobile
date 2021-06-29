@@ -6,6 +6,7 @@
     <data>
         <import type="com.ustadmobile.lib.db.entities.UmAccount"/>
         <import type="android.view.View"/>
+        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
         <variable
             name="umaccount"
             type="UmAccount" />
@@ -31,14 +32,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="@dimen/dimen_16dp"
-        android:id="@+id/item_account_list"
-        android:onClick="@{() -> presenter.handleClickAccount(umaccount)}"
-        app:backgroundIfAnimationEnabled="@{@drawable/bg_listitem}">
+        android:id="@+id/item_account_list">
 
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/person_profile_icon"
             android:src="@drawable/ic_account_circle_black_24dp"
+            app:imageForeignKey="@{umaccount.personUid}"
+            app:imageForeignKeyAdapter="@{PersonDetailFragment.FOREIGNKEYADAPTER_PERSON}"
+            app:imageForeignKeyPlaceholder="@{@drawable/ic_account_circle_black_24dp}"
+            app:imageForeignKeyEndpoint="@{umaccount.endpointUrl}"
+            android:tint="@color/onBackgroundColor"
             android:layout_width="@dimen/dimen_48dp"
             android:layout_height="@dimen/dimen_48dp"
             android:layout_margin="@dimen/dimen_16dp"
@@ -68,9 +72,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/person_profile_icon"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginStart="@dimen/dimen_64dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="@dimen/dimen_16dp"
             android:layout_marginBottom="@dimen/dimen_16dp"
             android:layout_marginEnd="@dimen/dimen_60dp"

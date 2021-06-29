@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import androidx.lifecycle.*
@@ -8,7 +9,7 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -160,7 +161,7 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
 
             if(value != null && value.isStatusQueuedOrDownloading()) {
                 mBinding?.entryDetailProgress?.statusText = value.toStatusString(
-                        UstadMobileSystemImpl.instance, requireContext())
+                        di.direct.instance(), requireContext())
                 mBinding?.entryDetailProgress?.progress = if(value.downloadLength > 0) {
                     (value.downloadedSoFar.toFloat()) / (value.downloadLength.toFloat())
                 }else {
@@ -240,6 +241,16 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
         return when(item.itemId) {
             R.id.content_entry_group_activity -> {
                 mPresenter?.handleOnClickGroupActivityButton()
+                true
+            }
+            R.id.action_share -> {
+                val sendIntent: Intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, mPresenter?.deepLink)
+                    type = "text/plain"
+                }
+                val shareIntent = Intent.createChooser(sendIntent, null)
+                startActivity(shareIntent)
                 true
             }
             else -> super.onOptionsItemSelected(item)

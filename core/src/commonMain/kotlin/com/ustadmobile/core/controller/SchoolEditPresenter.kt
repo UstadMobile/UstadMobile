@@ -1,9 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
-import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.ScopedGrantOneToManyHelper
 import com.ustadmobile.core.util.ext.createNewSchoolAndGroups
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
@@ -11,15 +9,16 @@ import com.ustadmobile.core.view.SchoolDetailView
 import com.ustadmobile.core.view.SchoolEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.School
-import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
+import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_STUDENT_GROUP
+import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_TEACHER_GROUP
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -28,38 +27,16 @@ class SchoolEditPresenter(context: Any,
                           lifecycleOwner: DoorLifecycleOwner)
     : UstadEditPresenter<SchoolEditView, SchoolWithHolidayCalendar>(context, arguments, view, di, lifecycleOwner) {
 
-    enum class GenderOptions(val optionVal: Int, val messageId: Int){
-        MIXED(School.SCHOOL_GENDER_MIXED,
-                MessageID.mixed),
-        FEMALE(School.SCHOOL_GENDER_FEMALE,
-                MessageID.female),
-        MALE(School.SCHOOL_GENDER_MALE,
-                MessageID.male)
-    }
-
-    class GenderTypeMessageIdOption(day: GenderOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
-
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    private val clazzOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<Clazz>(
-            Clazz::clazzUid,"state_Clazz_list",
-            ListSerializer(Clazz.serializer()),
-            ListSerializer(Clazz.serializer()), this, Clazz::class) { clazzUid = it }
-
-    fun handleAddOrEditClazz(clazz: Clazz) {
-        clazzOneToManyJoinEditHelper.onEditResult(clazz)
-    }
-
-    fun handleRemoveSchedule(clazz: Clazz) {
-        clazzOneToManyJoinEditHelper.onDeactivateEntity(clazz)
-    }
+    val scopedGrantOneToManyHelper = ScopedGrantOneToManyHelper(repo, this,
+        requireBackStackEntry().savedStateHandle, School.TABLE_ID)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.genderOptions = GenderOptions.values().map { GenderTypeMessageIdOption(it, context) }
-        view.schoolClazzes = clazzOneToManyJoinEditHelper.liveList
+
+        view.scopedGrants = scopedGrantOneToManyHelper.liveList
 
     }
 
@@ -70,14 +47,33 @@ class SchoolEditPresenter(context: Any,
             db.schoolDao.findByUidWithHolidayCalendarAsync(entityUid)
         } ?: SchoolWithHolidayCalendar()
 
-        val clazzes = withTimeoutOrNull(2000){
-            db.takeIf { entityUid != 0L }?.clazzDao?.findAllClazzesBySchool(entityUid)
-        }?: listOf()
+        if(entityUid != 0L) {
+            val scopedGrants = db.onRepoWithFallbackToDb(2000) {
+                it.scopedGrantDao.findByTableIdAndEntityUid(School.TABLE_ID, entityUid)
+            }
 
-        clazzOneToManyJoinEditHelper.liveList.sendValue(clazzes)
+            scopedGrantOneToManyHelper.liveList.setVal(scopedGrants)
+        }else if(db is DoorDatabaseRepository){
+            //Add default roles
+            scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
+                name = "Teachers"
+                scopedGrant = ScopedGrant().apply {
+                    sgFlags = FLAG_TEACHER_GROUP.or(ScopedGrant.FLAG_NO_DELETE)
+                    sgPermissions = Role.ROLE_SCHOOL_STAFF_PERMISSIONS_DEFAULT
+                }
+            })
+
+            scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
+                name = "Students"
+                scopedGrant = ScopedGrant().apply {
+                    sgFlags = FLAG_STUDENT_GROUP.or(ScopedGrant.FLAG_NO_DELETE)
+                    sgPermissions = Role.ROLE_SCHOOL_STUDENT_PERMISSION_DEFAULT
+                }
+            })
+        }
+
 
         return school
-
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): SchoolWithHolidayCalendar? {
@@ -111,11 +107,11 @@ class SchoolEditPresenter(context: Any,
                 repo.schoolDao.updateAsync(entity)
             }
 
-            val allClazzes = clazzOneToManyJoinEditHelper.liveList.getValue() ?: listOf()
-            val clazzesToAssign = allClazzes.filter { it.clazzSchoolUid != entity.schoolUid}
-            repo.clazzDao.assignClassesToSchool(clazzesToAssign.map { it.clazzUid }, entity.schoolUid)
-            repo.clazzDao.assignClassesToSchool(
-                    clazzOneToManyJoinEditHelper.primaryKeysToDeactivate, 0L)
+            scopedGrantOneToManyHelper.commitToDatabase(repo, entity.schoolUid,
+                flagToGroupMap = mapOf(
+                    FLAG_TEACHER_GROUP to entity.schoolTeachersPersonGroupUid,
+                    FLAG_STUDENT_GROUP to entity.schoolStudentsPersonGroupUid)
+            )
 
             onFinish(SchoolDetailView.VIEW_NAME, entity.schoolUid, entity)
         }

@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.Manifest
 import android.os.Bundle
 import android.view.*
 import androidx.core.os.bundleOf
@@ -15,7 +14,9 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
+import com.ustadmobile.core.util.ext.determineListMode
 import com.ustadmobile.core.util.ext.observeResult
+import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_TITLE
@@ -67,19 +68,23 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         if(mTitle != null){
             ustadFragmentTitle = mTitle.toString()
         }
-        mPresenter = ContentEntryList2Presenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di, viewLifecycleOwner)
 
-        mDataRecyclerViewAdapter = ContentEntryListRecyclerAdapter(mPresenter,
-                arguments?.get(UstadView.ARG_LISTMODE).toString(), viewLifecycleOwner, di)
-        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
-            requireContext().getString(R.string.add_new_content))
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val accountManager: UstadAccountManager by di.instance()
         val localAvailabilityManager: LocalAvailabilityManager by di.on(accountManager.activeAccount).instance()
+
+
+        mPresenter = ContentEntryList2Presenter(requireContext(), arguments.toStringMap(),
+                this, di, viewLifecycleOwner)
+
+        mDataRecyclerViewAdapter = ContentEntryListRecyclerAdapter(mPresenter,
+                arguments?.toStringMap()?.determineListMode().toString(), viewLifecycleOwner, di)
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
+                requireContext().getString(R.string.add_new_content), onClickSort = this,
+                sortOrderOption = mPresenter?.sortOptions?.get(0))
 
         val navController = findNavController()
 
@@ -147,6 +152,8 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
     override fun onClick(view: View?) {
         if (view?.id == R.id.item_createnew_layout)
             mPresenter?.handleClickCreateNewFab()
+        else
+            super.onClick(view)
     }
 
     override fun showMoveEntriesFolderPicker(selectedContentEntryParentChildJoinUids: String) {
@@ -155,8 +162,8 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         navigateToPickEntityFromList(ContentEntry::class.java,
                 R.id.content_entry_list_select_folder,
                 bundleOf(UstadView.ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
-                        ContentEntryList2View.ARG_CONTENT_FILTER to ContentEntryList2View.ARG_LIBRARIES_CONTENT,
-                        ContentEntryList2View.ARG_FOLDER_FILTER to true.toString()))
+                        ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
+                        ContentEntryList2View.ARG_SHOW_ONLY_FOLDER_FILTER to true.toString()))
     }
 
 

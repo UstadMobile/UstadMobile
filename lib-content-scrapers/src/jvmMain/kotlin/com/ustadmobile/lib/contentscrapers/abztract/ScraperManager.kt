@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.contentscrapers.abztract
 
 import ScraperTypes
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.LiveDataWorkQueue
 import com.ustadmobile.core.util.ext.requirePostfix
+import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.SCRAPER_TAG
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
@@ -24,10 +25,11 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlinx.coroutines.*
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.apache.commons.cli.*
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
-import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -36,7 +38,6 @@ import org.kodein.di.on
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLDecoder
 import java.nio.file.Files
@@ -53,6 +54,8 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
     private val contentImportManager: ContentImportManager by on(endpoint).instance()
 
     private val httpClient: HttpClient by instance()
+
+    private val okHttpClient: OkHttpClient by instance()
 
     private val logPrefix = "[ScraperManager endpoint url: ${endpoint.url}] "
 
@@ -74,8 +77,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                 val obj = cons?.newInstance(it.sqiContentEntryParentUid, it.runId, it.sqiUid, it.sqiContentEntryUid, endpoint, di) as Indexer?
                 obj?.indexUrl(it.scrapeUrl!!)
             } catch (e: Exception) {
-                Napier.e("$logPrefix Exception running indexer ${it.scrapeUrl}", tag = SCRAPER_TAG)
-                Napier.e("$logPrefix ${ExceptionUtils.getStackTrace(e)}", tag = SCRAPER_TAG)
+                Napier.e("$logPrefix Exception running indexer", tag = SCRAPER_TAG, throwable = e)
             }
 
             db.scrapeQueueItemDao.setTimeFinished(it.sqiUid, System.currentTimeMillis())
@@ -83,6 +85,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
             Napier.e("$logPrefix Ended indexer for url ${it.scrapeUrl} in duration: $duration", tag = SCRAPER_TAG)
         }.also { indexQueue ->
             GlobalScope.launch {
+                Napier.i("${logPrefix }Starting indexer ScrapeQueue")
                 indexQueue.start()
             }
         }
@@ -107,15 +110,16 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                     obj?.scrapeUrl(it.scrapeUrl!!)
                 }
             } catch (t: TimeoutCancellationException) {
+                Napier.e("$logPrefix Timeout Exception", tag = SCRAPER_TAG, throwable = t)
                 db.scrapeQueueItemDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_FAILED, ERROR_TYPE_TIMEOUT)
                 repo.contentEntryDao.updateContentEntryInActive(it.sqiContentEntryParentUid, true)
             } catch (s: ScraperException) {
-                Napier.e("$logPrefix Known Exception ${s.message}", tag = SCRAPER_TAG)
+                Napier.e("$logPrefix Known Exception ${s.message}", tag = SCRAPER_TAG,
+                    throwable = s)
             } catch (e: Exception) {
+                Napier.e("$logPrefix Exception running scrapeContent ${it.scrapeUrl}", tag = SCRAPER_TAG, throwable = e)
                 db.scrapeQueueItemDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_FAILED, 0)
                 repo.contentEntryDao.updateContentEntryInActive(it.sqiContentEntryParentUid, true)
-                Napier.e("$logPrefix Exception running scrapeContent ${it.scrapeUrl}", tag = SCRAPER_TAG)
-                Napier.e("$logPrefix ${ExceptionUtils.getStackTrace(e)}", tag = SCRAPER_TAG)
             } finally {
                 obj?.close()
             }
@@ -125,6 +129,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
             Napier.i("$logPrefix Ended scrape for url ${it.scrapeUrl} in duration: $duration", tag = SCRAPER_TAG)
 
         }.also { scrapeQueue ->
+            Napier.i("${logPrefix }Starting scraper ScrapeQueue")
             GlobalScope.launch {
                 scrapeQueue.start()
             }
@@ -168,15 +173,11 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
         val name = FilenameUtils.getName(if(urlName.endsWith("/")) urlName.substringBeforeLast("/") else urlName)
         val contentFile = File(tempDir, name)
 
-        val huc: HttpURLConnection = url.openConnection() as HttpURLConnection
+        val okRequest = Request.Builder().url(urlString).build()
+        val response = okHttpClient.newCall(okRequest).execute()
+        val mimeType = response.header("content-type")
+        response.body?.byteStream()?.writeToFile(contentFile) ?: throw IllegalStateException("url $urlString has no body!")
 
-        val mimeType = huc.contentType ?: ""
-        val stream = huc.inputStream
-        FileOutputStream(contentFile).use {
-            stream.copyTo(it)
-            it.flush()
-        }
-        stream.close()
         return when {
             urlString.startsWith("https://drive.google.com/") -> {
 
@@ -204,17 +205,17 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                     parameter("fields", "id,modifiedTime,name,mimeType,description,thumbnailLink")
                 }.execute()
 
-                val file = statement.receive<GoogleFile>()
+                val googleFileResponse = statement.receive<GoogleFile>()
 
-                if (file.mimeType.isNullOrEmpty()) {
+                if (googleFileResponse.mimeType.isNullOrEmpty()) {
                     Napier.e("$logPrefix no mimetype found in googleDriveLink", tag = SCRAPER_TAG)
                     return null
                 }
 
-                contentImportManager.getMimeTypeSupported().find { fileMimeType -> fileMimeType == file.mimeType }
+                contentImportManager.getMimeTypeSupported().find { fileMimeType -> fileMimeType == googleFileResponse.mimeType }
                         ?: return null
 
-                Napier.d("$logPrefix mimetype found for google drive link: ${file.mimeType}", tag = SCRAPER_TAG)
+                Napier.d("$logPrefix mimetype found for google drive link: ${googleFileResponse.mimeType}", tag = SCRAPER_TAG)
 
                 val dataStatement = httpClient.get<HttpStatement>(apiCall) {
                     parameter("alt", "media")
@@ -226,14 +227,14 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                 var metadata: ImportedContentEntryMetaData?
                 withContext(Dispatchers.IO){
                     val googleStream = dataStatement.receive<InputStream>()
-                    val googleFile = File(tempDir, file.name ?: file.id ?: fileId)
+                    val googleFile = File(tempDir, googleFileResponse.name
+                            ?: googleFileResponse.id ?: fileId)
 
                     FileOutputStream(googleFile).use {
                         googleStream.copyTo(it)
                         it.flush()
                     }
-                    stream.close()
-                    metadata = contentImportManager.extractMetadata(googleFile.path)
+                    metadata = contentImportManager.extractMetadata(googleFile.toURI().toString())
                 }
 
                 metadata?.scraperType = ScraperTypes.GOOGLE_DRIVE_SCRAPE
@@ -243,7 +244,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                 tempDir.deleteRecursively()
                 return metadata
             }
-            mimeType.contains("text/html") -> {
+            mimeType?.contains("text/html") == true -> {
 
                 val data = FileUtils.readFileToString(contentFile, ScraperConstants.UTF_ENCODING)
                 tempDir.deleteRecursively()
@@ -272,8 +273,8 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
             }
 
             else -> {
-
-                val metaData = contentImportManager.extractMetadata(contentFile.path)
+                Napier.i("$logPrefix extracting metadata for $urlString from ${contentFile.path}")
+                val metaData = contentImportManager.extractMetadata(contentFile.toURI().toString())
                 metaData?.scraperType = ScraperTypes.URL_SCRAPER
                 metaData?.uri = urlString
                 metaData?.contentEntry?.sourceUrl = urlString

@@ -5,6 +5,9 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.FROM_SCOPEDGRANT_TO_CLAZZENROLMENT_JOIN__ON_CLAUSE
+import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
+import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
 
 import kotlinx.serialization.Serializable
 
@@ -30,177 +33,183 @@ import kotlinx.serialization.Serializable
      * get the select permission on that person. Hence we need to trigger an update notification for
      * the other tables (such as person, statemententity, and others where permission can be affected
      * by class membership) for everyone who has permission to see this clazzEnrolment.
+     *
+     * Note: There is a possibility that this could be made more efficient with a CTE, and then
+     * joining to the CTE. There could then be two
+     *
      */
     notifyOnUpdate = [
         //clazzEnrolment itself
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClazzEnrolment.TABLE_ID} AS tableId FROM 
-            ChangeLog
-            JOIN ClazzEnrolment ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+    SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+           ${ClazzEnrolment.TABLE_ID} AS tableId 
+      FROM ChangeLog
+            JOIN ClazzEnrolment 
+                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
+                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
+            JOIN ScopedGrant 
+                 ON ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                         AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+                      OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
+                          AND ScopedGrant.sgEntityUid = ClazzEnrolment.clazzEnrolmentPersonUid)
+                      OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+                          AND ScopedGrant.sgEntityUid = ClazzEnrolment.clazzEnrolmentClazzUid)
+                      OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                         AND ScopedGrant.sgEntityUid = (
+                             SELECT clazzSchoolUid
+                               FROM Clazz
+                              WHERE clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid)))
+                    AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_SELECT}) > 0                               
+            JOIN PersonGroupMember 
+                   ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+            JOIN DeviceSession
+                   ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid  
         """,
         //Person
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${Person.TABLE_ID} AS tableId FROM
-            ChangeLog
-            JOIN ClazzEnrolment ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+    SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+           ${ClazzEnrolment.TABLE_ID} AS tableId 
+      FROM ChangeLog
+            JOIN ClazzEnrolment 
+                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
+                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
+                  ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT} 
+                  $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2     
         """,
         //AgentEntity
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${AgentEntity.TABLE_ID} AS tableId FROM
-            ChangeLog
-            JOIN ClazzEnrolment ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+           ${AgentEntity.TABLE_ID} AS tableId 
+      FROM ChangeLog
+            JOIN ClazzEnrolment 
+                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
+                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
+                    ${Role.PERMISSION_PERSON_SELECT}
+                    $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
         """,
         //ClazzLogAttendanceRecord
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClazzLogAttendanceRecord.TABLE_ID} AS tableId FROM
-            ChangeLog
-            JOIN ClazzEnrolment ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
-        """,
-        //ClazzWorkSubmission
-        """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClazzWorkSubmission.TABLE_ID} AS tableId FROM
-            ChangeLog
-            JOIN ClazzEnrolment ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZWORK_VIEWSTUDENTPROGRESS} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
-        """,
-        //ClazzWorkQuestionResponse
-        """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClazzWorkQuestionResponse.TABLE_ID} AS tableId FROM
-            ChangeLog
-            JOIN ClazzEnrolment ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZWORK_VIEWSTUDENTPROGRESS} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
-        """,
-        //ContentEntryProgress
-        """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ContentEntryProgress.CONTENT_ENTRY_PROGRESS_TABLE_ID} AS tableId FROM
-            ChangeLog
-            JOIN ClazzEnrolment ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
-        """,
-        //EntityRole
-        """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${EntityRole.TABLE_ID} AS tableId FROM
-            ChangeLog
-            JOIN ClazzEnrolment ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+                ${ClazzLogAttendanceRecord.TABLE_ID} AS tableId 
+          FROM ChangeLog
+            JOIN ClazzEnrolment 
+                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
+                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
+                  ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT} 
+                  $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
         """,
         //GroupLearningSession
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${GroupLearningSession.TABLE_ID} AS tableId FROM
-            ChangeLog
-            JOIN ClazzEnrolment ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+      SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+            ${GroupLearningSession.TABLE_ID} AS tableId 
+       FROM ChangeLog
+            JOIN ClazzEnrolment 
+                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
+                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
+                    ${Role.PERMISSION_PERSON_SELECT}
+                    $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
         """,
         //LearnerGroup
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${LearnerGroup.TABLE_ID} AS tableId FROM
-            ChangeLog
-            JOIN ClazzEnrolment ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+      SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+            ${LearnerGroup.TABLE_ID} AS tableId 
+       FROM ChangeLog
+            JOIN ClazzEnrolment 
+                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
+                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
+                    ${Role.PERMISSION_PERSON_SELECT}
+                    $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2      
         """,
         //LearnerGroupMember
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${LearnerGroupMember.TABLE_ID} AS tableId FROM
-            ChangeLog
-            JOIN ClazzEnrolment ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+      SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+            ${LearnerGroupMember.TABLE_ID} AS tableId 
+       FROM ChangeLog
+            JOIN ClazzEnrolment 
+                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
+                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
+                    ${Role.PERMISSION_PERSON_SELECT}
+                    $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2      
         """,
         //PersonGroup
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${PersonGroup.TABLE_ID} AS tableId FROM
-            ChangeLog
-            JOIN ClazzEnrolment ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+      SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+            ${PersonGroup.TABLE_ID} AS tableId 
+       FROM ChangeLog
+            JOIN ClazzEnrolment 
+                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
+                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
+                    ${Role.PERMISSION_PERSON_SELECT}
+                    $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
         """,
         //PersonGroupMember
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${PersonGroupMember.TABLE_ID} AS tableId FROM
-            ChangeLog
-            JOIN ClazzEnrolment ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+      SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+            ${PersonGroupMember.TABLE_ID} AS tableId 
+       FROM ChangeLog
+            JOIN ClazzEnrolment 
+                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
+                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
+                    ${Role.PERMISSION_PERSON_SELECT}
+                    $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
         """,
         //PersonPicture
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${PersonPicture.TABLE_ID} AS tableId FROM
-            ChangeLog
-            JOIN ClazzEnrolment ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_PICTURE_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+      SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+            ${PersonPicture.TABLE_ID} AS tableId 
+       FROM ChangeLog
+            JOIN ClazzEnrolment 
+                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
+                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
+                    ${Role.PERMISSION_PERSON_PICTURE_SELECT}
+                    $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
+                    
         """,
         //SchoolMember
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${SchoolMember.TABLE_ID} AS tableId FROM
-            ChangeLog
-            JOIN ClazzEnrolment ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+      SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+            ${SchoolMember.TABLE_ID} AS tableId 
+       FROM ChangeLog
+            JOIN ClazzEnrolment 
+                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
+                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
+                    ${Role.PERMISSION_PERSON_SELECT}
+                    $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
         """,
         //StatementEntity
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${StatementEntity.TABLE_ID} AS tableId FROM
-            ChangeLog
-            JOIN ClazzEnrolment ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+      SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+            ${StatementEntity.TABLE_ID} AS tableId 
+       FROM ChangeLog
+            JOIN ClazzEnrolment 
+                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
+                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
+            $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
+                    ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}
+                    $JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
         """
     ],
     syncFindAllQuery = """
-        SELECT clazzEnrolment.* FROM
-            ClazzEnrolment
-            JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
-            WHERE DeviceSession.dsDeviceId = :clientId
+       SELECT clazzEnrolment.* 
+         FROM DeviceSession
+              JOIN PersonGroupMember 
+                   ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+              JOIN ScopedGrant 
+                   ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+                      AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_SELECT}) > 0 
+              JOIN ClazzEnrolment 
+                   ON $FROM_SCOPEDGRANT_TO_CLAZZENROLMENT_JOIN__ON_CLAUSE
+             WHERE DeviceSession.dsDeviceId = :clientId
     """)
 @Serializable
 open class ClazzEnrolment()  {
@@ -264,9 +273,54 @@ open class ClazzEnrolment()  {
 
     companion object {
 
+        const val FROM_SCOPEDGRANT_TO_CLAZZENROLMENT_JOIN__ON_CLAUSE = """
+            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                  AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+              OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
+                  AND ScopedGrant.sgEntityUid = ClazzEnrolment.clazzEnrolmentPersonUid)
+              OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+                  AND ScopedGrant.sgEntityUid = ClazzEnrolment.clazzEnrolmentClazzUid)
+              OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                  AND ClazzEnrolment.clazzEnrolmentClazzUid IN (
+                      SELECT clazzUid 
+                        FROM Clazz
+                       WHERE clazzSchoolUid = ScopedGrant.sgEntityUid))
+                  )
+        """
+
+        const val FROM_CLAZZENROLMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE = """
+            (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+                  AND ScopedGrant.sgEntityUid = ClazzEnrolment.clazzEnrolmentClazzUid)
+        """
+
+
+        /**
+         * When the sync status of other tables is being invalidated because of a change on
+         * ClazzEnrolment, we only need to consider grants that are scoped by class. Grants that
+         * are scoped by School or Person are not affected.
+         */
+        const val JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1 = """
+            JOIN ScopedGrant 
+                 ON $FROM_CLAZZENROLMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
+                    AND (ScopedGrant.sgPermissions &
+        """
+
+        const val JOIN_FROM_CLAZZENROLMENT_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2 = """
+            ) > 0  
+            JOIN PersonGroupMember 
+                   ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+            JOIN DeviceSession
+                   ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid    
+        """
+
         const val ROLE_STUDENT = 1000
 
         const val ROLE_TEACHER = 1001
+
+        /**
+         * The role given to someone who has the class code, however their registration is not yet approved.
+         */
+        const val ROLE_STUDENT_PENDING = 1002
 
         const val OUTCOME_IN_PROGRESS = 200
 
@@ -275,11 +329,6 @@ open class ClazzEnrolment()  {
         const val OUTCOME_FAILED = 202
 
         const val OUTCOME_DROPPED_OUT = 203
-
-        /**
-         * The role given to someone who has the class code, however their registration is not yet approved.
-         */
-        const val ROLE_STUDENT_PENDING = 1002
 
         const val TABLE_ID = 65
     }

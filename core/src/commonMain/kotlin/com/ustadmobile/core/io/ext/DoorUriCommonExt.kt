@@ -8,3 +8,4 @@ import com.ustadmobile.door.DoorUri
  */
 expect suspend fun DoorUri.guessMimeType(): String?
 
+expect suspend fun DoorUri.getSize(context: Any): Long

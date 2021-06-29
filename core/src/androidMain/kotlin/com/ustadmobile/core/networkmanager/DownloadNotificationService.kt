@@ -10,7 +10,7 @@ import android.os.Looper
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.GROUP_ALERT_SUMMARY
 import androidx.core.app.NotificationManagerCompat
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
@@ -298,6 +298,7 @@ class DownloadNotificationService : Service(), DIAware {
 
                 if(t.cijJobStatus >= JobStatus.COMPLETE_MIN) {
                     activeImportJobNotifications.remove(this)
+                    importJobLiveData.removeObserver(this)
                     mNotificationManager.cancel(notificationId)
                     cancel()
                 }

@@ -7,9 +7,15 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
+import org.kodein.di.DI
 import java.io.File
+import org.kodein.di.android.di
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 class StorageOptionsAutocompleteTextView: DropDownListAutoCompleteTextView<UMStorageDir> {
+
+    private val di: DI by di(context)
 
     private val messageIdDropdownAdapter = object: DropDownListAutoCompleteAdapter<UMStorageDir> {
 
@@ -17,7 +23,8 @@ class StorageOptionsAutocompleteTextView: DropDownListAutoCompleteTextView<UMSto
 
         @SuppressLint("UsableSpace")
         override fun getText(item: UMStorageDir): String {
-            return String.format(UstadMobileSystemImpl.instance.getString(
+            val systemImpl: UstadMobileSystemImpl = di.direct.instance()
+            return String.format(systemImpl.getString(
                     MessageID.download_storage_option_device, context as Any), item.name,
                     UMFileUtil.formatFileSize(File(item.dirURI).usableSpace))
         }

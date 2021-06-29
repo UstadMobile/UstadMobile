@@ -80,6 +80,8 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
     private var containerUid: Long = 0
 
+    private val systemImpl: UstadMobileSystemImpl by instance()
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         mBinding = FragmentVideoContentBinding.inflate(inflater, container, false).also {
             rootView = it.root
@@ -242,7 +244,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
     }
 
     fun showError() {
-        showSnackBar(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found,
+        showSnackBar(systemImpl.getString(MessageID.no_video_file_found,
                 requireContext()), {}, 0)
     }
 

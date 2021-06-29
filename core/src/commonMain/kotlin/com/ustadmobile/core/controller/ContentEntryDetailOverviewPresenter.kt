@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
@@ -12,9 +13,11 @@ import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
+import com.ustadmobile.core.util.ext.toDeepLink
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -22,10 +25,7 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
-import org.kodein.di.DI
-import org.kodein.di.instance
-import org.kodein.di.instanceOrNull
-import org.kodein.di.on
+import org.kodein.di.*
 
 
 class ContentEntryDetailOverviewPresenter(context: Any,
@@ -34,6 +34,14 @@ class ContentEntryDetailOverviewPresenter(context: Any,
 
     : UstadDetailPresenter<ContentEntryDetailOverviewView, ContentEntryWithMostRecentContainer>(context,
         arguments, view, di, lifecycleOwner) {
+
+    val deepLink: String
+        get() {
+            val activeEndpoint = di.direct.instance<UstadAccountManager>().activeAccount.endpointUrl
+            return arguments.toDeepLink(activeEndpoint, ContentEntryDetailView.VIEW_NAME)
+        }
+
+
 
     private val isDownloadEnabled: Boolean by di.instance<Boolean>(tag = TAG_DOWNLOAD_ENABLED)
 
@@ -54,9 +62,12 @@ class ContentEntryDetailOverviewPresenter(context: Any,
 
     private var contentEntryUid = 0L
 
+    private var clazzUid = 0L
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         contentEntryUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+        clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
         println(containerDownloadManager)
         containerDownloadManager?.also {
             GlobalScope.launch(doorMainDispatcher()) {
@@ -141,7 +152,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
             try {
                 entity?.contentEntryUid?.also {
                     contentEntryOpener.openEntry(context, it, isDownloadEnabled, false,
-                            arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false)
+                            arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false, clazzUid = clazzUid)
                 }
             } catch (e: Exception) {
                 if (e is NoAppFoundException) {
@@ -157,7 +168,8 @@ class ContentEntryDetailOverviewPresenter(context: Any,
     }
 
     fun handleOnTranslationClicked(entryUid: Long) {
-        systemImpl.go(ContentEntryDetailView.VIEW_NAME, mapOf(ARG_ENTITY_UID to entryUid.toString()), context)
+        systemImpl.go(ContentEntryDetailView.VIEW_NAME, mapOf(ARG_ENTITY_UID to entryUid.toString(),
+                                            ARG_CLAZZUID to clazzUid.toString()), context)
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
@@ -191,7 +203,8 @@ class ContentEntryDetailOverviewPresenter(context: Any,
             }
             systemImpl.go(LearnerGroupMemberListView.VIEW_NAME,
                     mapOf(ARG_CONTENT_ENTRY_UID to contentEntryUid.toString(),
-                            ARG_LEARNER_GROUP_UID to learnerGroup.learnerGroupUid.toString()),
+                            ARG_LEARNER_GROUP_UID to learnerGroup.learnerGroupUid.toString(),
+                            ARG_CLAZZUID to clazzUid.toString()),
                     context)
         }
     }

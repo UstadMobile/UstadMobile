@@ -1,6 +1,9 @@
 package com.ustadmobile.lib.contentscrapers.phetsimulation
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import okhttp3.mockwebserver.Dispatcher
@@ -17,6 +20,7 @@ import org.junit.Test
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
+import kotlin.random.Random
 
 
 class TestPhetContentScraper {
@@ -241,9 +245,11 @@ class TestPhetContentScraper {
     @Throws(IOException::class)
     fun givenServerOnline_whenUrlFound_findAllSimulations() {
 
-        val db = UmAppDatabase.getInstance(Any())
+        val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
+            randomUuid().toString())
+        val db = UmAppDatabase.getInstance(Any(), nodeIdAndAuth, true)
         val repo = db //db.getRepository("https://localhost", "")
-        db.clearAllTables()
+        db.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
 
         val index = IndexPhetContentScraper()
         val mockWebServer = MockWebServer()
@@ -295,10 +301,11 @@ class TestPhetContentScraper {
     @Test
     @Throws(IOException::class)
     fun givenDirectoryOfTranslationsIsCreated_findAllTranslationRelations() {
-
-        val db = UmAppDatabase.getInstance(Any())
+        val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
+            randomUuid().toString())
+        val db = UmAppDatabase.getInstance(Any(), nodeIdAndAuth, true)
         val repo = db//db.getRepository("https://localhost", "")
-        db.clearAllTables()
+        db.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
 
         val tmpDir = Files.createTempDirectory("testphetcontentscraper").toFile()
         val containerDir = Files.createTempDirectory("container").toFile()

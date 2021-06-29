@@ -7,7 +7,6 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzLog
@@ -18,10 +17,7 @@ import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.util.test.ext.insertClazzLogs
 import com.ustadmobile.util.test.ext.insertTestClazzAndMembers
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
-import org.junit.After
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -55,7 +51,7 @@ class ClazzLogListAttendanceFragmentTest : TestCase() {
             }
 
             launchFragmentInContainer(
-                    bundleOf(UstadView.ARG_FILTER_BY_CLAZZUID to clazzAndMembers.clazz.clazzUid.toString()),
+                    bundleOf(UstadView.ARG_CLAZZUID to clazzAndMembers.clazz.clazzUid.toString()),
                     themeResId = R.style.UmTheme_App) {
                 ClazzLogListAttendanceFragment().also {
                     it.installNavController(systemImplNavRule.navController)
@@ -115,7 +111,7 @@ class ClazzLogListAttendanceFragmentTest : TestCase() {
             }
 
             launchFragmentInContainer(
-                    bundleOf(UstadView.ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString()),
+                    bundleOf(UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString()),
                     themeResId = R.style.UmTheme_App
             ) {
                 ClazzLogListAttendanceFragment().also {

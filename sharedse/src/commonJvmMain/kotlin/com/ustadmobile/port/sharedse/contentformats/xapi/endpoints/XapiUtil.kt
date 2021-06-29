@@ -51,21 +51,24 @@ object XapiUtil {
     fun insertOrUpdateVerbLangMap(dao: XLangMapEntryDao, verb: Verb, verbEntity: VerbEntity, languageDao: LanguageDao, languageVariantDao: LanguageVariantDao) {
         val verbDisplay = verb.display
         if (verbDisplay != null) {
-            val listToInsert = verbDisplay.map {
-                val split = it.key.split("-")
-                val lang = insertOrUpdateLanguageByTwoCode(languageDao, split[0])
-                val variant = insertOrUpdateLanguageVariant(languageVariantDao, split[1], lang)
+            val listToInsert = verbDisplay.mapNotNull {
+                val lang = insertOrUpdateLanguageByTwoCode(languageDao, it.key.substringBefore('-'))
+                val variant = it.key.substringAfter("-", "").let {
+                    if(it != "")
+                        insertOrUpdateLanguageVariant(languageVariantDao, it, lang)
+                    else
+                        null
+                }
 
                 val existingMap = dao.getXLangMapFromVerb(verbEntity.verbUid, lang.langUid)
 
                 if(existingMap == null){
-                    XLangMapEntry(verbEntity.verbUid, 0, lang.langUid, variant?.langVariantUid
-                            ?: 0, it.value)
+                    XLangMapEntry(verbEntity.verbUid, 0, lang.langUid,
+                        variant?.langVariantUid ?: 0, it.value)
                 }else{
                     null
                 }
-
-            }?.filterNotNull()
+            }
 
             if (listToInsert != null && listToInsert.isNotEmpty()) {
                 dao.insertList(listToInsert)
@@ -278,7 +281,8 @@ object XapiUtil {
                                       instructorUid: Long, agentUid: Long, authorityUid: Long, teamUid: Long,
                                       subActorUid: Long, subVerbUid: Long, subObjectUid: Long,
                                       contentEntryUid: Long = 0L,
-                                      learnerGroupUid: Long, contentEntryRoot: Boolean = false): StatementEntity {
+                                      learnerGroupUid: Long, contentEntryRoot: Boolean = false
+                                      ,clazzUid: Long = 0L): StatementEntity {
 
         val statementId = statement.id
                 ?: throw IllegalArgumentException("Statement $statement to be stored has no id!")
@@ -303,6 +307,7 @@ object XapiUtil {
                 it.statementContentEntryUid = contentEntryUid
                 it.statementLearnerGroupUid = learnerGroupUid
                 it.contentEntryRoot = contentEntryRoot
+                it.statementClazzUid = clazzUid
                 it.fullStatement = gson.toJson(statement)
             }
 

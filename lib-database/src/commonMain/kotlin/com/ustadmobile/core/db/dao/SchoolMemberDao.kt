@@ -26,13 +26,19 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
     @Query("""
         SELECT * FROM SchoolMember WHERE schoolMemberSchoolUid = :schoolUid
         AND schoolMemberPersonUid = :personUid
-        AND schoolMemberRole = :role
+        AND (:role = 0 OR schoolMemberRole = :role)
+        AND (:timeFilter = 0 OR :timeFilter BETWEEN SchoolMember.schoolMemberJoinDate AND SchoolMember.schoolMemberLeftDate) 
+        AND CAST(schoolMemberActive AS INTEGER) = 1
     """)
-    abstract suspend fun findBySchoolAndPersonAndRole(schoolUid: Long, personUid: Long, role: Int): List<SchoolMember>
+    abstract suspend fun findBySchoolAndPersonAndRole(schoolUid: Long, personUid: Long, role: Int,
+        timeFilter: Long = 0): List<SchoolMember>
 
-
-    @Query("""SELECT SchoolMember.*, Person.*
-         ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2} 
+    @Query("""
+        SELECT SchoolMember.*, Person.*
+          FROM PersonGroupMember
+                ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
+                ${Role.PERMISSION_PERSON_SELECT} 
+                ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
           LEFT JOIN SchoolMember ON Person.personUid = SchoolMember.schoolMemberPersonUid 
          WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
          AND PersonGroupMember.groupMemberActive  

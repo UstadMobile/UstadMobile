@@ -105,6 +105,8 @@ open class ContentEntry() {
 
     var contentTypeFlag: Int = 0
 
+    var contentOwner: Long = 0
+
     @LocalChangeSeqNum
     var contentEntryLocalChangeSeqNum: Long = 0
 

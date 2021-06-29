@@ -115,7 +115,7 @@ class TimeZoneListFragment : UstadBaseFragment() , TimeZoneListView, OnSearchSub
             }
         }
 
-        const val RESULT_TIMEZONE_KEY = "timezone"
+
 
     }
 }

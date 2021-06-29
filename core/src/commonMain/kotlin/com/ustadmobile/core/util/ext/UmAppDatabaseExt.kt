@@ -96,12 +96,22 @@ suspend fun UmAppDatabase.createPersonGroupAndMemberWithEnrolment(entity: ClazzE
  * Enrol the given person into the given class. The effective date of joining is midnight as per
  * the timezone of the class (e.g. when a teacher adds a student to the system who just joined and
  * wants to mark their attendance for the same day).
+ *
+ * @throws IllegalStateException when the person is already in the class
  */
+@Throws(AlreadyEnroledInClassException::class)
 suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Person, clazzUid: Long,
                                                               role: Int,
                                                               clazzWithSchool: ClazzWithSchool? = null): ClazzEnrolmentWithPerson {
     val clazzWithSchoolVal = clazzWithSchool ?: clazzDao.getClazzWithSchool(clazzUid)
         ?: throw IllegalArgumentException("Class does not exist")
+
+    val existingEnrolments = clazzEnrolmentDao.getAllClazzEnrolledAtTimeAsync(clazzUid,
+        systemTimeInMillis(), 0, personToEnrol.personUid)
+
+    if(existingEnrolments.isNotEmpty()) {
+        throw AlreadyEnroledInClassException(existingEnrolments.first())
+    }
 
     val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
     val joinTime = DateTime.now().toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
@@ -138,11 +148,18 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Per
  * the timezone of the school (e.g. when a teacher adds a student to the system who just joined and
  * wants to mark their attendance for the same day).
  */
+@Throws(AlreadyEnroledInSchoolException::class)
 suspend fun UmAppDatabase.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol: Person, schoolUid: Long,
                                                               role: Int)
         : SchoolMemberWithPerson {
     val schoolVal =  schoolDao.findByUidAsync(schoolUid)
-    ?: throw IllegalArgumentException("School does not exist")
+        ?: throw IllegalArgumentException("School does not exist")
+
+    val existingEnrolment = schoolMemberDao.findBySchoolAndPersonAndRole(schoolUid,
+        personToEnrol.personUid, 0, systemTimeInMillis())
+
+    if(existingEnrolment.isNotEmpty())
+        throw AlreadyEnroledInSchoolException(existingEnrolment.first())
 
     val schoolTimeZone = schoolVal.schoolTimeZone?: "UTC"
     val joinTime = DateTime.now().toOffsetByTimezone(schoolTimeZone).localMidnight.utc.unixMillisLong
@@ -180,27 +197,29 @@ suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: PersonWithClaz
 
     //find the group member and update that
     val numGroupUpdates = personGroupMemberDao.moveGroupAsync(enrolment.personUid,
-            effectiveClazz.clazzStudentsPersonGroupUid,
-            effectiveClazz.clazzPendingStudentsPersonGroupUid)
+        effectiveClazz.clazzStudentsPersonGroupUid,
+        effectiveClazz.clazzPendingStudentsPersonGroupUid)
 
     if(numGroupUpdates != 1) {
         throw IllegalStateException("Approve pending clazz member - no membership of clazz's pending group!")
     }
 
     //change the role
-    clazzEnrolmentDao.updateClazzEnrolmentRole(enrolment.personUid, clazzUid, ClazzEnrolment.ROLE_STUDENT)
+    val enrolmentUpdateCount = clazzEnrolmentDao.updateClazzEnrolmentRole(enrolment.personUid, clazzUid,
+        newRole = ClazzEnrolment.ROLE_STUDENT, oldRole = ClazzEnrolment.ROLE_STUDENT_PENDING)
+    if(enrolmentUpdateCount != 1) {
+        throw IllegalStateException("Approve pending clazz member - no update of enrolment!")
+    }
 }
 
 suspend fun UmAppDatabase.declinePendingClazzEnrolment(enrolment: PersonWithClazzEnrolmentDetails, clazzUid: Long){
     val effectiveClazz = clazzDao.findByUidAsync(clazzUid)
-            ?: throw IllegalStateException("Class does not exist")
+        ?: throw IllegalStateException("Class does not exist")
 
+        clazzEnrolmentDao.updateClazzEnrolmentActiveForPersonAndClazz(enrolment.personUid,
+            clazzUid, ClazzEnrolment.ROLE_STUDENT_PENDING, false)
 
-    clazzEnrolmentDao.updateClazzEnrolmentActiveForPersonAndClazz(
-            enrolment.personUid,
-            clazzUid,false)
-
-    personGroupMemberDao.setGroupMemberToInActive(enrolment.personUid,
+        personGroupMemberDao.setGroupMemberToInActive(enrolment.personUid,
             effectiveClazz.clazzPendingStudentsPersonGroupUid)
 
 }
@@ -226,8 +245,7 @@ suspend fun UmAppDatabase.approvePendingSchoolMember(member: SchoolMember, schoo
 /**
  * Inserts the person, sets its group and groupmember. Does not check if its an update
  */
-suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(entity: T,
-                loggedInPerson: Person? = null): T{
+suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(entity: T): T{
 
     val groupPerson = PersonGroup().apply {
         groupName = "Person individual group"
@@ -243,6 +261,9 @@ suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(entity: T,
     //Assign person to PersonGroup ie: Create PersonGroupMember
     personGroupMemberDao.insertAsync(
             PersonGroupMember(entity.personUid, entity.personGroupUid))
+
+    //Grant the person all permissions on their own data
+    grantScopedPermission(entity, Role.ALL_PERMISSIONS, Person.TABLE_ID, entity.personUid)
 
     return entity
 }
@@ -406,12 +427,12 @@ suspend fun UmAppDatabase.createNewSchoolAndGroups(school: School,
 
     school.schoolUid = schoolDao.insertAsync(school)
 
-    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
-            school.schoolTeachersPersonGroupUid, Role.ROLE_SCHOOL_STAFF_UID.toLong()))
-    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
-            school.schoolStudentsPersonGroupUid, Role.ROLE_SCHOOL_STUDENT_UID.toLong()))
-    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
-            school.schoolPendingStudentsPersonGroupUid, Role.ROLE_SCHOOL_STUDENT_PENDING_UID.toLong()))
+//    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
+//            school.schoolTeachersPersonGroupUid, Role.ROLE_SCHOOL_STAFF_UID.toLong()))
+//    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
+//            school.schoolStudentsPersonGroupUid, Role.ROLE_SCHOOL_STUDENT_UID.toLong()))
+//    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
+//            school.schoolPendingStudentsPersonGroupUid, Role.ROLE_SCHOOL_STUDENT_PENDING_UID.toLong()))
 
     return school.schoolUid
 }
@@ -549,4 +570,21 @@ suspend fun UmAppDatabase.linkExistingContainerEntries(containerUid: Long,
             entriesNeedDownloaded)
 }
 
+data class ScopedGrantResult(val sgUid: Long)
 
+suspend fun UmAppDatabase.grantScopedPermission(toGroupUid: Long, permissions: Long,
+                                                scopeTableId: Int, scopeEntityUid: Long) : ScopedGrantResult{
+    val sgUid = scopedGrantDao.insertAsync(ScopedGrant().apply {
+        sgGroupUid = toGroupUid
+        sgPermissions = permissions
+        sgTableId = scopeTableId
+        sgEntityUid = scopeEntityUid
+    })
+
+    return ScopedGrantResult(sgUid)
+}
+
+suspend fun UmAppDatabase.grantScopedPermission(toPerson: Person, permissions: Long,
+                                                scopeTableId: Int, scopeEntityUid: Long): ScopedGrantResult {
+    return grantScopedPermission(toPerson.personGroupUid, permissions, scopeTableId, scopeEntityUid)
+}

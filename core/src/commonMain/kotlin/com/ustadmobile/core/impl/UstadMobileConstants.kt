@@ -62,4 +62,10 @@ object UstadMobileConstants {
             "ne" to "नेपाली",
             "my" to "မြန်မာစာ")
 
+    /**
+     * Anyone under this age is considered a minor. They can only register with the consent of a
+     * parent/guardian.
+     */
+    val MINOR_AGE_THRESHOLD = 13
+
 }

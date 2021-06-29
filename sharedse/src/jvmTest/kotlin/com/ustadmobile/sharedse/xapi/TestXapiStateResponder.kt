@@ -34,11 +34,10 @@ import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import okhttp3.OkHttpClient
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.junit.*
+import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
+import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -65,12 +64,15 @@ class TestXapiStateResponder {
 
     private lateinit var okHttpClient: OkHttpClient
 
+    @JvmField
+    @Rule
+    val temporaryFolder = TemporaryFolder()
+
     @Before
     @Throws(IOException::class)
     fun setup() {
         checkJndiSetup()
         val endpointScope = EndpointScope()
-        val systemImplSpy = spy(UstadMobileSystemImpl.instance)
 
         okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp){
@@ -83,7 +85,10 @@ class TestXapiStateResponder {
         }
 
         di = DI {
-            bind<UstadMobileSystemImpl>() with singleton { systemImplSpy!! }
+            bind<UstadMobileSystemImpl>() with singleton {
+                spy(UstadMobileSystemImpl(XmlPullParserFactory.newInstance(),
+                    temporaryFolder.newFolder()))
+            }
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()

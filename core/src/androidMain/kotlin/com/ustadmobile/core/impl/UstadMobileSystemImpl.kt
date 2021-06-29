@@ -52,6 +52,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.navigation.*
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.nav.toNavOptions
 import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
@@ -60,6 +61,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
+import org.kodein.di.android.di
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.*
@@ -131,7 +133,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         override fun doInBackground(vararg params: Boolean?): String {
             val apkFile = File(context.applicationInfo.sourceDir)
             //TODO: replace this with something from appconfig.properties
-            val impl = instance
+            val di: DI by di(context)
+            val impl : UstadMobileSystemImpl = di.direct.instance()
 
             val baseName = impl.getAppConfigString(AppConfig.KEY_APP_BASE_NAME, "", context) + "-" +
                     impl.getVersion(context)
@@ -193,7 +196,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any,
                            flags: Int, ustadGoOptions: UstadGoOptions) {
 
-        val destinationQueryPos = viewName!!.indexOf('?')
+        val destinationQueryPos = viewName.indexOf('?')
         val viewNameOnly = if (destinationQueryPos == -1) {
             viewName
         }else {
@@ -210,26 +213,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             val navController = navController ?: (context as Activity).findNavController(destinationProvider.navControllerViewId)
 
             //Note: default could be set using style as per https://stackoverflow.com/questions/50482095/how-do-i-define-default-animations-for-navigation-actions
-            val options = navOptions {
-                anim {
-                    enter = android.R.anim.slide_in_left
-                    exit = android.R.anim.slide_out_right
-                    popEnter = android.R.anim.slide_in_left
-                    popExit = android.R.anim.slide_out_right
-                }
-
-                val popUpToViewName = ustadGoOptions.popUpToViewName
-                if(popUpToViewName != null) {
-                    val popUpToDestId = if(popUpToViewName == UstadView.CURRENT_DEST) {
-                        navController.currentDestination?.id ?: 0
-                    }else {
-                        destinationProvider.lookupDestinationName(popUpToViewName)
-                                ?.destinationId ?: 0
-                    }
-
-                    popUpTo(popUpToDestId) { inclusive = ustadGoOptions.popUpToInclusive }
-                }
-            }
+            val options = ustadGoOptions.toNavOptions(navController, destinationProvider)
 
             navController.navigate(ustadDestination.destinationId,
                     allArgs.toBundleWithNullableValues(), options)
@@ -622,6 +606,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
          * @return A singleton instance
          */
         @JvmStatic
+        @Deprecated("This old static getter should not be used! Use DI instead!")
         actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
 
     }

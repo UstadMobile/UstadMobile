@@ -105,6 +105,7 @@ class EpubContentPresenter(context: Any,
                            private val epubContentView: EpubContentView, di: DI)
     : UstadBaseController<EpubContentView>(context, args, epubContentView, di) {
 
+    private var clazzUid: Long =0L
     private var ocf: OcfDocument? = null
 
     private var mountedPath: String = ""
@@ -145,6 +146,7 @@ class EpubContentPresenter(context: Any,
         super.onCreate(savedState)
         val containerUid = arguments[UstadView.ARG_CONTAINER_UID]?.toLong() ?: 100
         contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
+        clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
         contextRegistration = randomUuid().toString()
         view.progressValue = -1
         view.progressVisible = true
@@ -172,7 +174,7 @@ class EpubContentPresenter(context: Any,
             val progress = ((maxPageReached + 1) * 100) / max(linearSpineUrls.size, 1)
             xapiStatementEndpoint.storeProgressStatement(
                     accountManager.activeAccount,
-                    contentEntry, progress, duration, contextRegistration)
+                    contentEntry, progress, duration, contextRegistration, clazzUid)
         }
 
     }

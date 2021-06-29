@@ -1,6 +1,9 @@
 package com.ustadmobile.lib.contentscrapers
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper
 
 import org.apache.commons.io.IOUtils
@@ -21,10 +24,14 @@ import okio.buffer
 import okio.source
 import org.junit.Before
 import java.net.URL
+import kotlin.random.Random
 
 
 class TestCK12ContentScraper {
     private lateinit var db: UmAppDatabase
+
+    private lateinit var nodeIdAndAuth: NodeIdAndAuth
+
     private val PRACTICE_JSON = "/com/ustadmobile/lib/contentscrapers/ck12/ck12-practice.txt"
     private val TEST_JSON = "/com/ustadmobile/lib/contentscrapers/ck12/ck12-test.txt"
     private val QUESTION_JSON = "/com/ustadmobile/lib/contentscrapers/ck12/ck12-question-1.txt"
@@ -55,8 +62,9 @@ class TestCK12ContentScraper {
     @Before
     fun setup() {
         ContentScraperUtil.checkIfPathsToDriversExist()
-        db = UmAppDatabase.getInstance(Any())
-        db.clearAllTables()
+        nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
+        db = UmAppDatabase.getInstance(Any(), nodeIdAndAuth, true)
+        db.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
     }
 
 
@@ -321,7 +329,7 @@ class TestCK12ContentScraper {
     @Test
     fun test() {
 
-        var db = UmAppDatabase.getInstance(Any())
+        var db = UmAppDatabase.getInstance(Any(), nodeIdAndAuth, true)
 
         val entry = ContentEntry()
         entry.contentEntryUid = -102

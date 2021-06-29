@@ -16,6 +16,7 @@ import com.google.android.material.datepicker.MaterialDatePicker.Builder.datePic
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.systemImpl
 import java.text.MessageFormat
 import java.util.*
 
@@ -118,7 +119,6 @@ fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: Inve
 
     val builder = AlertDialog.Builder(context)
 
-    val systemImpl = UstadMobileSystemImpl.instance
     val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_date_picker,
             null, false)
 
@@ -127,7 +127,7 @@ fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: Inve
     val picker = dialogView.findViewById<DatePicker>(R.id.date_picker)
     picker.init(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH), null)
 
-    builder.setPositiveButton(systemImpl.getString(MessageID.ok,
+    builder.setPositiveButton(et.systemImpl.getString(MessageID.ok,
             context)) { dialog, _ ->
 
         c[Calendar.DAY_OF_MONTH] = picker.dayOfMonth
@@ -138,7 +138,7 @@ fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: Inve
         updateDateOnEditText(et, c.timeInMillis)
         inverseBindingListener.onChange()
     }
-    builder.setNegativeButton(systemImpl.getString(MessageID.cancel,
+    builder.setNegativeButton(et.systemImpl.getString(MessageID.cancel,
             context)) { dialog, _ -> dialog.dismiss() }
     builder.show()
 }
@@ -213,5 +213,39 @@ fun getRealStringValue(et: TextView): String {
 @BindingAdapter("dateUseSpinners")
 fun TextView.setDateUseSpinners(dateUseSpinners: Boolean) {
     setTag(R.id.tag_dateusespinner, dateUseSpinners)
+}
+
+
+@BindingAdapter("timeInMillis")
+fun DatePicker.setTimeInMillis(timeInMillis: Long) {
+    setTag(R.id.tag_datelong, timeInMillis)
+    initIfReady()
+}
+
+@BindingAdapter("timeInMillisAttrChanged")
+fun DatePicker.setTimeInMillisChangeListener(inverseBindingListener: InverseBindingListener) {
+    setTag(R.id.tag_inverse_binding_listener, inverseBindingListener)
+    initIfReady()
+}
+
+private fun DatePicker.initIfReady() {
+    val bindingListener = getTag(R.id.tag_inverse_binding_listener) as? InverseBindingListener
+    val timeInMillis = getTag(R.id.tag_datelong) as? Long ?: 0L
+
+    val calendar = Calendar.getInstance()
+    calendar.timeInMillis = timeInMillis
+
+    init(calendar[Calendar.YEAR], calendar[Calendar.MONTH], calendar[Calendar.DAY_OF_MONTH]) {_, _, _, _ ->
+        bindingListener?.onChange()
+    }
+}
+
+@InverseBindingAdapter(attribute = "timeInMillis")
+fun DatePicker.getTimeInMillis() : Long{
+    return Calendar.getInstance().also {
+        it[Calendar.YEAR] = this.year
+        it[Calendar.MONTH] = this.month
+        it[Calendar.DAY_OF_MONTH] = this.dayOfMonth
+    }.timeInMillis
 }
 

@@ -10,55 +10,67 @@ import com.ustadmobile.lib.db.entities.Language
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParserException
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
 import java.util.*
-import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
+import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
+import com.ustadmobile.core.io.ext.skipToEntry
+import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.openInputStream
 import org.xmlpull.v1.XmlPullParserFactory
 
 class EpubTypePluginCommonJvm() : EpubTypePlugin() {
 
-    override suspend fun extractMetadata(filePath: String): ContentEntryWithLanguage? {
+    override suspend fun extractMetadata(uri: String, context: Any): ContentEntryWithLanguage? {
         return withContext(Dispatchers.Default) {
-            var contentEntry: ContentEntryWithLanguage? = null
+            val xppFactory = XmlPullParserFactory.newInstance()
             try {
-                val file = File(filePath.removePrefix("file://"))
-                ZipInputStream(FileInputStream(file)).use {
-                    var zipEntry: ZipEntry? = null
-                    while ({ zipEntry = it.nextEntry; zipEntry }() != null) {
 
-                        val fileName = zipEntry?.name
-                        if (fileName!!.contains(".opf")) {
-                            val xppFactory = XmlPullParserFactory.newInstance()
-                            val xpp = xppFactory.newPullParser()
-                            xpp.setInput(it, "UTF-8")
-                            val opfDocument = OpfDocument()
-                            opfDocument.loadFromOPF(xpp)
-                            val contentEntryVal = ContentEntryWithLanguage()
-                            contentEntryVal.contentFlags = ContentEntry.FLAG_IMPORTED
-                            contentEntryVal.contentTypeFlag = ContentEntry.TYPE_EBOOK
-                            contentEntryVal.licenseType = ContentEntry.LICENSE_TYPE_OTHER
-                            contentEntryVal.title = if(opfDocument.title.isNullOrEmpty()) file.nameWithoutExtension else opfDocument.title
-                            contentEntryVal.author = opfDocument.getCreator(0)?.creator
-                            contentEntryVal.description = opfDocument.description
-                            contentEntryVal.leaf = true
-                            contentEntryVal.entryId = opfDocument.id.alternative(UUID.randomUUID().toString())
-                            val languageCode = opfDocument.getLanguage(0)
-                            if (languageCode != null) {
-                                val language = Language()
-                                language.iso_639_1_standard = languageCode
-                                contentEntryVal.language = language
+                val doorUri = DoorUri.parse(uri)
+                val inputStream = doorUri.openInputStream(context)
+
+                val opfPath: String = ZipInputStream(inputStream).use {
+                    val metaDataEntry = it.skipToEntry { it.name == "META-INF/container.xml" }
+                    if(metaDataEntry != null) {
+                        val ocfContainer = OcfDocument()
+                        val xpp = xppFactory.newPullParser()
+                        xpp.setInput(it, "UTF-8")
+                        ocfContainer.loadFromParser(xpp)
+
+                        ocfContainer.rootFiles.firstOrNull()?.fullPath
+                    }else {
+                        null
+                    }
+                } ?: return@withContext null
+
+                return@withContext ZipInputStream(doorUri.openInputStream(context)).use {
+                    val entry = it.skipToEntry { it.name == opfPath } ?: return@use null
+
+                    val xpp = xppFactory.newPullParser()
+                    xpp.setInput(it, "UTF-8")
+                    val opfDocument = OpfDocument()
+                    opfDocument.loadFromOPF(xpp)
+
+                    ContentEntryWithLanguage().apply {
+                        contentFlags = ContentEntry.FLAG_IMPORTED
+                        contentTypeFlag = ContentEntry.TYPE_EBOOK
+                        licenseType = ContentEntry.LICENSE_TYPE_OTHER
+                        title = if(opfDocument.title.isNullOrEmpty()) doorUri.getFileName(context)
+                                else opfDocument.title
+                        author = opfDocument.getCreator(0)?.creator
+                        description = opfDocument.description
+                        leaf = true
+                        entryId = opfDocument.id.alternative(UUID.randomUUID().toString())
+                        val languageCode = opfDocument.getLanguage(0)
+                        if (languageCode != null) {
+                            this.language = Language().apply {
+                                iso_639_1_standard = languageCode
                             }
-                            contentEntry = contentEntryVal
-                            break
                         }
-
                     }
                 }
             } catch (e: IOException) {
@@ -67,11 +79,11 @@ class EpubTypePluginCommonJvm() : EpubTypePlugin() {
                 e.printStackTrace()
             }
 
-            contentEntry
+            null
         }
     }
 
-    override suspend fun importToContainer(filePath: String, conversionParams: Map<String, String>,
+    override suspend fun importToContainer(uri: String, conversionParams: Map<String, String>,
                                            contentEntryUid: Long, mimeType: String,
                                            containerBaseDir: String, context: Any,
                                            db: UmAppDatabase, repo: UmAppDatabase,
@@ -79,20 +91,21 @@ class EpubTypePluginCommonJvm() : EpubTypePlugin() {
 
         return withContext(Dispatchers.Default) {
 
-            val file = File(filePath)
+            val doorUri = DoorUri.parse(uri)
             val container = Container().apply {
                 containerContentEntryUid = contentEntryUid
                 cntLastModified = System.currentTimeMillis()
-                fileSize = file.length()
                 this.mimeType = mimeType
                 containerUid = repo.containerDao.insert(this)
             }
 
             repo.addEntriesToContainerFromZip(container.containerUid,
-                    File(filePath).toDoorUri(),
-                    ContainerAddOptions(storageDirUri = File(containerBaseDir).toDoorUri()))
+                    doorUri,
+                    ContainerAddOptions(storageDirUri = File(containerBaseDir).toDoorUri()), context)
 
-            container
+            val containerWithSize = repo.containerDao.findByUid(container.containerUid) ?: container
+
+            containerWithSize
         }
     }
 }

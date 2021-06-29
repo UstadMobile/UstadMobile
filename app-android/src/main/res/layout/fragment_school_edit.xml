@@ -9,6 +9,7 @@
         <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener"/>
+        <import type="com.ustadmobile.core.controller.SchoolEditPresenter"/>
 
 
         <variable
@@ -24,12 +25,12 @@
             type="boolean" />
 
         <variable
-            name="genderOptions"
-            type="java.util.List&lt;IdOption&gt;"/>
-
-        <variable
             name="activityEventHandler"
             type="com.ustadmobile.port.android.view.SchoolEditFragmentEventHandler" />
+
+        <variable
+            name="mPresenter"
+            type="SchoolEditPresenter" />
 
     </data>
 
@@ -47,28 +48,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/fragment_school_edit_school_picture"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/dimen_200dp"
-                android:contentDescription="@string/student_image"
-                android:src="@drawable/ic_photo_camera_black_24dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                android:visibility="gone"
-                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_appbar" />
-
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/fragment_school_edit_school_name_tip"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
+                android:layout_marginBottom="@dimen/dimen_8dp"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_picture">
+                app:layout_constraintTop_toTopOf="parent">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
@@ -160,28 +151,6 @@
                     tools:text="123, Main Street, Nairobi, Kenya" />
             </com.google.android.material.textfield.TextInputLayout>
 
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/fragment_school_edit_gender_til"
-                app:layout_constraintStart_toStartOf="parent"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/dimen_8dp"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_address_tip">
-
-                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:selectedMessageIdOption="@={school.schoolGender}"
-                    app:messageIdOptions="@{genderOptions}"
-                    android:hint="@string/gender_literal"/>
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-
-
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/fragment_school_edit_school_phonenumber_tip"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -191,7 +160,7 @@
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_gender_til">
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_address_tip">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
@@ -224,39 +193,13 @@
             </com.google.android.material.textfield.TextInputLayout>
 
 
-
-
-            <TextView
-                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-                android:id="@+id/fragment_school_edit_classes_heading"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/dimen_8dp"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                android:text="@string/classes"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_email_tip" />
-
-
-            <include layout="@layout/item_createnew"
+            <include layout="@layout/item_scoped_grant_one_to_many_list"
+                android:id="@+id/school_edit_fragment_permissions_inc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:onClickNew="@{() -> activityEventHandler.onClickAddClazz()}"
-                app:createNewText="@{@string/add_a_class}"
-                app:layout_constraintTop_toBottomOf=
-                    "@+id/fragment_school_edit_classes_heading"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_email_tip"
+                app:scopedGrantsOneToManyListener="@{mPresenter.scopedGrantOneToManyHelper}"
                 />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/fragment_school_edit_class_rv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                tools:listitem="@layout/item_clazz_simple_edit"
-                tools:itemCount="2"
-                app:layout_constraintTop_toBottomOf="@+id/item_createnew_layout"
-                app:layout_constraintStart_toStartOf="parent" />
-
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

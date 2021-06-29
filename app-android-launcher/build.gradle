@@ -52,11 +52,12 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-        //coreLibraryDesugaringEnabled true
+        coreLibraryDesugaringEnabled true
     }
 
     defaultConfig {
         applicationId "${baseAppId}.launcher"
+        resConfigs "en","fa","ps","ar","tg","bn","ne","my"
         minSdkVersion 21
         targetSdkVersion 30
         versionCode rootProject.ext.ustadVersionCode
@@ -125,7 +126,7 @@ configurations.all {
 
 
 dependencies {
-    //coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
 
     api project(':core')
     api project(':sharedse')
@@ -134,10 +135,8 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
-    implementation "com.github.aakira:napier:$version_napier"
+    implementation "io.github.aakira:napier:$version_napier"
     implementation "com.google.android.material:material:$version_android_material"
-
-    implementation "com.google.android.gms:play-services-safetynet:$version_android_play_services_safetynet"
 
     debugImplementation "com.squareup.leakcanary:leakcanary-android:$version_android_leakcanary"
 

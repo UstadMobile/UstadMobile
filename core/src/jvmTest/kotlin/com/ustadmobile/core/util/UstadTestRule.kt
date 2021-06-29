@@ -10,14 +10,20 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.util.randomUuid
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import com.ustadmobile.util.test.nav.TestUstadNavController
 import com.ustadmobile.xmlpullparserkmp.XmlPullParser
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
@@ -28,7 +34,10 @@ import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
+import java.io.File
+import java.nio.file.Files
 import javax.naming.InitialContext
+import kotlin.random.Random
 
 fun DI.onActiveAccount(): DI {
     val accountManager: UstadAccountManager by instance()
@@ -55,7 +64,7 @@ class UstadTestRule: TestWatcher() {
 
     lateinit var endpointScope: EndpointScope
 
-    private var systemImplSpy: UstadMobileSystemImpl? = null
+    private lateinit var systemImplSpy: UstadMobileSystemImpl
 
     lateinit var diModule: DI.Module
 
@@ -63,9 +72,23 @@ class UstadTestRule: TestWatcher() {
 
     lateinit var okHttpClient: OkHttpClient
 
+    lateinit var tempFolder: File
+
+    lateinit var nodeIdAndAuth: NodeIdAndAuth
+
+    val xppFactory = XmlPullParserFactory.newInstance().also {
+        it.isNamespaceAware = true
+    }
+
+
     override fun starting(description: Description?) {
+        val startTime = systemTimeInMillis()
+        tempFolder = Files.createTempDirectory("ustadtestrule").toFile()
+
+        nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
+
         endpointScope = EndpointScope()
-        systemImplSpy = spy(UstadMobileSystemImpl.instance)
+        systemImplSpy = spy(UstadMobileSystemImpl(xppFactory, tempFolder))
 
         okHttpClient = OkHttpClient.Builder().build()
 
@@ -79,22 +102,27 @@ class UstadTestRule: TestWatcher() {
         }
 
         diModule = DI.Module("UstadTestRule") {
-            bind<UstadMobileSystemImpl>() with singleton { systemImplSpy!! }
+            bind<UstadMobileSystemImpl>() with singleton { systemImplSpy }
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
-            bind<UmAppDatabase>(tag = TAG_DB) with scoped(endpointScope!!).singleton {
+            bind<UmAppDatabase>(tag = TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName).also {
-                    it.clearAllTables()
+                spy(UmAppDatabase.getInstance(Any(), dbName, nodeIdAndAuth).also {
+                    it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, isPrimary = false)
                 })
             }
 
-            bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope!!).singleton {
+            bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope).singleton {
                 spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(
-                    Any(), context.url, instance(), instance())))
+                    Any(), context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
+                    instance(), instance())))
             }
 
-            bind<NetworkManagerBle>() with singleton { mock<NetworkManagerBle> { } }
+            bind<NetworkManagerBle>() with singleton {
+                mock<NetworkManagerBle> {
+                    on { connectivityStatus }.thenReturn(mock {})
+                }
+            }
 
             bind<ContainerMounter>() with singleton { EmbeddedHTTPD(0, di).also { it.start() } }
 
@@ -111,13 +139,15 @@ class UstadTestRule: TestWatcher() {
             }
 
             bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
-                XmlPullParserFactory.newInstance().also {
-                    it.isNamespaceAware = true
-                }
+                xppFactory
             }
 
             bind<XmlPullParserFactory>(tag = DiTag.XPP_FACTORY_NSUNAWARE) with singleton {
                 XmlPullParserFactory.newInstance()
+            }
+
+            bind<UstadNavController>() with singleton {
+                spy(TestUstadNavController(di))
             }
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
@@ -125,8 +155,8 @@ class UstadTestRule: TestWatcher() {
     }
 
     override fun finished(description: Description?) {
-        UstadMobileSystemImpl.instance.clearPrefs()
         httpClient.close()
+        tempFolder.deleteRecursively()
     }
 
 }

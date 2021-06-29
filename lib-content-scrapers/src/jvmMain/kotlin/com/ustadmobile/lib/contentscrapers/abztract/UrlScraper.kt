@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.abztract
 
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.util.ext.alternative
@@ -8,13 +8,14 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.SCRAPER_TAG
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
+import com.ustadmobile.lib.contentscrapers.util.downloadToFile
 import com.ustadmobile.lib.db.entities.ContainerETag
 import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
-import org.apache.commons.io.FileUtils
+import okhttp3.Request
 import org.apache.commons.io.FilenameUtils
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -52,12 +53,12 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
         val urlName = URLDecoder.decode(url.path, ScraperConstants.UTF_ENCODING)
         val name = FilenameUtils.getName(urlName)
         tempDir = Files.createTempDirectory("apache").toFile()
-        var file = File(tempDir, name)
-        FileUtils.copyURLToFile(url, file)
+        val file = File(tempDir, name)
+        okHttpClient.newCall(Request.Builder().url(url).build()).downloadToFile(file)
 
         runBlocking {
 
-            val metadata = contentImportManager.extractMetadata(file.path)
+            val metadata = contentImportManager.extractMetadata(file.toURI().toString())
 
             if (metadata == null) {
                 Napier.i("$logPrefix with sourceUrl $sourceUrl had no metadata found, not supported", tag = SCRAPER_TAG)
@@ -96,7 +97,7 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
             if(params != null){
                 conversionParams = Json.decodeFromString(MapSerializer(String.serializer(), String.serializer()), params)
             }
-            val container = contentImportManager.importFileToContainer(file.path, metadata.mimeType,
+            val container = contentImportManager.importFileToContainer(file.toURI().toString(), metadata.mimeType,
                     fileEntry.contentEntryUid, containerFolder.path, conversionParams){
 
             }
