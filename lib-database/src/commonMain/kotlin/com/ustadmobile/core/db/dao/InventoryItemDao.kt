@@ -62,14 +62,20 @@ abstract class InventoryItemDao : BaseDao<InventoryItem> {
 			LEFT JOIN Person AS MEMBER ON MEMBER.personUid = PersonGroupMember.groupMemberPersonUid
 	        LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid
 	        LEFT JOIN InventoryItem ON InventoryItem.inventoryItemUid = 0
+            LEFT JOIN Product ON Product.productUid = :productUid
+            LEFT JOIN Person AS ProductPerson ON ProductPerson.personUid = Product.productPersonAdded
         WHERE
             CAST(PersonGroupMember.groupMemberActive AS INTEGER) = 1 
 			AND MEMBER.personGoldoziType = 2
 			AND CAST(MEMBER.admin AS INTEGER) = 0
 			AND CAST(MEMBER.active AS INTEGER) = 1
 			AND 
-			(PersonGroupMember.groupMemberGroupUid = MLE.personWeGroupUid OR CAST(MEMBER.admin AS INTEGER) = 1)
-			OR (CAST(MLE.admin AS INTEGER) = 1 AND MEMBER.personGoldoziType = 2)
+			(
+            PersonGroupMember.groupMemberGroupUid = MLE.personWeGroupUid 
+			OR (CAST(MLE.admin AS INTEGER) = 1  
+                AND PersonGroupMember.groupMemberGroupUid = ProductPerson.personWeGroupUid 
+                )
+            )
         """
 
         const val QUERY_GET_STOCK_LIST_BY_PRODUCT_AND_DELIVERY = """

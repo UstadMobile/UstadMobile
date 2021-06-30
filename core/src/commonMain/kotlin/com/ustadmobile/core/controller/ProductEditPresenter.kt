@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ProductDetailView
@@ -102,6 +103,7 @@ class ProductEditPresenter(context: Any,
             val loggedInPersonUid = accountManager.activeAccount.personUid
             entity.productPersonAdded = loggedInPersonUid
             if(entity.productUid == 0L) {
+                entity.productDateAdded = UMCalendarUtil.getDateInMilliPlusDays(0)
                 entity.productUid = repo.productDao.insertAsync(entity)
             }else {
                 repo.productDao.updateAsync(entity)
