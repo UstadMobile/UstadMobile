@@ -2,15 +2,14 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
-import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ContentEntryList2Presenter
+import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.KEY_SELECTED_ITEMS
 import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.SAVEDSTATE_KEY_FOLDER
-import com.ustadmobile.core.controller.TimeZoneListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -22,9 +21,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_TITLE
-import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import kotlinx.coroutines.Dispatchers
@@ -158,18 +155,6 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
             super.onClick(view)
     }
 
-    override fun showMoveEntriesFolderPicker(selectedContentEntryParentChildJoinUids: String) {
-        findNavController().currentBackStackEntry?.savedStateHandle?.set(
-                KEY_SELECTED_ITEMS, selectedContentEntryParentChildJoinUids)
-        navigateToPickEntityFromList(ContentEntry::class.java,
-                R.id.content_entry_list_select_folder,
-                bundleOf(UstadView.ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
-                        ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
-                        ContentEntryList2View.ARG_SHOW_ONLY_FOLDER_FILTER to true.toString()),
-                destinationResultKey = SAVEDSTATE_KEY_FOLDER, overwriteDestination = true)
-    }
-
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.edit -> {
@@ -220,12 +205,6 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                 ContentEntry.TYPE_INTERACTIVE_EXERCISE to MessageID.interactive,
                 ContentEntry.TYPE_AUDIO to MessageID.audio
         )
-
-        /**
-         * Key used when saving selected items to the savedStateHandle
-         */
-        const val KEY_SELECTED_ITEMS = "selected_items"
-
 
         val DIFF_CALLBACK: DiffUtil.ItemCallback<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> = object
             : DiffUtil.ItemCallback<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>() {

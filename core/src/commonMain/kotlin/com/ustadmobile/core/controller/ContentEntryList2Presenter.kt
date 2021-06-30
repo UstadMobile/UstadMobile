@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
+import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_CLAZZ
@@ -20,6 +21,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, view: ContentEntryList2View,
                                  di: DI, lifecycleOwner: DoorLifecycleOwner,
@@ -28,6 +30,8 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                                          di = di, clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L))
     : UstadListPresenter<ContentEntryList2View, ContentEntry>(context, arguments, view, di, lifecycleOwner),
         ContentEntryListItemListener by contentEntryListItemListener {
+
+    private val navController: UstadNavController by instance()
 
     private var contentFilter = ARG_DISPLAY_CONTENT_BY_PARENT
 
@@ -147,9 +151,6 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
             }
 
         }
-
-
-
     }
 
     override fun handleClickSelectionOption(selectedItem: List<ContentEntry>, option: SelectionOption) {
@@ -159,7 +160,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                     val listOfSelectedEntries = selectedItem.mapNotNull {
                         (it as? ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer)?.contentEntryParentChildJoin?.cepcjUid
                     }.joinToString(",")
-                    view.showMoveEntriesFolderPicker(listOfSelectedEntries)
+                    handleShowFolderOnlyEntries(listOfSelectedEntries)
                 }
                 SelectionOption.HIDE -> {
                     when(contentFilter){
@@ -178,10 +179,37 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         }
     }
 
+    /**
+     * Show ContentEntryList in picker mode so the user can select a folder to move entries to.
+     *
+     * @param selectedContentEntryParentChildJoinUids a string which is a comma separated list of
+     * the selected ContentEntryParentChildJoinUids (e.g. that should be saved to the savedStateHandle)
+     */
+    fun handleShowFolderOnlyEntries(selectedContentEntryParentChildJoinUids: String){
+        navController.currentBackStackEntry?.savedStateHandle?.set(
+                KEY_SELECTED_ITEMS, selectedContentEntryParentChildJoinUids)
+
+        val args = mutableMapOf(ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
+                ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_PARENT,
+                ARG_SHOW_ONLY_FOLDER_FILTER to true.toString())
+
+        navigateForResult(
+                NavigateForResultOptions(this,
+                        null, ContentEntryList2View.FOLDER_VIEW_NAME,
+                        ContentEntry::class,
+                        ContentEntry.serializer(),
+                        SAVEDSTATE_KEY_FOLDER,
+                        overwriteDestination = true,
+                        arguments = args))
+    }
+
+
     fun handleMoveContentEntries(parentChildJoinUids: List<Long>, destContentEntryUid: Long) {
         if (!parentChildJoinUids.isNullOrEmpty()) {
             GlobalScope.launch(doorMainDispatcher()) {
+
                 repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(destContentEntryUid, parentChildJoinUids)
+
                 view.showSnackBar(systemImpl.getString(MessageID.moved_x_entries, context).replace("%1\$s",
                         parentChildJoinUids.size.toString()), actionMessageId = MessageID.open_folder,
                         action = {
@@ -252,6 +280,12 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     }
 
     companion object {
+
+
+        /**
+         * Key used when saving selected items to the savedStateHandle
+         */
+        const val KEY_SELECTED_ITEMS = "selected_items"
 
         const val SAVEDSTATE_KEY_ENTRY = "Clazz_ContentEntry"
 
