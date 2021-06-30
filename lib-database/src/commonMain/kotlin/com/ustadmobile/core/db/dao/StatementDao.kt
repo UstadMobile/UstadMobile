@@ -83,7 +83,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             StatementEntity.resultScoreMax, StatementEntity.resultScoreScaled,
             StatementEntity.contentEntryRoot, StatementEntity.extensionProgress
             FROM PersonGroupMember
-            ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+            ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
              LEFT JOIN StatementEntity 
                 ON StatementEntity.statementPersonUid = Person.personUid 
                     WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
