@@ -29,16 +29,14 @@ import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UMStorageDir
-import com.ustadmobile.core.util.ext.observeResult
-import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
-import com.ustadmobile.core.util.ext.toBundleWithNullableValues
-import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.util.ext.*
+import com.ustadmobile.port.android.view.ContentEntryAddOptionsBottomSheetFragment.Companion.ARG_IS_UPDATE_CONTENT
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -194,12 +192,12 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     override fun onClickUpdateContent() {
         onSaveStateToBackStackStateHandle()
-        val entryAddOption = ContentEntryAddOptionsBottomSheetFragment(false)
+        val entryAddOption = ContentEntryAddOptionsBottomSheetFragment()
+        val argsMap = mutableMapOf(ARG_IS_UPDATE_CONTENT to true.toString())
         if(arguments?.containsKey(UstadView.ARG_PARENT_ENTRY_UID) == true){
-            entryAddOption.arguments = mapOf(UstadView.ARG_PARENT_ENTRY_UID
-                            to arguments?.get(UstadView.ARG_PARENT_ENTRY_UID)?.toString())
-                    .toBundleWithNullableValues()
+            argsMap[UstadView.ARG_PARENT_ENTRY_UID] = arguments?.get(UstadView.ARG_PARENT_ENTRY_UID).toString()
         }
+        entryAddOption.arguments = argsMap.toBundle()
         entryAddOption.show(childFragmentManager, entryAddOption.tag)
     }
 

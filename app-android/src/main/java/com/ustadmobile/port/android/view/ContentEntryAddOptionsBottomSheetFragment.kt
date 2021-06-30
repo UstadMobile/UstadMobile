@@ -32,7 +32,7 @@ import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
  * CONTENT_CREATE_CONTENT = create content from out content editor
  */
 
-class ContentEntryAddOptionsBottomSheetFragment(val showFolderOption: Boolean = true) : BottomSheetDialogFragment(), ContentEntryAddOptionsView, View.OnClickListener {
+class ContentEntryAddOptionsBottomSheetFragment() : BottomSheetDialogFragment(), ContentEntryAddOptionsView, View.OnClickListener {
 
 
     private var createFolderOptionView: View? = null
@@ -45,15 +45,18 @@ class ContentEntryAddOptionsBottomSheetFragment(val showFolderOption: Boolean = 
 
     private lateinit var argsMap: Map<String, String>
 
+    private var isUpdateContent: Boolean = false
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         argsMap = arguments.toStringMap()
+        isUpdateContent = argsMap[ARG_IS_UPDATE_CONTENT].toBoolean()
         return FragmentContentEntryAddOptionsBinding.inflate(inflater, container, false).also {
             createFolderOptionView = it.contentCreateFolder
             addLinkOptionView = it.contentAddLink
             addGalleryOptionView = it.contentAddGallery
             addFileOptionView = it.contentAddFile
-            it.showFolder = showFolderOption
+            it.showFolder = !isUpdateContent
             createFolderOptionView?.setOnClickListener(this)
             addLinkOptionView?.setOnClickListener(this)
             addFileOptionView?.setOnClickListener(this)
@@ -72,30 +75,30 @@ class ContentEntryAddOptionsBottomSheetFragment(val showFolderOption: Boolean = 
         when(view?.id){
 
             R.id.content_add_link -> {
-                if(showFolderOption){
-                    findNavController().navigate(R.id.import_link_view, args.toBundle())
+                if(isUpdateContent){
+                    navigateToPickEntityFromList(ImportedContentEntryMetaData::class.java,
+                            R.id.import_link_view, args.toBundle())
                 }else{
-                   navigateToPickEntityFromList(ImportedContentEntryMetaData::class.java,
-                   R.id.import_link_view, args.toBundle())
+                    findNavController().navigate(R.id.import_link_view, args.toBundle())
                 }
             }
             R.id.content_add_gallery ->{
                 args[SelectFileView.ARG_SELECT_FILE] = SelectFileView.SELECT_GALLERY
 
-                if(showFolderOption){
-                    findNavController().navigate(R.id.select_file_view, args.toBundle())
-                }else{
+                if(isUpdateContent){
                     navigateToPickEntityFromList(String::class.java,
                             R.id.select_file_view, args.toBundle())
+                }else{
+                    findNavController().navigate(R.id.select_file_view, args.toBundle())
                 }
             }
             R.id.content_add_file ->{
                 args[SelectFileView.ARG_SELECT_FILE] = SelectFileView.SELECT_FILE
-                if(showFolderOption){
-                    findNavController().navigate(R.id.select_file_view, args.toBundle())
-                }else{
+                if(isUpdateContent){
                     navigateToPickEntityFromList(String::class.java,
                             R.id.select_file_view, args.toBundle())
+                }else{
+                    findNavController().navigate(R.id.select_file_view, args.toBundle())
                 }
             }
             R.id.content_create_folder ->{
@@ -120,6 +123,12 @@ class ContentEntryAddOptionsBottomSheetFragment(val showFolderOption: Boolean = 
         createFolderOptionView = null
         addFileOptionView = null
         addGalleryOptionView = null
+    }
+
+    companion object {
+
+        const val ARG_IS_UPDATE_CONTENT = "ARG_UPDATE"
+
     }
 
 }
