@@ -224,8 +224,8 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
             }
         }
 
-    override fun onComponentReady() {
-        super.onComponentReady()
+    override fun onCreate(arguments: Map<String, String>) {
+        super.onCreate(arguments)
         loading = false
         if(registrationMode.hasFlag(PersonEditView.REGISTER_MODE_ENABLED)) {
             setState {
@@ -305,11 +305,15 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
                             css(defaultMarginTop)
                             mFormControl(variant = MFormControlVariant.outlined) {
                                 css(defaultFullWidth)
-                                mInputLabel("${genderLabel.text}", htmlFor = "gender", variant = MFormControlVariant.outlined) {
+                                mInputLabel("${genderLabel.text}",
+                                    htmlFor = "gender",
+                                    variant = MFormControlVariant.outlined) {
                                     css(alignTextToStart)
                                 }
-                                mSelect("${entity?.gender ?: 0}", native = false,
-                                    input = mOutlinedInput(name = "gender", id = "gender", addAsChild = false,
+                                mSelect("${entity?.gender ?: 0}",
+                                    native = false,
+                                    input = mOutlinedInput(name = "gender",
+                                        id = "gender", addAsChild = false,
                                         labelWidth = genderLabel.width),
                                     onChange = { it, _ ->
                                         setState {

@@ -24,7 +24,6 @@ import com.ustadmobile.util.StyleManager.errorTextClass
 import com.ustadmobile.util.ext.clean
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
-import kotlinx.css.Display
 import kotlinx.css.display
 import kotlinx.html.InputType
 import react.RBuilder
@@ -128,8 +127,8 @@ class PersonAccountEditComponent(mProps: RProps) : UstadEditComponent<PersonWith
 
     val spacing = MGridSpacing.spacing6
 
-    override fun onComponentReady() {
-        super.onComponentReady()
+    override fun onCreate(arguments: Map<String, String>) {
+        super.onCreate(arguments)
         mPresenter = PersonAccountEditPresenter(this, arguments,this, di, this)
         mPresenter.onCreate(mapOf())
     }
@@ -221,7 +220,8 @@ class PersonAccountEditComponent(mProps: RProps) : UstadEditComponent<PersonWith
                             mFormControl {
                                 css(defaultFullWidth)
 
-                                mInputLabel("${newPasswordLabel.text}",error = newPasswordError != null,
+                                mInputLabel("${newPasswordLabel.text}",
+                                    error = newPasswordError != null,
                                     variant = MFormControlVariant.outlined,
                                     htmlFor = "new-password")
 
@@ -265,14 +265,21 @@ class PersonAccountEditComponent(mProps: RProps) : UstadEditComponent<PersonWith
                         umItem(MGridSize.cells12, MGridSize.cells6){
                             mFormControl {
                                 css(defaultFullWidth)
-                                mInputLabel("${confirmPasswordLabel.text?.clean()}",error = confirmPasswordLabel.error,
-                                    variant = MFormControlVariant.outlined, htmlFor = "confirm-password")
-                                mOutlinedInput(value = entity?.confirmedPassword, labelWidth = confirmPasswordLabel.width,error = confirmPasswordLabel.error,
-                                    id = "confirm-password", type = if(showConfirmPassword) InputType.text else InputType.password,onChange = {
+                                mInputLabel("${confirmPasswordLabel.text?.clean()}",
+                                    error = confirmPasswordLabel.error,
+                                    variant = MFormControlVariant.outlined,
+                                    htmlFor = "confirm-password")
+                                mOutlinedInput(value = entity?.confirmedPassword,
+                                    labelWidth = confirmPasswordLabel.width,
+                                    error = confirmPasswordLabel.error,
+                                    id = "confirm-password",
+                                    type = if(showConfirmPassword) InputType.text else InputType.password,
+                                    onChange = {
                                         setState {
                                             entity?.confirmedPassword = it.targetInputValue
                                             confirmedPasswordError = null
-                                            errorMessage = "" } }) {
+                                            errorMessage = "" }
+                                    }) {
                                     attrs.endAdornment = mInputAdornment {
                                         mIconButton(if(showConfirmPassword) "visibility" else "visibility_off",
                                             edge = MIconEdge.end,

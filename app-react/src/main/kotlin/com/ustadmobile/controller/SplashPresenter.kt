@@ -15,6 +15,8 @@ import com.ustadmobile.view.SplashView
 import com.ustadmobile.view.SplashView.Companion.TAG_LOADED
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -33,7 +35,7 @@ class SplashPresenter(private val view: SplashView): DIAware{
         rootElement?.setAttribute("dir",directionAttributeValue)
     }
 
-    suspend fun handleResourceLoading() {
+    fun handleResourceLoading() = GlobalScope.launch{
         val localeCode = impl.getDisplayedLocale(this)
         val defaultLocale = impl.getAppPref(AppConfig.KEY_DEFAULT_LANGUAGE, this)
 

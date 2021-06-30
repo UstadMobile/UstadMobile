@@ -8,9 +8,6 @@ import com.ustadmobile.util.StyleManager.splashComponentPreloadContainer
 import com.ustadmobile.util.StyleManager.splashComponentPreloadProgressBar
 import com.ustadmobile.util.ThemeManager.isDarkModeActive
 import kotlinx.browser.document
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import react.RBuilder
 import react.RProps
 import react.RState
@@ -29,14 +26,12 @@ class SplashComponent (props: RProps): UstadBaseComponent<RProps, RState>(props)
     override val viewName: String
         get() = SplashView.VIEW_NAME
 
-    override fun onComponentReady() {
-        super.onComponentReady()
+    override fun onCreate(arguments: Map<String, String>) {
+        super.onCreate(arguments)
         mPresenter = SplashPresenter(this)
         mPresenter.onCreate()
 
-        GlobalScope.launch(Dispatchers.Main) {
-            mPresenter.handleResourceLoading()
-        }
+        mPresenter.handleResourceLoading()
     }
 
     override var appName: String? = null

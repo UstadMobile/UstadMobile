@@ -11,6 +11,5 @@ fun getViewNameFromUrl(url: String? = null): String? {
     val href = url ?: window.location.href
     val viewName = href.substringAfterLast("#/", "")
         .substringBeforeLast("?")
-    console.log(viewName)
     return if (viewName.isEmpty() || viewName.startsWith("http")) null else viewName
 }

@@ -37,8 +37,9 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
             title = value?.title
         }
 
-    override fun onComponentReady() {
-        super.onComponentReady()
+
+    override fun onCreate(arguments: Map<String, String>) {
+        super.onCreate(arguments)
         mPresenter = ContentEntryDetailPresenter(this, arguments, this, di, this)
         mPresenter.onCreate(mapOf())
     }
@@ -69,5 +70,4 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
             ContentEntryDetailAttemptsListView.VIEW_NAME to MessageID.attempts
         )
     }
-
 }

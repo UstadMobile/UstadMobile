@@ -77,7 +77,8 @@ class EpubContentComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(m
 
     override fun scrollToSpinePosition(spinePosition: Int, hashAnchor: String?) {}
 
-    override fun onComponentReady() {
+    override fun onCreate(arguments: Map<String, String>) {
+        super.onCreate(arguments)
         mPresenter = EpubContentPresenter(this,arguments,this, di)
         mPresenter.onCreate(mapOf())
     }

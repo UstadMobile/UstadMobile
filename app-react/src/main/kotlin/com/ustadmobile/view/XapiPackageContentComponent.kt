@@ -30,7 +30,8 @@ class XapiPackageContentComponent(mProps: RProps): UstadBaseComponent<RProps, RS
 
     private lateinit var mPresenter: XapiPackageContentPresenter
 
-    override fun onComponentReady() {
+    override fun onCreate(arguments: Map<String, String>) {
+        super.onCreate(arguments)
         mPresenter = XapiPackageContentPresenter(this,arguments,this,di)
         mPresenter.onCreate(mapOf())
     }

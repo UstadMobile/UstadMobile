@@ -7,7 +7,7 @@ version = rootProject.version
 
 repositories {
     //Few Wrapper dependencies are causing some issues, jcenter will be removed
-    //once solution is in place
+    //as soon as a solution is in place
     jcenter()
     maven {
         url 'https://dl.bintray.com/kotlin/kotlin-js-wrappers'

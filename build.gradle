@@ -39,7 +39,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-
         maven {
             url "https://devserver3.ustadmobile.com/maven"
         }

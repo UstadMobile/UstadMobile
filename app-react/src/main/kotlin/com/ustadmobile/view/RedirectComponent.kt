@@ -14,8 +14,8 @@ class RedirectComponent (props: RProps): UstadBaseComponent<RProps, RState>(prop
     override val viewName: String
         get() = RedirectView.VIEW_NAME
 
-    override fun onComponentReady() {
-        super.onComponentReady()
+    override fun onCreate(arguments: Map<String, String>) {
+        super.onCreate(arguments)
         val args = arguments.toMutableMap()
         args[ARG_WEB_PLATFORM] = true.toString()
         mPresenter = RedirectPresenter(this, args, this, di)

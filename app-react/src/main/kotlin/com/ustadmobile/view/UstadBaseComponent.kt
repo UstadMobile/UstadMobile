@@ -50,8 +50,6 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
 
     private val defaultFabState = ReduxFabState(icon = "add",visible = false, onClick = ::onFabClicked)
 
-    lateinit var arguments: Map<String, String>
-
     protected var fabState: ReduxFabState = defaultFabState
         set(value) {
             field = value
@@ -62,8 +60,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
 
     private var hashChangeListener:(Event) -> Unit = { (it as HashChangeEvent)
         if(viewName == getViewNameFromUrl(it.newURL)){
-            arguments = urlSearchParamsToMap()
-            onComponentReady()
+            onCreate(urlSearchParamsToMap())
         }
     }
 
@@ -84,7 +81,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
     override val currentState: Int
         get() = lifecycleStatus.value
 
-    open fun onComponentReady(){
+    open fun onCreate(arguments: Map<String,String>){
         for(observer in lifecycleObservers){
             observer.onStart(this)
         }
@@ -105,25 +102,24 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         searchManager = SearchManager()
 
         //Handle both arguments from URL and the ones passed during component rendering
-        arguments = if(props.asDynamic().arguments != js("undefined")){
-            props.asDynamic().arguments as Map<String, String>
-        }else {
-            urlSearchParamsToMap()
+        //i.e from tabs
+        val arguments = when {
+            props.asDynamic().arguments != js("undefined") ->
+                props.asDynamic().arguments as Map<String, String>
+            else -> urlSearchParamsToMap()
         }
-
-        onComponentReady()
+        onCreate(arguments)
     }
 
     override fun componentDidUpdate(prevProps: P, prevState: S, snapshot: Any) {
-        val componentDidChange = props.asDynamic().arguments != js("undefined")
+        val propsDidChange = props.asDynamic().arguments != js("undefined")
                 && !props.asDynamic().arguments.values.equals(prevProps.asDynamic().arguments.values)
 
         //Handles tabs behaviour when changing from one tab to another, react components
-        //are mounted once and when trying to re-mount it componentDidUpdate is triggered.
+        //are mounted once and when trying to re-mount it's componentDidUpdate is triggered.
         //This will check and make sure the component has changed by checking if the props has changed
-        if(componentDidChange){
-            arguments = props.asDynamic().arguments as Map<String, String>
-            onComponentReady()
+        if(propsDidChange){
+            onCreate(props.asDynamic().arguments as Map<String, String>)
         }
     }
 

@@ -61,11 +61,11 @@ class PersonDaoJs: PersonDao() {
     }
 
     override suspend fun personIsAdmin(accountPersonUid: Long): Boolean {
-        TODO("Not yet implemented")
+        return person?.admin == true
     }
 
     override fun findByUsername(username: String?): Person? {
-        TODO("Not yet implemented")
+        return person
     }
 
     override suspend fun findByUid(uid: Long): Person? {

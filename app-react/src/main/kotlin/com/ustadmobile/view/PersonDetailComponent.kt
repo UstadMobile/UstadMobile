@@ -8,7 +8,6 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
-import com.ustadmobile.lib.db.entities.EntityRoleWithNameAndRole
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
@@ -75,8 +74,8 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
             }
         }
 
-    override fun onComponentReady() {
-        super.onComponentReady()
+    override fun onCreate(arguments: Map<String, String>) {
+        super.onCreate(arguments)
         mPresenter = PersonDetailPresenter(this,arguments,this,di,this)
         mPresenter.onCreate(mapOf())
     }

@@ -130,8 +130,8 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
             }
         }
 
-    override fun onComponentReady() {
-        super.onComponentReady()
+    override fun onCreate(arguments: Map<String, String>) {
+        super.onCreate(arguments)
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
         window.setTimeout({
             searchManager?.searchListener = listPresenter
@@ -228,7 +228,8 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
         styledDiv {
             css(listItemCreateNewDiv)
             mListItemIcon("add","${StyleManager.name}-listCreateNewIconClass")
-            mTypography(variant = MTypographyVariant.button, color = MTypographyColor.textPrimary) {
+            mTypography(variant = MTypographyVariant.button,
+                color = MTypographyColor.textPrimary) {
                 css{
                     marginTop = 3.px
                 }
@@ -248,8 +249,12 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                 listFilterOptionChips?.forEach { chip ->
                     val mColor = if(chip == checkedFilterOptionChip) MChipColor.primary
                     else MChipColor.default
-                    mChip(chip.description, color = mColor,onClick = {
-                        setState { checkedFilterOptionChip = chip }
+                    mChip(chip.description,
+                        color = mColor,
+                        onClick = {
+                            setState {
+                                checkedFilterOptionChip = chip
+                            }
                         listPresenter?.onListFilterOptionSelected(chip)
                     }) {
                         css {
@@ -268,7 +273,8 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
         umGridContainer {
             css(selectionContainer)
             umItem(MGridSize.cells7, MGridSize.cells8){
-                mTypography(variant = MTypographyVariant.subtitle1, color = MTypographyColor.textPrimary){
+                mTypography(variant = MTypographyVariant.subtitle1,
+                    color = MTypographyColor.textPrimary){
                     css {
                         width = 10.pc
                         marginTop = 10.px

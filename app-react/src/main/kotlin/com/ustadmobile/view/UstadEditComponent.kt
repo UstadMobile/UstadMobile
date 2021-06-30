@@ -13,9 +13,14 @@ abstract class UstadEditComponent<T: Any>(mProps: RProps): UstadBaseComponent<RP
 
     abstract protected val mEditPresenter : UstadEditPresenter<*, T>?
 
-    override fun onComponentReady() {
-        super.onComponentReady()
-        fabState = fabState.copy(visible = true, icon = "check",
+    private lateinit var arguments: Map<String,String>
+
+    override fun onCreate(arguments: Map<String, String>) {
+        super.onCreate(arguments)
+        this.arguments = arguments
+        fabState = fabState.copy(
+            visible = true,
+            icon = "check",
             title = getString(MessageID.save))
     }
 
