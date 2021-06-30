@@ -17,6 +17,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.util.ext.determineListMode
 import com.ustadmobile.core.util.ext.observeResult
+import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadView
@@ -138,8 +139,16 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 
     override fun showContentEntryAddOptions(parentEntryUid: Long) {
         val entryAddOption = ContentEntryAddOptionsBottomSheetFragment()
-        entryAddOption.arguments = UMAndroidUtil.mapToBundle(mapOf(UstadView.ARG_PARENT_ENTRY_UID
-                to parentEntryUid.toString()))
+        val args = mutableMapOf(
+                UstadView.ARG_PARENT_ENTRY_UID to parentEntryUid.toString())
+
+        // add selectedItems to args if in stack
+        if(findNavController().previousBackStackEntry?.savedStateHandle?.contains(KEY_SELECTED_ITEMS) == true){
+            val selectedItems = findNavController().previousBackStackEntry?.savedStateHandle?.get<String>(KEY_SELECTED_ITEMS).toString()
+            args[KEY_SELECTED_ITEMS] = selectedItems
+        }
+
+        entryAddOption.arguments = args.toBundle()
         entryAddOption.show(childFragmentManager, entryAddOption.tag)
 
     }

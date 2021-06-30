@@ -2,9 +2,9 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.KEY_SELECTED_ITEMS
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
@@ -15,10 +15,8 @@ import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_IMPORTED_ME
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
-import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -221,6 +219,13 @@ class ContentEntryEdit2Presenter(context: Any,
                         systemImpl.popBack(destinationOnFinish, popUpInclusive = false, context)
                         return@launch
 
+                    }
+                } else {
+                    // its a folder, check if there is any selected items from previous screen
+                    if (arguments.containsKey(KEY_SELECTED_ITEMS)) {
+                        val selectedItems = arguments[KEY_SELECTED_ITEMS]?.split(",")?.map { it.trim().toLong() }
+                                ?: listOf()
+                        repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(entity.contentEntryUid, selectedItems)
                     }
                 }
 

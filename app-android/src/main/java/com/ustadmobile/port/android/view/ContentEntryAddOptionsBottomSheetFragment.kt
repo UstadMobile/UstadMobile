@@ -12,6 +12,8 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.toughra.ustadmobile.databinding.FragmentContentEntryAddOptionsBinding
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.controller.ContentEntryList2Presenter
+import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.KEY_SELECTED_ITEMS
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.ext.putResultDestInfo
 import com.ustadmobile.core.util.ext.toBundle
@@ -41,8 +43,11 @@ class ContentEntryAddOptionsBottomSheetFragment(val showFolderOption: Boolean = 
 
     private var addFileOptionView: View? = null
 
+    private lateinit var argsMap: Map<String, String>
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+        argsMap = arguments.toStringMap()
         return FragmentContentEntryAddOptionsBinding.inflate(inflater, container, false).also {
             createFolderOptionView = it.contentCreateFolder
             addLinkOptionView = it.contentAddLink
@@ -59,8 +64,10 @@ class ContentEntryAddOptionsBottomSheetFragment(val showFolderOption: Boolean = 
     override fun onClick(view: View?) {
         val isShowing = this.dialog?.isShowing
 
+
         val args = mutableMapOf(ARG_LEAF to true.toString())
-        args.putFromOtherMapIfPresent(arguments.toStringMap(), ARG_PARENT_ENTRY_UID)
+        args.putFromOtherMapIfPresent(argsMap, ARG_PARENT_ENTRY_UID)
+        args.putFromOtherMapIfPresent(argsMap, KEY_SELECTED_ITEMS)
 
         when(view?.id){
 
