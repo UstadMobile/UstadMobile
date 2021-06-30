@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.mocks.DummyDataPreload
@@ -38,15 +39,15 @@ class SplashPresenter(private val view: SplashView): DIAware{
     fun handleResourceLoading() = GlobalScope.launch{
         val localeCode = impl.getDisplayedLocale(this)
         val defaultLocale = impl.getAppPref(AppConfig.KEY_DEFAULT_LANGUAGE, this)
-
-        val hasUmApp = window.location.href.indexOf("umapp/") != -1
+        val url = window.location.href
         val apiUrl = urlSearchParamsToMap()[ARG_API_URL]
-            ?: window.location.href.substringBefore(if(hasUmApp) "umapp/" else "#/")
+            ?: UMFileUtil.joinPaths(url.substringBefore(
+                if(url.indexOf("umapp/") != -1) "umapp/" else "#/"), "umapp/")
 
         val appConfigs = loadFileContentAsMap<HashMap<String, String>>("appconfig.json")
         appConfigs.forEach {
             val value = when(it.key){
-                ARG_API_URL -> "${apiUrl}api/"
+                ARG_API_URL -> apiUrl
                 else -> it.value
             }
             impl.setAppPref(it.key, value, this)

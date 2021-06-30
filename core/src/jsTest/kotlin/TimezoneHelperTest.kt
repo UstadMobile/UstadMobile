@@ -15,12 +15,18 @@ class TimezoneHelperTest {
     @Test
     fun givenTimeZone_whenAskedForARawOffset_shouldProvideIt(){
         val offset = getRawTimezoneOffset("Asia/Dubai")
-        assertEquals(240,offset)
+        assertEquals(14400000,offset)
     }
 
     @Test
     fun givenTimeZoneAndUtcTime_whenAskedForAnOffset_shouldProvideIt(){
         val offset = getTimezoneOffset("Asia/Dubai", Date().getTime().toLong())
-        assertEquals(4,offset)
+        assertEquals(240,offset)
+    }
+
+    @Test
+    fun givenTimeZoneWithMinutesOffset_whenAskedForAnOffset_shouldProvideIt(){
+        val offset = getTimezoneOffset("Asia/Calcutta", Date().getTime().toLong())
+        assertEquals(330,offset)
     }
 }
