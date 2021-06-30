@@ -49,7 +49,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
         fun addEndpoint(endpoint: Endpoint) {
             val db: UmAppDatabase = di.direct.on(endpoint).instance(tag = DoorTag.TAG_DB)
-            val liveData = db.userSessionDao.findAllLocalSessions()
+            val liveData = db.userSessionDao.findAllLocalSessionsLive()
             endpointSessionsLiveDataMap[endpoint] = liveData
 
             addSource(liveData) { endpointSessionList ->
@@ -67,7 +67,15 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
     private val userSessionLiveDataMediator = UserSessionMediator()
 
+    val activeUserSessionsLive: DoorLiveData<List<UserSessionWithPersonAndEndpoint>>
+        get() = userSessionLiveDataMediator
+
     private val _activeUserSession: AtomicRef<UserSessionWithPersonAndEndpoint?>
+
+    private val _activeUserSessionLive = DoorMutableLiveData<UserSessionWithPersonAndEndpoint?>()
+
+    val activeUserSessionLive: DoorLiveData<UserSessionWithPersonAndEndpoint?>
+        get() = _activeUserSessionLive
 
     private val _activeEndpoint: AtomicRef<Endpoint>
 
@@ -97,6 +105,26 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
         _activeAccountLive.sendValue(_activeUserSession.value?.toUmAccount()
             ?: GUEST_PERSON.toUmAccount(activeEndpointStr))
+    }
+
+    /**
+     * Get a list of all accounts that are on the system across all endpoints
+     */
+    suspend fun activeSessionsList(): List<UserSessionWithPersonAndEndpoint> {
+        return endpointScope.activeEndpointUrls.flatMap { endpointUrl ->
+            val endpoint = Endpoint(endpointUrl)
+            val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
+            db.userSessionDao.findAllLocalSessionsAsync().map { userSession ->
+                userSession.withEndpoint(endpoint)
+            }
+        }
+    }
+
+    suspend fun activeSessionCount(): Int {
+        return endpointScope.activeEndpointUrls.fold(0) { total, endpointUrl ->
+            val db: UmAppDatabase = di.on(Endpoint(endpointUrl)).direct.instance(tag = DoorTag.TAG_DB)
+            total + db.userSessionDao.countAllLocalSessionsAsync()
+        }
     }
 
     //This is the older way of doing things now.

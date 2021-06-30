@@ -140,7 +140,8 @@ abstract class PersonDao : BaseDao<Person> {
           FROM Person
                JOIN PersonAuth2
                     ON Person.personUid = PersonAuth2.pauthUid
-         WHERE PersonAuth2.pauthAuth = :passwordHash
+         WHERE Person.username = :username 
+               AND PersonAuth2.pauthAuth = :passwordHash
     """)
     abstract suspend fun findByUsernameAndPasswordHash2(username: String, passwordHash: String): Person?
 

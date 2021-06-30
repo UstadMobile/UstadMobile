@@ -41,7 +41,7 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
                     root.setOnClickListener {
                         val account = this.umaccount
                         if(account != null)
-                            mPresenter?.handleClickAccount(account)
+                            mPresenter?.handleClickUserSession(account)
                     }
 
                     root.background  = ContextCompat.getDrawable(root.context, R.drawable.bg_listitem)

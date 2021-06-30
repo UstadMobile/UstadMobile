@@ -61,7 +61,7 @@
             app:icon="@drawable/ic_delete_black_24dp"
             app:iconTint="?colorOnIconTint"
             style="@style/UmTheme.Widget.TextButton.IconOnly"
-            android:onClick="@{()->presenter.handleClickDeleteAccount(umaccount)}"
+            android:onClick="@{()->presenter.handleClickDeleteSession(umaccount)}"
             app:layout_constraintStart_toEndOf="@id/person_full_name"
             app:layout_constraintTop_toTopOf="parent" />
 

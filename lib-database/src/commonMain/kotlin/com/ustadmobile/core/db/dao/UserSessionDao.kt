@@ -22,18 +22,23 @@ abstract class UserSessionDao {
     """)
     abstract suspend fun findSessionsByPerson(personUid: Long): List<UserSession>
 
-    @Query("""
-        SELECT UserSession.*, Person.*
-          FROM UserSession
-               JOIN Person ON UserSession.usPersonUid = Person.personUid
-         WHERE UserSession.usClientNodeId = (
-               SELECT COALESCE(
-                      (SELECT nodeClientId 
-                        FROM SyncNode
-                       LIMIT 1), 0))
-    """)
-    abstract fun findAllLocalSessions(): DoorLiveData<List<UserSessionAndPerson>>
+    @Query(FIND_LOCAL_SESSIONS_SQL)
+    abstract fun findAllLocalSessionsLive(): DoorLiveData<List<UserSessionAndPerson>>
 
+    @Query(FIND_LOCAL_SESSIONS_SQL)
+    abstract suspend fun findAllLocalSessionsAsync(): List<UserSessionAndPerson>
+
+    @Query("""
+        SELECT COUNT(*)
+          FROM UserSession
+         WHERE UserSession.usClientNodeId = (
+                   SELECT COALESCE(
+                          (SELECT nodeClientId 
+                            FROM SyncNode
+                           LIMIT 1), 0))
+           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+    """)
+    abstract suspend fun countAllLocalSessionsAsync(): Int
 
     @Query("""
         UPDATE UserSession
@@ -44,8 +49,23 @@ abstract class UserSessionDao {
                                (SELECT nodeClientId
                                   FROM SyncNode
                                  LIMIT 1), 0))
+         WHERE UserSession.usUid = :sessionUid                        
                
     """)
     abstract suspend fun endSession(sessionUid: Long, newStatus: Int, reason: Int)
+
+    companion object {
+        const val FIND_LOCAL_SESSIONS_SQL = """
+            SELECT UserSession.*, Person.*
+              FROM UserSession
+                   JOIN Person ON UserSession.usPersonUid = Person.personUid
+             WHERE UserSession.usClientNodeId = (
+                   SELECT COALESCE(
+                          (SELECT nodeClientId 
+                            FROM SyncNode
+                           LIMIT 1), 0))
+               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}        
+            """
+    }
 
 }

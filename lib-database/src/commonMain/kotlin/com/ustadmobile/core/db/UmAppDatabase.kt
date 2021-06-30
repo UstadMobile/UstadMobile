@@ -64,7 +64,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 69)
+], version = 70)
 @MinSyncVersion(60)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -4624,48 +4624,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         //Note 67-68 requires the predetermined nodeId, so it is not here as a constant.
 
-        val MIGRATION_68_69 = object: DoorMigration(68, 69) {
-            override fun migrate(database: DoorSqlDatabase) {
-                database.execSQL("ALTER TABLE Site ADD COLUMN authSalt TEXT")
-
-                if(database.dbType() == DoorDbType.SQLITE) {
-                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth2 (  pauthUid  INTEGER  PRIMARY KEY  NOT NULL , pauthMechanism  TEXT , pauthAuth  TEXT , pauthLcsn  INTEGER  NOT NULL , pauthPcsn  INTEGER  NOT NULL , pauthLcb  INTEGER  NOT NULL , pauthLct  INTEGER  NOT NULL )")
-                    DoorSqlGenerator.generateSyncableEntityInsertTriggersSqlite("PersonAuth2", 678,
-                        "pauthUid", "pauthLcsn", "pauthPcsn").forEach {
-                        database.execSQL(it)
-                    }
-                    DoorSqlGenerator.generateSyncableEntityUpdateTriggersSqlite("PersonAuth2", 678,
-                        "pauthUid", "pauthLcsn", "pauthPcsn").forEach {
-                        database.execSQL(it)
-                    }
-                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth2_trk (  epk  INTEGER  NOT NULL DEFAULT  0 , clientId  INTEGER  NOT NULL DEFAULT  0 , csn  INTEGER  NOT NULL DEFAULT  0 , rx  INTEGER  NOT NULL DEFAULT  0 , reqId  INTEGER  NOT NULL DEFAULT  0 , ts  INTEGER  NOT NULL DEFAULT  0 , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
-                    database.execSQL("CREATE  INDEX index_PersonAuth2_trk_clientId_epk_csn ON PersonAuth2_trk (clientId, epk, csn)")
-                    database.execSQL("CREATE UNIQUE INDEX index_PersonAuth2_trk_epk_clientId ON PersonAuth2_trk (epk, clientId)")
-                }else {
-                    database.execSQL("""
-                        UPDATE Site
-                           SET authSalt = '${randomString(20)}',
-                               siteLcb = (SELECT COALESCE(
-                                                 (SELECT nodeClientId 
-                                                    FROM SyncNode
-                                                   LIMIT 1), 0)
-                    """)
-                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth2 (  pauthUid  BIGINT  PRIMARY KEY  NOT NULL , pauthMechanism  TEXT , pauthAuth  TEXT , pauthLcsn  BIGINT  NOT NULL , pauthPcsn  BIGINT  NOT NULL , pauthLcb  INTEGER  NOT NULL , pauthLct  BIGINT  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonAuth2_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonAuth2_lcsn_seq")
-                    DoorSqlGenerator.generateSyncableEntityFunctionAndTriggerPostgres(entityName =
-                    "PersonAuth2", tableId = 678, pkFieldName = "pauthUid", localCsnFieldName =
-                    "pauthLcsn", primaryCsnFieldName = "pauthPcsn").forEach {
-                        database.execSQL(it)
-                    }
-                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth2_trk (  epk  BIGINT  NOT NULL DEFAULT  0 , clientId  INTEGER  NOT NULL DEFAULT  0 , csn  INTEGER  NOT NULL DEFAULT  0 , rx  BOOL  NOT NULL DEFAULT  false , reqId  INTEGER  NOT NULL DEFAULT  0 , ts  BIGINT  NOT NULL DEFAULT  0 , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE  INDEX index_PersonAuth2_trk_clientId_epk_csn ON PersonAuth2_trk (clientId, epk, csn)")
-                    database.execSQL("CREATE UNIQUE INDEX index_PersonAuth2_trk_epk_clientId ON PersonAuth2_trk (epk, clientId)")
-                }
-            }
-        }
-
-
         /**
          * This migration must update the SyncNode to set a new clientId, so we need to take a parameter here
          */
@@ -4712,6 +4670,74 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
 
+        internal val MIGRATION_69_70 = object: DoorMigration(69, 70) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("ALTER TABLE Site ADD COLUMN authSalt TEXT")
+
+                if(database.dbType() == DoorDbType.SQLITE) {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth2 (  pauthUid  INTEGER  PRIMARY KEY  NOT NULL , pauthMechanism  TEXT , pauthAuth  TEXT , pauthLcsn  INTEGER  NOT NULL , pauthPcsn  INTEGER  NOT NULL , pauthLcb  INTEGER  NOT NULL , pauthLct  INTEGER  NOT NULL )")
+                    DoorSqlGenerator.generateSyncableEntityInsertTriggersSqlite("PersonAuth2", 678,
+                        "pauthUid", "pauthLcsn", "pauthPcsn").forEach {
+                        database.execSQL(it)
+                    }
+                    DoorSqlGenerator.generateSyncableEntityUpdateTriggersSqlite("PersonAuth2", 678,
+                        "pauthUid", "pauthLcsn", "pauthPcsn").forEach {
+                        database.execSQL(it)
+                    }
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth2_trk (  epk  INTEGER  NOT NULL DEFAULT  0 , clientId  INTEGER  NOT NULL DEFAULT  0 , csn  INTEGER  NOT NULL DEFAULT  0 , rx  INTEGER  NOT NULL DEFAULT  0 , reqId  INTEGER  NOT NULL DEFAULT  0 , ts  INTEGER  NOT NULL DEFAULT  0 , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE  INDEX index_PersonAuth2_trk_clientId_epk_csn ON PersonAuth2_trk (clientId, epk, csn)")
+                    database.execSQL("CREATE UNIQUE INDEX index_PersonAuth2_trk_epk_clientId ON PersonAuth2_trk (epk, clientId)")
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS UserSession (  usPcsn  INTEGER  NOT NULL , usLcsn  INTEGER  NOT NULL , usLcb  INTEGER  NOT NULL , usLct  INTEGER  NOT NULL , usPersonUid  INTEGER  NOT NULL , usClientNodeId  INTEGER  NOT NULL , usStartTime  INTEGER  NOT NULL , usEndTime  INTEGER  NOT NULL , usStatus  INTEGER  NOT NULL , usReason  INTEGER  NOT NULL , usAuth  TEXT , usSessionType  INTEGER  NOT NULL , usUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    DoorSqlGenerator.generateSyncableEntityInsertTriggersSqlite("UserSession", 679, "usUid",
+                        "usLcsn", "usPcsn").forEach {
+                        database.execSQL(it)
+                    }
+                    DoorSqlGenerator.generateSyncableEntityUpdateTriggersSqlite("UserSession", 679, "usUid",
+                        "usLcsn", "usPcsn").forEach {
+                        database.execSQL(it)
+                    }
+                    database.execSQL("CREATE TABLE IF NOT EXISTS UserSession_trk (  epk  INTEGER  NOT NULL DEFAULT  0 , clientId  INTEGER  NOT NULL DEFAULT  0 , csn  INTEGER  NOT NULL DEFAULT  0 , rx  INTEGER  NOT NULL DEFAULT  0 , reqId  INTEGER  NOT NULL DEFAULT  0 , ts  INTEGER  NOT NULL DEFAULT  0 , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE  INDEX index_UserSession_trk_clientId_epk_csn ON UserSession_trk (clientId, epk, csn)")
+                    database.execSQL("CREATE UNIQUE INDEX index_UserSession_trk_epk_clientId ON UserSession_trk (epk, clientId)")
+                }else {
+                    database.execSQL("""
+                        UPDATE Site
+                           SET authSalt = '${randomString(20)}',
+                               siteLcb = (SELECT COALESCE(
+                                                 (SELECT nodeClientId 
+                                                    FROM SyncNode
+                                                   LIMIT 1), 0)
+                    """)
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth2 (  pauthUid  BIGINT  PRIMARY KEY  NOT NULL , pauthMechanism  TEXT , pauthAuth  TEXT , pauthLcsn  BIGINT  NOT NULL , pauthPcsn  BIGINT  NOT NULL , pauthLcb  INTEGER  NOT NULL , pauthLct  BIGINT  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonAuth2_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonAuth2_lcsn_seq")
+                    DoorSqlGenerator.generateSyncableEntityFunctionAndTriggerPostgres(entityName =
+                    "PersonAuth2", tableId = 678, pkFieldName = "pauthUid", localCsnFieldName =
+                    "pauthLcsn", primaryCsnFieldName = "pauthPcsn").forEach {
+                        database.execSQL(it)
+                    }
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth2_trk (  epk  BIGINT  NOT NULL DEFAULT  0 , clientId  INTEGER  NOT NULL DEFAULT  0 , csn  INTEGER  NOT NULL DEFAULT  0 , rx  BOOL  NOT NULL DEFAULT  false , reqId  INTEGER  NOT NULL DEFAULT  0 , ts  BIGINT  NOT NULL DEFAULT  0 , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE  INDEX index_PersonAuth2_trk_clientId_epk_csn ON PersonAuth2_trk (clientId, epk, csn)")
+                    database.execSQL("CREATE UNIQUE INDEX index_PersonAuth2_trk_epk_clientId ON PersonAuth2_trk (epk, clientId)")
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS UserSession (  usPcsn  BIGINT  NOT NULL , usLcsn  BIGINT  NOT NULL , usLcb  INTEGER  NOT NULL , usLct  BIGINT  NOT NULL , usPersonUid  BIGINT  NOT NULL , usClientNodeId  INTEGER  NOT NULL , usStartTime  BIGINT  NOT NULL , usEndTime  BIGINT  NOT NULL , usStatus  INTEGER  NOT NULL , usReason  INTEGER  NOT NULL , usAuth  TEXT , usSessionType  INTEGER  NOT NULL , usUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS UserSession_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS UserSession_lcsn_seq")
+                    DoorSqlGenerator.generateSyncableEntityFunctionAndTriggerPostgres(entityName =
+                    "UserSession", tableId = 679, pkFieldName = "usUid", localCsnFieldName = "usLcsn",
+                        primaryCsnFieldName = "usPcsn").forEach {
+                        database.execSQL(it)
+                    }
+                    database.execSQL("CREATE TABLE IF NOT EXISTS UserSession_trk (  epk  BIGINT  NOT NULL DEFAULT  0 , clientId  INTEGER  NOT NULL DEFAULT  0 , csn  INTEGER  NOT NULL DEFAULT  0 , rx  BOOL  NOT NULL DEFAULT  false , reqId  INTEGER  NOT NULL DEFAULT  0 , ts  BIGINT  NOT NULL DEFAULT  0 , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE  INDEX index_UserSession_trk_clientId_epk_csn ON UserSession_trk (clientId, epk, csn)")
+                    database.execSQL("CREATE UNIQUE INDEX index_UserSession_trk_epk_clientId ON UserSession_trk (epk, clientId)")
+                }
+            }
+        }
+
+
+
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
@@ -4723,7 +4749,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
                     MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
                     MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67,
-                    MIGRATION_68_69)
+                    MIGRATION_68_69, MIGRATION_69_70)
 
 
 
