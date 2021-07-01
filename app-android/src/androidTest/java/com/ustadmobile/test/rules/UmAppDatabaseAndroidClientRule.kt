@@ -1,13 +1,18 @@
 package com.ustadmobile.test.rules
 
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.asPerson
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.port.android.impl.BaseUstadApp
 import com.ustadmobile.port.android.impl.UstadApp
+import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import io.ktor.client.*
 import io.ktor.client.request.get
 import kotlinx.coroutines.runBlocking
@@ -50,12 +55,23 @@ class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "the
             account.endpointUrl = endpointUrl!!
         }
 
+        val endpoint = Endpoint(endpointUrl ?: account.endpointUrl)
         val accountManager: UstadAccountManager by di.instance()
-        accountManager.activeAccount = account
 
-        dbInternal = di.direct.on(accountManager.activeAccount).instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB)
+        dbInternal = di.direct.on(endpoint).instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB)
 
-        repoInternal = di.direct.on(accountManager.activeAccount).instance<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO)
+        repoInternal = di.direct.on(endpoint).instance<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO)
+
+        repo.siteDao.insert(Site().apply {
+            siteName = "Test Site"
+            authSalt = randomString(12)
+        })
+
+        val accountPerson = runBlocking {
+            repo.insertPersonAndGroup(account.asPerson())
+        }
+        accountManager.startLocalTestSessionBlocking(accountPerson,
+            endpointUrl ?: account.endpointUrl)
     }
 
 
@@ -74,8 +90,10 @@ class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "the
     }
 
     fun insertPersonForActiveUser(person: Person) {
+        /* This is actually done in the start now
         person.personUid = account.personUid
         runBlocking { repoInternal!!.insertPersonAndGroup(person) }
+         */
     }
 
 

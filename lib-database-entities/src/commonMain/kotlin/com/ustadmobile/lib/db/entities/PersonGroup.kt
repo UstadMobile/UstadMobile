@@ -80,6 +80,8 @@ open class PersonGroup() {
 
         const val PERSONGROUP_FLAG_TEACHERGROUP = 8
 
+        const val PERSONGROUP_FLAG_GUESTPERSON = 16
+
 
     }
 }

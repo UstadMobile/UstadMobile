@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view
 
 import android.app.Application
-import android.content.Context
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -14,27 +13,31 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.account.UstadAccounts
+import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY
+import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_SESSION_PREFKEY
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.AboutView
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.door.DoorDatabaseSyncRepository
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.port.android.screen.AccountListScreen
+import com.ustadmobile.test.port.android.util.getApplicationDi
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.waitUntilWithFragmentScenario
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockWebServer
-import org.junit.After
+import org.junit.*
 import org.junit.Assert.*
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.direct
-import org.kodein.di.instance
+import org.kodein.di.*
 
 
 @AdbScreenRecord("Account List Tests")
@@ -60,14 +63,20 @@ class AccountListFragmentTest : TestCase() {
 
     lateinit var impl: UstadMobileSystemImpl
 
+    lateinit var repo: UmAppDatabase
+
+    lateinit var sessions: MutableList<UserSessionWithPersonAndEndpoint>
+
     @Before
     fun setup() {
         mockWebServer = MockWebServer().also {
             it.start()
         }
         mockServerUrl = mockWebServer.url("/").toString()
-        di = (ApplicationProvider.getApplicationContext<Context>() as DIAware).di
+        di = getApplicationDi()
         impl = di.direct.instance()
+        val endpoint = Endpoint(mockServerUrl)
+        repo = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
     }
 
     @After
@@ -75,19 +84,90 @@ class AccountListFragmentTest : TestCase() {
         mockWebServer.shutdown()
     }
 
+    private fun launchFragment(numberOfAccounts: Int = 1, guestActive: Boolean = false):
+            FragmentScenario<AccountListFragment> {
+
+        runBlocking { addSessions(numberOfAccounts, guestActive) }
+
+
+        return launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+            fragmentArgs = bundleOf()) {
+            AccountListFragment().also {
+                it.installNavController(systemImplNavRule.navController)
+            }
+        }
+    }
+
+
+
+    private fun addSessions(numberOfAccounts: Int = 1, guestActive: Boolean = false) {
+        val endpoint = Endpoint(mockServerUrl)
+        val di = getApplicationDi()
+
+        sessions = (0 until numberOfAccounts).map {
+            val person = runBlocking {
+                repo.insertPersonAndGroup(Person().apply {
+                    username = "Person.${it+1}"
+                    firstNames = "FirstName${it+1}"
+                    lastName = "Lastname${it+1}"
+                })
+            }
+
+            val userSession = UserSession().apply {
+                usPersonUid = person.personUid
+                usStatus = UserSession.STATUS_ACTIVE
+                usStartTime = systemTimeInMillis()
+                usClientNodeId = (repo as DoorDatabaseSyncRepository).clientId
+                usUid = runBlocking { repo.userSessionDao.insertSession(this@apply) }
+            }
+
+            UserSessionWithPersonAndEndpoint(userSession, person, endpoint)
+
+
+        }.toMutableList()
+
+        impl.setAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY, endpoint.url,
+            ApplicationProvider.getApplicationContext())
+
+        if(guestActive) {
+            val guestPerson = runBlocking {
+                repo.insertPersonAndGroup(Person().apply {
+                    firstNames = "Guest"
+                    lastName = "User"
+                    username = null
+                })
+            }
+
+            val guestSession = UserSession().apply {
+                usPersonUid  = guestPerson.personUid
+                usStartTime = systemTimeInMillis()
+                usStatus = UserSession.STATUS_ACTIVE
+                usClientNodeId = (repo as DoorDatabaseSyncRepository).clientId
+                usUid = runBlocking { repo.userSessionDao.insertSession(this@apply) }
+            }
+
+            sessions += UserSessionWithPersonAndEndpoint(guestSession, guestPerson, endpoint)
+
+            impl.setAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY,
+                safeStringify(di, UserSessionWithPersonAndEndpoint.serializer(), sessions.last()),
+                ApplicationProvider.getApplicationContext())
+        }else {
+            impl.setAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY,
+                safeStringify(di, UserSessionWithPersonAndEndpoint.serializer(), sessions.first()),
+                ApplicationProvider.getApplicationContext())
+        }
+    }
+
     @AdbScreenRecord("given stored accounts exists when app launched should be displayed")
     @Test
     fun givenStoredAccounts_whenAppLaunched_thenShouldShowAllAccounts() {
-
-
         init {
-            launchFragment(true, defaultNumOfAccounts)
+            launchFragment(defaultNumOfAccounts)
         }.run {
-            val accountManager: UstadAccountManager by di.instance()
             AccountListScreen {
                 recycler {
                     //active account was removed from the list
-                    hasChildCount(accountManager.storedAccounts.size + 2)
+                    hasChildCount(sessions.size + 2)
                 }
             }
         }
@@ -98,10 +178,8 @@ class AccountListFragmentTest : TestCase() {
             "active then both profile and logout button should be hidden")
     @Test
     fun givenAppLaunched_whenOnlyGuestAccountOnTheDeviceAndIsLogged_thenShouldHideBothProfileAndLogoutButton() {
-
-
         init {
-            launchFragment()
+            launchFragment(numberOfAccounts = 0, guestActive = true)
         }.run {
             AccountListScreen {
                 recycler {
@@ -110,7 +188,7 @@ class AccountListFragmentTest : TestCase() {
                             isNotDisplayed()
                         }
                         logoutButton {
-                            isNotDisplayed()
+                            isDisplayed()
                         }
                     }
                 }
@@ -123,10 +201,8 @@ class AccountListFragmentTest : TestCase() {
     @AdbScreenRecord("given stored accounts when guest account active profile button should be hidden ")
     @Test
     fun givenStoredAccounts_whenGuestAccountActive_thenShouldHideProfileButton() {
-
-
         init {
-            launchFragment(true, defaultNumOfAccounts, true)
+            launchFragment(defaultNumOfAccounts, true)
 
         }.run {
 
@@ -140,8 +216,6 @@ class AccountListFragmentTest : TestCase() {
                 }
             }
         }
-
-
     }
 
 
@@ -149,7 +223,7 @@ class AccountListFragmentTest : TestCase() {
     @Test
     fun givenActiveAccountExists_whenAppLaunched_thenShouldShowIt() {
         init {
-            launchFragment(true, defaultNumOfAccounts)
+            launchFragment(defaultNumOfAccounts)
         }.run {
             AccountListScreen {
                 recycler {
@@ -198,13 +272,13 @@ class AccountListFragmentTest : TestCase() {
         init {
 
         }.run {
-            val fragmentScenario = launchFragment(true, defaultNumOfAccounts)
+            val fragmentScenario = launchFragment(defaultNumOfAccounts)
             val accountManager: UstadAccountManager by di.instance()
 
             AccountListScreen {
                 recycler {
                     childWith<AccountListScreen.MainItem> {
-                        withDescendant { withText("FirstName3 Lastname3") }
+                        withDescendant { withText("FirstName2 Lastname2") }
                     } perform {
                         accountDeleteButton {
                             click()
@@ -213,31 +287,27 @@ class AccountListFragmentTest : TestCase() {
                 }
             }
 
-            val currentStoredAccounts = accountManager.storedAccountsLive.waitUntilWithFragmentScenario(fragmentScenario) {
-                it.size == 2
+            val currentStoredAccounts = accountManager.activeUserSessionsLive.waitUntilWithFragmentScenario(fragmentScenario) {
+                it.size == 1
             }
 
-            val isAccountDeleted = currentStoredAccounts?.find { it.firstName == "FirstName3" }
+            val isAccountDeleted = currentStoredAccounts!!.find { it.person.firstNames == "FirstName2" }
             assertEquals("Correct account got deleted",
                     null, isAccountDeleted)
-
         }
 
 
     }
 
-    @AdbScreenRecord("given logout button when clicked should logout current active account")
+    @AdbScreenRecord("Given logout button clicked with no other accounts should navigate to enter link")
     @Test
-    fun givenLogoutButton_whenClicked_thenShouldRemoveAccountFromTheDevice() {
-
+    fun givenLogoutButton_whenClicked_thenShouldRemoveAccountFromTheDeviceAndNavigateToEnterLink() {
+        lateinit var fragmentScenario: FragmentScenario<AccountListFragment>
         init {
-
+            fragmentScenario = launchFragment(1)
         }.run {
 
-            val fragmentScenario = launchFragment(true, defaultNumOfAccounts)
             val accountManager: UstadAccountManager by di.instance()
-
-            val activeAccount = accountManager.activeAccount
 
             AccountListScreen {
                 recycler {
@@ -249,13 +319,13 @@ class AccountListFragmentTest : TestCase() {
                 }
             }
 
-            val currentActiveAccount = accountManager.activeAccountLive.waitUntilWithFragmentScenario(fragmentScenario) {
-                !accountManager.storedAccounts.contains(activeAccount)
+            flakySafely {
+                Assert.assertNull("Active session is null", accountManager.activeSession)
+
+                assertEquals("It navigated to the get started screen",
+                    R.id.site_enterlink_dest,
+                    systemImplNavRule.navController.currentDestination?.id)
             }
-
-            assertTrue("Active account was logged out successfully",
-                    currentActiveAccount != activeAccount)
-
         }
 
 
@@ -268,7 +338,7 @@ class AccountListFragmentTest : TestCase() {
 
 
         init {
-            launchFragment(true, defaultNumOfAccounts)
+            launchFragment(defaultNumOfAccounts)
         }.run {
 
             AccountListScreen {
@@ -290,10 +360,10 @@ class AccountListFragmentTest : TestCase() {
 
     @AdbScreenRecord("given account list when account is clicked should be active")
     @Test
-    fun givenAccountList_whenAccountIsClicked_shouldBeActive() {
+    fun givenAccountList_whenAccountIsClicked_shouldBeActiveAndNavigateToFirstDest() {
 
         init {
-            launchFragment(true, defaultNumOfAccounts)
+            launchFragment(defaultNumOfAccounts)
         }.run {
 
             AccountListScreen {
@@ -305,17 +375,21 @@ class AccountListFragmentTest : TestCase() {
                     }
 
                     childWith<AccountListScreen.MainItem> {
-                        withDescendant { withText("FirstName3 Lastname3") }
+                        withDescendant { withText("FirstName2 Lastname2") }
                     }perform {
                         click()
                     }
+
                     firstChild<AccountListScreen.MainItem> {
                         fullNameText {
-                            hasText("FirstName3 Lastname3")
+                            hasText("FirstName2 Lastname2")
                         }
                     }
                 }
             }
+
+            assertEquals("It navigated to first expected destination",
+                R.id.home_content_dest, systemImplNavRule.navController.currentDestination?.id)
         }
 
 
@@ -346,48 +420,6 @@ class AccountListFragmentTest : TestCase() {
         }
 
 
-    }
-
-
-    private fun addAccounts(numberOfAccounts: Int = 1, guestActive: Boolean = false) {
-        var usageMap = mapOf<String, Long>()
-        val accounts: MutableList<UmAccount> = (1..(numberOfAccounts + 1)).map {
-            val umAccount = UmAccount(it.toLong()).apply {
-                username = "Person.$it"
-                firstName = "FirstName$it"
-                lastName = "Lastname$it"
-                endpointUrl = mockServerUrl
-            }
-            usageMap = usageMap.plus(Pair(umAccount.username!!, System.currentTimeMillis() - it.toLong()))
-            umAccount
-        }.toMutableList()
-
-        if (guestActive) {
-            val guest = UmAccount(0L, "guest", "", mockServerUrl,
-                    "Guest", "User")
-            accounts.add(0, guest)
-        }
-        val storedAccounts = UstadAccounts("${accounts[0].username}@$mockServerUrl", accounts,
-                usageMap)
-        impl.setAppPref(UstadAccountManager.ACCOUNTS_PREFKEY, null, context)
-
-        impl.setAppPref(UstadAccountManager.ACCOUNTS_PREFKEY,
-                Json.encodeToString(UstadAccounts.serializer(), storedAccounts), context)
-    }
-
-
-    private fun launchFragment(createExtraAccounts: Boolean = false, numberOfAccounts: Int = 1, guestActive: Boolean = false):
-            FragmentScenario<AccountListFragment> {
-        if (createExtraAccounts) {
-            runBlocking { addAccounts(numberOfAccounts, guestActive) }
-        }
-
-        return launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf()) {
-            AccountListFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-            }
-        }
     }
 
 }

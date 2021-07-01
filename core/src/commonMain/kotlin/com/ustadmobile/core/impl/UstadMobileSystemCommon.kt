@@ -9,6 +9,9 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
+import com.ustadmobile.door.doorMainDispatcher
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
 /**
@@ -99,19 +102,22 @@ abstract class UstadMobileSystemCommon {
             //if there are any accounts that match endpoint url the user wants to work with,
             // then go to the accountmanager list in picker mode, otherwise go directly to the login
             // screen for that particular server.
-            if(accountManager.storedAccounts.any { it.endpointUrl == endpointUrl }) {
-                val args = mapOf(ARG_NEXT to viewUri,
-                    AccountListView.ARG_FILTER_BY_ENDPOINT to endpointUrl,
-                    AccountListView.ARG_ACTIVE_ACCOUNT_MODE to AccountListView.ACTIVE_ACCOUNT_MODE_INLIST,
-                    UstadView.ARG_TITLE to getString(MessageID.select_account, context),
-                    UstadView.ARG_INTENT_MESSAGE to intentMessage,
-                    UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
-                go(AccountListView.VIEW_NAME, args, context)
-            }else {
-                val args = mapOf(ARG_NEXT to viewUri,
-                    ARG_INTENT_MESSAGE to intentMessage,
-                    ARG_SERVER_URL to endpointUrl)
-                go(Login2View.VIEW_NAME, args, context)
+            GlobalScope.launch(doorMainDispatcher()) {
+                if(accountManager.activeSessionCount { it == endpointUrl } > 0) {
+                    val args = mapOf(ARG_NEXT to viewUri,
+                        AccountListView.ARG_FILTER_BY_ENDPOINT to endpointUrl,
+                        AccountListView.ARG_ACTIVE_ACCOUNT_MODE to AccountListView.ACTIVE_ACCOUNT_MODE_INLIST,
+                        UstadView.ARG_TITLE to getString(MessageID.select_account, context),
+                        UstadView.ARG_INTENT_MESSAGE to intentMessage,
+                        UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
+                    go(AccountListView.VIEW_NAME, args, context)
+                }else {
+                    val args = mapOf(ARG_NEXT to viewUri,
+                        ARG_INTENT_MESSAGE to intentMessage,
+                        ARG_SERVER_URL to endpointUrl)
+                    go(Login2View.VIEW_NAME, args, context)
+                }
+
             }
         }
     }

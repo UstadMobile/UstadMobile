@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.encryptWithPbkdf2
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.toUmAccount
 import com.ustadmobile.core.util.ext.withEndpoint
 import com.ustadmobile.core.util.safeParse
@@ -12,6 +13,8 @@ import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_GUESTPERSON
+import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_PERSONGROUP
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.features.*
@@ -95,6 +98,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         }
 
         _activeUserSession = atomic(activeUserSessionFromJson)
+        _activeUserSessionLive.sendValue(activeUserSessionFromJson)
 
 
         val activeEndpointStr = systemImpl.getAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY, appContext)
@@ -110,8 +114,8 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
     /**
      * Get a list of all accounts that are on the system across all endpoints
      */
-    suspend fun activeSessionsList(): List<UserSessionWithPersonAndEndpoint> {
-        return endpointScope.activeEndpointUrls.flatMap { endpointUrl ->
+    suspend fun activeSessionsList(endpointFilter: (String) -> Boolean = { true }): List<UserSessionWithPersonAndEndpoint> {
+        return endpointScope.activeEndpointUrls.filter(endpointFilter).flatMap { endpointUrl ->
             val endpoint = Endpoint(endpointUrl)
             val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
             db.userSessionDao.findAllLocalSessionsAsync().map { userSession ->
@@ -120,8 +124,8 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         }
     }
 
-    suspend fun activeSessionCount(): Int {
-        return endpointScope.activeEndpointUrls.fold(0) { total, endpointUrl ->
+    suspend fun activeSessionCount(endpointFilter: (String) -> Boolean = {true}): Int {
+        return endpointScope.activeEndpointUrls.filter(endpointFilter).fold(0) { total, endpointUrl ->
             val db: UmAppDatabase = di.on(Endpoint(endpointUrl)).direct.instance(tag = DoorTag.TAG_DB)
             total + db.userSessionDao.countAllLocalSessionsAsync()
         }
@@ -136,6 +140,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         get() = _activeUserSession.value
         set(value) {
             _activeUserSession.value = value
+            _activeUserSessionLive.sendValue(value)
 
             val activeAccountJson = value?.let {
                 safeStringify(di, UserSessionWithPersonAndEndpoint.serializer(), value)
@@ -156,9 +161,6 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
     val activeAccountLive: DoorLiveData<UmAccount>
         get() = _activeAccountLive
-
-    val storedAccounts: List<UmAccount>
-        get() = userSessionLiveDataMediator.getValue()?.map { it.toUmAccount() } ?: listOf()
 
     val storedAccountsLive: DoorLiveData<List<UmAccount>> = DoorMediatorLiveData<List<UmAccount>>().apply {
         addSource(userSessionLiveDataMediator) { userSessionList ->
@@ -200,7 +202,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         }
     }
 
-    suspend fun addSession(person: Person, endpointUrl: String, password: String) : UserSessionWithPersonAndEndpoint{
+    suspend fun addSession(person: Person, endpointUrl: String, password: String?) : UserSessionWithPersonAndEndpoint{
         val endpoint = Endpoint(endpointUrl)
         val endpointRepo: UmAppDatabase = di.on(endpoint).direct
             .instance(tag = DoorTag.TAG_REPO)
@@ -215,21 +217,27 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
             usStartTime = systemTimeInMillis()
             usSessionType = UserSession.TYPE_STANDARD
             usStatus = UserSession.STATUS_ACTIVE
-            usAuth = password.encryptWithPbkdf2(authSalt, pbkdf2Params)
+            usAuth = password?.encryptWithPbkdf2(authSalt, pbkdf2Params)
             usUid = endpointRepo.userSessionDao.insertSession(this)
         }
 
         return UserSessionWithPersonAndEndpoint(userSession, person, endpoint)
     }
 
-    suspend fun endSession(userSessionWithPersonAndEndpoint: UserSessionWithPersonAndEndpoint,
-        endStatus: Int = UserSession.STATUS_LOGGED_OUT,
-        endReason: Int = UserSession.REASON_LOGGED_OUT
+    suspend fun endSession(session: UserSessionWithPersonAndEndpoint,
+                           endStatus: Int = UserSession.STATUS_LOGGED_OUT,
+                           endReason: Int = UserSession.REASON_LOGGED_OUT
     ) {
-        val endpointRepo: UmAppDatabase = di.on(userSessionWithPersonAndEndpoint.endpoint)
+        val endpointRepo: UmAppDatabase = di.on(session.endpoint)
             .direct.instance(tag = DoorTag.TAG_REPO)
         endpointRepo.userSessionDao.endSession(
-            userSessionWithPersonAndEndpoint.userSession.usUid, endStatus, endReason)
+            session.userSession.usUid, endStatus, endReason)
+
+        //check if the active session has been ended.
+        if(activeSession?.userSession?.usUid == session.userSession.usUid
+            && activeSession?.endpoint == session.endpoint) {
+            activeSession = null
+        }
     }
 
     suspend fun login(username: String, password: String, endpointUrl: String, replaceActiveAccount: Boolean = false): UmAccount = withContext(Dispatchers.Default){
@@ -263,6 +271,17 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
         //This should not be needed - as responseAccount can be smartcast, but will not otherwise compile
         responseAccount
+    }
+
+    suspend fun startGuestSession(endpointUrl: String) {
+        val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_REPO)
+        val guestPerson = repo.insertPersonAndGroup(Person().apply {
+            username = null
+            firstNames = "Guest"
+            lastName = "User"
+        }, groupFlag = PERSONGROUP_FLAG_PERSONGROUP or PERSONGROUP_FLAG_GUESTPERSON)
+
+        activeSession = addSession(guestPerson, endpointUrl, null)
     }
 
     suspend fun changePassword(username: String, currentPassword: String?, newPassword: String, endpointUrl: String): UmAccount = withContext(Dispatchers.Default){

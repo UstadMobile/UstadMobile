@@ -10,6 +10,7 @@ import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentformats.ContentImportManager
@@ -50,6 +51,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 import com.ustadmobile.core.impl.*
+import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_ITERATIONS
+import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_KEYLENGTH
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.networkmanager.*
@@ -86,7 +89,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<UstadAccountManager>() with singleton {
-            UstadAccountManager(instance(), applicationContext, di)
+            UstadAccountManager(instance(), applicationContext, EndpointScope.Default, di)
         }
 
         bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
@@ -226,6 +229,16 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<DestinationProvider>() with singleton {
             ViewNameToDestMap()
+        }
+
+        bind<Pbkdf2Params>() with singleton {
+            val systemImpl: UstadMobileSystemImpl = instance()
+            val numIterations = systemImpl.getAppConfigInt(KEY_PBKDF2_ITERATIONS,
+                UstadMobileConstants.PBKDF2_ITERATIONS, applicationContext)
+            val keyLength = systemImpl.getAppConfigInt(KEY_PBKDF2_KEYLENGTH,
+                UstadMobileConstants.PBKDF2_KEYLENGTH, applicationContext)
+
+            Pbkdf2Params(numIterations, keyLength)
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
