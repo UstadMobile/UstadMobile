@@ -1,12 +1,15 @@
 package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.ClientSyncManager.Companion.TABLEID_SYNC_ALL_TABLES
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
-@Entity
+@Entity(indices = [
+    Index(value = ["usPersonUid", "usStatus", "usClientNodeId"], name = "person_status_node_idx"),
+    Index(value = ["usClientNodeId", "usStatus", "usPersonUid"], name = "node_status_person_idx")])
 @SyncableEntity(tableId = UserSession.TABLE_ID,
     syncFindAllQuery = """
         SELECT UserSession.*

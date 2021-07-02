@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
 @SyncableEntity(tableId = TABLE_ID,
     notifyOnUpdate = [
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                $TABLE_ID AS tableId 
           FROM ChangeLog 
                 JOIN Clazz
@@ -27,13 +27,14 @@ import kotlinx.serialization.Serializable
     ],
     syncFindAllQuery = """
         SELECT Clazz.* 
-          FROM DeviceSession
+          FROM UserSession
                JOIN PersonGroupMember 
-                    ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
                $JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1
                     ${Role.PERMISSION_CLAZZ_SELECT} 
                     $JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2
-         WHERE DeviceSession.dsDeviceId = :clientId
+         WHERE UserSession.usClientNodeId = :clientId 
+           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
     """
 )
 @Serializable
@@ -141,8 +142,9 @@ open class Clazz() {
                                                      ) > 0
              JOIN PersonGroupMember AS PrsGrpMbr
                    ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
-              JOIN DeviceSession
-                   ON DeviceSession.dsPersonUid = PrsGrpMbr.groupMemberPersonUid
+              JOIN UserSession
+                   ON UserSession.usPersonUid = PrsGrpMbr.groupMemberPersonUid
+                      AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE }
         """
 
         const val JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1 = """

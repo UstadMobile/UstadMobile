@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @SyncableEntity(tableId = Schedule.TABLE_ID,
     notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${Schedule.TABLE_ID} AS tableId 
           FROM ChangeLog
                JOIN Schedule 

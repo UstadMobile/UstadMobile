@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
 @SyncableEntity(tableId = ClazzLog.TABLE_ID,
     notifyOnUpdate = [
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${ClazzLog.TABLE_ID} AS tableId 
           FROM ChangeLog
                JOIN ClazzLog 

@@ -12,18 +12,19 @@ import com.ustadmobile.door.annotation.*
 @SyncableEntity(tableId = PersonAuth2.TABLE_ID,
     syncFindAllQuery = """
         SELECT PersonAuth2.*
-          FROM DeviceSession
+          FROM UserSession
                    JOIN PersonGroupMember 
-                        ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+                        ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
                    ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
                         ${Role.PERMISSION_AUTH_SELECT}
                         ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
                    JOIN PersonAuth2
                         ON PersonAuth2.pauthUid = Person.personUid
-         WHERE DeviceSession.dsDeviceId = :clientId
+         WHERE UserSession.usClientNodeId = :clientId
+           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
     """,
     notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${PersonAuth2.TABLE_ID} AS tableId 
           FROM ChangeLog
                JOIN PersonAuth2 
@@ -31,9 +32,9 @@ import com.ustadmobile.door.annotation.*
                        AND ChangeLog.chEntityPk = PersonAuth2.pauthUid
                JOIN Person 
                     ON Person.personUid = PersonAuth2.pauthUid
-               ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+               ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
                     ${Role.PERMISSION_AUTH_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}        
+                    ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}        
     """])
 class PersonAuth2 {
 

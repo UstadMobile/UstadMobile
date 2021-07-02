@@ -25,7 +25,7 @@ internal fun UmAppDatabase.insertDefaultSite() {
 }
 
 fun UmAppDatabase.ktorInitDbWithRepo(repo: UmAppDatabase, passwordFilePath: String) {
-    insertDefaultSite()
+    repo.insertDefaultSite()
 
     val adminuser = personDao.findByUsername("admin")
 

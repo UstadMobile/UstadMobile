@@ -213,11 +213,6 @@ class PersonAuthRegisterRouteTest {
             val umAccount = Gson().fromJson(bodyStr, UmAccount::class.java)
             Assert.assertEquals("Received expected account object",
                 "mary", umAccount.username)
-
-            val userSessions = runBlocking { db.userSessionDao.findSessionsByPerson(umAccount.personUid)}
-            Assert.assertEquals("User session created for user",
-                umAccount.personUid, userSessions[0].usPersonUid)
-            Assert.assertEquals("One session created", 1, userSessions.size)
         }
     }
 

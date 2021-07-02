@@ -22,19 +22,14 @@ import io.ktor.routing.Route
 import io.ktor.routing.post
 import io.ktor.routing.route
 import org.kodein.di.instance
-import org.kodein.di.ktor.di
 import org.kodein.di.on
 import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.ktor.request.*
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.ktor.closestDI
 import kotlin.IllegalStateException
-
-private const val DEFAULT_SESSION_LENGTH = (1000L * 60 * 60 * 24 * 365)//One year
 
 fun Route.PersonAuthRegisterRoute() {
 
@@ -84,18 +79,6 @@ fun Route.PersonAuthRegisterRoute() {
             }
 
             if(authorizedPerson != null) {
-                db.deviceSessionDao.insert(DeviceSession(dsDeviceId = deviceId,
-                    dsPersonUid = authorizedPerson.personUid,
-                    expires = getSystemTimeInMillis() + DEFAULT_SESSION_LENGTH))
-
-                repo.userSessionDao.insertSession(UserSession().apply {
-                    usClientNodeId = deviceId
-                    usPersonUid = authorizedPerson.personUid
-                    usStartTime = systemTimeInMillis()
-                    usSessionType = UserSession.TYPE_STANDARD
-                    usStatus = UserSession.STATUS_ACTIVE
-                })
-
                 call.respond(HttpStatusCode.OK, authorizedPerson.toUmAccount(""))
             }else {
                 call.respond(HttpStatusCode.Forbidden, "")
@@ -150,7 +133,7 @@ fun Route.PersonAuthRegisterRoute() {
                 mParentJoinVal.ppjMinorPersonUid = mPerson.personUid
                 mParentJoinVal.ppjUid = repo.personParentJoinDao.insertAsync(mParentJoinVal)
 
-                val systemImpl: UstadMobileSystemImpl by di().instance()
+                val systemImpl: UstadMobileSystemImpl by closestDI().instance()
                 val appName = systemImpl.getString(mLangCode, MessageID.app_name, Any())
                 val linkArgs : Map<String, String> = mapOf(UstadView.ARG_ENTITY_UID to
                         mParentJoinVal.ppjUid.toString())
@@ -166,7 +149,7 @@ fun Route.PersonAuthRegisterRoute() {
                     MessageID.parent_child_register_message_subject, Any())
                     .replace("%1\$s", appName)
 
-                val notificationSender: NotificationSender by di().instance()
+                val notificationSender: NotificationSender by closestDI().instance()
                 notificationSender.sendEmail(mParentContactVal, subjectText, emailText)
             }
 
@@ -180,7 +163,7 @@ fun Route.PersonAuthRegisterRoute() {
 
     route("password") {
         post("change") {
-            val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
+            val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
             val username = call.request.queryParameters["username"]
             val currentPassword = call.request.queryParameters["currentPassword"]
             val newPassword = call.request.queryParameters["newPassword"]
