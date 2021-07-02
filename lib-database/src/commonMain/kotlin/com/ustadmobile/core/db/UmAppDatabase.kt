@@ -43,7 +43,7 @@ import kotlin.jvm.Volatile
     ClazzWorkQuestion::class, ClazzWorkQuestionOption::class, ClazzWorkSubmission::class,
     ClazzWorkQuestionResponse::class, ContentEntryProgress::class,
     Report::class,
-    DeviceSession::class, Site::class, ContainerImportJob::class,
+    Site::class, ContainerImportJob::class,
     LearnerGroup::class, LearnerGroupMember::class,
     GroupLearningSession::class,
     SiteTerms::class, ClazzContentJoin::class,
@@ -64,7 +64,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 70)
+], version = 71)
 @MinSyncVersion(60)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -291,9 +291,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("syncNodeDao")
     abstract val syncNodeDao: SyncNodeDao
-
-    @JsName("deviceSessionDao")
-    abstract val deviceSessionDao: DeviceSessionDao
 
     abstract val siteDao: SiteDao
 
@@ -4670,6 +4667,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
 
+        @Suppress("MemberVisibilityCanBePrivate")
         internal val MIGRATION_69_70 = object: DoorMigration(69, 70) {
             override fun migrate(database: DoorSqlDatabase) {
                 database.execSQL("ALTER TABLE Site ADD COLUMN authSalt TEXT")
@@ -4733,13 +4731,24 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("CREATE  INDEX index_UserSession_trk_clientId_epk_csn ON UserSession_trk (clientId, epk, csn)")
                     database.execSQL("CREATE UNIQUE INDEX index_UserSession_trk_epk_clientId ON UserSession_trk (epk, clientId)")
                 }
+
+                database.execSQL("CREATE INDEX person_status_node_idx ON UserSession (usPersonUid, usStatus, usClientNodeId)")
+                database.execSQL("CREATE INDEX node_status_person_idx ON UserSession (usClientNodeId, usStatus, usPersonUid)")
+            }
+
+        }
+
+        internal val MIGRATION_70_71 = object: DoorMigration(70, 71) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("CREATE INDEX idx_group_to_entity ON ScopedGrant (sgGroupUid, sgPermissions, sgTableId, sgEntityUid)")
+                database.execSQL("CREATE INDEX idx_entity_to_group ON ScopedGrant (sgTableId, sgEntityUid, sgPermissions, sgGroupUid)")
+                database.execSQL("DROP TABLE DeviceSession")
+
             }
         }
 
 
-
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
-
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
                     MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
                     MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
@@ -4749,7 +4758,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
                     MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
                     MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67,
-                    MIGRATION_68_69, MIGRATION_69_70)
+                    MIGRATION_68_69, MIGRATION_69_70, MIGRATION_70_71)
 
 
 

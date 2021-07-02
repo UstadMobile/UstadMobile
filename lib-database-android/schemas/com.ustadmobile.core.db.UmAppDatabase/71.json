@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 71,
-    "identityHash": "d306a84aff90bf1ec9c25b999d1f3f3a",
+    "identityHash": "8d53785321189ff0e3e29024a8ebcebc",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5405,44 +5405,6 @@
         "foreignKeys": []
       },
       {
-        "tableName": "DeviceSession",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`deviceSessionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `dsDeviceId` INTEGER NOT NULL, `dsPersonUid` INTEGER NOT NULL, `expires` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "deviceSessionUid",
-            "columnName": "deviceSessionUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "dsDeviceId",
-            "columnName": "dsDeviceId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "dsPersonUid",
-            "columnName": "dsPersonUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "expires",
-            "columnName": "expires",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "deviceSessionUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
         "tableName": "Site",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`siteUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sitePcsn` INTEGER NOT NULL, `siteLcsn` INTEGER NOT NULL, `siteLcb` INTEGER NOT NULL, `siteLct` INTEGER NOT NULL, `siteName` TEXT, `guestLogin` INTEGER NOT NULL, `registrationAllowed` INTEGER NOT NULL, `authSalt` TEXT)",
         "fields": [
@@ -6114,7 +6076,30 @@
           ],
           "autoGenerate": true
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "idx_group_to_entity",
+            "unique": false,
+            "columnNames": [
+              "sgGroupUid",
+              "sgPermissions",
+              "sgTableId",
+              "sgEntityUid"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_group_to_entity` ON `${TABLE_NAME}` (`sgGroupUid`, `sgPermissions`, `sgTableId`, `sgEntityUid`)"
+          },
+          {
+            "name": "idx_entity_to_group",
+            "unique": false,
+            "columnNames": [
+              "sgTableId",
+              "sgEntityUid",
+              "sgPermissions",
+              "sgGroupUid"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_entity_to_group` ON `${TABLE_NAME}` (`sgTableId`, `sgEntityUid`, `sgPermissions`, `sgGroupUid`)"
+          }
+        ],
         "foreignKeys": []
       },
       {
@@ -11200,7 +11185,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd306a84aff90bf1ec9c25b999d1f3f3a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8d53785321189ff0e3e29024a8ebcebc')"
     ]
   }
 }

@@ -197,7 +197,6 @@ class Login2PresenterTest {
             })
 
         verifyBlocking(accountManager, timeout(defaultTimeout)) { login(VALID_USER, VALID_PASS, httpUrl) }
-        verifyBlocking(mockRepo as DoorDatabaseSyncRepository, timeout(defaultTimeout)) { invalidateAllTables() }
     }
 
     @Test

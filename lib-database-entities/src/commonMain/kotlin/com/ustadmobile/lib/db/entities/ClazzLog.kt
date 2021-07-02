@@ -21,23 +21,24 @@ import kotlinx.serialization.Serializable
                         AND ClazzLog.clazzLogUid = ChangeLog.chEntityPk
                JOIN Clazz 
                     ON Clazz.clazzUid = ClazzLog.clazzLogClazzUid 
-               ${Clazz.JOIN_FROM_CLAZZ_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+               ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
                     ${Role.PERMISSION_CLAZZ_SELECT}
-                    ${Clazz.JOIN_FROM_CLAZZ_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}
+                    ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
         """
     ],
     syncFindAllQuery =
         """
         SELECT ClazzLog.* 
-          FROM DeviceSession
+          FROM UserSession
                JOIN PersonGroupMember 
-                    ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
                ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
                     ${Role.PERMISSION_CLAZZ_SELECT} 
                     ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
                JOIN ClazzLog
                     ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid
-         WHERE DeviceSession.dsDeviceId = :clientId
+         WHERE UserSession.usClientNodeId = :clientId
+               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
         """
 )
 @Entity

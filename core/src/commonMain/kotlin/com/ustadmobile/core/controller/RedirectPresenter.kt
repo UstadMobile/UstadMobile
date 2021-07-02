@@ -44,22 +44,6 @@ class RedirectPresenter(context: Any, arguments: Map<String, String>, view: Redi
 
                 systemImpl.goToViewLink(destination, context)
             }
-
-
-
-//            val userHasLoggedInOrSelectedGuest = systemImpl.getAppPref(
-//                    Login2Presenter.PREFKEY_USER_LOGGED_IN, "false", context).toBoolean()
-//
-//            val destination = nextViewArg ?: if (!userHasLoggedInOrSelectedGuest) {
-//                if (canSelectServer)
-//                    SiteEnterLinkView.VIEW_NAME
-//                else
-//                    Login2View.VIEW_NAME
-//            } else {
-//                ContentEntryListTabsView.VIEW_NAME
-//            }
-
-
         }
     }
 
