@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_SESSION_PREFKEY
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY
+import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION
 import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.waitUntil
@@ -26,6 +27,8 @@ import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
@@ -341,6 +344,10 @@ class UstadAccountManagerTest {
             on {
                 getAppPref(eq(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY), any())
             }.thenReturn(mockServerUrl)
+            on {
+                getAppPref(eq(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION), any())
+            }.thenReturn(
+                json.encodeToString(ListSerializer(String.serializer()), listOf(mockServerUrl)))
         }
 
 

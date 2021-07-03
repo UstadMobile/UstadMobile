@@ -74,6 +74,8 @@ import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.lib.db.entities.ContainerImportJob
+import kotlinx.coroutines.asCoroutineDispatcher
+import java.util.concurrent.Executors
 
 /**
  * Note: BaseUstadApp extends MultidexApplication on the multidex variant, but extends the
@@ -131,7 +133,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<NetworkManagerBle>() with singleton {
-            NetworkManagerBle(applicationContext, di, newSingleThreadContext("NetworkManager")).also {
+            val coroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+            NetworkManagerBle(applicationContext, di, coroutineDispatcher).also {
                 it.onCreate()
             }
         }

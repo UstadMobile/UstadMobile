@@ -8,9 +8,11 @@ import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.toUmAccount
 import com.ustadmobile.core.util.ext.withEndpoint
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_GUESTPERSON
@@ -28,6 +30,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -38,8 +44,9 @@ data class UstadAccounts(var currentAccount: String,
                          val storedAccounts: List<UmAccount>,
                          val lastUsed: Map<String, Long> = mapOf())
 
-class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext: Any,
-                          val endpointScope: EndpointScope,
+class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
+                          private val appContext: Any,
+                          private val endpointScope: EndpointScope,
                           val di: DI) {
 
     data class ResponseWithAccount(val statusCode: Int, val umAccount: UmAccount?)
@@ -84,12 +91,21 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
     private val _activeAccountLive = DoorMutableLiveData<UmAccount>()
 
-    val httpClient: HttpClient by di.instance()
+    private val httpClient: HttpClient by di.instance()
+
+    private val endpointsWithActiveSessions = concurrentSafeListOf<Endpoint>()
 
     init {
-        GlobalScope.launch(doorMainDispatcher()) {
-            endpointScope.activeEndpointUrls.forEach { endpointUrl ->
-                userSessionLiveDataMediator.addEndpoint(Endpoint(endpointUrl))
+        systemImpl.getAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION, appContext)?.also { endpointJson ->
+            val endpointStrs = safeParseList(di, ListSerializer(String.serializer()), String::class,
+                endpointJson)
+            val allEndpoints = endpointStrs.map { Endpoint(it) }
+            endpointsWithActiveSessions.addAll(allEndpoints)
+
+            GlobalScope.launch(doorMainDispatcher()) {
+                allEndpoints.forEach {
+                    userSessionLiveDataMediator.addEndpoint(it)
+                }
             }
         }
 
@@ -115,8 +131,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
      * Get a list of all accounts that are on the system across all endpoints
      */
     suspend fun activeSessionsList(endpointFilter: (String) -> Boolean = { true }): List<UserSessionWithPersonAndEndpoint> {
-        return endpointScope.activeEndpointUrls.filter(endpointFilter).flatMap { endpointUrl ->
-            val endpoint = Endpoint(endpointUrl)
+        return endpointsWithActiveSessions.filter { endpointFilter(it.url) }.flatMap { endpoint ->
             val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
             db.userSessionDao.findAllLocalSessionsAsync().map { userSession ->
                 userSession.withEndpoint(endpoint)
@@ -125,8 +140,8 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
     }
 
     suspend fun activeSessionCount(endpointFilter: (String) -> Boolean = {true}): Int {
-        return endpointScope.activeEndpointUrls.filter(endpointFilter).fold(0) { total, endpointUrl ->
-            val db: UmAppDatabase = di.on(Endpoint(endpointUrl)).direct.instance(tag = DoorTag.TAG_DB)
+        return endpointsWithActiveSessions.filter{ endpointFilter(it.url) }.fold(0) { total, endpoint ->
+            val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
             total + db.userSessionDao.countAllLocalSessionsAsync()
         }
     }
@@ -206,6 +221,15 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         val endpoint = Endpoint(endpointUrl)
         val endpointRepo: UmAppDatabase = di.on(endpoint).direct
             .instance(tag = DoorTag.TAG_REPO)
+
+        if(endpoint !in endpointsWithActiveSessions) {
+            endpointsWithActiveSessions += endpoint
+            commitActiveEndpointsToPref()
+            withContext(doorMainDispatcher()) {
+                userSessionLiveDataMediator.addEndpoint(endpoint)
+            }
+        }
+
         val pbkdf2Params: Pbkdf2Params = di.direct.instance()
 
         val authSalt = endpointRepo.siteDao.getSiteAsync()?.authSalt
@@ -238,6 +262,21 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
             && activeSession?.endpoint == session.endpoint) {
             activeSession = null
         }
+
+
+        if(activeSessionsList { it == session.endpoint.url }.isEmpty()) {
+            endpointsWithActiveSessions -= session.endpoint
+            commitActiveEndpointsToPref()
+            withContext(doorMainDispatcher()) {
+                userSessionLiveDataMediator.removeEndpoint(session.endpoint)
+            }
+        }
+    }
+
+    private fun commitActiveEndpointsToPref() {
+        val json = Json.encodeToString(ListSerializer(String.serializer()),
+            endpointsWithActiveSessions.map { it.url })
+        systemImpl.setAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION, json, appContext)
     }
 
     suspend fun login(username: String, password: String, endpointUrl: String, replaceActiveAccount: Boolean = false): UmAccount = withContext(Dispatchers.Default){
@@ -327,6 +366,8 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         const val ACCOUNTS_ACTIVE_SESSION_PREFKEY = "accountmgr.activesession"
 
         const val ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY = "accountmgr.activeendpoint"
+
+        const val ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION = "accountmgr.endpointswithsessions"
 
         const val MANIFEST_URL_FALLBACK = "http://localhost/"
 
