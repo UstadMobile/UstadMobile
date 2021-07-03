@@ -104,7 +104,7 @@ class UstadTestRule: TestWatcher() {
         diModule = DI.Module("UstadTestRule") {
             bind<UstadMobileSystemImpl>() with singleton { systemImplSpy }
             bind<UstadAccountManager>() with singleton {
-                UstadAccountManager(instance(), Any(), endpointScope, di)
+                UstadAccountManager(instance(), Any(), di)
             }
             bind<UmAppDatabase>(tag = TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)

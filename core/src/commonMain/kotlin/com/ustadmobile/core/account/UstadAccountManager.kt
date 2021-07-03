@@ -29,24 +29,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
-@Serializable
-data class UstadAccounts(var currentAccount: String,
-                         val storedAccounts: List<UmAccount>,
-                         val lastUsed: Map<String, Long> = mapOf())
-
 class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
                           private val appContext: Any,
-                          private val endpointScope: EndpointScope,
                           val di: DI) {
 
     data class ResponseWithAccount(val statusCode: Int, val umAccount: UmAccount?)
@@ -68,7 +60,6 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
             }
         }
 
-        @Suppress("unused")
         fun removeEndpoint(endpoint: Endpoint) {
             val liveData = endpointSessionsLiveDataMap[endpoint] ?: return
             removeSource(liveData)
@@ -279,7 +270,7 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
         systemImpl.setAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION, json, appContext)
     }
 
-    suspend fun login(username: String, password: String, endpointUrl: String, replaceActiveAccount: Boolean = false): UmAccount = withContext(Dispatchers.Default){
+    suspend fun login(username: String, password: String, endpointUrl: String): UmAccount = withContext(Dispatchers.Default){
         val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_REPO)
         val nodeId = (repo as? DoorDatabaseSyncRepository)?.clientId
                 ?: throw IllegalStateException("Could not open repo for endpoint $endpointUrl")

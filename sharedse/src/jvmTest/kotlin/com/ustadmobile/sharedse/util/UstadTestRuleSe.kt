@@ -94,7 +94,7 @@ class UstadTestRule: TestWatcher() {
         diModule = DI.Module("UstadTestRule") {
             bind<UstadMobileSystemImpl>() with singleton { systemImplSpy }
             bind<UstadAccountManager>() with singleton {
-                UstadAccountManager(instance(), Any(), endpointScope!!, di)
+                UstadAccountManager(instance(), Any(), di)
             }
             bind<NodeIdAndAuth>() with scoped(endpointScope!!).singleton {
                 NodeIdAndAuth(Random.nextInt(), randomUuid().toString())

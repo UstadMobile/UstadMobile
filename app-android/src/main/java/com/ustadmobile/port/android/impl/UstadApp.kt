@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.impl
 
 import android.content.Context
-import android.os.Build
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import com.google.gson.Gson
@@ -48,7 +47,6 @@ import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploadManagerCommonJvm
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.newSingleThreadContext
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_ITERATIONS
@@ -91,7 +89,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<UstadAccountManager>() with singleton {
-            UstadAccountManager(instance(), applicationContext, EndpointScope.Default, di)
+            UstadAccountManager(instance(), applicationContext, di)
         }
 
         bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {

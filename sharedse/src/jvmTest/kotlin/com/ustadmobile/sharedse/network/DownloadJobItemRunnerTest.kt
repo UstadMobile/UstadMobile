@@ -259,7 +259,7 @@ class DownloadJobItemRunnerTest {
             }
 
             bind<UstadAccountManager>() with singleton {
-                UstadAccountManager(instance(), Any(), endpointScope, di)
+                UstadAccountManager(instance(), Any(), di)
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {

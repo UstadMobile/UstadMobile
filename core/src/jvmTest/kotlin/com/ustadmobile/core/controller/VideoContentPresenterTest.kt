@@ -76,7 +76,7 @@ class VideoContentPresenterTest {
             }
 
             bind<UstadAccountManager>() with singleton {
-                UstadAccountManager(instance(), Any(), endpointScope, di)
+                UstadAccountManager(instance(), Any(), di)
             }
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()
