@@ -23,8 +23,11 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.net.URL
 
-class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "theanswer", "", "http://localhost/"),
-                                     val controlServerUrl: String? = null) : TestWatcher()  {
+class UmAppDatabaseAndroidClientRule(
+    val account: UmAccount = UmAccount(DEFAULT_ACTIVE_USER_PERSONUID,
+        "theanswer", "", "http://localhost/"),
+    val controlServerUrl: String? = null
+) : TestWatcher()  {
 
     private var dbInternal: UmAppDatabase? = null
 
@@ -110,4 +113,9 @@ class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "the
     }
 
 
+    companion object {
+
+        const val DEFAULT_ACTIVE_USER_PERSONUID = 42L
+
+    }
 }
