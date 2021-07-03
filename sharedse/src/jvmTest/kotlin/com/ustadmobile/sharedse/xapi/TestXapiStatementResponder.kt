@@ -19,6 +19,7 @@ import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.door.util.randomUuid
@@ -31,7 +32,6 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatement
 import com.ustadmobile.port.sharedse.impl.http.XapiStatementResponder
 import com.ustadmobile.port.sharedse.impl.http.XapiStatementResponder.Companion.URI_PARAM_ENDPOINT
 import com.ustadmobile.util.test.checkJndiSetup
-import com.ustadmobile.util.test.extractTestResourceToFile
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.*
@@ -74,7 +74,7 @@ class TestXapiStatementResponder {
         checkJndiSetup()
         val endpointScope = EndpointScope()
         di = DI {
-            bind<NodeIdAndAuth>() with scoped(endpointScope!!).singleton {
+            bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
                 NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
             }
 
@@ -82,7 +82,9 @@ class TestXapiStatementResponder {
                 spy(UstadMobileSystemImpl(XmlPullParserFactory.newInstance(),
                     temporaryFolder.newFolder()))
             }
-            bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
+            bind<UstadAccountManager>() with singleton {
+                UstadAccountManager(instance(), Any(), endpointScope, di)
+            }
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()
                 builder.registerTypeAdapter(Statement::class.java, StatementSerializer())
@@ -105,7 +107,7 @@ class TestXapiStatementResponder {
                 }
             }
 
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope!!).singleton {
+            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
@@ -130,7 +132,7 @@ class TestXapiStatementResponder {
 
 
         accountManager = di.direct.instance()
-        db = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_DB)
+        db = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
 
         mockUriResource = mock<RouterNanoHTTPD.UriResource> {
             on { initParameter(0, DI::class.java) }.thenReturn(di)
