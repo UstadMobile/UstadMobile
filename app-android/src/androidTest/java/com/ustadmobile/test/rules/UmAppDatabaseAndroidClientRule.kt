@@ -5,13 +5,13 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.asPerson
+import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.Site
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.port.android.impl.BaseUstadApp
 import com.ustadmobile.port.android.impl.UstadApp
+import com.ustadmobile.test.port.android.util.getApplicationDi
 import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import io.ktor.client.*
 import io.ktor.client.request.get
@@ -89,11 +89,24 @@ class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "the
         repoInternal = null
     }
 
-    fun insertPersonForActiveUser(person: Person) {
-        /* This is actually done in the start now
-        person.personUid = account.personUid
-        runBlocking { repoInternal!!.insertPersonAndGroup(person) }
-         */
+    fun insertPersonAndStartSession(person: Person, isAdmin: Boolean = false) {
+        runBlocking {
+            if(person.personUid == account.personUid) {
+                repoInternal!!.personDao.update(person)
+            }else {
+                repoInternal!!.insertPersonAndGroup(person)
+            }
+
+
+            if(isAdmin || person.admin) {
+                repo.grantScopedPermission(person, Role.ALL_PERMISSIONS, ScopedGrant.ALL_TABLES,
+                    ScopedGrant.ALL_ENTITIES)
+            }
+
+            val di = getApplicationDi()
+            val accountManager: UstadAccountManager = di.direct.instance()
+            accountManager.startLocalTestSessionBlocking(person, account.endpointUrl)
+        }
     }
 
 

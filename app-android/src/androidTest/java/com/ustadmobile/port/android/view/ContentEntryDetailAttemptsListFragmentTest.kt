@@ -46,7 +46,7 @@ class ContentEntryDetailAttemptsListFragmentTest : TestCase()  {
                 admin = true
                 personUid = 42
             }
-            dbRule.insertPersonForActiveUser(adminPerson)
+            dbRule.insertPersonAndStartSession(adminPerson)
             dbRule.repo.grantScopedPermission(adminPerson, Role.ALL_PERMISSIONS,
                 ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
             dbRule.repo.insertStatementForSessions()

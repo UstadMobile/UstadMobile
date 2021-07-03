@@ -57,7 +57,7 @@ class LearnerGroupEndToEndTest : TestCase() {
             lastName = "Teacher"
             username = "Ms Teach"
         }
-        dbRule.insertPersonForActiveUser(adminPerson)
+        dbRule.insertPersonAndStartSession(adminPerson)
 
         runBlocking {
             dbRule.repo.grantScopedPermission(adminPerson, Role.ALL_PERMISSIONS,

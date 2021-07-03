@@ -35,7 +35,7 @@ class LearnerGroupMemberListFragmentTest : TestCase() {
     @Before
     fun setup() {
 
-        dbRule.insertPersonForActiveUser(Person().apply {
+        dbRule.insertPersonAndStartSession(Person().apply {
             admin = true
             firstNames = "Test"
             lastName = "Teacher"
