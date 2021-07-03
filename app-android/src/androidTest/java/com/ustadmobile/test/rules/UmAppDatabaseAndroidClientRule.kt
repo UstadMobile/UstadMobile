@@ -25,7 +25,8 @@ import java.net.URL
 
 class UmAppDatabaseAndroidClientRule(
     val account: UmAccount = UmAccount(DEFAULT_ACTIVE_USER_PERSONUID,
-        "theanswer", "", "http://localhost/"),
+        firstName = "Test", lastName = "User",
+        username = "theanswer", auth = "", endpointUrl = "http://localhost/"),
     val controlServerUrl: String? = null
 ) : TestWatcher()  {
 
@@ -44,6 +45,8 @@ class UmAppDatabaseAndroidClientRule(
     var endpointUrl: String? = null
         private set
 
+    //The person object inserted into the database for the default active account
+    private lateinit var accountPerson: Person
 
     override fun starting(description: Description) {
         val di = (getApplicationContext<BaseUstadApp>() as UstadApp).di
@@ -70,7 +73,7 @@ class UmAppDatabaseAndroidClientRule(
             authSalt = randomString(12)
         })
 
-        val accountPerson = runBlocking {
+        accountPerson = runBlocking {
             repo.insertPersonAndGroup(account.asPerson())
         }
         accountManager.startLocalTestSessionBlocking(accountPerson,
@@ -95,7 +98,9 @@ class UmAppDatabaseAndroidClientRule(
     fun insertPersonAndStartSession(person: Person, isAdmin: Boolean = false) {
         runBlocking {
             if(person.personUid == account.personUid) {
+                person.personGroupUid = accountPerson.personGroupUid
                 repoInternal!!.personDao.update(person)
+                accountPerson = person
             }else {
                 repoInternal!!.insertPersonAndGroup(person)
             }

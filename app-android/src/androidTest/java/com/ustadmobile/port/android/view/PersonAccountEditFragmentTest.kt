@@ -7,7 +7,6 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.screen.PersonAccountEditScreen
@@ -83,21 +82,12 @@ class PersonAccountEditFragmentTest : TestCase(){
     private fun createPerson(withUsername: Boolean = false, isAdmin: Boolean = false,
                              matchPassword: Boolean = false): PersonWithAccount {
 
-        runBlocking {
-            val loggedInPerson = dbRule.repo.insertPersonAndGroup(Person().apply {
-                admin = isAdmin
-                username = "First"
-                lastName = "User"
-                personUid = 42
-            })
-            if(isAdmin) {
-                dbRule.repo.grantScopedPermission(loggedInPerson, Role.ALL_PERMISSIONS,
-                    ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
-            }
-        }
-
-
-
+        dbRule.insertPersonAndStartSession(Person().apply {
+            admin = isAdmin
+            username = "First"
+            lastName = "User"
+            personUid = UmAppDatabaseAndroidClientRule.DEFAULT_ACTIVE_USER_PERSONUID
+        })
 
         val password = "password"
         val confirmPassword = if(matchPassword) password else "password1"

@@ -3,14 +3,11 @@ package com.ustadmobile.port.android.view
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
+import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.toughra.ustadmobile.R
-import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.ScopedGrant
 import com.ustadmobile.port.android.screen.ContentEntryDetailAttemptsListScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
@@ -47,8 +44,6 @@ class ContentEntryDetailAttemptsListFragmentTest : TestCase()  {
                 personUid = 42
             }
             dbRule.insertPersonAndStartSession(adminPerson)
-            dbRule.repo.grantScopedPermission(adminPerson, Role.ALL_PERMISSIONS,
-                ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
             dbRule.repo.insertStatementForSessions()
         }
     }
@@ -57,16 +52,13 @@ class ContentEntryDetailAttemptsListFragmentTest : TestCase()  {
     @AdbScreenRecord("Given list when personWithAttempt clicked then navigate to PersonSessionList")
     @Test
     fun givenPersonsAttemptedContent_whenClickOnPerson_thenShouldNavigateToSessionListForPerson() {
-
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to 1000L.toString())) {
-            ContentEntryDetailAttemptsListFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-            }
-        }
-
         init{
-
+            launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to 1000L.toString())) {
+                ContentEntryDetailAttemptsListFragment().also {
+                    it.installNavController(systemImplNavRule.navController)
+                }
+            }
         }.run{
 
             ContentEntryDetailAttemptsListScreen{

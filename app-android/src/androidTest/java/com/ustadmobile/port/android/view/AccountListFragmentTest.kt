@@ -9,6 +9,7 @@ import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.espresso.matcher.ViewMatchers.hasChildCount
+import com.google.gson.Gson
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
@@ -18,6 +19,7 @@ import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_SESSION_PREFKEY
+import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
@@ -53,9 +55,9 @@ class AccountListFragmentTest : TestCase() {
 
     val context: Application = ApplicationProvider.getApplicationContext()
 
-    lateinit var mockWebServer: MockWebServer
+    private lateinit var mockWebServer: MockWebServer
 
-    lateinit var mockServerUrl: String
+    private lateinit var mockServerUrl: String
 
     private val defaultNumOfAccounts = 2
 
@@ -103,6 +105,7 @@ class AccountListFragmentTest : TestCase() {
     private fun addSessions(numberOfAccounts: Int = 1, guestActive: Boolean = false) {
         val endpoint = Endpoint(mockServerUrl)
         val di = getApplicationDi()
+        val gson: Gson = di.direct.instance()
 
         sessions = (0 until numberOfAccounts).map {
             val person = runBlocking {
@@ -128,6 +131,8 @@ class AccountListFragmentTest : TestCase() {
 
         impl.setAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY, endpoint.url,
             ApplicationProvider.getApplicationContext())
+        impl.setAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION,
+            gson.toJson(listOf(endpoint.url)), ApplicationProvider.getApplicationContext())
 
         if(guestActive) {
             val guestPerson = runBlocking {
@@ -302,9 +307,8 @@ class AccountListFragmentTest : TestCase() {
     @AdbScreenRecord("Given logout button clicked with no other accounts should navigate to enter link")
     @Test
     fun givenLogoutButton_whenClicked_thenShouldRemoveAccountFromTheDeviceAndNavigateToEnterLink() {
-        lateinit var fragmentScenario: FragmentScenario<AccountListFragment>
         init {
-            fragmentScenario = launchFragment(1)
+            launchFragment(1)
         }.run {
 
             val accountManager: UstadAccountManager by di.instance()
@@ -320,7 +324,7 @@ class AccountListFragmentTest : TestCase() {
             }
 
             flakySafely {
-                Assert.assertNull("Active session is null", accountManager.activeSession)
+                assertNull("Active session is null", accountManager.activeSession)
 
                 assertEquals("It navigated to the get started screen",
                     R.id.site_enterlink_dest,
