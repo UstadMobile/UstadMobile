@@ -4,9 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.viewpager.widget.ViewPager
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_OPTION
@@ -18,11 +21,9 @@ import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 
 class ContentEntryListTabsFragment : UstadBaseFragment(), ContentEntryListTabsView {
 
-    private inner class ContentEntryTabsPagerAdapter(fm: FragmentManager, viewList: List<String>, val titleList: List<String>): ViewNameListFragmentPagerAdapter(fm,
-            BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, viewList, mapOf(ContentEntryList2View.VIEW_NAME to ContentEntryList2Fragment::class.java),
-            mapOf()) {
+    private inner class ContentEntryTabsPagerAdapter(fa: FragmentActivity, viewList: List<String>): ViewNameListFragmentPagerAdapter(fa,
+            viewList, mapOf(ContentEntryList2View.VIEW_NAME to ContentEntryList2Fragment::class.java)) {
 
-        override fun getPageTitle(position: Int) = titleList[position]
     }
 
 
@@ -39,18 +40,18 @@ class ContentEntryListTabsFragment : UstadBaseFragment(), ContentEntryListTabsVi
 
 
         val mTabLayout: TabLayout = view.findViewById(R.id.tabs)
-        val mPager: ViewPager = view.findViewById(R.id.home_contententry_viewpager)
+        val mPager: ViewPager2 = view.findViewById(R.id.home_contententry_viewpager)
 
-        //Unfortunately if we dont use a Handler here then the first tab will not show up on first load
-        //As of Kotlin1.4, this actually seems to cause a crash.
-        //Handler().post {
         val defArgs = "${ContentEntryList2View.VIEW_NAME}?${ARG_PARENT_ENTRY_UID}=" +
                 "${arguments?.get(ARG_PARENT_ENTRY_UID).toString()}&$ARG_DISPLAY_CONTENT_BY_OPTION="
 
-        mPager.adapter = ContentEntryTabsPagerAdapter(childFragmentManager,
-            listOf("$defArgs$ARG_DISPLAY_CONTENT_BY_PARENT", "$defArgs$ARG_DISPLAY_CONTENT_BY_DOWNLOADED"),
-            listOf(getString(R.string.libraries), getString(R.string.downloaded)))
-        mTabLayout.setupWithViewPager(mPager)
-        //}
+        mPager.adapter = ContentEntryTabsPagerAdapter(requireActivity(),
+            listOf("$defArgs$ARG_DISPLAY_CONTENT_BY_PARENT", "$defArgs$ARG_DISPLAY_CONTENT_BY_DOWNLOADED"))
+        val titleList = listOf(getString(R.string.libraries), getString(R.string.downloaded))
+
+        TabLayoutMediator(mTabLayout, mPager) { tab, position ->
+            tab.text = titleList[position]
+        }.attach()
+
     }
 }

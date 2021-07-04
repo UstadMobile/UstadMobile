@@ -1,13 +1,12 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentPagerAdapter
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntryDetailViewpagerBinding
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter
@@ -43,18 +42,19 @@ class ContentEntryDetailFragment: UstadDetailFragment<ContentEntry>(), ContentEn
                 return
 
             field = value
-            mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager,
-                    FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, value, viewNameToFragmentMap,
-                    viewNameToTitleMap.map { it.key to requireContext().getString(it.value) }.toMap())
-            Handler().post {
-                mBinding.also {
-                    if(it == null)
-                        return@also
+            mPagerAdapter = ViewNameListFragmentPagerAdapter(requireActivity(),
+                    value, viewNameToFragmentMap)
 
-                    it.fragmentContentEntryDetailViewpager.adapter = mPagerAdapter
-                    it.fragmentContentEntryTabs.tabs.setupWithViewPager(it.fragmentContentEntryDetailViewpager)
-                }
-            }
+            val pager = mBinding?.fragmentContentEntryDetailViewpager ?: return
+            val tabList = mBinding?.fragmentContentEntryTabs?.tabs ?: return
+
+            pager.adapter = mPagerAdapter
+
+            val titleMap = viewNameToTitleMap.map { it.key to requireContext().getString(it.value) }.toMap()
+            TabLayoutMediator(tabList, pager) { tab, position ->
+                val viewName = value[position].substringBefore('?')
+                tab.text = titleMap[viewName]
+            }.attach()
         }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

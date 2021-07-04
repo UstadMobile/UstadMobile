@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzDetailBinding
 import com.ustadmobile.core.controller.ClazzDetailPresenter
@@ -41,18 +42,18 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
                 return
 
             field = value
-            mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager,
-                    BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, value, viewNameToFragmentMap,
-                    viewNameToTitleMap.map { it.key to requireContext().getString(it.value) }.toMap())
-            Handler().post {
-                mBinding.also {
-                    if(it == null)
-                        return@also
+            mPagerAdapter = ViewNameListFragmentPagerAdapter(requireActivity(), value, viewNameToFragmentMap)
 
-                    it.fragmentClazzDetailViewpager.adapter = mPagerAdapter
-                    it.fragmentClazzTabs.tabs.setupWithViewPager(it.fragmentClazzDetailViewpager)
-                }
-            }
+            val pager = mBinding?.fragmentClazzDetailViewpager ?: return
+            val tabList = mBinding?.fragmentClazzTabs?.tabs ?: return
+
+            pager.adapter = mPagerAdapter
+
+            val titleMap =  viewNameToTitleMap.map { it.key to requireContext().getString(it.value) }.toMap()
+            TabLayoutMediator(tabList, pager) { tab, position ->
+                val viewName = value[position].substringBefore('?')
+                tab.text = titleMap[viewName]
+            }.attach()
         }
 
     override val detailPresenter: UstadDetailPresenter<*, *>?

@@ -1,6 +1,8 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
@@ -19,12 +21,15 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 
 class ClazzDetailPresenter(context: Any,
                            arguments: Map<String, String>, view: ClazzDetailView, di: DI,
                            lifecycleOwner: DoorLifecycleOwner)
     : UstadDetailPresenter<ClazzDetailView, Clazz>(context, arguments, view, di, lifecycleOwner) {
+
+    private val scope: CoroutineScope by instance(tag = DiTag.TAG_COROUTINE_SCOPE)
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -66,7 +71,7 @@ class ClazzDetailPresenter(context: Any,
     private suspend fun setupTabs(clazz: Clazz) {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         val personUid = accountManager.activeAccount.personUid
-        GlobalScope.launch(doorMainDispatcher()) {
+        scope.launch {
 
             val contentEntryListParams = mapOf(
                     ARG_CLAZZUID to entityUid.toString(),
