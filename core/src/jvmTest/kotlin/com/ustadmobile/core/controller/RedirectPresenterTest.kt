@@ -1,11 +1,16 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import org.mockito.kotlin.*
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
+import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.UserSession
 import org.junit.Before
 import org.junit.Test
 import org.kodein.di.DI
@@ -27,6 +32,22 @@ class RedirectPresenterTest {
 
     private lateinit var mockedAccountManager: UstadAccountManager
 
+    private val defaultActiveSession = UserSessionWithPersonAndEndpoint(
+        UserSession().apply {
+            usUid = 1
+            usPersonUid = 1
+            usStatus = UserSession.STATUS_ACTIVE
+            usStartTime = systemTimeInMillis()
+        },
+        Person().apply {
+            personUid = 1
+            username = "jane"
+            firstNames = "Jane"
+            lastName = "Doe"
+        },
+        Endpoint("https://app.ustadmobile.com/")
+    )
+
     @Before
     fun setup() {
         mockedView = mock()
@@ -41,10 +62,10 @@ class RedirectPresenterTest {
     }
 
     @Test
-    fun givenAppLaunched_whenUserHasNotLoggedInBefore_thenShouldNavigateToGetStarted() {
+    fun givenAppLaunched_whenUserHasNoActiveSession_thenShouldNavigateToGetStarted() {
         whenever(impl.getAppConfigBoolean(eq(AppConfig.KEY_ALLOW_SERVER_SELECTION), any())).thenReturn(true)
         mockedAccountManager.stub {
-            onBlocking { activeSessionCount(any()) }.thenReturn(0)
+            on { activeSession }.thenReturn(null)
         }
 
         mPresenter = RedirectPresenter(context, mapOf(),
@@ -54,9 +75,9 @@ class RedirectPresenterTest {
     }
 
     @Test
-    fun givenAppLaunched_whenUserHasLoggedInBefore_thenShouldNavigateFeedList() {
+    fun givenAppLaunched_whenUserHasActiveSession_thenShouldNavigateFeedList() {
         mockedAccountManager.stub {
-            onBlocking { activeSessionCount(any()) }.thenReturn(1)
+            onBlocking { activeSession }.thenReturn(defaultActiveSession)
         }
 
         mPresenter = RedirectPresenter(context, mapOf(),
@@ -69,7 +90,7 @@ class RedirectPresenterTest {
     fun givenNextArgProvied_whenOnCreateCalled_thenShouldGoToNextDest() {
         val viewLink = "${ContentEntryDetailView.VIEW_NAME}?entityUid=42"
         mockedAccountManager.stub {
-            onBlocking { activeSessionCount(any()) }.thenReturn(1)
+            onBlocking { activeSession }.thenReturn(defaultActiveSession)
         }
 
         mPresenter = RedirectPresenter(context, mapOf(ARG_NEXT to viewLink),
