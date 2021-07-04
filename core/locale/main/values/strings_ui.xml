@@ -1368,4 +1368,16 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="add_new_clazz_to_school">Add new class to school</string>
 
+    <!-- This appears as a notification after the user selects a content piece to add to a class
+    %1$s will be replaced with the title of the content item selected
+    -->
+    <string name="added_to_class_content">%1$s added to class content</string>
+
+    <!--
+    This appears as a notification after the user selects a content piece to add to a class when
+    the user selects something that they had already added before.
+    %1$s will be replaced with the title of the content item selected
+    -->
+    <string name="content_already_added_to_class">%1$s was already in class content</string>
+
 </resources>
