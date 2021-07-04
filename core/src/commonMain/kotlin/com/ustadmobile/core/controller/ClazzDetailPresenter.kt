@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
@@ -98,6 +99,11 @@ class ClazzDetailPresenter(context: Any,
                 val entriesInClazz = repo.clazzContentJoinDao.listOfEntriesInClazz(arguments[ARG_ENTITY_UID]?.toLong() ?: 0)
 
                 if(entriesInClazz.contains(entry.contentEntryUid)) {
+
+                    view.showSnackBar(
+                            systemImpl.getString(MessageID.content_already_added_to_class, context)
+                                    .replace("%1\$s",entry.title ?: ""))
+
                     return@launch
                 }
 
@@ -106,6 +112,10 @@ class ClazzDetailPresenter(context: Any,
                     ccjContentEntryUid = entry.contentEntryUid
                     ccjUid = repo.clazzContentJoinDao.insert(this)
                 }
+
+                view.showSnackBar(
+                        systemImpl.getString(MessageID.added_to_class_content, context)
+                                .replace("%1\$s",entry.title ?: ""))
             }
             requireSavedStateHandle()[ContentEntryList2Presenter.SAVEDSTATE_KEY_ENTRY] = null
         }
