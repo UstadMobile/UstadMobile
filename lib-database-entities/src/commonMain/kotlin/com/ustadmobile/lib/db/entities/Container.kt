@@ -11,8 +11,9 @@ import kotlinx.serialization.Serializable
         value = ["containerContentEntryUid", "cntLastModified"])))
 @SyncableEntity(tableId = Container.TABLE_ID,
     notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId as deviceId, ${Container.TABLE_ID} AS tableId 
-        FROM DeviceSession 
+        SELECT DISTINCT UserSession.usClientNodeId as deviceId, 
+               ${Container.TABLE_ID} AS tableId 
+          FROM UserSession
     """]
 )
 @Serializable

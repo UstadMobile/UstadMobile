@@ -1,12 +1,17 @@
 package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
-@Entity
+@Entity(indices = [
+    Index(value = ["sgGroupUid", "sgPermissions", "sgTableId", "sgEntityUid"], name = "idx_group_to_entity"),
+    Index(value = ["sgTableId", "sgEntityUid", "sgPermissions", "sgGroupUid"], name = "idx_entity_to_group")]
+)
+
 @SyncableEntity(tableId = TABLE_ID)
 @Serializable
 class ScopedGrant {

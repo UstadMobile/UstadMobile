@@ -5,10 +5,10 @@ import com.google.gson.GsonBuilder
 import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
-import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
@@ -20,12 +20,13 @@ import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.door.ext.clearAllTablesAndResetSync
 import com.ustadmobile.door.util.randomUuid
+import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
@@ -91,8 +92,10 @@ class UstadTestRule: TestWatcher() {
         }
 
         diModule = DI.Module("UstadTestRule") {
-            bind<UstadMobileSystemImpl>() with singleton { systemImplSpy!! }
-            bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
+            bind<UstadMobileSystemImpl>() with singleton { systemImplSpy }
+            bind<UstadAccountManager>() with singleton {
+                UstadAccountManager(instance(), Any(), di)
+            }
             bind<NodeIdAndAuth>() with scoped(endpointScope!!).singleton {
                 NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
             }
@@ -118,10 +121,20 @@ class UstadTestRule: TestWatcher() {
             bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope!!).singleton {
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(Any(),
-                    context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, instance(), instance())))
+                    context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, instance(), instance()))
+                ).also {
+                    it.siteDao.insert(Site().apply {
+                        siteName = "Test"
+                        authSalt = randomString(16)
+                    })
+                }
             }
 
             bind<ContainerMounter>() with singleton { EmbeddedHTTPD(0, di).also { it.start() } }
+
+            bind<Pbkdf2Params>() with singleton {
+                Pbkdf2Params()
+            }
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
 

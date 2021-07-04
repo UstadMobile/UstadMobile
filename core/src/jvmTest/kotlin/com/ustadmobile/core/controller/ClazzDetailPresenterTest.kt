@@ -17,6 +17,7 @@ import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.ext.insertPersonWithRole
+import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
@@ -24,7 +25,6 @@ import org.junit.Test
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
-import org.kodein.di.on
 
 class ClazzDetailPresenterTest {
 
@@ -76,9 +76,8 @@ class ClazzDetailPresenterTest {
             rolePermissions = Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT or Role.PERMISSION_CLAZZ_SELECT
         }
 
-        val endpointUrl = accountManager.activeAccount.endpointUrl
-        accountManager.activeAccount = UmAccount(activePerson.personUid, activePerson.username,
-                "", endpointUrl, activePerson.firstNames, activePerson.lastName)
+        val endpointUrl = accountManager.activeEndpoint.url
+        accountManager.startLocalTestSessionBlocking(activePerson, endpointUrl)
 
         runBlocking { repo.insertPersonWithRole(activePerson, roleWithAttendancePermission,
                 EntityRole().apply {

@@ -148,10 +148,10 @@ class ContainerUploader2Test {
 
         val accountManager: UstadAccountManager = di.direct.instance()
         siteEndpoint = Endpoint(mockWebServer.url("/").toString())
-        accountManager.activeAccount.endpointUrl = siteEndpoint.url
+        accountManager.activeEndpoint = siteEndpoint
 
-        clientDb = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
-        clientRepo = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
+        clientDb = di.on(siteEndpoint).direct.instance(tag = DoorTag.TAG_DB)
+        clientRepo = di.on(siteEndpoint).direct.instance(tag = DoorTag.TAG_REPO)
 
         container = Container().apply {
             containerUid = clientRepo.containerDao.insert(this)

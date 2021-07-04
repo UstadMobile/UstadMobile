@@ -33,4 +33,7 @@ open class Site {
     var guestLogin: Boolean = true
 
     var registrationAllowed: Boolean = true
+
+    var authSalt: String? = null
+
 }

@@ -1,13 +1,18 @@
 package com.ustadmobile.test.rules
 
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.asPerson
+import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.port.android.impl.BaseUstadApp
 import com.ustadmobile.port.android.impl.UstadApp
+import com.ustadmobile.test.port.android.util.getApplicationDi
+import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import io.ktor.client.*
 import io.ktor.client.request.get
 import kotlinx.coroutines.runBlocking
@@ -18,8 +23,12 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.net.URL
 
-class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "theanswer", "", "http://localhost/"),
-                                     val controlServerUrl: String? = null) : TestWatcher()  {
+class UmAppDatabaseAndroidClientRule(
+    val account: UmAccount = UmAccount(DEFAULT_ACTIVE_USER_PERSONUID,
+        firstName = "Test", lastName = "User",
+        username = "theanswer", auth = "", endpointUrl = "http://localhost/"),
+    val controlServerUrl: String? = null
+) : TestWatcher()  {
 
     private var dbInternal: UmAppDatabase? = null
 
@@ -36,6 +45,8 @@ class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "the
     var endpointUrl: String? = null
         private set
 
+    //The person object inserted into the database for the default active account
+    private lateinit var accountPerson: Person
 
     override fun starting(description: Description) {
         val di = (getApplicationContext<BaseUstadApp>() as UstadApp).di
@@ -50,12 +61,23 @@ class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "the
             account.endpointUrl = endpointUrl!!
         }
 
+        val endpoint = Endpoint(endpointUrl ?: account.endpointUrl)
         val accountManager: UstadAccountManager by di.instance()
-        accountManager.activeAccount = account
 
-        dbInternal = di.direct.on(accountManager.activeAccount).instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB)
+        dbInternal = di.direct.on(endpoint).instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB)
 
-        repoInternal = di.direct.on(accountManager.activeAccount).instance<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO)
+        repoInternal = di.direct.on(endpoint).instance<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO)
+
+        repo.siteDao.insert(Site().apply {
+            siteName = "Test Site"
+            authSalt = randomString(12)
+        })
+
+        accountPerson = runBlocking {
+            repo.insertPersonAndGroup(account.asPerson())
+        }
+        accountManager.startLocalTestSessionBlocking(accountPerson,
+            endpointUrl ?: account.endpointUrl)
     }
 
 
@@ -73,10 +95,32 @@ class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "the
         repoInternal = null
     }
 
-    fun insertPersonForActiveUser(person: Person) {
-        person.personUid = account.personUid
-        runBlocking { repoInternal!!.insertPersonAndGroup(person) }
+    fun insertPersonAndStartSession(person: Person, isAdmin: Boolean = false) {
+        runBlocking {
+            if(person.personUid == account.personUid) {
+                person.personGroupUid = accountPerson.personGroupUid
+                repoInternal!!.personDao.update(person)
+                accountPerson = person
+            }else {
+                repoInternal!!.insertPersonAndGroup(person)
+            }
+
+
+            if(isAdmin || person.admin) {
+                repo.grantScopedPermission(person, Role.ALL_PERMISSIONS, ScopedGrant.ALL_TABLES,
+                    ScopedGrant.ALL_ENTITIES)
+            }
+
+            val di = getApplicationDi()
+            val accountManager: UstadAccountManager = di.direct.instance()
+            accountManager.startLocalTestSessionBlocking(person, account.endpointUrl)
+        }
     }
 
 
+    companion object {
+
+        const val DEFAULT_ACTIVE_USER_PERSONUID = 42L
+
+    }
 }

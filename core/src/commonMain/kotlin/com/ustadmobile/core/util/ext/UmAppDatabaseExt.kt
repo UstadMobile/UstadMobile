@@ -2,6 +2,7 @@ package com.ustadmobile.core.util.ext
 
 import androidx.paging.DataSource
 import com.soywiz.klock.DateTime
+import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.controller.ReportFilterEditPresenter.Companion.genderMap
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.StatementDao
@@ -11,6 +12,7 @@ import com.ustadmobile.core.schedule.localEndOfDay
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.graph.*
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.ext.dbType
@@ -245,11 +247,12 @@ suspend fun UmAppDatabase.approvePendingSchoolMember(member: SchoolMember, schoo
 /**
  * Inserts the person, sets its group and groupmember. Does not check if its an update
  */
-suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(entity: T): T{
+suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(entity: T,
+    groupFlag: Int = PersonGroup.PERSONGROUP_FLAG_PERSONGROUP): T{
 
     val groupPerson = PersonGroup().apply {
         groupName = "Person individual group"
-        personGroupFlag = PersonGroup.PERSONGROUP_FLAG_PERSONGROUP
+        personGroupFlag = groupFlag
     }
     //Create person's group
     groupPerson.groupUid = personGroupDao.insertAsync(groupPerson)
@@ -588,3 +591,24 @@ suspend fun UmAppDatabase.grantScopedPermission(toPerson: Person, permissions: L
                                                 scopeTableId: Int, scopeEntityUid: Long): ScopedGrantResult {
     return grantScopedPermission(toPerson.personGroupUid, permissions, scopeTableId, scopeEntityUid)
 }
+
+/**
+ * Insert authentication credentials for the given person uid with the given password. The
+ */
+suspend fun UmAppDatabase.insertPersonAuthCredentials2(personUid: Long,
+                                            password: String,
+                                            pbkdf2Params: Pbkdf2Params,
+                                            site: Site? = null
+) {
+    val db = (this as DoorDatabaseRepository).db as UmAppDatabase
+    val effectiveSite = site ?: db.siteDao.getSite()
+    val authSalt = effectiveSite?.authSalt ?: throw IllegalStateException("insertAuthCredentials: No auth salt!")
+
+    personAuth2Dao.insertAsync(PersonAuth2().apply {
+        pauthUid = personUid
+        pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
+        pauthAuth = password.encryptWithPbkdf2(authSalt, pbkdf2Params)
+            .encryptWithPbkdf2(authSalt, pbkdf2Params)
+    })
+}
+

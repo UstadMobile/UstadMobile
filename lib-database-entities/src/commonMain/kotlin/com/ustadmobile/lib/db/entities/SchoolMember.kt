@@ -6,10 +6,9 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.SchoolMember.Companion.FROM_SCHOOLMEMBER_TO_SCOPEDGRANT_JOIN_ON_PERSON_OR_CLAZZ_PERMISSION_CLAUSE
-import com.ustadmobile.lib.db.entities.SchoolMember.Companion.FROM_SCHOOLMEMBER_TO_SCOPEDGRANT_JOIN_ON_SCHOOL_PERMISSION_CLAUSE
-import com.ustadmobile.lib.db.entities.SchoolMember.Companion.JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PERSON_OR_CLAZZ_PERMISSION_PT1
-import com.ustadmobile.lib.db.entities.SchoolMember.Companion.JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
-import com.ustadmobile.lib.db.entities.SchoolMember.Companion.JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
+import com.ustadmobile.lib.db.entities.SchoolMember.Companion.JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PERSON_OR_CLAZZ_PERMISSION_PT1
+import com.ustadmobile.lib.db.entities.SchoolMember.Companion.JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
+import com.ustadmobile.lib.db.entities.SchoolMember.Companion.JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
 import kotlinx.serialization.Serializable
 
 /**
@@ -23,170 +22,171 @@ import kotlinx.serialization.Serializable
 ])
 @SyncableEntity(tableId = SchoolMember.TABLE_ID,
     notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId,
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
                ${SchoolMember.TABLE_ID} AS tableId 
           FROM ChangeLog
                JOIN SchoolMember 
                     ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                         AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PERSON_OR_CLAZZ_PERMISSION_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PERSON_OR_CLAZZ_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
-                    $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
+                    $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
         """,
 
         //Person
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${Person.TABLE_ID} AS tableId 
           FROM ChangeLog
                JOIN SchoolMember ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                     AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
-                    $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
+                    $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
         """,
         //AgentEntity
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${AgentEntity.TABLE_ID} AS tableId 
           FROM ChangeLog
                JOIN SchoolMember ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                     AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
-                    $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2 
+                    $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PT2 
         """,
         //ClazzLogAttendanceRecord
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${ClazzLogAttendanceRecord.TABLE_ID} AS tableId 
           FROM ChangeLog
                JOIN SchoolMember ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                     AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT}
-                    $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2 
+                    $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PT2 
         """,
         //GroupLearningSession
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${GroupLearningSession.TABLE_ID} AS tableId 
           FROM ChangeLog
                JOIN SchoolMember 
                     ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                         AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
-                    $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2          
+                    $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PT2          
         """,
         //LearnerGroup
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${LearnerGroup.TABLE_ID} AS tableId 
           FROM ChangeLog
                JOIN SchoolMember 
                     ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                         AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
-                    $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2         
+                    $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PT2         
         """,
         //LearnerGroupMember
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${LearnerGroupMember.TABLE_ID} AS tableId 
           FROM ChangeLog
                JOIN SchoolMember ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                     AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
-                    $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
+                    $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
         """,
         //PersonGroup
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${PersonGroup.TABLE_ID} AS tableId 
           FROM ChangeLog
                JOIN SchoolMember 
                     ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                         AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
-                    $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2     
+                    $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PT2     
         """,
         //PersonGroupMember
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${PersonGroupMember.TABLE_ID} AS tableId 
           FROM ChangeLog
                JOIN SchoolMember 
                     ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                        AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
-                    $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
+                    $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
         """,
             //PersonPicture
             """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${PersonPicture.TABLE_ID} AS tableId 
           FROM ChangeLog
                JOIN SchoolMember 
                     ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                         AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_PICTURE_SELECT}
-                    $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2 
+                    $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PT2 
         """,
         //ClazzEnrolment
         """ 
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${ClazzEnrolment.TABLE_ID} AS tableId 
           FROM ChangeLog
                JOIN SchoolMember 
                     ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID}
                             AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
-                    $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2  
+                    $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PT2  
         """,
         //Clazz
         """ 
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${Clazz.TABLE_ID} AS tableId 
           FROM ChangeLog
                JOIN SchoolMember 
                     ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID}
                             AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-               $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
+               $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_CLAZZ_SELECT}
-                    $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2  
+                    $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PT2  
         """,
         //StatementEntity
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${StatementEntity.TABLE_ID} AS tableId FROM
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, ${StatementEntity.TABLE_ID} AS tableId FROM
             ChangeLog
             JOIN SchoolMember 
                  ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} 
                         AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
-                 $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
+                 $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1
                     ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}
-                    $JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2  
+                    $JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PT2  
         """
         ],
         //Note: because the ScopedGrant JOIN ON clause does not include any subquery,
         // there is currently no need to have two different versions of it for SchoolMember
         syncFindAllQuery = """
             SELECT SchoolMember.* 
-              FROM DeviceSession
+              FROM UserSession
                    JOIN PersonGroupMember 
-                        ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+                        ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
                    JOIN ScopedGrant 
                         ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
                            AND (ScopedGrant.sgPermissions &  ${Role.PERMISSION_PERSON_SELECT}) > 0
                    JOIN SchoolMember
                         ON $FROM_SCHOOLMEMBER_TO_SCOPEDGRANT_JOIN_ON_PERSON_OR_CLAZZ_PERMISSION_CLAUSE
-             WHERE DeviceSession.dsDeviceId = :clientId         
+             WHERE UserSession.usClientNodeId = :clientId
+                   AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
     """)
 @Serializable
 open class SchoolMember {
@@ -242,7 +242,7 @@ open class SchoolMember {
                  AND ScopedGrant.sgEntityUid = SchoolMember.schoolMemberSchoolUid))
         """
 
-        const val JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PERSON_OR_CLAZZ_PERMISSION_PT1 = """
+        const val JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PERSON_OR_CLAZZ_PERMISSION_PT1 = """
             JOIN ScopedGrant
                  ON $FROM_SCHOOLMEMBER_TO_SCOPEDGRANT_JOIN_ON_PERSON_OR_CLAZZ_PERMISSION_CLAUSE
                     AND (ScopedGrant.sgPermissions &
@@ -267,19 +267,20 @@ open class SchoolMember {
                  AND ScopedGrant.sgEntityUid = SchoolMember.schoolMemberSchoolUid)
         """
 
-        const val JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1 = """
+        const val JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_SCHOOOL_PERMISSION_PT1 = """
             JOIN ScopedGrant
                  ON $FROM_SCHOOLMEMBER_TO_SCOPEDGRANT_JOIN_ON_SCHOOL_PERMISSION_CLAUSE
                     AND (ScopedGrant.sgPermissions &
         """
 
 
-        const val JOIN_FROM_SCHOOLMEMBER_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2 = """
+        const val JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PT2 = """
             ) > 0  
             JOIN PersonGroupMember 
                    ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-            JOIN DeviceSession
-                   ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid    
+            JOIN UserSession
+                   ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+                      AND UserSession.usStatus =${UserSession.STATUS_ACTIVE}
         """
 
 

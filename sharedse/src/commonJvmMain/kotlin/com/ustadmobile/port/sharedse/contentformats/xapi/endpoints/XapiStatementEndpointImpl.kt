@@ -433,7 +433,6 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
 
         const val EXTENSION_PROGRESS = "https://w3id.org/xapi/cmi5/result/extensions/progress"
 
-        @Throws(StatementRequestException::class)
         fun checkValidActor(actor: Actor) {
 
             val hasMbox = actor.mbox?.isNotEmpty() ?: false
