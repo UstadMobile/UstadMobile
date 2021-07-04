@@ -1299,8 +1299,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <!-- Allows the user to see a list of supported educational websites for importing educational content via a link -->
     <string name="see_supported_sites">See supported sites</string>
 
-    <string name="total_score">Total score</string>
-
     <!-- A section of the class edit screen that allows users to choose what features are enabled
     and what permissions users will have -->
     <string name="class_setup">Class setup</string>
