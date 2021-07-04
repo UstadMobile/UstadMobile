@@ -103,7 +103,7 @@
                 android:onClick="@{()-> activityEventHandler.onClickUpdateContent()}"
                 android:padding="@dimen/dimen_20dp"
                 android:text="@string/update_content"
-                android:visibility="@{(contentEntry.leaf || importedMetadata.uri != null) ? View.VISIBLE: View.GONE}"
+                android:visibility="@{(contentEntry.leaf || contentEntry.contentEntryUid != 0) ? View.VISIBLE: View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"

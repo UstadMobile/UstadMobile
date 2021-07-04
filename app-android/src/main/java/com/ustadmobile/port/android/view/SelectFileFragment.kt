@@ -13,7 +13,7 @@ import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
-import com.ustadmobile.core.view.SelectFileView.Companion.ARG_SELECT_FILE
+import com.ustadmobile.core.view.SelectFileView.Companion.ARG_SELECTION_MODE
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
 import org.kodein.di.instance
@@ -53,7 +53,7 @@ class SelectFileFragment(private val registry: ActivityResultRegistry? = null) :
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val mimeTypeList = arguments?.get(ARG_SELECT_FILE)?.toString()?.split(";")?.toTypedArray()
+        val mimeTypeList = arguments?.get(ARG_SELECTION_MODE)?.toString()?.split(";")?.toTypedArray()
         activityResultLauncher?.launch(mimeTypeList)
         return null
     }

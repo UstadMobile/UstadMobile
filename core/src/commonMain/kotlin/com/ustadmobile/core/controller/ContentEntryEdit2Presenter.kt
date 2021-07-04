@@ -5,32 +5,31 @@ import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.KEY_SELECTED_ITEMS
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.view.ContentEntryDetailView
-import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_IMPORTED_METADATA
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
-import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.door.util.randomUuid
-import com.ustadmobile.lib.db.entities.ContainerImportJob
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.lib.db.entities.*
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -44,10 +43,11 @@ class ContentEntryEdit2Presenter(context: Any,
                                  arguments: Map<String, String>, view: ContentEntryEdit2View,
                                  lifecycleOwner: DoorLifecycleOwner,
                                  di: DI)
-    : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view, di, lifecycleOwner) {
+    : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view, di, lifecycleOwner),
+        ContentEntryAddOptionsListener {
 
     private val contentImportManager: ContentImportManager?
-            by on(accountManager.activeAccount).instanceOrNull<ContentImportManager>()
+            by on(accountManager.activeAccount).instanceOrNull()
 
     private lateinit var destinationOnFinish: String
 
@@ -103,8 +103,9 @@ class ContentEntryEdit2Presenter(context: Any,
             return null
         }
         if(metaData != null){
-            view.entryMetaData = safeParse(di, ImportedContentEntryMetaData.serializer(), metaData)
-            return view.entryMetaData?.contentEntry
+            val importedMetadata = safeParse(di, ImportedContentEntryMetaData.serializer(), metaData)
+            view.fileImportErrorVisible = false
+            return importedMetadata.contentEntry
         }
         return withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.contentEntryDao?.findEntryWithLanguageByEntryIdAsync(entityUid)
@@ -127,6 +128,41 @@ class ContentEntryEdit2Presenter(context: Any,
             ContentEntryWithLanguage()
         }
         return editEntity
+    }
+
+    override fun onLoadDataComplete() {
+        super.onLoadDataComplete()
+
+        observeSavedStateResult(SAVED_STATE_KEY_URI, ListSerializer(String.serializer()),
+                String::class) {
+            val uri = it.firstOrNull() ?: return@observeSavedStateResult
+            view.loading = true
+            view.fieldsEnabled = false
+
+            handleFileSelection(uri)
+
+            requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
+        }
+
+        observeSavedStateResult(SAVED_STATE_KEY_METADATA, ListSerializer(ImportedContentEntryMetaData.serializer()),
+                ImportedContentEntryMetaData::class) {
+            val metadata = it.firstOrNull() ?: return@observeSavedStateResult
+            view.loading = true
+            // back from navigate import
+            view.entryMetaData = metadata
+            val entry = view.entryMetaData?.contentEntry
+            val entryUid = arguments[ARG_ENTITY_UID]
+            if (entry != null) {
+                if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
+                view.fileImportErrorVisible = false
+                entity = entry
+            }
+            view.loading = false
+
+            requireSavedStateHandle()[SAVED_STATE_KEY_METADATA] = null
+        }
+
+
     }
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
@@ -268,6 +304,60 @@ class ContentEntryEdit2Presenter(context: Any,
             view.loading = false
             view.fieldsEnabled = true
         }
+    }
+
+    override fun onClickNewFolder() {
+        // wont happen in edit screen
+    }
+
+    override fun onClickImportFile() {
+        val args = mutableMapOf(
+                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_FILE,
+                ARG_LEAF to true.toString())
+        args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
+
+        navigateForResult(
+                NavigateForResultOptions(this,
+                        null, SelectFileView.VIEW_NAME, String::class,
+                        String.serializer(), SAVED_STATE_KEY_URI,
+                        arguments = args)
+        )
+    }
+
+    override fun onClickImportLink() {
+        val args = mutableMapOf(ARG_LEAF to true.toString())
+        args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
+
+        navigateForResult(
+                NavigateForResultOptions(this,
+                        null, ContentEntryImportLinkView.VIEW_NAME,
+                        ImportedContentEntryMetaData::class,
+                        ImportedContentEntryMetaData.serializer(), SAVED_STATE_KEY_METADATA,
+                        arguments = args)
+        )
+    }
+
+    override fun onClickImportGallery() {
+        val args = mutableMapOf(
+                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_GALLERY,
+                ARG_LEAF to true.toString())
+        args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
+
+        navigateForResult(
+                NavigateForResultOptions(this,
+                        null, SelectFileView.VIEW_NAME, String::class,
+                        String.serializer(), SAVED_STATE_KEY_URI,
+                        arguments = args)
+        )
+    }
+
+    companion object {
+
+        const val SAVED_STATE_KEY_URI = "URI"
+
+        const val SAVED_STATE_KEY_METADATA = "importedMetadata"
+
+
     }
 
 }

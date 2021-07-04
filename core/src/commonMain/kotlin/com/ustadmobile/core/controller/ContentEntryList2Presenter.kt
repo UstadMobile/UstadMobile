@@ -5,6 +5,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_CLAZZ
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_OPTION
@@ -12,6 +13,7 @@ import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CON
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_PARENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_SHOW_ONLY_FOLDER_FILTER
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -29,7 +31,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                                  = DefaultContentEntryListItemListener(view = view, context = context,
                                          di = di, clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L))
     : UstadListPresenter<ContentEntryList2View, ContentEntry>(context, arguments, view, di, lifecycleOwner),
-        ContentEntryListItemListener by contentEntryListItemListener {
+        ContentEntryListItemListener by contentEntryListItemListener, ContentEntryAddOptionsListener {
 
     private val navController: UstadNavController by instance()
 
@@ -157,10 +159,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         GlobalScope.launch(doorMainDispatcher()) {
             when (option) {
                 SelectionOption.MOVE -> {
-                    val listOfSelectedEntries = selectedItem.mapNotNull {
-                        (it as? ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer)?.contentEntryParentChildJoin?.cepcjUid
-                    }.joinToString(",")
-                    handleShowFolderOnlyEntries(listOfSelectedEntries)
+                    handleClickMove(selectedItem)
                 }
                 SelectionOption.HIDE -> {
                     when(contentFilter){
@@ -182,16 +181,16 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     /**
      * Show ContentEntryList in picker mode so the user can select a folder to move entries to.
      *
-     * @param selectedContentEntryParentChildJoinUids a string which is a comma separated list of
-     * the selected ContentEntryParentChildJoinUids (e.g. that should be saved to the savedStateHandle)
+     * @param childrenToMove list of child entries selected to move
      */
-    fun handleShowFolderOnlyEntries(selectedContentEntryParentChildJoinUids: String){
-        navController.currentBackStackEntry?.savedStateHandle?.set(
-                KEY_SELECTED_ITEMS, selectedContentEntryParentChildJoinUids)
+    fun handleClickMove(childrenToMove: List<ContentEntry>){
 
         val args = mutableMapOf(ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
                 ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_PARENT,
-                ARG_SHOW_ONLY_FOLDER_FILTER to true.toString())
+                ARG_SHOW_ONLY_FOLDER_FILTER to true.toString(),
+                KEY_SELECTED_ITEMS to childrenToMove.mapNotNull {
+                    (it as? ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer)?.contentEntryParentChildJoin?.cepcjUid
+                }.joinToString(","))
 
         navigateForResult(
                 NavigateForResultOptions(this,
@@ -262,7 +261,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 )
             }
             else -> {
-                view.showContentEntryAddOptions(parentEntryUid)
+                view.showContentEntryAddOptions()
             }
         }
 
@@ -278,6 +277,46 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         showHiddenEntries = true
         getAndSetList()
     }
+
+    override fun onClickNewFolder() {
+        val args = mutableMapOf(
+                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_FILE,
+                ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
+                ARG_LEAF to false.toString())
+        args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
+
+        navController.navigate(ContentEntryEdit2View.VIEW_NAME, args)
+    }
+
+    override fun onClickImportFile() {
+        val args = mutableMapOf(
+                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_FILE,
+                ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
+                ARG_LEAF to true.toString())
+        args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
+
+        navController.navigate(SelectFileView.VIEW_NAME, args)
+    }
+
+    override fun onClickImportLink() {
+        val args = mutableMapOf(
+                ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
+                ARG_LEAF to true.toString())
+        args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
+
+        navController.navigate(ContentEntryImportLinkView.VIEW_NAME, args)
+    }
+
+    override fun onClickImportGallery() {
+        val args = mutableMapOf(
+                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_GALLERY,
+                ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
+                ARG_LEAF to true.toString())
+        args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
+
+        navController.navigate(SelectFileView.VIEW_NAME, args)
+    }
+
 
     companion object {
 
@@ -297,4 +336,6 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         )
 
     }
+
+
 }

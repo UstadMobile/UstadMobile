@@ -10,11 +10,11 @@ interface SelectFileView : UstadView {
 
         const val VIEW_NAME = "SelectFileView"
 
-        const val ARG_SELECT_FILE = "selectFile"
+        const val ARG_SELECTION_MODE = "selectMode"
 
-        const val SELECT_GALLERY = "video/*;audio/*"
+        const val SELECTION_MODE_GALLERY = "video/*;audio/*"
 
-        val SELECT_FILE =
+        val SELECTION_MODE_FILE =
                 (EpubTypePlugin.MIME_TYPES +
                 XapiPackageTypePlugin.MIME_TYPES +
                 H5PTypePlugin.MIME_TYPES +

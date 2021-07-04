@@ -1,11 +1,9 @@
 package com.ustadmobile.port.android.view
 
-import android.app.AlertDialog
 import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
@@ -27,20 +25,16 @@ import com.toughra.ustadmobile.databinding.FragmentContentEntryEdit2Binding
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ContentEntryEdit2View
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.util.ext.*
-import com.ustadmobile.port.android.view.ContentEntryAddOptionsBottomSheetFragment.Companion.ARG_IS_UPDATE_CONTENT
+import com.ustadmobile.port.android.view.ContentEntryAddOptionsBottomSheetFragment.Companion.ARG_SHOW_ADD_FOLDER
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.io.File
 
 
 interface ContentEntryEdit2FragmentEventHandler {
@@ -192,11 +186,8 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     override fun onClickUpdateContent() {
         onSaveStateToBackStackStateHandle()
-        val entryAddOption = ContentEntryAddOptionsBottomSheetFragment()
-        val argsMap = mutableMapOf(ARG_IS_UPDATE_CONTENT to true.toString())
-        if(arguments?.containsKey(UstadView.ARG_PARENT_ENTRY_UID) == true){
-            argsMap[UstadView.ARG_PARENT_ENTRY_UID] = arguments?.get(UstadView.ARG_PARENT_ENTRY_UID).toString()
-        }
+        val entryAddOption = ContentEntryAddOptionsBottomSheetFragment(mPresenter)
+        val argsMap = mutableMapOf(ARG_SHOW_ADD_FOLDER to false.toString())
         entryAddOption.arguments = argsMap.toBundle()
         entryAddOption.show(childFragmentManager, entryAddOption.tag)
     }
@@ -272,39 +263,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             val language = it.firstOrNull() ?: return@observeResult
             entity?.language = language
             entity?.primaryLanguageUid = language.langUid
-        }
-
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                ImportedContentEntryMetaData::class.java) {
-            val metadata = it.firstOrNull() ?: return@observeResult
-            loading = true
-            // back from navigate import
-            entryMetaData = metadata
-            val entry = entryMetaData?.contentEntry
-            val entryUid = arguments?.get(ARG_ENTITY_UID)
-            if (entry != null) {
-                if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
-                fileImportErrorVisible = false
-                entity = entry
-            }
-            loading = false
-        }
-
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                String::class.java){
-            val uri = it.firstOrNull() ?: return@observeResult
-            try {
-                loading = true
-                fieldsEnabled = false
-                GlobalScope.launch {
-                    mPresenter?.handleFileSelection(uri)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                loading = false
-                fieldsEnabled = true
-            }
-
         }
 
         viewLifecycleOwner.lifecycle.addObserver(viewLifecycleObserver)

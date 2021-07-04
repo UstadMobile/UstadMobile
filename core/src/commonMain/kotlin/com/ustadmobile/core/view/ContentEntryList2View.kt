@@ -5,7 +5,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusA
 
 interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
 
-    fun showContentEntryAddOptions(parentEntryUid: Long)
+    fun showContentEntryAddOptions()
 
     /**
      * Show the download dialog button. If required by the OS, show a permission dialog first

@@ -12,7 +12,6 @@ import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.KEY_
 import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.SAVEDSTATE_KEY_FOLDER
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.util.ext.determineListMode
@@ -23,6 +22,7 @@ import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_TITLE
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.view.ContentEntryAddOptionsBottomSheetFragment.Companion.ARG_SHOW_ADD_FOLDER
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import kotlinx.coroutines.Dispatchers
@@ -97,12 +97,12 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 
         setHasOptionsMenu(true)
 
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
+      /*  navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
             ContentEntry::class.java, SAVEDSTATE_KEY_FOLDER) {
             val selectedParentChildJoinUids = navController.currentBackStackEntry?.savedStateHandle
                     ?.get<String>(KEY_SELECTED_ITEMS)?.split(",")?.map { it.trim().toLong() } ?: return@observeResult
             mPresenter?.handleMoveContentEntries(selectedParentChildJoinUids, it.first().contentEntryUid )
-        }
+        }*/
 
         super.onViewCreated(view, savedInstanceState)
     }
@@ -137,20 +137,11 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                 getString(R.string.content)
     }
 
-    override fun showContentEntryAddOptions(parentEntryUid: Long) {
-        val entryAddOption = ContentEntryAddOptionsBottomSheetFragment()
-        val args = mutableMapOf(
-                UstadView.ARG_PARENT_ENTRY_UID to parentEntryUid.toString())
-
-        // add selectedItems to args if in stack
-        if(findNavController().previousBackStackEntry?.savedStateHandle?.contains(KEY_SELECTED_ITEMS) == true){
-            val selectedItems = findNavController().previousBackStackEntry?.savedStateHandle?.get<String>(KEY_SELECTED_ITEMS).toString()
-            args[KEY_SELECTED_ITEMS] = selectedItems
-        }
-
+    override fun showContentEntryAddOptions() {
+        val entryAddOption = ContentEntryAddOptionsBottomSheetFragment(mPresenter)
+        val args = mutableMapOf(ARG_SHOW_ADD_FOLDER to true.toString())
         entryAddOption.arguments = args.toBundle()
         entryAddOption.show(childFragmentManager, entryAddOption.tag)
-
     }
 
     /**
