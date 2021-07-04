@@ -130,6 +130,12 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         }
     }
 
+    val mainComponentAppBarWithNoNav by css{
+        position = Position.absolute
+        marginLeft = 0.px
+        width = fullWidth
+    }
+
     val mainComponentContentContainer by css {
         height = LinearDimension("100vh")
         flexGrow = 1.0
