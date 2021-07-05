@@ -318,6 +318,18 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     }
 
 
+    fun handleMoveWithSelectedEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
+
+        GlobalScope.launch(doorMainDispatcher()) {
+            if (arguments.containsKey(KEY_SELECTED_ITEMS)) {
+                val selectedItems = arguments[KEY_SELECTED_ITEMS]?.split(",")?.map { it.trim().toLong() }
+                        ?: listOf()
+                repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(entry.contentEntryUid, selectedItems)
+            }
+        }
+    }
+
+
     companion object {
 
 

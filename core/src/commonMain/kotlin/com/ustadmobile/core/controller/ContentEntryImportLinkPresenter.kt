@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.dumpException
@@ -79,6 +80,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
             } catch (e: Exception) {
                 view.showHideProgress(true)
+                view.showSnackBar(systemImpl.getString(MessageID.import_link_error, context))
                 dumpException(e)
             }
         }
