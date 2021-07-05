@@ -824,6 +824,30 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="add_a_new_clazzwork">Add a new classwork</string>
     <string name="edit_clazzwork">Edit classwork</string>
 
+    <string name="clazz_assignment">Assignment</string>
+    <string name="new_assignment">New assignment</string>
+    <string name="edit_assignment">Edit assignment</string>
+    <string name="total_score">Total score</string>
+    <string name="late_submission">Late submissions</string>
+    <!-- when assignment is submitted late by student, teacher has option to mark a penalty -->
+    <string name="mark_penalty">Mark penalty</string>
+    <string name="late_submission_penalty">Late submission penalty</string>
+    <string name="end_of_grace_period">End of grace period</string>
+    <string name="allow_class_comments">Allow class comments from students</string>
+    <string name="after_deadline_date_error">Must be after deadline date</string>
+
+    <!-- score points gained from content -->
+    <string name="points">Points</string>
+    <string name="minimum_score">Minimum score</string>
+    <string name="automatic">Automatic</string>
+    <string name="student_marks_content">Student marks themselves</string>
+    <string name="completion_criteria">Completion criteria</string>
+    <string name="mark_complete">Mark complete</string>
+    <!-- this will be shown next to the score if the student has had a
+        penalty applied for submitting his assignment late.
+         %1$s%% will be replaced by the app to show (0-100%) -->
+    <string name="late_penalty">(%1$s%% late penalty)</string>
+
     <string name="marked">marked</string>
     <string name="submitted">submitted</string>
     <string name="not_submitted">not submitted</string>
@@ -1275,8 +1299,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <!-- Allows the user to see a list of supported educational websites for importing educational content via a link -->
     <string name="see_supported_sites">See supported sites</string>
 
-    <string name="total_score">Total score</string>
-
     <!-- A section of the class edit screen that allows users to choose what features are enabled
     and what permissions users will have -->
     <string name="class_setup">Class setup</string>
@@ -1367,5 +1389,17 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="edit_clazzes">Edit classes</string>
 
     <string name="add_new_clazz_to_school">Add new class to school</string>
+
+    <!-- This appears as a notification after the user selects a content piece to add to a class
+    %1$s will be replaced with the title of the content item selected
+    -->
+    <string name="added_to_class_content">%1$s added to class content</string>
+
+    <!--
+    This appears as a notification after the user selects a content piece to add to a class when
+    the user selects something that they had already added before.
+    %1$s will be replaced with the title of the content item selected
+    -->
+    <string name="content_already_added_to_class">%1$s was already in class content</string>
 
 </resources>

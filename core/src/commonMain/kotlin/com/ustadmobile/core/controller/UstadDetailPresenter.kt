@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.UstadDetailView
 import com.ustadmobile.core.view.UstadSingleEntityView
@@ -19,7 +18,7 @@ abstract class UstadDetailPresenter<V: UstadSingleEntityView<RT>, RT: Any>(conte
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        accountManager.activeAccountLive.observeWithLifecycleOwner(lifecycleOwner, this::onAccountChanged)
+        onAccountChanged(accountManager.activeAccount)
     }
 
     protected open fun onAccountChanged(account: UmAccount?) {
