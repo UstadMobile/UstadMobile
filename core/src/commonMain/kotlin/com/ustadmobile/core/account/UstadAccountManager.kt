@@ -195,8 +195,8 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
         val newPassword = person.newPassword
         if(status == 200 && account != null && newPassword != null) {
             account.endpointUrl = endpointUrl
-            val session = addSession(person, endpointUrl, newPassword)
             if(accountRegisterOptions.makeAccountActive){
+                val session = addSession(person, endpointUrl, newPassword)
                 activeSession = session
             }
 
