@@ -232,7 +232,7 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
      * @param context System context
      * @param zip if true, the app setup file should be delivered within a zip.
      */
-    actual override suspend fun getAppSetupFile(context: Any, zip: Boolean): Any{
+    actual override suspend fun getAppSetupFile(context: Any, zip: Boolean): String{
         TODO("not implemented")
     }
 

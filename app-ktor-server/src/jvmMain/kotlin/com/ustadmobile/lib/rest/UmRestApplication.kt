@@ -5,12 +5,15 @@ import io.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.di.commonJvmDiModule
@@ -231,6 +234,19 @@ fun Application.umRestApplication(dbModeOverride: String? = null,
                 it.isNamespaceAware = true
             }
         }
+
+        bind<Pbkdf2Params>() with singleton {
+            val systemImpl: UstadMobileSystemImpl = instance()
+            val numIterations = systemImpl.getAppConfigInt(
+                AppConfig.KEY_PBKDF2_ITERATIONS,
+                UstadMobileConstants.PBKDF2_ITERATIONS, context)
+            val keyLength = systemImpl.getAppConfigInt(
+                AppConfig.KEY_PBKDF2_KEYLENGTH,
+                UstadMobileConstants.PBKDF2_KEYLENGTH, context)
+
+            Pbkdf2Params(numIterations, keyLength)
+        }
+
 
         try {
             appConfig.config("mail")

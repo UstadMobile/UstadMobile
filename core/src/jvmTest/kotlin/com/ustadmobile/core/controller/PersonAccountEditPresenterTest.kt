@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.google.gson.Gson
 import com.ustadmobile.core.account.AccountRegisterOptions
+import com.ustadmobile.core.account.Endpoint
 import org.mockito.kotlin.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
@@ -75,6 +76,7 @@ class PersonAccountEditPresenterTest  {
         serverUrl = mockWebServer.url("/").toString()
 
         accountManager = mock{
+            on { activeEndpoint }.thenReturn(Endpoint(serverUrl))
             on{activeAccount}.thenReturn(UmAccount(loggedInPersonUid,"","",serverUrl))
         }
 

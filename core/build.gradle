@@ -1,4 +1,3 @@
-import groovy.json.JsonBuilder
 import org.json.JSONObject
 
 import java.util.concurrent.atomic.AtomicInteger
@@ -225,6 +224,8 @@ kotlin {
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-json-js:$version_ktor"
                 implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
+                implementation npm("pbkdf2","$version_npm_pbkdf2")
+                implementation npm("buffer","$version_npm_buffer")
             }
         }
 

@@ -144,8 +144,6 @@ class DatabaseJs: UmAppDatabase() , DoorDatabaseSyncRepository{
         get() = TODO("Not yet implemented")
     override val syncNodeDao: SyncNodeDao
         get() = TODO("Not yet implemented")
-    override val deviceSessionDao: DeviceSessionDao
-        get() = TODO("Not yet implemented")
     override val siteDao: SiteDao
         get() = TODO("Not yet implemented")
     override val siteTermsDao: SiteTermsDao
@@ -155,6 +153,10 @@ class DatabaseJs: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val scopedGrantDao: ScopedGrantDao
         get() = TODO("Not yet implemented")
     override val errorReportDao: ErrorReportDao
+        get() = TODO("Not yet implemented")
+    override val personAuth2Dao: PersonAuth2Dao
+        get() = TODO("Not yet implemented")
+    override val userSessionDao: UserSessionDao
         get() = TODO("Not yet implemented")
     override val dbVersion: Int
         get() = TODO("Not yet implemented")

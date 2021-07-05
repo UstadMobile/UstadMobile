@@ -46,7 +46,7 @@ class ContentEntryEndtoEnd : TestCase() {
 
             runBlocking {
 
-                dbRule.insertPersonForActiveUser(Person().apply {
+                dbRule.insertPersonAndStartSession(Person().apply {
                     firstNames = "Bob"
                     lastName = "Jones"
                     admin = true
@@ -138,7 +138,7 @@ class ContentEntryEndtoEnd : TestCase() {
         init {
 
             runBlocking {
-                dbRule.insertPersonForActiveUser(Person().apply {
+                dbRule.insertPersonAndStartSession(Person().apply {
                     firstNames = "Test"
                     lastName = "User"
                     username = "admin"
@@ -198,7 +198,7 @@ class ContentEntryEndtoEnd : TestCase() {
         init {
 
             runBlocking {
-                dbRule.insertPersonForActiveUser(Person().apply {
+                dbRule.insertPersonAndStartSession(Person().apply {
                     firstNames = "Test"
                     lastName = "User"
                     username = "admin"
@@ -252,7 +252,7 @@ class ContentEntryEndtoEnd : TestCase() {
         init {
 
             runBlocking {
-                dbRule.insertPersonForActiveUser(Person().apply {
+                dbRule.insertPersonAndStartSession(Person().apply {
                     firstNames = "Test"
                     lastName = "User"
                     username = "admin"
@@ -330,7 +330,7 @@ class ContentEntryEndtoEnd : TestCase() {
         init {
 
             runBlocking {
-                dbRule.insertPersonForActiveUser(Person().apply {
+                dbRule.insertPersonAndStartSession(Person().apply {
                     firstNames = "Test"
                     lastName = "User"
                     username = "admin"

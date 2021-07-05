@@ -1,17 +1,11 @@
 package com.ustadmobile.port.android.impl
 
 import android.content.Context
-import android.os.Build
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
-import com.ustadmobile.core.account.ClientId
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
-import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.account.*
 import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImplAndroid
@@ -22,9 +16,14 @@ import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
+import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
+import com.ustadmobile.core.impl.*
+import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_ITERATIONS
+import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_KEYLENGTH
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
+import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.networkmanager.*
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
@@ -33,12 +32,15 @@ import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.NanoHttpdCall
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.android.generated.MessageIDMap
@@ -54,22 +56,21 @@ import com.ustadmobile.sharedse.network.*
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploadManagerCommonJvm
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.asCoroutineDispatcher
 import okhttp3.OkHttpClient
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
-import com.ustadmobile.core.impl.di.commonJvmDiModule
-import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
-import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.lib.db.entities.ContainerImportJob
+import java.util.concurrent.Executors
 
 /**
  * Note: BaseUstadApp extends MultidexApplication on the multidex variant, but extends the
@@ -134,7 +135,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<NetworkManagerBle>() with singleton {
-            NetworkManagerBle(applicationContext, di, newSingleThreadContext("NetworkManager")).also {
+            val coroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+            NetworkManagerBle(applicationContext, di, coroutineDispatcher).also {
                 it.onCreate()
             }
         }
@@ -232,6 +234,16 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<DestinationProvider>() with singleton {
             ViewNameToDestMap()
+        }
+
+        bind<Pbkdf2Params>() with singleton {
+            val systemImpl: UstadMobileSystemImpl = instance()
+            val numIterations = systemImpl.getAppConfigInt(KEY_PBKDF2_ITERATIONS,
+                UstadMobileConstants.PBKDF2_ITERATIONS, applicationContext)
+            val keyLength = systemImpl.getAppConfigInt(KEY_PBKDF2_KEYLENGTH,
+                UstadMobileConstants.PBKDF2_KEYLENGTH, applicationContext)
+
+            Pbkdf2Params(numIterations, keyLength)
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

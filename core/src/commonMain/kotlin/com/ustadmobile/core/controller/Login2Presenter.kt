@@ -19,10 +19,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
-import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.Site
 import io.ktor.client.*
 import kotlinx.coroutines.GlobalScope
@@ -30,9 +27,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
-import org.kodein.di.direct
 import org.kodein.di.instance
-import org.kodein.di.on
 
 class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2View,
                       di: DI)
@@ -122,12 +117,10 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         if(username != null && username.isNotEmpty() && password != null && password.isNotEmpty()){
             GlobalScope.launch(doorMainDispatcher()) {
                 try {
-                    val umAccount = accountManager.login(username.trim(),
-                            password.trim() ,serverUrl)
+                    accountManager.login(username.trim(), password.trim(), serverUrl)
                     view.inProgress = false
                     view.loading = false
-                    val accountRepo: UmAppDatabase =  di.on(umAccount).direct.instance(tag = DoorTag.TAG_REPO)
-                    (accountRepo as DoorDatabaseSyncRepository).invalidateAllTables()
+
                     goToNextDestAfterLoginOrGuestSelected()
                 } catch (e: Exception) {
                     view.errorMessage = impl.getString(if(e is UnauthorizedException)
@@ -158,8 +151,8 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
     }
 
     fun handleConnectAsGuest(){
-        accountManager.activeAccount = UmAccount(0L,"guest",
-                "",serverUrl,"Guest","User")
+//        accountManager.activeAccount = UmAccount(0L,"guest",
+//                "",serverUrl,"Guest","User")
         goToNextDestAfterLoginOrGuestSelected()
     }
 

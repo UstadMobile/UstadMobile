@@ -48,6 +48,15 @@ class PersonDaoJs: PersonDao() {
         TODO("Not yet implemented")
     }
 
+    override suspend fun findByUsernameAndPasswordHash2(
+        mUsername: String,
+        passwordHash: String
+    ): Person? {
+        return person?.apply {
+            username = mUsername
+        }
+    }
+
     override fun insertPersonAuth(personAuth: PersonAuth) {
         TODO("Not yet implemented")
     }

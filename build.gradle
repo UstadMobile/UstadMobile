@@ -16,7 +16,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.2.1'
+        classpath 'com.android.tools.build:gradle:4.2.2'
         classpath 'com.google.gms:google-services:4.3.8'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
@@ -39,6 +39,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        mavenLocal()
         maven {
             url "https://devserver3.ustadmobile.com/maven"
         }
@@ -88,9 +89,12 @@ ext {
     version_kotlin_redux = "4.0.5-pre.148-kotlin-1.4.30"
     version_kotlin_react_redux = "7.2.2-pre.148-kotlin-1.4.30"
     version_muirwik_components = "0.6.7"
-    version_door = "0.0.21-js"
-    version_xmlpullparserkmp = '0.0.19'
     version_npm_moment = "^2.29.1"
+    version_npm_buffer = "^6.0.3"
+    version_npm_pbkdf2 = "^3.1.2"
+
+    version_door = "0.0.23-js"
+    version_xmlpullparserkmp = '0.0.19'
 
     version_gradle_buildconfig_plugin = "1.1.7"
     version_jacoco_tool = "0.8.5"

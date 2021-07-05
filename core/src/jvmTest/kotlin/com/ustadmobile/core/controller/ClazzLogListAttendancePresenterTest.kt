@@ -21,8 +21,10 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzLog
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.util.test.ext.insertClazzLogs
+import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -90,11 +92,19 @@ class ClazzLogListAttendancePresenterTest {
     fun givenExistingCompletedClazzLogs_whenOnCreateCalled_thenShouldSetGraphDataAndSetFabVisible() {
         val repo: UmAppDatabase by di.activeRepoInstance()
         val accountManager: UstadAccountManager by di.instance()
-        accountManager.activeAccount = UmAccount(42L, "admin", "",
-                accountManager.activeAccount.endpointUrl, "Admin", "Admin")
+
+        val activePerson = Person().also {
+            it.personUid = 42L
+            it.username = "admin"
+            it.firstNames = "Admin"
+            it.lastName = "admin"
+            it.admin = true
+        }
+        accountManager.startLocalTestSessionBlocking(activePerson,
+            accountManager.activeEndpoint.url)
 
         runBlocking {
-            repo.insertPersonAndGroup(accountManager.activeAccount.asPerson(admin = true))
+            repo.insertPersonAndGroup(activePerson)
         }
 
         val testClazz = Clazz("Test Clazz").apply {

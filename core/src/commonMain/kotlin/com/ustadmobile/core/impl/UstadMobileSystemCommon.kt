@@ -9,6 +9,10 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
+import com.ustadmobile.door.doorMainDispatcher
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlin.js.JsName
 
 /**
  * Class has all the shared function across all supported platforms
@@ -53,15 +57,15 @@ abstract class UstadMobileSystemCommon {
      */
     internal var lastDestination: LastGoToDest? = null
 
-
     /**
      * Return absolute path of the application setup file. Asynchronous.
      *
      * @param context System context
      * @param zip if true, the app setup file should be delivered within a zip.
-     * @param callback callback to call when complete or if any error occurs.
      */
-    abstract suspend fun getAppSetupFile(context: Any, zip: Boolean): Any
+
+    @JsName("getAppSetupFile")
+    abstract suspend fun getAppSetupFile(context: Any, zip: Boolean): String
 
 
     /**
@@ -74,6 +78,7 @@ abstract class UstadMobileSystemCommon {
      *
      * @return The value of the key if found, if not, the default value provided
      */
+    @JsName("getAppConfigString")
     abstract fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?
 
     /**
@@ -96,19 +101,22 @@ abstract class UstadMobileSystemCommon {
             //if there are any accounts that match endpoint url the user wants to work with,
             // then go to the accountmanager list in picker mode, otherwise go directly to the login
             // screen for that particular server.
-            if(accountManager.storedAccounts.any { it.endpointUrl == endpointUrl }) {
-                val args = mapOf(ARG_NEXT to viewUri,
-                    AccountListView.ARG_FILTER_BY_ENDPOINT to endpointUrl,
-                    AccountListView.ARG_ACTIVE_ACCOUNT_MODE to AccountListView.ACTIVE_ACCOUNT_MODE_INLIST,
-                    UstadView.ARG_TITLE to getString(MessageID.select_account, context),
-                    ARG_INTENT_MESSAGE to intentMessage,
-                    UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
-                go(AccountListView.VIEW_NAME, args, context)
-            }else {
-                val args = mapOf(ARG_NEXT to viewUri,
-                    ARG_INTENT_MESSAGE to intentMessage,
-                    ARG_SERVER_URL to endpointUrl)
-                go(Login2View.VIEW_NAME, args, context)
+            GlobalScope.launch(doorMainDispatcher()) {
+                if(accountManager.activeSessionCount { it == endpointUrl } > 0) {
+                    val args = mapOf(ARG_NEXT to viewUri,
+                        AccountListView.ARG_FILTER_BY_ENDPOINT to endpointUrl,
+                        AccountListView.ARG_ACTIVE_ACCOUNT_MODE to AccountListView.ACTIVE_ACCOUNT_MODE_INLIST,
+                        UstadView.ARG_TITLE to getString(MessageID.select_account, context),
+                        UstadView.ARG_INTENT_MESSAGE to intentMessage,
+                        UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
+                    go(AccountListView.VIEW_NAME, args, context)
+                }else {
+                    val args = mapOf(ARG_NEXT to viewUri,
+                        ARG_INTENT_MESSAGE to intentMessage,
+                        ARG_SERVER_URL to endpointUrl)
+                    go(Login2View.VIEW_NAME, args, context)
+                }
+
             }
         }
     }
@@ -149,6 +157,7 @@ abstract class UstadMobileSystemCommon {
      * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
      * @param context System context object
      */
+    @JsName("go")
     abstract fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int,
                     ustadGoOptions: UstadGoOptions)
 
@@ -157,8 +166,10 @@ abstract class UstadMobileSystemCommon {
      *
      * @return The currently active locale code, or a blank "" string meaning the locale is the system default.
      */
+    @JsName("getLocale")
     open fun getLocale(context: Any) = getAppPref(PREFKEY_LOCALE, LOCALE_USE_SYSTEM, context)
 
+    @JsName("setLocale")
     fun setLocale(locale: String, context: Any) = setAppPref(PREFKEY_LOCALE, locale, context)
 
 
@@ -168,6 +179,7 @@ abstract class UstadMobileSystemCommon {
      * @param key preference key as a string
      * @return value of that preference
      */
+    @JsName("getAppPref")
     abstract fun getAppPref(key: String, context: Any): String?
 
     /**
@@ -201,7 +213,18 @@ abstract class UstadMobileSystemCommon {
      *
      * @return System locale
      */
+    @JsName("getSystemLocale")
     abstract fun getSystemLocale(context: Any): String
+
+    /**
+     * Provide language UI directionality
+     * @return TRUE if the UI direction is RTL otherwise it's FALSE
+     */
+    open fun isRtlActive(): Boolean {
+        val languages = getAppPref(AppConfig.KEY_RTL_LANGUAGES, this)
+        return languages?.split(",")?.firstOrNull{it == getDisplayedLocale(this)} != null
+    }
+
 
 
     /**
@@ -224,11 +247,13 @@ abstract class UstadMobileSystemCommon {
     /**
      * Get a string for use in the UI using a constant int from MessageID
      */
+    @JsName("getString")
     abstract fun getString(messageCode: Int, context: Any): String
 
     /**
      * Get list of all UI supported languages
      */
+    @JsName("getAllUiLanguage")
     @Deprecated("Use getAllUiLanguagesList instead")
     open fun getAllUiLanguage(context: Any): Map<String, String> {
         val languagesConfigVal = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
@@ -244,19 +269,18 @@ abstract class UstadMobileSystemCommon {
      *
      * @param context
      */
+    @JsName("getAllUiLanguagesList")
     open fun getAllUiLanguagesList(context: Any): List<Pair<String, String>> {
         val languagesConfigVal = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
                 "", context) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
         val availableLangs = languagesConfigVal.split(",").sorted()
+
+
         return listOf(LOCALE_USE_SYSTEM to getString(MessageID.use_device_language, context)) +
                 availableLangs.map { it to (LANGUAGE_NAMES[it] ?: it) }
     }
 
-    open fun isRtlActive(): Boolean {
-        val languages = getAppPref(AppConfig.KEY_RTL_LANGUAGES, this)
-        return languages?.split(",")?.firstOrNull{it == getDisplayedLocale(this)} != null
-    }
-
+    @JsName("getStorageDirAsync")
     abstract suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?>
 
     /**
@@ -334,7 +358,8 @@ abstract class UstadMobileSystemCommon {
      */
     open fun hasDisplayedLocaleChanged(oldLocale: String?, context: Any): Boolean {
         val currentlyDisplayedLocale = getDisplayedLocale(context)
-        return !(oldLocale != null && oldLocale.substring(0, 2) == currentlyDisplayedLocale.substring(0, 2))
+        return !(currentlyDisplayedLocale != null && oldLocale != null
+                && oldLocale.substring(0, 2) == currentlyDisplayedLocale.substring(0, 2))
     }
 
     protected fun getContentDirName(context: Any): String? {
@@ -362,6 +387,7 @@ abstract class UstadMobileSystemCommon {
         /**
          * The preference key where we save a string for the user's locale preference
          */
+        @JsName("PREFKEY_LOCALE")
         const val PREFKEY_LOCALE = "locale"
 
 
@@ -410,12 +436,12 @@ abstract class UstadMobileSystemCommon {
 
         const val SUBDIR_ATTACHMENTS_NAME = "attachments"
 
-        const val TAG_CLIENT_ID = "client_id"
-
         /**
          * The RedirectFragment will remove itself from the view stack.
          */
         const val PREF_ROOT_VIEWNAME = "rootViewName"
+
+        const val TAG_CLIENT_ID = "client_id"
 
     }
 }

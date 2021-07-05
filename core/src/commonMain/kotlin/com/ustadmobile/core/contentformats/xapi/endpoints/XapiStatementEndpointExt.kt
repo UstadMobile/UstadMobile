@@ -13,7 +13,7 @@ fun XapiStatementEndpoint.storeProgressStatement(account: UmAccount, entry: Cont
         this.actor = Actor().apply {
             this.account = Account().apply {
                 this.homePage = account.endpointUrl
-                this.name = account.username
+                this.name = account.username ?: "guest"
             }
         }
         this.verb = Verb().apply {

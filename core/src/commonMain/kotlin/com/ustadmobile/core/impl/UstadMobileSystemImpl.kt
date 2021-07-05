@@ -92,7 +92,7 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
      * @param context System context
      * @param zip if true, the app setup file should be delivered within a zip.
      */
-    override suspend fun getAppSetupFile(context: Any, zip: Boolean): Any
+    override suspend fun getAppSetupFile(context: Any, zip: Boolean): String
 
 
     /**
