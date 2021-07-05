@@ -30,6 +30,8 @@ class ContentEntryDetailFragment: UstadDetailFragment<ContentEntry>(), ContentEn
         get() = mPresenter
 
 
+    private var mediator: TabLayoutMediator? = null
+
     override var tabs: List<String>? = null
         get() = field
         set(value) {
@@ -51,10 +53,11 @@ class ContentEntryDetailFragment: UstadDetailFragment<ContentEntry>(), ContentEn
             pager.adapter = mPagerAdapter
 
             val titleMap = viewNameToTitleMap.map { it.key to requireContext().getString(it.value) }.toMap()
-            TabLayoutMediator(tabList, pager) { tab, position ->
+            mediator = TabLayoutMediator(tabList, pager) { tab, position ->
                 val viewName = value[position].substringBefore('?')
                 tab.text = titleMap[viewName]
-            }.attach()
+            }
+            mediator?.attach()
         }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -82,6 +85,8 @@ class ContentEntryDetailFragment: UstadDetailFragment<ContentEntry>(), ContentEn
 
     override fun onDestroyView() {
         super.onDestroyView()
+        mediator?.detach()
+        mediator = null
         mBinding?.fragmentContentEntryDetailViewpager?.adapter = null
         mPagerAdapter = null
         mBinding = null

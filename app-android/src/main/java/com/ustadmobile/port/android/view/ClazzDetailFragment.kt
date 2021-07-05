@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.toughra.ustadmobile.R
@@ -31,6 +32,8 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
     private var mPagerAdapter: ViewNameListFragmentPagerAdapter? = null
 
+    private var mediator: TabLayoutMediator? = null
+
     override var tabs: List<String>? = null
         set(value) {
             if(field == value)
@@ -50,10 +53,11 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
             pager.adapter = mPagerAdapter
 
             val titleMap =  viewNameToTitleMap.map { it.key to requireContext().getString(it.value) }.toMap()
-            TabLayoutMediator(tabList, pager) { tab, position ->
+            mediator = TabLayoutMediator(tabList, pager) { tab, position ->
                 val viewName = value[position].substringBefore('?')
                 tab.text = titleMap[viewName]
-            }.attach()
+            }
+            mediator?.attach()
         }
 
     override val detailPresenter: UstadDetailPresenter<*, *>?
@@ -84,6 +88,8 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
     override fun onDestroyView() {
         super.onDestroyView()
+        mediator?.detach()
+        mediator = null
         mPagerAdapter = null
         mBinding = null
         mPresenter = null

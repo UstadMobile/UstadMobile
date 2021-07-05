@@ -5,8 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager
-import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -26,6 +24,7 @@ class ContentEntryListTabsFragment : UstadBaseFragment(), ContentEntryListTabsVi
 
     }
 
+    private var mediator: TabLayoutMediator? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_contententry_tabs, container, false)
@@ -49,9 +48,16 @@ class ContentEntryListTabsFragment : UstadBaseFragment(), ContentEntryListTabsVi
             listOf("$defArgs$ARG_DISPLAY_CONTENT_BY_PARENT", "$defArgs$ARG_DISPLAY_CONTENT_BY_DOWNLOADED"))
         val titleList = listOf(getString(R.string.libraries), getString(R.string.downloaded))
 
-        TabLayoutMediator(mTabLayout, mPager) { tab, position ->
+        mediator = TabLayoutMediator(mTabLayout, mPager) { tab, position ->
             tab.text = titleList[position]
-        }.attach()
+        }
+        mediator?.attach()
 
+    }
+
+    override fun onDestroyView() {
+        mediator?.detach()
+        mediator = null
+        super.onDestroyView()
     }
 }

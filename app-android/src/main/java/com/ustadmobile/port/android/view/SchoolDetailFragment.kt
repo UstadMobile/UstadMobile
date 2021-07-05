@@ -30,6 +30,7 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
 
     private var mTabs: TabLayout? = null
 
+    private var mediator: TabLayoutMediator? = null
 
     private var mPagerAdapter: ViewNameListFragmentPagerAdapter? = null
 
@@ -82,7 +83,7 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         val pager = mPager ?: return
         val tabList = mTabs ?: return
 
-        TabLayoutMediator(tabList, pager) { tab, position ->
+        mediator = TabLayoutMediator(tabList, pager) { tab, position ->
             tab.text = when (position) {
                 0 -> {
                     getText(R.string.overview).toString()
@@ -95,13 +96,16 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
                 }
                 else -> ""
             }
-        }.attach()
+        }
+        mediator?.attach()
     }
 
     override var title: String? = null
 
     override fun onDestroyView() {
         super.onDestroyView()
+        mediator?.detach()
+        mediator = null
         mBinding = null
         mPresenter = null
         entity = null
