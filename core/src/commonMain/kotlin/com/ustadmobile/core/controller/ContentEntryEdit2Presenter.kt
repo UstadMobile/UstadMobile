@@ -8,6 +8,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.logErrorReport
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.safeParse
@@ -18,6 +19,7 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
@@ -86,7 +88,7 @@ class ContentEntryEdit2Presenter(context: Any,
         super.onCreate(savedState)
         view.licenceOptions = LicenceOptions.values().map { LicenceMessageIdOptions(it, context) }
         parentEntryUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0
-        destinationOnFinish = if((arguments[ARG_ENTITY_UID]?.toLong() ?:0L) == 0L)
+        destinationOnFinish = if ((arguments[ARG_ENTITY_UID]?.toLong() ?: 0L) == 0L)
             ContentEntryList2View.VIEW_NAME else ContentEntryDetailView.VIEW_NAME
         GlobalScope.launch(doorMainDispatcher()) {
             view.storageOptions = systemImpl.getStorageDirsAsync(context)
@@ -98,20 +100,22 @@ class ContentEntryEdit2Presenter(context: Any,
         val isLeaf = arguments[ARG_LEAF]?.toBoolean()
         val metaData = arguments[ARG_IMPORTED_METADATA]
         val uri = arguments[ARG_URI]
-        if(uri != null){
-            handleFileSelection(uri)
-            return null
+        if (db is DoorDatabaseRepository) {
+            if (uri != null) {
+                return handleFileSelection(uri)
+            }
+            if (metaData != null) {
+                val importedMetadata = safeParse(di, ImportedContentEntryMetaData.serializer(), metaData)
+                view.fileImportErrorVisible = false
+                return importedMetadata.contentEntry
+            }
+            return withTimeoutOrNull(2000) {
+                db.takeIf { entityUid != 0L }?.contentEntryDao?.findEntryWithLanguageByEntryIdAsync(entityUid)
+            } ?: ContentEntryWithLanguage().apply {
+                leaf = isLeaf ?: (contentFlags != ContentEntry.FLAG_IMPORTED)
+            }
         }
-        if(metaData != null){
-            val importedMetadata = safeParse(di, ImportedContentEntryMetaData.serializer(), metaData)
-            view.fileImportErrorVisible = false
-            return importedMetadata.contentEntry
-        }
-        return withTimeoutOrNull(2000) {
-            db.takeIf { entityUid != 0L }?.contentEntryDao?.findEntryWithLanguageByEntryIdAsync(entityUid)
-        } ?: ContentEntryWithLanguage().apply {
-            leaf = isLeaf ?: (contentFlags != ContentEntry.FLAG_IMPORTED)
-        }
+        return null
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): ContentEntryWithLanguage? {
@@ -139,7 +143,10 @@ class ContentEntryEdit2Presenter(context: Any,
             view.loading = true
             view.fieldsEnabled = false
 
-            handleFileSelection(uri)
+            GlobalScope.launch(doorMainDispatcher()){
+                view.entity = handleFileSelection(uri)
+            }
+
 
             requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
         }
@@ -240,9 +247,11 @@ class ContentEntryEdit2Presenter(context: Any,
                                 body = entity
                             }.execute()
 
-                        }catch (e: Exception){
-                            view.showSnackBar("${systemImpl.getString(MessageID.error, 
-                                    context)}: ${e.message ?: ""}", {})
+                        } catch (e: Exception) {
+                            view.showSnackBar("${
+                                systemImpl.getString(MessageID.error,
+                                        context)
+                            }: ${e.message ?: ""}", {})
                             return@launch
                         }
 
@@ -275,13 +284,17 @@ class ContentEntryEdit2Presenter(context: Any,
         }
     }
 
-    fun isImportValid(entity: ContentEntryWithLanguage): Boolean{
+    fun isImportValid(entity: ContentEntryWithLanguage): Boolean {
         return entity.title != null && (!entity.leaf || entity.contentEntryUid != 0L ||
                 (entity.contentEntryUid == 0L && view.entryMetaData?.uri != null))
     }
 
-    fun handleFileSelection(uri: String) {
-        GlobalScope.launch(doorMainDispatcher()) {
+    suspend fun handleFileSelection(uri: String): ContentEntryWithLanguage? {
+        view.loading = true
+        view.fieldsEnabled = true
+
+        var entry: ContentEntryWithLanguage? = null
+        try {
             val metadata = contentImportManager?.extractMetadata(uri)
             view.entryMetaData = metadata
             when (metadata) {
@@ -290,20 +303,24 @@ class ContentEntryEdit2Presenter(context: Any,
                 }
             }
 
-            val entry = metadata?.contentEntry
+            entry = metadata?.contentEntry
             val entryUid = arguments[ARG_ENTITY_UID]
             if (entry != null) {
                 if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
                 view.fileImportErrorVisible = false
-                view.entity = entry
-                if(metadata.mimeType.startsWith("video/") &&
-                        !metadata.uri.lowercase().startsWith("https://drive.google.com")){
+                if (metadata?.mimeType?.startsWith("video/") == true &&
+                        !metadata.uri.lowercase().startsWith("https://drive.google.com")) {
                     view.videoUri = uri
                 }
             }
             view.loading = false
             view.fieldsEnabled = true
+        }catch (e: Exception){
+            view.showSnackBar(systemImpl.getString(MessageID.import_link_content_not_supported, context))
+            repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, e, this)
         }
+
+        return entry
     }
 
     override fun onClickNewFolder() {

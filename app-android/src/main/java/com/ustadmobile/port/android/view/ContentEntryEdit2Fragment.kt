@@ -28,6 +28,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.util.ext.*
@@ -45,7 +46,7 @@ interface ContentEntryEdit2FragmentEventHandler {
 
 }
 
-class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = null) : UstadEditFragment<ContentEntryWithLanguage>(), ContentEntryEdit2View, ContentEntryEdit2FragmentEventHandler {
+class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(), ContentEntryEdit2View, ContentEntryEdit2FragmentEventHandler {
 
     private var mBinding: FragmentContentEntryEdit2Binding? = null
 
@@ -65,8 +66,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
     private var playbackPosition: Long = 0
 
     private var webView: WebView?  = null
-
-    var activityResultLauncher: ActivityResultLauncher<String>? = null
 
     override var entity: ContentEntryWithLanguage? = null
         get() = field
@@ -195,28 +194,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
     override fun handleClickLanguage() {
         onSaveStateToBackStackStateHandle()
         navigateToPickEntityFromList(Language::class.java, R.id.language_list_dest)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        activityResultLauncher = registerForActivityResult(ActivityResultContracts.GetContent(),
-            registry ?: requireActivity().activityResultRegistry) { uri: Uri? ->
-            if (uri != null) {
-                try {
-                    loading = true
-                    fieldsEnabled = false
-                    GlobalScope.launch {
-                        mPresenter?.handleFileSelection(uri.toString())
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    loading = false
-                    fieldsEnabled = true
-                }
-            }
-
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
