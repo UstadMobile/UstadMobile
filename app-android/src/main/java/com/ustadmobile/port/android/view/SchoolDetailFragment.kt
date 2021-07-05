@@ -76,8 +76,8 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
                         "&${UstadView.ARG_FILTER_BY_SCHOOLUID}=" + entityUidValue
         )
 
-        mPagerAdapter = ViewNameListFragmentPagerAdapter(requireActivity(), tabs,
-                VIEW_NAME_TO_FRAGMENT_CLASS)
+        mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager, tabs,
+                VIEW_NAME_TO_FRAGMENT_CLASS, lifecycle = lifecycle)
         mPager?.adapter = mPagerAdapter
 
         val pager = mPager ?: return
@@ -106,6 +106,7 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         super.onDestroyView()
         mediator?.detach()
         mediator = null
+        mBinding?.fragmentSchoolDetailViewpager?.adapter = null
         mBinding = null
         mPresenter = null
         entity = null

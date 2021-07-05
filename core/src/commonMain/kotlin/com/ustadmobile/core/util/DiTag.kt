@@ -16,7 +16,7 @@ object DiTag {
 
     const val TAG_GOOGLE_API = 12
 
-    const val TAG_COROUTINE_SCOPE = 14
+    const val TAG_PRESENTER_COROUTINE_SCOPE = 14
 
     const val XPP_FACTORY_NSAWARE = 1
 

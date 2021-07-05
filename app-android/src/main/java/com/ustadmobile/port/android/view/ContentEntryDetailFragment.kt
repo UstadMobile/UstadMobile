@@ -44,8 +44,8 @@ class ContentEntryDetailFragment: UstadDetailFragment<ContentEntry>(), ContentEn
                 return
 
             field = value
-            mPagerAdapter = ViewNameListFragmentPagerAdapter(requireActivity(),
-                    value, viewNameToFragmentMap)
+            mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager,
+                    value, viewNameToFragmentMap, lifecycle = lifecycle)
 
             val pager = mBinding?.fragmentContentEntryDetailViewpager ?: return
             val tabList = mBinding?.fragmentContentEntryTabs?.tabs ?: return

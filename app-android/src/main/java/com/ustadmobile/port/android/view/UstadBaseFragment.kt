@@ -8,6 +8,8 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
@@ -57,8 +59,8 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
             NavControllerAdapter(findNavController(), instance())
         }
 
-        bind<CoroutineScope>(DiTag.TAG_COROUTINE_SCOPE) with provider {
-            CoroutineScope(Job() + doorMainDispatcher())
+        bind<CoroutineScope>(DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with provider {
+            viewLifecycleOwner.lifecycleScope
         }
     }
 

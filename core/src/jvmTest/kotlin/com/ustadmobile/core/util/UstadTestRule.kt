@@ -34,7 +34,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import okhttp3.OkHttpClient
-import okhttp3.internal.closeQuietly
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.kodein.di.*
@@ -166,7 +165,7 @@ class UstadTestRule: TestWatcher() {
                 spy(TestUstadNavController(di))
             }
 
-            bind<CoroutineScope>(tag = DiTag.TAG_COROUTINE_SCOPE) with singleton {
+            bind<CoroutineScope>(tag = DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with singleton {
                 CoroutineScope(coroutineDispatcher)
             }
 

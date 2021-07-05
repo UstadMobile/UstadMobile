@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.toQueryString
@@ -14,7 +13,6 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -32,7 +30,7 @@ class ClazzDetailPresenter(context: Any,
                            lifecycleOwner: DoorLifecycleOwner)
     : UstadDetailPresenter<ClazzDetailView, Clazz>(context, arguments, view, di, lifecycleOwner) {
 
-    private val scope: CoroutineScope by instance(tag = DiTag.TAG_COROUTINE_SCOPE)
+    private val scope: CoroutineScope by instance(tag = DiTag.TAG_PRESENTER_COROUTINE_SCOPE)
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB

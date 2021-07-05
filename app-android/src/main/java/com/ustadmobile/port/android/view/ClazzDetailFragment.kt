@@ -45,7 +45,8 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
                 return
 
             field = value
-            mPagerAdapter = ViewNameListFragmentPagerAdapter(requireActivity(), value, viewNameToFragmentMap)
+            mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager, value,
+                    viewNameToFragmentMap, lifecycle = lifecycle)
 
             val pager = mBinding?.fragmentClazzDetailViewpager ?: return
             val tabList = mBinding?.fragmentClazzTabs?.tabs ?: return
@@ -90,6 +91,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
         super.onDestroyView()
         mediator?.detach()
         mediator = null
+        mBinding?.fragmentClazzDetailViewpager?.adapter = null
         mPagerAdapter = null
         mBinding = null
         mPresenter = null
