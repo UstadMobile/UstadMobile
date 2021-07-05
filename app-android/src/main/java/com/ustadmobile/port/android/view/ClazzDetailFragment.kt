@@ -1,13 +1,10 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
-import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.toughra.ustadmobile.R
@@ -17,6 +14,7 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.port.android.view.ext.createTabLayoutStrategy
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 
 
@@ -53,11 +51,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
             pager.adapter = mPagerAdapter
 
-            val titleMap =  viewNameToTitleMap.map { it.key to requireContext().getString(it.value) }.toMap()
-            mediator = TabLayoutMediator(tabList, pager) { tab, position ->
-                val viewName = value[position].substringBefore('?')
-                tab.text = titleMap[viewName]
-            }
+            mediator = TabLayoutMediator(tabList, pager, viewNameToTitleMap.createTabLayoutStrategy(value, requireContext()))
             mediator?.attach()
         }
 

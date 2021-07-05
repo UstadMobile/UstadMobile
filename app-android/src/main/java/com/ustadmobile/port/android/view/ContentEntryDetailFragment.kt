@@ -15,6 +15,7 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.port.android.view.ext.createTabLayoutStrategy
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 
 
@@ -52,11 +53,7 @@ class ContentEntryDetailFragment: UstadDetailFragment<ContentEntry>(), ContentEn
 
             pager.adapter = mPagerAdapter
 
-            val titleMap = viewNameToTitleMap.map { it.key to requireContext().getString(it.value) }.toMap()
-            mediator = TabLayoutMediator(tabList, pager) { tab, position ->
-                val viewName = value[position].substringBefore('?')
-                tab.text = titleMap[viewName]
-            }
+            mediator = TabLayoutMediator(tabList, pager, viewNameToTitleMap.createTabLayoutStrategy(value, requireContext()))
             mediator?.attach()
         }
 
