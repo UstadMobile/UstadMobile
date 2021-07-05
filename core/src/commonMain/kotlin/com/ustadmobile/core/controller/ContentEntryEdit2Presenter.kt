@@ -109,13 +109,12 @@ class ContentEntryEdit2Presenter(context: Any,
                 view.fileImportErrorVisible = false
                 return importedMetadata.contentEntry
             }
-            return withTimeoutOrNull(2000) {
-                db.takeIf { entityUid != 0L }?.contentEntryDao?.findEntryWithLanguageByEntryIdAsync(entityUid)
-            } ?: ContentEntryWithLanguage().apply {
-                leaf = isLeaf ?: (contentFlags != ContentEntry.FLAG_IMPORTED)
-            }
         }
-        return null
+        return withTimeoutOrNull(2000) {
+            db.takeIf { entityUid != 0L }?.contentEntryDao?.findEntryWithLanguageByEntryIdAsync(entityUid)
+        } ?: ContentEntryWithLanguage().apply {
+            leaf = isLeaf ?: (contentFlags != ContentEntry.FLAG_IMPORTED)
+        }
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): ContentEntryWithLanguage? {

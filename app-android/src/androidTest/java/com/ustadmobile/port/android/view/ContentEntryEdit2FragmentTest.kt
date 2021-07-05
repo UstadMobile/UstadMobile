@@ -47,7 +47,8 @@ class ContentEntryEdit2FragmentTest : TestCase() {
                         ARG_PARENT_ENTRY_UID to 10000L.toString()),
                 themeResId = R.style.UmTheme_App) {
             ContentEntryEdit2Fragment().also {
-                it.installNavController(systemImplNavRule.navController)
+                it.installNavController(systemImplNavRule.navController,
+                        initialDestId = R.id.content_entry_edit_dest)
             }
         }
 
