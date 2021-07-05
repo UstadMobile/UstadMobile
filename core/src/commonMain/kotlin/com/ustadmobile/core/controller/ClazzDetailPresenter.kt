@@ -3,9 +3,11 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ClazzDetailView.Companion.ARG_TABS
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_CLAZZ
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_OPTION
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -20,6 +22,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -34,7 +37,6 @@ class ClazzDetailPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
         return false //This has no effect because the button is controlled by the overview presenter
     }
@@ -43,6 +45,7 @@ class ClazzDetailPresenter(context: Any,
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
+        val tabsJson = bundle[ARG_TABS]
         var editEntity: Clazz? = null
         if(entityJsonStr != null) {
             editEntity = safeParse(di,  Clazz.serializer(), entityJsonStr)
@@ -50,12 +53,27 @@ class ClazzDetailPresenter(context: Any,
             editEntity = Clazz()
         }
 
-        GlobalScope.launch {
-            setupTabs(editEntity)
+        if(tabsJson != null){
+            view.tabs = safeParse(di, ListSerializer(String.serializer()), tabsJson)
+        }else{
+            GlobalScope.launch {
+                setupTabs(editEntity)
+            }
         }
+
+
 
         return editEntity
     }
+
+    override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
+        super.onSaveInstanceState(savedState)
+        val entityVal = entity
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
+                entityVal)
+        savedState.putEntityAsJson(ARG_TABS, null, view.tabs)
+    }
+
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): Clazz? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L

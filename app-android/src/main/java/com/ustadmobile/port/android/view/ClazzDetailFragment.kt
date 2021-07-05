@@ -84,7 +84,6 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
     override fun onDestroyView() {
         super.onDestroyView()
-        mBinding?.fragmentClazzDetailViewpager?.adapter = null
         mPagerAdapter = null
         mBinding = null
         mPresenter = null
