@@ -5,12 +5,15 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.util.test.ext.insertVideoContent
+import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
@@ -70,6 +73,19 @@ class VideoContentPresenterTest {
 
         val db: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
         val repo: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
+
+        accountManager = di.direct.instance()
+        val userPerson = runBlocking {
+            repo.insertPersonAndGroup(Person().apply {
+                personUid = 42
+                firstNames = "Jane"
+                lastName = "Doe"
+                username = "janedoe"
+            })
+        }
+
+        accountManager.startLocalTestSessionBlocking(userPerson, accountManager.activeEndpoint.url)
+
 
         runBlocking {
             container = repo.insertVideoContent()

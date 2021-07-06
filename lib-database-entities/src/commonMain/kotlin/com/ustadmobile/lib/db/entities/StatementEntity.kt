@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 @Entity
 @SyncableEntity(tableId = StatementEntity.TABLE_ID,
     notifyOnUpdate = ["""
-         SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${StatementEntity.TABLE_ID} AS tableId 
           FROM ChangeLog
             JOIN StatementEntity 
@@ -24,17 +24,17 @@ import kotlinx.serialization.Serializable
                  ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid   
                 """],
     syncFindAllQuery = """
-       SELECT StatementEntity.*
-              FROM DeviceSession
-                   JOIN PersonGroupMember 
-                        ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
-                   JOIN ScopedGrant 
-                        ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                            AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
-                   JOIN StatementEntity 
+        SELECT StatementEntity.* 
+          FROM UserSession
+               JOIN PersonGroupMember 
+                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+               JOIN ScopedGrant 
+                    ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+                    AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
+               JOIN StatementEntity 
                         ON ${StatementEntity.FROM_SCOPEDGRANT_TO_STATEMENT_JOIN_ON_CLAUSE}
-             WHERE DeviceSession.dsDeviceId = :clientId
-          """
+         WHERE UserSession.usClientNodeId = :clientId
+               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}"""
 )
 @Serializable
 open class StatementEntity {

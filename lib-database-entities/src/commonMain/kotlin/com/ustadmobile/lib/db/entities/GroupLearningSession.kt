@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
-import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
@@ -11,7 +10,7 @@ import kotlinx.serialization.Serializable
 @Entity
 @SyncableEntity(tableId = GroupLearningSession.TABLE_ID,
     notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${GroupLearningSession.TABLE_ID} AS tableId 
           FROM ChangeLog
                JOIN GroupLearningSession 
@@ -21,15 +20,15 @@ import kotlinx.serialization.Serializable
                     ON LearnerGroupMember.learnerGroupMemberLgUid = GroupLearningSession.groupLearningSessionLearnerGroupUid
                JOIN Person 
                     ON Person.personUid = LearnerGroupMember.learnerGroupMemberPersonUid
-                ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+                ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
                     ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}
+                    ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
                         """],
     syncFindAllQuery = """
         SELECT GroupLearningSession.*
-          FROM DeviceSession
+          FROM UserSession
                JOIN PersonGroupMember
-                    ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
                $JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
                     ${Role.PERMISSION_PERSON_SELECT}
                     $JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
@@ -37,7 +36,8 @@ import kotlinx.serialization.Serializable
                     ON LearnerGroupMember.learnerGroupMemberPersonUid = Person.personUid
                JOIN GroupLearningSession
                     ON GroupLearningSession.groupLearningSessionLearnerGroupUid = LearnerGroupMember.learnerGroupMemberLgUid
-         WHERE DeviceSession.dsDeviceId = :clientId
+         WHERE UserSession.usClientNodeId = :clientId
+           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
          """
 )
 @Serializable

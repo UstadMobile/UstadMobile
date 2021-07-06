@@ -50,7 +50,7 @@ class ReportEndToEndTests : TestCase() {
     fun setup() {
         impl = getApplicationDi().direct.instance()
         runBlocking {
-            dbRule.insertPersonForActiveUser(Person().apply {
+            dbRule.insertPersonAndStartSession(Person().apply {
                 admin = true
                 firstNames = "Bob"
                 lastName = "Jones"

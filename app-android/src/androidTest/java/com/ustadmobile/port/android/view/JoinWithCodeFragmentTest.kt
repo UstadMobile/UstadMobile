@@ -50,7 +50,7 @@ class JoinWithCodeFragmentTest : TestCase() {
                 personUid = dbRule.repo.personDao.insert(this)
             }
 
-            dbRule.insertPersonForActiveUser(Person().apply {
+            dbRule.insertPersonAndStartSession(Person().apply {
                 admin = true
                 firstNames = "Test"
                 lastName = "User"

@@ -12,21 +12,7 @@ import kotlinx.serialization.Serializable
     //Index to handle permission queries
     Index(value=["rolePermissions"])
 ])
-@SyncableEntity(tableId = Role.TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${Role.TABLE_ID} AS tableId 
-        FROM DeviceSession""",
-
-        //Anyone who has this role must do a full resync when the role itself changes
-        """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClientSyncManager.TABLEID_SYNC_ALL_TABLES} AS tableId FROM 
-        ChangeLog
-        JOIN Role ON ChangeLog.chTableId = ${Role.TABLE_ID} AND ChangeLog.chEntityPk = Role.roleUid
-        JOIN EntityRole ON EntityRole.erRoleUid = Role.roleUid
-        JOIN PersonGroupMember ON PersonGroupMember.groupMemberGroupUid = EntityRole.erGroupUid
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
-        """
-    ])
+@SyncableEntity(tableId = Role.TABLE_ID)
 @Serializable
 open class Role() {
 
@@ -193,6 +179,10 @@ open class Role() {
         const val PERMISSION_PERSONSOCIOECONOMIC_UPDATE: Long = 140737488355328L
 
         const val PERMISSION_ADD_CLASS_TO_SCHOOL: Long = 281474976710656L
+
+        const val PERMISSION_AUTH_SELECT: Long = 562949953421312L
+
+        const val PERMISSION_AUTH_UPDATE: Long = 1125899906842624L
 
         //Predefined roles that are added by the system
         const val ROLE_CLAZZ_TEACHER_NAME = "Teacher"

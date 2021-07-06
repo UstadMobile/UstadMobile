@@ -68,4 +68,14 @@ object UstadMobileConstants {
      */
     val MINOR_AGE_THRESHOLD = 13
 
+    /**
+     * Default number of iterations for pbkdf2 hashing
+     */
+    const val PBKDF2_ITERATIONS = 10000
+
+    /**
+     * Default key length for PBKDF2 hashing
+     */
+    const val PBKDF2_KEYLENGTH = 512
+
 }

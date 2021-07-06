@@ -207,7 +207,7 @@ class PersonEditPresenter(context: Any,
 
                 try {
                     val umAccount = accountManager.register(entity, serverUrl, AccountRegisterOptions(
-                        makeAccountActive = false,
+                        makeAccountActive = !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR),
                         parentJoin = view.approvalPersonParentJoin
                     ))
 
@@ -229,10 +229,8 @@ class PersonEditPresenter(context: Any,
 
                         impl.go(RegisterMinorWaitForParentView.VIEW_NAME, args, context, goOptions)
                     }else {
-                        accountManager.activeAccount = umAccount
                         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
                             popUpToViewName, true)
-                        accountManager.activeAccount = umAccount
                         impl.go(nextDestination, mapOf(), context, goOptions)
                     }
                 } catch (e: Exception) {

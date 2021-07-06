@@ -126,7 +126,9 @@
 
     <string name="underRegistrationAgeError">Self-registration of children under 13 is not allowed. Please ask your teacher to register you.</string>
 
-
+    <string name="add_link_description">Add educational content using web link, then use it offline</string>
+    <string name="add_gallery_description">Add video or audio from the device gallery</string>
+    <string name="add_file_description">Add educational content using supported formats e.g. PDF, xAPI, H5P, EPUB</string>
 
     <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>
 
@@ -547,6 +549,20 @@
     <string name="active">Active</string>
     <string name="class_id">Class ID</string>
     <string name="gender_literal">Gender</string>
+    <string name="country">Country</string>
+    <string name="connectivity">Connectivity</string>
+    <string name="home_internet_access">Home Internet access</string>
+    <string name="mobile_internet_access">Mobile Internet access</string>
+
+    <!-- This is an option when we ask users about their connectivity access -->
+    <string name="connectivity_limited">Limited - I avoid downloading too much</string>
+
+    <!-- This is an option when we ask users about their connectivity access -->
+    <string name="connectivity_full">Full - I download as much as I want</string>
+
+    <!-- This is an option when we ask users about thier connectivity access -->
+    <string name="prefer_not_to_say">Prefer not to say</string>
+
     <!--
     SEL = Social Emotional Learning
     -->
@@ -1008,6 +1024,10 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="content_editor_create_new_category">New folder</string>
 
+    <string name="content_pieces_completed">Content pieces completed</string>
+
+    <string name="content_usage_duration">Content usage duration</string>
+
     <string name="manage_download">Manage download</string>
 
     <!--
@@ -1278,8 +1298,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <!-- Allows the user to see a list of supported educational websites for importing educational content via a link -->
     <string name="see_supported_sites">See supported sites</string>
 
-    <string name="total_score">Total score</string>
-
     <!-- A section of the class edit screen that allows users to choose what features are enabled
     and what permissions users will have -->
     <string name="class_setup">Class setup</string>
@@ -1328,16 +1346,9 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="alternatively_you_can_download_the_apk">Alternatively, you can download the APK file for manual installation if you want.</string>
 
-    <string name="connectivity">Connectivity</string>
 
-    <string name="home_internet_access">Home Internet access</string>
-
-    <string name="mobile_internet_access">Mobile Internet access</string>
-
-    <!-- This is an option when we ask users about their connectivity access -->
     <string name="full_i_can_download_as_much_as_i_like">Full - I can download as much as I like</string>
 
-    <!-- This is an option when we ask users about their connectivity access -->
     <string name="limited_i_avoid_downloading_too_much">Limited - I avoid downloading too much</string>
 
     <!-- Oops: This is displayed as the title for a screen that appears when an error occurs -->
@@ -1377,5 +1388,17 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="edit_clazzes">Edit classes</string>
 
     <string name="add_new_clazz_to_school">Add new class to school</string>
+
+    <!-- This appears as a notification after the user selects a content piece to add to a class
+    %1$s will be replaced with the title of the content item selected
+    -->
+    <string name="added_to_class_content">%1$s added to class content</string>
+
+    <!--
+    This appears as a notification after the user selects a content piece to add to a class when
+    the user selects something that they had already added before.
+    %1$s will be replaced with the title of the content item selected
+    -->
+    <string name="content_already_added_to_class">%1$s was already in class content</string>
 
 </resources>

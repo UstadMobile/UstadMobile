@@ -43,11 +43,11 @@ class ClazzEndToEndTests : TestCase() {
                 this.umCalendarName = "Test Calendar"
             })
 
-            dbRule.insertPersonForActiveUser(Person().apply {
+            dbRule.insertPersonAndStartSession(Person().apply {
                 firstNames = "Bob"
                 lastName = "Jones"
                 admin = true
-            })
+            }, isAdmin = true)
 
             launchActivity<MainActivity>()
 

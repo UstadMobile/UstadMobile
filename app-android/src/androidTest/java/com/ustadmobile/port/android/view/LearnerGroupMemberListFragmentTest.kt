@@ -35,8 +35,9 @@ class LearnerGroupMemberListFragmentTest : TestCase() {
     @Before
     fun setup() {
 
-        dbRule.insertPersonForActiveUser(Person().apply {
+        dbRule.insertPersonAndStartSession(Person().apply {
             admin = true
+            personUid = UmAppDatabaseAndroidClientRule.DEFAULT_ACTIVE_USER_PERSONUID
             firstNames = "Test"
             lastName = "Teacher"
         })

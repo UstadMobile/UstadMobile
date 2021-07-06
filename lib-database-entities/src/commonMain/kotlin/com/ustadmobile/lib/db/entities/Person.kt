@@ -16,25 +16,25 @@ import kotlinx.serialization.Serializable
 @SyncableEntity(tableId = TABLE_ID,
 
     notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${TABLE_ID} AS tableId 
           FROM ChangeLog
                JOIN Person 
                     ON ChangeLog.chTableId = $TABLE_ID 
                        AND ChangeLog.chEntityPk = Person.personUid
-               ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+               ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
                     ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}
+                    ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
         """],
         syncFindAllQuery ="""
             SELECT Person.*
-              FROM DeviceSession
+              FROM UserSession
                    JOIN PersonGroupMember 
-                        ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+                        ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
                    $JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1 
                         ${Role.PERMISSION_PERSON_SELECT}
                         $JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
-             WHERE DeviceSession.dsDeviceId = :clientId
+             WHERE UserSession.usClientNodeId = :clientId
         """
     )
 @Serializable
@@ -245,19 +245,20 @@ open class Person() {
         """
 
 
-        const val JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1 = """
+        const val JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1 = """
             JOIN ScopedGrant 
                    ON $FROM_SCOPEDGRANT_TO_PERSON_JOIN_ON_CLAUSE
                    AND (ScopedGrant.sgPermissions & 
         """
 
 
-        const val JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2 = """
+        const val JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2 = """
                                                      ) > 0
              JOIN PersonGroupMember AS PrsGrpMbr
                    ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
-              JOIN DeviceSession
-                   ON DeviceSession.dsPersonUid = PrsGrpMbr.groupMemberPersonUid
+              JOIN UserSession
+                   ON UserSession.usPersonUid = PrsGrpMbr.groupMemberPersonUid
+                      AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
         """
 
     }

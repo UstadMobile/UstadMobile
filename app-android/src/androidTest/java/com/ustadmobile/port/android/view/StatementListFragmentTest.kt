@@ -40,15 +40,12 @@ class StatementListFragmentTest : TestCase()  {
     @Before
     fun setup(){
         runBlocking {
-            val admin = Person().apply {
+            dbRule.insertPersonAndStartSession(Person().apply {
                 firstNames = "Bob"
                 lastName = "Jones"
                 admin = true
                 personUid = 42
-            }
-            dbRule.insertPersonForActiveUser(admin)
-            dbRule.repo.grantScopedPermission(admin, Role.ALL_PERMISSIONS,
-                    ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
+            })
             dbRule.repo.insertStatementForSessions()
         }
     }

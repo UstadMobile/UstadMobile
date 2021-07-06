@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UstadAccountManager
 import org.mockito.kotlin.*
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -24,43 +25,57 @@ class RedirectPresenterTest {
 
     private lateinit var di: DI
 
+    private lateinit var mockedAccountManager: UstadAccountManager
+
     @Before
-    @Throws(IOException::class)
     fun setup() {
         mockedView = mock()
         impl = mock()
 
+        mockedAccountManager = mock { }
+
         di = DI {
             bind<UstadMobileSystemImpl>() with singleton { impl }
+            bind<UstadAccountManager>() with singleton { mockedAccountManager }
         }
     }
 
     @Test
     fun givenAppLaunched_whenUserHasNotLoggedInBefore_thenShouldNavigateToGetStarted() {
         whenever(impl.getAppConfigBoolean(eq(AppConfig.KEY_ALLOW_SERVER_SELECTION), any())).thenReturn(true)
-        whenever(impl.getAppPref(eq(Login2Presenter.PREFKEY_USER_LOGGED_IN), eq("false"), any())).thenReturn("false")
+        mockedAccountManager.stub {
+            onBlocking { activeSessionCount(any()) }.thenReturn(0)
+        }
+
         mPresenter = RedirectPresenter(context, mapOf(),
                 mockedView, di)
         mPresenter.onCreate(null)
-        verify(impl).goToViewLink(eq(SiteEnterLinkView.VIEW_NAME), any(), any())
+        verify(impl, timeout(5000)).goToViewLink(eq(SiteEnterLinkView.VIEW_NAME), any(), any())
     }
 
     @Test
     fun givenAppLaunched_whenUserHasLoggedInBefore_thenShouldNavigateFeedList() {
-        whenever(impl.getAppPref(eq(Login2Presenter.PREFKEY_USER_LOGGED_IN), eq("false"), any())).thenReturn("true")
+        mockedAccountManager.stub {
+            onBlocking { activeSessionCount(any()) }.thenReturn(1)
+        }
+
         mPresenter = RedirectPresenter(context, mapOf(),
                 mockedView, di)
         mPresenter.onCreate(null)
-        verify(impl).goToViewLink(eq(ContentEntryListTabsView.VIEW_NAME), any(), any())
+        verify(impl, timeout(5000)).goToViewLink(eq(ContentEntryListTabsView.VIEW_NAME), any(), any())
     }
 
     @Test
     fun givenNextArgProvied_whenOnCreateCalled_thenShouldGoToNextDest() {
         val viewLink = "${ContentEntryDetailView.VIEW_NAME}?entityUid=42"
+        mockedAccountManager.stub {
+            onBlocking { activeSessionCount(any()) }.thenReturn(1)
+        }
+
         mPresenter = RedirectPresenter(context, mapOf(ARG_NEXT to viewLink),
                 mockedView, di)
         mPresenter.onCreate(null)
-        verify(impl).goToViewLink(eq(viewLink), any(), any())
+        verify(impl, timeout(5000)).goToViewLink(eq(viewLink), any(), any())
     }
 
 }
