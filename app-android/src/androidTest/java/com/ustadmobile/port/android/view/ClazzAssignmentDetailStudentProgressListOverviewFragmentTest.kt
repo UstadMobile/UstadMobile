@@ -46,9 +46,7 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragmentTest : TestCase() 
                 admin = true
                 personUid = 42
             }
-            dbRule.insertPersonForActiveUser(admin)
-            dbRule.repo.grantScopedPermission(admin, Role.ALL_PERMISSIONS,
-                    ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
+            dbRule.insertPersonAndStartSession(admin, true)
         }
     }
 
