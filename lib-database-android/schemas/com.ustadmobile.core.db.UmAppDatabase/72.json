@@ -5405,46 +5405,8 @@
         "foreignKeys": []
       },
       {
-        "tableName": "DeviceSession",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`deviceSessionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `dsDeviceId` INTEGER NOT NULL, `dsPersonUid` INTEGER NOT NULL, `expires` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "deviceSessionUid",
-            "columnName": "deviceSessionUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "dsDeviceId",
-            "columnName": "dsDeviceId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "dsPersonUid",
-            "columnName": "dsPersonUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "expires",
-            "columnName": "expires",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "deviceSessionUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
         "tableName": "Site",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`siteUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sitePcsn` INTEGER NOT NULL, `siteLcsn` INTEGER NOT NULL, `siteLcb` INTEGER NOT NULL, `siteLct` INTEGER NOT NULL, `siteName` TEXT, `guestLogin` INTEGER NOT NULL, `registrationAllowed` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`siteUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sitePcsn` INTEGER NOT NULL, `siteLcsn` INTEGER NOT NULL, `siteLcb` INTEGER NOT NULL, `siteLct` INTEGER NOT NULL, `siteName` TEXT, `guestLogin` INTEGER NOT NULL, `registrationAllowed` INTEGER NOT NULL, `authSalt` TEXT)",
         "fields": [
           {
             "fieldPath": "siteUid",
@@ -5493,6 +5455,12 @@
             "columnName": "registrationAllowed",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "authSalt",
+            "columnName": "authSalt",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -6108,7 +6076,30 @@
           ],
           "autoGenerate": true
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "idx_group_to_entity",
+            "unique": false,
+            "columnNames": [
+              "sgGroupUid",
+              "sgPermissions",
+              "sgTableId",
+              "sgEntityUid"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_group_to_entity` ON `${TABLE_NAME}` (`sgGroupUid`, `sgPermissions`, `sgTableId`, `sgEntityUid`)"
+          },
+          {
+            "name": "idx_entity_to_group",
+            "unique": false,
+            "columnNames": [
+              "sgTableId",
+              "sgEntityUid",
+              "sgPermissions",
+              "sgGroupUid"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_entity_to_group` ON `${TABLE_NAME}` (`sgTableId`, `sgEntityUid`, `sgPermissions`, `sgGroupUid`)"
+          }
+        ],
         "foreignKeys": []
       },
       {
@@ -6213,6 +6204,175 @@
           "autoGenerate": true
         },
         "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "PersonAuth2",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pauthUid` INTEGER NOT NULL, `pauthMechanism` TEXT, `pauthAuth` TEXT, `pauthLcsn` INTEGER NOT NULL, `pauthPcsn` INTEGER NOT NULL, `pauthLcb` INTEGER NOT NULL, `pauthLct` INTEGER NOT NULL, PRIMARY KEY(`pauthUid`))",
+        "fields": [
+          {
+            "fieldPath": "pauthUid",
+            "columnName": "pauthUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pauthMechanism",
+            "columnName": "pauthMechanism",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "pauthAuth",
+            "columnName": "pauthAuth",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "pauthLcsn",
+            "columnName": "pauthLcsn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pauthPcsn",
+            "columnName": "pauthPcsn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pauthLcb",
+            "columnName": "pauthLcb",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pauthLct",
+            "columnName": "pauthLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pauthUid"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "UserSession",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`usUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `usPcsn` INTEGER NOT NULL, `usLcsn` INTEGER NOT NULL, `usLcb` INTEGER NOT NULL, `usLct` INTEGER NOT NULL, `usPersonUid` INTEGER NOT NULL, `usClientNodeId` INTEGER NOT NULL, `usStartTime` INTEGER NOT NULL, `usEndTime` INTEGER NOT NULL, `usStatus` INTEGER NOT NULL, `usReason` INTEGER NOT NULL, `usAuth` TEXT, `usSessionType` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "usUid",
+            "columnName": "usUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "usPcsn",
+            "columnName": "usPcsn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "usLcsn",
+            "columnName": "usLcsn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "usLcb",
+            "columnName": "usLcb",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "usLct",
+            "columnName": "usLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "usPersonUid",
+            "columnName": "usPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "usClientNodeId",
+            "columnName": "usClientNodeId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "usStartTime",
+            "columnName": "usStartTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "usEndTime",
+            "columnName": "usEndTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "usStatus",
+            "columnName": "usStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "usReason",
+            "columnName": "usReason",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "usAuth",
+            "columnName": "usAuth",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "usSessionType",
+            "columnName": "usSessionType",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "usUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "person_status_node_idx",
+            "unique": false,
+            "columnNames": [
+              "usPersonUid",
+              "usStatus",
+              "usClientNodeId"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `person_status_node_idx` ON `${TABLE_NAME}` (`usPersonUid`, `usStatus`, `usClientNodeId`)"
+          },
+          {
+            "name": "node_status_person_idx",
+            "unique": false,
+            "columnNames": [
+              "usClientNodeId",
+              "usStatus",
+              "usPersonUid"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `node_status_person_idx` ON `${TABLE_NAME}` (`usClientNodeId`, `usStatus`, `usPersonUid`)"
+          }
+        ],
         "foreignKeys": []
       },
       {
@@ -6385,85 +6545,6 @@
           "autoGenerate": true
         },
         "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "CacheClazzAssignment",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cacheUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cachePersonUid` INTEGER NOT NULL, `cacheContentEntryUid` INTEGER NOT NULL, `cacheClazzAssignmentUid` INTEGER NOT NULL, `cacheStudentScore` INTEGER NOT NULL, `cacheMaxScore` INTEGER NOT NULL, `cacheProgress` INTEGER NOT NULL, `cacheContentComplete` INTEGER NOT NULL, `lastCsnChecked` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "cacheUid",
-            "columnName": "cacheUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cachePersonUid",
-            "columnName": "cachePersonUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cacheContentEntryUid",
-            "columnName": "cacheContentEntryUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cacheClazzAssignmentUid",
-            "columnName": "cacheClazzAssignmentUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cacheStudentScore",
-            "columnName": "cacheStudentScore",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cacheMaxScore",
-            "columnName": "cacheMaxScore",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cacheProgress",
-            "columnName": "cacheProgress",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cacheContentComplete",
-            "columnName": "cacheContentComplete",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "lastCsnChecked",
-            "columnName": "lastCsnChecked",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "cacheUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_CacheClazzAssignment_cachePersonUid_cacheContentEntryUid_cacheClazzAssignmentUid",
-            "unique": true,
-            "columnNames": [
-              "cachePersonUid",
-              "cacheContentEntryUid",
-              "cacheClazzAssignmentUid"
-            ],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_CacheClazzAssignment_cachePersonUid_cacheContentEntryUid_cacheClazzAssignmentUid` ON `${TABLE_NAME}` (`cachePersonUid`, `cacheContentEntryUid`, `cacheClazzAssignmentUid`)"
-          }
-        ],
         "foreignKeys": []
       },
       {
@@ -11268,6 +11349,158 @@
               "clientId"
             ],
             "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzAssignmentContentJoin_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "PersonAuth2_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_PersonAuth2_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonAuth2_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_PersonAuth2_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_PersonAuth2_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "UserSession_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_UserSession_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_UserSession_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_UserSession_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_UserSession_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []

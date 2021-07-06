@@ -827,6 +827,7 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="clazz_assignment">Assignment</string>
     <string name="new_assignment">New assignment</string>
     <string name="edit_assignment">Edit assignment</string>
+    <string name="total_score">Total score</string>
     <string name="late_submission">Late submissions</string>
     <!-- when assignment is submitted late by student, teacher has option to mark a penalty -->
     <string name="mark_penalty">Mark penalty</string>

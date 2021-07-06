@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 @SyncableEntity(tableId = TABLE_ID,
         notifyOnUpdate =  [
             """
-           SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+           SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                   $TABLE_ID AS tableId 
             FROM ChangeLog
                  JOIN ClazzAssignment
@@ -18,22 +18,23 @@ import kotlinx.serialization.Serializable
                             AND ClazzAssignment.caUid = ChangeLog.chEntityPk
                  JOIN Clazz 
                     ON Clazz.clazzUid = ClazzAssignment.caClazzUid 
-               ${Clazz.JOIN_FROM_CLAZZ_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+               ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
                     ${Role.PERMISSION_ASSIGNMENT_SELECT}
-                    ${Clazz.JOIN_FROM_CLAZZ_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}                           
+                    ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}                           
         """
         ],
         syncFindAllQuery = """
            SELECT ClazzAssignment.* 
-          FROM DeviceSession
+          FROM UserSession
                JOIN PersonGroupMember 
-                    ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
                ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
                     ${Role.PERMISSION_ASSIGNMENT_SELECT} 
                     ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
                JOIN ClazzAssignment
                     ON ClazzAssignment.caClazzUid = Clazz.clazzUid
-         WHERE DeviceSession.dsDeviceId = :clientId
+         WHERE UserSession.usClientNodeId = :clientId
+               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
         """)
 @Serializable
 open class ClazzAssignment {

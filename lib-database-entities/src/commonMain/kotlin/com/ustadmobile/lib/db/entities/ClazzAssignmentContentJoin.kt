@@ -10,8 +10,8 @@ import kotlinx.serialization.Serializable
 @SyncableEntity(tableId = TABLE_ID,
         notifyOnUpdate =  [
         """
-             SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
-                  ${ClazzAssignment.TABLE_ID} AS tableId 
+             SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
+                  $TABLE_ID AS tableId 
             FROM ChangeLog
                  JOIN ClazzAssignmentContentJoin 
                        ON ChangeLog.chTableId = $TABLE_ID 
@@ -20,17 +20,17 @@ import kotlinx.serialization.Serializable
                       ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
                  JOIN Clazz 
                     ON Clazz.clazzUid = ClazzAssignment.caClazzUid 
-               ${Clazz.JOIN_FROM_CLAZZ_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+               ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
                     ${Role.PERMISSION_ASSIGNMENT_SELECT}
-                    ${Clazz.JOIN_FROM_CLAZZ_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}  
+                    ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}  
             
         """
         ],
         syncFindAllQuery = """
              SELECT ClazzAssignmentContentJoin.* 
-          FROM DeviceSession
+          FROM UserSession
                JOIN PersonGroupMember 
-                    ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
                ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
                     ${Role.PERMISSION_ASSIGNMENT_SELECT} 
                     ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2} 
@@ -38,8 +38,8 @@ import kotlinx.serialization.Serializable
                     ON ClazzAssignment.caClazzUid = Clazz.clazzUid
                JOIN ClazzAssignmentContentJoin
                     ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid       
-         WHERE DeviceSession.dsDeviceId = :clientId
-            
+          WHERE UserSession.usClientNodeId = :clientId
+               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
         """)
 @Serializable
 class ClazzAssignmentContentJoin {

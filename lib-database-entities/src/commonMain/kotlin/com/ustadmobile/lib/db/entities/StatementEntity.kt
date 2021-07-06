@@ -20,8 +20,9 @@ import kotlinx.serialization.Serializable
                     AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
             JOIN PersonGroupMember 
                  ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-            JOIN DeviceSession
-                 ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid   
+            JOIN UserSession
+                 ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+                    AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
                 """],
     syncFindAllQuery = """
         SELECT StatementEntity.* 
