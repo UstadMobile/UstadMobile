@@ -235,12 +235,11 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
                             renderBottomNavigation()
                         }
 
-                        mFab(appState.appFab.icon ?: "",
-                            appState.appFab.title?.uppercase() ?: "",
-                            color = MColor.secondary,
-                            onClick = appState.appFab.onClick) {
+                        mFab("","",
+                            color = MColor.secondary) {
+                            attrs.id = "um-fab"
                             css{
-                                display = displayProperty(appState.appFab.visible, true)
+                                display = Display.none
                                 +mainComponentFab
                             }
                         }

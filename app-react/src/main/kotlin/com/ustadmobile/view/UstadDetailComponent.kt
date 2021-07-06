@@ -16,13 +16,14 @@ abstract class UstadDetailComponent<T: Any>(mProps: RProps) : UstadBaseComponent
     override var editButtonMode: EditButtonMode = EditButtonMode.GONE
         get() = field
         set(value) {
-            fabState = fabState.copy(title = getString(MessageID.edit),
-                icon = "edit", visible = true)
+            fabManager?.visible = true
+            fabManager?.icon = "edit"
+            fabManager?.text = getString(MessageID.edit)
             field = value
         }
 
-    override fun onFabClicked(event: Event) {
-        super.onFabClicked(event)
+    override fun onFabClicked() {
+        super.onFabClicked()
         detailPresenter?.handleClickEdit()
     }
 }

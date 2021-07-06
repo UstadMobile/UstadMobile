@@ -83,7 +83,6 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 213
 
-<<<<<<< HEAD
     version_kotlin_react = "17.0.1-pre.148-kotlin-1.4.30"
     version_kotlin_react_router_dom = "5.2.0-pre.148-kotlin-1.4.30"
     version_kotlin_styled = "5.2.1-pre.148-kotlin-1.4.30"

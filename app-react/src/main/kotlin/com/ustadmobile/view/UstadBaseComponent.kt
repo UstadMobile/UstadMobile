@@ -8,14 +8,10 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
-import com.ustadmobile.redux.ReduxFabState
 import com.ustadmobile.redux.ReduxSnackBarState
 import com.ustadmobile.redux.ReduxThemeState
 import com.ustadmobile.redux.ReduxToolbarState
-import com.ustadmobile.util.ProgressBarManager
-import com.ustadmobile.util.SearchManager
-import com.ustadmobile.util.getViewNameFromUrl
-import com.ustadmobile.util.urlSearchParamsToMap
+import com.ustadmobile.util.*
 import kotlinx.atomicfu.atomic
 import kotlinx.browser.window
 import kotlinx.coroutines.Runnable
@@ -44,19 +40,11 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
 
     var searchManager: SearchManager? = null
 
+    var fabManager: FabManager? = null
+
     protected abstract val viewName: String?
 
     private val lifecycleStatus = atomic(0)
-
-    private val defaultFabState = ReduxFabState(icon = "add",visible = false, onClick = ::onFabClicked)
-
-    protected var fabState: ReduxFabState = defaultFabState
-        set(value) {
-            field = value
-            window.setTimeout({
-                dispatch(value)
-            },STATE_CHANGE_DELAY)
-        }
 
     private var hashChangeListener:(Event) -> Unit = { (it as HashChangeEvent)
         if(viewName == getViewNameFromUrl(it.newURL)){
@@ -86,6 +74,11 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
             observer.onStart(this)
         }
         title = null
+        fabManager?.visible = false
+        fabManager?.icon = "add"
+        fabManager?.onClickListener = {
+            onFabClicked()
+        }
         lifecycleStatus.value = DoorLifecycleObserver.STARTED
     }
 
@@ -97,9 +90,9 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         for(observer in lifecycleObservers){
             observer.onStart(this)
         }
-        dispatch(fabState)
         progressBarManager = ProgressBarManager()
         searchManager = SearchManager()
+        fabManager = FabManager()
 
         //Handle both arguments from URL and the ones passed during component rendering
         //i.e from tabs
@@ -125,7 +118,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
 
     override fun RBuilder.render() {}
 
-    open fun onFabClicked(event: Event){}
+    open fun onFabClicked(){}
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
         dispatch(ReduxSnackBarState(message, getString(actionMessageId), action))
@@ -159,6 +152,8 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         progressBarManager.onDestroy()
         searchManager?.onDestroy()
         searchManager = null
+        fabManager?.onDestroy()
+        fabManager = null
     }
 
     companion object {

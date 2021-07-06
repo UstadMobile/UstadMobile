@@ -18,14 +18,13 @@ abstract class UstadEditComponent<T: Any>(mProps: RProps): UstadBaseComponent<RP
     override fun onCreate(arguments: Map<String, String>) {
         super.onCreate(arguments)
         this.arguments = arguments
-        fabState = fabState.copy(
-            visible = true,
-            icon = "check",
-            title = getString(MessageID.save))
+        fabManager?.icon = "check"
+        fabManager?.text = getString(MessageID.save)
+        fabManager?.visible = true
     }
 
-    override fun onFabClicked(event: Event) {
-        super.onFabClicked(event)
+    override fun onFabClicked() {
+        super.onFabClicked()
         val entityVal = entity ?: return
         mEditPresenter?.handleClickSave(entityVal)
     }

@@ -18,7 +18,7 @@ object RouteManager {
         UstadDestination("library_books", MessageID.content, ContentEntryListTabsView.VIEW_NAME,
             ContentEntryListTabsComponent::class, true),
         UstadDestination("school", MessageID.schools,SchoolListView.VIEW_NAME, PlaceHolderComponent::class),
-        UstadDestination("people", MessageID.classes,ClazzList2View.VIEW_NAME, PlaceHolderComponent::class),
+        UstadDestination("people", MessageID.classes,ClazzList2View.VIEW_NAME, ClazzListComponent::class),
         UstadDestination("person", MessageID.people, PersonListView.VIEW_NAME, PersonListComponent::class),
         UstadDestination("pie_chart", MessageID.reports, ReportListView.VIEW_NAME, PlaceHolderComponent::class, divider = true),
         UstadDestination("settings", MessageID.settings, SettingsView.VIEW_NAME, PlaceHolderComponent::class),

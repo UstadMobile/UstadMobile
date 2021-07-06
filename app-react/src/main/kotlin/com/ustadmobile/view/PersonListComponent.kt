@@ -38,7 +38,7 @@ class PersonListComponent(mProps: RProps): UstadListComponent<Person, PersonWith
 
     override fun onCreate(arguments: Map<String, String>) {
         super.onCreate(arguments)
-        fabState.title = getString(MessageID.person)
+        fabManager?.text = getString(MessageID.person)
         if(arguments.containsKey(UstadView.ARG_CODE_TABLE)){
             //handle invite with link
         }

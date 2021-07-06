@@ -195,8 +195,8 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
         }
     }
 
-    override fun onFabClicked(event: Event) {
-        super.onFabClicked(event)
+    override fun onFabClicked() {
+        super.onFabClicked()
         mPresenter.handleClickEdit()
     }
 

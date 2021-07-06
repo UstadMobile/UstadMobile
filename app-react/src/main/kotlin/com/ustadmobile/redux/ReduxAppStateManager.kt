@@ -28,7 +28,6 @@ object ReduxAppStateManager {
         return when (action) {
             is ReduxThemeState -> state.copy(appTheme = action)
             is ReduxDiState -> state.copy(appDi = action)
-            is ReduxFabState -> state.copy(appFab = action)
             is ReduxToolbarState -> state.copy(appToolbar = action)
             is ReduxSnackBarState -> state.copy(appSnackBar = action)
             else -> state

@@ -14,11 +14,13 @@ class  SearchManager(private val viewId: String = "um-search") {
 
     private var searchView: Element? = null
 
-    private var searchHandlerId = 0
+    private var searchHandlerId = -1
+
+    private var viewInitTimeoutId = -1
 
     var searchListener: OnSearchSubmitted? = null
         set(value) {
-            window.setTimeout({
+            viewInitTimeoutId = window.setTimeout({
                 searchView = document.getElementById(viewId)
                 searchView?.addEventListener("input", searchHandler)
             }, 1000)
@@ -35,6 +37,7 @@ class  SearchManager(private val viewId: String = "um-search") {
     fun onDestroy(){
         window.removeEventListener("input",searchHandler)
         window.clearTimeout(searchHandlerId)
+        window.clearTimeout(viewInitTimeoutId)
         searchListener = null
         searchView = null
     }

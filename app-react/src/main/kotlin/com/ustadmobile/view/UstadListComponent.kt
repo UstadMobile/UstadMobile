@@ -64,6 +64,22 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
 
     protected var dbRepo: UmAppDatabase? = null
 
+    private var multiColumnItemSize = MGridSize.cells4
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
+    protected var listType: Int = LIST_TYPE_SINGLE_COLUMN
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
     private val itemPressEventHandler:(Event) -> Unit  = {
         if(!isEventHandled){
             //Long press detected, add to selection
@@ -107,7 +123,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
         set(value) {
             showCreateNewItem = value == ListViewAddMode.FIRST_ITEM
             if(value == ListViewAddMode.FAB){
-                fabState = fabState.copy(visible = value == ListViewAddMode.FAB)
+                fabManager?.visible = value == ListViewAddMode.FAB
             }
             setState {
                 field = value
@@ -139,52 +155,105 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
     }
 
     override fun RBuilder.render() {
-        styledDiv {
+        val singleColumnList = listType == LIST_TYPE_SINGLE_COLUMN
+        umGridContainer {
             css{
-                +listComponentContainer
+                if(singleColumnList){
+                    +listComponentContainer
+                }
                 +contentContainer
             }
             renderFilters()
             renderMenuOptions()
 
-            mList {
-                css{ +(styleList() ?: horizontalList) }
-                if(showCreateNewItem){
-                    mListItem {
-                        css(listCreateNewContainer)
-                        attrs.alignItems = MListItemAlignItems.flexStart
-                        attrs.button = true
-                        attrs.divider = true
-                        attrs.onClick = {
-                            listPresenter?.handleClickCreateNewFab()
-                        }
-                        renderHeaderView()
-                    }
-                }
+            if(singleColumnList)
+                renderSingleColumnList()
+            else
+                renderMultiColumnList()
+        }
 
-                listItems.forEach {entry->
-                    mListItem {
-                        css{
-                            backgroundColor = Color(if(selectedEntries.indexOf(entry) != -1)
-                                umTheme.theme!!.palette.action.selected
-                            else umTheme.theme!!.palette.background.paper)
-                            width = LinearDimension("100%")
+        //Render dialog UI to be shown when fab is clicked
+        renderAddEntryOptions()
+    }
+
+
+    private fun RBuilder.renderMultiColumnList(){
+        umGridContainer {
+            if(showCreateNewItem){
+                umItem(MGridSize.cells12) {
+                    css(listCreateNewContainer)
+                    attrs.alignItems = MGridAlignItems.flexStart
+                    attrs.asDynamic().onClick = {
+                        listPresenter?.handleClickCreateNewFab()
+                    }
+                    renderHeaderView()
+                }
+            }
+
+            umItem(MGridSize.cells12){
+                umGridContainer(MGridSpacing.spacing4) {
+                    listItems.forEach {entry->
+                        umItem(MGridSize.cells12, multiColumnItemSize){
+                            css{
+                                backgroundColor = Color(if(selectedEntries.indexOf(entry) != -1)
+                                    umTheme.theme!!.palette.action.selected
+                                else umTheme.theme!!.palette.background.paper)
+                            }
+
+                            attrs.asDynamic().onMouseDown = {
+                                handleListItemPress(entry)
+                            }
+                            attrs.asDynamic().onMouseUp = {
+                                handleListItemRelease(entry)
+                            }
+                            mPaper(elevation = 2) {
+                                renderListItem(entry)
+                            }
                         }
-                        attrs.alignItems = MListItemAlignItems.flexStart
-                        attrs.button = true
-                        attrs.divider = true
-                        attrs.onMouseDown = {
-                            handleListItemPress(entry)
-                        }
-                        attrs.onMouseUp = {
-                            handleListItemRelease(entry)
-                        }
-                        renderListItem(entry)
                     }
                 }
             }
+
         }
-        renderAddEntryOptions()
+    }
+
+    private fun RBuilder.renderSingleColumnList(){
+        mList {
+            css{ +(styleList() ?: horizontalList) }
+            if(showCreateNewItem){
+                mListItem {
+                    css(listCreateNewContainer)
+                    attrs.alignItems = MListItemAlignItems.flexStart
+                    attrs.button = true
+                    attrs.divider = true
+                    attrs.onClick = {
+                        listPresenter?.handleClickCreateNewFab()
+                    }
+                    renderHeaderView()
+                }
+            }
+
+            listItems.forEach {entry->
+                mListItem {
+                    css{
+                        backgroundColor = Color(if(selectedEntries.indexOf(entry) != -1)
+                            umTheme.theme!!.palette.action.selected
+                        else umTheme.theme!!.palette.background.paper)
+                        width = LinearDimension("100%")
+                    }
+                    attrs.alignItems = MListItemAlignItems.flexStart
+                    attrs.button = true
+                    attrs.divider = true
+                    attrs.onMouseDown = {
+                        handleListItemPress(entry)
+                    }
+                    attrs.onMouseUp = {
+                        handleListItemRelease(entry)
+                    }
+                    renderListItem(entry)
+                }
+            }
+        }
     }
 
 
@@ -240,7 +309,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
 
     private fun RBuilder.renderFilters(){
         if(listFilterOptionChips == null) return
-        styledDiv {
+        umItem(MGridSize.cells12) {
             css{
                 margin = "16px"
             }
@@ -328,8 +397,8 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
         //Save result to back stack here
     }
 
-    override fun onFabClicked(event: Event) {
-        super.onFabClicked(event)
+    override fun onFabClicked() {
+        super.onFabClicked()
         listPresenter?.handleClickCreateNewFab()
     }
 
@@ -345,5 +414,16 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                 SelectionOption.MOVE to "drive_file_move",
                 SelectionOption.HIDE to "visibility",
                 SelectionOption.UNHIDE to "visibility_of")
+
+        /**
+         * List type on which list item cover the entire row
+         */
+        const val LIST_TYPE_SINGLE_COLUMN = 1
+
+        /**
+         * List type on which list item cover
+         * just a fraction of space and it might have two or more columns
+         */
+        const val LIST_TYPE_MULTI_COLUMN = 2
     }
 }
