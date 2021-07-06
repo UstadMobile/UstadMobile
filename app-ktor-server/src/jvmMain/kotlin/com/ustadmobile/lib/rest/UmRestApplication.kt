@@ -20,13 +20,11 @@ import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.io.UploadSessionManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
-import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
-import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.rest.ext.*
 import com.ustadmobile.lib.rest.messaging.MailProperties
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
@@ -47,27 +45,18 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.request.header
 import io.ktor.routing.Routing
-import okhttp3.Dispatcher
-import okhttp3.OkHttpClient
 import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
-import org.quartz.Job
-import org.quartz.JobExecutionContext
 import org.quartz.Scheduler
-import org.quartz.SchedulerFactory
-import org.quartz.impl.StdScheduler
 import org.quartz.impl.StdSchedulerFactory
 import java.io.File
 import java.nio.file.Files
 import java.util.*
-import java.util.concurrent.TimeUnit
 import javax.naming.InitialContext
-import io.ktor.client.features.json.JsonFeature
 import io.ktor.http.content.*
 import jakarta.mail.Authenticator
 import jakarta.mail.PasswordAuthentication
 import org.xmlpull.v1.XmlPullParserFactory
-import javax.sql.DataSource
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 
 const val TAG_UPLOAD_DIR = 10
@@ -201,8 +190,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
             ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm(),
                     XapiTypePluginCommonJvm(), VideoTypePluginJvm(),
-                    H5PTypePluginCommonJvm()), ContainerImportJob.SERVER_IMPORT_MODE,
-                    Any(), context, di)
+                    H5PTypePluginCommonJvm()), Any(),
+                    context, di)
         }
 
         bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {

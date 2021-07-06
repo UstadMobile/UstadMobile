@@ -352,7 +352,7 @@
     <string name="licence_type_cc_by">CC BY</string>
     <!--
     The Creative Commons CC BY SA license as per https://creativecommons.org/licenses/by-sa/4.0/
-    Please see the bottom of the link for some of the official translations available for this title.
+        Please see the bottom of the link for some of the official translations available for this title.
     -->
     <string name="licence_type_cc_by_sa">CC BY SA</string>
 

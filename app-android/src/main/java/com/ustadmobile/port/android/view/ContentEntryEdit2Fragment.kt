@@ -1,11 +1,9 @@
 package com.ustadmobile.port.android.view
 
-import android.app.AlertDialog
 import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
@@ -30,34 +28,31 @@ import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.util.IdOption
-import com.ustadmobile.core.util.ext.observeResult
-import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.util.ext.*
+import com.ustadmobile.port.android.view.ContentEntryAddOptionsBottomSheetFragment.Companion.ARG_SHOW_ADD_FOLDER
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.io.File
 
 
 interface ContentEntryEdit2FragmentEventHandler {
 
-    fun onClickContentImportSourceSelection()
+    fun onClickUpdateContent()
 
     fun handleClickLanguage()
 
-    fun handleToggleCompress(checked: Boolean)
-
 }
 
-class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = null)
-    : UstadEditFragment<ContentEntryWithLanguage>(), ContentEntryEdit2View,
-        ContentEntryEdit2FragmentEventHandler, DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption> {
+class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(),
+        ContentEntryEdit2View, ContentEntryEdit2FragmentEventHandler, DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption> {
 
     private var mBinding: FragmentContentEntryEdit2Binding? = null
 
@@ -77,8 +72,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
     private var playbackPosition: Long = 0
 
     private var webView: WebView?  = null
-
-    var activityResultLauncher: ActivityResultLauncher<String>? = null
 
     override var entity: ContentEntryWithLanguage? = null
         get() = field
@@ -210,69 +203,17 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             field = value
         }
 
-    override fun onClickContentImportSourceSelection() {
+    override fun onClickUpdateContent() {
         onSaveStateToBackStackStateHandle()
-        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
-        builder.setItems(R.array.content_source_option) { dialog, which ->
-            when (which) {
-                0 -> handleFileSelection()
-                1 -> handleLinkSelection()
-            }
-            dialog.dismiss()
-        }
-        builder.show()
-
-    }
-
-    override fun handleToggleCompress(checked: Boolean) {
-        compressionEnabled = checked
-    }
-
-    /**
-     * removes the temp folder from being deleted in the backstack
-     */
-    private fun unregisterFileFromTemp() {
-        if (entryMetaData?.uri?.startsWith("file://") == true) {
-            findNavController().unregisterDestinationTempFile(requireContext(), File(entryMetaData?.uri?.removePrefix("file://")).parentFile)
-        }
-    }
-
-
-    internal fun handleFileSelection() {
-            activityResultLauncher?.launch("*/*")
-            //.launch("*/*")
+        val entryAddOption = ContentEntryAddOptionsBottomSheetFragment(mPresenter)
+        val argsMap = mutableMapOf(ARG_SHOW_ADD_FOLDER to false.toString())
+        entryAddOption.arguments = argsMap.toBundle()
+        entryAddOption.show(childFragmentManager, entryAddOption.tag)
     }
 
     override fun handleClickLanguage() {
         onSaveStateToBackStackStateHandle()
         navigateToPickEntityFromList(Language::class.java, R.id.language_list_dest)
-    }
-
-    private fun handleLinkSelection() {
-        onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(ImportedContentEntryMetaData::class.java, R.id.import_link_view)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        activityResultLauncher = registerForActivityResult(ActivityResultContracts.GetContent(),
-            registry ?: requireActivity().activityResultRegistry) { uri: Uri? ->
-            if (uri != null) {
-                try {
-                    loading = true
-                    fieldsEnabled = false
-                    GlobalScope.launch {
-                        mPresenter?.handleFileSelection(uri.toString())
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    loading = false
-                    fieldsEnabled = true
-                }
-            }
-
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -322,21 +263,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             entity?.primaryLanguageUid = language.langUid
         }
 
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                ImportedContentEntryMetaData::class.java) {
-            val metadata = it.firstOrNull() ?: return@observeResult
-            loading = true
-            // back from navigate import
-            entryMetaData = metadata
-            val entry = entryMetaData?.contentEntry
-            val entryUid = arguments?.get(ARG_ENTITY_UID)
-            if (entry != null) {
-                if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
-                fileImportErrorVisible = false
-                entity = entry
-            }
-            loading = false
-        }
         viewLifecycleOwner.lifecycle.addObserver(viewLifecycleObserver)
 
     }
@@ -346,15 +272,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         playerView?.player = player
         player?.playWhenReady = playWhenReady
         player?.seekTo(currentWindow, playbackPosition)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.menu_done) {
-            if (entity?.let { mPresenter?.isImportValid(it) } == true) {
-                unregisterFileFromTemp()
-            }
-        }
-        return super.onOptionsItemSelected(item)
     }
 
     override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {

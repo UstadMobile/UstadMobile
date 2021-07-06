@@ -1,13 +1,12 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzDetailBinding
 import com.ustadmobile.core.controller.ClazzDetailPresenter
@@ -15,6 +14,7 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.port.android.view.ext.createTabLayoutStrategy
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 
 
@@ -30,6 +30,8 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
     private var mPagerAdapter: ViewNameListFragmentPagerAdapter? = null
 
+    private var mediator: TabLayoutMediator? = null
+
     override var tabs: List<String>? = null
         set(value) {
             if(field == value)
@@ -41,18 +43,16 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
                 return
 
             field = value
-            mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager,
-                    BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, value, viewNameToFragmentMap,
-                    viewNameToTitleMap.map { it.key to requireContext().getString(it.value) }.toMap())
-            Handler().post {
-                mBinding.also {
-                    if(it == null)
-                        return@also
+            mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager, lifecycle,
+                    value, VIEWNAME_TO_FRAGMENT_MAP)
 
-                    it.fragmentClazzDetailViewpager.adapter = mPagerAdapter
-                    it.fragmentClazzTabs.tabs.setupWithViewPager(it.fragmentClazzDetailViewpager)
-                }
-            }
+            val pager = mBinding?.fragmentClazzDetailViewpager ?: return
+            val tabList = mBinding?.fragmentClazzTabs?.tabs ?: return
+
+            pager.adapter = mPagerAdapter
+
+            mediator = TabLayoutMediator(tabList, pager, VIEWNAME_TO_TITLE_MAP.createTabLayoutStrategy(value, requireContext()))
+            mediator?.attach()
         }
 
     override val detailPresenter: UstadDetailPresenter<*, *>?
@@ -83,6 +83,8 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
     override fun onDestroyView() {
         super.onDestroyView()
+        mediator?.detach()
+        mediator = null
         mBinding?.fragmentClazzDetailViewpager?.adapter = null
         mPagerAdapter = null
         mBinding = null
@@ -99,7 +101,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
         }
 
     companion object {
-        val viewNameToFragmentMap = mapOf<String, Class<out Fragment>>(
+        val VIEWNAME_TO_FRAGMENT_MAP = mapOf<String, Class<out Fragment>>(
                 ClazzDetailOverviewView.VIEW_NAME to ClazzDetailOverviewFragment::class.java,
                 ContentEntryList2View.VIEW_NAME to ContentEntryList2Fragment::class.java,
                 ClazzMemberListView.VIEW_NAME to ClazzMemberListFragment::class.java,
@@ -108,7 +110,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
         )
 
-        val viewNameToTitleMap = mapOf(
+        val VIEWNAME_TO_TITLE_MAP = mapOf(
                 ClazzDetailOverviewView.VIEW_NAME to R.string.overview,
                 ContentEntryList2View.VIEW_NAME to R.string.content,
                 ClazzMemberListView.VIEW_NAME to R.string.members,

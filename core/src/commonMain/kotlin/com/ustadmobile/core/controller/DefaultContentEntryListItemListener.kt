@@ -43,6 +43,9 @@ class DefaultContentEntryListItemListener(var view: ContentEntryList2View? = nul
     }
 
     override fun onClickSelectContentEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
+
+        presenter?.handleMoveWithSelectedEntry(entry)
+
         view?.finishWithResult(listOf(entry))
     }
 

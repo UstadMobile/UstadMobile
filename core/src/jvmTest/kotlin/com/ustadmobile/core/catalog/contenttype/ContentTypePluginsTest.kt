@@ -8,7 +8,6 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.util.randomUuid
-import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import io.ktor.client.*
 import kotlinx.coroutines.runBlocking
@@ -49,7 +48,7 @@ class ContentTypePluginsTest {
             import(ustadTestRule.diModule)
             bind<ContentImportManager>() with scoped(ustadTestRule.endpointScope!!).singleton {
                 ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm()),
-                    ContainerImportJob.CLIENT_IMPORT_MODE, context, this.context, di)
+                        context, this.context, di)
             }
         }
 

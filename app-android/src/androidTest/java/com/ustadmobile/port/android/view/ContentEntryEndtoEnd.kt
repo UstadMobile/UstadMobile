@@ -102,17 +102,16 @@ class ContentEntryEndtoEnd : TestCase() {
                     }
                 }
 
-                KView {
-                    withId(R.id.menu_done)
-                } perform {
-                    click()
-                }
+            }
 
+            MainScreen {
+                menuDone.click()
             }
 
             // go back to the previous screen and check the title got changed
             ContentEntryListScreen{
 
+                pressBack()
                 pressBack()
 
                 recycler{
