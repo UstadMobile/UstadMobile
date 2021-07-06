@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager.widget.ViewPager
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzWorkDetailBinding
@@ -26,7 +27,7 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
 
     private var mPresenter: ClazzWorkDetailPresenter? = null
 
-    private var mPager: ViewPager? = null
+    private var mPager: ViewPager2? = null
 
     private var mTabLayout: TabLayout? = null
 
@@ -111,14 +112,13 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
                 ClazzWorkDetailProgressListView.VIEW_NAME to getText(R.string.student_progress).toString()
         )
 
-        mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager,
-                FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, tabs,
-                VIEW_NAME_TO_FRAGMENT_CLASS, viewNameToTitle)
-
-        Handler().post {
-            mPager?.adapter = mPagerAdapter
-            mTabLayout?.setupWithViewPager(mPager)
-        }
+//        mPagerAdapter = ViewNameListFragmentPagerAdapter(requireActivity(), tabs,
+//                VIEW_NAME_TO_FRAGMENT_CLASS, viewNameToTitle)
+//
+//        Handler().post {
+//            mPager?.adapter = mPagerAdapter
+//            mTabLayout?.setupWithViewPager(mPager)
+//        }
     }
 
     override var progressOverviewVisible: Boolean = true
