@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.widget.ViewPager2
@@ -22,8 +21,8 @@ import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 
 class ContentEntryListTabsFragment : UstadBaseFragment(), ContentEntryListTabsView {
 
-    private inner class ContentEntryTabsPagerAdapter(fa: FragmentManager, viewList: List<String>, lifecycle: Lifecycle): ViewNameListFragmentPagerAdapter(fa,
-            viewList, mapOf(ContentEntryList2View.VIEW_NAME to ContentEntryList2Fragment::class.java), lifecycle = lifecycle) {
+    private inner class ContentEntryTabsPagerAdapter(fa: FragmentManager, lifecycle: Lifecycle, viewList: List<String>): ViewNameListFragmentPagerAdapter(fa,
+            lifecycle, viewList, mapOf(ContentEntryList2View.VIEW_NAME to ContentEntryList2Fragment::class.java)) {
 
     }
 
@@ -50,7 +49,7 @@ class ContentEntryListTabsFragment : UstadBaseFragment(), ContentEntryListTabsVi
                 "${arguments?.get(ARG_PARENT_ENTRY_UID).toString()}&$ARG_DISPLAY_CONTENT_BY_OPTION="
 
         mPager.adapter = ContentEntryTabsPagerAdapter(childFragmentManager,
-            listOf("$defArgs$ARG_DISPLAY_CONTENT_BY_PARENT", "$defArgs$ARG_DISPLAY_CONTENT_BY_DOWNLOADED"), lifecycle = lifecycle)
+                lifecycle, listOf("$defArgs$ARG_DISPLAY_CONTENT_BY_PARENT", "$defArgs$ARG_DISPLAY_CONTENT_BY_DOWNLOADED"))
         val titleList = listOf(getString(R.string.libraries), getString(R.string.downloaded))
 
         mediator = TabLayoutMediator(mTabLayout, mPager) { tab, position ->

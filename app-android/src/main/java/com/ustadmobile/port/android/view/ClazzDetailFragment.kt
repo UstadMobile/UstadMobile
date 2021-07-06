@@ -43,15 +43,15 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
                 return
 
             field = value
-            mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager, value,
-                    viewNameToFragmentMap, lifecycle = lifecycle)
+            mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager, lifecycle,
+                    value, VIEWNAME_TO_FRAGMENT_MAP)
 
             val pager = mBinding?.fragmentClazzDetailViewpager ?: return
             val tabList = mBinding?.fragmentClazzTabs?.tabs ?: return
 
             pager.adapter = mPagerAdapter
 
-            mediator = TabLayoutMediator(tabList, pager, viewNameToTitleMap.createTabLayoutStrategy(value, requireContext()))
+            mediator = TabLayoutMediator(tabList, pager, VIEWNAME_TO_TITLE_MAP.createTabLayoutStrategy(value, requireContext()))
             mediator?.attach()
         }
 
@@ -101,7 +101,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
         }
 
     companion object {
-        val viewNameToFragmentMap = mapOf<String, Class<out Fragment>>(
+        val VIEWNAME_TO_FRAGMENT_MAP = mapOf<String, Class<out Fragment>>(
                 ClazzDetailOverviewView.VIEW_NAME to ClazzDetailOverviewFragment::class.java,
                 ContentEntryList2View.VIEW_NAME to ContentEntryList2Fragment::class.java,
                 ClazzMemberListView.VIEW_NAME to ClazzMemberListFragment::class.java,
@@ -110,7 +110,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
         )
 
-        val viewNameToTitleMap = mapOf(
+        val VIEWNAME_TO_TITLE_MAP = mapOf(
                 ClazzDetailOverviewView.VIEW_NAME to R.string.overview,
                 ContentEntryList2View.VIEW_NAME to R.string.content,
                 ClazzMemberListView.VIEW_NAME to R.string.members,

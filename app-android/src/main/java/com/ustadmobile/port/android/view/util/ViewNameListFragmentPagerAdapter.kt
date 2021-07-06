@@ -2,7 +2,6 @@ package com.ustadmobile.port.android.view.util
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -28,10 +27,10 @@ private fun makeBundleFromArgs(viewUri: String, index: Int): Bundle {
  * However if all views have the same arguments you can just provide a single premade bundle.
  */
 open class ViewNameListFragmentPagerAdapter(fm: FragmentManager,
+                                            lifecycle: Lifecycle,
                                             val viewList: List<String>,
                                             val viewNameToFragmentClassMap: Map<String, Class<out Fragment>>,
-                                            val bundleMakerFn: (viewUri: String, index: Int) -> Bundle = ::makeBundleFromArgs,
-                                            lifecycle: Lifecycle) : FragmentStateAdapter(fm, lifecycle) {
+                                            val bundleMakerFn: (viewUri: String, index: Int) -> Bundle = ::makeBundleFromArgs) : FragmentStateAdapter(fm, lifecycle) {
 
     override fun createFragment(position: Int): Fragment {
         val viewName = viewList[position].substringBefore('?')
