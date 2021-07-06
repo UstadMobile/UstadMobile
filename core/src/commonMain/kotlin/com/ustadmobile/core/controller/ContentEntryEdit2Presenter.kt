@@ -106,7 +106,7 @@ class ContentEntryEdit2Presenter(context: Any,
             }
             if (metaData != null) {
                 val importedMetadata = safeParse(di, ImportedContentEntryMetaData.serializer(), metaData)
-                view.fileImportErrorVisible = false
+                view.entryMetaData = importedMetadata
                 return importedMetadata.contentEntry
             }
         }

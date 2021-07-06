@@ -34,7 +34,7 @@ class SelectFileFragment(private val registry: ActivityResultRegistry? = null) :
                 it == null -> {
                     findNavController().popBackStack()
                 }
-                arguments?.containsKey(UstadView.ARG_RESULT_DEST_ID) == true -> {
+                arguments?.containsKey(UstadView.ARG_RESULT_DEST_KEY) == true -> {
                     saveResultToBackStackSavedStateHandle(listOf(it.toString()))
                 }
                 else -> {

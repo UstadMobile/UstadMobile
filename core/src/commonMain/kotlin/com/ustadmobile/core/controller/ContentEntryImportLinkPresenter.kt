@@ -3,7 +3,6 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.util.UMFileUtil
@@ -11,21 +10,15 @@ import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryImportLinkView
-import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
-import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_ID
-import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
+import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.ContentEntry
 import io.ktor.client.*
-import io.ktor.client.call.receive
+import io.ktor.client.call.*
 import io.ktor.client.features.*
-import io.ktor.client.request.parameter
-import io.ktor.client.request.post
-import io.ktor.client.request.url
-import io.ktor.client.statement.HttpStatement
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -63,7 +56,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                     val data = it.receive<ImportedContentEntryMetaData>()
                     view.showHideProgress(true)
 
-                    if (arguments.containsKey(ARG_RESULT_DEST_ID)) {
+                    if (arguments.containsKey(ARG_RESULT_DEST_KEY)) {
                         view.finishWithResult(data)
                     } else {
                         val args = mutableMapOf<String, String>()
