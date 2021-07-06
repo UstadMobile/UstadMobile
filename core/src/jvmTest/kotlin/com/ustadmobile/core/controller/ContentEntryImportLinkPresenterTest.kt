@@ -65,7 +65,7 @@ class ContentEntryImportLinkPresenterTest {
         }
 
 
-        presenter = ContentEntryImportLinkPresenter(context, mapOf(UstadView.ARG_RESULT_DEST_ID to ""), mockView, di)
+        presenter = ContentEntryImportLinkPresenter(context, mapOf(UstadView.ARG_RESULT_DEST_KEY to ""), mockView, di)
 
 
 
