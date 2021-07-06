@@ -68,24 +68,35 @@ fun RBuilder.umItem(xs: MGridSize, sm: MGridSize? = null, lg: MGridSize? = null,
     }
 }
 
-fun RBuilder.umEntityAvatar (src: String? = null, fallbackSrc: String? = "assets/account.jpg",
-                             iconName: String = "add_a_photo", imgProps: RProps? = null,
+fun RBuilder.umEntityAvatar (src: String? = null,
+                             fallbackSrc: String? = "assets/account.jpg",
+                             iconName: String = "add_a_photo",
+                             imgProps: RProps? = null,
                              variant: MAvatarVariant = MAvatarVariant.rounded,
                              showIcon: Boolean = true,
+                             listItem: Boolean = false,
                              className: String? = "${StyleManager.name}-entityImageClass",
-                             clickEvent:(Event) -> Unit = {  }){
+                             clickEvent:((Event) -> Unit)? = null){
 
     styledDiv {
-        css(entryItemImageContainer)
+        css{
+            +entryItemImageContainer
+            if(!listItem){
+                margin = "1.5%"
+            }
+        }
         mAvatar(src = if(src.isNullOrEmpty()) fallbackSrc else src,
             variant = variant, imgProps = imgProps, className = className) {
             styledSpan{
                 css{
                     position = Position.absolute
                     cursor = Cursor.pointer
-                    padding = "20px"
+                    //padding = "20px"
                 }
-                attrs.onClickFunction = clickEvent
+                if(clickEvent != null){
+                    attrs.onClickFunction = clickEvent
+                }
+
                 if(showIcon){
                     mIcon(iconName, className = "${StyleManager.name}-entityImageIconClass")
                 }

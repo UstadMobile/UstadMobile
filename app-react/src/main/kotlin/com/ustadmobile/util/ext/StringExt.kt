@@ -1,12 +1,15 @@
 package com.ustadmobile.util.ext
 
+import kotlin.text.toCharArray
+
 fun String.format(vararg args: Any): String{
     var placeHolder = this
-    this.match("\\d+")?.forEachIndexed { index, arg ->
+    this.filter { it == "%".toCharArray().first() }.forEachIndexed { index, _ ->
         val replaceTo = if(args.isNotEmpty() && args.size >= index) args[index].toString() else null
-        val replaceFromPrefix = """%$arg${"$"}"""
+        val replaceFromPrefix = """%${index + 1}${"$"}"""
         if(replaceTo != null){
-            placeHolder = placeHolder.replace("${replaceFromPrefix}d",replaceTo)
+            placeHolder = placeHolder
+                .replace("${replaceFromPrefix}d",replaceTo)
                 .replace("${replaceFromPrefix}s",replaceTo)
         }
     }

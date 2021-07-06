@@ -22,7 +22,7 @@ import styled.StyleSheet
  */
 object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
-    private val theme = ReduxAppStateManager.getCurrentState().appTheme?.theme!!
+    val theme = ReduxAppStateManager.getCurrentState().appTheme?.theme!!
 
     private val systemImpl : UstadMobileSystemImpl by instance()
 
@@ -363,7 +363,6 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
     val entryItemImageContainer by css {
         width = LinearDimension("100%")
-        margin = "1.5%"
         textAlign = TextAlign.center
     }
 
@@ -432,6 +431,11 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         minHeight = LinearDimension("100%")
         height = LinearDimension("100%")
         backgroundColor = Color.transparent
+    }
+
+    val clazzItemClass by css {
+        height = 200.px
+        width = LinearDimension("100%")
     }
 
     override val di: DI

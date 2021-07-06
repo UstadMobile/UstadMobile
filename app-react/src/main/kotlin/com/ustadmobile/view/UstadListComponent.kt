@@ -24,6 +24,7 @@ import com.ustadmobile.util.StyleManager.listComponentContainer
 import com.ustadmobile.util.StyleManager.listCreateNewContainer
 import com.ustadmobile.util.StyleManager.listItemCreateNewDiv
 import com.ustadmobile.util.StyleManager.selectionContainer
+import com.ustadmobile.util.StyleManager.theme
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
@@ -156,7 +157,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
 
     override fun RBuilder.render() {
         val singleColumnList = listType == LIST_TYPE_SINGLE_COLUMN
-        umGridContainer {
+        styledDiv {
             css{
                 if(singleColumnList){
                     +listComponentContainer
@@ -195,19 +196,22 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                     listItems.forEach {entry->
                         umItem(MGridSize.cells12, multiColumnItemSize){
                             css{
+                                cursor = Cursor.pointer
                                 backgroundColor = Color(if(selectedEntries.indexOf(entry) != -1)
-                                    umTheme.theme!!.palette.action.selected
-                                else umTheme.theme!!.palette.background.paper)
+                                    theme.palette.action.selected
+                                else theme.palette.background.default)
                             }
+                            mPaper(elevation = 4) {
+                                styledDiv {
+                                    renderListItem(entry)
+                                }
 
-                            attrs.asDynamic().onMouseDown = {
-                                handleListItemPress(entry)
-                            }
-                            attrs.asDynamic().onMouseUp = {
-                                handleListItemRelease(entry)
-                            }
-                            mPaper(elevation = 2) {
-                                renderListItem(entry)
+                                attrs.onMouseDown = {
+                                    handleListItemPress(entry)
+                                }
+                                attrs.onMouseUp = {
+                                    handleListItemRelease(entry)
+                                }
                             }
                         }
                     }

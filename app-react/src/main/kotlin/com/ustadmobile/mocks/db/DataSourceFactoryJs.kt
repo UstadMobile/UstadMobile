@@ -1,10 +1,14 @@
 package com.ustadmobile.mocks.db
 
 import androidx.paging.DataSource
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.lib.db.entities.EntityRoleWithNameAndRole
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
+import com.ustadmobile.mocks.db.ClazzDaoJs.Companion.CLAZZ_LIST
 import com.ustadmobile.util.Util.loadDataAsList
 import kotlinx.serialization.DeserializationStrategy
+import kotlin.js.Date
 
 class DataSourceFactoryJs<Key,Value, EXtra>(private val key:String? = null,
                                             private val filterBy: Any,
@@ -35,6 +39,10 @@ class DataSourceFactoryJs<Key,Value, EXtra>(private val key:String? = null,
             } as Value)
         }
 
+        if(sourcePath == "clazzList"){
+            return CLAZZ_LIST as List<Value>
+        }
+
         if(key != null && dataSet.isNotEmpty()){
             dataSet = dataSet.filter{it.asDynamic()[key].toString() == filterBy.toString()}
         }
@@ -53,4 +61,5 @@ class DataSourceFactoryJs<Key,Value, EXtra>(private val key:String? = null,
         }
         return dataSet
     }
+
 }

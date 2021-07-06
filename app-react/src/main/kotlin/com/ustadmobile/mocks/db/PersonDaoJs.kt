@@ -9,19 +9,7 @@ import com.ustadmobile.mocks.db.DatabaseJs.Companion.ALLOW_ACCESS
 import kotlinx.serialization.builtins.ListSerializer
 
 class PersonDaoJs: PersonDao() {
-
-    private var person: PersonWithAccount? = PersonWithAccount().apply {
-        username = "admin"
-        firstNames = "Admin"
-        admin = true
-        emailAddr = "admin@admin.com"
-        phoneNum = "+255 71242 5886"
-        personAddress = "Miyuji Proper, Dodoma"
-        dateOfBirth = 706563066000
-        lastName = "Users"
-        gender = 2
-    }
-
+    
     private val mPath: String = "people"
 
     override suspend fun insertListAsync(entityList: List<Person>) {
@@ -52,7 +40,7 @@ class PersonDaoJs: PersonDao() {
         mUsername: String,
         passwordHash: String
     ): Person? {
-        return person?.apply {
+        return PERSON_LIST.first().apply {
             username = mUsername
         }
     }
@@ -70,33 +58,33 @@ class PersonDaoJs: PersonDao() {
     }
 
     override suspend fun personIsAdmin(accountPersonUid: Long): Boolean {
-        return person?.admin == true
+        return PERSON_LIST.first().admin
     }
 
     override fun findByUsername(username: String?): Person? {
-        return person
+        return PERSON_LIST.first()
     }
 
     override suspend fun findByUid(uid: Long): Person? {
-        return person?.apply {
+        return PERSON_LIST.first().apply {
             personUid = uid
         }
     }
 
     override suspend fun findPersonAccountByUid(uid: Long): PersonWithAccount? {
-        return person?.apply {
+        return PERSON_LIST.first().apply {
             personUid = uid
         }
     }
 
     override fun findByUidLive(uid: Long): DoorLiveData<Person?> {
-        return DoorLiveDataJs(person?.apply {
+        return DoorLiveDataJs(PERSON_LIST.first().apply {
             personUid = uid
         })
     }
 
     override suspend fun findByUidAsync(uid: Long): Person? {
-        return person?.apply {
+        return PERSON_LIST.first().apply {
             personUid = uid
         }
     }
@@ -143,7 +131,7 @@ class PersonDaoJs: PersonDao() {
         mPersonUid: Long,
         activeUserPersonUid: Long
     ): DoorLiveData<PersonWithPersonParentJoin?> {
-        return DoorLiveDataJs(person?.apply {
+        return DoorLiveDataJs(PERSON_LIST.first().apply {
             personUid = mPersonUid
         }) as DoorLiveData<PersonWithPersonParentJoin?>
     }
@@ -153,7 +141,7 @@ class PersonDaoJs: PersonDao() {
     }
 
     override fun getAllPerson(): List<Person> {
-        return listOf(person!!)
+        return PERSON_LIST
     }
 
     override fun insert(entity: Person): Long {
@@ -174,5 +162,21 @@ class PersonDaoJs: PersonDao() {
 
     override fun update(entity: Person) {
         TODO("Not yet implemented")
+    }
+    
+    companion object {
+        val PERSON_LIST = listOf(
+            PersonWithAccount().apply {
+                username = "admin"
+                firstNames = "Admin"
+                admin = true
+                emailAddr = "admin@admin.com"
+                phoneNum = "+255 71242 5886"
+                personAddress = "Miyuji Proper, Dodoma"
+                dateOfBirth = 706563066000
+                lastName = "Users"
+                gender = 2
+            }
+        )
     }
 }

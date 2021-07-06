@@ -21,7 +21,7 @@ class DatabaseJs: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val personDao: PersonDao
         get() = PersonDaoJs()
     override val clazzDao: ClazzDao
-        get() = TODO("Not yet implemented")
+        get() = ClazzDaoJs()
     override val clazzEnrolmentDao: ClazzEnrolmentDao
         get() = TODO("Not yet implemented")
     override val leavingReasonDao: LeavingReasonDao
@@ -55,7 +55,7 @@ class DatabaseJs: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val personGroupDao: PersonGroupDao
         get() = TODO("Not yet implemented")
     override val personGroupMemberDao: PersonGroupMemberDao
-        get() = TODO("Not yet implemented")
+        get() = PersonGroupMemberDaoJs()
     override val entityRoleDao: EntityRoleDao
         get() = EntityRoleDaoJs()
     override val personPictureDao: PersonPictureDao
