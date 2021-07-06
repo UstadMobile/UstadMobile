@@ -85,7 +85,6 @@
 
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:layout_marginStart="@dimen/dimen_5dp"
             tools:text="20/12/2021"
             android:id="@+id/item_clazz_assignment_deadline_icon"
             android:tint="?colorOnIconTint"
@@ -141,7 +140,6 @@
 
 
         <TextView
-            android:paddingStart="@dimen/dimen_8dp"
             android:id="@+id/line3_progress_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

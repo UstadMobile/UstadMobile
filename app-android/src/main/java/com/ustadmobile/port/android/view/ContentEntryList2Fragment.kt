@@ -46,6 +46,11 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 
     private var localAvailabilityCallback: ContentEntryLocalAvailabilityPagedListCallback? = null
 
+    override fun showDownloadDialog(args: Map<String, String>) {
+        val systemImpl : UstadMobileSystemImpl = di.direct.instance()
+        systemImpl.go(DownloadDialogView.VIEW_NAME, args, requireContext())
+    }
+
     override var title: String? = null
         set(value) {
             ustadFragmentTitle = value
@@ -84,8 +89,6 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                 requireContext().getString(R.string.add_new_content), onClickSort = this,
                 sortOrderOption = mPresenter?.sortOptions?.get(0))
 
-        val navController = findNavController()
-
         localAvailabilityCallback = ContentEntryLocalAvailabilityPagedListCallback(localAvailabilityManager,
                 null) {availabilityMap ->
             GlobalScope.launch(Dispatchers.Main) {
@@ -94,13 +97,6 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         }
 
         setHasOptionsMenu(true)
-
-      /*  navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
-            ContentEntry::class.java, SAVEDSTATE_KEY_FOLDER) {
-            val selectedParentChildJoinUids = navController.currentBackStackEntry?.savedStateHandle
-                    ?.get<String>(KEY_SELECTED_ITEMS)?.split(",")?.map { it.trim().toLong() } ?: return@observeResult
-            mPresenter?.handleMoveContentEntries(selectedParentChildJoinUids, it.first().contentEntryUid )
-        }*/
 
         super.onViewCreated(view, savedInstanceState)
     }
