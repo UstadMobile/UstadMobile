@@ -1,17 +1,17 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.util.test.ext.insertVideoContent
 import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import kotlinx.coroutines.runBlocking
@@ -31,9 +31,6 @@ class VideoContentPresenterTest {
 
     lateinit var accountManager: UstadAccountManager
 
-    val account = UmAccount(42, "username", "fefe1010fe",
-            "http://localhost/")
-
     lateinit var di: DI
 
     private var context: Any = Any()
@@ -44,8 +41,6 @@ class VideoContentPresenterTest {
 
     var container: Container? = null
 
-    private lateinit var endpoint: Endpoint
-
     var selectedClazzUid = 10001L
 
     @JvmField
@@ -54,16 +49,14 @@ class VideoContentPresenterTest {
 
     @Before
     fun setup() {
-        val endpointUrl = account.endpointUrl!!
-        endpoint = Endpoint(endpointUrl)
-
         mockEndpoint = mock {}
+        val endpointScope = EndpointScope()
         di = DI {
             import(ustadTestRule.diModule)
-            bind<XapiStatementEndpoint>() with singleton { mockEndpoint }
+            bind<XapiStatementEndpoint>() with scoped(endpointScope).singleton {
+                mockEndpoint
+            }
         }
-
-        di.direct.instance<UstadAccountManager>().activeAccount = account
 
         mockView = mock{
             on { runOnUiThread(any())}.doAnswer{
@@ -71,8 +64,8 @@ class VideoContentPresenterTest {
             }
         }
 
-        val db: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
-        val repo: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
+
+        val repo: UmAppDatabase by di.activeRepoInstance()
 
         accountManager = di.direct.instance()
         val userPerson = runBlocking {
