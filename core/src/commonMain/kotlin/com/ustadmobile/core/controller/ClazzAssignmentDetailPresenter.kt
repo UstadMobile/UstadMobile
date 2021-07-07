@@ -5,6 +5,7 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -43,8 +44,10 @@ class ClazzAssignmentDetailPresenter(context: Any,
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzAssignment? {
         val entityUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
         val entry = withContext(Dispatchers.Default) {
-            withTimeoutOrNull(2000) { db.clazzAssignmentDao.findByUidAsync(entityUid) }
-        } ?: ClazzAssignment()
+            db.onRepoWithFallbackToDb(2000) { it.clazzAssignmentDao.findByUidAsync(entityUid) }
+        } ?: ClazzAssignment().apply {
+            caUid = entityUid
+        }
 
         setupTabs(entry)
 

@@ -14,11 +14,11 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
@@ -77,7 +77,7 @@ class ClazzDetailPresenter(context: Any,
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): Clazz? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         val clazz = withContext(Dispatchers.Default) {
-            withTimeoutOrNull(2000) { db.clazzDao.findByUidAsync(entityUid) }
+            db.onRepoWithFallbackToDb(2000) { it.clazzDao.findByUidAsync(entityUid) }
         } ?: Clazz()
 
         setupTabs(clazz)

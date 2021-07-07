@@ -2,16 +2,15 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_LISTMODE
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.ListSerializer
@@ -70,12 +69,12 @@ class ClazzAssignmentEditPresenter(context: Any,
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzAssignment? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
-        val clazzAssignment = withTimeoutOrNull(2000) {
-            db.clazzAssignmentDao.findByUidAsync(entityUid)
-        } ?: ClazzAssignment()
+        val clazzAssignment = db.onRepoWithFallbackToDb(2000) {
+            it.clazzAssignmentDao.findByUidAsync(entityUid)
+        } ?: return null
 
-        val clazzWithSchool = withTimeoutOrNull(2000) {
-            db.clazzDao.getClazzWithSchool(clazzAssignment.caClazzUid)
+        val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
+            it.clazzDao.getClazzWithSchool(clazzAssignment.caClazzUid)
         } ?: ClazzWithSchool()
 
         val timeZone = clazzWithSchool.effectiveTimeZone()
@@ -83,11 +82,10 @@ class ClazzAssignmentEditPresenter(context: Any,
 
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
-        val contentList = withTimeoutOrNull(2000) {
-            db.clazzAssignmentContentJoinDao.findAllContentByClazzAssignmentUidAsync(
-                    clazzAssignment.caUid, loggedInPersonUid
-            )
-        } ?: listOf()
+        val contentList = db.onRepoWithFallbackToDb(2000) {
+            it.clazzAssignmentContentJoinDao.findAllContentByClazzAssignmentUidAsync(
+                    clazzAssignment.caUid, loggedInPersonUid)
+        }
 
         contentOneToManyJoinEditHelper.liveList.sendValue(contentList)
 
@@ -106,8 +104,8 @@ class ClazzAssignmentEditPresenter(context: Any,
         }
 
         GlobalScope.launch {
-            val clazzWithSchool = withTimeoutOrNull(2000) {
-                db.clazzDao.getClazzWithSchool(editEntity.caClazzUid)
+            val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
+                it.clazzDao.getClazzWithSchool(editEntity.caClazzUid)
             } ?: ClazzWithSchool()
 
             val timeZone = clazzWithSchool.effectiveTimeZone()
