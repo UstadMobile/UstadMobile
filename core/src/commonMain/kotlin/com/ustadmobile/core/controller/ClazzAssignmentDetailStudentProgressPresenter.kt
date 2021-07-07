@@ -6,6 +6,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
@@ -46,21 +47,21 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
             db.clazzAssignmentDao.findByUidAsync(selectedClazzAssignmentUid)
         } ?: ClazzAssignment()
 
-        view.person = withTimeoutOrNull(2000){
-            db.personDao.findByUidAsync(selectedPersonUid)
+        view.person = db.onRepoWithFallbackToDb(2000){
+            it.personDao.findByUidAsync(selectedPersonUid)
         }
 
         view.clazzAssignmentContent =
-                withTimeoutOrNull(2000) {
-                    repo.clazzAssignmentContentJoinDao.findAllContentWithAttemptsByClazzAssignmentUid(
+                db.onRepoWithFallbackToDb(2000) {
+                    it.clazzAssignmentContentJoinDao.findAllContentWithAttemptsByClazzAssignmentUid(
                             clazzAssignment.caUid, selectedPersonUid, mLoggedInPersonUid)
                 }
 
-        view.studentScore = repo.clazzAssignmentDao.getStatementScoreProgressForAssignment(
+        view.studentScore = db.clazzAssignmentDao.getStatementScoreProgressForAssignment(
                 clazzAssignment.caUid, selectedPersonUid)
 
         if(clazzAssignment.caPrivateCommentsEnabled){
-            view.clazzAssignmentPrivateComments = repo.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(
+            view.clazzAssignmentPrivateComments = db.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(
                     ClazzAssignment.TABLE_ID, clazzAssignment.caUid,
                     selectedPersonUid)
         }

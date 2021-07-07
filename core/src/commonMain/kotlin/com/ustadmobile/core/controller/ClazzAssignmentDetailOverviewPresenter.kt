@@ -6,6 +6,7 @@ import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
@@ -48,37 +49,38 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
-        val clazzAssignment = withTimeoutOrNull(2000) {
-            db.clazzAssignmentDao.findByUidAsync(entityUid)
+
+        val clazzAssignment = db.onRepoWithFallbackToDb(2000){
+            it.clazzAssignmentDao.findByUidAsync(entityUid)
         } ?: ClazzAssignment()
 
 
-        val clazzWithSchool = withTimeoutOrNull(2000) {
-            db.clazzDao.getClazzWithSchool(clazzAssignment.caClazzUid)
+        val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
+            it.clazzDao.getClazzWithSchool(clazzAssignment.caClazzUid)
         } ?: ClazzWithSchool()
 
         view.timeZone = clazzWithSchool.effectiveTimeZone()
 
         view.clazzAssignmentContent =
-                withTimeoutOrNull(2000) {
-                    repo.clazzAssignmentContentJoinDao.findAllContentByClazzAssignmentUidDF(
+                db.onRepoWithFallbackToDb(2000) {
+                    it.clazzAssignmentContentJoinDao.findAllContentByClazzAssignmentUidDF(
                             clazzAssignment.caUid, loggedInPersonUid)
                 }
 
-        val clazzEnrolment: ClazzEnrolment? = withTimeoutOrNull(2000) {
-            db.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
+        val clazzEnrolment: ClazzEnrolment? = db.onRepoWithFallbackToDb(2000) {
+            it.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
                     clazzAssignment.caClazzUid)
         }
 
         val isStudent = ClazzEnrolment.ROLE_STUDENT == clazzEnrolment?.clazzEnrolmentRole ?: 0
 
         if(isStudent){
-            view.clazzMetrics = repo.clazzAssignmentDao.getStatementScoreProgressForAssignment(
+            view.clazzMetrics = db.clazzAssignmentDao.getStatementScoreProgressForAssignment(
                     clazzAssignment.caUid, loggedInPersonUid)
         }
 
         if(isStudent && clazzAssignment.caPrivateCommentsEnabled){
-            view.clazzAssignmentPrivateComments = repo.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(
+            view.clazzAssignmentPrivateComments = db.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(
                     ClazzAssignment.TABLE_ID, clazzAssignment.caUid,
                     loggedInPersonUid)
             view.showPrivateComments = true
@@ -87,7 +89,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         }
 
         if(clazzAssignment.caClassCommentEnabled){
-            view.clazzAssignmentClazzComments = repo.commentsDao.findPublicByEntityTypeAndUidLive(
+            view.clazzAssignmentClazzComments = db.commentsDao.findPublicByEntityTypeAndUidLive(
                     ClazzAssignment.TABLE_ID, clazzAssignment.caUid)
         }
 
