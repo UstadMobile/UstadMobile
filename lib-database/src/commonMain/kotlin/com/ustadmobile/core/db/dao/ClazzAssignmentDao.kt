@@ -176,7 +176,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
     
     @Query("""
          SELECT ResultSource.personUid, ResultSource.firstNames, ResultSource.lastName,
-            COUNT(DISTINCT(ResultSource.contextRegistration)) AS attempts, 
+            COALESCE(COUNT(DISTINCT(ResultSource.contextRegistration)),0) AS attempts, 
             COALESCE(MIN(ResultSource.timestamp),0) AS startDate, 
             COALESCE(MAX(ResultSource.timestamp),0) AS endDate, 
             SUM(ResultSource.resultDuration) AS duration, 
@@ -218,26 +218,28 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
              LEFT JOIN ClazzEnrolment
              ON ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid 
                 AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+            
+             LEFT JOIN ClazzAssignment 
+             ON ClazzAssignment.caUid = :assignmentUid
+             
+             LEFT JOIN ClazzAssignmentContentJoin 
+             ON ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid 
+		                   
                           
              LEFT JOIN StatementEntity 
-             ON StatementEntity.statementPersonUid = Person.personUid 
-                
-             LEFT JOIN ClazzAssignmentContentJoin 
-             ON ClazzAssignmentContentJoin.cacjContentUid = StatementEntity.statementContentEntryUid
-		     
-             LEFT JOIN ClazzAssignment 
-             ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid   
-                    WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
-                        AND PersonGroupMember.groupMemberActive  
-                        AND ClazzAssignment.caUid = :assignmentUid
-                        AND cacjActive
-                        AND StatementEntity.timestamp
-                            BETWEEN ClazzAssignment.caStartDate
-                            AND ClazzAssignment.caGracePeriodDate            
-                        AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
-                        AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}     
-                        AND ClazzEnrolment.clazzEnrolmentActive
-          GROUP BY Person.personUid, StatementEntity.statementUid) AS ResultSource 
+             ON StatementEntity.statementPersonUid = Person.personUid  
+                AND StatementEntity.statementContentEntryUid = ClazzAssignmentContentJoin.cacjContentUid  
+                AND StatementEntity.timestamp
+                BETWEEN ClazzAssignment.caStartDate
+                AND ClazzAssignment.caGracePeriodDate    
+               
+                WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
+                AND PersonGroupMember.groupMemberActive                      
+                AND cacjActive
+                AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
+                AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}     
+                AND ClazzEnrolment.clazzEnrolmentActive
+                GROUP BY Person.personUid, StatementEntity.statementUid) AS ResultSource 
              		LEFT JOIN Comments AS cm 
                     ON cm.commentsUid = (
                                  SELECT Comments.commentsUid 
