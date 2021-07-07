@@ -100,10 +100,15 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                          AND cachePersonUid = :accountPersonUid),0) AS resultMax,
                                 
                                 
-            COALESCE((SELECT COUNT(cacheContentComplete) = COUNT(cacheContentEntryUid) 
+            COALESCE((SELECT COUNT(cacheContentComplete)
                         FROM CacheClazzAssignment
                         WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
-                          AND cachePersonUid = :accountPersonUid),'FALSE') AS contentComplete,
+                        AND cacheContentComplete
+                          AND cachePersonUid = :accountPersonUid)  =  
+                          
+                          (SELECT COUNT(DISTINCT cacheContentEntryUid) 
+                             FROM CacheClazzAssignment
+                            WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid), 'FALSE') AS contentComplete,
                           
             COALESCE((SELECT AVG(cachePenalty) 
                         FROM CacheClazzAssignment 

@@ -51,7 +51,7 @@
             android:translationX="2dp"
             android:translationY="-16dp"
             android:src="@drawable/ic_content_complete"
-            android:visibility="@{assignment.studentScore.resultMax == 0 ? View.GONE : View.VISIBLE}"
+            android:visibility="@{assignment.studentScore.contentComplete ? View.VISIBLE : View.GONE}"
             app:layout_constraintEnd_toEndOf="@id/item_clazz_assignment_newitemicon"
             app:layout_constraintTop_toBottomOf="@id/item_clazz_assignment_newitemicon" />
 
