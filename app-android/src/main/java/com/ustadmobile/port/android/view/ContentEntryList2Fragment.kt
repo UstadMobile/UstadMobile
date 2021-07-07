@@ -83,7 +83,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 
         mDataRecyclerViewAdapter = ContentEntryListRecyclerAdapter(mPresenter,
                 arguments?.toStringMap()?.determineListMode().toString(),
-                arguments?.get(ARG_SELECT_FOLDER_VISIBLE).toString().toBoolean(),
+                arguments?.get(ARG_SELECT_FOLDER_VISIBLE)?.toString()?.toBoolean(),
                 viewLifecycleOwner, di)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_new_content), onClickSort = this,
