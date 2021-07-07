@@ -103,6 +103,7 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
                 di)
         mBinding?.presenter = mPresenter
         mPresenter?.onCreate(savedInstanceState.toStringMap())
+        mBinding?.personUsername?.filters = arrayOf(PersonAccountEditFragment.USERNAME_FILTER)
         return rootView
     }
 

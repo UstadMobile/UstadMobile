@@ -48,6 +48,9 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
 
     private val httpClient: HttpClient by instance()
 
+    private val languageOptions = impl.getAllUiLanguagesList(context)
+
+
     //Removes the active account from the main list (this is normally at the top)
     private var accountListObserver : DoorObserver<List<UmAccount>> = object: DoorObserver<List<UmAccount>> {
         override fun onChanged(t: List<UmAccount>) {

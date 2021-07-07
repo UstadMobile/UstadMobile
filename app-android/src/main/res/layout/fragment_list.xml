@@ -26,10 +26,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="vertical"
+
         android:clipToPadding="false"
         android:paddingBottom="@{addMode == ListViewAddMode.FAB ? @dimen/dimen_116dp: @dimen/dimen_56dp}"
         tools:itemCount="8"
         tools:listitem="@layout/item_holiday_calendar"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
 
 </layout>
