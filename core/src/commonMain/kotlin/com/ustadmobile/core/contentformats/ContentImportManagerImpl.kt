@@ -22,8 +22,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
 
-open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>, val importMode: Int, val context: Any, val endpoint: Endpoint,
-                                    final override val di: DI) : ContentImportManager, DIAware {
+open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>, val context: Any, val endpoint: Endpoint, final override val di: DI) : ContentImportManager, DIAware {
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
 
@@ -81,7 +80,7 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
     }
 
     override suspend fun queueImportContentFromFile(uri: String, metadata: ImportedContentEntryMetaData,
-                                                    containerBaseDir: String,
+                                                    containerBaseDir: String, importMode: Int,
                                                     conversionParams: Map<String, String>): ContainerImportJob {
         return ContainerImportJob().apply {
             cijBytesSoFar = 0

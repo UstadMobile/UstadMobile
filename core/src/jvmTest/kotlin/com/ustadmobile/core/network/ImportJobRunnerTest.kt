@@ -107,7 +107,7 @@ class ImportJobRunnerTest {
             }
             bind<ContentImportManager>() with scoped(endpointScope).singleton {
                 ContentImportManagerImpl(listOf(H5PTypePluginCommonJvm(), XapiTypePluginCommonJvm()),
-                    ContainerImportJob.CLIENT_IMPORT_MODE, context, this.context, di)
+                       context, this.context, di)
             }
         }
 
