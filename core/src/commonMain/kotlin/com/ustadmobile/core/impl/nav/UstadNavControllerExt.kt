@@ -1,6 +1,5 @@
 package com.ustadmobile.core.impl.nav
 
-import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.impl.ErrorCodeException
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toQueryString
