@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
+import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
 import io.ktor.application.*
 import io.ktor.http.*
@@ -8,10 +9,6 @@ import io.ktor.routing.*
 import io.ktor.server.testing.*
 import org.junit.Test
 import org.kodein.di.ktor.DIFeature
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
-import com.ustadmobile.core.account.Pbkdf2Params
-import com.ustadmobile.core.account.RegisterRequest
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.util.DiTag
@@ -24,7 +21,6 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.serialization.json.Json
 import org.mockito.kotlin.*
 import org.xmlpull.v1.XmlPullParserFactory
-import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.clearAllTablesAndResetSync
 import com.ustadmobile.door.util.randomUuid
@@ -104,13 +100,17 @@ class PersonAuthRegisterRouteTest {
                     Pbkdf2Params()
                 }
 
+                bind<AuthManager>() with scoped(endpointScope).singleton {
+                    AuthManager(context, di)
+                }
+
                 registerContextTranslator { _: ApplicationCall ->
                     Endpoint("localhost")
                 }
             }
 
             routing {
-                PersonAuthRegisterRoute()
+                personAuthRegisterRoute()
             }
         }) {
             val di: DI by closestDI { this.application }
@@ -191,7 +191,6 @@ class PersonAuthRegisterRouteTest {
     fun givenValidCredentials_whenLoginCalled_thenShouldReturnAccount()  = withTestRegister {
         val di: DI by closestDI { application }
         val repo: UmAppDatabase by di.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
-        val db: UmAppDatabase by di.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_DB)
         val pbkdf2Params: Pbkdf2Params by di.instance()
 
         val person = runBlocking {

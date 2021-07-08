@@ -3,10 +3,7 @@ package com.ustadmobile.core.account
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.encryptWithPbkdf2
-import com.ustadmobile.core.util.ext.insertPersonAndGroup
-import com.ustadmobile.core.util.ext.toUmAccount
-import com.ustadmobile.core.util.ext.withEndpoint
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.util.safeStringify
@@ -249,7 +246,9 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
 
     private suspend fun removeActiveEndpoint(endpoint: Endpoint, commit: Boolean = true) {
         endpointsWithActiveSessions -= endpoint
-        commitActiveEndpointsToPref()
+        if(commit)
+            commitActiveEndpointsToPref()
+
         withContext(doorMainDispatcher()) {
             val repo: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
             (repo as DoorDatabaseRepository).removeSyncListener(UserSession::class,
@@ -342,37 +341,6 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
 
         activeSession = addSession(guestPerson, endpointUrl, null)
     }
-
-    suspend fun changePassword(username: String, currentPassword: String?, newPassword: String, endpointUrl: String): UmAccount = withContext(Dispatchers.Default){
-        val httpStmt = httpClient.post<HttpStatement> {
-            url("${endpointUrl.removeSuffix("/")}/password/change")
-            parameter("username", username)
-            if(currentPassword != null) {
-                parameter("currentPassword", currentPassword)
-            }
-            parameter("newPassword", newPassword)
-            expectSuccess = false
-        }
-
-        val changePasswordResponse = httpStmt.execute { response ->
-            val responseAccount = if (response.status.value == 200) {
-                response.receive<UmAccount>()
-            } else {
-                null
-            }
-            ResponseWithAccount(response.status.value, responseAccount)
-        }
-        val responseAccount = changePasswordResponse.umAccount
-        if (changePasswordResponse.statusCode == 403) {
-            throw UnauthorizedException("Access denied")
-        }else if(responseAccount == null || !(changePasswordResponse.statusCode == 200
-                        || changePasswordResponse.statusCode == 204)) {
-            throw IllegalStateException("Server error - response ${changePasswordResponse.statusCode}")
-        }
-
-        responseAccount
-    }
-
 
 
     companion object {

@@ -3,6 +3,7 @@ package com.ustadmobile.lib.rest
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import com.google.gson.Gson
+import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
@@ -11,7 +12,6 @@ import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -232,6 +232,9 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             Pbkdf2Params(numIterations, keyLength)
         }
 
+        bind<AuthManager>() with scoped(EndpointScope.Default).singleton {
+            AuthManager(context, di)
+        }
 
         try {
             appConfig.config("mail")
@@ -278,7 +281,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
     install(Routing) {
         ContainerDownload()
-        PersonAuthRegisterRoute()
+        personAuthRegisterRoute()
         ContainerMountRoute()
         ContainerUploadRoute2()
         UmAppDatabase_KtorRoute(true)
