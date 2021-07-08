@@ -39,7 +39,7 @@ import org.kodein.di.on
 
 class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
                           private val appContext: Any,
-                          val di: DI) {
+                          val di: DI) : SyncListener<UserSession> {
 
     data class ResponseWithAccount(val statusCode: Int, val umAccount: UmAccount?)
 
@@ -87,6 +87,13 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
     private val endpointsWithActiveSessions = concurrentSafeListOf<Endpoint>()
 
     init {
+        val activeUserSessionFromJson = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, appContext)?.let {
+            safeParse(di, UserSessionWithPersonAndEndpoint.serializer(), it)
+        }
+
+        _activeUserSession = atomic(activeUserSessionFromJson)
+        _activeUserSessionLive.sendValue(activeUserSessionFromJson)
+
         systemImpl.getAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION, appContext)?.also { endpointJson ->
             val endpointStrs = safeParseList(di, ListSerializer(String.serializer()), String::class,
                 endpointJson)
@@ -95,17 +102,10 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
 
             GlobalScope.launch(doorMainDispatcher()) {
                 allEndpoints.forEach {
-                    userSessionLiveDataMediator.addEndpoint(it)
+                    addActiveEndpoint(it)
                 }
             }
         }
-
-        val activeUserSessionFromJson = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, appContext)?.let {
-            safeParse(di, UserSessionWithPersonAndEndpoint.serializer(), it)
-        }
-
-        _activeUserSession = atomic(activeUserSessionFromJson)
-        _activeUserSessionLive.sendValue(activeUserSessionFromJson)
 
 
         val activeEndpointStr = systemImpl.getAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY, appContext)
@@ -154,8 +154,6 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
 
             systemImpl.setAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, activeAccountJson, appContext)
 
-            if(value != null)
-                activeEndpoint = value.endpoint
         }
 
     var activeEndpoint: Endpoint
@@ -214,11 +212,8 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
             .instance(tag = DoorTag.TAG_REPO)
 
         if(endpoint !in endpointsWithActiveSessions) {
-            endpointsWithActiveSessions += endpoint
+            addActiveEndpoint(endpoint, commit = false)
             commitActiveEndpointsToPref()
-            withContext(doorMainDispatcher()) {
-                userSessionLiveDataMediator.addEndpoint(endpoint)
-            }
         }
 
         val pbkdf2Params: Pbkdf2Params = di.direct.instance()
@@ -239,6 +234,48 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
         return UserSessionWithPersonAndEndpoint(userSession, person, endpoint)
     }
 
+    private suspend fun addActiveEndpoint(endpoint: Endpoint, commit: Boolean = true) {
+        endpointsWithActiveSessions += endpoint
+        if(commit)
+            commitActiveEndpointsToPref()
+
+        withContext(doorMainDispatcher()) {
+            val repo: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
+            (repo as DoorDatabaseRepository).addSyncListener(UserSession::class,
+                this@UstadAccountManager)
+            userSessionLiveDataMediator.addEndpoint(endpoint)
+        }
+    }
+
+    private suspend fun removeActiveEndpoint(endpoint: Endpoint, commit: Boolean = true) {
+        endpointsWithActiveSessions -= endpoint
+        commitActiveEndpointsToPref()
+        withContext(doorMainDispatcher()) {
+            val repo: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
+            (repo as DoorDatabaseRepository).removeSyncListener(UserSession::class,
+                this@UstadAccountManager)
+            userSessionLiveDataMediator.removeEndpoint(endpoint)
+        }
+    }
+
+    private fun commitActiveEndpointsToPref() {
+        val json = Json.encodeToString(ListSerializer(String.serializer()),
+            endpointsWithActiveSessions.map { it.url })
+        systemImpl.setAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION, json, appContext)
+    }
+
+    //When sync data comes in, check to see if a change has been actioned that has ended our active
+    // session
+    override fun onEntitiesReceived(evt: SyncEntitiesReceivedEvent<UserSession>) {
+        val activeSessionUpdate = evt.entitiesReceived.firstOrNull {
+            it.usUid == activeSession?.userSession?.usUid
+        }
+
+        if(activeSessionUpdate != null && activeSessionUpdate.usStatus != UserSession.STATUS_ACTIVE) {
+            activeSession = null
+        }
+    }
+
     suspend fun endSession(session: UserSessionWithPersonAndEndpoint,
                            endStatus: Int = UserSession.STATUS_LOGGED_OUT,
                            endReason: Int = UserSession.REASON_LOGGED_OUT
@@ -256,19 +293,11 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
 
 
         if(activeSessionsList { it == session.endpoint.url }.isEmpty()) {
-            endpointsWithActiveSessions -= session.endpoint
-            commitActiveEndpointsToPref()
-            withContext(doorMainDispatcher()) {
-                userSessionLiveDataMediator.removeEndpoint(session.endpoint)
-            }
+            removeActiveEndpoint(session.endpoint)
         }
     }
 
-    private fun commitActiveEndpointsToPref() {
-        val json = Json.encodeToString(ListSerializer(String.serializer()),
-            endpointsWithActiveSessions.map { it.url })
-        systemImpl.setAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION, json, appContext)
-    }
+
 
     suspend fun login(username: String, password: String, endpointUrl: String): UmAccount = withContext(Dispatchers.Default){
         val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_REPO)

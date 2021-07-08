@@ -20,8 +20,6 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_TITLE
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMediatorLiveData
-import com.ustadmobile.door.doorMainDispatcher
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -46,8 +44,8 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        endpointFilter = arguments.get(ARG_FILTER_BY_ENDPOINT)
-        activeAccountMode = arguments.get(ARG_ACTIVE_ACCOUNT_MODE) ?: ACTIVE_ACCOUNT_MODE_HEADER
+        endpointFilter = arguments[ARG_FILTER_BY_ENDPOINT]
+        activeAccountMode = arguments[ARG_ACTIVE_ACCOUNT_MODE] ?: ACTIVE_ACCOUNT_MODE_HEADER
         view.activeAccountLive = if(activeAccountMode == ACTIVE_ACCOUNT_MODE_HEADER)
             accountManager.activeUserSessionLive
         else
@@ -55,8 +53,8 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
 
         view.accountListLive = accountListMediator
 
-        accountListMediator.addSource(accountManager.activeUserSessionsLive) {
-            val newList = it.toMutableList()
+        accountListMediator.addSource(accountManager.activeUserSessionsLive) { sessionList ->
+            val newList = sessionList.toMutableList()
             if(activeAccountMode == ACTIVE_ACCOUNT_MODE_HEADER)
                 newList.removeAll { it.userSession.usUid == accountManager.activeSession?.userSession?.usUid }
 
@@ -67,9 +65,9 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
             accountListMediator.sendValue(newList)
         }
 
-        nextDest = arguments.get(ARG_NEXT) ?: impl.getAppConfigDefaultFirstDest(context)
-        view.intentMessage = arguments.get(ARG_INTENT_MESSAGE)
-        view.title = arguments.get(ARG_TITLE) ?: impl.getString(MessageID.accounts, context)
+        nextDest = arguments[ARG_NEXT] ?: impl.getAppConfigDefaultFirstDest(context)
+        view.intentMessage = arguments[ARG_INTENT_MESSAGE]
+        view.title = arguments[ARG_TITLE] ?: impl.getString(MessageID.accounts, context)
     }
 
     fun handleClickAddAccount(){
@@ -88,7 +86,7 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
     }
 
     fun handleClickDeleteSession(session: UserSessionWithPersonAndEndpoint){
-        GlobalScope.launch {
+        presenterScope.launch {
             accountManager.endSession(session)
         }
     }
@@ -103,34 +101,9 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
     }
 
     fun handleClickLogout(session: UserSessionWithPersonAndEndpoint){
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch {
             accountManager.endSession(session)
-
-            val numAccountsRemaining = accountManager.activeSessionCount()
-            val canSelectServer = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_SERVER_SELECTION,
-                context)
-
-            //Wherever the user is going now, we must wipe the backstack
-            val goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                popUpToViewName = UstadView.ROOT_DEST, popUpToInclusive = false)
-
-            when {
-                numAccountsRemaining == 0 && canSelectServer -> {
-                    impl.go(SiteEnterLinkView.VIEW_NAME, mapOf(), context, goOptions)
-                }
-
-                numAccountsRemaining == 0 && !canSelectServer -> {
-                    impl.go(Login2View.VIEW_NAME, mapOf(), context, goOptions)
-                }
-
-                numAccountsRemaining > 0 -> {
-                    impl.go(AccountListView.VIEW_NAME,
-                        mapOf(ARG_ACTIVE_ACCOUNT_MODE to AccountListView.ACTIVE_ACCOUNT_MODE_INLIST,
-                              ARG_TITLE to impl.getString(MessageID.select_account, context),
-                              UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString()),
-                        context, goOptions)
-                }
-            }
+            navigateToStartNewUserSession()
         }
     }
 

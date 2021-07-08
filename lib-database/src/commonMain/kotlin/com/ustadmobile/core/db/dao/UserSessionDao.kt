@@ -54,6 +54,14 @@ abstract class UserSessionDao {
     """)
     abstract suspend fun endSession(sessionUid: Long, newStatus: Int, reason: Int)
 
+    @Query("""
+        SELECT UserSession.*
+          FROM UserSession
+         WHERE UserSession.usUid = :sessionUid
+         LIMIT 1
+    """)
+    abstract fun findByUidLive(sessionUid: Long): DoorLiveData<UserSession?>
+
     companion object {
         const val FIND_LOCAL_SESSIONS_SQL = """
             SELECT UserSession.*, Person.*
