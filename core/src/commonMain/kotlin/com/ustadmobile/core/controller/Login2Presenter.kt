@@ -3,7 +3,6 @@ package com.ustadmobile.core.controller
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -19,10 +18,8 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Site
 import io.ktor.client.*
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -31,7 +28,7 @@ import org.kodein.di.instance
 
 class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2View,
                       di: DI)
-    : UstadBaseController<Login2View>(context, arguments, view, di) {
+    : UstadBaseController<Login2View>(context, arguments, view, di, activeSessionRequired = false) {
 
     private  lateinit var nextDestination: String
 
@@ -70,7 +67,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
             view.loading = true
             view.inProgress = true
 
-           siteLoadJob = GlobalScope.launch(doorMainDispatcher()) {
+           siteLoadJob = presenterScope.launch {
                while(workSpace == null) {
                    try {
                        val site = httpClient.verifySite(serverUrl, 10000)
@@ -115,7 +112,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         view.isEmptyPassword = password == null || password.isEmpty()
 
         if(username != null && username.isNotEmpty() && password != null && password.isNotEmpty()){
-            GlobalScope.launch(doorMainDispatcher()) {
+            presenterScope.launch {
                 try {
                     accountManager.login(username.trim(), password.trim(), serverUrl)
                     view.inProgress = false

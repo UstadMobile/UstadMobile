@@ -20,10 +20,15 @@ import kotlin.jvm.Volatile
 import kotlin.reflect.KClass
 
 abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>(
-        context: Any,
-        arguments: Map<String, String>,
-        view: V, di: DI,
-        val lifecycleOwner: DoorLifecycleOwner): UstadBaseController<V>(context, arguments, view, di) {
+    context: Any,
+    arguments: Map<String, String>,
+    view: V,
+    di: DI,
+    val lifecycleOwner: DoorLifecycleOwner,
+    activeSessionRequired: Boolean = true
+): UstadBaseController<V>(
+    context, arguments, view, di, activeSessionRequired
+) {
 
     fun interface OnLoadDataCompletedListener {
         fun onLoadDataCompleted(editPresenter: UstadSingleEntityPresenter<*, *>)
