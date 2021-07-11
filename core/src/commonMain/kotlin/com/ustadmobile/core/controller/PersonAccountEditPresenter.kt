@@ -120,7 +120,7 @@ class PersonAccountEditPresenter(context: Any,
                 if(entityUsername == null || currentPassword == null)
                     throw IllegalStateException("Should have been an error")
 
-                if(!authManager.authenticate(entityUsername, entityUsername).success) {
+                if(!authManager.authenticate(entityUsername, currentPassword).success) {
                     //current password is wrong
                     view.currentPasswordError = impl.getString(MessageID.incorrect_current_password,
                         context)

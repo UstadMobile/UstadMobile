@@ -10,6 +10,7 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_GUESTPERSON
@@ -224,7 +225,7 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
             usStartTime = systemTimeInMillis()
             usSessionType = UserSession.TYPE_STANDARD
             usStatus = UserSession.STATUS_ACTIVE
-            usAuth = password?.encryptWithPbkdf2(authSalt, pbkdf2Params)
+            usAuth = password?.encryptWithPbkdf2(authSalt, pbkdf2Params)?.toHexString()
             usUid = endpointRepo.userSessionDao.insertSession(this)
         }
 
@@ -313,6 +314,9 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
 
         if(loginResponse.status.value == 403) {
             throw UnauthorizedException("Access denied")
+        }else if(loginResponse.status == HttpStatusCode.FailedDependency) {
+            //Used to indicate where parental consent is required, but not granted
+            throw ConsentNotGrantedException("Parental consent required but not granted")
         }else if(loginResponse.status.value != 200){
             throw IllegalStateException("Server error - response ${loginResponse.status.value}")
         }

@@ -7,6 +7,10 @@ import kotlin.text.Typography.ellipsis
 
 fun String.inBrackets() = "($this)"
 
+/**
+ * To ensure consistency between JVM and Android, Base64 encoding
+ * **must** be done with NO_WRAP
+ */
 expect fun String.base64StringToByteArray(): ByteArray
 
 fun String?.toQueryLikeParam() = if(this.isNullOrEmpty()) "%" else "%$this%"

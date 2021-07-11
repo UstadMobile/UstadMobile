@@ -62,6 +62,21 @@ abstract class UserSessionDao {
     """)
     abstract fun findByUidLive(sessionUid: Long): DoorLiveData<UserSession?>
 
+
+    @Query("""
+        UPDATE UserSession
+           SET usAuth = null,
+               usStatus = :newStatus,
+               usReason = :reason,
+               usLcb = (SELECT COALESCE(
+                               (SELECT nodeClientId
+                                  FROM SyncNode
+                                 LIMIT 1), 0))
+         WHERE usClientNodeId != :exemptNodeId
+           AND usStatus != :newStatus                     
+    """)
+    abstract suspend fun endOtherSessions(exemptNodeId: Long, newStatus: Int, reason: Int)
+
     companion object {
         const val FIND_LOCAL_SESSIONS_SQL = """
             SELECT UserSession.*, Person.*

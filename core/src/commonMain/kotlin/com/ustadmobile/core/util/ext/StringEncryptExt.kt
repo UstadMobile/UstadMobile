@@ -7,4 +7,4 @@ package com.ustadmobile.core.util.ext
  * For JS: See
  * https://stackoverflow.com/questions/34462316/replicating-java-password-hashing-code-in-node-js-pbkdf2withhmacsha1
  */
-expect fun String.encryptWithPbkdf2(salt: String, iterations: Int = 10000, keyLength: Int = 512): String
+expect fun String.encryptWithPbkdf2(salt: String, iterations: Int = 10000, keyLength: Int = 512): ByteArray

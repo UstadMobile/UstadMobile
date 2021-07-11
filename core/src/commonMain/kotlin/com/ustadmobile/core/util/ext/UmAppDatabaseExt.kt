@@ -608,7 +608,6 @@ suspend fun UmAppDatabase.insertPersonAuthCredentials2(personUid: Long,
     personAuth2Dao.insertAsync(PersonAuth2().apply {
         pauthUid = personUid
         pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
-        pauthAuth = password.encryptWithPbkdf2(authSalt, pbkdf2Params)
-            .encryptWithPbkdf2(authSalt, pbkdf2Params)
+        pauthAuth = password.doublePbkdf2Hash(authSalt, pbkdf2Params).encodeBase64()
     })
 }

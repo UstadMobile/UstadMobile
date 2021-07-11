@@ -15,6 +15,7 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.door.RepositoryConfig
+import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.*
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -23,6 +24,7 @@ import org.mockito.kotlin.*
 import org.xmlpull.v1.XmlPullParserFactory
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.rest.ext.insertDefaultSite
@@ -181,7 +183,7 @@ class PersonAuthRegisterRouteTest {
                 val personAuth2 = db.personAuth2Dao.findByPersonUid(createdAccount.personUid)
                 val salt = db.siteDao.getSite()?.authSalt ?: throw IllegalStateException("No auth salt!")
                 Assert.assertEquals("PersonAuth2 created with valid hashed password",
-                    "secret23".encryptWithPbkdf2(salt, pbkdf2Params).encryptWithPbkdf2(salt, pbkdf2Params),
+                    "secret23".doublePbkdf2Hash(salt, pbkdf2Params).encodeBase64(),
                     personAuth2?.pauthAuth)
             }
         }
@@ -236,6 +238,35 @@ class PersonAuthRegisterRouteTest {
             addHeader("X-nid", "123")
         }.apply {
             Assert.assertEquals("Response is Forbidden", HttpStatusCode.Forbidden, response.status())
+        }
+    }
+
+    @Test
+    fun givenParentalConsentIsRequiredButNotGranted_whenLoginCalled_thenShouldRespondFailedDepdency() = withTestRegister {
+        val di: DI by closestDI { application }
+        val repo: UmAppDatabase by di.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
+        val pbkdf2Params: Pbkdf2Params by di.instance()
+
+        val person = runBlocking {
+            repo.insertPersonAndGroup(Person().apply {
+                username = "mary"
+                dateOfBirth = systemTimeInMillis() - (5 * 365 * 24 * 60 * 60 * 1000L)
+            })
+        }
+
+        runBlocking {
+            repo.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params)
+            repo.personParentJoinDao.insertAsync(PersonParentJoin().apply {
+                ppjMinorPersonUid = person.personUid
+                ppjStatus = PersonParentJoin.STATUS_UNSET
+            })
+        }
+
+        handleRequest(HttpMethod.Post, "/auth/login?username=mary&password=secret23") {
+            addHeader("X-nid", "123")
+        }.apply {
+            Assert.assertEquals("Response is Precondition Failed",
+                HttpStatusCode.FailedDependency, response.status())
         }
     }
 

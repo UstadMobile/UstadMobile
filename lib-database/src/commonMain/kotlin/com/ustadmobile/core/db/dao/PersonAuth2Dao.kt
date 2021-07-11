@@ -24,4 +24,12 @@ abstract class PersonAuth2Dao {
     """)
     abstract suspend fun findByPersonUid(personUid: Long): PersonAuth2?
 
+    @Query("""
+        SELECT PersonAuth2.*
+          FROM PersonAuth2
+               JOIN Person ON PersonAuth2.pauthUid = Person.personUid
+         WHERE Person.username = :username
+    """)
+    abstract suspend fun findByUsername(username: String): PersonAuth2?
+
 }

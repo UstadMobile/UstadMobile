@@ -2,6 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.account.AuthManager
+import com.ustadmobile.core.account.AuthResult
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.RegisterRequest
 import com.ustadmobile.core.db.UmAppDatabase
@@ -45,10 +46,15 @@ fun Route.personAuthRegisterRoute() {
                 return@post
             }
 
-            val authorizedPerson = authManager.authenticate(username, password).authenticatedPerson
 
-            if(authorizedPerson != null) {
+            val authResult = authManager.authenticate(username, password,
+                fallbackToOldPersonAuth = true)
+            val authorizedPerson = authResult.authenticatedPerson
+
+            if(authResult.success && authorizedPerson != null) {
                 call.respond(HttpStatusCode.OK, authorizedPerson.toUmAccount(""))
+            }else if(authResult.reason == AuthResult.REASON_NEEDS_CONSENT) {
+                call.respond(HttpStatusCode.FailedDependency, "")
             }else {
                 call.respond(HttpStatusCode.Forbidden, "")
             }

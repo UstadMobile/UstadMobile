@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.ConsentNotGrantedException
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
@@ -119,10 +120,15 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                     view.loading = false
 
                     goToNextDestAfterLoginOrGuestSelected()
-                } catch (e: Exception) {
-                    view.errorMessage = impl.getString(if(e is UnauthorizedException)
-                        MessageID.wrong_user_pass_combo else
-                        MessageID.login_network_error , context)
+                } catch(e: UnauthorizedException) {
+                    view.errorMessage = impl.getString(MessageID.wrong_user_pass_combo,
+                        context)
+                } catch(e: ConsentNotGrantedException) {
+                    view.errorMessage = impl.getString(MessageID.we_sent_a_message_to_your_parent,
+                        context)
+                }catch(e: Exception) {
+                    view.errorMessage = impl.getString(MessageID.login_network_error, context)
+                }finally {
                     view.inProgress = false
                     view.loading = false
                     view.clearFields()
