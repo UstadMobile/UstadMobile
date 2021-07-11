@@ -27,6 +27,12 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                COALESCE(StatementEntity.extensionProgress,0) AS progress,  
                COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
                COALESCE(StatementEntity.resultSuccess, 0) AS success,
+               COALESCE((CASE WHEN StatementEntity.resultCompletion 
+                THEN 1 ELSE 0 END),0) AS totalCompletedContent,
+                
+                1 as totalContent, 
+               
+               
                0 as penalty
           FROM DownloadJob 
                     LEFT JOIN ContentEntry 
@@ -169,6 +175,11 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                 COALESCE(StatementEntity.extensionProgress,0) AS progress, 
                 COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
                 COALESCE(StatementEntity.resultSuccess, 0) AS success,
+                COALESCE((CASE WHEN StatementEntity.resultCompletion 
+                THEN 1 ELSE 0 END),0) AS totalCompletedContent,
+                
+                1 as totalContent, 
+                
                 0 as penalty
             FROM ContentEntry 
                     LEFT JOIN ContentEntryParentChildJoin 
@@ -228,6 +239,10 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                       COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
                       COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
                       COALESCE(StatementEntity.resultSuccess, 0) AS success,
+                      COALESCE((CASE WHEN StatementEntity.resultCompletion 
+                        THEN 1 ELSE 0 END),0) AS totalCompletedContent,
+                
+                      1 as totalContent, 
                       0 as penalty
                  FROM ClazzContentJoin
                           LEFT JOIN ContentEntry  

@@ -20,6 +20,10 @@ class ContentEntryStatementScoreProgress {
 
     var penalty: Int = 0
 
+    var totalContent: Int = 0
+
+    var totalCompletedContent: Int  = 0
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false

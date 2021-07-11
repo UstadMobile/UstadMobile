@@ -120,7 +120,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:scorePercentage="@{assignment.studentScore}"
-            android:visibility="@{assignment.studentScore.resultMax == 0 ? View.GONE : View.VISIBLE}"
+            app:showScoreVisibility="@{assignment.studentScore}"
             app:layout_constraintStart_toEndOf="@+id/line3_deadline"
             app:layout_constraintTop_toBottomOf="@id/line2_description"
             android:layout_marginBottom="@dimen/dimen_16dp" />
@@ -133,7 +133,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text='@{"(" + assignment.studentScore.resultScore + &quot;/&quot; + assignment.studentScore.resultMax + ")"}'
-            android:visibility="@{assignment.studentScore.resultMax == 0 ? View.GONE : View.VISIBLE}"
+            app:showScoreVisibility="@{assignment.studentScore}"
             app:layout_constraintStart_toEndOf="@+id/item_person_progress"
             app:layout_constraintTop_toBottomOf="@+id/line2_description"
             android:layout_marginBottom="@dimen/dimen_16dp" />

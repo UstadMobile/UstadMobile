@@ -11,16 +11,26 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment
 @Repository
 abstract class CacheClazzAssignmentDao: BaseDao<CacheClazzAssignment> {
 
-    @Query("""
+    @Query(""" 
         REPLACE INTO CacheClazzAssignment 
                 (cachePersonUid, cacheContentEntryUid, cacheClazzAssignmentUid, 
                  cacheStudentScore, cacheMaxScore, cacheProgress, 
                  cacheContentComplete, cacheSuccess,cachePenalty, lastCsnChecked)
-       
+                 
+        WITH MaxScoreTable (maxScore, maxScoreContentEntryUid) 
+                AS (SELECT MAX(resultScoreMax), statementContentEntryUid 
+                      FROM StatementEntity
+                     WHERE contentEntryRoot 
+                  GROUP BY statementContentEntryUid)               
+
        SELECT clazzEnrolmentPersonUid AS cachePersonUid, 
                 cacjContentUid AS cacheContentEntryUid, caUid AS cacheClazzAssignmentUid, 
                COALESCE(resultScoreRaw,0) AS cacheStudentScore, 
-               COALESCE(resultScoreMax,0) AS cacheMaxScore,
+               
+               COALESCE((SELECT maxScore 
+                          FROM MaxScoreTable 
+                         WHERE cacjContentUid = maxScoreContentEntryUid), 0) AS cacheMaxScore,
+                          
                COALESCE(extensionProgress,0) AS cacheProgress,
                COALESCE(resultCompletion,'FALSE') AS cacheContentComplete, 
                COALESCE(resultSuccess,0) AS cacheSuccess,

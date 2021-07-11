@@ -192,7 +192,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:scorePercentage="@{scoreProgress}"
-                android:visibility="@{scoreProgress == null || scoreProgress.resultMax == 0 ? View.GONE : View.VISIBLE}"
+                app:showScoreVisibility="@{scoreProgress}"
                 app:layout_constraintStart_toEndOf="@+id/entry_detail_content_size"
                 app:layout_constraintTop_toBottomOf="@+id/entry_detail_license"
                 android:layout_marginBottom="@dimen/dimen_16dp" />
@@ -207,7 +207,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/UmTheme.TextAppearance.Caption"
                 android:text='@{"(" + scoreProgress.resultScore + &quot;/&quot; + scoreProgress.resultMax + ")"}'
-                android:visibility="@{scoreProgress == null || scoreProgress.resultMax == 0 ? View.GONE : View.VISIBLE}"
+                app:showScoreVisibility="@{scoreProgress}"
                 app:layout_constraintStart_toEndOf="@+id/item_person_progress"
                 app:layout_constraintTop_toBottomOf="@+id/entry_detail_license"
                 android:layout_marginBottom="@dimen/dimen_16dp" />

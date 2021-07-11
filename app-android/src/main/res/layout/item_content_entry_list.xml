@@ -225,7 +225,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="@style/UmTheme.TextAppearance.Caption"
             app:scorePercentage="@{contentEntry.scoreProgress}"
-            android:visibility="@{contentEntry.scoreProgress.resultMax == 0 ? View.GONE : View.VISIBLE}"
+            app:showScoreVisibility="@{contentEntry.scoreProgress}"
             app:layout_constraintStart_toEndOf="@+id/content_type_barrier"
             app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description"
             android:layout_marginBottom="@dimen/dimen_16dp" />
@@ -240,7 +240,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text='@{"(" + contentEntry.scoreProgress.resultScore + &quot;/&quot; + contentEntry.scoreProgress.resultMax + ")"}'
-            android:visibility="@{contentEntry.scoreProgress.resultMax == 0 ? View.GONE : View.VISIBLE}"
+            app:showScoreVisibility="@{contentEntry.scoreProgress}"
             app:layout_constraintStart_toEndOf="@+id/item_person_progress"
             app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description"
             android:layout_marginBottom="@dimen/dimen_16dp" />
@@ -257,7 +257,7 @@
             android:textAppearance="@style/UmTheme.TextAppearance.Caption"
             android:textColor="@color/errorColor"
             android:text="@{@string/late_penalty(contentEntry.scoreProgress.penalty)}"
-            android:visibility="@{contentEntry.scoreProgress.resultMax == 0 || contentEntry.scoreProgress.penalty == 0 ? View.GONE : View.VISIBLE}"
+            android:visibility="@{contentEntry.scoreProgress.penalty == 0 ? View.GONE : View.VISIBLE}"
             app:layout_constraintStart_toEndOf="@+id/item_person_score_results"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description"

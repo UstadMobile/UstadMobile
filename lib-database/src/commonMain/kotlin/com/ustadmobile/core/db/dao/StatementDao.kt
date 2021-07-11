@@ -71,9 +71,16 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                 THEN resultScoreScaled
                 ELSE 0 END) AS resultScaled, 
             MAX(ResultSource.extensionProgress) AS progress,
-            0 as penalty,
-            'FALSE' as contentComplete,
-            0 as success,
+            0 AS penalty,
+            'FALSE' AS contentComplete,
+            0 AS success,
+            
+            CASE WHEN ResultSource.resultCompletion 
+                THEN 1 ELSE 0 END AS totalCompletedContent,
+                
+            1 as totalContent, 
+            
+             
          
             '' AS latestPrivateComment
         
@@ -81,7 +88,8 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             StatementEntity.contextRegistration, StatementEntity.timestamp, 
             StatementEntity.resultDuration, StatementEntity.resultScoreRaw, 
             StatementEntity.resultScoreMax, StatementEntity.resultScoreScaled,
-            StatementEntity.contentEntryRoot, StatementEntity.extensionProgress
+            StatementEntity.contentEntryRoot, StatementEntity.extensionProgress, 
+            StatementEntity.resultCompletion
             FROM PersonGroupMember
             ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
              LEFT JOIN StatementEntity 
@@ -125,6 +133,11 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                 COALESCE(StatementEntity.extensionProgress,0) AS progress, 
                 COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
                 COALESCE(StatementEntity.resultSuccess, 0) AS success,
+                
+                COALESCE((CASE WHEN resultCompletion 
+                THEN 1 ELSE 0 END),0) AS totalCompletedContent,
+                
+                1 as totalContent, 
                 0 as penalty
                 
         FROM ContentEntry
@@ -159,7 +172,13 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             MAX(CASE WHEN contentEntryRoot 
                      THEN resultScoreMax ELSE 0 END) AS resultMax,
             MAX(CASE WHEN contentEntryRoot 
-                     THEN resultScoreScaled ELSE 0 END) AS resultScoreScaled  
+                     THEN resultScoreScaled ELSE 0 END) AS resultScoreScaled,
+                       
+            SUM(CASE WHEN resultCompletion AND StatementEntity.contentEntryRoot 
+                THEN 1 ELSE 0 END) AS totalCompletedContent,
+                
+             1 as totalContent          
+                       
         FROM StatementEntity 
              JOIN ScopedGrant 
                  ON ${StatementEntity.FROM_STATEMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE}
@@ -210,7 +229,12 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                0 as penalty,
                0 as success,
                'FALSE' as contentComplete,
-               0 AS resultScaled
+               0 AS resultScaled,
+               COALESCE((CASE WHEN resultCompletion 
+               THEN 1 ELSE 0 END),0) AS totalCompletedContent,
+                
+                1 as totalContent
+               
          FROM (SELECT * FROM StatementEntity 
                 WHERE contextRegistration = :contextRegistration
                   AND NOT contentEntryRoot
@@ -227,7 +251,10 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                0 AS penalty,
                resultSuccess AS success,
                resultCompletion AS contentComplete, 
-               resultScoreScaled AS resultScaled
+               resultScoreScaled AS resultScaled,
+                1 AS totalCompletedContent,
+                1 as totalContent
+               
           FROM StatementEntity
          WHERE resultCompletion
           AND contextRegistration = :contextRegistration

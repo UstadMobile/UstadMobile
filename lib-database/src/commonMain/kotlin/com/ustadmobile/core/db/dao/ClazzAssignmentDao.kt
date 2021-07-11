@@ -88,13 +88,13 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                       WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid)) 
                   ELSE 0 END) AS completedStudents, 
            
-            COALESCE((SELECT SUM(cacheStudentScore) 
+            COALESCE((SELECT MAX(cacheStudentScore) 
                         FROM CacheClazzAssignment
                        WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
                          AND cachePersonUid = :accountPersonUid),0) AS resultScore,
                           
                           
-            COALESCE((SELECT SUM(cacheMaxScore) 
+            COALESCE((SELECT MAX(cacheMaxScore) 
                         FROM CacheClazzAssignment 
                        WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
                          AND cachePersonUid = :accountPersonUid),0) AS resultMax,
@@ -104,7 +104,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                         FROM CacheClazzAssignment
                         WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
                         AND cacheContentComplete
-                          AND cachePersonUid = :accountPersonUid)  =  
+                              AND cachePersonUid = :accountPersonUid)  =  
                           
                           (SELECT COUNT(DISTINCT cacheContentEntryUid) 
                              FROM CacheClazzAssignment
@@ -113,7 +113,19 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
             COALESCE((SELECT AVG(cachePenalty) 
                         FROM CacheClazzAssignment 
                        WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
-                         AND cachePersonUid = :accountPersonUid),0) AS penalty,                      
+                         AND cachePersonUid = :accountPersonUid),0) AS penalty,
+                                               
+            COALESCE((SELECT COUNT(cacheContentComplete)
+                        FROM CacheClazzAssignment
+                        WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
+                        AND cacheContentComplete
+                              AND cachePersonUid = :accountPersonUid), 0) AS totalCompletedContent,
+            
+            COALESCE((SELECT COUNT(DISTINCT cacheContentEntryUid) 
+                              FROM CacheClazzAssignment
+                             WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid), 0) AS totalContent,
+                            
+                                               
                           
              0 as success,           
              0 as resultScaled,    
@@ -157,9 +169,17 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                COALESCE(SUM(ResultSource.cacheStudentScore),0) AS resultScore, 
                0 as resultScaled,
                'FALSE' as contentComplete, 0 as progress, 0 as success,
-               COALESCE(AVG(ResultSource.cachePenalty),0) AS penalty
+               COALESCE(AVG(ResultSource.cachePenalty),0) AS penalty,
+               
+              COALESCE((SUM(CASE 
+                        WHEN CAST(ResultSource.cacheContentComplete AS INTEGER) > 0 
+                        THEN 1 ELSE 0 END)), 0) AS totalCompletedContent,
+                        
+               COALESCE(COUNT(DISTINCT ResultSource.cacheContentEntryUid), 0) AS totalContent
+ 
      	  FROM (SELECT CacheClazzAssignment.cacheStudentScore, CacheClazzAssignment.cacheMaxScore,
-                        CacheClazzAssignment.cachePenalty
+                        CacheClazzAssignment.cachePenalty, CacheClazzAssignment.cacheContentComplete,
+                        CacheClazzAssignment.cacheContentEntryUid
      	 	      FROM ClazzAssignmentContentJoin 
                          LEFT JOIN ContentEntry 
                          ON ContentEntry.contentEntryUid = ClazzAssignmentContentJoin.cacjContentUid 
@@ -206,7 +226,18 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                  (SELECT AVG(cachePenalty)
                              FROM CacheClazzAssignment 
                             WHERE cacheClazzAssignmentUid = :assignmentUid
-                              AND cachePersonUid = ResultSource.personUid) AS penalty,                         
+                              AND cachePersonUid = ResultSource.personUid) AS penalty,   
+                                                    
+                   COALESCE((SELECT COUNT(cacheContentComplete)
+                        FROM CacheClazzAssignment
+                        WHERE cacheClazzAssignmentUid = :assignmentUid
+                        AND cacheContentComplete
+                              AND cachePersonUid = ResultSource.personUid), 0) AS totalCompletedContent,
+            
+            COALESCE((SELECT COUNT(DISTINCT cacheContentEntryUid) 
+                              FROM CacheClazzAssignment
+                             WHERE cacheClazzAssignmentUid = :assignmentUid), 0) AS totalContent,                              
+                                                    
 
             cm.commentsText AS latestPrivateComment
         
