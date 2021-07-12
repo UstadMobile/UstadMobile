@@ -5,13 +5,13 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.nav.navigateToErrorScreen
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadSingleEntityView
 import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.DeserializationStrategy
@@ -73,7 +73,7 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
         }else if(persistenceMode == PersistenceMode.DB) {
             view.loading = true
             (view as? UstadEditView<*>)?.fieldsEnabled = false
-            GlobalScope.launch(doorMainDispatcher()) {
+            presenterScope.launch {
                 try {
                     listOf(db, repo).forEach {
                         entity = onLoadEntityFromDb(it)
@@ -83,6 +83,8 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
                     view.loading = false
                     (view as? UstadEditView<*>)?.fieldsEnabled = true
                     onLoadDataComplete()
+                } catch (ex: CancellationException) {
+                    throw ex
                 }catch(e: Exception) {
                     navigateToErrorScreen(e)
                 }

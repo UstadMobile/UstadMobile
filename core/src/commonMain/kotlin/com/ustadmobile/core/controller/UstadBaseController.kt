@@ -36,6 +36,7 @@ import com.ustadmobile.core.impl.UmLifecycleOwner
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.impl.nav.navigateToErrorScreen
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.putResultDestInfo
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ListViewMode
@@ -44,6 +45,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.SerializationStrategy
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -72,6 +74,13 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
         private set
 
     protected val ustadNavController: UstadNavController by instance()
+
+    /**
+     * A coroutine scope that is tied to the lifecycle of the presenter. It will be canceled after
+     * onDestroy. This avoids longer-running async processes accidentally interacting with a view
+     * that has been destroyed etc.
+     */
+    protected val presenterScope: CoroutineScope by instance(tag = DiTag.TAG_PRESENTER_COROUTINE_SCOPE)
 
     /**
      * Handle when the presenter is created. Analogous to Android's onCreate
