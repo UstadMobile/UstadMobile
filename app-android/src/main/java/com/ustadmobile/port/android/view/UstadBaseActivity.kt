@@ -26,13 +26,11 @@ import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.squareup.seismic.ShakeDetector
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadViewWithNotifications
 import com.ustadmobile.port.android.impl.UserFeedbackException
-import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
 import com.ustadmobile.port.android.util.ext.getUstadLocaleSetting
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import org.acra.ACRA
@@ -66,17 +64,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotificatio
     lateinit var appUpdateManager: AppUpdateManager
 
     private val systemImpl: UstadMobileSystemImpl by instance()
-
-
-    private val mSyncServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            mSyncServiceBound = true
-        }
-
-        override fun onServiceDisconnected(name: ComponentName) {
-            mSyncServiceBound = false
-        }
-    }
 
     private val appUpdatedListener: InstallStateUpdatedListener by lazy {
         object : InstallStateUpdatedListener {
@@ -132,9 +119,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotificatio
         }
     }
 
-    private var mSyncServiceBound = false
-
-
     private var shakeDetector: ShakeDetector? = null
     private var sensorManager: SensorManager? = null
     internal var feedbackDialogVisible = false
@@ -149,11 +133,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotificatio
         }
         super.onCreate(savedInstanceState)
         localeOnCreate = systemImpl.getDisplayedLocale(this)
-
-
-        val syncServiceIntent = Intent(this, UmAppDatabaseSyncService::class.java)
-        bindService(syncServiceIntent, mSyncServiceConnection,
-                Context.BIND_AUTO_CREATE or Context.BIND_ADJUST_WITH_ACTIVITY)
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         shakeDetector = ShakeDetector(this)
@@ -221,9 +200,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotificatio
     }
 
     public override fun onDestroy() {
-        if (mSyncServiceBound) {
-            unbindService(mSyncServiceConnection)
-        }
         shakeDetector = null
         sensorManager = null
         super.onDestroy()

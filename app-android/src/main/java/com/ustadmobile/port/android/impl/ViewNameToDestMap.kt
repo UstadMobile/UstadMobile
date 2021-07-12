@@ -43,6 +43,7 @@ class ViewNameToDestMap: DestinationProvider {
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             ContentEntryListTabsView.VIEW_NAME to UstadDestination(R.id.home_content_dest),
             ContentEntryList2View.VIEW_NAME to UstadDestination(R.id.content_entry_list_dest),
+            ContentEntryList2View.FOLDER_VIEW_NAME to UstadDestination(R.id.content_entry_list_select_folder),
             ContentEntryDetailOverviewView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_overview_dest),
             ContentEntryDetailView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_dest),
             ContentEntryDetailAttemptsListView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_attempt_dest),
@@ -59,7 +60,9 @@ class ViewNameToDestMap: DestinationProvider {
             LeavingReasonListView.VIEW_NAME to UstadDestination(R.id.leaving_reason_list),
             LeavingReasonEditView.VIEW_NAME to UstadDestination(R.id.leaving_reason_edit,
                     hideAccountIcon = true),
-            VideoContentView.VIEW_NAME to UstadDestination(R.id.video_content),
+            SelectFileView.VIEW_NAME to UstadDestination(R.id.select_file_view),
+            ContentEntryImportLinkView.VIEW_NAME to UstadDestination(R.id.import_link_view),
+            VideoPlayerView.VIEW_NAME to UstadDestination(R.id.video_content),
             WebChunkView.VIEW_NAME to UstadDestination(R.id.webchunk_view,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true),
             // If ActionBarScrollBehavior is collapsing/scroll, then the WebView for Xapi content

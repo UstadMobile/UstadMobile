@@ -2,30 +2,36 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.KEY_SELECTED_ITEMS
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.logErrorReport
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_IMPORTED_METADATA
+import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.door.util.randomUuid
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.lib.db.entities.*
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -39,10 +45,13 @@ class ContentEntryEdit2Presenter(context: Any,
                                  arguments: Map<String, String>, view: ContentEntryEdit2View,
                                  lifecycleOwner: DoorLifecycleOwner,
                                  di: DI)
-    : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view, di, lifecycleOwner) {
+    : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view, di, lifecycleOwner),
+        ContentEntryAddOptionsListener {
 
     private val contentImportManager: ContentImportManager?
-            by on(accountManager.activeAccount).instanceOrNull<ContentImportManager>()
+            by on(accountManager.activeAccount).instanceOrNull()
+
+    private lateinit var destinationOnFinish: String
 
     private val httpClient: HttpClient by di.instance()
 
@@ -79,6 +88,8 @@ class ContentEntryEdit2Presenter(context: Any,
         super.onCreate(savedState)
         view.licenceOptions = LicenceOptions.values().map { LicenceMessageIdOptions(it, context) }
         parentEntryUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0
+        destinationOnFinish = if ((arguments[ARG_ENTITY_UID]?.toLong() ?: 0L) == 0L)
+            ContentEntryList2View.VIEW_NAME else ContentEntryDetailView.VIEW_NAME
         GlobalScope.launch(doorMainDispatcher()) {
             view.storageOptions = systemImpl.getStorageDirsAsync(context)
         }
@@ -87,6 +98,18 @@ class ContentEntryEdit2Presenter(context: Any,
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithLanguage? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0
         val isLeaf = arguments[ARG_LEAF]?.toBoolean()
+        val metaData = arguments[ARG_IMPORTED_METADATA]
+        val uri = arguments[ARG_URI]
+        if (db is DoorDatabaseRepository) {
+            if (uri != null) {
+                return handleFileSelection(uri)
+            }
+            if (metaData != null) {
+                val importedMetadata = safeParse(di, ImportedContentEntryMetaData.serializer(), metaData)
+                view.entryMetaData = importedMetadata
+                return importedMetadata.contentEntry
+            }
+        }
         return withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.contentEntryDao?.findEntryWithLanguageByEntryIdAsync(entityUid)
         } ?: ContentEntryWithLanguage().apply {
@@ -108,6 +131,44 @@ class ContentEntryEdit2Presenter(context: Any,
             ContentEntryWithLanguage()
         }
         return editEntity
+    }
+
+    override fun onLoadDataComplete() {
+        super.onLoadDataComplete()
+
+        observeSavedStateResult(SAVED_STATE_KEY_URI, ListSerializer(String.serializer()),
+                String::class) {
+            val uri = it.firstOrNull() ?: return@observeSavedStateResult
+            view.loading = true
+            view.fieldsEnabled = false
+
+            GlobalScope.launch(doorMainDispatcher()){
+                view.entity = handleFileSelection(uri)
+            }
+
+
+            requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
+        }
+
+        observeSavedStateResult(SAVED_STATE_KEY_METADATA, ListSerializer(ImportedContentEntryMetaData.serializer()),
+                ImportedContentEntryMetaData::class) {
+            val metadata = it.firstOrNull() ?: return@observeSavedStateResult
+            view.loading = true
+            // back from navigate import
+            view.entryMetaData = metadata
+            val entry = view.entryMetaData?.contentEntry
+            val entryUid = arguments[ARG_ENTITY_UID]
+            if (entry != null) {
+                if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
+                view.fileImportErrorVisible = false
+                entity = entry
+            }
+            view.loading = false
+
+            requireSavedStateHandle()[SAVED_STATE_KEY_METADATA] = null
+        }
+
+
     }
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
@@ -160,9 +221,9 @@ class ContentEntryEdit2Presenter(context: Any,
                         metaData.contentEntry = entity
                         contentImportManager?.queueImportContentFromFile(uri, metaData,
                                 view.storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(),
-                                conversionParams)
+                                ContainerImportJob.CLIENT_IMPORT_MODE, conversionParams)
 
-                        view.finishWithResult(listOf(entity))
+                        systemImpl.popBack(destinationOnFinish, popUpInclusive = false, context)
                         return@launch
 
 
@@ -185,9 +246,11 @@ class ContentEntryEdit2Presenter(context: Any,
                                 body = entity
                             }.execute()
 
-                        }catch (e: Exception){
-                            view.showSnackBar("${systemImpl.getString(MessageID.error, 
-                                    context)}: ${e.message ?: ""}", {})
+                        } catch (e: Exception) {
+                            view.showSnackBar("${
+                                systemImpl.getString(MessageID.error,
+                                        context)
+                            }: ${e.message ?: ""}", {})
                             return@launch
                         }
 
@@ -197,13 +260,20 @@ class ContentEntryEdit2Presenter(context: Any,
                             return@launch
                         }
 
-                        view.finishWithResult(listOf(entity))
+                        systemImpl.popBack(destinationOnFinish, popUpInclusive = false, context)
                         return@launch
 
                     }
+                } else {
+                    // its a folder, check if there is any selected items from previous screen
+                    if (arguments.containsKey(KEY_SELECTED_ITEMS)) {
+                        val selectedItems = arguments[KEY_SELECTED_ITEMS]?.split(",")?.map { it.trim().toLong() }
+                                ?: listOf()
+                        repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(entity.contentEntryUid, selectedItems)
+                    }
                 }
 
-                view.finishWithResult(listOf(entity))
+                systemImpl.popBack(destinationOnFinish, popUpInclusive = false, context)
 
             } else {
                 view.titleErrorEnabled = entity.title == null
@@ -213,13 +283,17 @@ class ContentEntryEdit2Presenter(context: Any,
         }
     }
 
-    fun isImportValid(entity: ContentEntryWithLanguage): Boolean{
+    fun isImportValid(entity: ContentEntryWithLanguage): Boolean {
         return entity.title != null && (!entity.leaf || entity.contentEntryUid != 0L ||
                 (entity.contentEntryUid == 0L && view.entryMetaData?.uri != null))
     }
 
-    fun handleFileSelection(uri: String) {
-        GlobalScope.launch(doorMainDispatcher()) {
+    suspend fun handleFileSelection(uri: String): ContentEntryWithLanguage? {
+        view.loading = true
+        view.fieldsEnabled = true
+
+        var entry: ContentEntryWithLanguage? = null
+        try {
             val metadata = contentImportManager?.extractMetadata(uri)
             view.entryMetaData = metadata
             when (metadata) {
@@ -228,20 +302,78 @@ class ContentEntryEdit2Presenter(context: Any,
                 }
             }
 
-            val entry = metadata?.contentEntry
+            entry = metadata?.contentEntry
             val entryUid = arguments[ARG_ENTITY_UID]
             if (entry != null) {
                 if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
                 view.fileImportErrorVisible = false
-                view.entity = entry
-                if(metadata.mimeType.startsWith("video/") &&
-                        !metadata.uri.lowercase().startsWith("https://drive.google.com")){
+                if (metadata?.mimeType?.startsWith("video/") == true &&
+                        !metadata.uri.lowercase().startsWith("https://drive.google.com")) {
                     view.videoUri = uri
                 }
             }
             view.loading = false
             view.fieldsEnabled = true
+        }catch (e: Exception){
+            view.showSnackBar(systemImpl.getString(MessageID.import_link_content_not_supported, context))
+            repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, e, this)
         }
+
+        return entry
+    }
+
+    override fun onClickNewFolder() {
+        // wont happen in edit screen
+    }
+
+    override fun onClickImportFile() {
+        val args = mutableMapOf(
+                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_FILE,
+                ARG_LEAF to true.toString())
+        args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
+
+        navigateForResult(
+                NavigateForResultOptions(this,
+                        null, SelectFileView.VIEW_NAME, String::class,
+                        String.serializer(), SAVED_STATE_KEY_URI,
+                        arguments = args)
+        )
+    }
+
+    override fun onClickImportLink() {
+        val args = mutableMapOf(ARG_LEAF to true.toString())
+        args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
+
+        navigateForResult(
+                NavigateForResultOptions(this,
+                        null, ContentEntryImportLinkView.VIEW_NAME,
+                        ImportedContentEntryMetaData::class,
+                        ImportedContentEntryMetaData.serializer(), SAVED_STATE_KEY_METADATA,
+                        arguments = args)
+        )
+    }
+
+    override fun onClickImportGallery() {
+        val args = mutableMapOf(
+                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_GALLERY,
+                ARG_LEAF to true.toString())
+        args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
+
+        navigateForResult(
+                NavigateForResultOptions(this,
+                        null, SelectFileView.VIEW_NAME, String::class,
+                        String.serializer(), SAVED_STATE_KEY_URI,
+                        arguments = args)
+        )
+    }
+
+    companion object {
+
+        const val SAVED_STATE_KEY_URI = "URI"
+
+        const val SAVED_STATE_KEY_METADATA = "importedMetadata"
+
+
     }
 
 }
