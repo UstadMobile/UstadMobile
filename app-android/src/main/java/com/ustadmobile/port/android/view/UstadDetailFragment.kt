@@ -2,11 +2,14 @@ package com.ustadmobile.port.android.view
 
 import android.content.Context
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.UstadDetailView
+import com.ustadmobile.port.android.view.util.PresenterViewLifecycleObserver
 
 abstract class UstadDetailFragment<T: Any>: UstadBaseFragment(), UstadDetailView<T> {
 
@@ -21,9 +24,20 @@ abstract class UstadDetailFragment<T: Any>: UstadBaseFragment(), UstadDetailView
 
     protected open var mActivityWithFab: UstadListViewActivityWithFab? = null
 
+    private var presenterLifecycleObserver: PresenterViewLifecycleObserver? = null
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mActivityWithFab = (context as? UstadListViewActivityWithFab)
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = super.onCreateView(inflater, container, savedInstanceState)
+
+        presenterLifecycleObserver = PresenterViewLifecycleObserver(detailPresenter).also {
+            viewLifecycleOwner.lifecycle.addObserver(it)
+        }
+        return view
     }
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
@@ -42,5 +56,13 @@ abstract class UstadDetailFragment<T: Any>: UstadBaseFragment(), UstadDetailView
         fabManager?.onClickListener = {
             detailPresenter?.handleClickEdit()
         }
+    }
+
+    override fun onDestroyView() {
+        presenterLifecycleObserver?.also {
+            viewLifecycleOwner.lifecycle.removeObserver(it)
+        }
+        presenterLifecycleObserver = null
+        super.onDestroyView()
     }
 }

@@ -37,6 +37,8 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
     @Volatile
     private var dataLoadCompleted: Boolean = false
 
+    private var onCreateException: Exception? = null
+
     protected var entity: RT? = null
 
     enum class PersistenceMode{
@@ -91,8 +93,7 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
                 }catch(e: Exception) {
                     if(e !is CancellationException)
                         withContext(NonCancellable) {
-                            repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, e,
-                                this@UstadSingleEntityPresenter)
+                            onCreateException = e
                         }
                 }
             }
@@ -113,6 +114,18 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
                     entityLiveData?.observe(lifecycleOwner, it)
                     onLoadDataComplete()
                 }
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val exception = onCreateException
+        if(exception != null){
+            presenterScope.launch {
+                repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, exception,
+                        this@UstadSingleEntityPresenter)
+                onCreateException = null
             }
         }
     }

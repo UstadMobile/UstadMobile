@@ -1,10 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UstadEditPresenter
@@ -14,10 +11,13 @@ import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.port.android.util.ext.saveStateToCurrentBackStackStateHandle
 import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
+import com.ustadmobile.port.android.view.util.PresenterViewLifecycleObserver
 
 abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> {
 
     abstract protected val mEditPresenter : UstadEditPresenter<*, T>?
+
+    private var presenterLifecycleObserver: PresenterViewLifecycleObserver? = null
 
     override var fieldsEnabled: Boolean = true
         set(value) {
@@ -29,6 +29,15 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
 
     override fun finishWithResult(result: List<T>) {
         saveResultToBackStackSavedStateHandle(result)
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = super.onCreateView(inflater, container, savedInstanceState)
+
+        presenterLifecycleObserver = PresenterViewLifecycleObserver(mEditPresenter).also {
+            viewLifecycleOwner.lifecycle.addObserver(it)
+        }
+        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -83,4 +92,11 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
 
     protected open fun onSaveStateToBackStackStateHandle() = mEditPresenter?.saveStateToCurrentBackStackStateHandle(findNavController())
 
+    override fun onDestroyView() {
+        presenterLifecycleObserver?.also {
+            viewLifecycleOwner.lifecycle.removeObserver(it)
+        }
+        presenterLifecycleObserver = null
+        super.onDestroyView()
+    }
 }

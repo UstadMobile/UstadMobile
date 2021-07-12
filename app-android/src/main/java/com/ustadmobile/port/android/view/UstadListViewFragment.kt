@@ -35,6 +35,7 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.port.android.view.ext.repoLoadingStatus
 import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.PresenterViewLifecycleObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -61,6 +62,8 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     protected var dbRepo: UmAppDatabase? = null
 
     private val systemImpl: UstadMobileSystemImpl by instance()
+
+    private var presenterLifecycleObserver: PresenterViewLifecycleObserver? = null
 
     /**
      * Whether or not UstadListViewFragment should attempt to manage the MergeAdapter. The MergeAdapter
@@ -198,6 +201,10 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         val accountManager: UstadAccountManager by instance()
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
 
+        presenterLifecycleObserver = PresenterViewLifecycleObserver(listPresenter).also {
+            viewLifecycleOwner.lifecycle.addObserver(it)
+        }
+
         return rootView
     }
 
@@ -249,6 +256,10 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         currentLiveData = null
         actionModeCallback = null
         actionMode?.finish()
+        presenterLifecycleObserver?.also {
+            viewLifecycleOwner.lifecycle.removeObserver(it)
+        }
+        presenterLifecycleObserver = null
         dbRepo = null
 
         super.onDestroyView()

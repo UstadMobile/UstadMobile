@@ -45,8 +45,6 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
     override val listPresenter: UstadListPresenter<*, in SchoolMemberWithPerson>?
         get() = mPresenter
 
-    private var presenterLifecycleObserver: PresenterViewLifecycleObserver? = null
-
     private lateinit var addPersonKeyName: String
 
     override var autoMergeRecyclerViewAdapter: Boolean = false
@@ -162,11 +160,6 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
 
 
 
-
-        presenterLifecycleObserver = PresenterViewLifecycleObserver(mPresenter).also {
-            viewLifecycleOwner.lifecycle.addObserver(it)
-        }
-
         return view
     }
 
@@ -225,10 +218,6 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
         dbRepo = null
         mDataBinding = null
         mDataRecyclerViewAdapter = null
-        presenterLifecycleObserver?.also {
-            viewLifecycleOwner.lifecycle.removeObserver(it)
-        }
-        presenterLifecycleObserver = null
     }
 
     override val displayTypeRepo: Any?
