@@ -110,6 +110,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
     override var fieldsEnabled: Boolean = true
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mDataBinding?.fieldsEnabled = value
         }
