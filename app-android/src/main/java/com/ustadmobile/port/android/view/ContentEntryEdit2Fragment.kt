@@ -179,6 +179,7 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
 
     override var fieldsEnabled: Boolean = false
         set(value) {
+            super.fieldsEnabled = value
             mBinding?.fieldsEnabled = value
             field = value
         }

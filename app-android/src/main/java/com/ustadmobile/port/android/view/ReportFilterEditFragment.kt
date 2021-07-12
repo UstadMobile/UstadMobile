@@ -145,6 +145,10 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
         }
 
     override var fieldsEnabled: Boolean = false
+        set(value){
+            super.fieldsEnabled = value
+            field = value
+        }
 
     override var entity: ReportFilter? = null
         get() = field

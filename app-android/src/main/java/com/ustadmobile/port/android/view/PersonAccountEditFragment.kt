@@ -76,6 +76,10 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
 
 
     override var fieldsEnabled: Boolean = true
+        set(value){
+            super.fieldsEnabled = value
+            field = value
+        }
 
     override var entity: PersonWithAccount? = null
         set(value) {

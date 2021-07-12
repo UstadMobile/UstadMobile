@@ -249,6 +249,7 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

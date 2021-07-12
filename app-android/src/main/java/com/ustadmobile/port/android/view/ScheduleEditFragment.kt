@@ -60,6 +60,7 @@ class ScheduleEditFragment: UstadEditFragment<Schedule>(), ScheduleEditView {
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

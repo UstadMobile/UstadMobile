@@ -61,6 +61,7 @@ class HolidayEditFragment(): UstadEditFragment<Holiday>(), HolidayEditView {
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

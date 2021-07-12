@@ -118,6 +118,7 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
 
     override var fieldsEnabled: Boolean = false
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

@@ -138,6 +138,7 @@ class SiteTermsEditFragment: UstadEditFragment<SiteTermsWithLanguage>(), SiteTer
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }
