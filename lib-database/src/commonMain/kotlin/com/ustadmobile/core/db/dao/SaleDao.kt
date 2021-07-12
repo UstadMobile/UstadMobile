@@ -85,7 +85,7 @@ abstract class SaleDao : BaseDao<Sale> {
         """
 
         const val FIND_ALL_SALES = """
-            SELECT sl.*, Customer.*,
+            SELECT sl.*, Customer.*, SalePerson.firstNames||' '||SalePerson.lastName as saleCreator,
                 (SELECT SaleItem.saleItemQuantity 
                   FROM Sale stg 
                   LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = stg.saleUid 
@@ -217,6 +217,7 @@ abstract class SaleDao : BaseDao<Sale> {
                     LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = sl.saleUid 
                         AND CAST(SaleItem.saleItemActive AS INTEGER) = 1
                     LEFT JOIN Person as LE ON LE.personUid = :leUid
+                    LEFT JOIN Person as SalePerson ON SalePerson.personUid = sl.salePersonUid 
                 
                 WHERE CAST(sl.saleActive AS INTEGER) = 1
                 

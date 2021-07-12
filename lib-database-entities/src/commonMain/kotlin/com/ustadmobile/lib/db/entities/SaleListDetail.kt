@@ -10,7 +10,6 @@ import androidx.room.Embedded
 @Serializable
 class SaleListDetail() : Sale() {
 
-
     @Embedded
     var customer: Person? = null
 
@@ -30,6 +29,7 @@ class SaleListDetail() : Sale() {
     var saleAmountDue: Float = 0.toFloat()
     var earliestDueDate: Long = 0
     var saleItemPreOrder: Boolean = false
+    var saleCreator: String? = null
 
 
 }

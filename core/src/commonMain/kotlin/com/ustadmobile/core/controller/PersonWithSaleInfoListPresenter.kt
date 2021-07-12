@@ -52,7 +52,7 @@ import org.kodein.di.DI
         GlobalScope.launch {
 
 
-            val loggedInPerson = withTimeoutOrNull(2000) {
+            val loggedInPerson = withTimeoutOrNull(4000) {
 
                 repo.personDao.findByUidAsync(loggedInPersonUid)
 

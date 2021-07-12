@@ -122,7 +122,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         if(username != null && username.isNotEmpty() && password != null && password.isNotEmpty()){
             GlobalScope.launch(doorMainDispatcher()) {
                 try {
-                    val umAccount = accountManager.login(username.trim(),
+                    val umAccount = accountManager.login(username.lowercase().trim(),
                             password.trim() ,serverUrl)
                     view.inProgress = false
                     view.loading = false

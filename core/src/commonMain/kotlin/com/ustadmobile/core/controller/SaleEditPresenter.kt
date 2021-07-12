@@ -156,11 +156,6 @@ class SaleEditPresenter(context: Any,
             editEntity = SaleWithCustomerAndLocation()
         }
 
-//        saleItemEditHelper.onLoadFromJsonSavedState(bundle)
-//        saleDeliveryEditHelper.onLoadFromJsonSavedState(bundle)
-//        salePaymentEditHelper.onLoadFromJsonSavedState(bundle)
-
-
         return editEntity
     }
 

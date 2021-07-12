@@ -53,7 +53,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="9,500 Afs" />
-
+        
         <TextView
             android:id="@+id/item_sale_location"
             android:layout_width="wrap_content"
@@ -61,7 +61,7 @@
             android:layout_marginHorizontal="@dimen/dimen_16dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:text="@{sale.customer.fullName()}"
+            android:text="@{@string/x_item_by_y(sale.customer.fullName(), sale.saleCreator)}"
             app:layout_constraintBottom_toTopOf="@+id/item_sale_order_due_date"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/item_sale_title"
