@@ -7,7 +7,6 @@ import com.ustadmobile.door.annotation.MinSyncVersion
 import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
-import com.ustadmobile.door.ext.doorDatabaseMetadata
 import com.ustadmobile.door.ext.syncableTableIdMap
 import com.ustadmobile.door.util.DoorSqlGenerator
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -49,7 +48,7 @@ import kotlin.jvm.Volatile
     ScopedGrant::class,
     ErrorReport::class,
     ClazzAssignment::class, ClazzAssignmentContentJoin::class,
-    CacheClazzAssignment::class,
+    ClazzAssignmentRollUp::class,
     PersonAuth2::class,
     UserSession::class,
 
@@ -271,7 +270,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val clazzAssignmentContentJoinDao: ClazzAssignmentContentJoinDao
 
     @JsName("cacheClazzAssignmentDao")
-    abstract val cacheClazzAssignmentDao: CacheClazzAssignmentDao
+    abstract val clazzAssignmentRollUpDao: ClazzAssignmentRollUpDao
 
     @JsName("commentsDao")
     abstract val commentsDao: CommentsDao
@@ -4988,14 +4987,14 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
 
                 if(database.dbType() == DoorDbType.SQLITE) {
-                    database.execSQL("CREATE TABLE IF NOT EXISTS CacheClazzAssignment (`cacheUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cachePersonUid` INTEGER NOT NULL, `cacheContentEntryUid` INTEGER NOT NULL, `cacheClazzAssignmentUid` INTEGER NOT NULL, `cacheStudentScore` INTEGER NOT NULL, `cacheMaxScore` INTEGER NOT NULL, `cacheProgress` INTEGER NOT NULL, `cacheContentComplete` INTEGER NOT NULL, `lastCsnChecked` INTEGER NOT NULL)")
-                    database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_CacheClazzAssignment_cachePersonUid_cacheContentEntryUid_cacheClazzAssignmentUid` ON CacheClazzAssignment (`cachePersonUid`, `cacheContentEntryUid`, `cacheClazzAssignmentUid`)")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignmentRollUp (`cacheUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cachePersonUid` INTEGER NOT NULL, `cacheContentEntryUid` INTEGER NOT NULL, `cacheClazzAssignmentUid` INTEGER NOT NULL, `cacheStudentScore` INTEGER NOT NULL, `cacheMaxScore` INTEGER NOT NULL, `cacheProgress` INTEGER NOT NULL, `cacheContentComplete` INTEGER NOT NULL, `lastCsnChecked` INTEGER NOT NULL)")
+                    database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzAssignmentRollUp_cachePersonUid_cacheContentEntryUid_cacheClazzAssignmentUid` ON ClazzAssignmentRollUp (`cachePersonUid`, `cacheContentEntryUid`, `cacheClazzAssignmentUid`)")
 
 
                 }else if(database.dbType() == DoorDbType.POSTGRES){
 
-                    database.execSQL("CREATE TABLE IF NOT EXISTS CacheClazzAssignment (  cachePersonUid  BIGINT  NOT NULL , cacheContentEntryUid  BIGINT  NOT NULL , cacheClazzAssignmentUid  BIGINT  NOT NULL , cacheStudentScore  INTEGER  NOT NULL , cacheMaxScore  INTEGER  NOT NULL , cacheProgress  INTEGER  NOT NULL , cacheContentComplete  BOOL  NOT NULL , lastCsnChecked  BIGINT  NOT NULL , cacheUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE UNIQUE INDEX index_CacheClazzAssignment_cachePersonUid_cacheContentEntryUid_cacheClazzAssignmentUid ON CacheClazzAssignment (cachePersonUid, cacheContentEntryUid, cacheClazzAssignmentUid)")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignmentRollUp (  cachePersonUid  BIGINT  NOT NULL , cacheContentEntryUid  BIGINT  NOT NULL , cacheClazzAssignmentUid  BIGINT  NOT NULL , cacheStudentScore  INTEGER  NOT NULL , cacheMaxScore  INTEGER  NOT NULL , cacheProgress  INTEGER  NOT NULL , cacheContentComplete  BOOL  NOT NULL , lastCsnChecked  BIGINT  NOT NULL , cacheUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE UNIQUE INDEX index_ClazzAssignmentRollUp_cachePersonUid_cacheContentEntryUid_cacheClazzAssignmentUid ON ClazzAssignmentRollUp (cachePersonUid, cacheContentEntryUid, cacheClazzAssignmentUid)")
 
                 }
 
@@ -5009,15 +5008,15 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 database.execSQL("ALTER TABLE ContentEntry ADD COLUMN completionCriteria INTEGER NOT NULL DEFAULT 0")
                 database.execSQL("ALTER TABLE ContentEntry ADD COLUMN minScore INTEGER NOT NULL DEFAULT 0")
 
-                database.execSQL("ALTER TABLE CacheClazzAssignment ADD COLUMN cachePenalty INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE ClazzAssignmentRollUp ADD COLUMN cachePenalty INTEGER NOT NULL DEFAULT 0")
 
                 if(database.dbType() == DoorDbType.SQLITE) {
 
-                    database.execSQL("ALTER TABLE CacheClazzAssignment ADD COLUMN cacheSuccess INTEGER NOT NULL DEFAULT 0")
+                    database.execSQL("ALTER TABLE ClazzAssignmentRollUp ADD COLUMN cacheSuccess INTEGER NOT NULL DEFAULT 0")
 
                 }else if(database.dbType() == DoorDbType.POSTGRES){
 
-                    database.execSQL("ALTER TABLE CacheClazzAssignment ADD COLUMN cacheSuccess SMALLINT NOT NULL DEFAULT 0")
+                    database.execSQL("ALTER TABLE ClazzAssignmentRollUp ADD COLUMN cacheSuccess SMALLINT NOT NULL DEFAULT 0")
 
                 }
 

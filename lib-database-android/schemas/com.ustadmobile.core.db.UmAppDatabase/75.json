@@ -5801,7 +5801,7 @@
         "foreignKeys": []
       },
       {
-        "tableName": "CacheClazzAssignment",
+        "tableName": "ClazzAssignmentRollUp",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cacheUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cachePersonUid` INTEGER NOT NULL, `cacheContentEntryUid` INTEGER NOT NULL, `cacheClazzAssignmentUid` INTEGER NOT NULL, `cacheStudentScore` INTEGER NOT NULL, `cacheMaxScore` INTEGER NOT NULL, `cacheProgress` INTEGER NOT NULL, `cacheContentComplete` INTEGER NOT NULL, `cacheSuccess` INTEGER NOT NULL, `cachePenalty` INTEGER NOT NULL, `lastCsnChecked` INTEGER NOT NULL)",
         "fields": [
           {
@@ -5879,14 +5879,14 @@
         },
         "indices": [
           {
-            "name": "index_CacheClazzAssignment_cachePersonUid_cacheContentEntryUid_cacheClazzAssignmentUid",
+            "name": "index_ClazzAssignmentRollUp_cachePersonUid_cacheContentEntryUid_cacheClazzAssignmentUid",
             "unique": true,
             "columnNames": [
               "cachePersonUid",
               "cacheContentEntryUid",
               "cacheClazzAssignmentUid"
             ],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_CacheClazzAssignment_cachePersonUid_cacheContentEntryUid_cacheClazzAssignmentUid` ON `${TABLE_NAME}` (`cachePersonUid`, `cacheContentEntryUid`, `cacheClazzAssignmentUid`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzAssignmentRollUp_cachePersonUid_cacheContentEntryUid_cacheClazzAssignmentUid` ON `${TABLE_NAME}` (`cachePersonUid`, `cacheContentEntryUid`, `cacheClazzAssignmentUid`)"
           }
         ],
         "foreignKeys": []

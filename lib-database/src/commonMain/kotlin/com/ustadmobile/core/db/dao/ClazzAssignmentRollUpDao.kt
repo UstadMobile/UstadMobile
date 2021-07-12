@@ -3,16 +3,15 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.lib.db.entities.CacheClazzAssignment
-import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignmentRollUp
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 
 @Dao
 @Repository
-abstract class CacheClazzAssignmentDao: BaseDao<CacheClazzAssignment> {
+abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
 
     @Query(""" 
-        REPLACE INTO CacheClazzAssignment 
+        REPLACE INTO ClazzAssignmentRollUp 
                 (cachePersonUid, cacheContentEntryUid, cacheClazzAssignmentUid, 
                  cacheStudentScore, cacheMaxScore, cacheProgress, 
                  cacheContentComplete, cacheSuccess,cachePenalty, lastCsnChecked)
@@ -68,14 +67,14 @@ abstract class CacheClazzAssignmentDao: BaseDao<CacheClazzAssignment> {
            AND (:clazzUid = 0 OR ClazzAssignment.caClazzUid = :clazzUid)
            AND (:assignmentUid = 0 OR ClazzAssignment.caUid = :assignmentUid)
            AND (:personUid = 0 OR ClazzEnrolment.clazzEnrolmentPersonUid = :personUid)
-           AND lastCsnChecked >= COALESCE((SELECT MAX(lastCsnChecked) FROM CacheClazzAssignment),0)
+           AND lastCsnChecked >= COALESCE((SELECT MAX(lastCsnChecked) FROM ClazzAssignmentRollUp),0)
       GROUP BY cacheClazzAssignmentUid, cacheContentEntryUid, cachePersonUid
     """)
     abstract suspend fun cacheBestStatements(clazzUid: Long, assignmentUid: Long, personUid: Long)
 
     @Query("""
         DELETE
-         FROM CacheClazzAssignment
+         FROM ClazzAssignmentRollUp
         WHERE cacheContentEntryUid 
                 IN (SELECT cacjContentUid 
                      FROM ClazzAssignmentContentJoin
@@ -85,14 +84,14 @@ abstract class CacheClazzAssignmentDao: BaseDao<CacheClazzAssignment> {
 
 
     @Query("""
-        UPDATE CacheClazzAssignment 
+        UPDATE ClazzAssignmentRollUp 
            SET lastCsnChecked = 0
          WHERE cacheClazzAssignmentUid = :changedAssignmentUid
     """)
     abstract suspend fun invalidateCacheByAssignment(changedAssignmentUid: Long)
 
     @Query("""
-        UPDATE CacheClazzAssignment 
+        UPDATE ClazzAssignmentRollUp 
            SET lastCsnChecked = 0
          WHERE cacheClazzAssignmentUid IN (:changedAssignmentUid)
     """)

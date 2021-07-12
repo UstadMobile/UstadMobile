@@ -18,7 +18,7 @@ private fun Person.asClazzMember(clazzUid: Long, clazzMemberRole: Int, joinTime:
     }
 }
 
-fun UmAppDatabase.insertTestClazzAssignment(admin: Boolean = false): CacheClazzAssignment{
+fun UmAppDatabase.insertTestClazzAssignment(admin: Boolean = false): ClazzAssignmentRollUp{
 
     val testClazz = Clazz().apply {
         clazzUid = clazzDao.insert(this)
@@ -63,7 +63,7 @@ fun UmAppDatabase.insertTestClazzAssignment(admin: Boolean = false): CacheClazzA
         cacjUid = clazzAssignmentContentJoinDao.insert(this)
     }
 
-    val cacheClazzAssignment = CacheClazzAssignment().apply {
+    val cacheClazzAssignment = ClazzAssignmentRollUp().apply {
         this.cacheClazzAssignmentUid = clazzAssignment.caUid
         this.cacheContentEntryUid = contentEntry.contentEntryUid
         this.cacheContentComplete = true
@@ -71,7 +71,7 @@ fun UmAppDatabase.insertTestClazzAssignment(admin: Boolean = false): CacheClazzA
         this.cachePersonUid = student.personUid
         this.cacheStudentScore = 5
         this.cacheProgress = 100
-        this.cacheUid = cacheClazzAssignmentDao.insert(this)
+        this.cacheUid = clazzAssignmentRollUpDao.insert(this)
     }
 
     StatementEntity().apply {

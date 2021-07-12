@@ -14,7 +14,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.CacheClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignmentRollUp
 import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
 import com.ustadmobile.util.test.ext.insertTestClazzAssignment
 import kotlinx.coroutines.runBlocking
@@ -33,7 +33,7 @@ import org.mockito.kotlin.*
 
 class ClazzAssignmentDetailStudentProgressOverviewListPresenterTest {
 
-    private var cacheAssignment: CacheClazzAssignment? = null
+    private var assignmentRollUp: ClazzAssignmentRollUp? = null
 
     @JvmField
     @Rule
@@ -60,7 +60,7 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenterTest {
             import(ustadTestRule.diModule)
         }
         val repo: UmAppDatabase by di.activeRepoInstance()
-        cacheAssignment = repo.insertTestClazzAssignment()
+        assignmentRollUp = repo.insertTestClazzAssignment()
 
         repoClazzAssignmentDaoSpy = spy(repo.clazzAssignmentDao)
         whenever(repo.clazzAssignmentDao).thenReturn(repoClazzAssignmentDaoSpy)
@@ -72,11 +72,11 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenterTest {
 
         val db: UmAppDatabase by di.activeDbInstance()
         val clazzAssignment = runBlocking {
-            db.clazzAssignmentDao.findByUidAsync(cacheAssignment!!.cacheClazzAssignmentUid)!!
+            db.clazzAssignmentDao.findByUidAsync(assignmentRollUp!!.cacheClazzAssignmentUid)!!
         }
 
         val presenterArgs = mutableMapOf<String, String>()
-        presenterArgs[ARG_ENTITY_UID] = cacheAssignment?.cacheClazzAssignmentUid.toString()
+        presenterArgs[ARG_ENTITY_UID] = assignmentRollUp?.cacheClazzAssignmentUid.toString()
         val presenter = ClazzAssignmentDetailStudentProgressOverviewListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
@@ -85,23 +85,23 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenterTest {
         runBlocking {
             verify(repoClazzAssignmentDaoSpy, timeout(5000))
                     .getStudentsProgressOnAssignment(eq(clazzAssignment.caClazzUid), any(),
-                            eq(cacheAssignment!!.cacheClazzAssignmentUid), any())
+                            eq(assignmentRollUp!!.cacheClazzAssignmentUid), any())
         }
 
         verify(repoClazzAssignmentDaoSpy, timeout(5000))
-                .getAttemptSummaryForStudentsInAssignment(eq(cacheAssignment!!.cacheClazzAssignmentUid),
+                .getAttemptSummaryForStudentsInAssignment(eq(assignmentRollUp!!.cacheClazzAssignmentUid),
                         eq(clazzAssignment.caClazzUid), any(), any(), any())
         verify(mockView, timeout(5000)).studentProgress = any()
         verify(mockView, timeout(5000)).list = any()
 
         presenter.onClickPersonWithStatementDisplay(PersonWithAttemptsSummary().apply {
-            this.personUid = cacheAssignment!!.cachePersonUid
+            this.personUid = assignmentRollUp!!.cachePersonUid
         })
 
         val systemImpl: UstadMobileSystemImpl by di.instance()
         verify(systemImpl, timeout(5000)).go(eq(ClazzAssignmentDetailStudentProgressView.VIEW_NAME),
-                eq(mapOf(ARG_PERSON_UID to cacheAssignment!!.cachePersonUid.toString(),
-                        ARG_CLAZZ_ASSIGNMENT_UID to cacheAssignment!!.cacheClazzAssignmentUid.toString())),
+                eq(mapOf(ARG_PERSON_UID to assignmentRollUp!!.cachePersonUid.toString(),
+                        ARG_CLAZZ_ASSIGNMENT_UID to assignmentRollUp!!.cacheClazzAssignmentUid.toString())),
                 any())
 
     }

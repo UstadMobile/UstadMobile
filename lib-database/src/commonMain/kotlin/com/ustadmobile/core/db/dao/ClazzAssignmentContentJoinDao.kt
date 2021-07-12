@@ -24,21 +24,21 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
     @Query("""
         SELECT ContentEntry.title AS contentEntryTitle, ContentEntry.contentEntryUid,
         
-        COALESCE(CacheClazzAssignment.cacheStudentScore,0) AS resultScore,
+        COALESCE(ClazzAssignmentRollUp.cacheStudentScore,0) AS resultScore,
                                            
-        COALESCE(CacheClazzAssignment.cacheMaxScore,0) AS resultMax,
+        COALESCE(ClazzAssignmentRollUp.cacheMaxScore,0) AS resultMax,
                                                          
-        COALESCE(CacheClazzAssignment.cacheProgress,0) AS progress,                   
+        COALESCE(ClazzAssignmentRollUp.cacheProgress,0) AS progress,                   
                  
         0 as resultScaled,
                             
-        COALESCE(CacheClazzAssignment.cacheContentComplete,'FALSE') AS contentComplete,
+        COALESCE(ClazzAssignmentRollUp.cacheContentComplete,'FALSE') AS contentComplete,
         
-        COALESCE(CacheClazzAssignment.cacheSuccess,0) AS success,
+        COALESCE(ClazzAssignmentRollUp.cacheSuccess,0) AS success,
         
-        COALESCE(CacheClazzAssignment.cachePenalty,0) AS penalty,
+        COALESCE(ClazzAssignmentRollUp.cachePenalty,0) AS penalty,
         
-       COALESCE((CASE WHEN CacheClazzAssignment.cacheContentComplete 
+       COALESCE((CASE WHEN ClazzAssignmentRollUp.cacheContentComplete 
                         THEN 1 ELSE 0 END),0) AS totalCompletedContent,
                         
         1 as totalContent,                
@@ -53,7 +53,7 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
                 LEFT JOIN ContentEntry 
                 ON ContentEntry.contentEntryUid = cacjContentUid 
                 
-                LEFT JOIN CacheClazzAssignment
+                LEFT JOIN ClazzAssignmentRollUp
                 ON cacheContentEntryUid = ClazzAssignmentContentJoin.cacjContentUid
                 AND cachePersonUid = :personUid
                 AND cacheClazzAssignmentUid = :clazzAssignmentUid
@@ -115,19 +115,19 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
                 """
                     SELECT ContentEntry.*, ContentEntryParentChildJoin.*, 
                             Container.*, 
-                             COALESCE(CacheClazzAssignment.cacheStudentScore,0) AS resultScore,
+                             COALESCE(ClazzAssignmentRollUp.cacheStudentScore,0) AS resultScore,
                                            
-                             COALESCE(CacheClazzAssignment.cacheMaxScore,0) AS resultMax,
+                             COALESCE(ClazzAssignmentRollUp.cacheMaxScore,0) AS resultMax,
                                                          
-                             COALESCE(CacheClazzAssignment.cacheProgress,0) AS progress,                            
+                             COALESCE(ClazzAssignmentRollUp.cacheProgress,0) AS progress,                            
                             
-                             COALESCE(CacheClazzAssignment.cacheContentComplete,'FALSE') AS contentComplete,
+                             COALESCE(ClazzAssignmentRollUp.cacheContentComplete,'FALSE') AS contentComplete,
                                  
-                             COALESCE(CacheClazzAssignment.cacheSuccess,0) AS success,
+                             COALESCE(ClazzAssignmentRollUp.cacheSuccess,0) AS success,
                              
-                             COALESCE(CacheClazzAssignment.cachePenalty,0) AS penalty,
+                             COALESCE(ClazzAssignmentRollUp.cachePenalty,0) AS penalty,
                                
-                             COALESCE((CASE WHEN CacheClazzAssignment.cacheContentComplete 
+                             COALESCE((CASE WHEN ClazzAssignmentRollUp.cacheContentComplete 
                                             THEN 1 ELSE 0 END),0) AS totalCompletedContent,
                         
                              1 as totalContent
@@ -140,7 +140,7 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
                             LEFT JOIN ContentEntryParentChildJoin 
                             ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
                            
-                            LEFT JOIN CacheClazzAssignment
+                            LEFT JOIN ClazzAssignmentRollUp
                             ON cacheContentEntryUid = ClazzAssignmentContentJoin.cacjContentUid
                                 AND cachePersonUid = :personUid
                                 AND cacheClazzAssignmentUid = :clazzAssignmentUid

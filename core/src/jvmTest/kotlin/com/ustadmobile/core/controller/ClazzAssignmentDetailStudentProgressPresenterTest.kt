@@ -6,13 +6,11 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.CacheClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignmentRollUp
 import com.ustadmobile.util.test.ext.insertTestClazzAssignment
 import org.junit.Assert
 import org.junit.Before
@@ -29,7 +27,7 @@ import org.mockito.kotlin.*
 
 class ClazzAssignmentDetailStudentProgressPresenterTest {
 
-    private var cacheAssignment: CacheClazzAssignment? = null
+    private var assignmentRollUp: ClazzAssignmentRollUp? = null
 
     @JvmField
     @Rule
@@ -56,7 +54,7 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
             import(ustadTestRule.diModule)
         }
         val repo: UmAppDatabase by di.activeRepoInstance()
-        cacheAssignment = repo.insertTestClazzAssignment()
+        assignmentRollUp = repo.insertTestClazzAssignment()
 
         repoClazzAssignmentDaoSpy = spy(repo.clazzAssignmentDao)
         whenever(repo.clazzAssignmentDao).thenReturn(repoClazzAssignmentDaoSpy)
@@ -67,8 +65,8 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
 
         val presenterArgs = mutableMapOf<String, String>()
-        presenterArgs[ARG_CLAZZ_ASSIGNMENT_UID] =  cacheAssignment!!.cacheClazzAssignmentUid.toString()
-        presenterArgs[ARG_PERSON_UID] = cacheAssignment!!.cachePersonUid.toString()
+        presenterArgs[ARG_CLAZZ_ASSIGNMENT_UID] =  assignmentRollUp!!.cacheClazzAssignmentUid.toString()
+        presenterArgs[ARG_PERSON_UID] = assignmentRollUp!!.cachePersonUid.toString()
         val presenter = ClazzAssignmentDetailStudentProgressPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
@@ -76,7 +74,7 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
         //eg. verify the correct DAO method was called and was set on the view
         val entityValSet = mockView.captureLastEntityValue()!!
         Assert.assertEquals("Expected entity was set on view",
-                cacheAssignment!!.cacheClazzAssignmentUid, entityValSet.caUid)
+                assignmentRollUp!!.cacheClazzAssignmentUid, entityValSet.caUid)
     }
 
 }

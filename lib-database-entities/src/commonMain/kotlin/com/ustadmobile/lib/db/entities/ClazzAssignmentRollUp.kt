@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 @Entity(indices = [Index(value = ["cachePersonUid", "cacheContentEntryUid","cacheClazzAssignmentUid"],
         unique = true)])
 @Serializable
-class CacheClazzAssignment {
+class ClazzAssignmentRollUp {
 
     @PrimaryKey(autoGenerate = true)
     var cacheUid: Long = 0

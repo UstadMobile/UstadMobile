@@ -89,40 +89,40 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                   ELSE 0 END) AS completedStudents, 
            
             COALESCE((SELECT MAX(cacheStudentScore) 
-                        FROM CacheClazzAssignment
+                        FROM ClazzAssignmentRollUp
                        WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
                          AND cachePersonUid = :accountPersonUid),0) AS resultScore,
                           
                           
             COALESCE((SELECT MAX(cacheMaxScore) 
-                        FROM CacheClazzAssignment 
+                        FROM ClazzAssignmentRollUp 
                        WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
                          AND cachePersonUid = :accountPersonUid),0) AS resultMax,
                                 
                                 
             COALESCE((SELECT COUNT(cacheContentComplete)
-                        FROM CacheClazzAssignment
+                        FROM ClazzAssignmentRollUp
                         WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
                         AND cacheContentComplete
                               AND cachePersonUid = :accountPersonUid)  =  
                           
                           (SELECT COUNT(DISTINCT cacheContentEntryUid) 
-                             FROM CacheClazzAssignment
+                             FROM ClazzAssignmentRollUp
                             WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid), 'FALSE') AS contentComplete,
                           
             COALESCE((SELECT AVG(cachePenalty) 
-                        FROM CacheClazzAssignment 
+                        FROM ClazzAssignmentRollUp 
                        WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
                          AND cachePersonUid = :accountPersonUid),0) AS penalty,
                                                
             COALESCE((SELECT COUNT(cacheContentComplete)
-                        FROM CacheClazzAssignment
+                        FROM ClazzAssignmentRollUp
                         WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
                         AND cacheContentComplete
                               AND cachePersonUid = :accountPersonUid), 0) AS totalCompletedContent,
             
             COALESCE((SELECT COUNT(DISTINCT cacheContentEntryUid) 
-                              FROM CacheClazzAssignment
+                              FROM ClazzAssignmentRollUp
                              WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid), 0) AS totalContent,
                             
                                                
@@ -177,14 +177,14 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                         
                COALESCE(COUNT(DISTINCT ResultSource.cacheContentEntryUid), 0) AS totalContent
  
-     	  FROM (SELECT CacheClazzAssignment.cacheStudentScore, CacheClazzAssignment.cacheMaxScore,
-                        CacheClazzAssignment.cachePenalty, CacheClazzAssignment.cacheContentComplete,
-                        CacheClazzAssignment.cacheContentEntryUid
+     	  FROM (SELECT ClazzAssignmentRollUp.cacheStudentScore, ClazzAssignmentRollUp.cacheMaxScore,
+                        ClazzAssignmentRollUp.cachePenalty, ClazzAssignmentRollUp.cacheContentComplete,
+                        ClazzAssignmentRollUp.cacheContentEntryUid
      	 	      FROM ClazzAssignmentContentJoin 
                          LEFT JOIN ContentEntry 
                          ON ContentEntry.contentEntryUid = ClazzAssignmentContentJoin.cacjContentUid 
                          
-                         LEFT JOIN CacheClazzAssignment
+                         LEFT JOIN ClazzAssignmentRollUp
                          ON cacheContentEntryUid = ClazzAssignmentContentJoin.cacjContentUid 
                          AND cachePersonUid = :personUid
                          AND cacheClazzAssignmentUid = :caUid
@@ -203,7 +203,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
             
             
              (SELECT AVG(cacheProgress) 
-               FROM CacheClazzAssignment 
+               FROM ClazzAssignmentRollUp 
               WHERE cacheClazzAssignmentUid = :assignmentUid
                 AND cachePersonUid = ResultSource.personUid
                 ) AS progress,
@@ -214,28 +214,28 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                 'FALSE' as contentComplete,
                 
                 (SELECT SUM(cacheStudentScore) 
-                         FROM CacheClazzAssignment 
+                         FROM ClazzAssignmentRollUp 
                         WHERE cacheClazzAssignmentUid = :assignmentUid
                           AND cachePersonUid =  ResultSource.personUid) AS resultScore,
                           
                 (SELECT SUM(cacheMaxScore)
-                             FROM CacheClazzAssignment 
+                             FROM ClazzAssignmentRollUp 
                             WHERE cacheClazzAssignmentUid = :assignmentUid
                               AND cachePersonUid = ResultSource.personUid) AS resultMax, 
                                         
                  (SELECT AVG(cachePenalty)
-                             FROM CacheClazzAssignment 
+                             FROM ClazzAssignmentRollUp 
                             WHERE cacheClazzAssignmentUid = :assignmentUid
                               AND cachePersonUid = ResultSource.personUid) AS penalty,   
                                                     
                    COALESCE((SELECT COUNT(cacheContentComplete)
-                        FROM CacheClazzAssignment
+                        FROM ClazzAssignmentRollUp
                         WHERE cacheClazzAssignmentUid = :assignmentUid
                         AND cacheContentComplete
                               AND cachePersonUid = ResultSource.personUid), 0) AS totalCompletedContent,
             
             COALESCE((SELECT COUNT(DISTINCT cacheContentEntryUid) 
-                              FROM CacheClazzAssignment
+                              FROM ClazzAssignmentRollUp
                              WHERE cacheClazzAssignmentUid = :assignmentUid), 0) AS totalContent,                              
                                                     
 
