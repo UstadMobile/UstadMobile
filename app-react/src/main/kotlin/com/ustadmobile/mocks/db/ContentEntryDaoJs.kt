@@ -2,6 +2,7 @@ package com.ustadmobile.mocks.db
 
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mocks.db.DatabaseJs.Companion.ALLOW_ACCESS
@@ -122,7 +123,9 @@ class ContentEntryDaoJs: ContentEntryDao() {
         personUid: Long,
         sortOrder: Int
     ): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
-        TODO("Not yet implemented")
+        return DataSourceFactoryJs<Int,ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, Any>("entryId",
+            UstadView.MASTER_SERVER_ROOT_ENTRY_UID,sourcePath,
+            ListSerializer(ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer()))
     }
 
     override suspend fun updateAsync(entity: ContentEntry): Int {

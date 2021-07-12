@@ -149,6 +149,7 @@ open class ClazzDaoJs: ClazzDao() {
                 teacherNames = "Jane Doe"
                 lastRecorded = Date().getTime().toLong()
                 clazzCode = "tyui"
+                attendanceAverage = 0.0f
                 clazzActiveEnrolment = ClazzEnrolment().apply {
                     clazzEnrolmentRole = ClazzEnrolment.ROLE_TEACHER
                 }
@@ -162,6 +163,7 @@ open class ClazzDaoJs: ClazzDao() {
                 teacherNames = "June Doe"
                 lastRecorded = Date().getTime().toLong()
                 clazzCode = "xetyr"
+                attendanceAverage = 0.9f
             },
             ClazzWithListDisplayDetails().apply {
                 clazzUid = 3
@@ -172,6 +174,7 @@ open class ClazzDaoJs: ClazzDao() {
                 teacherNames = "Sam John"
                 lastRecorded = Date().getTime().toLong()
                 clazzCode = "hnjyk"
+                attendanceAverage = 0.7f
                 clazzActiveEnrolment = ClazzEnrolment().apply {
                     clazzEnrolmentRole = ClazzEnrolment.ROLE_STUDENT_PENDING
                 }

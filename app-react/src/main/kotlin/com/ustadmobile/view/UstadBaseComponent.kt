@@ -2,10 +2,13 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import com.ustadmobile.navigation.NavControllerJs
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.redux.ReduxSnackBarState
@@ -14,10 +17,10 @@ import com.ustadmobile.redux.ReduxToolbarState
 import com.ustadmobile.util.*
 import kotlinx.atomicfu.atomic
 import kotlinx.browser.window
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.instance
+import org.kodein.di.*
 import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.events.Event
 import react.RBuilder
@@ -128,8 +131,17 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         r?.run()
     }
 
-    override val di: DI
-        get() = getCurrentState().appDi.di
+    override val di: DI by DI.lazy {
+        extend(getCurrentState().appDi.di)
+
+        bind<UstadNavController>() with provider {
+            NavControllerJs()
+        }
+
+        bind<CoroutineScope>(DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with provider {
+            GlobalScope
+        }
+    }
 
     override fun addObserver(observer: DoorLifecycleObserver) {
         lifecycleObservers.add(observer)

@@ -1,14 +1,10 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.MAppBarPosition
-import com.ccfraser.muirwik.components.mAppBar
-import com.ccfraser.muirwik.components.mTab
-import com.ccfraser.muirwik.components.mTabs
+import com.ccfraser.muirwik.components.*
 import com.ustadmobile.navigation.RouteManager.findDestination
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.tabsContainer
-import kotlinx.css.Display
-import kotlinx.css.display
+import kotlinx.css.*
 import react.RBuilder
 import react.RProps
 import react.RState
@@ -47,14 +43,20 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,RState>(mP
                 display = displayProperty(props.showTabs)
             }
             mTabs(selectedView,
+                scrollButtons = MTabScrollButtons.auto,
+                variant = MTabVariant.scrollable,
                 onChange = { _, value ->
                     tabChangeListener(value)
                 }) {
+                css {
+                    padding = "0 20px 0 20px"
+                }
                 attrs.asDynamic().id = "um-tabs"
                 props.tabs.forEachIndexed { _, it ->
                     mTab(it.title, it.viewName) {
                         css {
                             display = Display.block
+                            width = LinearDimension("100%")
                         }
                     }
                 }

@@ -23,6 +23,7 @@ class DataSourceFactoryJs<Key,Value, EXtra>(private val key:String? = null,
 
     override suspend fun getData(offset: Int, limit: Int): List<Value> {
         var dataSet = loadDataAsList(sourcePath,dStrategy)
+        console.log(dataSet)
 
         if(sourcePath == "people"){
             return listOf(PersonWithDisplayDetails().apply {

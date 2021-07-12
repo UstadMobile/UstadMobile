@@ -12,6 +12,10 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
+import com.ustadmobile.util.StyleManager.clazzItemSecondaryDesc
+import com.ustadmobile.util.StyleManager.clazzListItemSecondaryIcons
+import com.ustadmobile.util.StyleManager.clazzListRoleChip
+import com.ustadmobile.util.StyleManager.theme
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
@@ -63,16 +67,16 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
             css{
                 position = Position.relative
             }
-            umEntityAvatar(className = "${StyleManager.name}-clazzItemClass",
-                listItem = true, fallbackSrc = "assets/entry_placeholder.jpeg")
+            umEntityAvatar(
+                className = "${StyleManager.name}-clazzItemClass",
+                listItem = true,
+                fallbackSrc = "assets/entry_placeholder.jpeg")
+
             val memberRole = "${item.clazzActiveEnrolment?.roleToString(this,systemImpl)}"
+
             if(item.clazzActiveEnrolment != null){
                 mChip(memberRole,color = MChipColor.primary){
-                    css{
-                        position = Position.absolute
-                        right = 10.px
-                        top = 10.px
-                    }
+                    css(clazzListRoleChip)
                     attrs.asDynamic().icon = mIcon("badge"){
                         css{
                             fontSize = LinearDimension("1.2em")
@@ -102,21 +106,45 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
             umGridContainer{
                 umItem(MGridSize.cells1){
                     mIcon("people", color = MIconColor.inherit){
-                        css{
-                            marginTop = 4.px
-                            fontSize = LinearDimension("1.1em")
-                        }
+                        css(clazzListItemSecondaryIcons)
                     }
                 }
 
-                umItem(MGridSize.cells11){
+                umItem(MGridSize.cells6){
                     val numOfStudentTeachers = getString(MessageID.x_teachers_y_students)
                         .format(item.numTeachers, item.numStudents)
                     mTypography(numOfStudentTeachers,
-                        variant = MTypographyVariant.caption,
                         color = MTypographyColor.textPrimary
                     ){
-                        css(alignTextToStart)
+                        css{
+                            +alignTextToStart
+                            +clazzItemSecondaryDesc
+                        }
+                    }
+
+                }
+
+                umItem(MGridSize.cells1){
+                    mIcon("circle",
+                        color = when {
+                            item.attendanceAverage > 0.8f -> MIconColor.primary
+                            item.attendanceAverage > 0.6f -> MIconColor.inherit
+                            else -> MIconColor.error
+                        }){
+                        css(clazzListItemSecondaryIcons)
+                    }
+                }
+
+                umItem(MGridSize.cells4){
+                    val attendancesPercentage = getString(MessageID.x_percent_attended)
+                        .format(item.attendanceAverage * 100)
+                    mTypography(attendancesPercentage,
+                        color = MTypographyColor.textPrimary
+                    ){
+                        css{
+                            +alignTextToStart
+                            +clazzItemSecondaryDesc
+                        }
                     }
 
                 }

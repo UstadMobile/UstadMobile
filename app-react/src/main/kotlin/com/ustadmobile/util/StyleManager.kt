@@ -438,6 +438,28 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         width = LinearDimension("100%")
     }
 
+    val clazzDetailExtraInfo by css {
+        width = LinearDimension("100%")
+        margin = "0 2% 0 2%"
+        paddingBottom = 10.spacingUnits
+    }
+
+    val clazzListRoleChip by css{
+        position = Position.absolute
+        right = 10.px
+        top = 10.px
+    }
+
+    val clazzListItemSecondaryIcons by css {
+        marginTop = 4.px
+        fontSize = LinearDimension("1em")
+    }
+
+    val clazzItemSecondaryDesc by css {
+        marginTop = 4.px
+        fontSize = LinearDimension("0.68rem")
+    }
+
     override val di: DI
         get() = ReduxAppStateManager.getCurrentState().appDi.di
 
