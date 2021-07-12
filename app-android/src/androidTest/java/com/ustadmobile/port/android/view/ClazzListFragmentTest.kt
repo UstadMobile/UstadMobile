@@ -73,8 +73,10 @@ class ClazzListFragmentTest : TestCase() {
 
             }
 
-            Assert.assertEquals("After clicking on item, it navigates to detail view",
-                    R.id.clazz_detail_dest, systemImplNavRule.navController.currentDestination?.id)
+            flakySafely {
+                Assert.assertEquals("After clicking on item, it navigates to detail view",
+                        R.id.clazz_detail_dest, systemImplNavRule.navController.currentDestination?.id)
+            }
             val currentArgs = systemImplNavRule.navController.currentDestination?.arguments
             //Note: as of 02/June/2020 arguments were missing even though they were given
 
