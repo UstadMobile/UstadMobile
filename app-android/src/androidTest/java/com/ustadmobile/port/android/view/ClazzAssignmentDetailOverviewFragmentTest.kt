@@ -85,7 +85,7 @@ class ClazzAssignmentDetailOverviewFragmentTest : TestCase() {
             cacjUid = dbRule.repo.clazzAssignmentContentJoinDao.insert(this)
         }
 
-        CacheClazzAssignment().apply {
+        ClazzAssignmentRollUp().apply {
             this.cacheClazzAssignmentUid = clazzAssignment.caUid
             this.cacheContentEntryUid = contentEntry.contentEntryUid
             this.cacheContentComplete = true
@@ -93,7 +93,7 @@ class ClazzAssignmentDetailOverviewFragmentTest : TestCase() {
             this.cachePersonUid = 42
             this.cacheStudentScore = 5
             this.cacheProgress = 100
-            this.cacheUid = dbRule.repo.cacheClazzAssignmentDao.insert(this)
+            this.cacheUid = dbRule.repo.clazzAssignmentRollUpDao.insert(this)
         }
 
         StatementEntity().apply {

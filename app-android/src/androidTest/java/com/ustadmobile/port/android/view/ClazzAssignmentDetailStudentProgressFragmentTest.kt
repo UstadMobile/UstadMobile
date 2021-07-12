@@ -11,12 +11,10 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.screen.ClazzAssignmentDetailOverviewScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -93,7 +91,7 @@ class ClazzAssignmentDetailStudentProgressFragmentTest : TestCase()  {
             cacjUid = dbRule.repo.clazzAssignmentContentJoinDao.insert(this)
         }
 
-        CacheClazzAssignment().apply {
+        ClazzAssignmentRollUp().apply {
             this.cacheClazzAssignmentUid = clazzAssignment.caUid
             this.cacheContentEntryUid = contentEntry.contentEntryUid
             this.cacheContentComplete = true
@@ -101,7 +99,7 @@ class ClazzAssignmentDetailStudentProgressFragmentTest : TestCase()  {
             this.cachePersonUid = student.personUid
             this.cacheStudentScore = 5
             this.cacheProgress = 100
-            this.cacheUid = dbRule.repo.cacheClazzAssignmentDao.insert(this)
+            this.cacheUid = dbRule.repo.clazzAssignmentRollUpDao.insert(this)
         }
 
         StatementEntity().apply {

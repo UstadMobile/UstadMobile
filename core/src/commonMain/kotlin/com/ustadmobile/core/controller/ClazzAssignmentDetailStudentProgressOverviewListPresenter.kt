@@ -40,7 +40,7 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
             clazzAssignment = withTimeoutOrNull(2000) {
                 db.clazzAssignmentDao.findByUidAsync(filterByClazzAssignmentUid)
             }
-            repo.cacheClazzAssignmentDao.cacheBestStatements(
+            repo.clazzAssignmentRollUpDao.cacheBestStatements(
                     clazzAssignment?.caClazzUid ?: 0, clazzAssignment?.caUid ?: 0,
                     0)
 

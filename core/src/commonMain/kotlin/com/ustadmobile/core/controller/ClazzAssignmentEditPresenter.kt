@@ -174,7 +174,7 @@ class ClazzAssignmentEditPresenter(context: Any,
                 repo.clazzAssignmentDao.updateAsync(entity)
             }
 
-            repo.cacheClazzAssignmentDao.invalidateCacheByAssignment(entity.caUid)
+            repo.clazzAssignmentRollUpDao.invalidateCacheByAssignment(entity.caUid)
 
             val contentToInsert = contentOneToManyJoinEditHelper.entitiesToInsert
             val contentToDelete = contentOneToManyJoinEditHelper.primaryKeysToDeactivate
@@ -188,7 +188,7 @@ class ClazzAssignmentEditPresenter(context: Any,
 
             repo.clazzAssignmentContentJoinDao.deactivateByUids(contentToDelete, entity.caUid)
 
-            repo.cacheClazzAssignmentDao.deleteCachedInactiveContent()
+            repo.clazzAssignmentRollUpDao.deleteCachedInactiveContent()
 
             onFinish(ClazzAssignmentDetailView.VIEW_NAME, entity.caUid, entity)
 

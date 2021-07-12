@@ -14,7 +14,7 @@ import org.kodein.di.on
 
 /**
  * SyncListener that will handle when an incoming ClazzAssignment change requires a recheck of
- * CacheClazzAssignment generation. E.g. When a assignment is created on a client device.
+ * ClazzAssignmentRollUp generation. E.g. When a assignment is created on a client device.
  */
 class ClazzAssignmentSyncListener(val site: Endpoint, val di: DI) {
 
@@ -25,7 +25,7 @@ class ClazzAssignmentSyncListener(val site: Endpoint, val di: DI) {
             GlobalScope.launch {
                 val clazzAssignmentUids = evt.entitiesReceived.map { it.caUid }.distinct()
                 clazzAssignmentUids.chunked(100).forEach {
-                    db.cacheClazzAssignmentDao.invalidateCacheByAssignmentList(it)
+                    db.clazzAssignmentRollUpDao.invalidateCacheByAssignmentList(it)
                 }
             }
         }

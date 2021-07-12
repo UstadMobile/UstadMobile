@@ -39,7 +39,7 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
         selectedSortOption = SORT_OPTIONS[0]
         GlobalScope.launch(doorMainDispatcher()) {
             mLoggedInPersonUid = accountManager.activeAccount.personUid
-            repo.cacheClazzAssignmentDao.cacheBestStatements(
+            repo.clazzAssignmentRollUpDao.cacheBestStatements(
                     clazzUid, 0,
                     0)
             updateListOnView()
