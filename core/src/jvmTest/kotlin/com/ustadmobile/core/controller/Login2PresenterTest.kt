@@ -320,7 +320,9 @@ class Login2PresenterTest {
 
         presenter.handleLogin(" $VALID_USER ", "$VALID_PASS ")
 
-        verifyBlocking(accountManager) { login(VALID_USER, VALID_PASS, httpUrl) }
+        verifyBlocking(accountManager) {
+            login(eq(VALID_USER), eq(VALID_PASS), eq(httpUrl))
+        }
     }
 
 
