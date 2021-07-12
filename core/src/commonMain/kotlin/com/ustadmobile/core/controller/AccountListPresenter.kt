@@ -26,7 +26,7 @@ import org.kodein.di.instance
 
 class AccountListPresenter(context: Any, arguments: Map<String, String>, view: AccountListView,
                            di: DI, val doorLifecycleOwner: DoorLifecycleOwner)
-    : UstadBaseController<AccountListView>(context, arguments, view, di) {
+    : UstadBaseController<AccountListView>(context, arguments, view, di, activeSessionRequired = false) {
 
     private val accountManager: UstadAccountManager by instance()
 

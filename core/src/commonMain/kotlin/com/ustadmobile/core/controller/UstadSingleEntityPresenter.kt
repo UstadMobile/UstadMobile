@@ -5,15 +5,15 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.nav.navigateToErrorScreen
+import com.ustadmobile.core.util.ext.logErrorReport
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadSingleEntityView
 import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.concurrentSafeListOf
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import com.ustadmobile.lib.db.entities.ErrorReport
+import kotlinx.coroutines.*
 import kotlinx.serialization.DeserializationStrategy
 import org.kodein.di.*
 import kotlin.jvm.Volatile
@@ -78,7 +78,7 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
         }else if(persistenceMode == PersistenceMode.DB) {
             view.loading = true
             (view as? UstadEditView<*>)?.fieldsEnabled = false
-            GlobalScope.launch(doorMainDispatcher()) {
+            presenterScope.launch {
                 try {
                     listOf(db, repo).forEach {
                         entity = onLoadEntityFromDb(it)
@@ -89,7 +89,11 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
                     (view as? UstadEditView<*>)?.fieldsEnabled = true
                     onLoadDataComplete()
                 }catch(e: Exception) {
-                    navigateToErrorScreen(e)
+                    if(e !is CancellationException)
+                        withContext(NonCancellable) {
+                            repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, e,
+                                this@UstadSingleEntityPresenter)
+                        }
                 }
             }
         }else if(persistenceMode == PersistenceMode.JSON){
