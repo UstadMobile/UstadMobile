@@ -51,7 +51,8 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
             pager.adapter = mPagerAdapter
 
-            mediator = TabLayoutMediator(tabList, pager, VIEWNAME_TO_TITLE_MAP.createTabLayoutStrategy(value, requireContext()))
+            mediator = TabLayoutMediator(tabList, pager,
+                VIEWNAME_TO_TITLE_MAP.createTabLayoutStrategy(value, requireContext()))
             mediator?.attach()
         }
 

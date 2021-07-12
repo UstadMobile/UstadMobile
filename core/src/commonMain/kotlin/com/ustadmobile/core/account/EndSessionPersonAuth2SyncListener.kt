@@ -18,7 +18,7 @@ class EndSessionPersonAuth2SyncListener(
     override fun onEntitiesReceived(evt: SyncEntitiesReceivedEvent<PersonAuth2>) {
         GlobalScope.launch {
             evt.entitiesReceived.forEach {
-                repo.userSessionDao.endOtherSessions(it.pauthLcb.toLong(),
+                repo.userSessionDao.endOtherSessions(it.pauthUid, it.pauthLcb.toLong(),
                     UserSession.STATUS_NEEDS_REAUTH, UserSession.REASON_PASSWORD_CHANGED)
             }
         }

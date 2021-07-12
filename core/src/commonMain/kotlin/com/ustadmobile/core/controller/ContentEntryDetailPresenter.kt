@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -52,9 +53,16 @@ class ContentEntryDetailPresenter(context: Any,
 
     private fun setupTabs() {
         val entityUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
-        view.tabs = listOf("${ContentEntryDetailOverviewView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid" +
-                "&${UstadView.ARG_CLAZZUID}=${arguments[UstadView.ARG_CLAZZUID]}",
-                "${ContentEntryDetailAttemptsListView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid")
+        val commonArgs = mapOf(
+            UstadView.ARG_NAV_CHILD to true.toString(),
+            UstadView.ARG_ENTITY_UID to entityUid.toString(),
+            UstadView.ARG_CLAZZUID to (arguments[UstadView.ARG_CLAZZUID] ?: "0")
+        )
+
+        view.tabs = listOf(
+            ContentEntryDetailOverviewView.VIEW_NAME.appendQueryArgs(commonArgs),
+            ContentEntryDetailAttemptsListView.VIEW_NAME.appendQueryArgs(commonArgs)
+        )
     }
 
 

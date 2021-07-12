@@ -78,6 +78,21 @@ abstract class UstadBaseController<V : UstadView>(
     protected val ustadNavController: UstadNavController by instance()
 
     /**
+     * There are two possible scenarios for using a presenter:
+     *
+     *  1) Top level view e.g. ClazzDetail reached by navigation with the navcontroller. There is
+     *     only one top level view active at a time.
+     *  2) Embedded and not reached via the navcontroller (e.g. ClazzDetailOverview which is
+     *     displayed as a tab).
+     *
+     *  This can be used to control which presenters are observing for the end of a user session to
+     *  avoid a situation where multiple presenters react to a user being logged out, to decide
+     *  whether or not the presenter should observe for return results, etc.
+     */
+    protected open val navChild: Boolean
+        get() = arguments[UstadView.ARG_NAV_CHILD]?.toBoolean() == true
+
+    /**
      * A coroutine scope that is tied to the lifecycle of the presenter. It will be canceled after
      * onDestroy. This avoids longer-running async processes accidentally interacting with a view
      * that has been destroyed etc.
@@ -99,7 +114,9 @@ abstract class UstadBaseController<V : UstadView>(
      */
     @JsName("onCreate")
     open fun onCreate(savedState: Map<String, String>?) {
-        if(created) throw IllegalStateException("onCreate must be called ONCE AND ONLY ONCE! It has already been called")
+        if(created)
+            throw IllegalStateException("onCreate must be called ONCE AND ONLY ONCE! It has already been called")
+
         created = true
         this.savedState = savedState
 
@@ -111,7 +128,7 @@ abstract class UstadBaseController<V : UstadView>(
 
         lifecycleStatus.value = CREATED
 
-        if(activeSessionRequired) {
+        if(activeSessionRequired && !navChild) {
             val accountManager: UstadAccountManager = direct.instance()
             val lifecycleOwner: DoorLifecycleOwner? = direct.instanceOrNull()
             if(lifecycleOwner != null) {

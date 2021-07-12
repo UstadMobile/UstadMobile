@@ -13,6 +13,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSchoolDetailBinding
 import com.ustadmobile.core.controller.SchoolDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
+import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.Role
@@ -62,18 +63,22 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 
         val entityUidValue : String = arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"
+        val commonArgs = mapOf(UstadView.ARG_NAV_CHILD to true.toString())
 
         val tabs = listOf(
-                SchoolDetailOverviewView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +
-                        entityUidValue
-                ,
-                SchoolMemberListView.VIEW_NAME + "?${UstadView.ARG_FILTER_BY_ROLE}=" +
-                        Role.ROLE_SCHOOL_STAFF_UID +
-                        "&${UstadView.ARG_FILTER_BY_SCHOOLUID}=" + entityUidValue
-                ,
-                SchoolMemberListView.VIEW_NAME + "?${UstadView.ARG_FILTER_BY_ROLE}=" +
-                        Role.ROLE_SCHOOL_STUDENT_UID +
-                        "&${UstadView.ARG_FILTER_BY_SCHOOLUID}=" + entityUidValue
+            SchoolDetailOverviewView.VIEW_NAME.appendQueryArgs(
+                commonArgs + mapOf(UstadView.ARG_ENTITY_UID to entityUidValue)
+            ),
+            SchoolMemberListView.VIEW_NAME.appendQueryArgs(
+                commonArgs + mapOf(
+                    UstadView.ARG_FILTER_BY_ROLE to Role.ROLE_SCHOOL_STAFF_UID.toString(),
+                    UstadView.ARG_FILTER_BY_SCHOOLUID to entityUidValue)
+            ),
+            SchoolMemberListView.VIEW_NAME.appendQueryArgs(
+                commonArgs + mapOf(
+                    UstadView.ARG_FILTER_BY_ROLE to Role.ROLE_SCHOOL_STUDENT_UID.toString(),
+                    UstadView.ARG_FILTER_BY_SCHOOLUID to entityUidValue)
+            ),
         )
 
         mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager, lifecycle,

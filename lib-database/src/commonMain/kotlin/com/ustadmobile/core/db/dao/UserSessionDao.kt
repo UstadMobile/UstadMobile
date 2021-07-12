@@ -72,10 +72,12 @@ abstract class UserSessionDao {
                                (SELECT nodeClientId
                                   FROM SyncNode
                                  LIMIT 1), 0))
-         WHERE usClientNodeId != :exemptNodeId
+         WHERE usPersonUid = :personUid
+           AND usClientNodeId != :exemptNodeId
            AND usStatus != :newStatus                     
     """)
-    abstract suspend fun endOtherSessions(exemptNodeId: Long, newStatus: Int, reason: Int)
+    abstract suspend fun endOtherSessions(personUid: Long, exemptNodeId: Long, newStatus: Int,
+                                          reason: Int)
 
     companion object {
         const val FIND_LOCAL_SESSIONS_SQL = """

@@ -3,8 +3,8 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ClazzDetailView.Companion.ARG_TABS
@@ -89,23 +89,31 @@ class ClazzDetailPresenter(context: Any,
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         val personUid = accountManager.activeAccount.personUid
         scope.launch {
+            val commonArgs = mapOf(UstadView.ARG_NAV_CHILD to true.toString())
 
-            val contentEntryListParams = mapOf(
-                    ARG_CLAZZUID to entityUid.toString(),
-                    ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_CLAZZ)
-                    .toQueryString()
+            val coreTabs = listOf(
+                ClazzDetailOverviewView.VIEW_NAME.appendQueryArgs(
+                    commonArgs + mapOf(ARG_ENTITY_UID to entityUid.toString())
+                ),
+                ContentEntryList2View.VIEW_NAME.appendQueryArgs(
+                    commonArgs + mapOf(
+                        ARG_CLAZZUID to entityUid.toString(),
+                        ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_CLAZZ)
+                ),
+                ClazzMemberListView.VIEW_NAME.appendQueryArgs(
+                    commonArgs + mapOf(ARG_CLAZZUID to entityUid.toString())
+                ))
 
-            view.tabs = listOf("${ClazzDetailOverviewView.VIEW_NAME}?$ARG_ENTITY_UID=$entityUid",
-                    """${ContentEntryList2View.VIEW_NAME}?$contentEntryListParams""",
-                    """${ClazzMemberListView.VIEW_NAME}?
-                        $ARG_CLAZZUID=$entityUid
-                        """.trimMargin()) +
-                    CLAZZ_FEATURES.filter { featureFlag ->
-                        (clazz.clazzFeatures and featureFlag) > 0 && db.clazzDao.personHasPermissionWithClazz(personUid, entityUid,
-                                FEATURE_PERMISSION_MAP[featureFlag] ?: -1)
-                    }.map {
-                        (VIEWNAME_MAP[it] ?: "INVALID") + "?$ARG_CLAZZUID=$entityUid"
-                    }
+            val permissionAndFeatureBasedTabs = CLAZZ_FEATURES.filter { featureFlag ->
+                (clazz.clazzFeatures and featureFlag) > 0 && db.clazzDao.personHasPermissionWithClazz(personUid, entityUid,
+                    FEATURE_PERMISSION_MAP[featureFlag] ?: -1)
+            }.map {
+                (VIEWNAME_MAP[it] ?: "INVALID").appendQueryArgs(
+                    commonArgs + mapOf(ARG_CLAZZUID to entityUid.toString())
+                )
+            }
+
+            view.tabs =  coreTabs + permissionAndFeatureBasedTabs
         }
     }
 
