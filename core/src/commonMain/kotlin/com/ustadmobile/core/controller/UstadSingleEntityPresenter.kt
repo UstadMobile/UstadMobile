@@ -5,25 +5,30 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.logErrorReport
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadSingleEntityView
 import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.concurrentSafeListOf
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import com.ustadmobile.lib.db.entities.ErrorReport
+import kotlinx.coroutines.*
 import kotlinx.serialization.DeserializationStrategy
 import org.kodein.di.*
 import kotlin.jvm.Volatile
 import kotlin.reflect.KClass
 
 abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>(
-        context: Any,
-        arguments: Map<String, String>,
-        view: V, di: DI,
-        val lifecycleOwner: DoorLifecycleOwner): UstadBaseController<V>(context, arguments, view, di) {
+    context: Any,
+    arguments: Map<String, String>,
+    view: V,
+    di: DI,
+    val lifecycleOwner: DoorLifecycleOwner,
+    activeSessionRequired: Boolean = true
+): UstadBaseController<V>(
+    context, arguments, view, di, activeSessionRequired
+) {
 
     fun interface OnLoadDataCompletedListener {
         fun onLoadDataCompleted(editPresenter: UstadSingleEntityPresenter<*, *>)
@@ -83,10 +88,12 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
                     view.loading = false
                     (view as? UstadEditView<*>)?.fieldsEnabled = true
                     onLoadDataComplete()
-                } catch (ex: CancellationException) {
-                    throw ex
                 }catch(e: Exception) {
-                    navigateToErrorScreen(e)
+                    if(e !is CancellationException)
+                        withContext(NonCancellable) {
+                            repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, e,
+                                this@UstadSingleEntityPresenter)
+                        }
                 }
             }
         }else if(persistenceMode == PersistenceMode.JSON){

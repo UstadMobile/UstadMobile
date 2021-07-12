@@ -28,21 +28,14 @@ class RedirectPresenter(context: Any, arguments: Map<String, String>, view: Redi
         if(deepLink?.isNotEmpty() == true){
             systemImpl.goToDeepLink(deepLink, accountManager, context)
         }else {
-            val canSelectServer = systemImpl.getAppConfigBoolean(AppConfig.KEY_ALLOW_SERVER_SELECTION,
-                    context)
-
-            GlobalScope.launch(doorMainDispatcher()) {
-                val numActiveAccounts = accountManager.activeSessionCount()
-                val destination = nextViewArg ?: if (numActiveAccounts < 1) {
-                    if (canSelectServer)
-                        SiteEnterLinkView.VIEW_NAME
-                    else
-                        Login2View.VIEW_NAME
-                } else {
-                    ContentEntryListTabsView.VIEW_NAME
+            if(nextViewArg != null) {
+                systemImpl.goToViewLink(nextViewArg, context)
+            }else if(accountManager.activeSession != null) {
+                systemImpl.goToViewLink(ContentEntryListTabsView.VIEW_NAME, context)
+            }else {
+                presenterScope.launch {
+                    navigateToStartNewUserSession()
                 }
-
-                systemImpl.goToViewLink(destination, context)
             }
         }
     }

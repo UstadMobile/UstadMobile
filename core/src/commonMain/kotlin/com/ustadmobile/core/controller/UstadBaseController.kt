@@ -30,28 +30,26 @@
  */
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.impl.NavigateForResultOptions
-import com.ustadmobile.core.impl.UmLifecycleListener
-import com.ustadmobile.core.impl.UmLifecycleOwner
+import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
+import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.impl.nav.navigateToErrorScreen
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.putResultDestInfo
 import com.ustadmobile.core.util.safeStringify
-import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.UstadEditView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.DoorObserver
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.serialization.SerializationStrategy
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.instance
+import kotlinx.coroutines.launch
+import org.kodein.di.*
 import kotlin.js.JsName
-import kotlin.reflect.KClass
 
 /**
  * Base Controller that provides key functionality for any view :
@@ -60,9 +58,13 @@ import kotlin.reflect.KClass
  *
  * @author mike
  */
-abstract class UstadBaseController<V : UstadView>(override val context: Any,
-                                                  protected val arguments: Map<String, String>,
-                                                  val view: V, override val di: DI): UmLifecycleOwner, DIAware {
+abstract class UstadBaseController<V : UstadView>(
+    override val context: Any,
+    protected val arguments: Map<String, String>,
+    val view: V,
+    override val di: DI,
+    open val activeSessionRequired: Boolean = true
+): UmLifecycleOwner, DIAware {
 
     private val lifecycleListeners = mutableListOf<UmLifecycleListener>()
 
@@ -76,11 +78,34 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
     protected val ustadNavController: UstadNavController by instance()
 
     /**
+     * There are two possible scenarios for using a presenter:
+     *
+     *  1) Top level view e.g. ClazzDetail reached by navigation with the navcontroller. There is
+     *     only one top level view active at a time.
+     *  2) Embedded and not reached via the navcontroller (e.g. ClazzDetailOverview which is
+     *     displayed as a tab).
+     *
+     *  This can be used to control which presenters are observing for the end of a user session to
+     *  avoid a situation where multiple presenters react to a user being logged out, to decide
+     *  whether or not the presenter should observe for return results, etc.
+     */
+    protected open val navChild: Boolean
+        get() = arguments[UstadView.ARG_NAV_CHILD]?.toBoolean() == true
+
+    /**
      * A coroutine scope that is tied to the lifecycle of the presenter. It will be canceled after
      * onDestroy. This avoids longer-running async processes accidentally interacting with a view
      * that has been destroyed etc.
      */
     protected val presenterScope: CoroutineScope by instance(tag = DiTag.TAG_PRESENTER_COROUTINE_SCOPE)
+
+    private val activeSessionObserver = DoorObserver<UserSessionWithPersonAndEndpoint?> {
+        if(it == null) {
+            presenterScope.launch {
+                navigateToStartNewUserSession()
+            }
+        }
+    }
 
     /**
      * Handle when the presenter is created. Analogous to Android's onCreate
@@ -89,7 +114,9 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
      */
     @JsName("onCreate")
     open fun onCreate(savedState: Map<String, String>?) {
-        if(created) throw IllegalStateException("onCreate must be called ONCE AND ONLY ONCE! It has already been called")
+        if(created)
+            throw IllegalStateException("onCreate must be called ONCE AND ONLY ONCE! It has already been called")
+
         created = true
         this.savedState = savedState
 
@@ -100,6 +127,14 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
 
 
         lifecycleStatus.value = CREATED
+
+        if(activeSessionRequired && !navChild) {
+            val accountManager: UstadAccountManager = direct.instance()
+            val lifecycleOwner: DoorLifecycleOwner? = direct.instanceOrNull()
+            if(lifecycleOwner != null) {
+                accountManager.activeUserSessionLive.observe(lifecycleOwner, activeSessionObserver)
+            }
+        }
     }
 
     /**
@@ -203,7 +238,7 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
         val stateHandle = ustadNavController.currentBackStackEntry?.savedStateHandle
         if(stateHandle != null) {
             stateMap.forEach {
-                stateHandle.set(it.key, it.value)
+                stateHandle[it.key] = it.value
             }
         }
     }
@@ -271,10 +306,8 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
 
         val currentEntityValue = options.currentEntityValue
         if(currentEntityValue != null) {
-            options.arguments.put(
-                UstadEditView.ARG_ENTITY_JSON,
-                safeStringify(di, options.serializationStrategy, options.entityClass,
-                    currentEntityValue))
+            options.arguments[UstadEditView.ARG_ENTITY_JSON] = safeStringify(
+                di, options.serializationStrategy, options.entityClass,currentEntityValue)
         }
 
         ustadNavController.navigate(options.destinationViewName, options.arguments)
@@ -287,6 +320,56 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
     fun navigateToErrorScreen(exception: Exception) {
         ustadNavController.navigateToErrorScreen(exception, di, context)
     }
+
+    /**
+     * Navigate when the user does not have an active session and needs to start one. E.g.
+     * When the user logs out of the currently active account, when the app starts and there
+     * is no currently active account, or when the active session is terminated remotely (e.g. due
+     * to password change or parental consent change).
+     *
+     * In this case the backstack will be cleared. Navigation will be as follows:
+     * If the user has remaining sessions on the device:
+     *   Navigate to AccountList to select an existing session (with the option to start a new session)
+     *
+     * If there are no remaining sessions and server selection is allowed:
+     *   Navigate to SiteEnterLink for the user to select what server to connect to
+     *
+     * If there are no remaining sessions and the app is locked to a single server:
+     *   Navigate to Login for the user to login
+     */
+    suspend fun navigateToStartNewUserSession() {
+        val accountManager: UstadAccountManager = direct.instance()
+        val impl: UstadMobileSystemImpl = direct.instance()
+        val numAccountsRemaining = accountManager.activeSessionCount()
+        val canSelectServer = impl.getAppConfigBoolean(
+            AppConfig.KEY_ALLOW_SERVER_SELECTION,
+            context)
+
+        //Wherever the user is going now, we must wipe the backstack
+        val goOptions = UstadMobileSystemCommon.UstadGoOptions(
+            popUpToViewName = UstadView.ROOT_DEST, popUpToInclusive = false)
+
+        when {
+            numAccountsRemaining == 0 && canSelectServer -> {
+                impl.go(SiteEnterLinkView.VIEW_NAME, mapOf(), context, goOptions)
+            }
+
+            numAccountsRemaining == 0 && !canSelectServer -> {
+                impl.go(Login2View.VIEW_NAME, mapOf(), context, goOptions)
+            }
+
+            numAccountsRemaining > 0 -> {
+                impl.go(
+                    AccountListView.VIEW_NAME,
+                    mapOf(
+                        AccountListView.ARG_ACTIVE_ACCOUNT_MODE to AccountListView.ACTIVE_ACCOUNT_MODE_INLIST,
+                        UstadView.ARG_TITLE to impl.getString(MessageID.select_account, context),
+                        UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString()),
+                    context, goOptions)
+            }
+        }
+    }
+
 
     companion object {
 

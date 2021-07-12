@@ -19,6 +19,14 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
 
     abstract protected val mEditPresenter : UstadEditPresenter<*, T>?
 
+    override var fieldsEnabled: Boolean = true
+        set(value) {
+            if(field != value) {
+                field = value
+                activity?.invalidateOptionsMenu()
+            }
+        }
+
     override fun finishWithResult(result: List<T>) {
         saveResultToBackStackSavedStateHandle(result)
     }
@@ -32,11 +40,15 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_done, menu)
 
-        menu.findItem(R.id.menu_done).title = if(mEditPresenter?.persistenceMode == UstadSingleEntityPresenter.PersistenceMode.DB) {
+        val menuItem = menu.findItem(R.id.menu_done)
+
+        menuItem.title = if(mEditPresenter?.persistenceMode == UstadSingleEntityPresenter.PersistenceMode.DB) {
             requireContext().getString(R.string.save)
         }else {
             requireContext().getString(R.string.done)
         }
+
+        menuItem.isEnabled = fieldsEnabled
     }
 
     protected fun setEditFragmentTitle(newTitleId: Int, editStringId: Int) {

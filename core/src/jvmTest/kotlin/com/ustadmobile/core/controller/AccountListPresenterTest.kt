@@ -35,7 +35,10 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
 import com.ustadmobile.core.db.waitUntil
+import com.ustadmobile.util.test.rules.CoroutineDispatcherRule
+import com.ustadmobile.util.test.rules.bindPresenterCoroutineRule
 import org.junit.Assert
+import org.junit.Rule
 
 class AccountListPresenterTest {
 
@@ -58,6 +61,10 @@ class AccountListPresenterTest {
     private lateinit var mockedAccountObserver:DoorObserver<UmAccount>
 
     private val accountList = listOf(UmAccount(1,"dummy",null,""))
+
+    @JvmField
+    @Rule
+    val dispatcherRule = CoroutineDispatcherRule()
 
     private val defaultSessionList = listOf(UserSessionWithPersonAndEndpoint(
         userSession = UserSession().apply {
@@ -134,6 +141,7 @@ class AccountListPresenterTest {
                     install(HttpTimeout)
                 }
             }
+            bindPresenterCoroutineRule(dispatcherRule)
         }
     }
 

@@ -9,9 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.textfield.TextInputLayout
 import com.toughra.ustadmobile.databinding.FragmentPersonAccountEditBinding
 import com.ustadmobile.core.controller.PersonAccountEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
@@ -83,9 +81,7 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
         set(value) {
             field = value
             mBinding?.person = value
-            if(view != null && viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
-                (activity as? AppCompatActivity)?.supportActionBar?.title = value?.firstNames + " " + value?.lastName
-            mBinding?.currentPasswordTextinputlayout?.isEnabled = value != null && !value.admin
+            ustadFragmentTitle = value?.fullName()
         }
 
     override val mEditPresenter: UstadEditPresenter<*, PersonWithAccount>?
@@ -106,7 +102,7 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
         val rootView: View
         mBinding = FragmentPersonAccountEditBinding.inflate(inflater, container,
             false).also {
@@ -136,40 +132,9 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
         })
 
         mBinding?.accountUsernameText?.filters = arrayOf(USERNAME_FILTER)
-        /*
-        mBinding?.accountUsernameText?.addTextChangedListener(object: TextWatcher {
-            override fun beforeTextChanged( s: CharSequence, start: Int, count: Int,after: Int){}
-            override fun afterTextChanged(s: Editable) {}
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-
-
-                val sb = StringBuilder(s.length)
-
-                if(s.isNotEmpty()) {
-                    sb.append(s.toString().substring(0, s.length - 1))
-                }
-
-                for (i in start until s.length) {
-                    val c = s[i]
-                    if (BLOCK_CHARACTER_SET.contains(c)) {
-                        ""
-                    }else if(c != null || !c.equals("")) {
-                        sb.append(c.toString().toLowerCase())
-                    } else {
-                        null
-                    }
-                }
-                sb.toString()
-                print("hi")
-
-            }
-        })
-         */
 
         return rootView
     }
-
-    private fun replaceInvalidCharacters(value: String) = value.replace("[a-zA-Z0-9 ]*".toRegex(), "")
 
     override fun onResume() {
         super.onResume()
@@ -177,11 +142,6 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
             (activity as? AppCompatActivity)?.supportActionBar?.title =
                     mBinding?.person?.firstNames + " " + mBinding?.person?.lastName
         }
-    }
-
-    private fun handleInputError(inputView: TextInputLayout?,error: Boolean,hint: String?){
-        inputView?.isErrorEnabled = error
-        inputView?.error = if(error) hint else null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -199,19 +159,14 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
 
     companion object{
 
-        val USERNAME_FILTER = InputFilter { source, start, end, dest, dstart, dend ->
+        val USERNAME_FILTER = InputFilter { source, start, end, _, _, _ ->
 
             val sb = StringBuilder(attr.end - start)
 
             for (i in start until end) {
                 val c = source[i]
-                if (BLOCK_CHARACTER_SET.contains(c)) {
-                    null
-                }else if(c != null || !c.equals("")) {
-                    sb.append(c.toString().toLowerCase())
-                } else {
-                    null
-                }
+                if(!BLOCK_CHARACTER_SET.contains(c))
+                    sb.append(c.toString().lowercase())
             }
             sb.toString()
         }
