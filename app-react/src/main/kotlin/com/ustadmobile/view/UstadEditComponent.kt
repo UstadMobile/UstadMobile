@@ -5,7 +5,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import org.w3c.dom.events.Event
 import react.RProps
 import react.RState
 

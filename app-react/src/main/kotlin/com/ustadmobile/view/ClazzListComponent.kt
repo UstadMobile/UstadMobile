@@ -156,7 +156,7 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
         mPresenter?.onClickClazz(entry)
     }
 
-    override fun RBuilder.renderAddEntryOptions() {
+    override fun RBuilder.renderAddEntryOptionsDialog() {
         if(showAddEntryOptions){
             val options = if(newClazzListOptionVisible)
                 mutableListOf(PopUpOptionItem("add",MessageID.add_a_new_class) { mPresenter?.handleClickCreateNewFab() })
@@ -166,7 +166,6 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
             renderPopUpOptions(systemImpl,options, Date().getTime().toLong())
         }
     }
-
 
     override var newClazzListOptionVisible: Boolean = false
         get() = field

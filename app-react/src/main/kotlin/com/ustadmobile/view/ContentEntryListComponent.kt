@@ -134,14 +134,13 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
         mPresenter.onClickContentEntry(entry)
     }
 
-    override fun showContentEntryAddOptions(parentEntryUid: Long) {
+    override fun showContentEntryAddOptions() {
         setState {
-            mParentEntryUid = parentEntryUid
             showAddEntryOptions = true
         }
     }
 
-    override fun RBuilder.renderAddEntryOptions() {
+    override fun RBuilder.renderAddEntryOptionsDialog() {
         mDialog(showAddEntryOptions, onClose = { _, _ ->
             setState {
                 showAddEntryOptions = false
@@ -197,14 +196,10 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
             UstadView.ARG_LEAF to contentType.toString()),this)
     }
 
+
     override fun showDownloadDialog(args: Map<String, String>) {
         TODO("Not yet implemented")
     }
-
-    override fun showMoveEntriesFolderPicker(selectedContentEntryParentChildJoinUids: String) {
-        //implement moving entries from one folder to another
-    }
-
 
     override fun RBuilder.renderEditOptionMenu() {
         mGridItem {

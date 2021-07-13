@@ -171,10 +171,12 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                 renderSingleColumnList()
             else
                 renderMultiColumnList()
+
+            renderOtherLists()
         }
 
         //Render dialog UI to be shown when fab is clicked
-        renderAddEntryOptions()
+        renderAddEntryOptionsDialog()
     }
 
 
@@ -241,8 +243,8 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                 mListItem {
                     css{
                         backgroundColor = Color(if(selectedEntries.indexOf(entry) != -1)
-                            umTheme.theme!!.palette.action.selected
-                        else umTheme.theme!!.palette.background.paper)
+                            theme.palette.action.selected
+                        else theme.palette.background.paper)
                         width = LinearDimension("100%")
                     }
                     attrs.alignItems = MListItemAlignItems.flexStart
@@ -382,9 +384,11 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
         }
     }
 
-    open fun RBuilder.renderAddEntryOptions(){}
+    open fun RBuilder.renderAddEntryOptionsDialog(){}
 
     open fun RBuilder.renderEditOptionMenu(){}
+
+    open fun RBuilder.renderOtherLists(){}
 
     abstract fun handleClickEntry(entry: DT)
 

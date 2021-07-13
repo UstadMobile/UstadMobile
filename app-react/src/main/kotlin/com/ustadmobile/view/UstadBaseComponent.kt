@@ -37,8 +37,6 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
 
     val accountManager: UstadAccountManager by instance()
 
-    val umTheme : ReduxThemeState by instance()
-
     private lateinit var progressBarManager: ProgressBarManager
 
     var searchManager: SearchManager? = null
