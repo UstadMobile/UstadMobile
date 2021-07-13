@@ -32,6 +32,7 @@ import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import okhttp3.OkHttpClient
 import org.junit.rules.TestWatcher
@@ -166,7 +167,7 @@ class UstadTestRule: TestWatcher() {
             }
 
             bind<CoroutineScope>(tag = DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with singleton {
-                CoroutineScope(coroutineDispatcher)
+                GlobalScope
             }
 
             bind<Pbkdf2Params>() with singleton {

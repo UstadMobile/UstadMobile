@@ -99,7 +99,6 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
      * or at least removing the login screen itself from the stack).
      */
     private fun goToNextDestAfterLoginOrGuestSelected() {
-        impl.setAppPref(PREFKEY_USER_LOGGED_IN, "true", context)
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
                 arguments[ARG_POPUPTO_ON_FINISH] ?: UstadView.ROOT_DEST,
                 false)
@@ -156,7 +155,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
     fun handleConnectAsGuest(){
 //        accountManager.activeAccount = UmAccount(0L,"guest",
 //                "",serverUrl,"Guest","User")
-        goToNextDestAfterLoginOrGuestSelected()
+//        goToNextDestAfterLoginOrGuestSelected()
     }
 
     override fun onDestroy() {
@@ -166,13 +165,4 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         siteLoadJob = null
     }
 
-    companion object {
-
-        /**
-         * This preference key is used to track whether or not a user has ever logged in or
-         * selected to continue as a guest.
-         */
-        const val PREFKEY_USER_LOGGED_IN = "loggedIn"
-
-    }
 }
