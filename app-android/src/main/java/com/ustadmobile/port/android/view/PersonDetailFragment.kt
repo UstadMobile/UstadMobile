@@ -118,7 +118,7 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithPersonParentJoin>(), P
         super.onViewCreated(view, savedInstanceState)
 
         mPresenter = PersonDetailPresenter(requireContext(), arguments.toStringMap(), this,
-            di, viewLifecycleOwner)
+            di, viewLifecycleOwner).withViewLifecycle()
         clazzEnrolmentWithClazzRecyclerAdapter?.presenter = mPresenter
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
         mBinding?.presenter = mPresenter

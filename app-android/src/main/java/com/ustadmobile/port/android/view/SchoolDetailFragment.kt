@@ -50,7 +50,7 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         mTabs = mBinding?.fragmentSchoolTabsFixed?.tabs
 
         mPresenter = SchoolDetailPresenter(requireContext(),arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+                di, viewLifecycleOwner).withViewLifecycle()
 
         return rootView
     }

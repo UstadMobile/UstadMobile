@@ -180,7 +180,7 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         mBinding?.accountListRecycler?.layoutManager = LinearLayoutManager(requireContext())
         val impl: UstadMobileSystemImpl by instance()
         mPresenter = AccountListPresenter(requireContext(),arguments.toStringMap(),this, di,
-            viewLifecycleOwner)
+            viewLifecycleOwner).withViewLifecycle()
 
         val versionText = impl.getVersion(requireContext()) + " - " +
                 UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(requireContext()))

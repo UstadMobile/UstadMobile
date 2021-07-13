@@ -77,7 +77,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
         super.onViewCreated(view, savedInstanceState)
 
         mPresenter = ClazzDetailPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+                di, viewLifecycleOwner).withViewLifecycle()
 
         mPresenter?.onCreate(backStackSavedState)
     }

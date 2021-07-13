@@ -145,6 +145,10 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
         }
 
     override var fieldsEnabled: Boolean = false
+        set(value){
+            super.fieldsEnabled = value
+            field = value
+        }
 
     override var entity: ReportFilter? = null
         get() = field
@@ -192,7 +196,7 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
         }
 
         mPresenter = ReportFilterEditPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+                di, viewLifecycleOwner).withViewLifecycle()
 
         return rootView
     }

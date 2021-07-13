@@ -139,14 +139,9 @@ class ContentEntryEdit2Presenter(context: Any,
         observeSavedStateResult(SAVED_STATE_KEY_URI, ListSerializer(String.serializer()),
                 String::class) {
             val uri = it.firstOrNull() ?: return@observeSavedStateResult
-            view.loading = true
-            view.fieldsEnabled = false
-
             GlobalScope.launch(doorMainDispatcher()){
                 view.entity = handleFileSelection(uri)
             }
-
-
             requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
         }
 
@@ -180,6 +175,8 @@ class ContentEntryEdit2Presenter(context: Any,
 
 
     override fun handleClickSave(entity: ContentEntryWithLanguage) {
+        view.loading = true
+        view.fieldsEnabled = false
         view.titleErrorEnabled = false
         view.fileImportErrorVisible = false
         GlobalScope.launch(doorMainDispatcher()) {
@@ -223,6 +220,8 @@ class ContentEntryEdit2Presenter(context: Any,
                                 view.storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(),
                                 ContainerImportJob.CLIENT_IMPORT_MODE, conversionParams)
 
+                        view.loading = false
+                        view.fieldsEnabled = true
                         systemImpl.popBack(destinationOnFinish, popUpInclusive = false, context)
                         return@launch
 
@@ -251,15 +250,21 @@ class ContentEntryEdit2Presenter(context: Any,
                                 systemImpl.getString(MessageID.error,
                                         context)
                             }: ${e.message ?: ""}", {})
+                            view.loading = false
+                            view.fieldsEnabled = true
                             return@launch
                         }
 
                         if (client.status.value != 200) {
                             view.showSnackBar(systemImpl.getString(MessageID.error,
                                     context), {})
+                            view.loading = false
+                            view.fieldsEnabled = true
                             return@launch
                         }
 
+                        view.loading = false
+                        view.fieldsEnabled = true
                         systemImpl.popBack(destinationOnFinish, popUpInclusive = false, context)
                         return@launch
 
@@ -273,12 +278,16 @@ class ContentEntryEdit2Presenter(context: Any,
                     }
                 }
 
+                view.loading = false
+                view.fieldsEnabled = true
                 systemImpl.popBack(destinationOnFinish, popUpInclusive = false, context)
 
             } else {
                 view.titleErrorEnabled = entity.title == null
                 view.fileImportErrorVisible = entity.title != null && entity.leaf
                         && view.entryMetaData?.uri == null
+                view.loading = false
+                view.fieldsEnabled = true
             }
         }
     }
@@ -290,7 +299,7 @@ class ContentEntryEdit2Presenter(context: Any,
 
     suspend fun handleFileSelection(uri: String): ContentEntryWithLanguage? {
         view.loading = true
-        view.fieldsEnabled = true
+        view.fieldsEnabled = false
 
         var entry: ContentEntryWithLanguage? = null
         try {
@@ -312,11 +321,12 @@ class ContentEntryEdit2Presenter(context: Any,
                     view.videoUri = uri
                 }
             }
-            view.loading = false
-            view.fieldsEnabled = true
         }catch (e: Exception){
             view.showSnackBar(systemImpl.getString(MessageID.import_link_content_not_supported, context))
             repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, e, this)
+        }finally {
+            view.loading = false
+            view.fieldsEnabled = true
         }
 
         return entry

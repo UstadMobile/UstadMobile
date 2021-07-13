@@ -64,7 +64,7 @@ class ParentalConsentManagementFragment: UstadEditFragment<PersonParentJoinWithM
         }
 
         mPresenter = ParentalConsentManagementPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
 
 
         return rootView
@@ -123,6 +123,7 @@ class ParentalConsentManagementFragment: UstadEditFragment<PersonParentJoinWithM
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }
