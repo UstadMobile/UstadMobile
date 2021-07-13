@@ -41,7 +41,7 @@ class ClazzListFragmentTest : TestCase() {
 
         init {
 
-            dbRule.insertPersonForActiveUser(Person().apply {
+            dbRule.insertPersonAndStartSession(Person().apply {
                 admin = true
                 firstNames = "Test"
                 lastName = "User"

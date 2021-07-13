@@ -46,7 +46,7 @@ class ContentEntryList2FragmentTest : TestCase() {
 
     @Before
     fun setup() {
-        dbRule.insertPersonForActiveUser(Person().apply {
+        dbRule.insertPersonAndStartSession(Person().apply {
             firstNames = "Test"
             lastName = "User"
             username = "admin"
@@ -64,13 +64,13 @@ class ContentEntryList2FragmentTest : TestCase() {
         }
 
         launchFragment(bundleOf(UstadView.ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
-                ContentEntryList2View.ARG_CONTENT_FILTER to ContentEntryList2View.ARG_LIBRARIES_CONTENT))
+                ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT))
 
         ContentEntryListScreen {
             recycler {
                 isVisible()
-                hasSize(4)
-                childAt<ContentEntryListScreen.MainItem>(0) {
+                hasSize(5)
+                childAt<ContentEntryListScreen.MainItem>(1) {
                     title.hasText("Dummy  entry title 1")
                     click()
                 }
@@ -154,7 +154,7 @@ class ContentEntryList2FragmentTest : TestCase() {
                 emptyChildAt(3) {
                     click()
                 }
-                childAt<ContentEntryListScreen.MainItem>(1) {
+                childAt<ContentEntryListScreen.MainItem>(2) {
                     selectButton {
                         click()
                     }
@@ -196,7 +196,7 @@ class ContentEntryList2FragmentTest : TestCase() {
                 GlobalScope.launch(doorMainDispatcher()) {
                     list2Fragment?.onHostBackPressed()
                 }
-                hasSize(createdEntries.size + 1)
+                hasSize(createdEntries.size + 2)
 
             }
 
@@ -205,7 +205,7 @@ class ContentEntryList2FragmentTest : TestCase() {
 
 
     private fun launchFragment(bundle: Bundle = bundleOf(UstadView.ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
-            ContentEntryList2View.ARG_CONTENT_FILTER to ContentEntryList2View.ARG_LIBRARIES_CONTENT,
+            ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
             UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())): FragmentScenario<ContentEntryList2Fragment> {
         return launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundle) {

@@ -3,8 +3,10 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.Clazz.Companion.ENTITY_PERSONS_WITH_PERMISSION_PT1
-import com.ustadmobile.lib.db.entities.Clazz.Companion.ENTITY_PERSONS_WITH_PERMISSION_PT2
+import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
+import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
+import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1
+import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2
 import com.ustadmobile.lib.db.entities.Clazz.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
@@ -12,19 +14,27 @@ import kotlinx.serialization.Serializable
 @SyncableEntity(tableId = TABLE_ID,
     notifyOnUpdate = [
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId as deviceId, $TABLE_ID as tableId FROM 
-        ChangeLog
-        JOIN Clazz ON ChangeLog.chTableId = $TABLE_ID AND Clazz.clazzUid = ChangeLog.chEntityPk
-        JOIN Person ON Person.personUid IN ($ENTITY_PERSONS_WITH_PERMISSION_PT1  ${Role.PERMISSION_CLAZZ_SELECT } $ENTITY_PERSONS_WITH_PERMISSION_PT2)
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
+               $TABLE_ID AS tableId 
+          FROM ChangeLog 
+                JOIN Clazz
+                     ON ChangeLog.chTableId = $TABLE_ID 
+                            AND Clazz.clazzUid = ChangeLog.chEntityPk
+                $JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
+                    ${Role.PERMISSION_CLAZZ_SELECT}
+                    $JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
         """
     ],
     syncFindAllQuery = """
-        SELECT Clazz.* FROM
-        Clazz
-        JOIN Person ON Person.personUid IN  ($ENTITY_PERSONS_WITH_PERMISSION_PT1 ${Role.PERMISSION_CLAZZ_SELECT } $ENTITY_PERSONS_WITH_PERMISSION_PT2)
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
-        WHERE DeviceSession.dsDeviceId = :clientId
+        SELECT Clazz.* 
+          FROM UserSession
+               JOIN PersonGroupMember 
+                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+               $JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1
+                    ${Role.PERMISSION_CLAZZ_SELECT} 
+                    $JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2
+         WHERE UserSession.usClientNodeId = :clientId 
+           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
     """
 )
 @Serializable
@@ -111,25 +121,43 @@ open class Clazz() {
 
         const val CLAZZ_CODE_DEFAULT_LENGTH = 6
 
-
-        const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
-            SELECT DISTINCT Person_Perm.PersonUid FROM Person Person_Perm
-            LEFT JOIN PersonGroupMember ON Person_Perm.personUid = PersonGroupMember.groupMemberPersonUid
-            LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
-            WHERE 
-            CAST(Person.admin AS INTEGER) = 1
-            OR 
-            (
-            ((EntityRole.ertableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzUid) OR
-            (EntityRole.ertableId = ${School.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzSchoolUid)
-            )
-            AND
-            (Role.rolePermissions &  
+        //Because no subqueries are needed here, there is no need for multiple versions based
+        //on which way the joins are going
+        const val JOIN_SCOPEDGRANT_ON_CLAUSE = """
+            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                                AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+                            OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+                                AND ScopedGrant.sgEntityUid = Clazz.clazzUid)
+                            OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                                AND ScopedGrant.sgEntityUid = Clazz.clazzSchoolUid))
         """
 
-        const val ENTITY_PERSONS_WITH_PERMISSION_PT2 = ") > 0)"
+        const val JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1 = """
+            JOIN ScopedGrant
+                 ON $JOIN_SCOPEDGRANT_ON_CLAUSE
+                    AND (ScopedGrant.sgPermissions & 
+        """
 
+        const val JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2 = """
+                                                     ) > 0
+             JOIN PersonGroupMember AS PrsGrpMbr
+                   ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
+              JOIN UserSession
+                   ON UserSession.usPersonUid = PrsGrpMbr.groupMemberPersonUid
+                      AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE }
+        """
+
+        const val JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1 = """
+               JOIN ScopedGrant
+                    ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+                        AND (ScopedGrant.sgPermissions & 
+        """
+
+        const val JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2 = """
+                       ) > 0
+               JOIN Clazz 
+                    ON $JOIN_SCOPEDGRANT_ON_CLAUSE
+        """
 
 
     }

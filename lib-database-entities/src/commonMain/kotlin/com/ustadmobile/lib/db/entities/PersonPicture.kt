@@ -8,21 +8,29 @@ import kotlinx.serialization.Serializable
 @Entity
 @SyncableEntity(tableId = PersonPicture.TABLE_ID,
     notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${PersonPicture.TABLE_ID} AS tableId FROM 
-        ChangeLog
-        JOIN PersonPicture ON ChangeLog.chTableId = ${PersonPicture.TABLE_ID} AND ChangeLog.chEntityPk = PersonPicture.personPictureUid
-        JOIN Person ON Person.personUid = PersonPicture.personPicturePersonUid
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_PICTURE_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid"""],
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
+               ${PersonPicture.TABLE_ID} AS tableId 
+          FROM ChangeLog
+               JOIN PersonPicture 
+                    ON ChangeLog.chTableId = ${PersonPicture.TABLE_ID} 
+                       AND ChangeLog.chEntityPk = PersonPicture.personPictureUid
+               JOIN Person 
+                    ON Person.personUid = PersonPicture.personPicturePersonUid
+               ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_PERSON_PICTURE_SELECT}
+                    ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}"""],
     syncFindAllQuery = """
-        SELECT PersonPicture.* FROM 
-        PersonPicture
-        JOIN Person ON Person.personUid = PersonPicture.personPicturePersonUid
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_PICTURE_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
-        WHERE DeviceSession.dsDeviceId = :clientId
+        SELECT PersonPicture.*
+          FROM UserSession
+                   JOIN PersonGroupMember 
+                        ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+                   ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
+                        ${Role.PERMISSION_PERSON_PICTURE_SELECT}
+                        ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+                   JOIN PersonPicture
+                        ON PersonPicture.personPicturePersonUid = Person.personUid
+         WHERE UserSession.usClientNodeId = :clientId
+               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
         """
 )
 @Serializable

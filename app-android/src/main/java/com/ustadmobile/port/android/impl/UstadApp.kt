@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.impl
 
 import android.content.Context
-import android.os.Build
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import com.google.gson.Gson
@@ -10,6 +9,7 @@ import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentformats.ContentImportManager
@@ -21,7 +21,6 @@ import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
-import com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
@@ -48,9 +47,10 @@ import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploadManagerCommonJvm
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.newSingleThreadContext
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 import com.ustadmobile.core.impl.*
+import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_ITERATIONS
+import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_KEYLENGTH
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.networkmanager.*
@@ -62,16 +62,18 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
-import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 
 import org.kodein.di.*
-import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
-
-import java.util.concurrent.TimeUnit
+import com.ustadmobile.core.impl.di.commonJvmDiModule
+import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
+import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.lib.db.entities.ContainerImportJob
+import kotlinx.coroutines.asCoroutineDispatcher
+import java.util.concurrent.Executors
 
 /**
  * Note: BaseUstadApp extends MultidexApplication on the multidex variant, but extends the
@@ -80,6 +82,8 @@ import java.util.concurrent.TimeUnit
 open class UstadApp : BaseUstadApp(), DIAware {
 
     val diModule = DI.Module("UstadApp-Android") {
+        import(commonJvmDiModule)
+
         bind<UstadMobileSystemImpl>() with singleton {
             UstadMobileSystemImpl.instance
         }
@@ -88,17 +92,27 @@ open class UstadApp : BaseUstadApp(), DIAware {
             UstadAccountManager(instance(), applicationContext, di)
         }
 
+        bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
+            val systemImpl: UstadMobileSystemImpl = instance()
+            val contextIdentifier: String = sanitizeDbNameFromUrl(context.url)
+            systemImpl.getOrGenerateNodeIdAndAuth(contextPrefix = contextIdentifier, applicationContext)
+        }
+
         bind<UmAppDatabase>(tag = TAG_DB) with scoped(EndpointScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
-            getInstance(applicationContext, dbName).also {
+            UmAppDatabase.getInstance(context = applicationContext, dbName = dbName,
+                nodeIdAndAuth = instance()
+            ).also {
                 val networkManager: NetworkManagerBle = di.direct.instance()
                 it.connectivityStatusDao.commitLiveConnectivityStatus(networkManager.connectivityStatus)
             }
         }
 
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
-            instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(applicationContext, context.url,
-                instance(), instance()) {
+            val nodeIdAndAuth: NodeIdAndAuth = instance()
+            instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(applicationContext,
+                context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, instance(), instance()
+            ) {
                 attachmentsDir = File(applicationContext.filesDir.siteDataSubDir(this@singleton.context),
                     UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME).absolutePath
                 useClientSyncManager = true
@@ -117,7 +131,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<NetworkManagerBle>() with singleton {
-            NetworkManagerBle(applicationContext, di, newSingleThreadContext("NetworkManager")).also {
+            val coroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+            NetworkManagerBle(applicationContext, di, coroutineDispatcher).also {
                 it.onCreate()
             }
         }
@@ -171,8 +186,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
             ContentImportManagerImplAndroid(listOf(EpubTypePluginCommonJvm(),
                     XapiTypePluginCommonJvm(), VideoTypePluginAndroid(),
-                    H5PTypePluginCommonJvm()),
-                    applicationContext, context, di)
+                    H5PTypePluginCommonJvm()), applicationContext,
+                    context, di)
         }
 
 
@@ -213,36 +228,18 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<XmlPullParserFactory>().newSerializer()
         }
 
-        bind<OkHttpClient>() with singleton {
-            OkHttpClient.Builder()
-                    .dispatcher(Dispatcher().also {
-                        it.maxRequests = 30
-                        it.maxRequestsPerHost = 10
-                    })
-                    .build()
-        }
-
-        bind<HttpClient>() with singleton {
-            HttpClient(OkHttp) {
-
-                install(JsonFeature) {
-                    serializer = GsonSerializer()
-                }
-                install(HttpTimeout)
-
-                val dispatcher = Dispatcher()
-                dispatcher.maxRequests = 30
-                dispatcher.maxRequestsPerHost = 10
-
-                engine {
-                    preconfigured = instance()
-                }
-
-            }
-        }
-
         bind<DestinationProvider>() with singleton {
             ViewNameToDestMap()
+        }
+
+        bind<Pbkdf2Params>() with singleton {
+            val systemImpl: UstadMobileSystemImpl = instance()
+            val numIterations = systemImpl.getAppConfigInt(KEY_PBKDF2_ITERATIONS,
+                UstadMobileConstants.PBKDF2_ITERATIONS, applicationContext)
+            val keyLength = systemImpl.getAppConfigInt(KEY_PBKDF2_KEYLENGTH,
+                UstadMobileConstants.PBKDF2_KEYLENGTH, applicationContext)
+
+            Pbkdf2Params(numIterations, keyLength)
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

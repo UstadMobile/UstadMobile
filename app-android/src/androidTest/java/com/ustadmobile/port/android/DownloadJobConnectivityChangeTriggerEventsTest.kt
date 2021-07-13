@@ -6,6 +6,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.DownloadJob
@@ -24,11 +26,14 @@ import org.kodein.di.android.di
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.random.Random
 
 class DownloadJobConnectivityChangeTriggerEventsTest {
 
 
     private lateinit var umAppDatabase: UmAppDatabase
+
+    private lateinit var nodeIdAndAuth: NodeIdAndAuth
 
     private lateinit var repo: UmAppDatabase
 
@@ -64,11 +69,13 @@ class DownloadJobConnectivityChangeTriggerEventsTest {
         val httpClient: HttpClient = di.direct.instance()
         val okHttpClient: OkHttpClient = di.direct.instance()
 
-        umAppDatabase = UmAppDatabase.getInstance(context)
+        nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
+            randomUuid().toString())
+        umAppDatabase = UmAppDatabase.getInstance(context, nodeIdAndAuth)
         umAppDatabase.clearAllTables()
 
         repo = umAppDatabase.asRepository(repositoryConfig(context, "http://localhost/dummy",
-            httpClient, okHttpClient))
+            nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))
 
         entry = ContentEntry("title 2", "title 2", leaf = true, publik = true)
         entry.contentEntryUid = repo.contentEntryDao.insert(entry)

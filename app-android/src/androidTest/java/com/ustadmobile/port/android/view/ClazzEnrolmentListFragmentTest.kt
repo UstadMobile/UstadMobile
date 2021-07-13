@@ -7,7 +7,7 @@ import com.soywiz.klock.DateTime
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
@@ -40,7 +40,7 @@ class ClazzEnrolmentListFragmentTest : TestCase()  {
     @Before
     fun setup() {
         runBlocking {
-            dbRule.insertPersonForActiveUser(Person().apply {
+            dbRule.insertPersonAndStartSession(Person().apply {
                 firstNames = "Bob"
                 lastName = "Jones"
                 admin = true
@@ -76,7 +76,7 @@ class ClazzEnrolmentListFragmentTest : TestCase()  {
             }
 
             val bundle = bundleOf(ARG_PERSON_UID to person.personUid.toString(),
-            ARG_FILTER_BY_CLAZZUID to clazz.clazzUid.toString())
+            ARG_CLAZZUID to clazz.clazzUid.toString())
 
             launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                     fragmentArgs = bundle) {

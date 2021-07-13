@@ -13,7 +13,9 @@ class ContainerImportJob {
 
     var cijContainerUid: Long = 0
 
-    var cijFilePath: String? = null
+    var cijUri: String? = null
+
+    var cijImportMode: Int = 0
 
     var cijContainerBaseDir: String? = null
 
@@ -34,5 +36,13 @@ class ContainerImportJob {
     var cijContainerEntryFileUids: String? = null
 
     var cijConversionParams: String? = null
+
+    companion object {
+
+        const val SERVER_IMPORT_MODE = 1001
+
+        const val CLIENT_IMPORT_MODE = 1002
+
+    }
 
 }

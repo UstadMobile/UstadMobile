@@ -36,13 +36,12 @@ class SortListFragmentTest : TestCase() {
     @Test
     fun givenPersonPresent_whenOnSortOptionClicked_thenShoulShowBottomFragAndChangeSort() {
 
-        val admin = Person().apply {
-            this.personUid = 42
+        dbRule.insertPersonAndStartSession(Person().apply {
+            this.personUid = UmAppDatabaseAndroidClientRule.DEFAULT_ACTIVE_USER_PERSONUID
             this.username = "theanswer"
             this.admin = true
             this.firstNames = "LMNOP"
-            dbRule.repo.personDao.insert(this)
-        }
+        })
 
         val abc = Person().apply {
             this.firstNames = "ABC"

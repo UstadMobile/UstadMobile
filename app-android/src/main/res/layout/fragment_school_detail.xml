@@ -34,15 +34,16 @@
 
 
         <include
+            android:id="@+id/fragment_school_tabs_fixed"
             layout="@layout/appbar_material_tabs_fixed"/>
 
-        <androidx.viewpager.widget.ViewPager
+        <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/fragment_school_detail_viewpager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/fragment_school_detail_tablayout"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
-        </androidx.viewpager.widget.ViewPager>
+        </androidx.viewpager2.widget.ViewPager2>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

@@ -31,13 +31,12 @@
             layout="@layout/appbar_material_tabs_scrollable"/>
 
 
-        <androidx.viewpager.widget.ViewPager
+        <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/fragment_clazzwork_detail_viewpager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/fragment_clazzwork_detail_tablayout"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
-        </androidx.viewpager.widget.ViewPager>
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 

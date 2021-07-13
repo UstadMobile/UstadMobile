@@ -6,8 +6,8 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.web.webdriver.Locator
-import com.agoda.kakao.text.KTextView
-import com.agoda.kakao.web.KWebView
+import io.github.kakaocup.kakao.text.KTextView
+import io.github.kakaocup.kakao.web.KWebView
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord

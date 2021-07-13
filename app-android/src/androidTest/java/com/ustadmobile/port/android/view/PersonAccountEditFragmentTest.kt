@@ -7,15 +7,15 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonWithAccount
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.screen.PersonAccountEditScreen
 import com.ustadmobile.test.port.android.UmViewActions.hasInputLayoutError
 import com.ustadmobile.test.port.android.util.waitUntilWithFragmentScenario
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import junit.framework.Assert.assertEquals
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -82,14 +82,12 @@ class PersonAccountEditFragmentTest : TestCase(){
     private fun createPerson(withUsername: Boolean = false, isAdmin: Boolean = false,
                              matchPassword: Boolean = false): PersonWithAccount {
 
-        Person().apply {
+        dbRule.insertPersonAndStartSession(Person().apply {
             admin = isAdmin
             username = "First"
             lastName = "User"
-            personUid = 42
-            dbRule.repo.personDao.insert(this)
-        }
-
+            personUid = UmAppDatabaseAndroidClientRule.DEFAULT_ACTIVE_USER_PERSONUID
+        })
 
         val password = "password"
         val confirmPassword = if(matchPassword) password else "password1"
@@ -105,7 +103,7 @@ class PersonAccountEditFragmentTest : TestCase(){
             newPassword = password
             currentPassword = password
             confirmedPassword = confirmPassword
-            dbRule.repo.personDao.insert(this)
+            runBlocking { dbRule.repo.insertPersonAndGroup(this@apply) }
         }
     }
 

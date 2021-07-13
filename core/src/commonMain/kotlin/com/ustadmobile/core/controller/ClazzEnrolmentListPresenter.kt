@@ -20,7 +20,7 @@ class ClazzEnrolmentListPresenter(context: Any, arguments: Map<String, String>, 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         selectedPerson = arguments[UstadView.ARG_PERSON_UID]?.toLong() ?: 0L
-        selectedClazz = arguments[UstadView.ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
+        selectedClazz = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0L
         updateListOnView()
     }
 

@@ -21,8 +21,10 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzLog
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.util.test.ext.insertClazzLogs
+import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -78,7 +80,7 @@ class ClazzLogListAttendancePresenterTest {
 
 
         val presenter = ClazzLogListAttendancePresenter(context,
-                mapOf(UstadView.ARG_FILTER_BY_CLAZZUID to "42"), mockView, di, mockLifecycleOwner)
+                mapOf(UstadView.ARG_CLAZZUID to "42"), mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
         verify(repoClazzLogDao, timeout(5000)).findByClazzUidAsFactory(42L,
@@ -90,11 +92,19 @@ class ClazzLogListAttendancePresenterTest {
     fun givenExistingCompletedClazzLogs_whenOnCreateCalled_thenShouldSetGraphDataAndSetFabVisible() {
         val repo: UmAppDatabase by di.activeRepoInstance()
         val accountManager: UstadAccountManager by di.instance()
-        accountManager.activeAccount = UmAccount(42L, "admin", "",
-                accountManager.activeAccount.endpointUrl, "Admin", "Admin")
+
+        val activePerson = Person().also {
+            it.personUid = 42L
+            it.username = "admin"
+            it.firstNames = "Admin"
+            it.lastName = "admin"
+            it.admin = true
+        }
+        accountManager.startLocalTestSessionBlocking(activePerson,
+            accountManager.activeEndpoint.url)
 
         runBlocking {
-            repo.insertPersonAndGroup(accountManager.activeAccount.asPerson(admin = true))
+            repo.insertPersonAndGroup(activePerson)
         }
 
         val testClazz = Clazz("Test Clazz").apply {
@@ -118,7 +128,7 @@ class ClazzLogListAttendancePresenterTest {
         } }
 
         val presenter = ClazzLogListAttendancePresenter(context,
-                mapOf(UstadView.ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString()), mockView, di,
+                mapOf(UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString()), mockView, di,
                 mockLifecycleOwner)
         presenter.onCreate(null)
         nullableArgumentCaptor<DoorMutableLiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>>() {
@@ -153,7 +163,7 @@ class ClazzLogListAttendancePresenterTest {
         }
 
         val presenter = ClazzLogListAttendancePresenter(context,
-                mapOf(UstadView.ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString()), mockView, di,
+                mapOf(UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString()), mockView, di,
                 mockLifecycleOwner)
         presenter.onCreate(null)
 

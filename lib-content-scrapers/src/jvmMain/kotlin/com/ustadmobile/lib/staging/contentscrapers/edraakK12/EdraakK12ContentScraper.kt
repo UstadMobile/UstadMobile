@@ -25,6 +25,7 @@ import com.ustadmobile.lib.contentscrapers.ShrinkerUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.edraakK12.ContentResponse
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.staging.contentscrapers.replaceMeWithDi
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.exception.ExceptionUtils
@@ -79,7 +80,7 @@ class EdraakK12ContentScraper : Runnable {
 
     public override fun run() {
         System.gc()
-        val db = UmAppDatabase.getInstance(Any())
+        val db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
         val repository = db // db.getRepository("https://localhost", "");
         val containerDao = repository.containerDao
         val queueDao = db.scrapeQueueItemDao

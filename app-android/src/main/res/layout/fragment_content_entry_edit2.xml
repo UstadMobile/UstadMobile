@@ -100,14 +100,14 @@
                 android:enabled="@{fieldsEnabled}"
                 android:backgroundTint="?colorSecondary"
                 android:textColor="?colorOnSecondary"
-                android:onClick="@{()-> activityEventHandler.onClickContentImportSourceSelection()}"
+                android:onClick="@{()-> activityEventHandler.onClickUpdateContent()}"
                 android:padding="@dimen/dimen_20dp"
-                android:text="@{contentEntry.contentEntryUid == 0 ? @string/import_content: @string/update_content}"
-                android:visibility="@{(contentEntry.leaf || importedMetadata.uri != null) ? View.VISIBLE: View.GONE}"
+                android:text="@string/update_content"
+                android:visibility="@{(contentEntry.leaf || contentEntry.contentEntryUid != 0) ? View.VISIBLE: View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="@string/import_content" />
+                tools:text="@string/update_content" />
 
             <TextView
                 android:textAppearance="@style/UmTheme.TextAppearance.Body2"
@@ -313,65 +313,33 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <RelativeLayout
-                android:layout_margin="@dimen/dimen_20dp"
-                android:clickable="true"
-                android:focusable="true"
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/entry_content_compress"
-                android:layout_width="match_parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/container_storage_option"
-                android:layout_height="wrap_content">
-                <TextView
-                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-                    android:layout_centerVertical="true"
-                    android:layout_toStartOf="@+id/entry_compress_switch"
-                    android:id="@+id/entry_visibility_compress_label"
-                    android:text="@string/compress"
-                    android:enabled="@{fieldsEnabled}"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:checked="@{compressionEnabled}"
-                    android:enabled="@{fieldsEnabled}"
-                    android:onCheckedChanged="@{(switch, checked) -> activityEventHandler.handleToggleCompress(checked)}"
-                    android:layout_alignParentEnd="true"
-                    android:id="@+id/entry_compress_switch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </RelativeLayout>
-
-            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
                 android:layout_margin="@dimen/dimen_20dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:id="@+id/entry_content_public"
-                android:layout_width="match_parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/entry_content_compress"
                 android:enabled="@{fieldsEnabled}"
-                android:layout_height="wrap_content">
-                <TextView
-                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-                    android:layout_centerVertical="true"
-                    android:layout_toStartOf="@+id/entry_public_switch"
-                    android:id="@+id/entry_visibility_public_label"
-                    android:text="@string/publicly_accessible"
-                    android:enabled="@{fieldsEnabled}"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                android:visibility="@{importedMetadata != null ? View.VISIBLE : View.GONE}"
+                android:text="@string/compress"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                android:checked="@={compressionEnabled}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/container_storage_option" />
 
-                <androidx.appcompat.widget.SwitchCompat
-                    android:checked="@={contentEntry.publik}"
-                    android:layout_alignParentEnd="true"
-                    android:id="@+id/entry_public_switch"
-                    android:enabled="@{fieldsEnabled}"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </RelativeLayout>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/entry_content_public"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:enabled="@{fieldsEnabled}"
+                android:layout_margin="@dimen/dimen_20dp"
+                android:text="@string/publicly_accessible"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                android:checked="@={contentEntry.publik}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/entry_content_compress" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/entry_language"

@@ -10,7 +10,7 @@ import com.ustadmobile.core.view.*
 @Keep
 class ViewNameToDestMap: DestinationProvider {
 
-    val destinationMap = mapOf(
+    private val destinationMap = mapOf(
             ClazzEdit2View.VIEW_NAME to UstadDestination(R.id.clazz_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             ClazzList2View.VIEW_NAME to UstadDestination(R.id.home_clazzlist_dest),
@@ -19,9 +19,6 @@ class ViewNameToDestMap: DestinationProvider {
             HolidayCalendarEditView.VIEW_NAME to UstadDestination(R.id.holidaycalendar_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             SettingsView.VIEW_NAME to UstadDestination(R.id.settings_list_dest),
-            RoleListView.VIEW_NAME to UstadDestination(R.id.role_list_dest),
-            RoleEditView.VIEW_NAME to UstadDestination(R.id.role_edit_dest,
-                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             PersonEditView.VIEW_NAME to UstadDestination(R.id.person_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             PersonEditView.VIEW_NAME_REGISTER to UstadDestination(R.id.person_edit_register_dest,
@@ -46,6 +43,7 @@ class ViewNameToDestMap: DestinationProvider {
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             ContentEntryListTabsView.VIEW_NAME to UstadDestination(R.id.home_content_dest),
             ContentEntryList2View.VIEW_NAME to UstadDestination(R.id.content_entry_list_dest),
+            ContentEntryList2View.FOLDER_VIEW_NAME to UstadDestination(R.id.content_entry_list_select_folder),
             ContentEntryDetailOverviewView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_overview_dest),
             ContentEntryDetailView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_dest),
             ContentEntryDetailAttemptsListView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_attempt_dest),
@@ -62,6 +60,8 @@ class ViewNameToDestMap: DestinationProvider {
             LeavingReasonListView.VIEW_NAME to UstadDestination(R.id.leaving_reason_list),
             LeavingReasonEditView.VIEW_NAME to UstadDestination(R.id.leaving_reason_edit,
                     hideAccountIcon = true),
+            SelectFileView.VIEW_NAME to UstadDestination(R.id.select_file_view),
+            ContentEntryImportLinkView.VIEW_NAME to UstadDestination(R.id.import_link_view),
             VideoPlayerView.VIEW_NAME to UstadDestination(R.id.video_content),
             WebChunkView.VIEW_NAME to UstadDestination(R.id.webchunk_view,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true),
@@ -86,8 +86,6 @@ class ViewNameToDestMap: DestinationProvider {
             PersonAccountEditView.VIEW_NAME to UstadDestination(R.id.person_account_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             InviteViaLinkView.VIEW_NAME to UstadDestination(R.id.invite_via_link_dest),
-            EntityRoleEditView.VIEW_NAME to UstadDestination(R.id.entityrole_edit_dest,
-                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             LanguageListView.VIEW_NAME to UstadDestination(R.id.language_list_dest),
             LanguageEditView.VIEW_NAME to UstadDestination(R.id.language_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
@@ -105,7 +103,19 @@ class ViewNameToDestMap: DestinationProvider {
             SiteTermsDetailView.VIEW_NAME to UstadDestination(R.id.site_terms_detail_dest),
             SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS to UstadDestination(R.id.site_terms_detail_accept_dest,
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true,
-                hideAccountIcon = true)
+                hideAccountIcon = true),
+            ScheduleEditView.VIEW_NAME to UstadDestination(R.id.schedule_edit_dest,
+                actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
+            BitmaskEditView.VIEW_NAME to UstadDestination(R.id.bitmask_edit_dest,
+                actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
+            RegisterMinorWaitForParentView.VIEW_NAME to UstadDestination(R.id.register_minor_wait_for_parent_dest,
+                hideBottomNavigation = true, hideAccountIcon = true),
+            RegisterAgeRedirectView.VIEW_NAME to UstadDestination(R.id.register_age_redirect_dest,
+                hideBottomNavigation = true, hideAccountIcon = true),
+            ParentalConsentManagementView.VIEW_NAME to UstadDestination(R.id.parental_consent_management_dest),
+            ScopedGrantEditView.VIEW_NAME to UstadDestination(R.id.scoped_grant_edit_dest,
+                hideAccountIcon = true),
+            ErrorReportView.VIEW_NAME to UstadDestination(R.id.error_report_dest),
     )
 
     override val navControllerViewId: Int
@@ -113,5 +123,9 @@ class ViewNameToDestMap: DestinationProvider {
 
     override fun lookupDestinationName(viewName: String) = destinationMap[viewName]
 
-    override fun lookupDestinationById(destinationId: Int) = destinationMap.values.firstOrNull { it.destinationId == destinationId }
+    override fun lookupDestinationById(destinationId: Int) = destinationMap.values
+            .firstOrNull { it.destinationId == destinationId }
+
+    override fun lookupViewNameById(destinationId: Int) = destinationMap.entries
+            .firstOrNull { it.value.destinationId == destinationId }?.key
 }

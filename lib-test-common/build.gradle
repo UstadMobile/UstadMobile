@@ -72,6 +72,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
                 implementation "io.github.aakira:napier:$version_napier"
+                implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 compileOnly project(":lib-database-entities")
                 compileOnly project(":lib-database")
                 compileOnly "com.ustadmobile.door:door-runtime:$version_door"
@@ -104,6 +105,7 @@ kotlin {
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                implementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
             }
         }
 

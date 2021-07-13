@@ -3,9 +3,9 @@ package com.ustadmobile.port.android.view
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
+import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.screen.ContentEntryDetailAttemptsListScreen
@@ -37,12 +37,13 @@ class ContentEntryDetailAttemptsListFragmentTest : TestCase()  {
     @Before
     fun setup(){
         runBlocking {
-            dbRule.insertPersonForActiveUser(Person().apply {
+            val adminPerson = Person().apply {
                 firstNames = "Bob"
                 lastName = "Jones"
                 admin = true
                 personUid = 42
-            })
+            }
+            dbRule.insertPersonAndStartSession(adminPerson)
             dbRule.repo.insertStatementForSessions()
         }
     }
@@ -51,16 +52,13 @@ class ContentEntryDetailAttemptsListFragmentTest : TestCase()  {
     @AdbScreenRecord("Given list when personWithAttempt clicked then navigate to PersonSessionList")
     @Test
     fun givenPersonsAttemptedContent_whenClickOnPerson_thenShouldNavigateToSessionListForPerson() {
-
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to 1000L.toString())) {
-            ContentEntryDetailAttemptsListFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-            }
-        }
-
         init{
-
+            launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to 1000L.toString())) {
+                ContentEntryDetailAttemptsListFragment().also {
+                    it.installNavController(systemImplNavRule.navController)
+                }
+            }
         }.run{
 
             ContentEntryDetailAttemptsListScreen{
