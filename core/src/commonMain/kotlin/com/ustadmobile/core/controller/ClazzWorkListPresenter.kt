@@ -33,14 +33,14 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        val clazzUid = arguments.get(UstadView.ARG_FILTER_BY_CLAZZUID)?.toLong() ?: 0L
+        val clazzUid = arguments.get(UstadView.ARG_CLAZZUID)?.toLong() ?: 0L
         return db.clazzDao.personHasPermissionWithClazz(accountManager.activeAccount.personUid,
                 clazzUid, Role.PERMISSION_CLAZZWORK_UPDATE)
     }
 
     private suspend fun updateListOnView() {
 
-        val clazzUid = arguments[UstadView.ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
+        val clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0L
         val loggedInPersonUid = accountManager.activeAccount.personUid
         val clazzEnrolment: ClazzEnrolment? =
                 db.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid, clazzUid)
@@ -60,7 +60,7 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
     }
 
     override fun handleClickCreateNewFab() {
-        val clazzUid = arguments.get(UstadView.ARG_FILTER_BY_CLAZZUID)?.toLong() ?: 0L
+        val clazzUid = arguments.get(UstadView.ARG_CLAZZUID)?.toLong() ?: 0L
 
         val clazzWork: ClazzWork = ClazzWork().apply {
             clazzWorkClazzUid = clazzUid

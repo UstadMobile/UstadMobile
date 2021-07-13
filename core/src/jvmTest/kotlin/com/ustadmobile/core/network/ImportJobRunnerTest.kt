@@ -24,16 +24,16 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag.Companion.TAG_DB
 import com.ustadmobile.door.ext.DoorTag.Companion.TAG_REPO
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.rest.ContainerUploadRoute2
 import com.ustadmobile.lib.rest.TAG_UPLOAD_DIR
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.sharedse.io.extractResourceToFile
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploadManagerCommonJvm
 import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
 import org.kodein.di.ktor.DIFeature
@@ -58,6 +58,7 @@ import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
 import java.io.File
 import java.util.*
+import kotlin.random.Random.Default.nextInt
 
 class ImportJobRunnerTest {
 
@@ -106,15 +107,18 @@ class ImportJobRunnerTest {
             }
             bind<ContentImportManager>() with scoped(endpointScope).singleton {
                 ContentImportManagerImpl(listOf(H5PTypePluginCommonJvm(), XapiTypePluginCommonJvm()),
-                        context, this.context, di)
+                       context, this.context, di)
             }
         }
 
         val httpClient: HttpClient = di.direct.instance()
-        serverDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase").build()
+        serverDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class,
+            "UmAppDatabase").build()
         serverDb.clearAllTables()
+
+        val serverNodeIdAndAuth = NodeIdAndAuth(nextInt(), randomUuid().toString())
         serverRepo = spy(serverDb.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
-            httpClient, di.direct.instance())))
+            serverNodeIdAndAuth.nodeId, serverNodeIdAndAuth.auth, httpClient, di.direct.instance())))
 
         server = embeddedServer(Netty, port = defaultPort) {
             install(ContentNegotiation) {
@@ -181,7 +185,8 @@ class ImportJobRunnerTest {
         return runBlocking {
             ContainerImportJob().apply {
                 cijBytesSoFar = 0
-                this.cijFilePath = fileToUpload.absolutePath
+                this.cijUri = fileToUpload.toURI().toString()
+                this.cijImportMode = ContainerImportJob.SERVER_IMPORT_MODE
                 this.cijContentEntryUid = metadata.contentEntry.contentEntryUid
                 this.cijMimeType = metadata.mimeType
                 this.cijContainerBaseDir = clientFolder.absolutePath
@@ -211,7 +216,7 @@ class ImportJobRunnerTest {
             .writeToFile(fileToUpload)
 
         metadata = runBlocking {
-            contentImportManager.extractMetadata(fileToUpload.path)!!
+            contentImportManager.extractMetadata(fileToUpload.toURI().toString())!!
         }
 
         metadata.contentEntry.contentEntryUid = runBlocking {

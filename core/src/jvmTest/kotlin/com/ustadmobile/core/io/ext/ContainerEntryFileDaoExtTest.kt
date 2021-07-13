@@ -6,10 +6,8 @@ import com.ustadmobile.core.io.ConcatenatedInputStream2
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
-import com.ustadmobile.core.util.ext.base64StringToByteArray
 import com.ustadmobile.core.util.ext.distinctMds5sSorted
 import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.Container
 import kotlinx.coroutines.runBlocking
@@ -71,8 +69,9 @@ class ContainerEntryFileDaoExtTest {
         val storageDir = temporaryFolder.newFolder()
 
         runBlocking {
-            repo.addEntriesToContainerFromZip(container.containerUid, epubTmpFile.toDoorUri(),
-                    ContainerAddOptions(storageDir.toDoorUri(), false))
+            repo.addEntriesToContainerFromZip(
+                    container.containerUid, epubTmpFile.toDoorUri(),
+                    ContainerAddOptions(storageDir.toDoorUri(), false), Any())
         }
 
         //get a list of all the md5s
@@ -111,8 +110,9 @@ class ContainerEntryFileDaoExtTest {
         val storageDir = temporaryFolder.newFolder()
 
         runBlocking {
-            repo.addEntriesToContainerFromZip(container.containerUid, epubTmpFile.toDoorUri(),
-                    ContainerAddOptions(storageDir.toDoorUri(), false))
+            repo.addEntriesToContainerFromZip(
+                    container.containerUid, epubTmpFile.toDoorUri(),
+                    ContainerAddOptions(storageDir.toDoorUri(), false), Any())
         }
 
         //get a list of all the md5s

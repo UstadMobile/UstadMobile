@@ -12,9 +12,12 @@ import com.ustadmobile.core.io.ext.toKmpUriString
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.clearAllTablesAndResetSync
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
 import com.ustadmobile.util.commontest.ext.mockResponseForConcatenatedFiles2Request
@@ -33,6 +36,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.random.Random
 
 class ContainerFetcherJobOkHttpTest {
 
@@ -87,11 +91,13 @@ class ContainerFetcherJobOkHttpTest {
             }
         }
 
-        serverDb = UmAppDatabase.getInstance(Any(), "UmAppDatabase").also {
-            it.clearAllTables()
+        val serverNodeIdAndAuth = NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
+        serverDb = UmAppDatabase.getInstance(Any(), "UmAppDatabase", serverNodeIdAndAuth, primary = true).also {
+            it.clearAllTablesAndResetSync(serverNodeIdAndAuth.nodeId, true)
         }
+
         serverRepo = serverDb.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
-            serverHttpClient, serverOkHttpClient))
+            serverNodeIdAndAuth.nodeId, serverNodeIdAndAuth.auth, serverHttpClient, serverOkHttpClient))
 
         container = Container().apply {
             containerUid = serverRepo.containerDao.insert(this)
@@ -102,8 +108,10 @@ class ContainerFetcherJobOkHttpTest {
                 .writeToFile(epubFile)
         val containerTmpFolder = temporaryFolder.newFolder()
         runBlocking {
-            serverRepo.addEntriesToContainerFromZip(container.containerUid,
-                epubFile.toDoorUri(), ContainerAddOptions(containerTmpFolder.toDoorUri()))
+            serverRepo.addEntriesToContainerFromZip(
+                    container.containerUid,
+                    epubFile.toDoorUri(), ContainerAddOptions(containerTmpFolder.toDoorUri()), Any()
+            )
         }
 
         //Create a mock web server that will serve the concatenated data

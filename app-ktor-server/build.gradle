@@ -30,6 +30,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "io.ktor:ktor-io:$version_ktor"
+                implementation "com.soywiz.korlibs.klock:klock:$version_klock"
             }
         }
 
@@ -45,6 +46,7 @@ kotlin {
                 implementation "io.ktor:ktor-gson:$version_ktor"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "io.ktor:ktor-html-builder:$version_ktor"
                 implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
                 implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
                 implementation "io.github.bonigarcia:webdrivermanager:$version_chrome_manager"
@@ -67,6 +69,9 @@ kotlin {
 
                 implementation "io.github.aakira:napier-jvm:$version_napier"
 
+                implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
+                implementation "net.sf.kxml:kxml2:$version_kxml"
+
                 implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"
 
                 implementation project(":core")
@@ -82,6 +87,9 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
                 implementation "io.netty:netty-tcnative-boringssl-static:$version_netty_tcnative"
+
+                implementation "com.sun.mail:jakarta.mail:$version_jakartamail"
+                implementation "org.apache.commons:commons-compress:$version_apache_commons_compress"
             }
         }
 
@@ -90,6 +98,9 @@ kotlin {
 
                 implementation project(":lib-test-common")
                 implementation project(":sharedse")
+
+                implementation "io.ktor:ktor-server-test-host:$version_ktor"
+                implementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
 
                 implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
                 implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"

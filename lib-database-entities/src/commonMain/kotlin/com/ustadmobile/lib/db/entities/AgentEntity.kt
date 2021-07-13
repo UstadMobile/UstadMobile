@@ -3,30 +3,40 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
+import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
 import kotlinx.serialization.Serializable
 
 @Entity
 @SyncableEntity(tableId = AgentEntity.TABLE_ID,
     notifyOnUpdate = [
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId as deviceId, ${AgentEntity.TABLE_ID} as tableId FROM 
-        ChangeLog
-        JOIN AgentEntity ON ChangeLog.chTableId = ${AgentEntity.TABLE_ID} AND ChangeLog.chEntityPk = AgentEntity.agentUid
-        JOIN Person ON Person.personUid = AgentEntity.agentPersonUid
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
+               ${AgentEntity.TABLE_ID} AS tableId 
+         FROM ChangeLog
+              JOIN AgentEntity 
+                   ON ChangeLog.chTableId = ${AgentEntity.TABLE_ID} 
+                        AND ChangeLog.chEntityPk = AgentEntity.agentUid
+              JOIN Person 
+                   ON Person.personUid = AgentEntity.agentPersonUid
+              $JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
+                    ${Role.PERMISSION_PERSON_SELECT}
+                    $JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
         """
     ],
 
     syncFindAllQuery = """
-        SELECT AgentEntity.* FROM 
-        AgentEntity
-        JOIN Person ON Person.personUid = AgentEntity.agentPersonUid
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
-        WHERE DeviceSession.dsDeviceId = :clientId
+        SELECT AgentEntity.*
+          FROM UserSession
+               JOIN PersonGroupMember 
+                        ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+               ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
+                        ${Role.PERMISSION_PERSON_SELECT}
+                        ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+               JOIN AgentEntity 
+                    ON AgentEntity.agentPersonUid = Person.personUid
+         WHERE UserSession.usClientNodeId= :clientId
+           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
         """
 )
 

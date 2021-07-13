@@ -8,7 +8,10 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ETAG_TXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.LAST_MODIFIED_TXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
@@ -42,6 +45,7 @@ import java.net.URISyntaxException
 import java.net.URL
 import java.nio.file.Files
 import javax.naming.InitialContext
+import kotlin.random.Random
 
 
 class TestPrathamContentScraper {
@@ -63,11 +67,15 @@ class TestPrathamContentScraper {
         endpointScope = EndpointScope()
 
         di = DI {
+            bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
+                NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
+            }
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
+                val nodeIdAndAuth: NodeIdAndAuth = instance()
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName).also {
-                    it.clearAllTables()
+                spy(UmAppDatabase.getInstance(Any(), dbName, nodeIdAndAuth).also {
+                    it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
                 })
             }
             bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {

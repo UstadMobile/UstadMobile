@@ -5,8 +5,8 @@ import androidx.core.widget.NestedScrollView
 import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
 import androidx.test.espresso.matcher.ViewMatchers
-import com.agoda.kakao.common.actions.ScrollableActions
-import com.agoda.kakao.common.actions.SwipeableActions
+import io.github.kakaocup.kakao.common.actions.ScrollableActions
+import io.github.kakaocup.kakao.common.actions.SwipeableActions
 import org.hamcrest.Matchers
 
 /**

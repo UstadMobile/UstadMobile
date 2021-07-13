@@ -97,8 +97,10 @@ class UmAppDatabaseContainerIoExtTest {
 
 
         runBlocking {
-            repo.addEntriesToContainerFromZip(container.containerUid, epubTmp.toDoorUri(),
-                ContainerAddOptions(containerFilesDir.toDoorUri()))
+            repo.addEntriesToContainerFromZip(
+                    container.containerUid, epubTmp.toDoorUri(),
+                    ContainerAddOptions(containerFilesDir.toDoorUri()), Any()
+            )
         }
     }
 

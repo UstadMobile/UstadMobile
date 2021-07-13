@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.AccountRegisterOptions
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.db.UmAppDatabase
@@ -53,8 +54,10 @@ class PersonAccountEditPresenter(context: Any,
         } ?: Person()
 
         activeUserHasPasswordResetPermission = withTimeoutOrNull(2000) {
-            db.personDao.personHasPermissionAsync(activePersonUid, entityUid,
-                Role.PERMISSION_RESET_PASSWORD, 0)
+            db.personDao.personHasPermissionAsync(
+                activePersonUid, entityUid,
+                Role.PERMISSION_RESET_PASSWORD
+            )
         } ?: false
 
         view.currentPasswordVisible = !activeUserHasPasswordResetPermission
@@ -113,7 +116,8 @@ class PersonAccountEditPresenter(context: Any,
             try{
                 if(createAccount && !entity.newPassword.isNullOrEmpty()
                         && !entity.confirmedPassword.isNullOrEmpty()){
-                    val umAccount = accountManager.register(entity,serverUrl, false)
+                    val umAccount = accountManager.register(entity,serverUrl,
+                        AccountRegisterOptions(makeAccountActive = false))
                     if(umAccount.username != null){
                         repo.personDao.updateAsync(entity)
                     }

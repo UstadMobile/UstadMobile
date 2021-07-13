@@ -83,9 +83,10 @@ class XapiPackageContentFragmentTest : TestCase() {
         }.run{
 
             XapiContentScreen{
-                //Timeout increased due to flakey failure on Jenkins 4/Jan/2021
+                //Timeout increased due to flakey failure on Jenkins 4/Jan/2021. Added reset 5/Jan/20201
                 flakySafely(timeoutMs = 15 * 1000) {
                     webView{
+                        reset()
                         withElement(Locator.TAG_NAME, "a"){
                             hasText("Tin Can Home")
                         }

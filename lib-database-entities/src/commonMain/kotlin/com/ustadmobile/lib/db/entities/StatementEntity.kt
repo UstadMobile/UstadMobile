@@ -9,24 +9,30 @@ import kotlinx.serialization.Serializable
 @Entity
 @SyncableEntity(tableId = StatementEntity.TABLE_ID,
     notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${StatementEntity.TABLE_ID} AS tableId 
-        FROM 
-        ChangeLog
-        JOIN StatementEntity ON ChangeLog.chTableId = ${StatementEntity.TABLE_ID} AND ChangeLog.chEntityPk = StatementEntity.statementUid
-        JOIN AgentEntity ON StatementEntity.agentUid = AgentEntity.agentUid
-        JOIN Person ON Person.personUid = AgentEntity.agentPersonUid
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid"""],
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
+               ${StatementEntity.TABLE_ID} AS tableId 
+          FROM ChangeLog
+               JOIN StatementEntity 
+                    ON ChangeLog.chTableId = ${StatementEntity.TABLE_ID} 
+                        AND ChangeLog.chEntityPk = StatementEntity.statementUid
+               JOIN Person 
+                    ON Person.personUid = StatementEntity.statementPersonUid
+               ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}
+                    ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
+                """],
     syncFindAllQuery = """
-        SELECT StatementEntity.* FROM
-        StatementEntity
-        JOIN AgentEntity ON StatementEntity.agentUid = AgentEntity.agentUid
-        JOIN Person ON Person.personUid = AgentEntity.agentPersonUid
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
-        WHERE DeviceSession.dsDeviceId = :clientId"""
+        SELECT StatementEntity.* 
+          FROM UserSession
+               JOIN PersonGroupMember 
+                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+               ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
+                    ${Role.PERMISSION_PERSON_SELECT}
+                    ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+               JOIN StatementEntity
+                    ON StatementEntity.statementPersonUid = Person.personUid
+         WHERE UserSession.usClientNodeId = :clientId
+               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}"""
 )
 @Serializable
 open class StatementEntity {
@@ -114,6 +120,8 @@ open class StatementEntity {
 
 
     var statementLearnerGroupUid: Long = 0
+
+    var statementClazzUid: Long = 0
 
     companion object {
 

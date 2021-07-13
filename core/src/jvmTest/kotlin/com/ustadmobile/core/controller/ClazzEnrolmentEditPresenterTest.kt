@@ -83,7 +83,7 @@ class ClazzEnrolmentEditPresenterTest {
 
         val presenterArgs = mapOf<String, String>(
                 UstadView.ARG_PERSON_UID to activePerson.personUid.toString(),
-                UstadView.ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString(),
+                UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString(),
                 UstadView.ARG_SAVE_TO_DB to true.toString())
         val systemImpl: UstadMobileSystemImpl by di.instance()
         val repo: UmAppDatabase by di.activeRepoInstance()
@@ -131,7 +131,7 @@ class ClazzEnrolmentEditPresenterTest {
 
         val presenterArgs = mapOf<String, String>(
                 UstadView.ARG_PERSON_UID to activePerson.personUid.toString(),
-                UstadView.ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString(),
+                UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString(),
                 UstadView.ARG_SAVE_TO_DB to true.toString(),
                 UstadView.ARG_ENTITY_UID to testEntity.clazzEnrolmentUid.toString())
         val presenter = ClazzEnrolmentEditPresenter(context,

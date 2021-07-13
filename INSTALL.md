@@ -72,6 +72,10 @@ ktor {
         # instances can run using the same server.
         dbmode = singleton
         datadir = data
+
+        # The app download link for Android users. Users will be redirected here if they select
+        # to download the app
+        androidDownloadHref = "https://play.google.com/store/apps/details?id=com.toughra.ustadmobile"
     }
 
     database {

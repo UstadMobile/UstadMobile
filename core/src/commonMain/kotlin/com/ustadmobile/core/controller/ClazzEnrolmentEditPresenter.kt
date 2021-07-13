@@ -18,7 +18,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import org.kodein.di.DI
 import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SAVE_TO_DB
@@ -65,7 +65,7 @@ class ClazzEnrolmentEditPresenter(context: Any,
         super.onCreate(savedState)
         view.statusList = OutcomeOptions.values().map { OutcomeMessageIdOption(it, context) }
         selectedPerson = arguments[ARG_PERSON_UID]?.toLong() ?: 0L
-        selectedClazz = arguments[ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
+        selectedClazz = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
         selectedRole = arguments[ARG_FILTER_BY_ENROLMENT_ROLE]?.toInt() ?: 0
     }
 

@@ -2,6 +2,7 @@ package com.ustadmobile.core.util.ext
 
 import org.mockito.kotlin.mock
 import com.soywiz.klock.DateTime
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UstadTestRule
@@ -41,6 +42,7 @@ class ReportWithSeriesWithFiltersExtTest {
     fun setup() {
         accountManager = mock{
             on{activeAccount}.thenReturn(UmAccount(loggedPersonUid,"","",serverUrl))
+            on { activeEndpoint }.thenReturn(Endpoint(serverUrl))
         }
 
         val di = DI {
@@ -51,12 +53,16 @@ class ReportWithSeriesWithFiltersExtTest {
         repo = di.directActiveRepoInstance()
 
         runBlocking {
-            repo.insertPersonAndGroup(Person().apply{
+            val person = repo.insertPersonAndGroup(Person().apply{
                 personUid = loggedPersonUid
                 admin = true
                 firstNames = "Bob"
                 lastName = "Jones"
             })
+
+            repo.grantScopedPermission(person, Role.ALL_PERMISSIONS,
+                ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
+
             repo.insertTestStatementsForReports()
         }
     }

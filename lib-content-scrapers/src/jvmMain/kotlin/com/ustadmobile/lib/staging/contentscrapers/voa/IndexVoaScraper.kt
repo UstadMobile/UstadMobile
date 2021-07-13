@@ -18,6 +18,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_PUBLI
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.core.util.LiveDataWorkQueue
+import com.ustadmobile.lib.staging.contentscrapers.replaceMeWithDi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.apache.commons.io.FilenameUtils
@@ -181,7 +182,7 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
             UMLogUtil.logInfo(args[0])
 
             try {
-                val runDao = UmAppDatabase.getInstance(Any()).scrapeRunDao
+                val runDao = UmAppDatabase.getInstance(Any(), replaceMeWithDi()).scrapeRunDao
 
                 scrapeFromRoot(File(args[0]), File(args[1]), 0)
             } catch (e: Exception) {
@@ -208,7 +209,7 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
             destinationDir.mkdirs()
             containerDir.mkdirs()
 
-            val db = UmAppDatabase.getInstance(Any())
+            val db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
             val repository = db// db.getRepository("https://localhost", "")
             contentEntryDao = repository.contentEntryDao
             contentParentChildJoinDao = repository.contentEntryParentChildJoinDao

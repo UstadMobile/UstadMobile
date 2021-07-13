@@ -7,12 +7,13 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.UmAccount
 
 fun XapiStatementEndpoint.storeProgressStatement(account: UmAccount, entry: ContentEntry,
-                                                 progress: Int, duration: Long, contextRegistration: String) {
+                                                 progress: Int, duration: Long, contextRegistration: String,
+                                                 clazzUid: Long) {
     val statement = Statement().apply {
         this.actor = Actor().apply {
             this.account = Account().apply {
                 this.homePage = account.endpointUrl
-                this.name = account.username
+                this.name = account.username ?: "guest"
             }
         }
         this.verb = Verb().apply {
@@ -38,5 +39,5 @@ fun XapiStatementEndpoint.storeProgressStatement(account: UmAccount, entry: Cont
         }
     }
 
-    storeStatements(listOf(statement), "", entry.contentEntryUid)
+    storeStatements(listOf(statement), "", entry.contentEntryUid, clazzUid)
 }

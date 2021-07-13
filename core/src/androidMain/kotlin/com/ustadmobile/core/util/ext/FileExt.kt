@@ -13,3 +13,4 @@ fun File.extractVideoResolutionMetadata(): Pair<Int, Int>{
 
     return Pair(originalWidth, originalHeight)
 }
+

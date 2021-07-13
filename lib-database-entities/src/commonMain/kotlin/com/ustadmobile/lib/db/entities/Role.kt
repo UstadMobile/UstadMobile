@@ -12,21 +12,7 @@ import kotlinx.serialization.Serializable
     //Index to handle permission queries
     Index(value=["rolePermissions"])
 ])
-@SyncableEntity(tableId = Role.TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${Role.TABLE_ID} AS tableId 
-        FROM DeviceSession""",
-
-        //Anyone who has this role must do a full resync when the role itself changes
-        """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClientSyncManager.TABLEID_SYNC_ALL_TABLES} AS tableId FROM 
-        ChangeLog
-        JOIN Role ON ChangeLog.chTableId = ${Role.TABLE_ID} AND ChangeLog.chEntityPk = Role.roleUid
-        JOIN EntityRole ON EntityRole.erRoleUid = Role.roleUid
-        JOIN PersonGroupMember ON PersonGroupMember.groupMemberGroupUid = EntityRole.erGroupUid
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
-        """
-    ])
+@SyncableEntity(tableId = Role.TABLE_ID)
 @Serializable
 open class Role() {
 
@@ -179,6 +165,25 @@ open class Role() {
 
         const val PERMISSION_PERSON_LEARNINGRECORD_UPDATE: Long = 2199023255552L
 
+        //Note: to create further constants, use the Tools - Kotlin - REPL to double each value
+        const val PERMISSION_CLAZZ_CONTENT_SELECT: Long = 4398046511104L
+
+        const val PERMISSION_CLAZZ_CONTENT_UPDATE: Long = 8796093022208L
+
+        const val PERMISSION_PERSONCONTACT_SELECT: Long = 17592186044416L
+
+        const val PERMISSION_PERSONCONTACT_UPDATE: Long = 35184372088832L
+
+        const val PERMISSION_PERSONSOCIOECONOMIC_SELECT: Long = 70368744177664L
+
+        const val PERMISSION_PERSONSOCIOECONOMIC_UPDATE: Long = 140737488355328L
+
+        const val PERMISSION_ADD_CLASS_TO_SCHOOL: Long = 281474976710656L
+
+        const val PERMISSION_AUTH_SELECT: Long = 562949953421312L
+
+        const val PERMISSION_AUTH_UPDATE: Long = 1125899906842624L
+
         //Predefined roles that are added by the system
         const val ROLE_CLAZZ_TEACHER_NAME = "Teacher"
 
@@ -300,6 +305,9 @@ open class Role() {
                         PERMISSION_RESET_PASSWORD or
                         PERMISSION_SCHOOL_ADD_STAFF or
                         PERMISSION_SCHOOL_ADD_STUDENT
+
+        const val ALL_PERMISSIONS = Long.MAX_VALUE
+
 
     }
 }

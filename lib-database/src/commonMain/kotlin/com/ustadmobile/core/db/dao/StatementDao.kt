@@ -70,14 +70,14 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             StatementEntity.contextRegistration, StatementEntity.timestamp, 
             StatementEntity.resultDuration, StatementEntity.resultScoreScaled, 
             StatementEntity.contentEntryRoot, StatementEntity.extensionProgress
-        
-         ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
+            FROM PersonGroupMember
+            ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
              LEFT JOIN StatementEntity 
-                ON StatementEntity.statementPersonUid = Person.personUid 
-                    WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
-                        AND PersonGroupMember.groupMemberActive  
-                        AND statementContentEntryUid = :contentEntryUid
-                        AND Person.firstNames || ' ' || Person.lastName LIKE :searchText 
+                       ON StatementEntity.statementPersonUid = Person.personUid 
+             WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
+               AND PersonGroupMember.groupMemberActive  
+               AND statementContentEntryUid = :contentEntryUid
+               AND Person.firstNames || ' ' || Person.lastName LIKE :searchText 
              GROUP BY StatementEntity.statementUid) AS ResultSource 
          GROUP BY ResultSource.personUid 
          ORDER BY CASE(:sortOrder) 

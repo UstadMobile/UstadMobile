@@ -16,7 +16,6 @@ import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
 import com.ustadmobile.core.util.ext.captureLastEntityValue
-import com.ustadmobile.lib.db.entities.Site
 import org.kodein.di.DI
 
 /**
@@ -66,15 +65,10 @@ class SiteDetailPresenterTest {
     @Test
     fun givenWorkspaceExists_whenOnCreateCalled_thenWorkspaceIsSetOnView() {
         val db: UmAppDatabase by di.activeDbInstance()
-        val repo: UmAppDatabase by di.activeRepoInstance()
 
-
-        val testEntity = Site().apply {
-            //set variables here
-            this.siteUid = repo.siteDao.insert(this)
-        }
-
-        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.siteUid.toString())
+        //Note: the initial site entity itself is created by UstadTestRule
+        val siteUid = db.siteDao.getSite()?.siteUid ?: throw IllegalStateException("No site in db!")
+        val presenterArgs = mapOf(ARG_ENTITY_UID to siteUid.toString())
         val presenter = SiteDetailPresenter(context,
                 presenterArgs, mockView, mockLifecycleOwner, di)
 
@@ -83,11 +77,9 @@ class SiteDetailPresenterTest {
 
         val entityValSet = mockView.captureLastEntityValue()!!
         Assert.assertEquals("Expected entity was set on view",
-                testEntity.siteUid, entityValSet.siteUid)
+                siteUid, entityValSet.siteUid)
 
         verify(repoSiteTermsDaoSpy).findAllTermsAsFactory()
     }
-
-
 
 }

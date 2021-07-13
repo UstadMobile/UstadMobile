@@ -7,6 +7,7 @@ import com.ustadmobile.core.view.LearnerGroupMemberListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.LearnerGroupMember
@@ -26,20 +27,23 @@ class LearnerGroupMemberListPresenter(context: Any, arguments: Map<String, Strin
 
     var contentEntryUid: Long = 0
 
+    var clazzUid: Long = 0
+
+
     private val contentEntryOpener: ContentEntryOpener by di.on(accountManager.activeAccount).instance()
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         learnerGroupUid = arguments[ARG_LEARNER_GROUP_UID]?.toLong() ?: 0L
         contentEntryUid = arguments[ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0L
+        clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
         updateList()
 
     }
 
     private fun updateList() {
-        GlobalScope.launch(doorMainDispatcher()) {
-            view.list = repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntry(learnerGroupUid, contentEntryUid)
-        }
+        view.list = repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntry(
+            learnerGroupUid, contentEntryUid)
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
@@ -66,7 +70,7 @@ class LearnerGroupMemberListPresenter(context: Any, arguments: Map<String, Strin
         GlobalScope.launch(doorMainDispatcher()) {
             try {
                 contentEntryOpener.openEntry(context, contentEntryUid, true, false,
-                        arguments[UstadView.ARG_NO_IFRAMES]?.toBoolean() ?: false, learnerGroupUid)
+                        arguments[UstadView.ARG_NO_IFRAMES]?.toBoolean() ?: false, learnerGroupUid, clazzUid)
             } catch (e: Exception) {
                 if (e is NoAppFoundException) {
                     view.showSnackBar(systemImpl.getString(MessageID.no_app_found, context))

@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager.widget.ViewPager
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzWorkDetailBinding
@@ -19,7 +20,6 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
-import kotlinx.android.synthetic.main.appbar_material_tabs_scrollable.view.*
 
 class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetailView{
 
@@ -27,7 +27,7 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
 
     private var mPresenter: ClazzWorkDetailPresenter? = null
 
-    private var mPager: ViewPager? = null
+    private var mPager: ViewPager2? = null
 
     private var mTabLayout: TabLayout? = null
 
@@ -40,7 +40,7 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
         mBinding = FragmentClazzWorkDetailBinding.inflate(inflater, container,
                 false).also {
             rootView = it.root
-            mTabLayout = it.root.tabs
+            mTabLayout = it.fragmentClazzWorkDetailAppbarTabs.tabs
         }
 
         mPager = mBinding?.fragmentClazzworkDetailViewpager
@@ -84,15 +84,14 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
 
     private fun setTabs(){
         if(progressOverviewVisible) {
-            mBinding?.root?.tabs?.visibility = View.VISIBLE
+            mBinding?.fragmentClazzWorkDetailAppbarTabs?.tabs?.visibility = View.VISIBLE
         }else{
-            mBinding?.root?.tabs?.visibility = View.GONE
+            mBinding?.fragmentClazzWorkDetailAppbarTabs?.tabs?.visibility = View.GONE
         }
 
         val entityUidValue : String = arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"
 
-        val tabs: List<String>
-        tabs = if(progressOverviewVisible){
+        val tabs: List<String> = if(progressOverviewVisible){
 
             listOf(
                     ClazzWorkDetailOverviewView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +
@@ -113,14 +112,13 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
                 ClazzWorkDetailProgressListView.VIEW_NAME to getText(R.string.student_progress).toString()
         )
 
-        mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager,
-                FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, tabs,
-                VIEW_NAME_TO_FRAGMENT_CLASS, viewNameToTitle)
-
-        Handler().post {
-            mPager?.adapter = mPagerAdapter
-            mTabLayout?.setupWithViewPager(mPager)
-        }
+//        mPagerAdapter = ViewNameListFragmentPagerAdapter(requireActivity(), tabs,
+//                VIEW_NAME_TO_FRAGMENT_CLASS, viewNameToTitle)
+//
+//        Handler().post {
+//            mPager?.adapter = mPagerAdapter
+//            mTabLayout?.setupWithViewPager(mPager)
+//        }
     }
 
     override var progressOverviewVisible: Boolean = true

@@ -46,7 +46,7 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
      */
     @Throws(IllegalArgumentException::class)
     override fun storeStatements(statements: List<Statement>, statementId: String,
-                                 contentEntryUid: Long): List<String> {
+                                 contentEntryUid: Long, clazzUid: Long): List<String> {
 
         hasStatementWithMatchingId(statements, statementId)
 
@@ -56,7 +56,8 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
 
         val statementUids = ArrayList<String>()
         for (statement in statements) {
-            val entity = storeStatement(statement, contentEntryUid = contentEntryUid)
+            val entity = storeStatement(statement,
+                    contentEntryUid = contentEntryUid, clazzUid = clazzUid)
             statementUids.add(entity.statementId!!)
         }
         return statementUids
@@ -234,7 +235,8 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
 
     @Throws(IllegalArgumentException::class)
     fun storeStatement(statement: Statement,
-                       contentEntryUid: Long = 0L): StatementEntity {
+                       contentEntryUid: Long = 0L,
+                        clazzUid: Long = 0L): StatementEntity {
 
         checkValidStatement(statement, false)
 
@@ -336,7 +338,8 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
                 agentUid, authorityUid, teamUid,
                 subActorUid, subVerbUid, subObjectUid,
                 contentEntryUid = contentEntryUid,
-                learnerGroupUid = learnerGroupUid, contentEntryRoot = contentEntryRoot)
+                learnerGroupUid = learnerGroupUid, contentEntryRoot = contentEntryRoot,
+                clazzUid = clazzUid)
 
         //ContentEntry should be available locally
         if (contentEntryRoot) {
@@ -430,7 +433,6 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
 
         const val EXTENSION_PROGRESS = "https://w3id.org/xapi/cmi5/result/extensions/progress"
 
-        @Throws(StatementRequestException::class)
         fun checkValidActor(actor: Actor) {
 
             val hasMbox = actor.mbox?.isNotEmpty() ?: false

@@ -66,7 +66,7 @@ class Login2PresenterTest {
         }
 
         accountManager = mock{
-            onBlocking { login(eq(VALID_USER), eq(VALID_PASS), any(), any()) }.thenAnswer {
+            onBlocking { login(eq(VALID_USER), eq(VALID_PASS), any()) }.thenAnswer {
                 val url = it.arguments[2] as String
                 UmAccount(personUid = 42,
                         username = VALID_USER, firstName = "user", lastName = "last", endpointUrl = url)
@@ -163,7 +163,7 @@ class Login2PresenterTest {
         val presenter = Login2Presenter(context, createParams(registration = true), view, di)
         presenter.onCreate(mapOf())
         presenter.handleCreateAccount()
-        verify(impl).go(eq(SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS), any(), any())
+        verify(impl).go(eq(RegisterAgeRedirectView.VIEW_NAME), any(), any())
     }
 
     @Test
@@ -197,7 +197,6 @@ class Login2PresenterTest {
             })
 
         verifyBlocking(accountManager, timeout(defaultTimeout)) { login(VALID_USER, VALID_PASS, httpUrl) }
-        verifyBlocking(mockRepo as DoorDatabaseSyncRepository, timeout(defaultTimeout)) { invalidateAllTables() }
     }
 
     @Test
@@ -255,7 +254,7 @@ class Login2PresenterTest {
     @Test
     fun givenInvalidUsernameAndPassword_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
         accountManager = mock{
-            onBlocking{login(any(), any(), any(), any())}.then{
+            onBlocking{login(any(), any(), any())}.then{
                 throw UnauthorizedException("Access denied")
             }
         }
@@ -279,7 +278,7 @@ class Login2PresenterTest {
     @Test
     fun givenServerOffline_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
         accountManager = mock{
-            onBlocking{login(any(), any(), any(), any())}.then{
+            onBlocking{login(any(), any(), any())}.then{
                 throw throw IllegalStateException("Server error")
             }
         }
