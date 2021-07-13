@@ -9,4 +9,4 @@ if not exist app-ktor-server\application.conf (
 )
 
 cd app-ktor-server
-java -jar app-ktor-server\build\libs\ustad-server-all.jar -config=application.conf
+java -jar build\libs\ustad-server-all.jar -config=application.conf

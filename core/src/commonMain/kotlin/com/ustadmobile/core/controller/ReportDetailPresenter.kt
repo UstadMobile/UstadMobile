@@ -201,9 +201,10 @@ class ReportDetailPresenter(context: Any,
 
             csvString.append("\n")
 
-            view.runOnUiThread(Runnable {
+            withContext(doorMainDispatcher()) {
                 view.shareCSVData(csvString)
-            })
+            }
+
         }
 
     }
