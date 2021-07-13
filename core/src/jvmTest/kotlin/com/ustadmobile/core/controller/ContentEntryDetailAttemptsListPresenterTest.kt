@@ -87,7 +87,6 @@ class ContentEntryDetailAttemptsListPresenterTest {
 
         presenter.onClickPersonWithStatementDisplay(PersonWithAttemptsSummary().apply {
             attempts = 2
-            progress = 100
             personUid = 1000L
             duration = 1000
         })

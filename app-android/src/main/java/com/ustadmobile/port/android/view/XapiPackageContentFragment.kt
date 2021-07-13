@@ -95,6 +95,11 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
         (context as? MainActivity)?.onAppBarExpand(isPortrait)
     }
 
+    override fun onStop() {
+        super.onStop()
+        mPresenter?.onStop()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         mPresenter?.onDestroy()

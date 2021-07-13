@@ -109,7 +109,7 @@ class ScopedGrantEditPresenterTest {
 
         //add some permission
         val bitmaskList = bitmaskFlagLiveData.value.get().toMutableList()
-        bitmaskList.firstOrNull { it.flagVal == Role.PERMISSION_CLAZZWORK_SELECT }?.enabled = true
+        bitmaskList.firstOrNull { it.flagVal == Role.PERMISSION_ASSIGNMENT_SELECT }?.enabled = true
         bitmaskList.firstOrNull { it.flagVal == Role.PERMISSION_CLAZZ_ADD_STUDENT }?.enabled = true
 
         presenter.handleClickSave(initialEntity)
@@ -124,7 +124,7 @@ class ScopedGrantEditPresenterTest {
         val result = testNavController.awaitResult(5000, ScopedGrant::class,
             ClazzEdit2View.VIEW_NAME, "ScopedGrant")
         Assert.assertEquals("Saved with expected permissions",
-            Role.PERMISSION_CLAZZWORK_SELECT or Role.PERMISSION_CLAZZ_ADD_STUDENT,
+            Role.PERMISSION_ASSIGNMENT_SELECT or Role.PERMISSION_CLAZZ_ADD_STUDENT,
             result.first().sgPermissions)
 
     }
@@ -132,7 +132,7 @@ class ScopedGrantEditPresenterTest {
     @Test
     fun givenExistingScopedGrant_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
         val testEntity = ScopedGrant().apply {
-            sgPermissions = (Role.PERMISSION_CLAZZWORK_SELECT or Role.PERMISSION_CLAZZWORK_UPDATE)
+            sgPermissions = (Role.PERMISSION_ASSIGNMENT_SELECT or Role.PERMISSION_ASSIGNMENT_UPDATE)
         }
 
         val presenterArgs = mapOf(
@@ -157,7 +157,7 @@ class ScopedGrantEditPresenterTest {
             ListSerializer(BitmaskFlag.serializer()), bitmaskFlagLiveData.value.get())
 
         val bitmaskList = bitmaskFlagLiveData.value.get().toMutableList()
-        bitmaskList.firstOrNull { it.flagVal == Role.PERMISSION_CLAZZWORK_SELECT }?.enabled = false
+        bitmaskList.firstOrNull { it.flagVal == Role.PERMISSION_ASSIGNMENT_SELECT }?.enabled = false
         bitmaskList.firstOrNull { it.flagVal == Role.PERMISSION_CLAZZ_ADD_TEACHER }?.enabled = true
 
         presenter.handleClickSave(initialEntity)
@@ -166,13 +166,13 @@ class ScopedGrantEditPresenterTest {
         val initialBitmaskFlags : List<BitmaskFlag> = Json.decodeFromString(ListSerializer(
             BitmaskFlag.serializer()), initialBitmaskFlagJson)
         Assert.assertEquals("Initial flags enabled as per arguments",
-            (Role.PERMISSION_CLAZZWORK_SELECT or Role.PERMISSION_CLAZZWORK_UPDATE),
+            (Role.PERMISSION_ASSIGNMENT_SELECT or Role.PERMISSION_ASSIGNMENT_UPDATE),
             initialBitmaskFlags.combinedFlagValue)
 
         val result = testNavController.awaitResult(5000, ScopedGrant::class,
             ClazzEdit2View.VIEW_NAME, "ScopedGrant")
         Assert.assertEquals("Got expected permissions",
-            Role.PERMISSION_CLAZZ_ADD_TEACHER or Role.PERMISSION_CLAZZWORK_UPDATE,
+            Role.PERMISSION_CLAZZ_ADD_TEACHER or Role.PERMISSION_ASSIGNMENT_UPDATE,
                 result.first().sgPermissions)
     }
 }

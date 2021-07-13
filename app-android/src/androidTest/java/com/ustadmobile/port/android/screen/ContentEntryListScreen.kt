@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.screen
 
 import android.view.View
-import androidx.test.espresso.matcher.ViewMatchers.withId
 import io.github.kakaocup.kakao.common.views.KView
 import io.github.kakaocup.kakao.recycler.KRecyclerItem
 import io.github.kakaocup.kakao.recycler.KRecyclerView

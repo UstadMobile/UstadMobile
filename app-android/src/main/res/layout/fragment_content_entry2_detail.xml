@@ -11,15 +11,17 @@
 
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
 
-        <import type="com.ustadmobile.lib.db.entities.ContentEntryProgress" />
-
         <variable
             name="contentEntry"
             type="com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer" />
 
         <variable
-            name="contentEntryProgress"
-            type="com.ustadmobile.lib.db.entities.ContentEntryProgress" />
+            name="scoreProgress"
+            type="com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress" />
+
+        <variable
+            name="markCompleteVisible"
+            type="boolean" />
 
         <variable
             name="loading"
@@ -80,9 +82,9 @@
                 android:layout_width="0dp"
                 android:layout_height="@dimen/dimen_4dp"
                 android:max="100"
-                android:progress="@{contentEntryProgress.contentEntryProgressProgress}"
+                android:progress="@{scoreProgress.progress}"
                 android:progressTint="@color/primaryColor"
-                android:visibility="@{contentEntryProgress != null &amp; contentEntryProgress.contentEntryProgressProgress > 0 ? View.VISIBLE : View.GONE}"
+                android:visibility="@{scoreProgress.progress > 0 ? View.VISIBLE : View.GONE}"
                 app:layout_constraintEnd_toEndOf="@id/entry_detail_thumbnail"
                 app:layout_constraintStart_toStartOf="@id/entry_detail_thumbnail"
                 app:layout_constraintTop_toBottomOf="@id/entry_detail_thumbnail"
@@ -95,11 +97,12 @@
                 android:scaleType="fitCenter"
                 android:translationX="8dp"
                 android:translationY="-8dp"
-                app:iconStatusFlag="@{contentEntryProgress.contentEntryProgressStatusFlag}"
+                app:iconProgressFlag="@{scoreProgress}"
                 app:layout_constraintEnd_toEndOf="@id/entry_detail_thumbnail"
                 app:layout_constraintTop_toBottomOf="@id/entry_detail_thumbnail"
                 tools:srcCompat="@drawable/ic_content_complete"
                 />
+
 
             <TextView
                 android:id="@+id/entry_detail_title"
@@ -172,10 +175,43 @@
                 android:textAppearance="@style/UmTheme.TextAppearance.Caption"
                 app:fileSize="@{contentEntry.container.fileSize}"
                 android:visibility="@{contentEntry.container.fileSize != 0 ? View.VISIBLE : View.GONE}"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
                 app:layout_constraintTop_toBottomOf="@id/entry_detail_license_label"
                 tools:text="50 MB" />
+
+
+            <TextView
+                android:paddingStart="@dimen/dimen_5dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:drawablePadding="@dimen/dimen_4dp"
+                app:drawableStartCompat="@drawable/ic_baseline_emoji_events_24"
+                tools:text="100%"
+                android:textAppearance="@style/UmTheme.TextAppearance.Caption"
+                android:id="@+id/item_person_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:scorePercentage="@{scoreProgress}"
+                app:showScoreVisibility="@{scoreProgress}"
+                app:layout_constraintStart_toEndOf="@+id/entry_detail_content_size"
+                app:layout_constraintTop_toBottomOf="@+id/entry_detail_license"
+                android:layout_marginBottom="@dimen/dimen_16dp" />
+
+
+            <TextView
+                android:paddingStart="@dimen/dimen_5dp"
+                android:layout_margin="@dimen/dimen_8dp"
+                tools:text="(4/4)"
+                android:id="@+id/item_person_score_results"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/UmTheme.TextAppearance.Caption"
+                android:text='@{"(" + scoreProgress.resultScore + &quot;/&quot; + scoreProgress.resultMax + ")"}'
+                app:showScoreVisibility="@{scoreProgress}"
+                app:layout_constraintStart_toEndOf="@+id/item_person_progress"
+                app:layout_constraintTop_toBottomOf="@+id/entry_detail_license"
+                android:layout_marginBottom="@dimen/dimen_16dp" />
+
 
 
             <androidx.constraintlayout.widget.Barrier
@@ -183,7 +219,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
-                app:constraint_referenced_ids="entry_detail_content_size,entry_detail_thumbnail" />
+                app:constraint_referenced_ids="entry_detail_content_size,content_progress_fail_correct" />
 
             <LinearLayout
                 android:id="@+id/entry_detail_anchor_download"
@@ -261,44 +297,49 @@
                 app:layout_constraintTop_toBottomOf="@id/library_size_divider"
                 app:layout_constraintBottom_toTopOf="@id/description_divider">
 
-                <TextView
-                    android:layout_weight="1"
-                    android:id='@+id/entry_detail_delete_button'
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/entry_detail_mark_complete"
+                    android:visibility="@{markCompleteVisible ? View.VISIBLE : View.GONE}"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxWidth="128dp"
-                    android:text="@string/delete"
-                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
-                    android:textColor="?colorPrimary"
-                    android:tint="?colorPrimary"
-                    app:drawableTint="?colorPrimary"
-                    android:gravity="center"
-                    android:textAllCaps="true"
+                    app:icon="@drawable/ic_checkbox_multiple_marked"
+                    app:iconGravity="top"
                     android:padding="@dimen/dimen_8dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:onClick="@{()-> fragmentEventHandler.handleOnClickDeleteButton()}"
+                    android:layout_weight="1"
+                    android:maxWidth="128dp"
+                    android:onClick="@{()-> fragmentEventHandler.handleOnClickMarkComplete()}"
+                    android:text="@string/mark_complete"/>
+
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/entry_detail_delete_button"
                     android:visibility="@{DownloadJobExtKt.isStatusCompletedSuccessfully(downloadJobItem) ? View.VISIBLE : View.GONE}"
-                    app:drawableTopCompat="@drawable/ic_delete_black_24dp"/>
-
-
-                <TextView
-                    android:layout_weight="1"
-                    android:id='@+id/entry_manage_download_button'
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
-                    android:maxWidth="128dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/manage_download"
-                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
-                    android:textColor="?colorPrimary"
-                    android:tint="?colorPrimary"
-                    app:drawableTint="?colorPrimary"
-                    android:gravity="center"
-                    android:textAllCaps="true"
+                    app:icon="@drawable/ic_delete_black_24dp"
+                    app:iconGravity="top"
                     android:padding="@dimen/dimen_8dp"
-                    android:background="?attr/selectableItemBackground"
+                    android:layout_weight="1"
+                    android:maxWidth="128dp"
+                    android:onClick="@{()-> fragmentEventHandler.handleOnClickDeleteButton()}"
+                    android:text="@string/delete"/>
+
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/entry_manage_download_button"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:icon="@drawable/ic_file_download_black_24dp"
+                    app:iconGravity="top"
+                    android:padding="@dimen/dimen_8dp"
+                    android:layout_weight="1"
+                    android:maxWidth="128dp"
                     android:onClick="@{()-> fragmentEventHandler.handleOnClickManageDownloadButton()}"
                     android:visibility="@{DownloadJobExtKt.isStatusQueuedOrDownloading(downloadJobItem) ? View.VISIBLE : View.GONE}"
-                    app:drawableTopCompat="@drawable/ic_file_download_black_24dp"/>
+                    android:text="@string/manage_download"/>
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 

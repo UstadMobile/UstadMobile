@@ -53,12 +53,8 @@ class PersonEditFragmentTest : TestCase() {
 
     private lateinit var serverUrl: String
 
-    lateinit var impl: UstadMobileSystemImpl
-
     @Before
     fun setUp() {
-        impl = getApplicationDi().direct.instance()
-        impl.messageIdMap = MessageIDMap.ID_MAP
         mockWebServer = MockWebServer()
         mockWebServer.start()
         serverUrl = mockWebServer.url("/").toString()
@@ -84,7 +80,7 @@ class PersonEditFragmentTest : TestCase() {
         }.run {
             PersonEditScreen {
                 launchFragment(PersonEditView.REGISTER_MODE_NONE, fillForm = false, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run,
+                        context = context, testContext = this@run,
                 databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
                 usernameTextInput {
@@ -115,7 +111,7 @@ class PersonEditFragmentTest : TestCase() {
 
                 launchFragment(registrationMode = PersonEditView.REGISTER_MODE_ENABLED, leftOutPassword = true, leftOutUsername = true,
                         serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run,
+                        context = context, testContext = this@run,
                         databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
 
@@ -144,7 +140,7 @@ class PersonEditFragmentTest : TestCase() {
 
 
                 launchFragment(registrationMode = PersonEditView.REGISTER_MODE_ENABLED, leftOutDateOfBirth = true, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run,
+                        context = context, testContext = this@run,
                         databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
 
@@ -166,7 +162,7 @@ class PersonEditFragmentTest : TestCase() {
             PersonEditScreen {
 
                 launchFragment(registrationMode = PersonEditView.REGISTER_MODE_ENABLED, misMatchPassword = true, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run,
+                        context = context, testContext = this@run,
                         databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
                 scrollToBottom()
@@ -195,7 +191,7 @@ class PersonEditFragmentTest : TestCase() {
             PersonEditScreen {
 
                 launchFragment(registrationMode = PersonEditView.REGISTER_MODE_ENABLED, misMatchPassword = false, leftOutUsername = false, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run,
+                        context = context, testContext = this@run,
                         databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
                 scrollToBottom()

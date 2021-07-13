@@ -8,7 +8,6 @@
         <import type="com.ustadmobile.port.android.view.ContentEntryList2Fragment"/>
         <import type="android.view.View"/>
         <import type="com.ustadmobile.port.android.view.ContentEntryListRecyclerAdapter"/>
-        <import type="com.ustadmobile.lib.db.entities.ContentEntryProgress" />
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
 
         <variable
@@ -20,6 +19,10 @@
 
         <variable
             name="isPickerMode"
+            type="boolean" />
+
+        <variable
+            name="selectFolderVisible"
             type="boolean" />
 
         <variable
@@ -63,9 +66,9 @@
             android:layout_height="@dimen/dimen_4dp"
             android:max="100"
             android:alpha="@{contentEntry.ceInactive ? .5f : 1f}"
-            android:progress="@{contentEntry.contentEntryProgress.contentEntryProgressProgress}"
+            android:progress="@{contentEntry.scoreProgress.progress}"
             android:progressTint="@color/primaryColor"
-            android:visibility="@{contentEntry.contentEntryProgress != null &amp; contentEntry.contentEntryProgress.contentEntryProgressProgress > 0 ? View.VISIBLE : View.GONE}"
+            android:visibility="@{contentEntry.scoreProgress.progress > 0 ? View.VISIBLE : View.GONE}"
             app:layout_constraintEnd_toEndOf="@id/content_entry_item_thumbnail"
             app:layout_constraintStart_toStartOf="@id/content_entry_item_thumbnail"
             app:layout_constraintTop_toBottomOf="@id/content_entry_item_thumbnail"
@@ -79,7 +82,7 @@
             android:translationX="8dp"
             android:translationY="-8dp"
             android:alpha="@{contentEntry.ceInactive ? .5f : 1f}"
-            app:iconStatusFlag="@{contentEntry.contentEntryProgress.contentEntryProgressStatusFlag}"
+            app:iconProgressFlag="@{contentEntry.scoreProgress}"
             app:layout_constraintEnd_toEndOf="@id/content_entry_item_thumbnail"
             app:layout_constraintTop_toBottomOf="@id/content_entry_item_thumbnail"
             tools:src="@drawable/ic_content_fail"/>
@@ -161,7 +164,7 @@
             android:visibility="@{contentEntry.leaf ? View.VISIBLE:View.GONE}"
             app:imageLookupKey="@{contentEntry.contentTypeFlag}"
             app:imageLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_ICON_MAP}"
-            app:layout_constraintStart_toEndOf="@+id/content_entry_item_thumbnail"
+            app:layout_constraintStart_toEndOf="@+id/content_entry_locally_available"
             app:layout_constraintTop_toBottomOf="@+id/content_entry_desc_bottom_barrier"
             tools:visibility="visible"
             tools:src="@drawable/ic_book_black_24dp"
@@ -205,24 +208,60 @@
             android:tint="?colorOnIconTint"
             android:alpha="@{contentEntry.ceInactive ? .5f : 1f}"
             android:visibility="@{locallyAvailable ? View.VISIBLE : View.GONE}"
-            app:layout_constraintStart_toEndOf="@+id/content_type_barrier"
+            app:layout_constraintStart_toEndOf="@+id/content_entry_item_thumbnail"
             app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description"
             app:srcCompat="@drawable/ic_nearby_black_24px"
             tools:visibility="visible" />
 
         <TextView
-            android:id="@+id/content_entry_locally_available_text"
-            android:text="@string/download_locally_availability"
+            android:paddingStart="@dimen/dimen_5dp"
+            tools:text="100%"
             android:layout_marginTop="@dimen/dimen_4dp"
+            app:drawableStartCompat="@drawable/ic_baseline_emoji_events_24"
+            android:drawablePadding="@dimen/dimen_4dp"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:id="@+id/item_person_progress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/dimen_8dp"
-            android:alpha="@{contentEntry.ceInactive ? .5f : 1f}"
             android:textAppearance="@style/UmTheme.TextAppearance.Caption"
-            app:layout_constraintTop_toBottomOf="@id/content_entry_desc_bottom_barrier"
-            app:layout_constraintStart_toEndOf="@+id/content_entry_locally_available"
-            android:visibility="@{locallyAvailable ? View.VISIBLE : View.GONE}"
-            />
+            app:scorePercentage="@{contentEntry.scoreProgress}"
+            app:showScoreVisibility="@{contentEntry.scoreProgress}"
+            app:layout_constraintStart_toEndOf="@+id/content_type_barrier"
+            app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description"
+            android:layout_marginBottom="@dimen/dimen_16dp" />
+
+
+        <TextView
+            android:paddingStart="@dimen/dimen_5dp"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            tools:text="(4/4)"
+            android:textAppearance="@style/UmTheme.TextAppearance.Caption"
+            android:id="@+id/item_person_score_results"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text='@{"(" + contentEntry.scoreProgress.resultScore + &quot;/&quot; + contentEntry.scoreProgress.resultMax + ")"}'
+            app:showScoreVisibility="@{contentEntry.scoreProgress}"
+            app:layout_constraintStart_toEndOf="@+id/item_person_progress"
+            app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description"
+            android:layout_marginBottom="@dimen/dimen_16dp" />
+
+
+        <TextView
+            android:paddingStart="@dimen/dimen_5dp"
+            tools:text="(20% late penalty)"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:layout_marginStart="@dimen/dimen_4dp"
+            android:id="@+id/item_person_penalty"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:textAppearance="@style/UmTheme.TextAppearance.Caption"
+            android:textColor="@color/errorColor"
+            android:text="@{@string/late_penalty(contentEntry.scoreProgress.penalty)}"
+            android:visibility="@{contentEntry.scoreProgress.penalty == 0 ? View.GONE : View.VISIBLE}"
+            app:layout_constraintStart_toEndOf="@+id/item_person_score_results"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description"
+            android:layout_marginBottom="@dimen/dimen_16dp" />
 
 
         <com.ustadmobile.port.android.view.DownloadStatusButton
@@ -249,7 +288,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/content_entry_select_btn"
-                android:visibility="@{isPickerMode ? View.VISIBLE: View.GONE}"
+                android:visibility="@{isPickerMode &amp; (contentEntry.leaf || selectFolderVisible) ? View.VISIBLE: View.GONE}"
                 style="@style/UmTheme.Widget.OutlinedButton"
                 android:onClick="@{() -> itemListener.onClickSelectContentEntry(contentEntry)}"
                 android:layout_width="wrap_content"

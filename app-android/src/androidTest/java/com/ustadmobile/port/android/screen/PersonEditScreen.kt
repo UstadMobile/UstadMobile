@@ -72,7 +72,7 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
                        personUid: Long = 0, leftOutDateOfBirth: Boolean = false,
                        selectedDateOfBirth: Long = DateTime(1990, 10, 18).unixMillisLong,
                        serverUrl: String, systemImplNavRule: SystemImplTestNavHostRule,
-                       impl: UstadMobileSystemImpl, context: Any, testContext: TestContext<Unit>,
+                       context: Any, testContext: TestContext<Unit>,
                        databinding: ScenarioIdlingResourceRule<DataBindingIdlingResource>, crud: ScenarioIdlingResourceRule<CrudIdlingResource>)
             : FragmentScenario<PersonEditFragment> {
 
@@ -136,7 +136,7 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
 
             person.gender.takeIf { it != personOnForm?.gender }?.also {
                 testContext.flakySafely {
-                    genderValue.setMessageIdOption(impl.getString(MessageID.male, context))
+                    genderValue.setMessageIdOption(systemImplNavRule.impl.getString(MessageID.male, context))
                 }
             }
 

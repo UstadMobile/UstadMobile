@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.*
@@ -41,8 +42,8 @@ class ContentEntryDetailPresenter(context: Any,
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntry? {
         val entityUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
         val entry = withContext(Dispatchers.Default) {
-            withTimeoutOrNull(2000) { db.contentEntryDao.findByUidAsync(entityUid) }
-        } ?: ContentEntry()
+            db.onRepoWithFallbackToDb(2000) { it.contentEntryDao.findByUidAsync(entityUid) }
+        }
 
         setupTabs()
 

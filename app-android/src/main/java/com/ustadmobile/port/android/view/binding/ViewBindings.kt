@@ -10,6 +10,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.BindingAdapter
 import com.toughra.ustadmobile.R
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.lib.db.entities.CustomFieldValue
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
@@ -205,6 +206,9 @@ fun View.setPercentageHeight(percentHeight: Float) {
     val params = layoutParams as ConstraintLayout.LayoutParams
     params.matchConstraintPercentHeight = percentHeight
     layoutParams = params
+}
 
-
+@BindingAdapter("showScoreVisibility")
+fun View.setScoreVisibility(score: ContentEntryStatementScoreProgress?){
+    visibility = if(score == null || (score.resultScore == 0 && score.progress == 0)) View.GONE else View.VISIBLE
 }

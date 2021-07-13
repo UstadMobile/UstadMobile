@@ -28,7 +28,7 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
 
         const val ARG_DISPLAY_CONTENT_BY_DOWNLOADED = "displayContentByDownloaded"
 
-        const val ARG_CLAZZWORK_FILTER = "clazzworkFilter"
+        const val ARG_CLAZZ_ASSIGNMENT_FILTER = "clazzAssignmentFilter"
 
         const val VIEW_NAME = "ContentEntryListView"
 
@@ -37,6 +37,8 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
         const val ARG_MOVING_CONTENT = "SelectedItems"
 
         const val ARG_MOVING_COUNT = "moveCount"
+
+        const val ARG_SELECT_FOLDER_VISIBLE = "selectFolderVisible"
 
     }
 
