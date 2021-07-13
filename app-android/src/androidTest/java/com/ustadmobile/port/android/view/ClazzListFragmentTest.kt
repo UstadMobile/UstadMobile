@@ -6,6 +6,7 @@ import androidx.navigation.Navigation
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.screen.ClazzListScreen
@@ -26,6 +27,10 @@ class ClazzListFragmentTest : TestCase() {
     @JvmField
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
+
+    @JvmField
+    @Rule
+    val screenRecordRule = AdbScreenRecordRule()
 
 
     @AdbScreenRecord("List screen should show class in database and allow clicking on item")
@@ -50,7 +55,8 @@ class ClazzListFragmentTest : TestCase() {
             val fragmentScenario = launchFragmentInContainer(
                     bundleOf(), themeResId = R.style.UmTheme_App){
                 ClazzListFragment().also {
-                    it.installNavController(systemImplNavRule.navController)
+                    it.installNavController(systemImplNavRule.navController,
+                            initialDestId = R.id.clazz_list_dest)
                 } }
 
             fragmentScenario.onFragment {
