@@ -56,6 +56,8 @@ class PersonEditPresenter(
 
     private var regViaLink: Boolean = false
 
+    private var mPersonParentJoin: PersonParentJoin? = null
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.genderOptions = listOf(MessageIdOption(MessageID.female, context, Person.GENDER_FEMALE),
@@ -93,7 +95,8 @@ class PersonEditPresenter(
         } ?: PersonPicture()
 
         if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)) {
-            view.approvalPersonParentJoin = PersonParentJoin()
+            mPersonParentJoin = PersonParentJoin()
+            view.approvalPersonParentJoin = mPersonParentJoin
         }
 
         val loggedInPersonUid = accountManager.activeAccount.personUid
@@ -188,8 +191,10 @@ class PersonEditPresenter(
 
                 val parentEmailError = when {
                     !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR) -> 0
-                    view.approvalPersonParentJoin?.ppjEmail.isNullOrBlank() -> MessageID.field_required_prompt
-                    view.approvalPersonParentJoin?.ppjEmail?.let { EMAIL_VALIDATION_REGEX.matches(it) } != true ->
+                    mPersonParentJoin?.ppjEmail.isNullOrBlank() -> {
+                        MessageID.field_required_prompt
+                    }
+                    mPersonParentJoin?.ppjEmail?.let { EMAIL_VALIDATION_REGEX.matches(it) } != true ->
                         MessageID.invalid_email
                     else -> 0
                 }
@@ -210,7 +215,7 @@ class PersonEditPresenter(
                 try {
                     accountManager.register(entity, serverUrl, AccountRegisterOptions(
                         makeAccountActive = !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR),
-                        parentJoin = view.approvalPersonParentJoin
+                        parentJoin = mPersonParentJoin
                     ))
 
                     val popUpToViewName = arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.CURRENT_DEST
@@ -222,7 +227,7 @@ class PersonEditPresenter(
                         val args = mutableMapOf<String, String>().also {
                             it[RegisterMinorWaitForParentView.ARG_USERNAME] = entity.username ?: ""
                             it[RegisterMinorWaitForParentView.ARG_PARENT_CONTACT] =
-                                view.approvalPersonParentJoin?.ppjEmail ?: ""
+                                mPersonParentJoin?.ppjEmail ?: ""
                             it[RegisterMinorWaitForParentView.ARG_PASSWORD] = entity.newPassword ?: ""
                             it.putFromOtherMapIfPresent(arguments, UstadView.ARG_POPUPTO_ON_FINISH)
                         }
