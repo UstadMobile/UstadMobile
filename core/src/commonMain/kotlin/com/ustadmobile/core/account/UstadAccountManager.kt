@@ -10,6 +10,7 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -216,8 +217,10 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
 
         val pbkdf2Params: Pbkdf2Params = di.direct.instance()
 
-        val authSalt = endpointRepo.siteDao.getSiteAsync()?.authSalt
-            ?: throw IllegalStateException("addSession: No auth salt!")
+        val authSalt = endpointRepo.onRepoWithFallbackToDb(2000) {
+            it.siteDao.getSiteAsync()?.authSalt
+        } ?: throw IllegalStateException("addSession: No auth salt!")
+
 
         val userSession = UserSession().apply {
             usClientNodeId = (endpointRepo as DoorDatabaseSyncRepository).clientId
