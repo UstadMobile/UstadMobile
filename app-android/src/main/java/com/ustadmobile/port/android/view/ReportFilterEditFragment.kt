@@ -196,7 +196,7 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
         }
 
         mPresenter = ReportFilterEditPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+                di, viewLifecycleOwner).withViewLifecycle()
 
         return rootView
     }

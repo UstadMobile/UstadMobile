@@ -146,7 +146,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
         seriesRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         mPresenter = ReportEditPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+                di, viewLifecycleOwner).withViewLifecycle()
 
         seriesAdapter?.presenter = mPresenter
 

@@ -35,7 +35,7 @@ class LanguageEditFragment: UstadEditFragment<Language>(), LanguageEditView, Lan
         }
 
         mPresenter = LanguageEditPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
 
         return rootView
     }

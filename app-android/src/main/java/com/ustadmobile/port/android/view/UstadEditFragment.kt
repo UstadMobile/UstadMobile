@@ -17,8 +17,6 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
 
     abstract protected val mEditPresenter : UstadEditPresenter<*, T>?
 
-    private var presenterLifecycleObserver: PresenterViewLifecycleObserver? = null
-
     override var fieldsEnabled: Boolean = true
         set(value) {
             if(field != value) {
@@ -29,15 +27,6 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
 
     override fun finishWithResult(result: List<T>) {
         saveResultToBackStackSavedStateHandle(result)
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = super.onCreateView(inflater, container, savedInstanceState)
-
-        presenterLifecycleObserver = PresenterViewLifecycleObserver(mEditPresenter).also {
-            viewLifecycleOwner.lifecycle.addObserver(it)
-        }
-        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -92,11 +81,4 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
 
     protected open fun onSaveStateToBackStackStateHandle() = mEditPresenter?.saveStateToCurrentBackStackStateHandle(findNavController())
 
-    override fun onDestroyView() {
-        presenterLifecycleObserver?.also {
-            viewLifecycleOwner.lifecycle.removeObserver(it)
-        }
-        presenterLifecycleObserver = null
-        super.onDestroyView()
-    }
 }

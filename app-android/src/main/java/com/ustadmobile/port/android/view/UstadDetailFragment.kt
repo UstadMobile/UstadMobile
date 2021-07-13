@@ -24,20 +24,9 @@ abstract class UstadDetailFragment<T: Any>: UstadBaseFragment(), UstadDetailView
 
     protected open var mActivityWithFab: UstadListViewActivityWithFab? = null
 
-    private var presenterLifecycleObserver: PresenterViewLifecycleObserver? = null
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mActivityWithFab = (context as? UstadListViewActivityWithFab)
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = super.onCreateView(inflater, container, savedInstanceState)
-
-        presenterLifecycleObserver = PresenterViewLifecycleObserver(detailPresenter).also {
-            viewLifecycleOwner.lifecycle.addObserver(it)
-        }
-        return view
     }
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
@@ -56,13 +45,5 @@ abstract class UstadDetailFragment<T: Any>: UstadBaseFragment(), UstadDetailView
         fabManager?.onClickListener = {
             detailPresenter?.handleClickEdit()
         }
-    }
-
-    override fun onDestroyView() {
-        presenterLifecycleObserver?.also {
-            viewLifecycleOwner.lifecycle.removeObserver(it)
-        }
-        presenterLifecycleObserver = null
-        super.onDestroyView()
     }
 }

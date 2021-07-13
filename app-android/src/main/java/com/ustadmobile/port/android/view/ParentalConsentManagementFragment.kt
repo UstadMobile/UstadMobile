@@ -64,7 +64,7 @@ class ParentalConsentManagementFragment: UstadEditFragment<PersonParentJoinWithM
         }
 
         mPresenter = ParentalConsentManagementPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
 
 
         return rootView

@@ -5,14 +5,12 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.logErrorReport
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadSingleEntityView
 import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.concurrentSafeListOf
-import com.ustadmobile.lib.db.entities.ErrorReport
 import kotlinx.coroutines.*
 import kotlinx.serialization.DeserializationStrategy
 import org.kodein.di.*
@@ -38,6 +36,8 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
     private var dataLoadCompleted: Boolean = false
 
     private var onCreateException: Exception? = null
+
+    private var isStarted: Boolean = false
 
     protected var entity: RT? = null
 
@@ -91,10 +91,13 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
                     (view as? UstadEditView<*>)?.fieldsEnabled = true
                     onLoadDataComplete()
                 }catch(e: Exception) {
-                    if(e !is CancellationException)
-                        withContext(NonCancellable) {
+                    if(e !is CancellationException) {
+                        if(isStarted){
+                            navigateToErrorScreen(e)
+                        }else{
                             onCreateException = e
                         }
+                    }
                 }
             }
         }else if(persistenceMode == PersistenceMode.JSON){
@@ -120,14 +123,11 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
 
     override fun onStart() {
         super.onStart()
-        val exception = onCreateException
-        if(exception != null){
-            presenterScope.launch {
-                repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, exception,
-                        this@UstadSingleEntityPresenter)
-                onCreateException = null
-            }
+        isStarted = true
+        onCreateException?.also {
+            navigateToErrorScreen(it)
         }
+        onCreateException = null
     }
 
     /**

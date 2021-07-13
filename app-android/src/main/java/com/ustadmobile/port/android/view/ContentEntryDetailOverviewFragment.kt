@@ -214,7 +214,7 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mPresenter = ContentEntryDetailOverviewPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+                di, viewLifecycleOwner).withViewLifecycle()
 
         val flexboxLayoutManager = FlexboxLayoutManager(requireContext())
         flexboxLayoutManager.flexDirection = FlexDirection.ROW

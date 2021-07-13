@@ -69,7 +69,7 @@ class ContentEntryDetailFragment: UstadDetailFragment<ContentEntry>(), ContentEn
         }
 
         mPresenter = ContentEntryDetailPresenter(requireContext(), arguments.toStringMap(),
-                this, di, viewLifecycleOwner)
+                this, di, viewLifecycleOwner).withViewLifecycle()
 
         return rootView
     }

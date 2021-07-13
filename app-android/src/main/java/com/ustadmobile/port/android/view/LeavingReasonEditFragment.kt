@@ -35,7 +35,7 @@ class LeavingReasonEditFragment: UstadEditFragment<LeavingReason>(), LeavingReas
         }
 
         mPresenter = LeavingReasonEditPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
 
 
         return rootView

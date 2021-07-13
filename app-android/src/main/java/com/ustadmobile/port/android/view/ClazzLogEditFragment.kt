@@ -58,7 +58,7 @@ class ClazzLogEditFragment: UstadEditFragment<ClazzLog>(), ClazzLogEditView, Cla
         }
 
         mPresenter = ClazzLogEditPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return rootView

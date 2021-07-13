@@ -100,7 +100,7 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
         }
 
         mPresenter = Login2Presenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),this,
-                di)
+                di).withViewLifecycle()
         mBinding?.presenter = mPresenter
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         return rootView

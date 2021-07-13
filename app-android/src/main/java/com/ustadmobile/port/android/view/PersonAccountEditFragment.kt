@@ -114,7 +114,7 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
         }
 
         mPresenter = PersonAccountEditPresenter(requireContext(), arguments.toStringMap(),
-            this, di, viewLifecycleOwner)
+            this, di, viewLifecycleOwner).withViewLifecycle()
 
         mBinding?.currentPasswordText?.addTextChangedListener(ClearErrorTextWatcher {
             mBinding?.currentPasswordError = null

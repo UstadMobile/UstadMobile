@@ -51,7 +51,7 @@ class ScopedGrantEditFragment: UstadEditFragment<ScopedGrant>(), ScopedGrantEdit
         }
 
         mPresenter = ScopedGrantEditPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
 
 
         return rootView

@@ -36,7 +36,7 @@ class DateRangeFragment: UstadEditFragment<DateRangeMoment>(), DateRangeView,
         }
 
         mPresenter = DateRangePresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
 
         return rootView
     }

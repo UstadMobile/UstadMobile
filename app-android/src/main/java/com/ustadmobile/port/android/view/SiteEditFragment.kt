@@ -110,7 +110,7 @@ class SiteEditFragment: UstadEditFragment<Site>(), SiteEditView, SiteEditFragmen
         }
 
         mPresenter = SiteEditPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
         siteTermsRecyclerAdapter?.presenter = mPresenter
 
         mPresenter?.onCreate(backStackSavedState)

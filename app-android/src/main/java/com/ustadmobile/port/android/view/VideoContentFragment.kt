@@ -106,7 +106,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         }
 
         mPresenter = VideoContentPresenter(requireContext(),
-                arguments.toStringMap(), this, di)
+                arguments.toStringMap(), this, di).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return rootView

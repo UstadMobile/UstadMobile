@@ -253,7 +253,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         }
 
         mPresenter = PersonEditPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+                di, viewLifecycleOwner).withViewLifecycle()
 
         mBinding?.usernameText?.addTextChangedListener(ClearErrorTextWatcher {
             mBinding?.usernameError = null

@@ -63,8 +63,6 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
     private val systemImpl: UstadMobileSystemImpl by instance()
 
-    private var presenterLifecycleObserver: PresenterViewLifecycleObserver? = null
-
     /**
      * Whether or not UstadListViewFragment should attempt to manage the MergeAdapter. The MergeAdapter
      * is normally used to add a create new item at the start of the list when the addmode is FIRST_ITEM
@@ -201,10 +199,6 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         val accountManager: UstadAccountManager by instance()
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
 
-        presenterLifecycleObserver = PresenterViewLifecycleObserver(listPresenter).also {
-            viewLifecycleOwner.lifecycle.addObserver(it)
-        }
-
         return rootView
     }
 
@@ -256,10 +250,6 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         currentLiveData = null
         actionModeCallback = null
         actionMode?.finish()
-        presenterLifecycleObserver?.also {
-            viewLifecycleOwner.lifecycle.removeObserver(it)
-        }
-        presenterLifecycleObserver = null
         dbRepo = null
 
         super.onDestroyView()

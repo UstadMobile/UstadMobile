@@ -168,7 +168,7 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
         val view = super.onCreateView(inflater, container, savedInstanceState)
         filterByClazzUid = arguments?.getString(ARG_CLAZZUID)?.toLong() ?: 0
         mPresenter = ClazzMemberListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di, viewLifecycleOwner)
+                this, di, viewLifecycleOwner).withViewLifecycle()
 
         mDataRecyclerViewAdapter = ClazzMemberListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.add_a_teacher)

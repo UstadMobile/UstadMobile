@@ -65,7 +65,7 @@ class BitmaskEditFragment: UstadEditFragment<LongWrapper>(), BitmaskEditView,
         }
 
         mPresenter = BitmaskEditPresenter(requireContext(), arguments.toStringMap(), this,
-                 di, viewLifecycleOwner)
+                 di, viewLifecycleOwner).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         mRecyclerViewAdapter = BitmaskRecyclerViewAdapter()

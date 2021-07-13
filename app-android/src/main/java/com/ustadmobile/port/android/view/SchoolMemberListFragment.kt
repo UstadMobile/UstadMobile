@@ -140,7 +140,7 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
 
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = SchoolMemberListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di, viewLifecycleOwner)
+                this, di, viewLifecycleOwner).withViewLifecycle()
 
         mDataRecyclerViewAdapter = SchoolMemberListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.add_new,

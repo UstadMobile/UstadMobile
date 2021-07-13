@@ -57,7 +57,7 @@ class SiteTermsEditFragment: UstadEditFragment<SiteTermsWithLanguage>(), SiteTer
         }
 
         mPresenter = SiteTermsEditPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
         mPresenter?.onCreate(backStackSavedState)
 
         return rootView
