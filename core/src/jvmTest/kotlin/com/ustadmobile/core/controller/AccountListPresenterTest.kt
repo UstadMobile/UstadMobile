@@ -225,8 +225,7 @@ class AccountListPresenterTest {
 
         presenter.handleClickDeleteSession(defaultSessionList[0])
         verifyBlocking(accountManager) {
-            endSession(eq(defaultSessionList[0]), eq(UserSession.STATUS_LOGGED_OUT),
-                eq(UserSession.REASON_LOGGED_OUT))
+            endSession(eq(defaultSessionList[0]), any(), any())
         }
 
     }

@@ -69,6 +69,11 @@ object UstadMobileConstants {
     val MINOR_AGE_THRESHOLD = 13
 
     /**
+     * Anyone over this age is considered an adult. They can approve accounts for minors.
+     */
+    val ADULT_AGE_THRESHOLD = 18
+
+    /**
      * Default number of iterations for pbkdf2 hashing
      */
     const val PBKDF2_ITERATIONS = 10000
