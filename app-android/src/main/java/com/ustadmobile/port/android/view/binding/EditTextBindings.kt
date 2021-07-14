@@ -132,18 +132,16 @@ fun EditText.setMinMax(min: String, max: Int){
 @BindingAdapter("reportTitleText")
 fun TextView.setReportTitleText(report: Report) {
     val reportTitleId = report.reportTitleId
-    text = if(REPORT_TITLE_TO_ID.containsKey(reportTitleId)) {
-        systemImpl.getString(REPORT_TITLE_TO_ID[reportTitleId] ?: 0, context)
-    }else{ report.reportTitle }
+    text = REPORT_TITLE_TO_ID[reportTitleId]?.let {
+        systemImpl.getString(it, context)} ?: report.reportTitle
 }
 
 @SuppressLint("SetTextI18n")
 @BindingAdapter("reportDescText")
 fun TextView.setReportDescText(report: Report) {
     val reportDescId = report.reportDescId
-    text = if(REPORT_TITLE_TO_ID.containsKey(reportDescId)) {
-        systemImpl.getString(REPORT_TITLE_TO_ID[reportDescId] ?: 0, context)
-    }else{ report.reportDescription }
+    text = REPORT_TITLE_TO_ID[reportDescId]?.let {
+        systemImpl.getString(it, context)} ?: report.reportDescription
 }
 
 

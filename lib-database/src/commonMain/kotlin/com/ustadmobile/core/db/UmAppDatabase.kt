@@ -4333,6 +4333,37 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             override fun migrate(database: DoorSqlDatabase) {
                 database.execSQL("ALTER TABLE Report ADD COLUMN reportTitleId INTEGER NOT NULL DEFAULT 0")
                 database.execSQL("ALTER TABLE Report ADD COLUMN reportDescId INTEGER NOT NULL DEFAULT 0")
+
+                if(database.dbType() == DoorDbType.POSTGRES){
+                    //Report Data migration
+
+                    database.execSQL("""
+                        UPDATE Report SET reportTitleId = ${Report.BLANK_REPORT} WHERE 
+                            reportUid = ${Report.TEMPLATE_BLANK_REPORT_UID}
+                    """.trimIndent())
+                    database.execSQL("""
+                        UPDATE Report SET reportTitleId = ${Report.CONTENT_USAGE_OVER_TIME} WHERE 
+                            reportUid = ${Report.TEMPLATE_CONTENT_USAGE_OVER_TIME_UID}
+                    """.trimIndent())
+                    database.execSQL("""
+                        UPDATE Report SET reportTitleId = ${Report.UNIQUE_CONTENT_USERS_OVER_TIME} WHERE 
+                            reportUid = ${Report.TEMPLATE_UNIQUE_CONTENT_USERS_UID}
+                    """.trimIndent())
+                    database.execSQL("""
+                        UPDATE Report SET reportTitleId = ${Report.ATTENDANCE_OVER_TIME_BY_CLASS} WHERE 
+                            reportUid = ${Report.TEMPLATE_ATTENDANCE_OVER_TIME_BY_CLASS_UID}
+                    """.trimIndent())
+                    database.execSQL("""
+                        UPDATE Report SET reportTitleId = ${Report.CONTENT_USAGE_BY_CLASS} WHERE 
+                            reportUid = ${Report.TEMPLATE_CONTENT_USAGE_BY_CLASS_UID}
+                    """.trimIndent())
+                    database.execSQL("""
+                        UPDATE Report SET reportTitleId = ${Report.CONTENT_COMPLETION} WHERE 
+                            reportUid = ${Report.TEMPLATE_CONTENT_COMPLETION_UID}
+                    """.trimIndent())
+
+
+                }
             }
         }
 
