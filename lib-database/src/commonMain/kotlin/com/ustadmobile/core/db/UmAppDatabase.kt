@@ -4338,27 +4338,27 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     //Report Data migration
 
                     database.execSQL("""
-                        UPDATE Report SET reportTitleId = ${Report.BLANK_REPORT} WHERE 
+                        UPDATE Report SET reportTitleId = ${Report.BLANK_REPORT} , reportDescId = ${Report.BLANK_REPORT_DESC} WHERE 
                             reportUid = ${Report.TEMPLATE_BLANK_REPORT_UID}
                     """.trimIndent())
                     database.execSQL("""
-                        UPDATE Report SET reportTitleId = ${Report.CONTENT_USAGE_OVER_TIME} WHERE 
+                        UPDATE Report SET reportTitleId = ${Report.CONTENT_USAGE_OVER_TIME} , reportDescId = ${Report.CONTENT_USAGE_OVER_TIME_DESC}  WHERE 
                             reportUid = ${Report.TEMPLATE_CONTENT_USAGE_OVER_TIME_UID}
                     """.trimIndent())
                     database.execSQL("""
-                        UPDATE Report SET reportTitleId = ${Report.UNIQUE_CONTENT_USERS_OVER_TIME} WHERE 
+                        UPDATE Report SET reportTitleId = ${Report.UNIQUE_CONTENT_USERS_OVER_TIME} , reportDescId = ${Report.UNIQUE_CONTENT_USERS_OVER_TIME_DESC} WHERE 
                             reportUid = ${Report.TEMPLATE_UNIQUE_CONTENT_USERS_UID}
                     """.trimIndent())
                     database.execSQL("""
-                        UPDATE Report SET reportTitleId = ${Report.ATTENDANCE_OVER_TIME_BY_CLASS} WHERE 
+                        UPDATE Report SET reportTitleId = ${Report.ATTENDANCE_OVER_TIME_BY_CLASS} , reportDescId = ${Report.ATTENDANCE_OVER_TIME_BY_CLASS_DESC} WHERE 
                             reportUid = ${Report.TEMPLATE_ATTENDANCE_OVER_TIME_BY_CLASS_UID}
                     """.trimIndent())
                     database.execSQL("""
-                        UPDATE Report SET reportTitleId = ${Report.CONTENT_USAGE_BY_CLASS} WHERE 
+                        UPDATE Report SET reportTitleId = ${Report.CONTENT_USAGE_BY_CLASS} , reportDescId = ${Report.CONTENT_USAGE_BY_CLASS_DESC} WHERE 
                             reportUid = ${Report.TEMPLATE_CONTENT_USAGE_BY_CLASS_UID}
                     """.trimIndent())
                     database.execSQL("""
-                        UPDATE Report SET reportTitleId = ${Report.CONTENT_COMPLETION} WHERE 
+                        UPDATE Report SET reportTitleId = ${Report.CONTENT_COMPLETION} , reportDescId = ${Report.CONTENT_COMPLETION_DESC} WHERE 
                             reportUid = ${Report.TEMPLATE_CONTENT_COMPLETION_UID}
                     """.trimIndent())
 
