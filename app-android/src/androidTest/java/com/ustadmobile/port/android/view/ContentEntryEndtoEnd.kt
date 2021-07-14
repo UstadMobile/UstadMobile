@@ -112,7 +112,6 @@ class ContentEntryEndtoEnd : TestCase() {
             ContentEntryListScreen{
 
                 pressBack()
-                pressBack()
 
                 recycler{
 
