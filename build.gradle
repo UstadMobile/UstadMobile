@@ -74,13 +74,13 @@ subprojects {
 
 
 //Major.minor.database version
-version = "7.1.36"
+version = "7.1.38"
 
 group = "com.ustadmobile.app"
 
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 305
+    ustadVersionCode = 306
 
     version_door = "0.0.14"
     version_xmlpullparserkmp = '0.0.18'
