@@ -96,7 +96,7 @@ class UstadTestRule: TestWatcher() {
 
         endpointScope = EndpointScope()
         systemImplSpy = spy(UstadMobileSystemImpl(xppFactory, tempFolder))
-        coroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+        //coroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
         okHttpClient = OkHttpClient.Builder().build()
 
@@ -180,7 +180,7 @@ class UstadTestRule: TestWatcher() {
 
     override fun finished(description: Description?) {
         httpClient.close()
-        coroutineDispatcher.close()
+        //coroutineDispatcher.close()
         tempFolder.deleteRecursively()
     }
 

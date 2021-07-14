@@ -13,6 +13,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonEditView.Companion.REGISTER_MODE_MINOR
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.lib.db.entities.*
@@ -56,15 +57,13 @@ class PersonEditPresenter(
 
     private var regViaLink: Boolean = false
 
-    private var mPersonParentJoin: PersonParentJoin? = null
+    internal var mPersonParentJoin: PersonParentJoin? = null
 
     override fun onCreate(savedState: Map<String, String>?) {
-        super.onCreate(savedState)
-        view.genderOptions = listOf(MessageIdOption(MessageID.female, context, Person.GENDER_FEMALE),
-                MessageIdOption(MessageID.male, context, Person.GENDER_MALE),
-                MessageIdOption(MessageID.other, context, Person.GENDER_OTHER))
-
-        registrationModeFlags = arguments[PersonEditView.ARG_REGISTRATION_MODE]?.toInt() ?: PersonEditView.REGISTER_MODE_NONE
+        //Setup variables that are used in the onLoad function before calling super (which will
+        // itself call onLoad)
+        registrationModeFlags = arguments[PersonEditView.ARG_REGISTRATION_MODE]?.toInt()
+            ?: PersonEditView.REGISTER_MODE_NONE
 
         regViaLink = arguments[PersonEditView.REGISTER_VIA_LINK]?.toBoolean()?:false
 
@@ -75,10 +74,16 @@ class PersonEditPresenter(
         }
 
         nextDestination = arguments[UstadView.ARG_NEXT] ?: impl.getAppConfigString(
-                AppConfig.KEY_FIRST_DEST, ContentEntryListTabsView.VIEW_NAME, context)
+            AppConfig.KEY_FIRST_DEST, ContentEntryListTabsView.VIEW_NAME, context)
                 ?: ContentEntryListTabsView.VIEW_NAME
 
         view.registrationMode = registrationModeFlags
+
+        super.onCreate(savedState)
+
+        view.genderOptions = listOf(MessageIdOption(MessageID.female, context, Person.GENDER_FEMALE),
+                MessageIdOption(MessageID.male, context, Person.GENDER_MALE),
+                MessageIdOption(MessageID.other, context, Person.GENDER_OTHER))
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): PersonWithAccount {
@@ -94,7 +99,7 @@ class PersonEditPresenter(
             dbToUse.takeIf { entityUid != 0L }?.personPictureDao?.findByPersonUidAsync(entityUid)
         } ?: PersonPicture()
 
-        if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)) {
+        if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR) && db !is DoorDatabaseRepository) {
             mPersonParentJoin = PersonParentJoin()
             view.approvalPersonParentJoin = mPersonParentJoin
         }
