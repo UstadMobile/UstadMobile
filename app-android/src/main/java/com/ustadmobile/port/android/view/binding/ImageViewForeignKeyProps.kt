@@ -12,7 +12,6 @@ class ImageViewForeignKeyProps(var foreignKey: Long = 0,
                                var foreignKeyLoadingOrDisplayed: Long = -1,
                                var currentJob: Job? = null,
                                var placeholder: Drawable? = null,
-                               var tintMode: Int = R.attr.colorOnIconTint,
                                var autoHide: Boolean = false) {
 
     /**
