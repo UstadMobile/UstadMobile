@@ -40,7 +40,7 @@
             android:visibility="@{isEditVisible ? View.VISIBLE : View.GONE}"
             android:onClick="@{() -> presenter.handleClickClazzEnrolment(clazzEnrolment)}"
             android:layout_margin="@dimen/dimen_8dp"
-            android:tint="@android:color/black"/>
+            app:tint="?colorOnIconTint"/>
 
 
         <!-- Line 1-->

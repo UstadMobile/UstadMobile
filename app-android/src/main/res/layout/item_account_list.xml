@@ -38,7 +38,7 @@
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/person_profile_icon"
             android:src="@drawable/ic_account_circle_black_24dp"
-            android:tint="@color/onBackgroundColor"
+            android:tint="?colorOnIconTint"
             app:imageForeignKey="@{session.person.personUid}"
             app:imageForeignKeyAdapter="@{PersonDetailFragment.FOREIGNKEYADAPTER_PERSON}"
             app:imageForeignKeyPlaceholder="@{@drawable/ic_account_circle_black_24dp}"

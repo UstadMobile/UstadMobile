@@ -5,6 +5,7 @@ import android.net.Uri
 import android.view.View
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
+import androidx.core.widget.ImageViewCompat
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
@@ -83,7 +84,6 @@ fun ImageView.setImageForeignKeyAutoHide(autoHide: Boolean) {
     foreignKeyProps.autoHide = autoHide
 }
 
-
 val ImageView.foreignKeyProps: ImageViewForeignKeyProps
     get(){
         val currentProps = getTag(R.id.tag_imageforeignkey_props) as ImageViewForeignKeyProps?
@@ -107,6 +107,7 @@ fun ImageView.setImageForeignKeyAdapter(foreignKeyAttachmentUriAdapter: ForeignK
  */
 private fun ImageView.updateImageFromForeignKey() {
     val foreignKeyPropsVal = foreignKeyProps
+    val tint = ImageViewCompat.getImageTintList(this)
     val adapter = foreignKeyPropsVal.foreignKeyAttachmentUriAdapter
     if(adapter != null && foreignKeyPropsVal.foreignKeyLoadingOrDisplayed != foreignKeyPropsVal.foreignKey) {
         //something new to load - cancel anything loading now and load this instead
@@ -137,6 +138,7 @@ private fun ImageView.updateImageFromForeignKey() {
                     }else if(uri == null && placeholderVal != null) {
                         //show placeholder
                         setImageDrawable(placeholderVal)
+                        imageTintList = tint
                         foreignKeyPropsVal.imageUriDisplayed = null
                     }
 
@@ -215,6 +217,7 @@ fun ImageView.setImageLookupMap(imageLookupMap: Map<Int, Int>?, imageLookupFallb
     setTag(R.id.tag_imagelookup_fallback, imageLookupFallback)
     updateFromImageLookupMap()
 }
+
 
 @BindingAdapter(value=["iconStatusFlag"])
 fun ImageView.setIconOnStatusFlag(statusFlag: Int){
