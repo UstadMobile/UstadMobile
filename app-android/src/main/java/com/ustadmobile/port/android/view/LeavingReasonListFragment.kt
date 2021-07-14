@@ -55,7 +55,7 @@ class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingR
         val view = super.onCreateView(inflater, container, savedInstanceState)
 
         mPresenter = LeavingReasonListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di, viewLifecycleOwner)
+                this, di, viewLifecycleOwner).withViewLifecycle()
 
         mDataRecyclerViewAdapter = LeavingReasonListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.add_leaving_reason)

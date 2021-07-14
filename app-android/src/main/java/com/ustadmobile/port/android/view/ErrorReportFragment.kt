@@ -51,7 +51,9 @@ class ErrorReportFragment : UstadBaseFragment(), ErrorReportFragmentEventHandler
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mPresenter = ErrorReportPresenter(requireContext(), arguments.toStringMap(), this, di)
+        mPresenter = ErrorReportPresenter(requireContext(),
+                arguments.toStringMap(), this, di).withViewLifecycle()
+
         mBinding?.mPresenter = mPresenter
         mPresenter?.onCreate(savedInstanceState?.toNullableStringMap())
     }

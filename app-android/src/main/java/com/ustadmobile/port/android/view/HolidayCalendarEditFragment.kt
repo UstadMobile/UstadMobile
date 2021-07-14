@@ -91,7 +91,7 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
         holidayRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         mPresenter = HolidayCalendarEditPresenter(requireContext(), arguments.toStringMap(), this,
-                this, di)
+                this, di).withViewLifecycle()
         holidayRecyclerAdapter?.presenter = mPresenter
 
 
@@ -144,6 +144,7 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

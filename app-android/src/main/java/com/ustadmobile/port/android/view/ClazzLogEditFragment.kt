@@ -58,7 +58,7 @@ class ClazzLogEditFragment: UstadEditFragment<ClazzLog>(), ClazzLogEditView, Cla
         }
 
         mPresenter = ClazzLogEditPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return rootView
@@ -81,6 +81,7 @@ class ClazzLogEditFragment: UstadEditFragment<ClazzLog>(), ClazzLogEditView, Cla
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

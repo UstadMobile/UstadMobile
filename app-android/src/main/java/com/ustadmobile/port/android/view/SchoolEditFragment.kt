@@ -67,7 +67,7 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
         val navController = findNavController()
 
         mPresenter = SchoolEditPresenter(requireContext(), arguments.toStringMap(), this,
-            di, viewLifecycleOwner)
+            di, viewLifecycleOwner).withViewLifecycle()
 
         val permissionList = ScopedGrantEditPresenter.PERMISSION_LIST_MAP[School.TABLE_ID]
             ?: throw IllegalStateException("ScopedGrantEdit permission list not found!")
@@ -118,6 +118,7 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
 
     override var fieldsEnabled: Boolean = false
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

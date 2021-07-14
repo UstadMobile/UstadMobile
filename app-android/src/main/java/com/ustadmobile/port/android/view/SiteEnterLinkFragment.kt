@@ -66,7 +66,7 @@ class SiteEnterLinkFragment : UstadBaseFragment(), SiteEnterLinkView{
             it.showProgress = false
         }
         mPresenter = SiteEnterLinkPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di)
+                this, di).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         mBinding?.presenter = mPresenter
         mBinding?.organisationLink?.addTextChangedListener(object: TextWatcher {

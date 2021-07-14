@@ -113,7 +113,6 @@
                 app:hintEnabled="true"
                 app:errorText="@{currentPasswordError}"
                 app:errorEnabled="@{currentPasswordError != null}"
-                android:enabled="@{!person.admin}"
                 app:layout_constraintTop_toBottomOf="@+id/username_textinputlayout">
 
                 <com.google.android.material.textfield.TextInputEditText

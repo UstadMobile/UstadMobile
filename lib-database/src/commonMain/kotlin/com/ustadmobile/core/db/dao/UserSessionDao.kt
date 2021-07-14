@@ -54,6 +54,31 @@ abstract class UserSessionDao {
     """)
     abstract suspend fun endSession(sessionUid: Long, newStatus: Int, reason: Int)
 
+    @Query("""
+        SELECT UserSession.*
+          FROM UserSession
+         WHERE UserSession.usUid = :sessionUid
+         LIMIT 1
+    """)
+    abstract fun findByUidLive(sessionUid: Long): DoorLiveData<UserSession?>
+
+
+    @Query("""
+        UPDATE UserSession
+           SET usAuth = null,
+               usStatus = :newStatus,
+               usReason = :reason,
+               usLcb = (SELECT COALESCE(
+                               (SELECT nodeClientId
+                                  FROM SyncNode
+                                 LIMIT 1), 0))
+         WHERE usPersonUid = :personUid
+           AND usClientNodeId != :exemptNodeId
+           AND usStatus != :newStatus                     
+    """)
+    abstract suspend fun endOtherSessions(personUid: Long, exemptNodeId: Long, newStatus: Int,
+                                          reason: Int)
+
     companion object {
         const val FIND_LOCAL_SESSIONS_SQL = """
             SELECT UserSession.*, Person.*

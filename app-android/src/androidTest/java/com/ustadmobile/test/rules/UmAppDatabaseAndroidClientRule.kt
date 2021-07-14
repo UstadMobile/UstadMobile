@@ -95,7 +95,7 @@ class UmAppDatabaseAndroidClientRule(
         repoInternal = null
     }
 
-    fun insertPersonAndStartSession(person: Person, isAdmin: Boolean = false) {
+    fun insertPersonAndStartSession(person: Person, isAdmin: Boolean = false) : Person{
         runBlocking {
             if(person.personUid == account.personUid) {
                 person.personGroupUid = accountPerson.personGroupUid
@@ -115,6 +115,8 @@ class UmAppDatabaseAndroidClientRule(
             val accountManager: UstadAccountManager = di.direct.instance()
             accountManager.startLocalTestSessionBlocking(person, account.endpointUrl)
         }
+
+        return person
     }
 
 

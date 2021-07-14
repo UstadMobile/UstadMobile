@@ -11,7 +11,6 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
 import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Site
 import io.ktor.client.*
 import io.ktor.client.features.*
@@ -22,7 +21,7 @@ import org.kodein.di.instance
 
 class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view: SiteEnterLinkView,
                              di: DI) :
-        UstadBaseController<SiteEnterLinkView>(context, arguments, view, di) {
+        UstadBaseController<SiteEnterLinkView>(context, arguments, view, di, activeSessionRequired = false) {
 
     private var site: Site? = null
 
@@ -57,7 +56,7 @@ class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view:
             checkTextLinkJob = null
         }
 
-        checkTextLinkJob = GlobalScope.async(doorMainDispatcher()) {
+        checkTextLinkJob = presenterScope.async {
             try {
                 val endpointUrl = href.requireHttpPrefix().requirePostfix("/")
                 site = httpClient.verifySite(endpointUrl)
