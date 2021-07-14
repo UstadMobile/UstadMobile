@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view.binding
 
-import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.view.View
@@ -19,9 +18,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.door.ext.resolveAttachmentAndroidUri
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.ext.getColorFromAttr
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
-import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.coroutines.*
 import org.kodein.di.*
 

@@ -2,7 +2,6 @@ package com.ustadmobile.port.android.view.binding
 
 import android.graphics.drawable.Drawable
 import android.net.Uri
-import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import kotlinx.coroutines.Job
 

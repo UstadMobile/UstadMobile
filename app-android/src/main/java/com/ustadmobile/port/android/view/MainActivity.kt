@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.Menu
