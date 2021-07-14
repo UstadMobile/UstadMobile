@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view.binding
 
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import kotlinx.coroutines.Job
 
@@ -11,6 +12,7 @@ class ImageViewForeignKeyProps(var foreignKey: Long = 0,
                                var foreignKeyLoadingOrDisplayed: Long = -1,
                                var currentJob: Job? = null,
                                var placeholder: Drawable? = null,
+                               var tintMode: Int = R.attr.colorOnIconTint,
                                var autoHide: Boolean = false) {
 
     /**

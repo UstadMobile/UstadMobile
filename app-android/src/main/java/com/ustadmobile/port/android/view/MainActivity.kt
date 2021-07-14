@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.Menu
@@ -43,8 +44,10 @@ import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
 import com.ustadmobile.port.android.view.binding.imageForeignKeyPlaceholder
 import com.ustadmobile.port.android.view.binding.setImageForeignKey
 import com.ustadmobile.port.android.view.binding.setImageForeignKeyAdapter
+import com.ustadmobile.port.android.view.binding.setImagePlaceholderTint
 import com.ustadmobile.port.android.view.util.UstadActivityWithProgressBar
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -245,8 +248,9 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     private fun setUserProfile(menuItem: MenuItem) {
         val accountManager: UstadAccountManager by instance()
 
-        val profileImgView: ImageView = menuItem.actionView.findViewById(R.id.person_name_profilepic)
+        val profileImgView: CircleImageView = menuItem.actionView.findViewById(R.id.person_name_profilepic)
         userProfileDrawable?.also { profileImgView.imageForeignKeyPlaceholder(it) }
+        profileImgView.setImagePlaceholderTint(R.attr.colorOnPrimary)
         profileImgView.setImageForeignKeyAdapter(PersonDetailFragment.FOREIGNKEYADAPTER_PERSON)
         profileImgView.setImageForeignKey(accountManager.activeAccount.personUid)
         profileImgView.setOnClickListener { impl.go(AccountListView.VIEW_NAME, mapOf(), this) }

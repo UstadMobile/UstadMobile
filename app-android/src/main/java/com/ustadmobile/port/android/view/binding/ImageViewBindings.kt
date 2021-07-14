@@ -20,6 +20,7 @@ import com.ustadmobile.door.ext.resolveAttachmentAndroidUri
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.getColorFromAttr
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
+import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.coroutines.*
 import org.kodein.di.*
 
@@ -85,6 +86,10 @@ fun ImageView.setImageForeignKeyAutoHide(autoHide: Boolean) {
     foreignKeyProps.autoHide = autoHide
 }
 
+fun CircleImageView.setImagePlaceholderTint(tint: Int){
+    foreignKeyProps.tintMode = tint
+}
+
 
 val ImageView.foreignKeyProps: ImageViewForeignKeyProps
     get(){
@@ -140,7 +145,7 @@ private fun ImageView.updateImageFromForeignKey() {
                         //show placeholder
                         setImageDrawable(placeholderVal)
                         imageTintList = ColorStateList.valueOf(
-                                context.getColorFromAttr(R.attr.colorOnIconTint))
+                                context.getColorFromAttr(foreignKeyPropsVal.tintMode))
                         foreignKeyPropsVal.imageUriDisplayed = null
                     }
 
@@ -219,6 +224,7 @@ fun ImageView.setImageLookupMap(imageLookupMap: Map<Int, Int>?, imageLookupFallb
     setTag(R.id.tag_imagelookup_fallback, imageLookupFallback)
     updateFromImageLookupMap()
 }
+
 
 @BindingAdapter(value=["iconStatusFlag"])
 fun ImageView.setIconOnStatusFlag(statusFlag: Int){
