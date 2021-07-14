@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view.binding
 
+import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.view.View
@@ -17,6 +18,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.door.ext.resolveAttachmentAndroidUri
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.util.ext.getColorFromAttr
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import kotlinx.coroutines.*
 import org.kodein.di.*
@@ -137,6 +139,8 @@ private fun ImageView.updateImageFromForeignKey() {
                     }else if(uri == null && placeholderVal != null) {
                         //show placeholder
                         setImageDrawable(placeholderVal)
+                        imageTintList = ColorStateList.valueOf(
+                                context.getColorFromAttr(R.attr.colorOnIconTint))
                         foreignKeyPropsVal.imageUriDisplayed = null
                     }
 

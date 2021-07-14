@@ -3,6 +3,9 @@ package com.ustadmobile.port.android.util.ext
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.util.TypedValue
+import androidx.annotation.AttrRes
+import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.PREFKEY_LOCALE
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -26,4 +29,10 @@ fun Context.getUstadLocaleSetting(): String {
     return sharedPrefs.getString(PREFKEY_LOCALE,
         UstadMobileSystemCommon.LOCALE_USE_SYSTEM) ?: UstadMobileSystemCommon.LOCALE_USE_SYSTEM
 
+}
+
+fun Context.getColorFromAttr(@AttrRes themeAttrId: Int): Int{
+    val typeValued = TypedValue()
+    theme.resolveAttribute(themeAttrId, typeValued, true)
+    return typeValued.data
 }

@@ -27,6 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/dimen_256dp"
             android:scaleType="centerCrop"
+            app:tint="?colorOnIconTint"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:imageForeignKey="@{personUid}"
