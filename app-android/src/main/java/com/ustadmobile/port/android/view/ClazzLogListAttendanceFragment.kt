@@ -235,7 +235,7 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
         val view = super.onCreateView(inflater, container, savedInstanceState)
         autoShowFabOnAddPermission = false
         mPresenter = ClazzLogListAttendancePresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di, viewLifecycleOwner).also {
+                this, di, viewLifecycleOwner).withViewLifecycle().also {
             mDataRecyclerViewAdapter = ClazzLogListRecyclerAdapter(it, clazzTimeZone)
         }
 

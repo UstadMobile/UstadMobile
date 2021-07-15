@@ -35,7 +35,7 @@ class LeavingReasonEditFragment: UstadEditFragment<LeavingReason>(), LeavingReas
         }
 
         mPresenter = LeavingReasonEditPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
 
 
         return rootView
@@ -72,6 +72,7 @@ class LeavingReasonEditFragment: UstadEditFragment<LeavingReason>(), LeavingReas
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

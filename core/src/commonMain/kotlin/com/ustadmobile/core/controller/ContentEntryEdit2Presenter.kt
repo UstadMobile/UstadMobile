@@ -19,6 +19,8 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
+import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -50,8 +52,6 @@ class ContentEntryEdit2Presenter(context: Any,
 
     private val contentImportManager: ContentImportManager?
             by on(accountManager.activeAccount).instanceOrNull()
-
-    private lateinit var destinationOnFinish: String
 
     private val httpClient: HttpClient by di.instance()
 
@@ -88,8 +88,6 @@ class ContentEntryEdit2Presenter(context: Any,
         super.onCreate(savedState)
         view.licenceOptions = LicenceOptions.values().map { LicenceMessageIdOptions(it, context) }
         parentEntryUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0
-        destinationOnFinish = if ((arguments[ARG_ENTITY_UID]?.toLong() ?: 0L) == 0L)
-            ContentEntryList2View.VIEW_NAME else ContentEntryDetailView.VIEW_NAME
         GlobalScope.launch(doorMainDispatcher()) {
             view.storageOptions = systemImpl.getStorageDirsAsync(context)
         }
@@ -139,14 +137,9 @@ class ContentEntryEdit2Presenter(context: Any,
         observeSavedStateResult(SAVED_STATE_KEY_URI, ListSerializer(String.serializer()),
                 String::class) {
             val uri = it.firstOrNull() ?: return@observeSavedStateResult
-            view.loading = true
-            view.fieldsEnabled = false
-
             GlobalScope.launch(doorMainDispatcher()){
                 view.entity = handleFileSelection(uri)
             }
-
-
             requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
         }
 
@@ -180,6 +173,8 @@ class ContentEntryEdit2Presenter(context: Any,
 
 
     override fun handleClickSave(entity: ContentEntryWithLanguage) {
+        view.loading = true
+        view.fieldsEnabled = false
         view.titleErrorEnabled = false
         view.fileImportErrorVisible = false
         GlobalScope.launch(doorMainDispatcher()) {
@@ -214,6 +209,9 @@ class ContentEntryEdit2Presenter(context: Any,
                 val videoDimensions = view.videoDimensions
                 val conversionParams = mapOf("compress" to view.compressionEnabled.toString(),
                         "dimensions" to "${videoDimensions.first}x${videoDimensions.second}")
+
+                val popUpTo = arguments[ARG_POPUPTO_ON_FINISH] ?: CURRENT_DEST
+
                 if (metaData != null && uri != null) {
 
                     if (uri.startsWith("content://")) {
@@ -223,7 +221,9 @@ class ContentEntryEdit2Presenter(context: Any,
                                 view.storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(),
                                 ContainerImportJob.CLIENT_IMPORT_MODE, conversionParams)
 
-                        systemImpl.popBack(destinationOnFinish, popUpInclusive = false, context)
+                        view.loading = false
+                        view.fieldsEnabled = true
+                        systemImpl.popBack(popUpTo, popUpInclusive = true, context)
                         return@launch
 
 
@@ -251,16 +251,22 @@ class ContentEntryEdit2Presenter(context: Any,
                                 systemImpl.getString(MessageID.error,
                                         context)
                             }: ${e.message ?: ""}", {})
+                            view.loading = false
+                            view.fieldsEnabled = true
                             return@launch
                         }
 
                         if (client.status.value != 200) {
                             view.showSnackBar(systemImpl.getString(MessageID.error,
                                     context), {})
+                            view.loading = false
+                            view.fieldsEnabled = true
                             return@launch
                         }
 
-                        systemImpl.popBack(destinationOnFinish, popUpInclusive = false, context)
+                        view.loading = false
+                        view.fieldsEnabled = true
+                        systemImpl.popBack(popUpTo, popUpInclusive = true, context)
                         return@launch
 
                     }
@@ -273,12 +279,16 @@ class ContentEntryEdit2Presenter(context: Any,
                     }
                 }
 
-                systemImpl.popBack(destinationOnFinish, popUpInclusive = false, context)
+                view.loading = false
+                view.fieldsEnabled = true
+                systemImpl.popBack(popUpTo, popUpInclusive = true, context)
 
             } else {
                 view.titleErrorEnabled = entity.title == null
                 view.fileImportErrorVisible = entity.title != null && entity.leaf
                         && view.entryMetaData?.uri == null
+                view.loading = false
+                view.fieldsEnabled = true
             }
         }
     }
@@ -290,7 +300,7 @@ class ContentEntryEdit2Presenter(context: Any,
 
     suspend fun handleFileSelection(uri: String): ContentEntryWithLanguage? {
         view.loading = true
-        view.fieldsEnabled = true
+        view.fieldsEnabled = false
 
         var entry: ContentEntryWithLanguage? = null
         try {
@@ -312,11 +322,12 @@ class ContentEntryEdit2Presenter(context: Any,
                     view.videoUri = uri
                 }
             }
-            view.loading = false
-            view.fieldsEnabled = true
         }catch (e: Exception){
             view.showSnackBar(systemImpl.getString(MessageID.import_link_content_not_supported, context))
             repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, e, this)
+        }finally {
+            view.loading = false
+            view.fieldsEnabled = true
         }
 
         return entry

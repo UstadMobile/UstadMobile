@@ -134,9 +134,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         ustadNavController = NavControllerAdapter(navController, destinationProvider)
         navController.addOnDestinationChangedListener(this)
         navController.addOnDestinationChangedListener(DeleteTempFilesNavigationListener(this))
-        val navGraph = navController.graph
-        navController.setGraph(navGraph, intent.extras)
-        appBarConfiguration = AppBarConfiguration(navGraph)
+        appBarConfiguration = AppBarConfiguration(navController.graph)
         mBinding.bottomNavView.setupWithNavController(navController)
         setupActionBarWithNavController(navController, AppBarConfiguration(mBinding.bottomNavView.menu))
 

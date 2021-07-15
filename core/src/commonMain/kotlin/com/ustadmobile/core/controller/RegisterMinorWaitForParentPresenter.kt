@@ -9,8 +9,14 @@ import com.ustadmobile.core.view.UstadView
 import org.kodein.di.DI
 import org.kodein.di.instance
 
-class RegisterMinorWaitForParentPresenter(context: Any, arguments: Map<String, String>, view: RegisterMinorWaitForParentView,
-                                          di: DI): UstadBaseController<RegisterMinorWaitForParentView>(context, arguments, view, di) {
+class RegisterMinorWaitForParentPresenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: RegisterMinorWaitForParentView,
+    di: DI
+): UstadBaseController<RegisterMinorWaitForParentView>(
+    context, arguments, view, di, activeSessionRequired = false
+) {
 
     val systemImpl: UstadMobileSystemImpl by instance()
 

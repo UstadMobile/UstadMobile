@@ -1,10 +1,11 @@
 package com.ustadmobile.lib.rest
 
 import com.soywiz.klock.DateTime
+import com.ustadmobile.core.account.AuthManager
+import com.ustadmobile.core.account.AuthResult
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.RegisterRequest
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.LINK_ENDPOINT_VIEWNAME_DIVIDER
@@ -14,8 +15,6 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.util.authenticateEncryptedPassword
-import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.routing.Route
@@ -25,61 +24,43 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.core.view.UstadView
+import io.ktor.application.*
 import io.ktor.request.*
+import io.ktor.util.pipeline.*
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.ktor.closestDI
 import kotlin.IllegalStateException
 
-fun Route.PersonAuthRegisterRoute() {
+fun Route.personAuthRegisterRoute() {
 
     route("auth") {
         post("login") {
-            val di: DI by closestDI()
-            val db: UmAppDatabase by di.on(call).instance(tag = DoorTag.TAG_DB)
-            val repo: UmAppDatabase by di.on(call).instance(tag = DoorTag.TAG_REPO)
+            val authManager: AuthManager by closestDI().on(call).instance()
 
             val username = call.request.queryParameters["username"]
             val password = call.request.queryParameters["password"]
+            val maxDateOfBirth = call.request.queryParameters["maxDateOfBirth"]?.toLong() ?: 0L
+
             val deviceId = call.request.header("X-nid")?.toInt()
             if(username == null || password == null || deviceId == null){
                 call.respond(HttpStatusCode.BadRequest, "No username/password provided, or no device id")
                 return@post
             }
 
-            val site: Site = db.siteDao.getSiteAsync() ?: throw IllegalStateException("No site!")
-            val authSalt = site.authSalt ?: throw IllegalStateException("No auth salt!")
 
-            val pbkdf2Params: Pbkdf2Params = di.direct.instance()
+            val authResult = authManager.authenticate(username, password,
+                fallbackToOldPersonAuth = true)
+            val authorizedPerson = authResult.authenticatedPerson
 
-            val passwordDoubleHashed = password.encryptWithPbkdf2(authSalt, pbkdf2Params)
-                .encryptWithPbkdf2(authSalt, pbkdf2Params)
-
-            var authorizedPerson = db.personDao.findByUsernameAndPasswordHash2(username,
-                passwordDoubleHashed)
-
-            if(authorizedPerson == null) {
-                //try the old way in case this user does not yet have a PersonAuth2 object
-                val person = db.personDao.findUidAndPasswordHashAsync(username)
-                if(person != null
-                    && ((person.passwordHash.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX)
-                            && person.passwordHash.substring(2) == password)
-                            ||(person.passwordHash.startsWith(PersonAuthDao.ENCRYPTED_PASS_PREFIX) &&
-                            authenticateEncryptedPassword(password, person.passwordHash.substring(2))))) {
-                    authorizedPerson = db.personDao.findByUid(0L)
-
-                    //Create the auth object
-                    repo.personAuth2Dao.insertAsync(PersonAuth2().apply {
-                        pauthUid = person.personUid
-                        pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
-                        pauthAuth = password.encryptWithPbkdf2(authSalt, pbkdf2Params)
-                            .encryptWithPbkdf2(authSalt, pbkdf2Params)
-                    })
+            if(authResult.success && authorizedPerson != null) {
+                if(maxDateOfBirth == 0L || authorizedPerson.dateOfBirth < maxDateOfBirth) {
+                    call.respond(HttpStatusCode.OK, authorizedPerson.toUmAccount(""))
+                }else {
+                    call.respond(HttpStatusCode.Conflict, "")
                 }
-            }
-
-            if(authorizedPerson != null) {
-                call.respond(HttpStatusCode.OK, authorizedPerson.toUmAccount(""))
+            }else if(authResult.reason == AuthResult.REASON_NEEDS_CONSENT) {
+                call.respond(HttpStatusCode.FailedDependency, "")
             }else {
                 call.respond(HttpStatusCode.Forbidden, "")
             }
@@ -157,41 +138,7 @@ fun Route.PersonAuthRegisterRoute() {
 
             repo.insertPersonAuthCredentials2(mPerson.personUid, newPassword, authParams)
 
-            call.respond(HttpStatusCode.OK, mPerson.toUmAccount(""))
-        }
-    }
-
-    route("password") {
-        post("change") {
-            val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
-            val username = call.request.queryParameters["username"]
-            val currentPassword = call.request.queryParameters["currentPassword"]
-            val newPassword = call.request.queryParameters["newPassword"]
-
-            if(username == null || newPassword == null){
-                call.respond(HttpStatusCode.BadRequest, "No user id or new password provide")
-                return@post
-            }
-
-            val person = db.personDao.findUidAndPasswordHashAsync(username)
-            if(person != null){
-
-                if(currentPassword != null && ((person.passwordHash.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX)
-                                && person.passwordHash.substring(2) != currentPassword)
-                                ||(person.passwordHash.startsWith(PersonAuthDao.ENCRYPTED_PASS_PREFIX) &&
-                                authenticateEncryptedPassword(currentPassword, person.passwordHash.substring(2))))){
-                    call.respond(HttpStatusCode.Forbidden, "Current password doesn't match, try again")
-                    return@post
-                }
-
-                val personAuth = PersonAuth(person.personUid,
-                        PersonAuthDao.PLAIN_PASS_PREFIX+newPassword)
-                db.personAuthDao.update(personAuth)
-
-                call.respond(HttpStatusCode.OK, person.toUmAccount("", username))
-            }else {
-                call.respond(HttpStatusCode.Forbidden, "")
-            }
+            call.respond(HttpStatusCode.OK, mPerson)
         }
     }
 }
