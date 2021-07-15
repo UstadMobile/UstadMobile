@@ -32,6 +32,7 @@ import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import okhttp3.OkHttpClient
 import org.junit.rules.TestWatcher
@@ -95,7 +96,7 @@ class UstadTestRule: TestWatcher() {
 
         endpointScope = EndpointScope()
         systemImplSpy = spy(UstadMobileSystemImpl(xppFactory, tempFolder))
-        coroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+        //coroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
         okHttpClient = OkHttpClient.Builder().build()
 
@@ -166,7 +167,7 @@ class UstadTestRule: TestWatcher() {
             }
 
             bind<CoroutineScope>(tag = DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with singleton {
-                CoroutineScope(coroutineDispatcher)
+                GlobalScope
             }
 
             bind<Pbkdf2Params>() with singleton {
@@ -179,7 +180,7 @@ class UstadTestRule: TestWatcher() {
 
     override fun finished(description: Description?) {
         httpClient.close()
-        coroutineDispatcher.close()
+        //coroutineDispatcher.close()
         tempFolder.deleteRecursively()
     }
 

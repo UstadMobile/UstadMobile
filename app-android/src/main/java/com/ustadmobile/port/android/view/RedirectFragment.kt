@@ -45,7 +45,7 @@ class RedirectFragment : UstadBaseFragment(), RedirectView {
             }
             mPresenter = RedirectPresenter(requireContext(),
                 arguments.toStringMap() + requireActivity().intent.extras.toStringMap() + intentMap,
-                this@RedirectFragment, di)
+                this@RedirectFragment, di).withViewLifecycle()
             mPresenter?.onCreate(null)
         }
     }

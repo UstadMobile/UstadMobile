@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
+import com.ustadmobile.core.view.SelectFileView
 import com.ustadmobile.core.view.SelectFileView.Companion.ARG_SELECTION_MODE
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
@@ -41,6 +42,7 @@ class SelectFileFragment(private val registry: ActivityResultRegistry? = null) :
                     val map = arguments.toStringMap()
                     val args = mutableMapOf<String, String>()
                     args[ARG_URI] = it.toString()
+                    args[UstadView.ARG_POPUPTO_ON_FINISH] = SelectFileView.VIEW_NAME
                     args.putFromOtherMapIfPresent(map, UstadView.ARG_LEAF)
                     args.putFromOtherMapIfPresent(map, UstadView.ARG_PARENT_ENTRY_UID)
                     systemImpl.go(ContentEntryEdit2View.VIEW_NAME,

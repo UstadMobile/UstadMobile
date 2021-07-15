@@ -8,24 +8,20 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.impl.nav.NavControllerAdapter
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SNACK_MESSAGE
-import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.util.FabManagerLifecycleObserver
-import com.ustadmobile.port.android.view.util.ProgressBarLifecycleObserver
-import com.ustadmobile.port.android.view.util.TitleLifecycleObserver
-import com.ustadmobile.port.android.view.util.UstadActivityWithProgressBar
+import com.ustadmobile.port.android.view.util.*
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import org.kodein.di.*
 import org.kodein.di.android.x.closestDI
 import java.util.*
@@ -61,6 +57,10 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
 
         bind<CoroutineScope>(DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with provider {
             viewLifecycleOwner.lifecycleScope
+        }
+
+        bind<DoorLifecycleOwner>() with provider {
+            viewLifecycleOwner
         }
     }
 
@@ -155,6 +155,10 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
         }
     }
 
+    fun <T : UstadBaseController<*>> T.withViewLifecycle(): T {
+        viewLifecycleOwner.lifecycle.addObserver(PresenterViewLifecycleObserver(this))
+        return this
+    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

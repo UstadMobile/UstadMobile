@@ -68,7 +68,7 @@ class ReportTemplateListFragment(): UstadListViewFragment<Report, Report>(),
         ustadFragmentTitle = getString(R.string.choose_template, context)
 
         mPresenter = ReportTemplateListPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+                di, viewLifecycleOwner).withViewLifecycle()
 
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter()
         mDataRecyclerViewAdapter = ReportTemplateRecyclerAdapter(mPresenter)

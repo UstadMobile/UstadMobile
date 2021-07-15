@@ -111,12 +111,17 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithPersonParentJoin>(), P
 
         val accountManager: UstadAccountManager by instance()
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
+        return rootView
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         mPresenter = PersonDetailPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+            di, viewLifecycleOwner).withViewLifecycle()
         clazzEnrolmentWithClazzRecyclerAdapter?.presenter = mPresenter
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
         mBinding?.presenter = mPresenter
-        return rootView
     }
 
     override fun onDestroyView() {

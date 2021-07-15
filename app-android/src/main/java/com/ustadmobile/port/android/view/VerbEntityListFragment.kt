@@ -52,7 +52,7 @@ class VerbEntityListFragment() : UstadListViewFragment<VerbDisplay, VerbDisplay>
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = VerbEntityListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di, viewLifecycleOwner)
+                this, di, viewLifecycleOwner).withViewLifecycle()
         mDataRecyclerViewAdapter = VerbEntityListRecyclerAdapter(mPresenter)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_a_new_verb))

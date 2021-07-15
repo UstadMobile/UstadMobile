@@ -39,7 +39,7 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
         val accountManager: UstadAccountManager by instance()
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
         mPresenter = ClazzListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di, viewLifecycleOwner)
+                this, di, viewLifecycleOwner).withViewLifecycle()
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
             requireContext().getString(R.string.add_a_new_class),  onClickSort = this,
             sortOrderOption = mPresenter?.sortOptions?.get(0),

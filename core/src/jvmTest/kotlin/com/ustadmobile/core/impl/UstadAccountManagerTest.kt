@@ -285,6 +285,28 @@ class UstadAccountManagerTest {
     }
 
     @Test
+    fun givenAccountRequiresParentalConsent_whenLoginCalled_thenShouldThrowException() {
+        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
+
+        mockWebServer.enqueue(MockResponse()
+            .setResponseCode(424))
+
+        var exception: Exception? = null
+        try {
+            runBlocking {
+                accountManager.login("bob", "pass", mockServerUrl)
+            }
+        }catch(e: Exception) {
+            exception = e
+        }
+
+        Assert.assertTrue(
+            "Got ConsentNotGrantedException when parental consent not granted",
+            exception is ConsentNotGrantedException)
+    }
+
+
+    @Test
     fun givenUnreachableServer_whenLoginCalled_thenShouldThrowException() {
         val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
 
