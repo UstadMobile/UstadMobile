@@ -47,7 +47,7 @@ class SettingsFragment : UstadBaseFragment(), SettingsView {
         }
 
         mPresenter = SettingsPresenter(requireContext(), arguments.toStringMap(),
-                this, di)
+                this, di).withViewLifecycle()
         mPresenter?.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState))
 
         mBinding?.presenter = mPresenter

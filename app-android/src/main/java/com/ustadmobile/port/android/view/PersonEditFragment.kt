@@ -216,6 +216,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }
@@ -239,7 +240,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         }
 
         mPresenter = PersonEditPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+                di, viewLifecycleOwner).withViewLifecycle()
 
         mBinding?.usernameText?.addTextChangedListener(ClearErrorTextWatcher {
             mBinding?.usernameError = null

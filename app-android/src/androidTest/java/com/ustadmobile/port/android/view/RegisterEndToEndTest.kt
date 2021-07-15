@@ -60,8 +60,6 @@ class RegisterEndToEndTest: TestCase() {
 
     @Test
     fun givenUserNotLoggedIn_whenUserRegistersAsMinor_shouldCompleteAndReturn() {
-        lateinit var activityScenario: ActivityScenario<MainActivity>
-
         init {
             val di = getApplicationDi()
             val repo: UmAppDatabase = di.on(Endpoint(mockWebServer.url("/").toString()))
@@ -100,7 +98,7 @@ class RegisterEndToEndTest: TestCase() {
                 it.putExtra(UstadView.ARG_NEXT,
                         "${Login2View.VIEW_NAME}?${destArgs.toQueryString()}")
             }
-            activityScenario = launchActivity(intent = launchIntent)
+            launchActivity<MainActivity>(intent = launchIntent)
         }.run {
             LoginScreen {
                 createAccount {

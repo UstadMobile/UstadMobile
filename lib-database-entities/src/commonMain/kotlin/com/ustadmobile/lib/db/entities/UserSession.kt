@@ -79,5 +79,7 @@ class UserSession {
 
         const val REASON_CONSENT_REVOKED = 2
 
+        const val REASON_PASSWORD_CHANGED = 3
+
     }
 }

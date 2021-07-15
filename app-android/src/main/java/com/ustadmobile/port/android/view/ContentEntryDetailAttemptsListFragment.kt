@@ -53,7 +53,7 @@ class ContentEntryDetailAttemptsListFragment(): UstadListViewFragment<PersonWith
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = ContentEntryDetailAttemptsListPresenter(requireContext(), arguments.toStringMap(),
-                this, di, viewLifecycleOwner)
+                this, di, viewLifecycleOwner).withViewLifecycle()
 
         mDataRecyclerViewAdapter = PersonWithStatementDisplayListRecyclerAdapter(mPresenter)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(

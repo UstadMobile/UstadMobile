@@ -36,7 +36,7 @@ class DateRangeFragment: UstadEditFragment<DateRangeMoment>(), DateRangeView,
         }
 
         mPresenter = DateRangePresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
 
         return rootView
     }
@@ -88,6 +88,7 @@ class DateRangeFragment: UstadEditFragment<DateRangeMoment>(), DateRangeView,
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

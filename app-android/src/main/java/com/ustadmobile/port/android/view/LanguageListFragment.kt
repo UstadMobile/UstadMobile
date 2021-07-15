@@ -51,7 +51,7 @@ class LanguageListFragment(): UstadListViewFragment<Language, Language>(),
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = LanguageListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di, viewLifecycleOwner)
+                this, di, viewLifecycleOwner).withViewLifecycle()
 
         mDataRecyclerViewAdapter = LanguageListRecyclerAdapter(mPresenter)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,

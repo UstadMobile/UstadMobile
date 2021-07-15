@@ -29,7 +29,7 @@ class @BaseFileName@Fragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = @BaseFileName@Presenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+                di, viewLifecycleOwner).withViewLifecycle()
 
         mDataRecyclerViewAdapter = @BaseFileName@RecyclerAdapter(mPresenter)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,

@@ -79,7 +79,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 
 
         mPresenter = ContentEntryList2Presenter(requireContext(), arguments.toStringMap(),
-                this, di, viewLifecycleOwner)
+                this, di, viewLifecycleOwner).withViewLifecycle()
 
         mDataRecyclerViewAdapter = ContentEntryListRecyclerAdapter(mPresenter,
                 arguments?.toStringMap()?.determineListMode().toString(),
