@@ -53,7 +53,7 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
         return false
     }
 
-    private suspend fun updateListOnView() {
+    private fun updateListOnView() {
         view.progressSummary = repo.clazzAssignmentDao.getStudentsProgressOnAssignment(
                 clazzAssignment?.caClazzUid?: 0,
                 mLoggedInPersonUid, clazzAssignment?.caUid ?: filterByClazzAssignmentUid,
@@ -72,16 +72,12 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
 
     override fun onClickSort(sortOption: SortOrderOption) {
         super.onClickSort(sortOption)
-        GlobalScope.launch(doorMainDispatcher()) {
-            updateListOnView()
-        }
+        updateListOnView()
     }
 
     override fun onSearchSubmitted(text: String?) {
-        GlobalScope.launch(doorMainDispatcher()) {
-            searchText = text
-            updateListOnView()
-        }
+        searchText = text
+        updateListOnView()
     }
 
     override fun onClickPersonWithStatementDisplay(personWithAttemptsSummary: PersonWithAttemptsSummary) {

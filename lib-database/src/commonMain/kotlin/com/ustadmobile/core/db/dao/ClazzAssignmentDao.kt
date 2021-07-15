@@ -383,8 +383,8 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
          AND caClazzUid = :clazzUid 
          AND caUid = :uid
     """)
-    abstract suspend fun getStudentsProgressOnAssignment(clazzUid: Long, accountPersonUid: Long,
-                                                 uid: Long, permission: Long): AssignmentProgressSummary?
+    abstract fun getStudentsProgressOnAssignment(clazzUid: Long, accountPersonUid: Long,
+                                                 uid: Long, permission: Long): DoorLiveData<AssignmentProgressSummary?>
 
 
 
