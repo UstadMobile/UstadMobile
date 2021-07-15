@@ -8,16 +8,15 @@ import com.ustadmobile.core.controller.ClazzAssignmentDetailStudentProgressOverv
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
-import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
-import com.ustadmobile.lib.db.entities.StudentAssignmentProgress
+import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 
 
 class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewFragment<PersonWithAttemptsSummary, PersonWithAttemptsSummary>(),
         ClazzAssignmentDetailStudentProgressOverviewListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener {
 
-    private var studentProgressAdapter: StudentAssignmentProgressRecyclerAdapter? = null
+    private var progressSummaryAdapter: AssignmentProgressSummaryRecyclerAdapter? = null
     private var mPresenter: ClazzAssignmentDetailStudentProgressOverviewListPresenter? = null
 
     override val listPresenter: UstadListPresenter<*, in PersonWithAttemptsSummary>?
@@ -34,10 +33,10 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
 
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
-        studentProgressAdapter = StudentAssignmentProgressRecyclerAdapter(null)
+        progressSummaryAdapter = AssignmentProgressSummaryRecyclerAdapter(null)
         mDataRecyclerViewAdapter = ContentEntryDetailAttemptsListFragment.PersonWithStatementDisplayListRecyclerAdapter(mPresenter)
 
-        mMergeRecyclerViewAdapter = ConcatAdapter(mUstadListHeaderRecyclerViewAdapter,studentProgressAdapter, mDataRecyclerViewAdapter)
+        mMergeRecyclerViewAdapter = ConcatAdapter(mUstadListHeaderRecyclerViewAdapter,progressSummaryAdapter, mDataRecyclerViewAdapter)
         mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
 
 
@@ -65,11 +64,11 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
     override val displayTypeRepo: Any?
         get() = dbRepo?.clazzAssignmentDao
 
-    override var studentProgress: StudentAssignmentProgress? = null
+    override var progressSummary: AssignmentProgressSummary? = null
         get() = field
         set(value) {
             field = value
-            studentProgressAdapter?.studentAssignmentProgressVal = studentProgress
+            progressSummaryAdapter?.assignmentProgressSummaryVal = progressSummary
         }
 
 }

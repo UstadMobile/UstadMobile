@@ -54,7 +54,7 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
     }
 
     private suspend fun updateListOnView() {
-        view.studentProgress = repo.clazzAssignmentDao.getStudentsProgressOnAssignment(
+        view.progressSummary = repo.clazzAssignmentDao.getStudentsProgressOnAssignment(
                 clazzAssignment?.caClazzUid?: 0,
                 mLoggedInPersonUid, clazzAssignment?.caUid ?: filterByClazzAssignmentUid,
                 Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)

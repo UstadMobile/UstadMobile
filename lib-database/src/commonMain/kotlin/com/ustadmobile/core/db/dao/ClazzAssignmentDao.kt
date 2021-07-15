@@ -133,7 +133,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
               0 as progress
              
              FROM ClazzAssignment
-            WHERE caActive
+            WHERE ClazzAssignment.caActive
               AND ClazzAssignment.caClazzUid = :clazzUid
               AND (ClazzAssignment.caTitle LIKE :searchText 
                     OR ClazzAssignment.caDescription LIKE :searchText)
@@ -364,7 +364,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                     IN (SELECT cacjContentUid 
                                           FROM ClazzAssignmentContentJoin 
                                          WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
-                                           AND cacjActive)
+                                           AND ClazzAssignmentContentJoin.cacjActive)
                            AND StatementEntity.contentEntryRoot 
                            AND StatementEntity.resultCompletion
                            AND StatementEntity.timestamp
@@ -384,7 +384,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
          AND caUid = :uid
     """)
     abstract suspend fun getStudentsProgressOnAssignment(clazzUid: Long, accountPersonUid: Long,
-                                                 uid: Long, permission: Long): StudentAssignmentProgress?
+                                                 uid: Long, permission: Long): AssignmentProgressSummary?
 
 
 

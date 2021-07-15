@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 class ClazzAssignmentWithMetrics : ClazzAssignment() {
 
     @Embedded
-    var studentProgress: StudentAssignmentProgress? = null
+    var progressSummary: AssignmentProgressSummary? = null
 
     @Embedded
     var studentScore: ContentEntryStatementScoreProgress? = null

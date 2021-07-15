@@ -91,7 +91,7 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenterTest {
         verify(repoClazzAssignmentDaoSpy, timeout(5000))
                 .getAttemptSummaryForStudentsInAssignment(eq(assignmentRollUp!!.cacheClazzAssignmentUid),
                         eq(clazzAssignment.caClazzUid), any(), any(), any())
-        verify(mockView, timeout(5000)).studentProgress = any()
+        verify(mockView, timeout(5000)).progressSummary = any()
         verify(mockView, timeout(5000)).list = any()
 
         presenter.onClickPersonWithStatementDisplay(PersonWithAttemptsSummary().apply {

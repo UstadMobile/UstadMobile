@@ -30,11 +30,11 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
                           FROM MaxScoreTable 
                          WHERE cacjContentUid = maxScoreContentEntryUid), 0) AS cacheMaxScore,
                           
-               COALESCE(extensionProgress,0) AS cacheProgress,
-               COALESCE(resultCompletion,'FALSE') AS cacheContentComplete, 
-               COALESCE(resultSuccess,0) AS cacheSuccess,
-               (CASE WHEN timestamp > caDeadlineDate 
-                     THEN caLateSubmissionPenalty 
+               COALESCE(StatementEntity.extensionProgress,0) AS cacheProgress,
+               COALESCE(StatementEntity.resultCompletion,'FALSE') AS cacheContentComplete, 
+               COALESCE(StatementEntity.resultSuccess,0) AS cacheSuccess,
+               (CASE WHEN StatementEntity.timestamp > ClazzAssignment.caDeadlineDate 
+                     THEN ClazzAssignment.caLateSubmissionPenalty 
                      ELSE 0 END) AS cachePenalty,
                (SELECT MAX(statementLocalChangeSeqNum) FROM StatementEntity) AS lastCsnChecked
           FROM ClazzAssignmentContentJoin
@@ -48,22 +48,23 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
 	            ON statementUid = (SELECT statementUid 
                                      FROM StatementEntity 
                                             LEFT JOIN ClazzAssignment 
-                                            ON caUid = ClazzAssignmentContentJoin.cacjAssignmentUid 
-                                    WHERE statementContentEntryUid = ClazzAssignmentContentJoin.cacjContentUid
-                                      AND statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
-                                      AND contentEntryRoot 
+                                            ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid 
+                                    WHERE StatementEntity.statementContentEntryUid = ClazzAssignmentContentJoin.cacjContentUid
+                                      AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
+                                      AND StatementEntity.contentEntryRoot 
                                       AND StatementEntity.timestamp 
                                             BETWEEN ClazzAssignment.caStartDate
                                             AND ClazzAssignment.caGracePeriodDate
-                                  ORDER BY CASE WHEN timestamp > ClazzAssignment.caDeadlineDate 
-                                                THEN resultScoreScaled * (1 - (caLateSubmissionPenalty/100))
-                                                ELSE resultScoreScaled END DESC, 
-                                            extensionProgress DESC, resultSuccess DESC LIMIT 1)
-	     WHERE clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-           AND clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}
-           AND clazzEnrolmentActive
-           AND caActive
-           AND cacjActive
+                                  ORDER BY CASE WHEN StatementEntity.timestamp > ClazzAssignment.caDeadlineDate 
+                                                THEN StatementEntity.resultScoreScaled * (1 - (caLateSubmissionPenalty/100))
+                                                ELSE StatementEntity.resultScoreScaled END DESC, 
+                                            StatementEntity.extensionProgress DESC, 
+                                            StatementEntity.resultSuccess DESC LIMIT 1)
+	     WHERE ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+           AND ClazzEnrolment.clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}
+           AND ClazzEnrolment.clazzEnrolmentActive
+           AND ClazzAssignment.caActive
+           AND ClazzAssignmentContentJoin.cacjActive
            AND (:clazzUid = 0 OR ClazzAssignment.caClazzUid = :clazzUid)
            AND (:assignmentUid = 0 OR ClazzAssignment.caUid = :assignmentUid)
            AND (:personUid = 0 OR ClazzEnrolment.clazzEnrolmentPersonUid = :personUid)

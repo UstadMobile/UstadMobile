@@ -7,8 +7,8 @@
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
 
         <variable
-            name="studentProgress"
-            type="com.ustadmobile.lib.db.entities.StudentAssignmentProgress" />
+            name="assignmentProgressSummary"
+            type="com.ustadmobile.lib.db.entities.AssignmentProgressSummary" />
 
 
     </data>
@@ -57,7 +57,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@{`` + studentProgress.notStartedStudents}"
+            android:text="@{`` + assignmentProgressSummary.notStartedStudents}"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             app:layout_constraintStart_toStartOf="@+id/item_clazz_assignment_progress_detail_not_started_title"
             app:layout_constraintTop_toTopOf="parent"
@@ -79,7 +79,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@{`` + studentProgress.calculateStartedStudents()}"
+            android:text="@{`` + assignmentProgressSummary.calculateStartedStudents()}"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             app:layout_constraintStart_toStartOf="@+id/item_clazz_assignment_progress_detail_started_title"
             app:layout_constraintTop_toTopOf="parent"
@@ -101,7 +101,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@{`` + studentProgress.completedStudents}"
+            android:text="@{`` + assignmentProgressSummary.completedStudents}"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             app:layout_constraintStart_toStartOf="@+id/item_clazz_assignment_progress_detail_completed_title"
             app:layout_constraintTop_toTopOf="parent"

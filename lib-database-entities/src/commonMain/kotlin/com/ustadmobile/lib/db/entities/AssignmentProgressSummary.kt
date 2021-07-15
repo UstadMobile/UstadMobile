@@ -2,9 +2,8 @@ package com.ustadmobile.lib.db.entities
 
 import kotlinx.serialization.Serializable
 
-//TODO: Rename this to AssignmentProgressSummary
 @Serializable
-class StudentAssignmentProgress {
+class AssignmentProgressSummary {
 
     var notStartedStudents : Int = 0
 
