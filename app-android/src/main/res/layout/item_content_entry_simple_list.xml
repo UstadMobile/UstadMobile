@@ -41,6 +41,7 @@
             android:layout_height="@dimen/dimen_70dp"
             app:fallbackDrawable="@{contentEntry.leaf ? @drawable/book_24px:@drawable/ic_folder_black_24dp}"
             app:imageUri="@{contentEntry.thumbnailUrl}"
+            app:tint="?colorOnIconTint"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@drawable/ic_outline_book_24" />
