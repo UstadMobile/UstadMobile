@@ -79,7 +79,7 @@ class UstadBaseControllerTest {
         mockActiveSessionLive = DoorMutableLiveData()
 
         accountManager = mock {
-            onBlocking { activeSessionCount(any()) }.thenAnswer {
+            onBlocking { activeSessionCount(any(), any()) }.thenAnswer {
                 numActiveSessions
             }
 

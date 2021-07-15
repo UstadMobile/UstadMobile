@@ -15,6 +15,7 @@ import com.ustadmobile.core.view.AccountListView.Companion.ARG_ACTIVE_ACCOUNT_MO
 import com.ustadmobile.core.view.AccountListView.Companion.ARG_FILTER_BY_ENDPOINT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
+import com.ustadmobile.core.view.UstadView.Companion.ARG_MAX_DATE_OF_BIRTH
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_TITLE
@@ -62,6 +63,11 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
                 newList.removeAll { it.endpoint.url != endpointFilter }
             }
 
+            arguments[UstadView.ARG_MAX_DATE_OF_BIRTH]?.also { maxDateOfBirthStr ->
+                val maxDateOfBirth = maxDateOfBirthStr.toLong()
+                newList.removeAll { it.person.dateOfBirth > maxDateOfBirth }
+            }
+
             accountListMediator.sendValue(newList)
         }
 
@@ -71,17 +77,21 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
     }
 
     fun handleClickAddAccount(){
-        val canSelectServer = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_SERVER_SELECTION, context)
-        val args = arguments.toMutableMap().also {
-            it.putIfNotAlreadySet(ARG_NEXT, nextDest)
-        }
-
         val filterByEndpoint = arguments[ARG_FILTER_BY_ENDPOINT]
         if(filterByEndpoint != null) {
-            impl.go(Login2View.VIEW_NAME,
-                mapOf(ARG_SERVER_URL to filterByEndpoint, ARG_NEXT to nextDest), context)
+            val args = mapOf(
+                ARG_SERVER_URL to filterByEndpoint,
+                ARG_NEXT to nextDest,
+                ARG_MAX_DATE_OF_BIRTH to (arguments[ARG_MAX_DATE_OF_BIRTH] ?: "0")
+            )
+            impl.go(Login2View.VIEW_NAME, args, context)
         }else {
-            impl.go(if(canSelectServer) SiteEnterLinkView.VIEW_NAME else Login2View.VIEW_NAME,args, context)
+            val canSelectServer = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_SERVER_SELECTION, context)
+            val args = arguments.toMutableMap().also {
+                it.putIfNotAlreadySet(ARG_NEXT, nextDest)
+            }
+            impl.go(if(canSelectServer) SiteEnterLinkView.VIEW_NAME else Login2View.VIEW_NAME, args,
+                context)
         }
     }
 

@@ -28,17 +28,25 @@ abstract class UserSessionDao {
     @Query(FIND_LOCAL_SESSIONS_SQL)
     abstract suspend fun findAllLocalSessionsAsync(): List<UserSessionAndPerson>
 
+    /**
+     * Count sessions on this device. If maxDateOfBirth is non-zero, then this can be used to
+     * provide a cut-off (e.g. to find only sessions for adults where their date of birth must be
+     * before a cut-off)
+     */
     @Query("""
         SELECT COUNT(*)
           FROM UserSession
+               JOIN Person 
+                    ON UserSession.usPersonUid = Person.personUid
          WHERE UserSession.usClientNodeId = (
                    SELECT COALESCE(
                           (SELECT nodeClientId 
                             FROM SyncNode
                            LIMIT 1), 0))
-           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}                
+           AND (:maxDateOfBirth = 0 OR Person.dateOfBirth < :maxDateOfBirth)                 
     """)
-    abstract suspend fun countAllLocalSessionsAsync(): Int
+    abstract suspend fun countAllLocalSessionsAsync(maxDateOfBirth: Long): Int
 
     @Query("""
         UPDATE UserSession
