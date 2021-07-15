@@ -51,7 +51,8 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
             pager.adapter = mPagerAdapter
 
-            mediator = TabLayoutMediator(tabList, pager, VIEWNAME_TO_TITLE_MAP.createTabLayoutStrategy(value, requireContext()))
+            mediator = TabLayoutMediator(tabList, pager,
+                VIEWNAME_TO_TITLE_MAP.createTabLayoutStrategy(value, requireContext()))
             mediator?.attach()
         }
 
@@ -76,7 +77,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
         super.onViewCreated(view, savedInstanceState)
 
         mPresenter = ClazzDetailPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+                di, viewLifecycleOwner).withViewLifecycle()
 
         mPresenter?.onCreate(backStackSavedState)
     }

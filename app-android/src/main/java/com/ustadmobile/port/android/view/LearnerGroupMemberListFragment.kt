@@ -63,7 +63,7 @@ class LearnerGroupMemberListFragment : UstadListViewFragment<LearnerGroupMember,
         val accountManager: UstadAccountManager by instance()
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
         mPresenter = LearnerGroupMemberListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di, viewLifecycleOwner)
+                this, di, viewLifecycleOwner).withViewLifecycle()
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter()
         mDataRecyclerViewAdapter = LearnerGroupMemberListRecyclerAdapter()
 

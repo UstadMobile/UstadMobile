@@ -184,6 +184,12 @@ interface UstadView {
 
         const val ARG_TITLE = "title"
 
+        /**
+         * Indicates whether this view is a top level view reached via navigation or a subview (
+         * e.g. a tab). See UstadBaseController.navChild property.
+         */
+        const val ARG_NAV_CHILD = "navChild"
+
         @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
         const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
 

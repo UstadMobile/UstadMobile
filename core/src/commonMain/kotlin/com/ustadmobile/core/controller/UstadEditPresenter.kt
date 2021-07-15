@@ -9,10 +9,14 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.util.copyOnWriteListOf
 import org.kodein.di.DI
 
-abstract class UstadEditPresenter<V: UstadEditView<RT>, RT: Any>(context: Any,
-    arguments: Map<String, String>, view: V, di: DI, lifecycleOwner: DoorLifecycleOwner)
-
-    : UstadSingleEntityPresenter<V, RT>(context, arguments, view, di, lifecycleOwner) {
+abstract class UstadEditPresenter<V: UstadEditView<RT>, RT: Any>(
+    context: Any,
+    arguments: Map<String, String>,
+    view: V,
+    di: DI,
+    lifecycleOwner: DoorLifecycleOwner,
+    override val activeSessionRequired: Boolean = true
+) : UstadSingleEntityPresenter<V, RT>(context, arguments, view, di, lifecycleOwner) {
 
     private val jsonLoadListeners: MutableList<JsonLoadListener> = copyOnWriteListOf()
 

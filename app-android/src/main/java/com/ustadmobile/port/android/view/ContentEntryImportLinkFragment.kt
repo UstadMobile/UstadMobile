@@ -45,7 +45,7 @@ class ContentEntryImportLinkFragment : UstadBaseFragment(), ContentEntryImportLi
         setHasOptionsMenu(true)
 
         mPresenter = ContentEntryImportLinkPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di)
+                this, di).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toStringMap())
 
     }

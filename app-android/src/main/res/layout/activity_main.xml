@@ -17,7 +17,7 @@
             layout="@layout/appbar_material_collapsing"/>
 
 
-        <fragment
+        <androidx.fragment.app.FragmentContainerView
             android:id="@+id/activity_main_navhost_fragment"
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"

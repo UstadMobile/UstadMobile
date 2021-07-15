@@ -199,6 +199,7 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
 
     override var fieldsEnabled: Boolean = false
         set(value) {
+            super.fieldsEnabled = value
             mBinding?.fieldsEnabled = value
             field = value
         }
@@ -254,7 +255,7 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
         ustadFragmentTitle = getString(R.string.content)
 
         mPresenter = ContentEntryEdit2Presenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
                 Language::class.java) {

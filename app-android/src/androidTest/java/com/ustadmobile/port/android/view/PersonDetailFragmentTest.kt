@@ -5,6 +5,7 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Person
@@ -35,9 +36,11 @@ class PersonDetailFragmentTest : TestCase() {
 
 
 
-    private fun launchFragment(activeUserIsAdmin: Boolean = true,
-                               personHasUsername: Boolean = true,
-                               activeUserIsPersonDisplayed: Boolean = false){
+    private fun launchFragment(
+        activeUserIsAdmin: Boolean = true,
+        personHasUsername: Boolean = true,
+        activeUserIsPersonDisplayed: Boolean = false
+    ){
 
         dbRule.insertPersonAndStartSession(Person().apply {
             personUid = UmAppDatabaseAndroidClientRule.DEFAULT_ACTIVE_USER_PERSONUID
@@ -51,7 +54,7 @@ class PersonDetailFragmentTest : TestCase() {
         if(!activeUserIsPersonDisplayed) {
             //Create an extra person
             runBlocking {
-                dbRule.insertPersonAndStartSession(Person().apply {
+                dbRule.repo.insertPersonAndGroup(Person().apply {
                     personUid = 43L
                     firstNames = "Jones"
                     lastName = "Doe"
@@ -81,10 +84,11 @@ class PersonDetailFragmentTest : TestCase() {
 
     @AdbScreenRecord("given person detail when username is null and account management allowed then should hide create account option")
     @Test
-    fun givenPersonDetails_whenPersonUsernameIsNullAndCanManageAccount_thenCreateAccountShouldHidden(){
+    fun givenPersonDetails_whenPersonUsernameIsNullAndCantManageAccount_thenCreateAccountShouldHidden(){
 
         init{
-            launchFragment(personHasUsername = false, activeUserIsAdmin = false)
+            launchFragment(personHasUsername = false, activeUserIsAdmin = false,
+                activeUserIsPersonDisplayed = false)
         }.run {
 
             PersonDetailScreen{

@@ -3,15 +3,12 @@ package com.ustadmobile.lib.rest
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import com.google.gson.Gson
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
-import com.ustadmobile.core.account.Pbkdf2Params
+import com.ustadmobile.core.account.*
 import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -58,6 +55,8 @@ import jakarta.mail.Authenticator
 import jakarta.mail.PasswordAuthentication
 import org.xmlpull.v1.XmlPullParserFactory
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
+import com.ustadmobile.lib.db.entities.PersonAuth2
+import kotlinx.coroutines.runBlocking
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -178,8 +177,13 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 updateNotificationManager = instance()
             })
             ServerChangeLogMonitor(db, repo as DoorDatabaseRepository)
+
+            //Add listener that will end sessions when authentication has been updated
+            repo.addSyncListener(PersonAuth2::class, EndSessionPersonAuth2SyncListener(repo))
             repo.preload()
-            db.ktorInitDbWithRepo(repo, instance<File>(tag = TAG_CONTEXT_DATA_ROOT).absolutePath)
+            repo.ktorInitRepo()
+            runBlocking { repo.initAdminUser(context, di) }
+
             repo
         }
 
@@ -232,6 +236,9 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             Pbkdf2Params(numIterations, keyLength)
         }
 
+        bind<AuthManager>() with scoped(EndpointScope.Default).singleton {
+            AuthManager(context, di)
+        }
 
         try {
             appConfig.config("mail")
@@ -278,7 +285,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
     install(Routing) {
         ContainerDownload()
-        PersonAuthRegisterRoute()
+        personAuthRegisterRoute()
         ContainerMountRoute()
         ContainerUploadRoute2()
         UmAppDatabase_KtorRoute(true)

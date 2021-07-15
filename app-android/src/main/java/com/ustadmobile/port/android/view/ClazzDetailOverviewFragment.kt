@@ -99,7 +99,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         val accountManager: UstadAccountManager by instance()
         repo = di.direct.on(accountManager.activeAccount).instance(tag = TAG_REPO)
         mPresenter = ClazzDetailOverviewPresenter(requireContext(), arguments.toStringMap(), this,
-                 di, viewLifecycleOwner)
+                 di, viewLifecycleOwner).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return rootView

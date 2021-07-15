@@ -12,6 +12,7 @@ import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
 import com.ustadmobile.door.doorMainDispatcher
 import io.ktor.client.*
@@ -62,6 +63,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                         val args = mutableMapOf<String, String>()
                         args.putEntityAsJson(ContentEntryEdit2View.ARG_IMPORTED_METADATA,
                                 ImportedContentEntryMetaData.serializer(), data)
+                        args[ARG_POPUPTO_ON_FINISH] = ContentEntryImportLinkView.VIEW_NAME
                         args.putFromOtherMapIfPresent(arguments, ARG_LEAF)
                         args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
                         systemImpl.go(ContentEntryEdit2View.VIEW_NAME,

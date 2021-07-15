@@ -559,7 +559,8 @@ suspend fun UmAppDatabase.grantScopedPermission(toPerson: Person, permissions: L
 }
 
 /**
- * Insert authentication credentials for the given person uid with the given password. The
+ * Insert authentication credentials for the given person uid with the given password. This is fine
+ * to use in tests etc, but for performance it is better to use AuthManager.setAuth
  */
 suspend fun UmAppDatabase.insertPersonAuthCredentials2(personUid: Long,
                                             password: String,
@@ -573,8 +574,6 @@ suspend fun UmAppDatabase.insertPersonAuthCredentials2(personUid: Long,
     personAuth2Dao.insertAsync(PersonAuth2().apply {
         pauthUid = personUid
         pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
-        pauthAuth = password.encryptWithPbkdf2(authSalt, pbkdf2Params)
-            .encryptWithPbkdf2(authSalt, pbkdf2Params)
+        pauthAuth = password.doublePbkdf2Hash(authSalt, pbkdf2Params).encodeBase64()
     })
 }
-

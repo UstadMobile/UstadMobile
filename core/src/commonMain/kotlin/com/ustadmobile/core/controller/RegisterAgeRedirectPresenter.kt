@@ -1,20 +1,22 @@
 package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.age
 import com.ustadmobile.core.view.PersonEditView
-import com.ustadmobile.core.view.RedirectView
 import com.ustadmobile.core.view.RegisterAgeRedirectView
 import com.ustadmobile.core.view.SiteTermsDetailView
 import com.ustadmobile.door.util.systemTimeInMillis
 import org.kodein.di.DI
 import org.kodein.di.instance
 
-class RegisterAgeRedirectPresenter(context: Any, arguments: Map<String, String>, view: RegisterAgeRedirectView,
-                                   di: DI): UstadBaseController<RegisterAgeRedirectView>(context, arguments, view, di) {
+class RegisterAgeRedirectPresenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: RegisterAgeRedirectView,
+    di: DI
+): UstadBaseController<RegisterAgeRedirectView>(context, arguments, view, di, activeSessionRequired = false) {
 
     val systemImpl: UstadMobileSystemImpl by instance()
 
