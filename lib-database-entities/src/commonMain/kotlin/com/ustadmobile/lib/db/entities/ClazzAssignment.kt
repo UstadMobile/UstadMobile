@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
@@ -62,6 +63,7 @@ open class ClazzAssignment {
 
     var caPrivateCommentsEnabled: Boolean = false
 
+    @ColumnInfo(index = true)
     var caClazzUid: Long = 0
 
     @LocalChangeSeqNum

@@ -36,6 +36,7 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
         super.onCreate(savedState)
         filterByClazzAssignmentUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: -1
         selectedSortOption = SORT_OPTIONS[0]
+        updateListOnView()
         GlobalScope.launch(doorMainDispatcher()) {
             clazzAssignment = withTimeoutOrNull(2000) {
                 db.clazzAssignmentDao.findByUidAsync(filterByClazzAssignmentUid)
@@ -45,7 +46,6 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
                     0)
 
             mLoggedInPersonUid = accountManager.activeAccount.personUid
-            updateListOnView()
         }
     }
 

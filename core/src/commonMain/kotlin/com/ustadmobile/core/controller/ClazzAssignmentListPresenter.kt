@@ -64,23 +64,21 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
             caClazzUid = clazzUid
         }
         val clazzWorkJson = Json.encodeToString(ClazzAssignment.serializer(), clazzAssignment)
+
+        //TODO: Convert this to using an argument
         systemImpl.go(ClazzAssignmentEditView.VIEW_NAME,
                 mapOf(UstadEditView.ARG_ENTITY_JSON to clazzWorkJson), context)
     }
 
     override fun onClickSort(sortOption: SortOrderOption) {
         super.onClickSort(sortOption)
-        GlobalScope.launch(doorMainDispatcher()) {
-            updateListOnView()
-        }
+        updateListOnView()
     }
 
 
     override fun onSearchSubmitted(text: String?) {
-        GlobalScope.launch(doorMainDispatcher()) {
-            searchText = text
-            updateListOnView()
-        }
+        searchText = text
+        updateListOnView()
     }
 
     companion object {

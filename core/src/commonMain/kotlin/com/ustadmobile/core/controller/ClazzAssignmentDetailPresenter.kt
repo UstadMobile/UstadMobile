@@ -59,9 +59,9 @@ class ClazzAssignmentDetailPresenter(context: Any,
         val entityUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
         GlobalScope.launch(doorMainDispatcher()) {
             val loggedInPersonUid = accountManager.activeAccount.personUid
-            val hasPermission = db.clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
+            val hasStudentProgressPermission = db.clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
                     assignment.caClazzUid, Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)
-            if(hasPermission){
+            if(hasStudentProgressPermission){
                 view.tabs = listOf("${ClazzAssignmentDetailOverviewView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid&${UstadView.ARG_CLAZZUID}=${assignment.caClazzUid}",
                         "${ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid")
             }else{
