@@ -59,15 +59,8 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
 
     override fun handleClickCreateNewFab() {
         val clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0L
-
-        val clazzAssignment: ClazzAssignment = ClazzAssignment().apply {
-            caClazzUid = clazzUid
-        }
-        val clazzWorkJson = Json.encodeToString(ClazzAssignment.serializer(), clazzAssignment)
-
-        //TODO: Convert this to using an argument
         systemImpl.go(ClazzAssignmentEditView.VIEW_NAME,
-                mapOf(UstadEditView.ARG_ENTITY_JSON to clazzWorkJson), context)
+                mapOf(UstadView.ARG_CLAZZUID to clazzUid.toString()), context)
     }
 
     override fun onClickSort(sortOption: SortOrderOption) {

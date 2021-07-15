@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -71,7 +72,9 @@ class ClazzAssignmentEditPresenter(context: Any,
 
         val clazzAssignment = db.onRepoWithFallbackToDb(2000) {
             it.clazzAssignmentDao.findByUidAsync(entityUid)
-        } ?: return null
+        } ?: ClazzAssignment().apply {
+            caClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: throw IllegalArgumentException("clazzUid was not given")
+        }
 
         val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
             it.clazzDao.getClazzWithSchool(clazzAssignment.caClazzUid)
@@ -92,29 +95,18 @@ class ClazzAssignmentEditPresenter(context: Any,
         return clazzAssignment
     }
 
-    override fun onLoadFromJson(bundle: Map<String, String>): ClazzAssignment? {
+    override fun onLoadFromJson(bundle: Map<String, String>): ClazzAssignmentWithTimezone? {
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
-        var editEntity: ClazzAssignment? = null
+        var editEntity: ClazzAssignmentWithTimezone? = null
         if (entityJsonStr != null) {
-            editEntity = safeParse(di, ClazzAssignment.serializer(), entityJsonStr)
-        } else {
-            editEntity = ClazzAssignment()
+            editEntity = safeParse(di, ClazzAssignmentWithTimezone.serializer(), entityJsonStr)
         }
 
-        GlobalScope.launch {
-            val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
-                it.clazzDao.getClazzWithSchool(editEntity.caClazzUid)
-            } ?: ClazzWithSchool()
-
-            val timeZone = clazzWithSchool.effectiveTimeZone()
-            view.timeZone = timeZone
-
-        }
+        view.timeZone = editEntity?.effectiveTimeZone
 
         contentOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
-
 
         return editEntity
     }
@@ -127,7 +119,7 @@ class ClazzAssignmentEditPresenter(context: Any,
     }
 
     override fun handleClickSave(entity: ClazzAssignment) {
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch {
 
             if (entity.caTitle.isNullOrEmpty()) {
                 view.caTitleError = systemImpl.getString(MessageID.field_required_prompt, context)
@@ -157,6 +149,9 @@ class ClazzAssignmentEditPresenter(context: Any,
                     return@launch
                 }
             }
+
+            view.loading = true
+            view.fieldsEnabled = false
 
             if(entity.caLateSubmissionType == 0 ||
                     entity.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_REJECT) {
@@ -191,6 +186,9 @@ class ClazzAssignmentEditPresenter(context: Any,
             repo.clazzAssignmentRollUpDao.deleteCachedInactiveContent()
 
             onFinish(ClazzAssignmentDetailView.VIEW_NAME, entity.caUid, entity)
+
+            view.loading = false
+            view.fieldsEnabled = true
 
         }
     }
