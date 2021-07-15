@@ -39,10 +39,10 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
     private var selectedClazzUid: Long = 0
 
     override fun onCreate(savedState: Map<String, String>?) {
-        super.onCreate(savedState)
         selectedPersonUid = arguments[ARG_PERSON_UID]?.toLong() ?: 0
         selectedClazzAssignmentUid = arguments[ARG_CLAZZ_ASSIGNMENT_UID]?.toLong() ?: 0
         selectedClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0
+        super.onCreate(savedState)
         presenterScope.launch {
             repo.clazzAssignmentRollUpDao.cacheBestStatements(
                     selectedClazzUid, selectedClazzAssignmentUid,

@@ -52,6 +52,9 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
                                     WHERE StatementEntity.statementContentEntryUid = ClazzAssignmentContentJoin.cacjContentUid
                                       AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
                                       AND StatementEntity.contentEntryRoot 
+                                      AND StatementEntity.statementLocalChangeSeqNum >= 
+                                                COALESCE((SELECT MAX(lastCsnChecked) 
+                                                            FROM ClazzAssignmentRollUp),0)
                                       AND StatementEntity.timestamp 
                                             BETWEEN ClazzAssignment.caStartDate
                                             AND ClazzAssignment.caGracePeriodDate
@@ -60,6 +63,12 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
                                                 ELSE StatementEntity.resultScoreScaled END DESC, 
                                             StatementEntity.extensionProgress DESC, 
                                             StatementEntity.resultSuccess DESC LIMIT 1)
+                LEFT JOIN ClazzAssignmentRollUp
+                ON ClazzAssignmentRollUp.cacheContentEntryUid = ClazzAssignmentContentJoin.cacjContentUid 
+                AND ClazzAssignmentRollUp.cachePersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
+                AND ClazzAssignmentRollUp.cacheClazzAssignmentUid = ClazzAssignment.caUid
+                                            
+                                            
 	     WHERE ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
            AND ClazzEnrolment.clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}
            AND ClazzEnrolment.clazzEnrolmentActive
@@ -68,7 +77,9 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
            AND (:clazzUid = 0 OR ClazzAssignment.caClazzUid = :clazzUid)
            AND (:assignmentUid = 0 OR ClazzAssignment.caUid = :assignmentUid)
            AND (:personUid = 0 OR ClazzEnrolment.clazzEnrolmentPersonUid = :personUid)
-           AND lastCsnChecked >= COALESCE((SELECT MAX(lastCsnChecked) FROM ClazzAssignmentRollUp),0)
+           AND (COALESCE(StatementEntity.resultScoreRaw,0) >= COALESCE(ClazzAssignmentRollUp.cacheStudentScore,0)
+                    AND COALESCE(StatementEntity.extensionProgress,0) >= COALESCE(ClazzAssignmentRollUp.cacheProgress,0)
+                    AND COALESCE(StatementEntity.resultSuccess,0) >= COALESCE(ClazzAssignmentRollUp.cacheSuccess,0))
       GROUP BY cacheClazzAssignmentUid, cacheContentEntryUid, cachePersonUid
     """)
     abstract suspend fun cacheBestStatements(clazzUid: Long, assignmentUid: Long, personUid: Long)
