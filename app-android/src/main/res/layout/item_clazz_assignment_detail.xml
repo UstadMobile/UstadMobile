@@ -49,6 +49,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"
             android:contentDescription="@string/school"
+            app:tint="?colorOnIconTint"
             app:visibleIfDateSet="@{clazzAssignment.caDeadlineDate}"
             android:src="@drawable/ic_event_available_black_24dp"
             app:layout_constraintStart_toStartOf="parent"

@@ -39,6 +39,7 @@
             app:imageForeignKey="@{personUid}"
             app:imageForeignKeyAdapter="@{PersonDetailFragment.FOREIGNKEYADAPTER_PERSON}"
             app:imageForeignKeyPlaceholder="@{@drawable/ic_person_black_24dp}"
+            android:tint="?colorOnIconTint"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
