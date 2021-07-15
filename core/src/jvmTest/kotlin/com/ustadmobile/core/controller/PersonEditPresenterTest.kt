@@ -257,6 +257,13 @@ class PersonEditPresenterTest  {
 
         val presenter = PersonEditPresenter(context, args, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
+
+        nullableArgumentCaptor<PersonParentJoin>() {
+            verify(mockView, timeout(5000)).approvalPersonParentJoin = capture()
+            firstValue?.ppjEmail = "parent@somewhere.com"
+        }
+
+
         val personToRegister : PersonWithAccount = mockView.captureLastEntityValue(5000)!!
         personToRegister.apply {
             firstNames = "Jane"
@@ -266,15 +273,9 @@ class PersonEditPresenterTest  {
             confirmedPassword = "secret"
         }
 
-        mockView.stub {
-            on { approvalPersonParentJoin  }.thenReturn(PersonParentJoin().apply {
-                ppjEmail = "parent@somewhere.com"
-            })
-        }
-
         presenter.handleClickSave(personToRegister)
 
-        verifyBlocking(accountManager, timeout(timeoutInMill* 1000)) {
+        verifyBlocking(accountManager, timeout(timeoutInMill)) {
             register(argWhere { it.personUid == personToRegister.personUid },
                 eq(serverUrl), argWhere<AccountRegisterOptions> { it.parentJoin?.ppjEmail == "parent@somewhere.com" })
         }

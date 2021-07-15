@@ -168,7 +168,7 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
         val view = super.onCreateView(inflater, container, savedInstanceState)
         filterByClazzUid = arguments?.getString(ARG_CLAZZUID)?.toLong() ?: 0
         mPresenter = ClazzMemberListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di, viewLifecycleOwner)
+                this, di, viewLifecycleOwner).withViewLifecycle()
 
         mDataRecyclerViewAdapter = ClazzMemberListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.add_a_teacher)
@@ -195,10 +195,6 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
                 mStudentListRecyclerViewAdapter, mPendingStudentsHeaderRecyclerViewAdapter,
                 mPendingStudentListRecyclerViewAdapter)
         mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
-
-        presenterLifecycleObserver = PresenterViewLifecycleObserver(mPresenter).also {
-            viewLifecycleOwner.lifecycle.addObserver(it)
-        }
 
         return view
     }
@@ -238,9 +234,6 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
         menu.findItem(R.id.menu_search).isVisible = true
     }
 
-    private var presenterLifecycleObserver: PresenterViewLifecycleObserver? = null
-
-
     /**
      * OnClick function that will handle when the user clicks to create a new item
      */
@@ -253,10 +246,6 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
         super.onDestroyView()
         mPresenter = null
         dbRepo = null
-        presenterLifecycleObserver?.also {
-            viewLifecycleOwner.lifecycle.removeObserver(it)
-        }
-        presenterLifecycleObserver = null
     }
 
     override val displayTypeRepo: Any?

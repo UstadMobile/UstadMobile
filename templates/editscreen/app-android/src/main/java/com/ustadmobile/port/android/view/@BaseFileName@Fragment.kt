@@ -33,7 +33,7 @@ class @BaseFileName@Fragment: UstadEditFragment<@Entity@>(), @BaseFileName@View,
         }
 
         mPresenter = @BaseFileName@Presenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
 
 
         return rootView

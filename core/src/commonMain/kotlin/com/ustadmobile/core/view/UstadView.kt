@@ -184,6 +184,20 @@ interface UstadView {
 
         const val ARG_TITLE = "title"
 
+        /**
+         * Indicates whether this view is a top level view reached via navigation or a subview (
+         * e.g. a tab). See UstadBaseController.navChild property.
+         */
+        const val ARG_NAV_CHILD = "navChild"
+
+        /**
+         * Used to 'enforce' a minimum age policy for certain screens (e.g. parent - child consent
+         * management). This can be used on AccountList to show only adult accounts (e.g.
+         * date of birth < MAX DATE OF BIRTH), or LoginPresenter where an adult account is required.
+         */
+        const val ARG_MAX_DATE_OF_BIRTH = "maxDob"
+
+
         @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
         const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
 

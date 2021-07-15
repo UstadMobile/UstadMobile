@@ -80,7 +80,7 @@ class JoinWithCodeFragment: UstadBaseFragment(), JoinWithCodeView {
         }
 
         mPresenter = JoinWithCodePresenter(requireContext(), arguments.toStringMap(), this,
-            di)
+            di).withViewLifecycle()
         mBinding?.presenter = mPresenter
         mPresenter?.onCreate(null)
     }

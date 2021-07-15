@@ -100,7 +100,7 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
                               savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = PersonListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di, viewLifecycleOwner)
+                this, di, viewLifecycleOwner).withViewLifecycle()
         
         inviteWithLinkRecyclerViewAdapter = InviteWithLinkRecyclerViewAdapter(this, mPresenter)
         inviteWithLinkRecyclerViewAdapter?.code = arguments?.get(UstadView.ARG_CODE)?.toString()

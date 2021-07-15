@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.ErrorCodeException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.formatDate
+import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -23,8 +24,10 @@ import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonParentJoinWithMinorPerson
+import com.ustadmobile.lib.db.entities.Role
 
 
 class ParentalConsentManagementPresenter(context: Any,
@@ -96,18 +99,15 @@ class ParentalConsentManagementPresenter(context: Any,
         return personParentJoin
     }
 
-    override fun onLoadFromJson(bundle: Map<String, String>): PersonParentJoinWithMinorPerson? {
+    override fun onLoadFromJson(bundle: Map<String, String>): PersonParentJoinWithMinorPerson {
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
-        var editEntity: PersonParentJoinWithMinorPerson? = null
-        if(entityJsonStr != null) {
-            editEntity = safeParse(di, PersonParentJoinWithMinorPerson.serializer(), entityJsonStr)
+        return if(entityJsonStr != null) {
+            safeParse(di, PersonParentJoinWithMinorPerson.serializer(), entityJsonStr)
         }else {
-            editEntity = PersonParentJoinWithMinorPerson()
+            PersonParentJoinWithMinorPerson()
         }
-
-        return editEntity
     }
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
@@ -118,7 +118,7 @@ class ParentalConsentManagementPresenter(context: Any,
     }
 
     override fun handleClickSave(entity: PersonParentJoinWithMinorPerson) {
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch(doorMainDispatcher()) {
             view.relationshipFieldError = null
 
             if(entity.ppjRelationship == 0) {
@@ -127,8 +127,15 @@ class ParentalConsentManagementPresenter(context: Any,
                 return@launch
             }
 
-            if(entity.ppjParentPersonUid == 0L)
-                entity.ppjParentPersonUid = accountManager.activeAccount.personUid
+            if(entity.ppjParentPersonUid == 0L) {
+                val activeSession = accountManager.activeSession
+                    ?: throw IllegalStateException("Could not find person group uid!")
+
+                entity.ppjParentPersonUid = activeSession.person.personUid
+
+                repo.grantScopedPermission(activeSession.person,
+                    Role.ROLE_PARENT_PERMISSIONS_DEFAULT, Person.TABLE_ID, entity.ppjMinorPersonUid)
+            }
 
             entity.ppjApprovalTiemstamp = systemTimeInMillis()
             repo.personParentJoinDao.updateAsync(entity)

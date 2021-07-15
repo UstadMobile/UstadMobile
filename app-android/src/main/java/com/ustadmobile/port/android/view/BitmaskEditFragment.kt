@@ -65,7 +65,7 @@ class BitmaskEditFragment: UstadEditFragment<LongWrapper>(), BitmaskEditView,
         }
 
         mPresenter = BitmaskEditPresenter(requireContext(), arguments.toStringMap(), this,
-                 di, viewLifecycleOwner)
+                 di, viewLifecycleOwner).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         mRecyclerViewAdapter = BitmaskRecyclerViewAdapter()
@@ -90,6 +90,7 @@ class BitmaskEditFragment: UstadEditFragment<LongWrapper>(), BitmaskEditView,
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }
