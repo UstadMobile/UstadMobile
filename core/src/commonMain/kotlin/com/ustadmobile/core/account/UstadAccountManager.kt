@@ -173,7 +173,7 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
 
 
     suspend fun register(person: PersonWithAccount, endpointUrl: String,
-                         accountRegisterOptions: AccountRegisterOptions = AccountRegisterOptions()): UmAccount = withContext(Dispatchers.Default){
+                         accountRegisterOptions: AccountRegisterOptions = AccountRegisterOptions()): PersonWithAccount = withContext(Dispatchers.Default){
         val parentVal = accountRegisterOptions.parentJoin
         val httpStmt = httpClient.post<HttpStatement>() {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
@@ -181,23 +181,22 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
             body = RegisterRequest(person, parentVal, endpointUrl)
         }
 
-        val (account: UmAccount?, status: Int) = httpStmt.execute { response ->
+        val (registeredPerson: Person?, status: Int) = httpStmt.execute { response ->
             if(response.status.value == 200) {
-                Pair(response.receive<UmAccount>(), 200)
+                Pair(response.receive<PersonWithAccount>(), 200)
             }else {
                 Pair(null, response.status.value)
             }
         }
 
         val newPassword = person.newPassword
-        if(status == 200 && account != null && newPassword != null) {
-            account.endpointUrl = endpointUrl
+        if(status == 200 && registeredPerson != null && newPassword != null) {
             if(accountRegisterOptions.makeAccountActive){
-                val session = addSession(person, endpointUrl, newPassword)
+                val session = addSession(registeredPerson, endpointUrl, newPassword)
                 activeSession = session
             }
 
-            account
+            registeredPerson
         }else if(status == 409){
             throw IllegalStateException("Conflict: username already taken")
         }else {

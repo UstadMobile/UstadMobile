@@ -99,18 +99,15 @@ class ParentalConsentManagementPresenter(context: Any,
         return personParentJoin
     }
 
-    override fun onLoadFromJson(bundle: Map<String, String>): PersonParentJoinWithMinorPerson? {
+    override fun onLoadFromJson(bundle: Map<String, String>): PersonParentJoinWithMinorPerson {
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
-        var editEntity: PersonParentJoinWithMinorPerson? = null
-        if(entityJsonStr != null) {
-            editEntity = safeParse(di, PersonParentJoinWithMinorPerson.serializer(), entityJsonStr)
+        return if(entityJsonStr != null) {
+            safeParse(di, PersonParentJoinWithMinorPerson.serializer(), entityJsonStr)
         }else {
-            editEntity = PersonParentJoinWithMinorPerson()
+            PersonParentJoinWithMinorPerson()
         }
-
-        return editEntity
     }
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
@@ -121,7 +118,7 @@ class ParentalConsentManagementPresenter(context: Any,
     }
 
     override fun handleClickSave(entity: PersonParentJoinWithMinorPerson) {
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch(doorMainDispatcher()) {
             view.relationshipFieldError = null
 
             if(entity.ppjRelationship == 0) {
@@ -131,15 +128,12 @@ class ParentalConsentManagementPresenter(context: Any,
             }
 
             if(entity.ppjParentPersonUid == 0L) {
-                val activePersonGroupUid = repo.onRepoWithFallbackToDb(2000) {
-                    it.personDao.findByUid(accountManager.activeSession?.userSession?.usPersonUid ?: 0L)
-                        ?.personGroupUid
-                } ?: throw IllegalStateException("Could not find person group uid!")
+                val activeSession = accountManager.activeSession
+                    ?: throw IllegalStateException("Could not find person group uid!")
 
-                entity.ppjParentPersonUid = accountManager.activeSession?.userSession?.usPersonUid
-                    ?: throw IllegalStateException("No active session!")
+                entity.ppjParentPersonUid = activeSession.person.personUid
 
-                repo.grantScopedPermission(activePersonGroupUid,
+                repo.grantScopedPermission(activeSession.person,
                     Role.ROLE_PARENT_PERMISSIONS_DEFAULT, Person.TABLE_ID, entity.ppjMinorPersonUid)
             }
 

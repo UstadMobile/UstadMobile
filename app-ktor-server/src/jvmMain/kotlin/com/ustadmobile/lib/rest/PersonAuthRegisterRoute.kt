@@ -138,7 +138,7 @@ fun Route.personAuthRegisterRoute() {
 
             repo.insertPersonAuthCredentials2(mPerson.personUid, newPassword, authParams)
 
-            call.respond(HttpStatusCode.OK, mPerson.toUmAccount(""))
+            call.respond(HttpStatusCode.OK, mPerson)
         }
     }
 }
