@@ -19,6 +19,7 @@ import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_SELECT_FOLDER_VISIBLE
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_TITLE
 import com.ustadmobile.lib.db.entities.*
@@ -81,12 +82,12 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                 this, di, viewLifecycleOwner).withViewLifecycle()
 
         mDataRecyclerViewAdapter = ContentEntryListRecyclerAdapter(mPresenter,
-                arguments?.toStringMap()?.determineListMode().toString(), viewLifecycleOwner, di)
+                arguments?.toStringMap()?.determineListMode().toString(),
+                arguments?.get(ARG_SELECT_FOLDER_VISIBLE)?.toString()?.toBoolean(),
+                viewLifecycleOwner, di)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_new_content), onClickSort = this,
                 sortOrderOption = mPresenter?.sortOptions?.get(0))
-
-        val navController = findNavController()
 
         localAvailabilityCallback = ContentEntryLocalAvailabilityPagedListCallback(localAvailabilityManager,
                 null) {availabilityMap ->
@@ -96,13 +97,6 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         }
 
         setHasOptionsMenu(true)
-
-      /*  navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
-            ContentEntry::class.java, SAVEDSTATE_KEY_FOLDER) {
-            val selectedParentChildJoinUids = navController.currentBackStackEntry?.savedStateHandle
-                    ?.get<String>(KEY_SELECTED_ITEMS)?.split(",")?.map { it.trim().toLong() } ?: return@observeResult
-            mPresenter?.handleMoveContentEntries(selectedParentChildJoinUids, it.first().contentEntryUid )
-        }*/
 
         super.onViewCreated(view, savedInstanceState)
     }

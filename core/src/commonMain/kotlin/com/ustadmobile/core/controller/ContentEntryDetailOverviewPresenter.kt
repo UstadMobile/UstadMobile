@@ -1,6 +1,8 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
+import com.ustadmobile.core.contentformats.xapi.endpoints.storeCompletedStatement
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
@@ -18,6 +20,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -60,9 +63,13 @@ class ContentEntryDetailOverviewPresenter(context: Any,
 
     private val availabilityRequestDeferred = CompletableDeferred<AvailabilityMonitorRequest>()
 
+    val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
+
     private var contentEntryUid = 0L
 
     private var clazzUid = 0L
+
+    private var contextRegistration: String? = null
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -100,7 +107,15 @@ class ContentEntryDetailOverviewPresenter(context: Any,
         val result = db.contentEntryRelatedEntryJoinDao.findAllTranslationsWithContentEntryUid(entityUid)
         view.availableTranslationsList = result
 
-        view.contentEntryProgress = db.contentEntryProgressDao.getProgressByContentAndPersonAsync(entityUid, accountManager.activeAccount.personUid)
+
+        view.scoreProgress = db.statementDao.getBestScoreForContentForPerson(entityUid, accountManager.activeAccount.personUid)
+        if(entity.completionCriteria == ContentEntry.COMPLETION_CRITERIA_MARKED_BY_STUDENT){
+            contextRegistration = db.statementDao.findLatestRegistrationStatement(
+                    accountManager.activeAccount.personUid, entityUid)
+            view.markCompleteVisible = contextRegistration != null
+        }else{
+            view.markCompleteVisible = false
+        }
 
         if (db == repo) {
             val containerUid = entity.container?.containerUid ?: 0L
@@ -118,7 +133,8 @@ class ContentEntryDetailOverviewPresenter(context: Any,
 
     override fun handleClickEdit() {
         systemImpl.go(ContentEntryEdit2View.VIEW_NAME,
-                mapOf(ARG_ENTITY_UID to entity?.contentEntryUid.toString()), context)
+                mapOf(ARG_ENTITY_UID to entity?.contentEntryUid.toString(),
+                        ARG_LEAF to true.toString()), context)
     }
 
     fun handleOnClickOpenDownloadButton() {
@@ -207,6 +223,22 @@ class ContentEntryDetailOverviewPresenter(context: Any,
                             ARG_CLAZZUID to clazzUid.toString()),
                     context)
         }
+    }
+
+    fun handleOnClickMarkComplete() {
+        if(accountManager.activeAccount.personUid == 0L)
+            return //no one is really logged in
+
+        GlobalScope.launch {
+            val contentEntry = view.entity ?: return@launch
+            statementEndpoint.storeCompletedStatement(accountManager.activeAccount, contentEntry,
+                    contextRegistration ?: "", null, clazzUid)
+        }
+        view.markCompleteVisible = false
+        val scoreProgress = view.scoreProgress
+        scoreProgress?.contentComplete = true
+        scoreProgress?.progress = 100
+        view.scoreProgress = scoreProgress
     }
 
 }

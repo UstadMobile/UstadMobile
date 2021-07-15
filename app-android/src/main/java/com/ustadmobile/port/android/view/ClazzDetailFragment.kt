@@ -107,7 +107,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
                 ContentEntryList2View.VIEW_NAME to ContentEntryList2Fragment::class.java,
                 ClazzMemberListView.VIEW_NAME to ClazzMemberListFragment::class.java,
                 ClazzLogListAttendanceView.VIEW_NAME to ClazzLogListAttendanceFragment::class.java,
-                ClazzWorkListView.VIEW_NAME to ClazzWorkListFragment::class.java
+                ClazzAssignmentListView.VIEW_NAME to ClazzAssignmentListFragment::class.java
 
         )
 
@@ -116,7 +116,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
                 ContentEntryList2View.VIEW_NAME to R.string.content,
                 ClazzMemberListView.VIEW_NAME to R.string.members,
                 ClazzLogListAttendanceView.VIEW_NAME to R.string.attendance,
-                ClazzWorkListView.VIEW_NAME to R.string.clazz_work
+                ClazzAssignmentListView.VIEW_NAME to R.string.assignments
         )
 
     }
