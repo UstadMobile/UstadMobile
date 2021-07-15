@@ -9,6 +9,7 @@ import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -103,7 +104,8 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenterTest {
         val systemImpl: UstadMobileSystemImpl by di.instance()
         verify(systemImpl, timeout(5000)).go(eq(ClazzAssignmentDetailStudentProgressView.VIEW_NAME),
                 eq(mapOf(ARG_PERSON_UID to assignmentRollUp!!.cachePersonUid.toString(),
-                        ARG_CLAZZ_ASSIGNMENT_UID to assignmentRollUp!!.cacheClazzAssignmentUid.toString())),
+                        ARG_CLAZZ_ASSIGNMENT_UID to assignmentRollUp!!.cacheClazzAssignmentUid.toString(),
+                        ARG_CLAZZUID to 100.toString())),
                 any())
 
     }

@@ -33,13 +33,12 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
         clazzAssignmentUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: -1
         clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: -1
         selectedSortOption = SORT_OPTIONS[0]
+        mLoggedInPersonUid = accountManager.activeAccount.personUid
         updateListOnView()
         presenterScope.launch {
             repo.clazzAssignmentRollUpDao.cacheBestStatements(
                     clazzUid, clazzAssignmentUid,
                     0)
-
-            mLoggedInPersonUid = accountManager.activeAccount.personUid
         }
     }
 
@@ -77,7 +76,8 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
     override fun onClickPersonWithStatementDisplay(personWithAttemptsSummary: PersonWithAttemptsSummary) {
         systemImpl.go(ClazzAssignmentDetailStudentProgressView.VIEW_NAME,
                 mapOf(UstadView.ARG_PERSON_UID to personWithAttemptsSummary.personUid.toString(),
-                UstadView.ARG_CLAZZ_ASSIGNMENT_UID to clazzAssignmentUid.toString()), context)
+                UstadView.ARG_CLAZZ_ASSIGNMENT_UID to clazzAssignmentUid.toString(),
+                UstadView.ARG_CLAZZUID to clazzUid.toString()), context)
     }
 
 
