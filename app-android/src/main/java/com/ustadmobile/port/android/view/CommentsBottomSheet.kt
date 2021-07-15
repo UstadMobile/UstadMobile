@@ -13,7 +13,7 @@ import com.ustadmobile.core.controller.NewCommentItemListener
 
 
 class CommentsBottomSheet(val publicComment: Boolean, val hintText: String,
-                          val personUid: Long, val listener: NewCommentItemListener?) : BottomSheetDialogFragment() {
+                          val personUid: Long, var listener: NewCommentItemListener?) : BottomSheetDialogFragment() {
 
     private var mBinding: ItemCommentNewSendBinding? = null
     private var rootView: View? = null
@@ -41,6 +41,7 @@ class CommentsBottomSheet(val publicComment: Boolean, val hintText: String,
         super.onDestroyView()
         rootView = null
         mBinding = null
+        listener = null
     }
 
 }

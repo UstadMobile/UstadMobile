@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.*
 import android.widget.AdapterView
 import androidx.core.widget.doAfterTextChanged
+import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
@@ -23,6 +24,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusA
 import com.ustadmobile.port.android.util.ext.*
 import com.ustadmobile.port.android.view.binding.isSet
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
+import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
 
 
 class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAssignmentEditView, DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption> {
@@ -83,7 +85,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             rootView = it.root
             it.typeSelectionListener = this
             it.caDeadlineDateTextinput.setEndIconOnClickListener(deadlineDateListener)
-            it.caDeadlineDate.doAfterTextChanged {
+            it.caDeadlineDate.doAfterTextChanged{
                 if(it?.isNullOrEmpty() == true){
                     return@doAfterTextChanged
                 }
@@ -97,6 +99,22 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
                 currentDeadlineDate = it.toString()
             }
         }
+
+        mBinding?.caEditContentTitle?.addTextChangedListener(ClearErrorTextWatcher {
+            mBinding?.caTitleError = null
+        })
+
+        mBinding?.caStartDate?.addTextChangedListener(ClearErrorTextWatcher {
+            mBinding?.caStartDateError = null
+        })
+
+        mBinding?.caDeadlineDate?.addTextChangedListener(ClearErrorTextWatcher {
+            mBinding?.caDeadlineError = null
+        })
+
+        mBinding?.caGraceDate?.addTextChangedListener(ClearErrorTextWatcher {
+            mBinding?.caGracePeriodError = null
+        })
 
         contentRecyclerView = rootView.findViewById(R.id.ca_recyclerview_content)
 
@@ -158,6 +176,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

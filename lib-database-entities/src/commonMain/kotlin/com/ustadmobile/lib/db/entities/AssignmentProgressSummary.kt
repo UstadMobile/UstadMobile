@@ -3,7 +3,7 @@ package com.ustadmobile.lib.db.entities
 import kotlinx.serialization.Serializable
 
 @Serializable
-class StudentAssignmentProgress {
+class AssignmentProgressSummary {
 
     var notStartedStudents : Int = 0
 

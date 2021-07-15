@@ -80,7 +80,7 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
           ON ClazzAssignmentContentJoin.cacjContentUid = ResultSource.statementContentEntryUid   
             
         WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = :clazzAssignmentUid
-          AND cacjActive    
+          AND ClazzAssignmentContentJoin.cacjActive    
           AND (ContentEntry.publik OR :personUid != 0)  
      GROUP BY ClazzAssignmentContentJoin.cacjContentUid, ResultSource.statementContentEntryUid
      ORDER BY ContentEntry.title, ContentEntry.contentEntryUid   
@@ -154,7 +154,7 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
                                ORDER BY cntLastModified DESC LIMIT 1)
                                
                     WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = :clazzAssignmentUid
-                      AND cacjActive
+                      AND ClazzAssignmentContentJoin.cacjActive
                       AND NOT ContentEntry.ceInactive
                       AND (ContentEntry.publik OR :personUid != 0)
                       ORDER BY ContentEntry.title ASC , 
