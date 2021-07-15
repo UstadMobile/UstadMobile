@@ -2,11 +2,16 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
-@Entity
+@Entity(indices = [
+    // index used to cache the best assignments from the statements
+    Index(value = ["statementContentEntryUid","statementPersonUid","contentEntryRoot",
+                    "timestamp","statementLocalChangeSeqNum"])
+])
 @SyncableEntity(tableId = StatementEntity.TABLE_ID,
     notifyOnUpdate = ["""
         SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
