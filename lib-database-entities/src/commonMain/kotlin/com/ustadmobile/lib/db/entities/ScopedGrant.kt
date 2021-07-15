@@ -69,5 +69,7 @@ class ScopedGrant {
 
         const val FLAG_STUDENT_GROUP = 16
 
+        const val FLAG_PARENT_GRANT = 32
+
     }
 }

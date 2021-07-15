@@ -1,5 +1,7 @@
 package com.ustadmobile.core.impl
 
+import com.soywiz.klock.DateTime
+import com.soywiz.klock.years
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
@@ -99,17 +101,25 @@ abstract class UstadMobileSystemCommon {
 
             val intentMessage = getString(MessageID.opening_link, context)
                 .replace("%1\$s", deepLink)
+
+            val maxDateOfBirth = if(viewUri.startsWith(ParentalConsentManagementView.VIEW_NAME)) {
+                (DateTime.now() - UstadMobileConstants.ADULT_AGE_THRESHOLD.years).unixMillisLong
+            }else {
+                0L
+            }
+
             //if there are any accounts that match endpoint url the user wants to work with,
             // then go to the accountmanager list in picker mode, otherwise go directly to the login
             // screen for that particular server.
             GlobalScope.launch(doorMainDispatcher()) {
-                if(accountManager.activeSessionCount { it == endpointUrl } > 0) {
+                if(accountManager.activeSessionCount(maxDateOfBirth) { it == endpointUrl } > 0) {
                     val args = mapOf(ARG_NEXT to viewUri,
                         AccountListView.ARG_FILTER_BY_ENDPOINT to endpointUrl,
                         AccountListView.ARG_ACTIVE_ACCOUNT_MODE to AccountListView.ACTIVE_ACCOUNT_MODE_INLIST,
                         UstadView.ARG_TITLE to getString(MessageID.select_account, context),
                         UstadView.ARG_INTENT_MESSAGE to intentMessage,
-                        UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
+                        UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString(),
+                        UstadView.ARG_MAX_DATE_OF_BIRTH to maxDateOfBirth.toString())
                     go(AccountListView.VIEW_NAME, args, context)
                 }else {
                     val args = mapOf(ARG_NEXT to viewUri,

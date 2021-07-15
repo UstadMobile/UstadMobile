@@ -69,7 +69,7 @@ class RedirectPresenterTest {
     fun givenAppLaunched_whenUserHasNotLoggedInBefore_thenShouldNavigateToGetStarted() {
         whenever(impl.getAppConfigBoolean(eq(AppConfig.KEY_ALLOW_SERVER_SELECTION), any())).thenReturn(true)
         mockedAccountManager.stub {
-            onBlocking { activeSessionCount(any()) }.thenReturn(0)
+            onBlocking { activeSessionCount(any(), any()) }.thenReturn(0)
         }
 
         mPresenter = RedirectPresenter(context, mapOf(),
@@ -81,7 +81,7 @@ class RedirectPresenterTest {
     @Test
     fun givenAppLaunched_whenUserHasLoggedInBefore_thenShouldNavigateFeedList() {
         mockedAccountManager.stub {
-            onBlocking { activeSessionCount(any()) }.thenReturn(1)
+            onBlocking { activeSessionCount(any(), any()) }.thenReturn(1)
             on { activeSession }.thenReturn(userSession)
         }
 
@@ -95,7 +95,7 @@ class RedirectPresenterTest {
     fun givenNextArgProvided_whenOnCreateCalled_thenShouldGoToNextDest() {
         val viewLink = "${ContentEntryDetailView.VIEW_NAME}?entityUid=42"
         mockedAccountManager.stub {
-            onBlocking { activeSessionCount(any()) }.thenReturn(1)
+            onBlocking { activeSessionCount(any(), any()) }.thenReturn(1)
 
         }
 

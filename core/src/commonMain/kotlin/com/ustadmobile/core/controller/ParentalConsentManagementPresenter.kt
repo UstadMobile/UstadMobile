@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.ErrorCodeException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.formatDate
+import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -23,8 +24,10 @@ import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonParentJoinWithMinorPerson
+import com.ustadmobile.lib.db.entities.Role
 
 
 class ParentalConsentManagementPresenter(context: Any,
@@ -127,8 +130,18 @@ class ParentalConsentManagementPresenter(context: Any,
                 return@launch
             }
 
-            if(entity.ppjParentPersonUid == 0L)
-                entity.ppjParentPersonUid = accountManager.activeAccount.personUid
+            if(entity.ppjParentPersonUid == 0L) {
+                val activePersonGroupUid = repo.onRepoWithFallbackToDb(2000) {
+                    it.personDao.findByUid(accountManager.activeSession?.userSession?.usPersonUid ?: 0L)
+                        ?.personGroupUid
+                } ?: throw IllegalStateException("Could not find person group uid!")
+
+                entity.ppjParentPersonUid = accountManager.activeSession?.userSession?.usPersonUid
+                    ?: throw IllegalStateException("No active session!")
+
+                repo.grantScopedPermission(activePersonGroupUid,
+                    Role.ROLE_PARENT_PERMISSIONS_DEFAULT, Person.TABLE_ID, entity.ppjMinorPersonUid)
+            }
 
             entity.ppjApprovalTiemstamp = systemTimeInMillis()
             repo.personParentJoinDao.updateAsync(entity)
