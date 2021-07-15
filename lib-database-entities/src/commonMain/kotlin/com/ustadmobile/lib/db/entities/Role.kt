@@ -307,6 +307,18 @@ open class Role() {
                         PERMISSION_SCHOOL_ADD_STAFF or
                         PERMISSION_SCHOOL_ADD_STUDENT
 
+
+        /**
+         * Permissions that are automatically granted to a parent via a ScopedGrant
+         */
+        const val ROLE_PARENT_PERMISSIONS_DEFAULT: Long =
+            PERMISSION_PERSON_SELECT or
+            PERMISSION_PERSONCONTACT_SELECT or
+            PERMISSION_PERSONSOCIOECONOMIC_SELECT or
+            PERMISSION_PERSON_LEARNINGRECORD_SELECT or
+            PERMISSION_PERSON_PICTURE_SELECT or
+            PERMISSION_RESET_PASSWORD
+
         const val ALL_PERMISSIONS = Long.MAX_VALUE
 
 

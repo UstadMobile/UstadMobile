@@ -70,7 +70,7 @@ class Login2PresenterTest {
         }
 
         accountManager = mock{
-            onBlocking { login(eq(VALID_USER), eq(VALID_PASS), any()) }.thenAnswer {
+            onBlocking { login(eq(VALID_USER), eq(VALID_PASS), any(), any()) }.thenAnswer {
                 val url = it.arguments[2] as String
                 UmAccount(personUid = 42,
                         username = VALID_USER, firstName = "user", lastName = "last", endpointUrl = url)
@@ -261,7 +261,7 @@ class Login2PresenterTest {
     @Test
     fun givenInvalidUsernameAndPassword_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
         accountManager = mock{
-            onBlocking{login(any(), any(), any())}.then{
+            onBlocking{login(any(), any(), any(), any())}.then{
                 throw UnauthorizedException("Access denied")
             }
         }
@@ -285,7 +285,7 @@ class Login2PresenterTest {
     @Test
     fun givenServerOffline_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
         accountManager = mock{
-            onBlocking{login(any(), any(), any())}.then{
+            onBlocking{login(any(), any(), any(), any())}.then{
                 throw throw IllegalStateException("Server error")
             }
         }
@@ -322,7 +322,7 @@ class Login2PresenterTest {
         presenter.handleLogin(" $VALID_USER ", "$VALID_PASS ")
 
         verifyBlocking(accountManager) {
-            login(eq(VALID_USER), eq(VALID_PASS), eq(httpUrl))
+            login(eq(VALID_USER), eq(VALID_PASS), eq(httpUrl), any())
         }
     }
 

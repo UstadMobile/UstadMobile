@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.AdultAccountRequiredException
 import com.ustadmobile.core.account.ConsentNotGrantedException
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.UnauthorizedException
@@ -114,16 +115,16 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         if(username != null && username.isNotEmpty() && password != null && password.isNotEmpty()){
             presenterScope.launch {
                 try {
-                    accountManager.login(username.trim(), password.trim(), serverUrl)
-                    view.inProgress = false
-                    view.loading = false
-
+                    accountManager.login(username.trim(), password.trim(), serverUrl,
+                        arguments[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong() ?: 0L)
                     goToNextDestAfterLoginOrGuestSelected()
+                }catch(e: AdultAccountRequiredException) {
+                    view.errorMessage = impl.getString(MessageID.adult_account_required, context)
                 } catch(e: UnauthorizedException) {
                     view.errorMessage = impl.getString(MessageID.wrong_user_pass_combo,
                         context)
                 } catch(e: ConsentNotGrantedException) {
-                    view.errorMessage = impl.getString(MessageID.we_sent_a_message_to_your_parent,
+                    view.errorMessage = impl.getString(MessageID.your_account_needs_approved,
                         context)
                 }catch(e: Exception) {
                     view.errorMessage = impl.getString(MessageID.login_network_error, context)

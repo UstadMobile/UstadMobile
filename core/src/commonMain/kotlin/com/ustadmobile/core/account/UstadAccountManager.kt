@@ -129,10 +129,10 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
         }
     }
 
-    suspend fun activeSessionCount(endpointFilter: (String) -> Boolean = {true}): Int {
+    suspend fun activeSessionCount(maxDateOfBirth: Long = 0, endpointFilter: (String) -> Boolean = {true}): Int {
         return endpointsWithActiveSessions.filter{ endpointFilter(it.url) }.fold(0) { total, endpoint ->
             val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
-            total + db.userSessionDao.countAllLocalSessionsAsync()
+            total + db.userSessionDao.countAllLocalSessionsAsync(maxDateOfBirth)
         }
     }
 
@@ -302,7 +302,8 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
 
 
 
-    suspend fun login(username: String, password: String, endpointUrl: String): UmAccount = withContext(Dispatchers.Default){
+    suspend fun login(username: String, password: String, endpointUrl: String,
+        maxDateOfBirth: Long = 0L): UmAccount = withContext(Dispatchers.Default){
         val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_REPO)
         val nodeId = (repo as? DoorDatabaseSyncRepository)?.clientId
                 ?: throw IllegalStateException("Could not open repo for endpoint $endpointUrl")
@@ -311,6 +312,7 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
             url("${endpointUrl.removeSuffix("/")}/auth/login")
             parameter("username", username)
             parameter("password", password)
+            parameter("maxDateOfBirth", maxDateOfBirth)
             header("X-nid", nodeId)
             expectSuccess = false
         }
@@ -320,6 +322,8 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
         }else if(loginResponse.status == HttpStatusCode.FailedDependency) {
             //Used to indicate where parental consent is required, but not granted
             throw ConsentNotGrantedException("Parental consent required but not granted")
+        }else if(loginResponse.status == HttpStatusCode.Conflict) {
+            throw AdultAccountRequiredException("Adult account required, credentials for child account")
         }else if(loginResponse.status.value != 200){
             throw IllegalStateException("Server error - response ${loginResponse.status.value}")
         }
