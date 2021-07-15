@@ -148,7 +148,7 @@ class RegisterEndToEndTest: TestCase() {
 
                 usernameTextInput {
                     edit {
-                        typeText("janedoe")
+                        replaceText("janedoe")
                     }
                 }
 
