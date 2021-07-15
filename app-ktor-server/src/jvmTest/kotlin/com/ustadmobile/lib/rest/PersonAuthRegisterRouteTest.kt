@@ -173,7 +173,7 @@ class PersonAuthRegisterRouteTest {
 
         }.apply {
             val response = response.content!!
-            val createdAccount : UmAccount = Json.decodeFromString(UmAccount.serializer(), response)
+            val createdAccount : Person = Json.decodeFromString(PersonWithAccount.serializer(), response)
             val di: DI by closestDI()
 
             val pbkdf2Params: Pbkdf2Params = di.direct.instance()
