@@ -8,14 +8,10 @@ import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewLis
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
 
 class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, arguments: Map<String, String>,
@@ -25,8 +21,8 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
         PersonWithAttemptsSummary>(context, arguments, view, di, lifecycleOwner), AttemptListListener,
         OnSortOptionSelected, OnSearchSubmitted{
 
-    private var filterByClazzAssignmentUid: Long = -1
-    private var clazzAssignment: ClazzAssignment? = null
+    private var clazzUid: Long = -1
+    private var clazzAssignmentUid: Long = -1
     var searchText: String? = null
 
     override val sortOptions: List<SortOrderOption>
@@ -34,15 +30,13 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        filterByClazzAssignmentUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: -1
+        clazzAssignmentUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: -1
+        clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: -1
         selectedSortOption = SORT_OPTIONS[0]
         updateListOnView()
-        GlobalScope.launch(doorMainDispatcher()) {
-            clazzAssignment = withTimeoutOrNull(2000) {
-                db.clazzAssignmentDao.findByUidAsync(filterByClazzAssignmentUid)
-            }
+        presenterScope.launch {
             repo.clazzAssignmentRollUpDao.cacheBestStatements(
-                    clazzAssignment?.caClazzUid ?: 0, clazzAssignment?.caUid ?: 0,
+                    clazzUid, clazzAssignmentUid,
                     0)
 
             mLoggedInPersonUid = accountManager.activeAccount.personUid
@@ -55,12 +49,12 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
 
     private fun updateListOnView() {
         view.progressSummary = repo.clazzAssignmentDao.getStudentsProgressOnAssignment(
-                clazzAssignment?.caClazzUid?: 0,
-                mLoggedInPersonUid, clazzAssignment?.caUid ?: filterByClazzAssignmentUid,
+                clazzUid,
+                mLoggedInPersonUid, clazzAssignmentUid,
                 Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)
 
         view.list = repo.clazzAssignmentDao.getAttemptSummaryForStudentsInAssignment(
-                filterByClazzAssignmentUid, clazzAssignment?.caClazzUid ?: 0,
+                clazzAssignmentUid, clazzUid,
                 mLoggedInPersonUid, searchText.toQueryLikeParam(),
                 selectedSortOption?.flag ?: StatementDao.SORT_FIRST_NAME_ASC)
 
@@ -83,7 +77,7 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
     override fun onClickPersonWithStatementDisplay(personWithAttemptsSummary: PersonWithAttemptsSummary) {
         systemImpl.go(ClazzAssignmentDetailStudentProgressView.VIEW_NAME,
                 mapOf(UstadView.ARG_PERSON_UID to personWithAttemptsSummary.personUid.toString(),
-                UstadView.ARG_CLAZZ_ASSIGNMENT_UID to filterByClazzAssignmentUid.toString()), context)
+                UstadView.ARG_CLAZZ_ASSIGNMENT_UID to clazzAssignmentUid.toString()), context)
     }
 
 

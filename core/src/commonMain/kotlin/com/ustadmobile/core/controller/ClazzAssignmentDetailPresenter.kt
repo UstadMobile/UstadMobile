@@ -1,10 +1,12 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.Role
@@ -16,7 +18,6 @@ class ClazzAssignmentDetailPresenter(context: Any,
                                   arguments: Map<String, String>, view: ClazzAssignmentDetailView, di: DI,
                                   lifecycleOwner: DoorLifecycleOwner)
     : UstadDetailPresenter<ClazzAssignmentDetailView, ClazzAssignment>(context, arguments, view, di, lifecycleOwner) {
-
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
         return false
@@ -42,7 +43,7 @@ class ClazzAssignmentDetailPresenter(context: Any,
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzAssignment? {
-        val entityUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
+        val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         val entry = withContext(Dispatchers.Default) {
             db.onRepoWithFallbackToDb(2000) { it.clazzAssignmentDao.findByUidAsync(entityUid) }
         } ?: ClazzAssignment().apply {
@@ -56,17 +57,23 @@ class ClazzAssignmentDetailPresenter(context: Any,
 
 
     private fun setupTabs(assignment: ClazzAssignment) {
-        val entityUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
-        GlobalScope.launch(doorMainDispatcher()) {
+        val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+        presenterScope.launch {
             val loggedInPersonUid = accountManager.activeAccount.personUid
             val hasStudentProgressPermission = db.clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
                     assignment.caClazzUid, Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)
+
+            val commonArgs = mapOf(UstadView.ARG_NAV_CHILD to true.toString(),
+                    ARG_ENTITY_UID to entityUid.toString(),
+                    ARG_CLAZZUID to assignment.caClazzUid.toString())
+
+            val coreTabs = mutableListOf(
+                    ClazzAssignmentDetailOverviewView.VIEW_NAME.appendQueryArgs(commonArgs))
             if(hasStudentProgressPermission){
-                view.tabs = listOf("${ClazzAssignmentDetailOverviewView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid&${UstadView.ARG_CLAZZUID}=${assignment.caClazzUid}",
-                        "${ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid")
-            }else{
-                view.tabs = listOf("${ClazzAssignmentDetailOverviewView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid")
+                coreTabs += ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME.appendQueryArgs(commonArgs)
             }
+
+            view.tabs = coreTabs
         }
     }
 
