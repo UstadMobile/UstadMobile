@@ -9,6 +9,7 @@ import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
@@ -77,6 +78,7 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenterTest {
 
         val presenterArgs = mutableMapOf<String, String>()
         presenterArgs[ARG_ENTITY_UID] = assignmentRollUp?.cacheClazzAssignmentUid.toString()
+        presenterArgs[ARG_CLAZZUID] = 100.toString()
         val presenter = ClazzAssignmentDetailStudentProgressOverviewListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)

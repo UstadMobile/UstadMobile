@@ -21,7 +21,8 @@ private fun Person.asClazzMember(clazzUid: Long, clazzMemberRole: Int, joinTime:
 fun UmAppDatabase.insertTestClazzAssignment(admin: Boolean = false): ClazzAssignmentRollUp{
 
     val testClazz = Clazz().apply {
-        clazzUid = clazzDao.insert(this)
+        clazzUid = 100
+        clazzDao.insert(this)
     }
 
     val student = Person().apply{

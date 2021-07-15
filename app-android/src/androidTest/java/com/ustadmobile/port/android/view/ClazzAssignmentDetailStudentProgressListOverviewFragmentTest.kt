@@ -118,7 +118,9 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragmentTest : TestCase() 
         }
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to clazzAssignment.caUid.toString())) {
+                fragmentArgs = bundleOf(
+                        UstadView.ARG_ENTITY_UID to clazzAssignment.caUid.toString(),
+                        UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString())) {
             ClazzAssignmentDetailStudentProgressListOverviewFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
