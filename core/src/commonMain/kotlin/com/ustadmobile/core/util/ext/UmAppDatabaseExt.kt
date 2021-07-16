@@ -480,40 +480,6 @@ suspend fun UmAppDatabase.enrollPersonToSchool(schoolUid: Long,
     }
 }
 
-
-suspend fun UmAppDatabase.getQuestionListForView(clazzWorkWithSubmission: ClazzWorkWithSubmission, responsePersonUid : Long)
-        : List<ClazzWorkQuestionAndOptionWithResponse>{
-
-    val questionsAndOptionsWithResponses :List<ClazzWorkQuestionAndOptionWithResponseRow> = withTimeoutOrNull(2000){
-        clazzWorkQuestionDao.findAllQuestionsAndOptionsWithResponse(clazzWorkWithSubmission.clazzWorkUid,
-                responsePersonUid)
-    } ?: listOf()
-
-    val questionsAndOptionsWithResponseList: List<ClazzWorkQuestionAndOptionWithResponse> =
-            questionsAndOptionsWithResponses.groupBy { it.clazzWorkQuestion }.entries
-                    .map {
-                        val questionUid = it.key?.clazzWorkQuestionUid ?: 0L
-
-                        ClazzWorkQuestionAndOptionWithResponse(
-                                clazzWorkWithSubmission ,
-                                it.key ?: ClazzWorkQuestion(),
-                                it.value.map {
-                                    it.clazzWorkQuestionOption ?: ClazzWorkQuestionOption()
-                                },
-                                it.value.map {
-                                    it.clazzWorkQuestionOptionResponse
-                                }.first()?: ClazzWorkQuestionResponse().apply {
-                                    clazzWorkQuestionResponseQuestionUid = questionUid?:0L
-                                    clazzWorkQuestionResponsePersonUid = responsePersonUid
-                                    clazzWorkQuestionResponseClazzWorkUid = clazzWorkWithSubmission.clazzWorkUid
-                                            ?: 0L
-                                })
-                    }
-
-
-    return questionsAndOptionsWithResponseList
-}
-
 /**
  * Gets the maximum number of items that can be in a query parameter of type list. This is 100 on
  * SQLite and unlimited (-1) on Postgres
@@ -593,7 +559,8 @@ suspend fun UmAppDatabase.grantScopedPermission(toPerson: Person, permissions: L
 }
 
 /**
- * Insert authentication credentials for the given person uid with the given password. The
+ * Insert authentication credentials for the given person uid with the given password. This is fine
+ * to use in tests etc, but for performance it is better to use AuthManager.setAuth
  */
 suspend fun UmAppDatabase.insertPersonAuthCredentials2(personUid: Long,
                                             password: String,
@@ -607,8 +574,6 @@ suspend fun UmAppDatabase.insertPersonAuthCredentials2(personUid: Long,
     personAuth2Dao.insertAsync(PersonAuth2().apply {
         pauthUid = personUid
         pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
-        pauthAuth = password.encryptWithPbkdf2(authSalt, pbkdf2Params)
-            .encryptWithPbkdf2(authSalt, pbkdf2Params)
+        pauthAuth = password.doublePbkdf2Hash(authSalt, pbkdf2Params).encodeBase64()
     })
 }
-

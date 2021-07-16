@@ -16,7 +16,8 @@ class ContentEntryDetailAttemptsListPresenter(context: Any, arguments: Map<Strin
                                               view: ContentEntryDetailAttemptsListView,
                                               di: DI, lifecycleOwner: DoorLifecycleOwner)
     : UstadListPresenter<ContentEntryDetailAttemptsListView, PersonWithAttemptsSummary>(
-        context, arguments, view, di, lifecycleOwner), OnSortOptionSelected, OnSearchSubmitted {
+        context, arguments, view, di, lifecycleOwner), OnSortOptionSelected, OnSearchSubmitted,
+        AttemptListListener {
 
     private var contentEntryUid: Long = 0L
 
@@ -62,7 +63,7 @@ class ContentEntryDetailAttemptsListPresenter(context: Any, arguments: Map<Strin
 
     }
 
-    fun onClickPersonWithStatementDisplay(personWithAttemptsSummary: PersonWithAttemptsSummary) {
+    override fun onClickPersonWithStatementDisplay(personWithAttemptsSummary: PersonWithAttemptsSummary) {
             systemImpl.go(SessionListView.VIEW_NAME,
                     mapOf(UstadView.ARG_CONTENT_ENTRY_UID to contentEntryUid.toString(),
                             UstadView.ARG_PERSON_UID to

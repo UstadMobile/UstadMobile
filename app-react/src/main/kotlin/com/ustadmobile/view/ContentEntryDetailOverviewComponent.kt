@@ -9,8 +9,8 @@ import com.ustadmobile.core.controller.ContentEntryDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
-import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
+import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.util.StyleManager.alignTextToStart
@@ -66,13 +66,9 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
             //handle download job
             field = value
         }
-
-    override var contentEntryProgress: ContentEntryProgress? = null
-        get() = field
-        set(value) {
-            //handle progress
-            field = value
-        }
+    override var scoreProgress: ContentEntryStatementScoreProgress?
+        get() = TODO("Not yet implemented")
+        set(value) {}
 
     override var locallyAvailable: Boolean = false
         get() = field
@@ -80,6 +76,9 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
             //handle locally available on web
             field = value
         }
+    override var markCompleteVisible: Boolean
+        get() = TODO("Not yet implemented")
+        set(value) {}
 
     override var entity: ContentEntryWithMostRecentContainer? = null
         get() = field

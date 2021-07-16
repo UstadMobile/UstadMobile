@@ -28,17 +28,25 @@ abstract class UserSessionDao {
     @Query(FIND_LOCAL_SESSIONS_SQL)
     abstract suspend fun findAllLocalSessionsAsync(): List<UserSessionAndPerson>
 
+    /**
+     * Count sessions on this device. If maxDateOfBirth is non-zero, then this can be used to
+     * provide a cut-off (e.g. to find only sessions for adults where their date of birth must be
+     * before a cut-off)
+     */
     @Query("""
         SELECT COUNT(*)
           FROM UserSession
+               JOIN Person 
+                    ON UserSession.usPersonUid = Person.personUid
          WHERE UserSession.usClientNodeId = (
                    SELECT COALESCE(
                           (SELECT nodeClientId 
                             FROM SyncNode
                            LIMIT 1), 0))
-           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}                
+           AND (:maxDateOfBirth = 0 OR Person.dateOfBirth < :maxDateOfBirth)                 
     """)
-    abstract suspend fun countAllLocalSessionsAsync(): Int
+    abstract suspend fun countAllLocalSessionsAsync(maxDateOfBirth: Long): Int
 
     @Query("""
         UPDATE UserSession
@@ -53,6 +61,31 @@ abstract class UserSessionDao {
                
     """)
     abstract suspend fun endSession(sessionUid: Long, newStatus: Int, reason: Int)
+
+    @Query("""
+        SELECT UserSession.*
+          FROM UserSession
+         WHERE UserSession.usUid = :sessionUid
+         LIMIT 1
+    """)
+    abstract fun findByUidLive(sessionUid: Long): DoorLiveData<UserSession?>
+
+
+    @Query("""
+        UPDATE UserSession
+           SET usAuth = null,
+               usStatus = :newStatus,
+               usReason = :reason,
+               usLcb = (SELECT COALESCE(
+                               (SELECT nodeClientId
+                                  FROM SyncNode
+                                 LIMIT 1), 0))
+         WHERE usPersonUid = :personUid
+           AND usClientNodeId != :exemptNodeId
+           AND usStatus != :newStatus                     
+    """)
+    abstract suspend fun endOtherSessions(personUid: Long, exemptNodeId: Long, newStatus: Int,
+                                          reason: Int)
 
     companion object {
         const val FIND_LOCAL_SESSIONS_SQL = """

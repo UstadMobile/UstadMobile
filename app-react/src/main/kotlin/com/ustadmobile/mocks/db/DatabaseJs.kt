@@ -98,8 +98,7 @@ class DatabaseJs: UmAppDatabase() , DoorDatabaseSyncRepository{
         get() = TODO("Not yet implemented")
     override val groupLearningSessionDao: GroupLearningSessionDao
         get() = TODO("Not yet implemented")
-    override val contentEntryProgressDao: ContentEntryProgressDao
-        get() = ContentEntryProgressDaoJs()
+
     override val syncresultDao: SyncResultDao
         get() = TODO("Not yet implemented")
     override val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
@@ -128,19 +127,14 @@ class DatabaseJs: UmAppDatabase() , DoorDatabaseSyncRepository{
         get() = TODO("Not yet implemented")
     override val schoolMemberDao: SchoolMemberDao
         get() = TODO("Not yet implemented")
-    override val clazzWorkDao: ClazzWorkDao
+    override val clazzAssignmentDao: ClazzAssignmentDao
         get() = TODO("Not yet implemented")
-    override val clazzWorkSubmissionDao: ClazzWorkSubmissionDao
+    override val clazzAssignmentContentJoinDao: ClazzAssignmentContentJoinDao
         get() = TODO("Not yet implemented")
-    override val clazzWorkContentJoinDao: ClazzWorkContentJoinDao
+    override val clazzAssignmentRollUpDao: ClazzAssignmentRollUpDao
         get() = TODO("Not yet implemented")
-    override val clazzWorkQuestionDao: ClazzWorkQuestionDao
-        get() = TODO("Not yet implemented")
-    override val clazzWorkQuestionOptionDao: ClazzWorkQuestionOptionDao
-        get() = TODO("Not yet implemented")
+
     override val commentsDao: CommentsDao
-        get() = TODO("Not yet implemented")
-    override val clazzWorkQuestionResponseDao: ClazzWorkQuestionResponseDao
         get() = TODO("Not yet implemented")
     override val syncNodeDao: SyncNodeDao
         get() = TODO("Not yet implemented")

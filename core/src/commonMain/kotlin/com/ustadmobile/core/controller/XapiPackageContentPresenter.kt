@@ -1,6 +1,8 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
+import com.ustadmobile.core.contentformats.xapi.endpoints.storeCompletedStatement
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.tincan.UmAccountActor
@@ -15,6 +17,7 @@ import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.util.randomUuid
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.ktor.client.*
@@ -55,17 +58,29 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
 
     private lateinit var mountedEndpoint: String
 
+    private lateinit var contextRegistration: String
+
+    private var contentEntryUid: Long = 0L
+
+    private var clazzUid: Long = 0L
+
     val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+
+    private val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
+
+    val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         val containerUid = arguments[UstadView.ARG_CONTAINER_UID]?.toLongOrNull() ?: 0L
-        val contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLongOrNull() ?: 0L
+        contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLongOrNull() ?: 0L
         val learnerGroupUid = arguments[UstadView.ARG_LEARNER_GROUP_UID]?.toLongOrNull() ?: 0L
-        val clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLongOrNull() ?: 0L
+        clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLongOrNull() ?: 0L
         val activeEndpoint = accountManager.activeAccount.endpointUrl.also {
             mountedEndpoint = it
         }
+
+        contextRegistration = randomUuid().toString()
 
         GlobalScope.launch {
             mountedPath = mounter.mountContainer(activeEndpoint, containerUid)
@@ -91,7 +106,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
                     "endpoint" to UMFileUtil.resolveLink(mountedPath,
                             "/${UMURLEncoder.encodeUTF8(activeEndpoint)}/xapi/$contentEntryUid/$clazzUid/"),
                     "auth" to "OjFjMGY4NTYxNzUwOGI4YWY0NjFkNzU5MWUxMzE1ZGQ1",
-                    "registration" to randomUuid().toString(),
+                    "registration" to contextRegistration,
                     "activity_id" to (tinCanXml?.launchActivity?.id ?: "xapi_id"))
             view.loading = false
             if(launchHref != null) {
@@ -101,6 +116,32 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
                     view.contentTitle = tinCanXml?.launchActivity?.name ?: ""
                     view.url = launchUrl
                 })
+            }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if(accountManager.activeAccount.personUid == 0L)
+            return //no one is really logged in
+
+        GlobalScope.launch {
+            val contentEntry = db.contentEntryDao.findByUid(contentEntryUid) ?: return@launch
+            if(contentEntry.completionCriteria != ContentEntry.COMPLETION_CRITERIA_MIN_SCORE) return@launch
+            val completedScore = db.statementDao.findCompletedScoreForSession(contextRegistration)
+            var scoreTotal = completedScore?.resultScore ?: 0
+            val scoreForSession = if((completedScore?.resultScaled ?: 0f) == 0f) {
+                // no completed statement found, calculate the score from the session and set the new scoreTotal
+               val score = db.statementDao.calculateScoreForSession(contextRegistration) ?: return@launch
+                scoreTotal = score.resultScore
+                score.resultScaled = (score.resultScore.toFloat() / score.resultMax)
+                score
+            }else{
+                completedScore
+            }
+            if(scoreTotal >= contentEntry.minScore){
+                statementEndpoint.storeCompletedStatement(accountManager.activeAccount,
+                        contentEntry, contextRegistration, scoreForSession, clazzUid)
             }
         }
     }

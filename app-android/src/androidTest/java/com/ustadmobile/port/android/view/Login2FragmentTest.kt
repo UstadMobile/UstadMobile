@@ -88,7 +88,8 @@ class Login2FragmentTest : TestCase(){
         launchFragmentInContainer(themeResId = R.style.UmTheme_App,
             fragmentArgs = args.toBundle()) {
             Login2Fragment().also {
-                it.installNavController(systemImplNavRule.navController)
+                it.installNavController(systemImplNavRule.navController,
+                initialDestId = R.id.login_dest)
             }
         }
 

@@ -9,6 +9,8 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.years
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.toQueryString
@@ -34,13 +36,18 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
+@AdbScreenRecord("Register EndtoEnd screen Test")
 class RegisterEndToEndTest: TestCase() {
 
+    @JvmField
+    @Rule
+    val screenRecordRule = AdbScreenRecordRule()
 
     private lateinit var mockWebServer: MockWebServer
 
@@ -53,8 +60,6 @@ class RegisterEndToEndTest: TestCase() {
 
     @Test
     fun givenUserNotLoggedIn_whenUserRegistersAsMinor_shouldCompleteAndReturn() {
-        lateinit var activityScenario: ActivityScenario<MainActivity>
-
         init {
             val di = getApplicationDi()
             val repo: UmAppDatabase = di.on(Endpoint(mockWebServer.url("/").toString()))
@@ -93,7 +98,7 @@ class RegisterEndToEndTest: TestCase() {
                 it.putExtra(UstadView.ARG_NEXT,
                         "${Login2View.VIEW_NAME}?${destArgs.toQueryString()}")
             }
-            activityScenario = launchActivity(intent = launchIntent)
+            launchActivity<MainActivity>(intent = launchIntent)
         }.run {
             LoginScreen {
                 createAccount {
@@ -141,7 +146,7 @@ class RegisterEndToEndTest: TestCase() {
 
                 usernameTextInput {
                     edit {
-                        typeText("janedoe")
+                        replaceText("janedoe")
                     }
                 }
 

@@ -3,8 +3,8 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ClazzDetailView.Companion.ARG_TABS
@@ -14,11 +14,11 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
@@ -77,7 +77,7 @@ class ClazzDetailPresenter(context: Any,
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): Clazz? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         val clazz = withContext(Dispatchers.Default) {
-            withTimeoutOrNull(2000) { db.clazzDao.findByUidAsync(entityUid) }
+            db.onRepoWithFallbackToDb(2000) { it.clazzDao.findByUidAsync(entityUid) }
         } ?: Clazz()
 
         setupTabs(clazz)
@@ -89,23 +89,31 @@ class ClazzDetailPresenter(context: Any,
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         val personUid = accountManager.activeAccount.personUid
         scope.launch {
+            val commonArgs = mapOf(UstadView.ARG_NAV_CHILD to true.toString())
 
-            val contentEntryListParams = mapOf(
-                    ARG_CLAZZUID to entityUid.toString(),
-                    ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_CLAZZ)
-                    .toQueryString()
+            val coreTabs = listOf(
+                ClazzDetailOverviewView.VIEW_NAME.appendQueryArgs(
+                    commonArgs + mapOf(ARG_ENTITY_UID to entityUid.toString())
+                ),
+                ContentEntryList2View.VIEW_NAME.appendQueryArgs(
+                    commonArgs + mapOf(
+                        ARG_CLAZZUID to entityUid.toString(),
+                        ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_CLAZZ)
+                ),
+                ClazzMemberListView.VIEW_NAME.appendQueryArgs(
+                    commonArgs + mapOf(ARG_CLAZZUID to entityUid.toString())
+                ))
 
-            view.tabs = listOf("${ClazzDetailOverviewView.VIEW_NAME}?$ARG_ENTITY_UID=$entityUid",
-                    """${ContentEntryList2View.VIEW_NAME}?$contentEntryListParams""",
-                    """${ClazzMemberListView.VIEW_NAME}?
-                        $ARG_CLAZZUID=$entityUid
-                        """.trimMargin()) +
-                    CLAZZ_FEATURES.filter { featureFlag ->
-                        (clazz.clazzFeatures and featureFlag) > 0 && db.clazzDao.personHasPermissionWithClazz(personUid, entityUid,
-                                FEATURE_PERMISSION_MAP[featureFlag] ?: -1)
-                    }.map {
-                        (VIEWNAME_MAP[it] ?: "INVALID") + "?$ARG_CLAZZUID=$entityUid"
-                    }
+            val permissionAndFeatureBasedTabs = CLAZZ_FEATURES.filter { featureFlag ->
+                (clazz.clazzFeatures and featureFlag) > 0 && db.clazzDao.personHasPermissionWithClazz(personUid, entityUid,
+                    FEATURE_PERMISSION_MAP[featureFlag] ?: -1)
+            }.map {
+                (VIEWNAME_MAP[it] ?: "INVALID").appendQueryArgs(
+                    commonArgs + mapOf(ARG_CLAZZUID to entityUid.toString())
+                )
+            }
+
+            view.tabs =  coreTabs + permissionAndFeatureBasedTabs
         }
     }
 
@@ -145,16 +153,16 @@ class ClazzDetailPresenter(context: Any,
 
     companion object {
 
-        val CLAZZ_FEATURES = listOf(Clazz.CLAZZ_FEATURE_ATTENDANCE, Clazz.CLAZZ_FEATURE_CLAZZWORK)
+        val CLAZZ_FEATURES = listOf(Clazz.CLAZZ_FEATURE_ATTENDANCE, Clazz.CLAZZ_FEATURE_CLAZZ_ASSIGNMENT)
 
         //Map of the feature flag to the permission flag required for that tab to be visible
         val FEATURE_PERMISSION_MAP = mapOf(
                 Clazz.CLAZZ_FEATURE_ATTENDANCE to Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT,
-                Clazz.CLAZZ_FEATURE_CLAZZWORK to Role.PERMISSION_CLAZZWORK_SELECT)
+                Clazz.CLAZZ_FEATURE_CLAZZ_ASSIGNMENT to Role.PERMISSION_ASSIGNMENT_SELECT)
 
         val VIEWNAME_MAP = mapOf<Long, String>(
                 Clazz.CLAZZ_FEATURE_ATTENDANCE to ClazzLogListAttendanceView.VIEW_NAME,
-                Clazz.CLAZZ_FEATURE_CLAZZWORK to ClazzWorkListView.VIEW_NAME
+                Clazz.CLAZZ_FEATURE_CLAZZ_ASSIGNMENT to ClazzAssignmentListView.VIEW_NAME
         )
     }
 

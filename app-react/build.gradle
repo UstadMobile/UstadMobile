@@ -32,7 +32,7 @@ kotlin {
     }
 }
 
-task fixMissingModule {
+task fixMissingKotlinExtensionModule {
     doLast{
         rootProject.fileTree (dir: "build/js/packages",
                 includes: ['**/kotlin-dce-dev/kotlin-extensions.js'], exclude: '**/*.meta.js')
@@ -43,11 +43,10 @@ task fixMissingModule {
                     FileWriter writer = new FileWriter(extFile)
                     writer.write(fileContent)
                     writer.flush()
+                    println(file.absolutePath +" fixed")
                 }
     }
 }
-
-browserDevelopmentRun.dependsOn(fixMissingModule)
 
 dependencies {
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
@@ -70,3 +69,5 @@ dependencies {
     implementation "io.ktor:ktor-client-json-js:$version_ktor"
     implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
 }
+
+tasks.findByName("processDceDevKotlinJs").finalizedBy(fixMissingKotlinExtensionModule)

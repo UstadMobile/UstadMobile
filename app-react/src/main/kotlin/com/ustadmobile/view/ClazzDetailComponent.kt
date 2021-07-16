@@ -94,7 +94,7 @@ class ClazzDetailComponent(mProps: RProps): UstadDetailComponent<Clazz>(mProps),
             ContentEntryList2View.VIEW_NAME to MessageID.content,
             ClazzMemberListView.VIEW_NAME to MessageID.members,
             ClazzLogListAttendanceView.VIEW_NAME to MessageID.attendance,
-            ClazzWorkListView.VIEW_NAME to MessageID.clazz_work
+            ClazzAssignmentListView.VIEW_NAME to MessageID.assignments
         )
 
     }

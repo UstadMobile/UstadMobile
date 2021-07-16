@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebView
+import android.widget.AdapterView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,8 +27,12 @@ import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.UMStorageDir
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
@@ -46,7 +51,8 @@ interface ContentEntryEdit2FragmentEventHandler {
 
 }
 
-class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(), ContentEntryEdit2View, ContentEntryEdit2FragmentEventHandler {
+class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(),
+        ContentEntryEdit2View, ContentEntryEdit2FragmentEventHandler, DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption> {
 
     private var mBinding: FragmentContentEntryEdit2Binding? = null
 
@@ -72,6 +78,7 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
         set(value) {
             field = value
             mBinding?.contentEntry = value
+            mBinding?.minScoreVisible = value?.completionCriteria == ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
         }
 
     override var entryMetaData: ImportedContentEntryMetaData? = null
@@ -94,6 +101,19 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
         set(value) {
             field = value
             mBinding?.licenceOptions = value
+        }
+
+    override var showCompletionCriteria: Boolean = false
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.showCompletionCriteria = value
+        }
+
+    override var completionCriteriaOptions: List<ContentEntryEdit2Presenter.CompletionCriteriaMessageIdOption>? = null
+        set(value) {
+            field = value
+            mBinding?.completionCriteriaOptions = value
         }
 
 
@@ -179,6 +199,7 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
 
     override var fieldsEnabled: Boolean = false
         set(value) {
+            super.fieldsEnabled = value
             mBinding?.fieldsEnabled = value
             field = value
         }
@@ -205,6 +226,7 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
             it.compressionEnabled = true
             it.showVideoPreview = false
             it.showWebPreview = false
+            it.completionCriteriaListener = this
             webView = it.entryEditWebPreview
             webView?.webChromeClient = WebChromeClient()
             playerView = it.entryEditVideoPreview
@@ -233,7 +255,7 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
         ustadFragmentTitle = getString(R.string.content)
 
         mPresenter = ContentEntryEdit2Presenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
                 Language::class.java) {
@@ -252,6 +274,15 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
         player?.playWhenReady = playWhenReady
         player?.seekTo(currentWindow, playbackPosition)
     }
+
+    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
+        mBinding?.minScoreVisible = selectedOption.optionId == ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
+    }
+
+    override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
+
+    }
+
 
     private val viewLifecycleObserver = object : DefaultLifecycleObserver {
 
