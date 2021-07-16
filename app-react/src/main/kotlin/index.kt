@@ -27,6 +27,7 @@ import io.ktor.client.*
 import io.ktor.client.engine.js.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
+import kotlinext.js.asJsObject
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineDispatcher
@@ -37,6 +38,7 @@ import react.redux.provider
 
 fun main() {
     defaultJsonSerializer()
+    print("{}".asJsObject())
     window.onload = {
         render(document.getElementById("root")) {
 

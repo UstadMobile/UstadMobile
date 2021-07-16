@@ -42,9 +42,9 @@ fun RBuilder.errorFallBack(text: String): ReactElement {
 fun RBuilder.renderRoutes() {
     hashRouter {
         switch{
-            route("/", defaultRoute, exact = true)
+            route(path = arrayOf("/"), defaultRoute, exact = true)
             destinationList.forEach {
-                route("/${it.view}", it.component, exact = true)
+                route(path = arrayOf("/${it.view}"), it.component, exact = true)
             }
         }
     }

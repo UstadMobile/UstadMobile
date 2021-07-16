@@ -1,3 +1,6 @@
+import java.nio.file.Files
+import java.nio.file.Paths
+
 plugins {
     id 'org.jetbrains.kotlin.js'
 }
@@ -6,12 +9,7 @@ group = rootProject.group
 version = rootProject.version
 
 repositories {
-    //Few Wrapper dependencies are causing some issues, jcenter will be removed
-    //as soon as a solution is in place
-    jcenter()
-    maven {
-        url 'https://dl.bintray.com/kotlin/kotlin-js-wrappers'
-    }
+    mavenCentral()
 }
 
 kotlin {
@@ -34,14 +32,31 @@ kotlin {
     }
 }
 
+task fixMissingModule {
+    doLast{
+        rootProject.fileTree (dir: "build/js/packages",
+                includes: ['**/kotlin-dce-dev/kotlin-extensions.js'], exclude: '**/*.meta.js')
+                .each() { File file ->
+                    File extFile = new File(file.parentFile.absolutePath, "kotlin-wrappers-kotlin-extensions-js-legacy.js")
+                    String fileContent = new String(Files.readAllBytes(Paths.get(file.path)), "UTF-8")
+                    fileContent = fileContent.replace("kotlin-extensions", "kotlin-wrappers-kotlin-extensions-js-legacy")
+                    FileWriter writer = new FileWriter(extFile)
+                    writer.write(fileContent)
+                    writer.flush()
+                }
+    }
+}
+
+browserDevelopmentRun.dependsOn(fixMissingModule)
+
 dependencies {
-    testImplementation 'org.jetbrains.kotlin:kotlin-test-js'
-    implementation "org.jetbrains:kotlin-react:$version_kotlin_react"
-    implementation "org.jetbrains:kotlin-react-dom:$version_kotlin_react"
-    implementation "org.jetbrains:kotlin-styled:$version_kotlin_styled"
-    implementation "org.jetbrains:kotlin-react-router-dom:$version_kotlin_react_router_dom"
-    implementation "org.jetbrains:kotlin-redux:$version_kotlin_redux"
-    implementation "org.jetbrains:kotlin-react-redux:$version_kotlin_react_redux"
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-react:$version_kotlin_react"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-react-dom:$version_kotlin_react"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-styled:$version_kotlin_styled"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom:$version_kotlin_react_router_dom"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-redux:$version_kotlin_redux"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-react-redux:$version_kotlin_react_redux"
     implementation "com.ccfraser.muirwik:muirwik-components:$version_muirwik_components"
     implementation project(":core")
     implementation project(":lib-util")

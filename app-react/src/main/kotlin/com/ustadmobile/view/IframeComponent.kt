@@ -7,6 +7,7 @@ import kotlinx.browser.document
 import kotlinx.html.id
 import kotlinx.html.js.onLoadFunction
 import react.*
+import react.dom.attrs
 import styled.css
 import styled.styledDiv
 import styled.styledIframe
