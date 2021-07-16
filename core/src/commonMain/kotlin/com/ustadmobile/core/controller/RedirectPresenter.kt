@@ -6,6 +6,9 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_DEEPLINK
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
+import com.ustadmobile.door.doorMainDispatcher
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -25,20 +28,15 @@ class RedirectPresenter(context: Any, arguments: Map<String, String>, view: Redi
         if(deepLink?.isNotEmpty() == true){
             systemImpl.goToDeepLink(deepLink, accountManager, context)
         }else {
-            val canSelectServer = systemImpl.getAppConfigBoolean(AppConfig.KEY_ALLOW_SERVER_SELECTION,
-                    context)
-
-            val activeSession = accountManager.activeSession
-            val destination = nextViewArg ?: if (activeSession == null) {
-                if (canSelectServer)
-                    SiteEnterLinkView.VIEW_NAME
-                else
-                    Login2View.VIEW_NAME
-            } else {
-                ContentEntryListTabsView.VIEW_NAME
+            if(nextViewArg != null) {
+                systemImpl.goToViewLink(nextViewArg, context)
+            }else if(accountManager.activeSession != null) {
+                systemImpl.goToViewLink(ContentEntryListTabsView.VIEW_NAME, context)
+            }else {
+                presenterScope.launch {
+                    navigateToStartNewUserSession()
+                }
             }
-
-            systemImpl.goToViewLink(destination, context)
         }
     }
 

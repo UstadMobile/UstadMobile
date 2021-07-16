@@ -35,7 +35,7 @@ class RegisterAgeRedirectFragment() : UstadBaseFragment(), RegisterAgeRedirectVi
         super.onViewCreated(view, savedInstanceState)
 
         mPresenter = RegisterAgeRedirectPresenter(requireContext(), arguments.toStringMap(),
-            this, di)
+            this, di).withViewLifecycle()
         mBinding?.presenter = mPresenter
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
     }

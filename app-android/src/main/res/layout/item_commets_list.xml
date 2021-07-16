@@ -8,6 +8,8 @@
             name="commentwithperson"
             type="com.ustadmobile.lib.db.entities.CommentsWithPerson" />
 
+        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -20,7 +22,10 @@
         <!-- TODO: Change or remove this icon -->
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/item_comments_list_newitemicon"
-            app:personPicturePersonUid="@{commentwithperson.commentsPerson.personUid}"
+            app:imageForeignKey="@{commentwithperson.commentsPerson.personUid}"
+            app:imageForeignKeyAdapter="@{PersonDetailFragment.FOREIGNKEYADAPTER_PERSON}"
+            app:imageForeignKeyPlaceholder="@{@drawable/ic_account_circle_black_24dp}"
+            android:tint="?colorOnIconTint"
             android:layout_width="@dimen/dimen_40dp"
             android:layout_height="@dimen/dimen_40dp"
             android:layout_marginTop="@dimen/dimen_16dp"
@@ -64,7 +69,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
-            app:dateTimeLongString="@{commentwithperson.commentsDateTimeAdded}"
+            app:relativeTime="@{commentwithperson.commentsDateTimeAdded}"
             app:layout_constraintBottom_toTopOf="@+id/item_comments_list_line2_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/item_comments_list_text"

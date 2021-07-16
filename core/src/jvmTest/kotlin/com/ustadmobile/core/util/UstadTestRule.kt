@@ -30,6 +30,10 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExecutorCoroutineDispatcher
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.asCoroutineDispatcher
 import okhttp3.OkHttpClient
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
@@ -37,6 +41,7 @@ import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.nio.file.Files
+import java.util.concurrent.Executors
 import javax.naming.InitialContext
 import kotlin.random.Random
 
@@ -62,6 +67,8 @@ fun DI.directActiveRepoInstance() = onActiveAccountDirect().instance<UmAppDataba
  * Simply override the built in bindings if required for specific tests
  */
 class UstadTestRule: TestWatcher() {
+
+    lateinit var coroutineDispatcher: ExecutorCoroutineDispatcher
 
     lateinit var endpointScope: EndpointScope
 
@@ -89,6 +96,7 @@ class UstadTestRule: TestWatcher() {
 
         endpointScope = EndpointScope()
         systemImplSpy = spy(UstadMobileSystemImpl(xppFactory, tempFolder))
+        //coroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
         okHttpClient = OkHttpClient.Builder().build()
 
@@ -158,6 +166,10 @@ class UstadTestRule: TestWatcher() {
                 spy(TestUstadNavController(di))
             }
 
+            bind<CoroutineScope>(tag = DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with singleton {
+                GlobalScope
+            }
+
             bind<Pbkdf2Params>() with singleton {
                 Pbkdf2Params(iterations = 10000, keyLength = 512)
             }
@@ -168,6 +180,7 @@ class UstadTestRule: TestWatcher() {
 
     override fun finished(description: Description?) {
         httpClient.close()
+        //coroutineDispatcher.close()
         tempFolder.deleteRecursively()
     }
 

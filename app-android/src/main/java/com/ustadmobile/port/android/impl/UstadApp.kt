@@ -7,10 +7,8 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
-import com.ustadmobile.core.account.Pbkdf2Params
-import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.account.*
+import com.ustadmobile.core.assignment.setupAssignmentSyncListener
 import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImplAndroid
@@ -119,6 +117,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
                 attachmentFilters += ImageResizeAttachmentFilter("PersonPicture", 1280, 1280)
             }).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
+                it.setupAssignmentSyncListener(context, di)
             }
         }
 
@@ -186,8 +185,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
             ContentImportManagerImplAndroid(listOf(EpubTypePluginCommonJvm(),
                     XapiTypePluginCommonJvm(), VideoTypePluginAndroid(),
-                    H5PTypePluginCommonJvm()), ContainerImportJob.CLIENT_IMPORT_MODE,
-                    applicationContext, context, di)
+                    H5PTypePluginCommonJvm()), applicationContext,
+                    context, di)
         }
 
 
@@ -240,6 +239,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
                 UstadMobileConstants.PBKDF2_KEYLENGTH, applicationContext)
 
             Pbkdf2Params(numIterations, keyLength)
+        }
+
+        bind<AuthManager>() with scoped(EndpointScope.Default).singleton {
+            AuthManager(context, di)
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

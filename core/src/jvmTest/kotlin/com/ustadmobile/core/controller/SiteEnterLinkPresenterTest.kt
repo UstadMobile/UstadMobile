@@ -4,6 +4,8 @@ import org.mockito.kotlin.*
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.lib.db.entities.Site
+import com.ustadmobile.util.test.rules.CoroutineDispatcherRule
+import com.ustadmobile.util.test.rules.bindPresenterCoroutineRule
 import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
@@ -13,6 +15,7 @@ import okhttp3.mockwebserver.MockWebServer
 import okio.Buffer
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
 import org.kodein.di.bind
@@ -36,6 +39,10 @@ class SiteEnterLinkPresenterTest {
 
     private lateinit var di: DI
 
+    @JvmField
+    @Rule
+    val presenterScopeRule  = CoroutineDispatcherRule()
+
     @Before
     fun setUp(){
         view = mock {
@@ -53,6 +60,7 @@ class SiteEnterLinkPresenterTest {
                     install(HttpTimeout)
                 }
             }
+            bindPresenterCoroutineRule(presenterScopeRule)
         }
 
         presenter = SiteEnterLinkPresenter(context, mapOf(), view, di)

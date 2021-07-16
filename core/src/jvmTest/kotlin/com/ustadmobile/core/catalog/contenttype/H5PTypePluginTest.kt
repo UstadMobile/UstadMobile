@@ -6,7 +6,6 @@ import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import kotlinx.coroutines.runBlocking
@@ -48,7 +47,7 @@ class H5PTypePluginTest {
             import(ustadTestRule.diModule)
             bind<ContentImportManager>() with scoped(ustadTestRule.endpointScope!!).singleton {
                 ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm(), H5PTypePluginCommonJvm()),
-                    ContainerImportJob.CLIENT_IMPORT_MODE, context, this.context, di)
+                        context, this.context, di)
             }
         }
         val accountManager: UstadAccountManager by di.instance()

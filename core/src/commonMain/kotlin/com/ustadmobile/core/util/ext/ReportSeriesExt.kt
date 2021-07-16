@@ -130,7 +130,7 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
     when(queryType){
         ATTENDANCE_QUERY -> {
             sql += """
-               ClazzLogAttendanceRecord.*, ClazzLog.logDate, Person.* 
+               ClazzLogAttendanceRecord.*, ClazzLog.logDate , Person.* 
             """.trimIndent()
         }
         STATEMENT_QUERY -> {
@@ -231,9 +231,9 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
 
                     var filterString = "(StatementEntity.contentEntryRoot AND StatementEntity.resultCompletion "
                     filterString += when (filter.reportFilterDropDownValue) {
-                        ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED -> ")"
-                        ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED -> "AND StatementEntity.resultSuccess ${handleCondition(filter.reportFilterCondition)} ${StatementEntity.RESULT_SUCCESS}) "
-                        ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED -> "AND StatementEntity.resultSuccess ${handleCondition(filter.reportFilterCondition)} ${StatementEntity.RESULT_FAILURE}) "
+                        StatementEntity.CONTENT_COMPLETE -> ")"
+                        StatementEntity.CONTENT_PASSED -> "AND StatementEntity.resultSuccess ${handleCondition(filter.reportFilterCondition)} ${StatementEntity.RESULT_SUCCESS}) "
+                        StatementEntity.CONTENT_FAILED -> "AND StatementEntity.resultSuccess ${handleCondition(filter.reportFilterCondition)} ${StatementEntity.RESULT_FAILURE}) "
                         else -> ""
                     }
                     whereList += (filterString)
@@ -300,19 +300,30 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
 
     }
 
+    // Start of resultSource group by
     when(queryType){
         ATTENDANCE_QUERY -> {
             sql += """
-                GROUP BY ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid
+                GROUP BY ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid, 
+                         ClazzLog.clazzLogUid, Person.personUid 
             """.trimIndent()
         }
         STATEMENT_QUERY -> {
             sql += """
-                GROUP BY StatementEntity.statementUid
+                GROUP BY StatementEntity.statementUid, Person.personUid 
             """.trimMargin()
         }
     }
-
+    if(addEnrolmentJoin){
+        sql += ",ClazzEnrolment.clazzEnrolmentUid "
+        if(addClassJoin){
+            sql += ",Clazz.clazzUid "
+        }
+    }
+    if (addEntryJoin || queryType == STATEMENT_QUERY) {
+        sql += ", StatementEntity.statementUid "
+    }
+    // END of resultSource group by
 
     sql += ") AS ResultSource "
 
