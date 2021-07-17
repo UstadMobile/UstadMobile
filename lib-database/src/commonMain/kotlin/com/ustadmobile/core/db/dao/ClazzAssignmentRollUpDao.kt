@@ -36,7 +36,7 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
                (CASE WHEN StatementEntity.timestamp > ClazzAssignment.caDeadlineDate 
                      THEN ClazzAssignment.caLateSubmissionPenalty 
                      ELSE 0 END) AS cachePenalty,
-               (SELECT MAX(statementLocalChangeSeqNum) FROM StatementEntity) AS lastCsnChecked
+               COALESCE((SELECT MAX(statementLocalChangeSeqNum) FROM StatementEntity),0) AS lastCsnChecked
           FROM ClazzAssignmentContentJoin
 	            LEFT JOIN ClazzAssignment 
                 ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
