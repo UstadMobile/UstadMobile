@@ -149,9 +149,16 @@ class ClazzEdit2Presenter(context: Any,
                     sgPermissions = Role.ROLE_CLAZZ_STUDENT_PERMISSIONS_DEFAULT
                 }
             })
+
+            scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
+                name = "Parents"
+                scopedGrant = ScopedGrant().apply {
+                    sgFlags = (ScopedGrant.FLAG_PARENT_GROUP or FLAG_NO_DELETE)
+                    sgPermissions = Role.ROLE_CLAZZ_PARENT_PERMISSION_DEFAULT
+                }
+            })
         }
-
-
+        
         return clazz
     }
 
@@ -215,7 +222,7 @@ class ClazzEdit2Presenter(context: Any,
     }
 
     override fun handleClickSave(entity: ClazzWithHolidayCalendarAndSchool) {
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch {
 
             if (entity.clazzStartTime == 0L) {
                 view.clazzStartDateError = systemImpl.getString(MessageID.field_required_prompt, context)

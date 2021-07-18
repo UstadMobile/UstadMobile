@@ -94,6 +94,8 @@ open class Clazz() {
 
     var clazzPendingStudentsPersonGroupUid: Long = 0
 
+    var clazzParentsPersonGroupUid: Long = 0
+
     /**
      * Code that can be used to join the class
      */

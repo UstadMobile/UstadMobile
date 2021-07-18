@@ -134,7 +134,7 @@ class ParentalConsentManagementPresenter(context: Any,
                 entity.ppjParentPersonUid = activeSession.person.personUid
 
                 repo.grantScopedPermission(activeSession.person,
-                    Role.ROLE_PARENT_PERMISSIONS_DEFAULT, Person.TABLE_ID, entity.ppjMinorPersonUid)
+                    Role.ROLE_PARENT_PERSON_PERMISSIONS_DEFAULT, Person.TABLE_ID, entity.ppjMinorPersonUid)
             }
 
             entity.ppjApprovalTiemstamp = systemTimeInMillis()

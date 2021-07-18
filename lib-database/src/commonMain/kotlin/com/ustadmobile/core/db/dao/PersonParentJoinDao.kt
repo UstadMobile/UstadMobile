@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonParentJoinWithMinorPerson
 
@@ -28,7 +29,25 @@ abstract class PersonParentJoinDao {
           FROM PersonParentJoin
          WHERE ppjMinorPersonUid = :minorPersonUid 
     """)
-    abstract suspend fun findByMinorPersonUid(minorPersonUid: Long): PersonParentJoin?
+    abstract suspend fun findByMinorPersonUid(minorPersonUid: Long): List<PersonParentJoin>
+
+    @Query("""
+        SELECT PersonParentJoin.*
+          FROM PersonParentJoin
+         WHERE PersonParentJoin.ppjMinorPersonUid = :minorPersonUid
+           AND PersonParentJoin.ppjParentPersonUid != 0
+           AND NOT EXISTS(
+               SELECT clazzEnrolmentUid 
+                 FROM ClazzEnrolment
+                WHERE ClazzEnrolment.clazzEnrolmentPersonUid = PersonParentJoin.ppjParentPersonUid
+                  AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+                  AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_PARENT}
+                  AND CAST(ClazzEnrolment.clazzEnrolmentActive AS INTEGER) = 1)
+    """)
+    abstract suspend fun findByMinorPersonUidWhereParentNotEnrolledInClazz(
+        minorPersonUid: Long,
+        clazzUid: Long
+    ): List<PersonParentJoin>
 
     @Query("""
         SELECT EXISTS(

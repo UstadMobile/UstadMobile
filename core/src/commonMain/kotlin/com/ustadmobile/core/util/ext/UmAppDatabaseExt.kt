@@ -19,7 +19,6 @@ import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString
-import kotlinx.coroutines.withTimeoutOrNull
 
 fun UmAppDatabase.runPreload() {
     preload()
@@ -135,11 +134,10 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Per
     }
 
     if(personGroupUid != null) {
-        val personGroupMember = PersonGroupMember().also {
+        personGroupMemberDao.insertAsync(PersonGroupMember().also {
             it.groupMemberPersonUid = personToEnrol.personUid
             it.groupMemberGroupUid = personGroupUid
-            it.groupMemberUid = personGroupMemberDao.insertAsync(it)
-        }
+        })
     }
 
     return clazzMember
@@ -183,11 +181,10 @@ suspend fun UmAppDatabase.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol: Pe
     }
 
     if(personGroupUid != null) {
-        val personGroupMember = PersonGroupMember().also {
+        personGroupMemberDao.insertAsync(PersonGroupMember().also {
             it.groupMemberPersonUid = personToEnrol.personUid
             it.groupMemberGroupUid = personGroupUid
-            it.groupMemberUid = personGroupMemberDao.insertAsync(it)
-        }
+        })
     }
 
     return schoolMember
@@ -467,11 +464,10 @@ suspend fun UmAppDatabase.enrollPersonToSchool(schoolUid: Long,
         }
 
         if(personGroupUid != null) {
-            val personGroupMember = PersonGroupMember().also {
+            personGroupMemberDao.insertAsync(PersonGroupMember().also {
                 it.groupMemberPersonUid = schoolMember.schoolMemberPersonUid
                 it.groupMemberGroupUid = personGroupUid
-                it.groupMemberUid = personGroupMemberDao.insertAsync(it)
-            }
+            })
         }
 
         return schoolMember
@@ -498,7 +494,6 @@ data class ContainerEntryWithMd5Partition(val entriesWithMatchingFile: List<Cont
  *
  * @param containerUid The container uid for which we are linking entries.
  * @param containerEntryFiles The ContainerEntryFile list to check.
- * @param maxListParamSize the maximum number of items in a query parameter list (e.g. to avoid room
  * throwing an exception)
  *
  * @return a pair of
@@ -516,11 +511,9 @@ suspend fun UmAppDatabase.linkExistingContainerEntries(containerUid: Long,
     val alreadyLinkedEntries = containerEntryDao.findByContainerAsync(containerUid)
     val entriesToLink = entriesWithFile
             .filter { entryWithFile ->! alreadyLinkedEntries.any { it.cePath ==  entryWithFile.cePath } }
-            .apply {
-                forEach { entryWithFile ->
-                    entryWithFile.ceUid = 0L
-                    entryWithFile.ceCefUid = existingFiles.first { it.cefMd5 == entryWithFile.cefMd5 }.cefUid
-                }
+            .onEach { entryWithFile ->
+                entryWithFile.ceUid = 0L
+                entryWithFile.ceCefUid = existingFiles.first { it.cefMd5 == entryWithFile.cefMd5 }.cefUid
             }
 
     containerEntryDao.insertListAsync(entriesToLink)

@@ -65,11 +65,17 @@ class ScopedGrant {
 
         const val FLAG_ADMIN_GROUP = 4
 
+        //Indicates that this grant is for a teacher group (e.g. for a class or school)
         const val FLAG_TEACHER_GROUP = 8
 
+        //Indicates that this grant is for a student group (e.g. for a class or school)
         const val FLAG_STUDENT_GROUP = 16
 
+        //Indicates that this grant is the grant for a parent directly over the child
         const val FLAG_PARENT_GRANT = 32
+
+        //Indicates that this grant is for a parents group (e.g. for a class or school)
+        const val FLAG_PARENT_GROUP = 64
 
     }
 }
