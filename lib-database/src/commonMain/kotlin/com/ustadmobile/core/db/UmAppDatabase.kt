@@ -63,7 +63,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 77)
+], version = 78)
 @MinSyncVersion(60)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -5093,6 +5093,39 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         val MIGRATION_77_78 = object: DoorMigration(77, 78) {
             override fun migrate(database: DoorSqlDatabase) {
                 database.execSQL("ALTER TABLE Clazz ADD COLUMN clazzParentsPersonGroupUid INTEGER NOT NULL DEFAULT 0")
+
+                if(database.dbType() == DoorDbType.POSTGRES) {
+                    //Create a new PersonGroup for each class for the parents group
+                    database.execSQL("""
+                        INSERT INTO PersonGroup (groupMasterCsn, groupLocalCsn, 
+                                    groupLastChangedBy, groupLct, groupName, groupActive, 
+                                    personGroupFlag)
+                             SELECT 0 AS groupMasterCsn, 0 AS groupLocalCsn,
+                                    (SELECT nodeClientId FROM SyncNode LIMIT 1) AS groupLastChangedBy,
+                                    0 AS groupLct,
+                                    ('Class-Parents-' || CAST(Clazz.clazzUid AS TEXT)) AS groupName,
+                                    true AS groupActive,
+                                    ${PersonGroup.PERSONGROUP_FLAG_PARENT_GROUP} AS personGroupFlag
+                               FROM Clazz
+                    """)
+
+                    database.execSQL("""
+                        UPDATE Clazz
+                           SET clazzParentsPersonGroupUid =
+                               (SELECT personGroupUid 
+                                  FROM PersonGroup
+                                 WHERE clazzParentsPersonGroupUid = 0
+                                   AND groupName = ('Class-Parents-' || CAST(Clazz.clazzUid AS TEXT))),
+                               clazzLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1)    
+                    """)
+
+                    database.execSQL("""
+                        UPDATE PersonGroup
+                           SET groupName = 'Parents'
+                         WHERE personGroupFlag =  ${PersonGroup.PERSONGROUP_FLAG_PARENT_GROUP}
+                           AND groupName LIKE 'Class-Parents%'  
+                    """)
+                }
             }
         }
 

@@ -493,7 +493,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 78, true,
-            UmAppDatabase.MIGRATION_76_77)
+            UmAppDatabase.MIGRATION_77_78)
     }
 
 }
