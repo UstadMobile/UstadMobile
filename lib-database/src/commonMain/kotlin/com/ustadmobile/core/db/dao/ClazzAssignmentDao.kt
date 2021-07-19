@@ -21,10 +21,14 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
 
     @Query("""
         WITH CtePermissionCheck (hasPermission) 
-          AS (SELECT EXISTS(SELECT 1 
-                FROM Clazz 
-                WHERE Clazz.clazzUid = :clazzUid 
-                AND :accountPersonUid IN (${ClazzDao.ENTITY_PERSONS_WITH_PERMISSION})))
+            AS (SELECT EXISTS( 
+               SELECT PrsGrpMbr.groupMemberPersonUid
+                  FROM Clazz
+                       ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+                          :permission
+                          ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
+                 WHERE Clazz.clazzUid = :clazzUid
+                   AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid))
                 
         SELECT ClazzAssignment.*, 
         
@@ -305,10 +309,14 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
 
     @Query("""
         WITH CtePermissionCheck (hasPermission) 
-          AS (SELECT EXISTS(SELECT 1 
-                FROM Clazz 
-                WHERE Clazz.clazzUid = :clazzUid 
-                AND :accountPersonUid IN (${ClazzDao.ENTITY_PERSONS_WITH_PERMISSION})))
+            AS (SELECT EXISTS( 
+               SELECT PrsGrpMbr.groupMemberPersonUid
+                  FROM Clazz
+                       ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+                          :permission
+                          ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
+                 WHERE Clazz.clazzUid = :clazzUid
+                   AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid))
                 
                 
         SELECT (SELECT hasPermission FROM CtePermissionCheck) AS hasMetricsPermission,

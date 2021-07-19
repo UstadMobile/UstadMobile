@@ -140,10 +140,14 @@ open class Clazz() {
                     AND (ScopedGrant.sgPermissions & 
         """
 
-        const val JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2 = """
-                                                     ) > 0
+        const val JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER = """
+                                                       ) > 0
              JOIN PersonGroupMember AS PrsGrpMbr
                    ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
+        """
+
+        const val JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2 = """
+              $JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER                                       
               JOIN UserSession
                    ON UserSession.usPersonUid = PrsGrpMbr.groupMemberPersonUid
                       AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE }

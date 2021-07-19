@@ -31,23 +31,36 @@ abstract class PersonParentJoinDao {
     """)
     abstract suspend fun findByMinorPersonUid(minorPersonUid: Long): List<PersonParentJoin>
 
+    /**
+     * Represents a parent enrolment that needs to be done
+     */
+    data class ParentEnrolmentRequired(var parentPersonUid: Long = 0L, var clazzUid: Long = 0L)
+
+    /**
+     * Find classes for which a minor (child) is enroled where there is no parent enrolment for
+     * the parent in the same class.
+     */
     @Query("""
-        SELECT PersonParentJoin.*
+        SELECT PersonParentJoin.ppjParentPersonUid AS parentPersonUid,
+               ChildEnrolment.clazzEnrolmentClazzUid AS clazzUid
           FROM PersonParentJoin
+               JOIN ClazzEnrolment ChildEnrolment 
+                    ON ChildEnrolment.clazzEnrolmentPersonUid = :minorPersonUid
+                   AND (:clazzUidFilter = 0 OR ChildEnrolment.clazzEnrolmentClazzUid = :clazzUidFilter)
          WHERE PersonParentJoin.ppjMinorPersonUid = :minorPersonUid
            AND PersonParentJoin.ppjParentPersonUid != 0
            AND NOT EXISTS(
                SELECT clazzEnrolmentUid 
                  FROM ClazzEnrolment
                 WHERE ClazzEnrolment.clazzEnrolmentPersonUid = PersonParentJoin.ppjParentPersonUid
-                  AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
+                  AND ClazzEnrolment.clazzEnrolmentClazzUid = ChildEnrolment.clazzEnrolmentClazzUid
                   AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_PARENT}
                   AND CAST(ClazzEnrolment.clazzEnrolmentActive AS INTEGER) = 1)
     """)
     abstract suspend fun findByMinorPersonUidWhereParentNotEnrolledInClazz(
         minorPersonUid: Long,
-        clazzUid: Long
-    ): List<PersonParentJoin>
+        clazzUidFilter: Long
+    ): List<ParentEnrolmentRequired>
 
     @Query("""
         SELECT EXISTS(

@@ -103,6 +103,7 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
         }else if(persistenceMode == PersistenceMode.JSON){
             entity = onLoadFromJson(arguments)
             view.entity = entity
+            (view as? UstadEditView<*>)?.fieldsEnabled = true
             onLoadDataComplete()
         }else if(persistenceMode == PersistenceMode.LIVEDATA) {
             entityLiveData = onLoadLiveData(repo)

@@ -16,6 +16,7 @@ import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.ext.dbType
+import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString
@@ -38,60 +39,14 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(clazz: Clazz, impl: UstadMobil
     clazz.clazzPendingStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
             impl.getString(MessageID.pending_requests, context)))
 
+    clazz.clazzParentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
+            impl.getString(MessageID.parent, context)))
+
     clazz.takeIf { it.clazzCode == null }?.clazzCode = randomString(Clazz.CLAZZ_CODE_DEFAULT_LENGTH)
 
     clazz.clazzUid = clazzDao.insertAsync(clazz)
-
-    entityRoleDao.insertAsync(EntityRole(Clazz.TABLE_ID, clazz.clazzUid,
-        clazz.clazzTeachersPersonGroupUid, Role.ROLE_CLAZZ_TEACHER_UID.toLong()))
-    entityRoleDao.insertAsync(EntityRole(Clazz.TABLE_ID, clazz.clazzUid,
-        clazz.clazzStudentsPersonGroupUid, Role.ROLE_CLAZZ_STUDENT_UID.toLong()))
-    entityRoleDao.insertAsync(EntityRole(Clazz.TABLE_ID, clazz.clazzUid,
-        clazz.clazzPendingStudentsPersonGroupUid, Role.ROLE_CLAZZ_STUDENT_PENDING_UID.toLong()))
 }
 
-
-suspend fun UmAppDatabase.createPersonGroupAndMemberWithEnrolment(entity: ClazzEnrolment){
-
-    val clazzWithSchoolVal = clazzDao.getClazzWithSchool(entity.clazzEnrolmentClazzUid)
-    ?: throw IllegalArgumentException("Class does not exist")
-
-    val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
-    entity.clazzEnrolmentDateJoined = DateTime(entity.clazzEnrolmentDateJoined)
-            .toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
-    if(entity.clazzEnrolmentDateLeft != Long.MAX_VALUE){
-        entity.clazzEnrolmentDateLeft = DateTime(entity.clazzEnrolmentDateLeft)
-                .toOffsetByTimezone(clazzTimeZone).localEndOfDay.utc.unixMillisLong
-    }
-
-    if (entity.clazzEnrolmentUid == 0L) {
-        entity.clazzEnrolmentUid = clazzEnrolmentDao.insertAsync(entity)
-    } else {
-        clazzEnrolmentDao.updateAsync(entity)
-    }
-
-    val personGroupUid = when(entity.clazzEnrolmentRole) {
-        ClazzEnrolment.ROLE_TEACHER -> clazzWithSchoolVal.clazzTeachersPersonGroupUid
-        ClazzEnrolment.ROLE_STUDENT -> clazzWithSchoolVal.clazzStudentsPersonGroupUid
-        ClazzEnrolment.ROLE_STUDENT_PENDING -> clazzWithSchoolVal.clazzPendingStudentsPersonGroupUid
-        else -> null
-    }
-
-    if(personGroupUid != null) {
-
-        val list = personGroupMemberDao.checkPersonBelongsToGroup(personGroupUid, entity.clazzEnrolmentPersonUid)
-
-        if(list.isEmpty()){
-            PersonGroupMember().also {
-                it.groupMemberPersonUid = entity.clazzEnrolmentPersonUid
-                it.groupMemberGroupUid = personGroupUid
-                it.groupMemberUid = personGroupMemberDao.insertAsync(it)
-            }
-        }
-
-    }
-
-}
 
 /**
  * Enrol the given person into the given class. The effective date of joining is midnight as per
@@ -103,7 +58,7 @@ suspend fun UmAppDatabase.createPersonGroupAndMemberWithEnrolment(entity: ClazzE
 @Throws(AlreadyEnroledInClassException::class)
 suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Person, clazzUid: Long,
                                                               role: Int,
-                                                              clazzWithSchool: ClazzWithSchool? = null): ClazzEnrolmentWithPerson {
+                                                              clazzWithSchool: ClazzWithSchool? = null): ClazzEnrolment {
     val clazzWithSchoolVal = clazzWithSchool ?: clazzDao.getClazzWithSchool(clazzUid)
         ?: throw IllegalArgumentException("Class does not exist")
 
@@ -116,31 +71,78 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Per
 
     val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
     val joinTime = DateTime.now().toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
-    val clazzMember = ClazzEnrolmentWithPerson().apply {
+    val clazzEnrolment = ClazzEnrolment().apply {
         clazzEnrolmentPersonUid = personToEnrol.personUid
         clazzEnrolmentClazzUid = clazzUid
         clazzEnrolmentRole = role
         clazzEnrolmentActive = true
         clazzEnrolmentDateJoined = joinTime
-        person = personToEnrol
-        clazzEnrolmentUid = clazzEnrolmentDao.insertAsync(this)
     }
 
-    val personGroupUid = when(role) {
+    return processEnrolmentIntoClass(clazzEnrolment, clazzWithSchoolVal)
+}
+
+/**
+ * Process the given enrolment. This will insert the ClazzEnrolment itself and will add the person
+ * being enroled into the PersonGroup according to their role.
+ */
+suspend fun UmAppDatabase.processEnrolmentIntoClass(
+    enrolment: ClazzEnrolment,
+    clazzWithSchool: ClazzWithSchool? = null
+) : ClazzEnrolment {
+
+    val clazzWithSchoolVal = clazzWithSchool ?: clazzDao.getClazzWithSchool(
+        enrolment.clazzEnrolmentClazzUid) ?: throw IllegalArgumentException("Class does not exist")
+    val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
+
+    enrolment.clazzEnrolmentDateJoined = DateTime(enrolment.clazzEnrolmentDateJoined)
+        .toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
+    if(enrolment.clazzEnrolmentDateLeft != Long.MAX_VALUE){
+        enrolment.clazzEnrolmentDateLeft = DateTime(enrolment.clazzEnrolmentDateLeft)
+            .toOffsetByTimezone(clazzTimeZone).localEndOfDay.utc.unixMillisLong
+    }
+
+    enrolment.clazzEnrolmentUid = clazzEnrolmentDao.insertAsync(enrolment)
+
+
+    val personGroupUid = when(enrolment.clazzEnrolmentRole) {
         ClazzEnrolment.ROLE_TEACHER -> clazzWithSchoolVal.clazzTeachersPersonGroupUid
         ClazzEnrolment.ROLE_STUDENT -> clazzWithSchoolVal.clazzStudentsPersonGroupUid
+        ClazzEnrolment.ROLE_PARENT -> clazzWithSchoolVal.clazzParentsPersonGroupUid
         ClazzEnrolment.ROLE_STUDENT_PENDING -> clazzWithSchoolVal.clazzPendingStudentsPersonGroupUid
-        else -> null
+        else -> -1
     }
 
-    if(personGroupUid != null) {
-        personGroupMemberDao.insertAsync(PersonGroupMember().also {
-            it.groupMemberPersonUid = personToEnrol.personUid
-            it.groupMemberGroupUid = personGroupUid
-        })
+    if(personGroupUid != -1L) {
+        val existingGroupMemberships = personGroupMemberDao.checkPersonBelongsToGroup(
+            personGroupUid, enrolment.clazzEnrolmentPersonUid)
+        personGroupMemberDao.takeIf { existingGroupMemberships.isEmpty() }?.insertAsync(
+            PersonGroupMember().also {
+                it.groupMemberPersonUid = enrolment.clazzEnrolmentPersonUid
+                it.groupMemberGroupUid = personGroupUid
+            })
     }
 
-    return clazzMember
+    val parentsToEnrol = if(enrolment.clazzEnrolmentRole == ClazzEnrolment.ROLE_STUDENT) {
+        onRepoWithFallbackToDb(2500) {
+            it.personParentJoinDao.findByMinorPersonUidWhereParentNotEnrolledInClazz(
+                enrolment.clazzEnrolmentPersonUid, enrolment.clazzEnrolmentClazzUid)
+        }
+    }else {
+        listOf()
+    }
+
+    parentsToEnrol.forEach { parentJoin ->
+        onRepoWithFallbackToDb(2500) {
+            it.personDao.findByUid(parentJoin.parentPersonUid)
+        }?.also { parentPerson ->
+            enrolPersonIntoClazzAtLocalTimezone(parentPerson, enrolment.clazzEnrolmentClazzUid,
+                ClazzEnrolment.ROLE_PARENT, clazzWithSchoolVal)
+        }
+
+    }
+
+    return enrolment
 }
 
 /**

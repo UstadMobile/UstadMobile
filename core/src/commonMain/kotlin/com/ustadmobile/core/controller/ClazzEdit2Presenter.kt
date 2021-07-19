@@ -20,6 +20,7 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
+import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_PARENT_GROUP
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_STUDENT_GROUP
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_TEACHER_GROUP
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
@@ -256,7 +257,8 @@ class ClazzEdit2Presenter(context: Any,
 
             scopedGrantOneToManyHelper.commitToDatabase(repo, entity.clazzUid, flagToGroupMap = mapOf(
                 FLAG_TEACHER_GROUP to entity.clazzTeachersPersonGroupUid,
-                FLAG_STUDENT_GROUP to entity.clazzStudentsPersonGroupUid
+                FLAG_STUDENT_GROUP to entity.clazzStudentsPersonGroupUid,
+                FLAG_PARENT_GROUP to entity.clazzParentsPersonGroupUid,
             ))
 
 

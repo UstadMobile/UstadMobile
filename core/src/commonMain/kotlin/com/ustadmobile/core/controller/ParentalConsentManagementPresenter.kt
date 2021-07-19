@@ -6,6 +6,7 @@ import com.ustadmobile.core.impl.AppErrorCode
 import com.ustadmobile.core.impl.ErrorCodeException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.formatDate
 import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.putEntityAsJson
@@ -24,10 +25,7 @@ import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonParentJoin
-import com.ustadmobile.lib.db.entities.PersonParentJoinWithMinorPerson
-import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.*
 
 
 class ParentalConsentManagementPresenter(context: Any,
@@ -134,7 +132,18 @@ class ParentalConsentManagementPresenter(context: Any,
                 entity.ppjParentPersonUid = activeSession.person.personUid
 
                 repo.grantScopedPermission(activeSession.person,
-                    Role.ROLE_PARENT_PERSON_PERMISSIONS_DEFAULT, Person.TABLE_ID, entity.ppjMinorPersonUid)
+                    Role.ROLE_PARENT_PERSON_PERMISSIONS_DEFAULT, Person.TABLE_ID,
+                    entity.ppjMinorPersonUid)
+
+                //Enrol the parent into any classes that the minor has been enroled into
+                val parentEnrolmentsRequired = repo.personParentJoinDao
+                    .findByMinorPersonUidWhereParentNotEnrolledInClazz(
+                        entity.ppjMinorPersonUid,0L)
+
+                parentEnrolmentsRequired.forEach { parentEnrolmentRequired ->
+                    repo.enrolPersonIntoClazzAtLocalTimezone(activeSession.person,
+                    parentEnrolmentRequired.clazzUid, ClazzEnrolment.ROLE_PARENT)
+                }
             }
 
             entity.ppjApprovalTiemstamp = systemTimeInMillis()
