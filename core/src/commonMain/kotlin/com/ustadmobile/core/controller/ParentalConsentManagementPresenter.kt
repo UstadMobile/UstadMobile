@@ -125,16 +125,24 @@ class ParentalConsentManagementPresenter(context: Any,
                 return@launch
             }
 
-            if(entity.ppjParentPersonUid == 0L) {
-                val activeSession = accountManager.activeSession
-                    ?: throw IllegalStateException("Could not find person group uid!")
+            val activeSession = accountManager.activeSession
+                ?: throw IllegalStateException("Could not find person group uid!")
 
+            var classCheckRequired = false
+            if(entity.ppjParentPersonUid == 0L) {
                 entity.ppjParentPersonUid = activeSession.person.personUid
 
                 repo.grantScopedPermission(activeSession.person,
                     Role.ROLE_PARENT_PERSON_PERMISSIONS_DEFAULT, Person.TABLE_ID,
                     entity.ppjMinorPersonUid)
 
+                classCheckRequired = true
+            }
+
+            entity.ppjApprovalTiemstamp = systemTimeInMillis()
+            repo.personParentJoinDao.updateAsync(entity)
+
+            if(classCheckRequired) {
                 //Enrol the parent into any classes that the minor has been enroled into
                 val parentEnrolmentsRequired = repo.personParentJoinDao
                     .findByMinorPersonUidWhereParentNotEnrolledInClazz(
@@ -142,12 +150,9 @@ class ParentalConsentManagementPresenter(context: Any,
 
                 parentEnrolmentsRequired.forEach { parentEnrolmentRequired ->
                     repo.enrolPersonIntoClazzAtLocalTimezone(activeSession.person,
-                    parentEnrolmentRequired.clazzUid, ClazzEnrolment.ROLE_PARENT)
+                        parentEnrolmentRequired.clazzUid, ClazzEnrolment.ROLE_PARENT)
                 }
             }
-
-            entity.ppjApprovalTiemstamp = systemTimeInMillis()
-            repo.personParentJoinDao.updateAsync(entity)
 
             if(arguments[UstadView.ARG_NEXT] == CURRENT_DEST) {
                 //Where this screen was accessed from another directly (e.g. PersonDetail) then the
