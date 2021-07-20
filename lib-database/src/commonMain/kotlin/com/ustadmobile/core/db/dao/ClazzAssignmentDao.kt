@@ -28,7 +28,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                           :permission
                           ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
                  WHERE Clazz.clazzUid = :clazzUid
-                   AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid))
+                   AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid))           
                 
         SELECT ClazzAssignment.*, 
         
@@ -92,17 +92,9 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                       WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid)) 
                   ELSE 0 END) AS completedStudents, 
            
-            COALESCE((SELECT MAX(cacheStudentScore) 
-                        FROM ClazzAssignmentRollUp
-                       WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
-                         AND cachePersonUid = :accountPersonUid),0) AS resultScore,
+            $GET_ALL_ASSIGNMENTS_SCORE_FOR_CURRENT_USER_SQL AS resultScore,
                           
-                          
-            COALESCE((SELECT MAX(cacheMaxScore) 
-                        FROM ClazzAssignmentRollUp 
-                       WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
-                         AND cachePersonUid = :accountPersonUid),0) AS resultMax,
-                                
+            $GET_ALL_ASSIGNMENTS_GET_MAX_SCORE_FOR_CURRENT_USER AS resultMax,
                                 
             COALESCE((SELECT COUNT(cacheContentComplete)
                         FROM ClazzAssignmentRollUp
@@ -141,17 +133,17 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
               AND ClazzAssignment.caClazzUid = :clazzUid
               AND (ClazzAssignment.caTitle LIKE :searchText 
                     OR ClazzAssignment.caDescription LIKE :searchText)
-              AND (hasMetricsPermission OR :timestamp >= ClazzAssignment.caStartDate)
+              AND ((SELECT hasPermission FROM CtePermissionCheck) OR :timestamp >= ClazzAssignment.caStartDate)
          ORDER BY CASE(:sortOrder)
                 WHEN $SORT_START_DATE_ASC THEN ClazzAssignment.caStartDate
                 WHEN $SORT_DEADLINE_ASC THEN ClazzAssignment.caDeadlineDate
-                WHEN $SORT_SCORE_ASC THEN (resultScore/resultMax)
+                WHEN $SORT_SCORE_ASC THEN ($GET_ALL_ASSIGNMENTS_SCORE_FOR_CURRENT_USER_SQL/$GET_ALL_ASSIGNMENTS_GET_MAX_SCORE_FOR_CURRENT_USER)
                 ELSE 0
             END ASC,
             CASE(:sortOrder)
                 WHEN $SORT_START_DATE_DESC THEN ClazzAssignment.caStartDate
                 WHEN $SORT_DEADLINE_DESC THEN ClazzAssignment.caDeadlineDate
-                WHEN $SORT_SCORE_DESC THEN (resultScore/resultMax)
+                WHEN $SORT_SCORE_DESC THEN ($GET_ALL_ASSIGNMENTS_SCORE_FOR_CURRENT_USER_SQL/$GET_ALL_ASSIGNMENTS_GET_MAX_SCORE_FOR_CURRENT_USER)
                 ELSE 0
             END DESC,
             CASE(:sortOrder)
@@ -415,6 +407,20 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
     abstract fun findByUidLive(uid: Long): DoorLiveData<ClazzAssignment?>
 
     companion object{
+
+        private const val GET_ALL_ASSIGNMENTS_SCORE_FOR_CURRENT_USER_SQL = """
+        COALESCE((SELECT MAX(cacheStudentScore) 
+                        FROM ClazzAssignmentRollUp
+                       WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
+                         AND cachePersonUid = :accountPersonUid),0)
+        """
+
+        private const val GET_ALL_ASSIGNMENTS_GET_MAX_SCORE_FOR_CURRENT_USER = """
+            COALESCE((SELECT MAX(cacheMaxScore) 
+                        FROM ClazzAssignmentRollUp 
+                       WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
+                         AND cachePersonUid = :accountPersonUid),0)
+        """
 
         const val SORT_DEADLINE_ASC = 1
 
