@@ -6,7 +6,6 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.EntityRole
 import com.ustadmobile.lib.db.entities.EntityRoleWithNameAndRole
 import com.ustadmobile.mocks.db.DatabaseJs.Companion.ALLOW_ACCESS
-import kotlinx.serialization.builtins.ListSerializer
 
 class EntityRoleDaoJs: EntityRoleDao() {
     override suspend fun updateEntityRoleActive(uid: Long, active: Boolean) {
@@ -37,9 +36,7 @@ class EntityRoleDaoJs: EntityRoleDao() {
     }
 
     override fun filterByPersonWithExtra(personGroupUid: Long): DataSource.Factory<Int, EntityRoleWithNameAndRole> {
-        return DataSourceFactoryJs<Int, EntityRoleWithNameAndRole, Any>("personExtra",personGroupUid,"roles",
-            ListSerializer(EntityRoleWithNameAndRole.serializer())
-        )
+        return DataSourceFactoryJs(listOf())
     }
 
     override suspend fun filterByPersonWithExtraAsList(personGroupUid: Long): List<EntityRoleWithNameAndRole> {

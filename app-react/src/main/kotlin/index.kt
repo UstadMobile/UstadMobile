@@ -15,6 +15,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.mocks.container.ContainerMounterJs
 import com.ustadmobile.mocks.db.DatabaseJs
+import com.ustadmobile.navigation.NavControllerJs
 import com.ustadmobile.redux.ReduxAppStateManager.createStore
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.redux.ReduxDiState
@@ -115,6 +116,10 @@ private val diModule = DI.Module("UstadApp-React"){
             install(JsonFeature)
             install(HttpTimeout)
         }
+    }
+
+    bind<UstadNavController>() with provider {
+        NavControllerJs()
     }
 
     registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

@@ -9,11 +9,11 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
-import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.StyleManager.defaultMarginTop
+import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.personDetailComponentActionIcon
 import com.ustadmobile.util.StyleManager.personDetailComponentActions
@@ -82,7 +82,10 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
 
     override fun RBuilder.render() {
         styledDiv {
-            css(contentContainer)
+            css{
+                +contentContainer
+                +defaultPaddingTop
+            }
             umGridContainer {
                 umItem(MGridSize.cells12){
                     umGridContainer(MGridSpacing.spacing4) {
@@ -140,13 +143,13 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
 
                                 umItem(MGridSize.cells12){
                                     createInformation("event",
-                                        Date(entity?.dateOfBirth ?: 0).formatDate("dd/mm/yyyy"),
-                                        MessageID.birthday)
+                                        Date(entity?.dateOfBirth ?: 0).formatDate("DD/MM/YYYY"),
+                                        getString(MessageID.birthday))
                                     createInformation(null,
                                         getString(GENDER_MESSAGE_ID_MAP[entity?.gender] ?: 0),
-                                        MessageID.field_person_gender)
-                                    createInformation("badge", entity?.personOrgId, MessageID.organization_id)
-                                    createInformation("account_circle", entity?.username, MessageID.username)
+                                        getString(MessageID.field_person_gender))
+                                    createInformation("badge", entity?.personOrgId, getString(MessageID.organization_id))
+                                    createInformation("account_circle", entity?.username, getString(MessageID.username))
                                 }
 
                                 umItem(MGridSize.cells12){
@@ -157,9 +160,9 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
                                 }
 
                                 umItem(MGridSize.cells12){
-                                    createInformation("call",entity?.phoneNum,MessageID.phone_number)
-                                    createInformation("email",entity?.emailAddr,MessageID.email)
-                                    createInformation("place",entity?.personAddress,MessageID.address)
+                                    createInformation("call",entity?.phoneNum,getString(MessageID.phone_number))
+                                    createInformation("email",entity?.emailAddr,getString(MessageID.email))
+                                    createInformation("place",entity?.personAddress,getString(MessageID.address))
                                 }
                             }
                         }
@@ -189,31 +192,6 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
                     }
                 }
                 mTypography(getString(messageId), variant = MTypographyVariant.body1, gutterBottom = true){
-                    css(alignTextToStart)
-                }
-            }
-        }
-    }
-
-    private fun RBuilder.createInformation(icon:String? = null, data: String?, label: Int){
-        umGridContainer {
-            css{
-                +defaultMarginTop
-                display = displayProperty(data != "0" || !data.isNullOrEmpty(), true)
-            }
-            umItem(MGridSize.cells2){
-               if(icon != null){
-                   mIcon(icon, className = "${StyleManager.name}-detailIconClass")
-               }
-            }
-
-            umItem(MGridSize.cells10){
-                mTypography("$data", variant = MTypographyVariant.body1){
-                    css(alignTextToStart)
-                }
-
-                mTypography(getString(label),
-                    variant = MTypographyVariant.body2){
                     css(alignTextToStart)
                 }
             }

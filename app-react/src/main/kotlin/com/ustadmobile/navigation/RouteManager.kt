@@ -35,6 +35,7 @@ object RouteManager {
         UstadDestination(view = WebChunkView.VIEW_NAME, component = WebChunkComponent::class),
         UstadDestination(view = RedirectView.VIEW_NAME, component = RedirectComponent::class),
         UstadDestination(view = ClazzDetailView.VIEW_NAME, component = ClazzDetailComponent::class),
+        UstadDestination(view = ClazzDetailOverviewView.VIEW_NAME, component = ClazzDetailOverviewComponent::class),
         UstadDestination(labelId= MessageID.accounts, view = AccountListView.VIEW_NAME, component = PlaceHolderComponent::class)
     )
 

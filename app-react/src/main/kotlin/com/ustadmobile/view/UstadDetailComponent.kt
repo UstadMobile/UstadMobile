@@ -4,7 +4,6 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.UstadDetailView
-import org.w3c.dom.events.Event
 import react.RProps
 import react.RState
 
@@ -17,10 +16,14 @@ abstract class UstadDetailComponent<T: Any>(mProps: RProps) : UstadBaseComponent
         get() = field
         set(value) {
             fabManager?.visible = true
-            fabManager?.icon = "edit"
-            fabManager?.text = getString(MessageID.edit)
             field = value
         }
+
+    override fun onCreate(arguments: Map<String, String>) {
+        super.onCreate(arguments)
+        fabManager?.icon = "edit"
+        fabManager?.text = getString(MessageID.edit)
+    }
 
     override fun onFabClicked() {
         super.onFabClicked()

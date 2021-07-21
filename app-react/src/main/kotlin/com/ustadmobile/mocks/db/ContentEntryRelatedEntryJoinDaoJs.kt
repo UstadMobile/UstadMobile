@@ -3,7 +3,6 @@ package com.ustadmobile.mocks.db
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao
 import com.ustadmobile.lib.db.entities.*
-import kotlinx.serialization.builtins.ListSerializer
 
 class ContentEntryRelatedEntryJoinDaoJs: ContentEntryRelatedEntryJoinDao() {
 
@@ -22,11 +21,12 @@ class ContentEntryRelatedEntryJoinDaoJs: ContentEntryRelatedEntryJoinDao() {
     }
 
     override fun findAllTranslationsWithContentEntryUid(contentEntryUid: Long): DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage> {
-        return DataSourceFactoryJs(null,contentEntryUid,relationPath,
-            ListSerializer(ContentEntryRelatedEntryJoinWithLanguage.serializer()),
-            ListSerializer(Language.serializer()), "language","cerejRelLanguageUid",
-            "langUid","languages.json"
-        )
+        val entries = ContentEntryDaoJs.ENTRIES.filter { it.leaf }
+            .unsafeCast<List<ContentEntryRelatedEntryJoinWithLanguage>>()
+        entries.mapIndexed { index, it ->
+                it.language = LanguageDaoJs.ENTRIES[index]
+        }
+        return DataSourceFactoryJs(entries)
     }
 
     override fun update(entity: ContentEntryRelatedEntryJoin) {

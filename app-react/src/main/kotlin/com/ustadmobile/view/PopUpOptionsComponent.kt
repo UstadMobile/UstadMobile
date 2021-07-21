@@ -20,7 +20,7 @@ import react.*
 import styled.css
 import styled.styledDiv
 
-data class PopUpOptionItem(var icon: String, var titleId: Int, val onOptionItemClicked: (() -> Unit)? = null)
+data class PopUpOptionItem(var icon: String, var primaryText: Int, var secondaryText: Int = 0, val onOptionItemClicked: (() -> Unit)? = null)
 
 interface OptionsProps: RProps {
     var optionItems: List<PopUpOptionItem>
@@ -60,7 +60,10 @@ class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, RSta
                                         mIcon(option.icon)
                                     }
                                 }
-                                mListItemText(primary = props.systemImpl.getString(option.titleId, this))
+                                mListItemText(
+                                    primary = props.systemImpl.getString(option.primaryText, this),
+                                    secondary = if(option.secondaryText != 0)
+                                        props.systemImpl.getString(option.secondaryText, this) else "")
                             }
                         }
                     }

@@ -2,7 +2,6 @@ package com.ustadmobile.mocks.db
 
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mocks.db.DatabaseJs.Companion.ALLOW_ACCESS
@@ -12,8 +11,6 @@ import kotlinx.serialization.builtins.ListSerializer
 
 class ContentEntryDaoJs: ContentEntryDao() {
 
-    private val sourcePath = TAG_ENTRIES
-
     override suspend fun insertListAsync(entityList: List<ContentEntry>) {
         TODO("Not yet implemented")
     }
@@ -22,7 +19,7 @@ class ContentEntryDaoJs: ContentEntryDao() {
         personUid: Long,
         sortOrder: Int
     ): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
-        TODO("Not yet implemented")
+        return DataSourceFactoryJs(listOf())
     }
 
     override suspend fun findEntryWithLanguageByEntryIdAsync(entryUuid: Long): ContentEntryWithLanguage? {
@@ -30,10 +27,9 @@ class ContentEntryDaoJs: ContentEntryDao() {
     }
 
     override suspend fun findEntryWithContainerByEntryId(entryUuid: Long): ContentEntryWithMostRecentContainer? {
-        val data = loadDataAsList(sourcePath, ListSerializer(ContentEntryWithMostRecentContainer.serializer()))
-        return data.first {
+        return ENTRIES.firstOrNull {
             it.contentEntryUid == entryUuid
-        }.apply {
+        }.unsafeCast<ContentEntryWithMostRecentContainer>().apply {
             container = Container()
         }
     }
@@ -43,9 +39,7 @@ class ContentEntryDaoJs: ContentEntryDao() {
     }
 
     override suspend fun findTitleByUidAsync(contentEntryUid: Long): String? {
-        val data = loadDataAsList(sourcePath,
-            ListSerializer(ContentEntry.serializer()))
-        return data.firstOrNull { it.contentEntryUid == contentEntryUid }?.title
+        return ENTRIES.firstOrNull { it.contentEntryUid == contentEntryUid }?.title
     }
 
     override fun getChildrenByParentUid(parentUid: Long): DataSource.Factory<Int, ContentEntry> {
@@ -61,9 +55,7 @@ class ContentEntryDaoJs: ContentEntryDao() {
     }
 
     override suspend fun getContentByUuidAsync(parentUid: Long): ContentEntry? {
-        val data = loadDataAsList(sourcePath,
-            ListSerializer(ContentEntry.serializer()))
-        return data.firstOrNull {
+        return ENTRIES.firstOrNull {
             it.contentEntryUid == parentUid
         }
     }
@@ -89,8 +81,7 @@ class ContentEntryDaoJs: ContentEntryDao() {
     }
 
     override suspend fun findByUidAsync(entryUid: Long): ContentEntry? {
-        val data = loadDataAsList(sourcePath, ListSerializer(ContentEntry.serializer()))
-        return data.firstOrNull { it.contentEntryUid == entryUid }
+        return ENTRIES.firstOrNull { it.contentEntryUid == entryUid }
     }
 
     override fun findByUid(entryUid: Long): ContentEntry? {
@@ -114,8 +105,8 @@ class ContentEntryDaoJs: ContentEntryDao() {
         onlyFolder: Boolean,
         sortOrder: Int
     ): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
-        return DataSourceFactoryJs<Int,ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, Any>("entryId",parentUid,sourcePath,
-            ListSerializer(ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer()))
+        val entries = ENTRIES.unsafeCast<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>()
+        return DataSourceFactoryJs(entries)
     }
 
     override fun getClazzContent(
@@ -123,9 +114,8 @@ class ContentEntryDaoJs: ContentEntryDao() {
         personUid: Long,
         sortOrder: Int
     ): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
-        return DataSourceFactoryJs<Int,ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, Any>("entryId",
-            UstadView.MASTER_SERVER_ROOT_ENTRY_UID,sourcePath,
-            ListSerializer(ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer()))
+        val entries = ENTRIES.unsafeCast<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>()
+        return DataSourceFactoryJs(entries)
     }
 
     override suspend fun updateAsync(entity: ContentEntry): Int {
@@ -213,6 +203,10 @@ class ContentEntryDaoJs: ContentEntryDao() {
 
     override fun updateList(entityList: List<ContentEntry>) {
         TODO("Not yet implemented")
+    }
+
+    companion object {
+        val ENTRIES = loadDataAsList(TAG_ENTRIES,ListSerializer(ContentEntry.serializer()))
     }
 
 }

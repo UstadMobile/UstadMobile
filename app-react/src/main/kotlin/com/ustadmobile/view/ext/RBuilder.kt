@@ -1,12 +1,19 @@
 package com.ustadmobile.view.ext
 
 import com.ccfraser.muirwik.components.*
+import com.ustadmobile.core.controller.ScheduleEditPresenter
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.navigation.RouteManager.defaultRoute
 import com.ustadmobile.navigation.RouteManager.destinationList
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.entryItemImageContainer
 import com.ustadmobile.util.StyleManager.mainComponentErrorPaper
 import com.ustadmobile.util.StyleManager.personListItemAvatar
+import com.ustadmobile.util.ext.formatDate
+import kotlinx.browser.document
+import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
 import org.w3c.dom.events.Event
@@ -20,6 +27,7 @@ import styled.StyledHandler
 import styled.css
 import styled.styledDiv
 import styled.styledSpan
+import kotlin.js.Date
 
 fun RBuilder.appBarSpacer() {
     themeContext.Consumer { theme ->
@@ -125,4 +133,83 @@ fun RBuilder.handleMail(email: String?){
 
 fun RBuilder.handleSMS(phoneNumber: String?){
 
+}
+
+fun RBuilder.setScheduleText(schedule: Schedule, systemImpl: UstadMobileSystemImpl) : ReactElement{
+    val frequencyMessageId = ScheduleEditPresenter.FrequencyOption.values()
+        .firstOrNull { it.optionVal == schedule.scheduleFrequency }?.messageId ?: MessageID.None
+    val dayMessageId = ScheduleEditPresenter.DayOptions.values()
+        .firstOrNull { it.optionVal == schedule.scheduleDay }?.messageId ?: MessageID.None
+
+    val scheduleDays = "${systemImpl.getString(frequencyMessageId, this)} - ${systemImpl.getString(dayMessageId, this)}"
+
+    val startEndTime = "${Date(schedule.sceduleStartTime).formatDate("HH:mm")} " +
+            "- ${Date(schedule.scheduleEndTime).formatDate("HH:mm")}"
+
+    return mTypography("$scheduleDays $startEndTime",
+        variant = MTypographyVariant.body2,
+        color = MTypographyColor.textPrimary,
+        gutterBottom = true){
+        css(StyleManager.alignTextToStart)
+    }
+}
+
+fun RBuilder.copyToClipboard(text: String, copyHandler:()-> Unit){
+    val secure = js("typeof(navigator.clipboard)!='undefined' " +
+            "&& window.isSecureContext").toString().toBoolean()
+    if(secure){
+        window.navigator.clipboard.writeText(text).then {
+            copyHandler()
+        }
+    }else{
+        val element = document.createElement("textarea")
+        val textArea = element.asDynamic()
+        textArea.value = text
+        textArea.style.position = "fixed"
+        textArea.style.left = "-999999px"
+        textArea.style.top = "-999999px"
+        document.body?.appendChild(textArea)
+        textArea.focus()
+        textArea.select()
+        val copied = document.execCommand("copy")
+        if(copied){
+            copyHandler()
+        }
+        textArea.remove()
+    }
+}
+
+fun RBuilder.createInformation(icon:String? = null, data: String?, label: String? = null, onClick:(() -> Unit)? = null){
+    umGridContainer {
+        css{
+            +StyleManager.defaultMarginTop
+            display = StyleManager.displayProperty(data != "0" || !data.isNullOrEmpty(), true)
+        }
+        umItem(MGridSize.cells2){
+            if(icon != null){
+                mIcon(icon, className = "${StyleManager.name}-detailIconClass")
+            }
+        }
+
+        umItem(MGridSize.cells10){
+            if(onClick != null){
+                attrs.asDynamic().onClick = {
+                    onClick()
+                }
+            }
+            mTypography("$data",
+                color = MTypographyColor.textPrimary,
+                variant = MTypographyVariant.body1){
+                css(StyleManager.alignTextToStart)
+            }
+
+            if(!label.isNullOrBlank()){
+                mTypography(label,
+                    color = MTypographyColor.textPrimary,
+                    variant = MTypographyVariant.body2){
+                    css(StyleManager.alignTextToStart)
+                }
+            }
+        }
+    }
 }

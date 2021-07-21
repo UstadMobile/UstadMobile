@@ -4,11 +4,13 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.mocks.DummyDataPreload
 import com.ustadmobile.mocks.DummyDataPreload.Companion.TAG_ENTRIES
+import com.ustadmobile.navigation.NavControllerJs
 import com.ustadmobile.util.Util.loadAssetsAsText
 import com.ustadmobile.util.Util.loadFileContentAsMap
 import com.ustadmobile.util.urlSearchParamsToMap
@@ -30,10 +32,15 @@ class SplashPresenter(private val view: SplashView): DIAware{
 
     private val accountManager: UstadAccountManager by instance()
 
+
     fun onCreate(){
         val directionAttributeValue = if(impl.isRtlActive()) "rtl" else "ltr"
         val rootElement = document.getElementById("root")
         rootElement?.setAttribute("dir",directionAttributeValue)
+
+        val navController: UstadNavController by instance()
+        console.log(navController)
+        impl.navController = navController
     }
 
     fun handleResourceLoading() = GlobalScope.launch{

@@ -314,17 +314,20 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
     private fun RBuilder.renderSnackBar(){
         mSnackbar(altBuilder.span { +"${appState.appSnackBar.message}"},
             open = appState.appSnackBar.message != null,
-            horizAnchor = MSnackbarHorizAnchor.center, autoHideDuration = 5000,
+            horizAnchor = MSnackbarHorizAnchor.center, autoHideDuration = 3000,
             onClose = { _, _ ->
                 dispatch(ReduxSnackBarState())
             }) {
-            attrs.action = altBuilder.div {
-                mButton("${appState.appSnackBar.actionLabel}", color = MColor.secondary,
-                    variant = MButtonVariant.text, size = MButtonSize.small,
-                    onClick = {
-                        appState.appSnackBar.onClick
-                        dispatch(ReduxSnackBarState())
-                    })
+
+            if(!appState.appSnackBar.actionLabel.isNullOrBlank()){
+                attrs.action = altBuilder.div {
+                    mButton("${appState.appSnackBar.actionLabel}", color = MColor.secondary,
+                        variant = MButtonVariant.text, size = MButtonSize.small,
+                        onClick = {
+                            appState.appSnackBar.onClick
+                            dispatch(ReduxSnackBarState())
+                        })
+                }
             }
         }
     }

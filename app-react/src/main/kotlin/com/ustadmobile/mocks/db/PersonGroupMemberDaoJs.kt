@@ -2,7 +2,7 @@ package com.ustadmobile.mocks.db
 
 import com.ustadmobile.core.db.dao.PersonGroupMemberDao
 import com.ustadmobile.lib.db.entities.PersonGroupMember
-import com.ustadmobile.mocks.db.PersonDaoJs.Companion.PERSON_LIST
+import com.ustadmobile.mocks.db.PersonDaoJs.Companion.ENTRIES
 
 class PersonGroupMemberDaoJs: PersonGroupMemberDao() {
     override suspend fun findAllGroupWherePersonIsIn(personUid: Long): List<PersonGroupMember> {
@@ -48,7 +48,7 @@ class PersonGroupMemberDaoJs: PersonGroupMemberDao() {
         val GROUP_MEMBERS = listOf(
             PersonGroupMember().apply {
                 groupMemberUid = 1
-                groupMemberPersonUid = PERSON_LIST.first().personUid
+                groupMemberPersonUid = ENTRIES.first().personUid
             }
         )
     }

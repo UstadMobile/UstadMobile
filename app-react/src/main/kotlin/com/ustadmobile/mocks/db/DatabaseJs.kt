@@ -23,7 +23,7 @@ class DatabaseJs: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val clazzDao: ClazzDao
         get() = ClazzDaoJs()
     override val clazzEnrolmentDao: ClazzEnrolmentDao
-        get() = TODO("Not yet implemented")
+        get() = ClazzEnrolmentDaoJs()
     override val leavingReasonDao: LeavingReasonDao
         get() = TODO("Not yet implemented")
     override val contentEntryDao: ContentEntryDao
@@ -112,7 +112,7 @@ class DatabaseJs: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val customFieldValueOptionDao: CustomFieldValueOptionDao
         get() = TODO("Not yet implemented")
     override val scheduleDao: ScheduleDao
-        get() = TODO("Not yet implemented")
+        get() = ScheduleDaoJs()
     override val scheduledCheckDao: ScheduledCheckDao
         get() = TODO("Not yet implemented")
     override val holidayCalendarDao: HolidayCalendarDao

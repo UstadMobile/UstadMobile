@@ -35,6 +35,7 @@ import react.RProps
 import react.setState
 import styled.css
 import styled.styledDiv
+import kotlin.js.Date
 
 
 class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
@@ -43,8 +44,6 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
     private lateinit var mPresenter: ContentEntryList2Presenter
 
     private var showAddEntryOptions = false
-
-    private var mParentEntryUid:Long = 0
 
     private var showingEditOptions = false
 
@@ -72,6 +71,11 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
     override fun onCreate(arguments: Map<String, String>) {
         super.onCreate(arguments)
         fabManager?.text = getString(MessageID.content)
+        fabManager?.onClickListener = {
+            setState {
+                showAddEntryOptions = true
+            }
+        }
         arguments.toMutableMap().putAll(mapOf(
             ARG_WEB_PLATFORM to true.toString()))
         mPresenter = ContentEntryList2Presenter(this, arguments, this,di,this)
@@ -81,14 +85,14 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
     override fun RBuilder.renderListItem(item: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
 
         umGridContainer(MGridSpacing.spacing7) {
-            umItem(MGridSize.cells4, MGridSize.cells2){
+            umItem(MGridSize.cells4, MGridSize.cells3){
                 val fallBackSrc = "assets/" + if(item.leaf) "book.png" else "folder.png"
                 umEntityAvatar(item.thumbnailUrl,fallBackSrc,
                     showIcon = false,
                     className = "${StyleManager.name}-entityThumbnailClass")
             }
 
-            umItem(MGridSize.cells8, MGridSize.cells10){
+            umItem(MGridSize.cells8, MGridSize.cells9){
                 umItem(MGridSize.cells12){
                     mTypography(item.title,variant = MTypographyVariant.h6,
                         color = MTypographyColor.textPrimary){
@@ -141,59 +145,29 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
     }
 
     override fun RBuilder.renderAddEntryOptionsDialog() {
-        mDialog(showAddEntryOptions, onClose = { _, _ ->
-            setState {
-                showAddEntryOptions = false
-            }
-        }) {
-            mDialogContent {
-                css {
-                    width = 25.pc
-                }
-                styledDiv {
-                    css {
-                        width = LinearDimension("100%")
-                    }
-                    mList {
-                        mListItem(button = true, onClick = {
-                            handleAddEntryOptionClicked(false) }) {
-                            mListItemAvatar {
-                                mAvatar {
-                                    mIcon("create_new_folder")
-                                }
-                            }
-                            mListItemText(primary = getString(MessageID.content_editor_create_new_category))
-                        }
 
-                        mListItem(button = true, onClick = {
-                            handleAddEntryOptionClicked(true) }) {
-                            mListItemAvatar {
-                                mAvatar {
-                                    mIcon("exit_to_app")
-                                }
-                            }
-                            mListItemText(primary = getString(MessageID.import_content))
-                        }
-                    }
+        if(showAddEntryOptions){
+            val options = mutableListOf(
+                PopUpOptionItem("create_new_folder",
+                    MessageID.content_editor_create_new_category) {
+                    mPresenter.onClickNewFolder()
+                },
+                PopUpOptionItem("link",MessageID.add_using_link,
+                    MessageID.add_link_description) {
+                    mPresenter.onClickImportLink()
+                },
+                PopUpOptionItem("collections",MessageID.add_from_gallery,
+                    MessageID.add_gallery_description) {
+                    mPresenter.onClickImportGallery()
+                },
+                PopUpOptionItem("note_add",MessageID.add_file,
+                    MessageID.add_file_description) {
+                    mPresenter.onClickImportFile()
                 }
-            }
+            )
 
-            mDialogActions {
-                mButton(getString(MessageID.cancel), color = MColor.primary,
-                    onClick = {
-                        setState {
-                            showAddEntryOptions = false
-                        }
-                    }
-                )
-            }
+            renderPopUpOptions(systemImpl,options, Date().getTime().toLong())
         }
-    }
-
-    private fun handleAddEntryOptionClicked(contentType: Boolean){
-        systemImpl.go(ContentEntryEdit2View.VIEW_NAME,mapOf(
-            ARG_PARENT_ENTRY_UID to mParentEntryUid.toString(),
-            UstadView.ARG_LEAF to contentType.toString()),this)
     }
 
 

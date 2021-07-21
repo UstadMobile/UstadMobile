@@ -132,10 +132,6 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
     override val di: DI by DI.lazy {
         extend(getCurrentState().appDi.di)
 
-        bind<UstadNavController>() with provider {
-            NavControllerJs()
-        }
-
         bind<CoroutineScope>(DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with provider {
             GlobalScope
         }

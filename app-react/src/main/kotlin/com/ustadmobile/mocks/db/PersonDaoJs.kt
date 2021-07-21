@@ -6,7 +6,6 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mocks.DoorLiveDataJs
 import com.ustadmobile.mocks.db.DatabaseJs.Companion.ALLOW_ACCESS
-import kotlinx.serialization.builtins.ListSerializer
 
 class PersonDaoJs: PersonDao() {
     
@@ -40,7 +39,7 @@ class PersonDaoJs: PersonDao() {
         mUsername: String,
         passwordHash: String
     ): Person? {
-        return PERSON_LIST.first().apply {
+        return ENTRIES.first().apply {
             username = mUsername
         }
     }
@@ -58,33 +57,33 @@ class PersonDaoJs: PersonDao() {
     }
 
     override suspend fun personIsAdmin(accountPersonUid: Long): Boolean {
-        return PERSON_LIST.first().admin
+        return ENTRIES.first().admin
     }
 
     override fun findByUsername(username: String?): Person? {
-        return PERSON_LIST.first()
+        return ENTRIES.first()
     }
 
     override suspend fun findByUid(uid: Long): Person? {
-        return PERSON_LIST.first().apply {
+        return ENTRIES.first().apply {
             personUid = uid
         }
     }
 
     override suspend fun findPersonAccountByUid(uid: Long): PersonWithAccount? {
-        return PERSON_LIST.first().apply {
+        return ENTRIES.first().apply {
             personUid = uid
         }
     }
 
     override fun findByUidLive(uid: Long): DoorLiveData<Person?> {
-        return DoorLiveDataJs(PERSON_LIST.first().apply {
+        return DoorLiveDataJs(ENTRIES.first().apply {
             personUid = uid
         })
     }
 
     override suspend fun findByUidAsync(uid: Long): Person? {
-        return PERSON_LIST.first().apply {
+        return ENTRIES.first().apply {
             personUid = uid
         }
     }
@@ -110,9 +109,7 @@ class PersonDaoJs: PersonDao() {
         sortOrder: Int,
         searchText: String?
     ): DataSource.Factory<Int, PersonWithDisplayDetails> {
-        return DataSourceFactoryJs<Int,PersonWithDisplayDetails, Any>(null,accountPersonUid,mPath,
-            ListSerializer(PersonWithDisplayDetails.serializer())
-        )
+        return DataSourceFactoryJs(ENTRIES.unsafeCast<List<PersonWithDisplayDetails>>())
     }
 
     override fun findPersonsWithPermissionAsList(
@@ -131,7 +128,7 @@ class PersonDaoJs: PersonDao() {
         mPersonUid: Long,
         activeUserPersonUid: Long
     ): DoorLiveData<PersonWithPersonParentJoin?> {
-        return DoorLiveDataJs(PERSON_LIST.first().apply {
+        return DoorLiveDataJs(ENTRIES.first().apply {
             personUid = mPersonUid
         }) as DoorLiveData<PersonWithPersonParentJoin?>
     }
@@ -141,7 +138,7 @@ class PersonDaoJs: PersonDao() {
     }
 
     override fun getAllPerson(): List<Person> {
-        return PERSON_LIST
+        return ENTRIES
     }
 
     override fun insert(entity: Person): Long {
@@ -165,7 +162,7 @@ class PersonDaoJs: PersonDao() {
     }
     
     companion object {
-        val PERSON_LIST = listOf(
+        val ENTRIES = listOf(
             PersonWithAccount().apply {
                 username = "admin"
                 firstNames = "Admin"
@@ -175,7 +172,29 @@ class PersonDaoJs: PersonDao() {
                 personAddress = "Miyuji Proper, Dodoma"
                 dateOfBirth = 706563066000
                 lastName = "Users"
-                gender = 2
+                gender = Person.GENDER_OTHER
+            },
+            PersonWithAccount().apply {
+                username = "janeDoe"
+                firstNames = "Jane"
+                admin = true
+                emailAddr = "jane@users.com"
+                phoneNum = "+255 71242 5886"
+                personAddress = "Proper, Dodoma"
+                dateOfBirth = 706513066080
+                lastName = "Doe"
+                gender = Person.GENDER_FEMALE
+            },
+            PersonWithAccount().apply {
+                username = "johnDoe"
+                firstNames = "John"
+                admin = true
+                emailAddr = "john@users.com"
+                phoneNum = "+255 71242 5886"
+                personAddress = "Proper, Dodoma"
+                dateOfBirth = 716513066080
+                lastName = "Doe"
+                gender = Person.GENDER_FEMALE
             }
         )
     }

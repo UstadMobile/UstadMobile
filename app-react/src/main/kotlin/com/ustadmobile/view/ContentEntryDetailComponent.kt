@@ -22,11 +22,19 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
     override val viewName: String
         get() = ContentEntryDetailView.VIEW_NAME
 
+    private var tabsToRender: List<UstadTab>? = null
+
     override var tabs: List<String>? = null
         get() = field
         set(value) {
-            setState {
-                field = value
+            field = value
+            tabsToRender = value?.map {
+                val messageId = viewNameToTitleMap[it.substringBefore("?",)] ?: 0
+                UstadTab(
+                    it.substringBefore("?"),
+                    urlSearchParamsToMap(it.substring(it.lastIndexOf("?"))),
+                    getString( messageId)
+                )
             }
         }
 
@@ -45,17 +53,8 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
     }
 
     override fun RBuilder.render() {
-        val detailTabs = tabs
-        if(detailTabs != null){
-            val tabsToRender = detailTabs.map {
-                val messageId = viewNameToTitleMap[it.substringBefore("?",)] ?: 0
-                UstadTab(
-                    it.substringBefore("?"),
-                    urlSearchParamsToMap(it.substring(it.lastIndexOf("?"))),
-                    getString( messageId)
-                )
-            }
-            renderTabs(tabsToRender, false)
+        tabsToRender?.let {
+            renderTabs(it, true)
         }
     }
 
