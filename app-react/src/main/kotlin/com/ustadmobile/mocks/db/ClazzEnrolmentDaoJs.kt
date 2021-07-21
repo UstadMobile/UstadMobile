@@ -140,25 +140,31 @@ class ClazzEnrolmentDaoJs: ClazzEnrolmentDao() {
                 clazzEnrolmentClazzUid = ClazzDaoJs.ENTRIES.first().clazzUid
                 attendance = 0.7f
                 clazzEnrolmentDateJoined = 1623866241000L
+                clazzEnrolmentDateLeft = 1725266241000L
                 clazzEnrolmentPersonUid = PersonDaoJs.ENTRIES.first().personUid
                 clazz = ClazzDaoJs.ENTRIES.first()
+                clazzEnrolmentRole = ClazzEnrolment.ROLE_TEACHER
             },
             ClazzEnrolmentWithClazzAndAttendance().apply {
                 clazzEnrolmentUid = 2
                 clazzEnrolmentClazzUid = ClazzDaoJs.ENTRIES[1].clazzUid
                 attendance = 0.2f
                 clazzEnrolmentDateJoined = 1623266241000L
+                clazzEnrolmentDateLeft = 1725266241000L
                 clazzEnrolmentPersonUid = PersonDaoJs.ENTRIES[1].personUid
-                clazz = ClazzDaoJs.ENTRIES.last()
+                clazzEnrolmentRole = ClazzEnrolment.ROLE_STUDENT
+                clazz = ClazzDaoJs.ENTRIES[1]
             },
 
             ClazzEnrolmentWithClazzAndAttendance().apply {
                 clazzEnrolmentUid = 3
-                clazzEnrolmentClazzUid = ClazzDaoJs.ENTRIES.last().clazzUid
+                clazzEnrolmentClazzUid = ClazzDaoJs.ENTRIES[2].clazzUid
                 attendance = 0.9f
                 clazzEnrolmentDateJoined = 1625266241000L
-                clazzEnrolmentPersonUid = PersonDaoJs.ENTRIES[1].personUid
-                clazz = ClazzDaoJs.ENTRIES.last()
+                clazzEnrolmentDateLeft = 1725266241000L
+                clazzEnrolmentPersonUid = PersonDaoJs.ENTRIES[2].personUid
+                clazz = ClazzDaoJs.ENTRIES[2]
+                clazzEnrolmentRole = ClazzEnrolment.ROLE_STUDENT_PENDING
             }
         )
     }

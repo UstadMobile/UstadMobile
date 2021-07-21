@@ -10,6 +10,7 @@ import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.navigation.RouteManager.defaultRoute
 import com.ustadmobile.navigation.RouteManager.destinationList
 import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.clazzListItemSecondaryIcons
 import com.ustadmobile.util.StyleManager.entryItemImageContainer
 import com.ustadmobile.util.StyleManager.mainComponentErrorPaper
 import com.ustadmobile.util.StyleManager.personListItemAvatar
@@ -32,6 +33,7 @@ import styled.StyledHandler
 import styled.css
 import styled.styledDiv
 import styled.styledSpan
+import kotlin.Float
 import kotlin.js.Date
 
 fun RBuilder.appBarSpacer() {
@@ -140,7 +142,7 @@ fun RBuilder.handleSMS(phoneNumber: String?){
 
 }
 
-fun RBuilder.setScheduleText(schedule: Schedule, systemImpl: UstadMobileSystemImpl) : ReactElement{
+fun RBuilder.setScheduleText(schedule: Schedule, systemImpl: UstadMobileSystemImpl) {
     val frequencyMessageId = ScheduleEditPresenter.FrequencyOption.values()
         .firstOrNull { it.optionVal == schedule.scheduleFrequency }?.messageId ?: MessageID.None
     val dayMessageId = ScheduleEditPresenter.DayOptions.values()
@@ -151,7 +153,7 @@ fun RBuilder.setScheduleText(schedule: Schedule, systemImpl: UstadMobileSystemIm
     val startEndTime = "${Date(schedule.sceduleStartTime).formatDate("HH:mm")} " +
             "- ${Date(schedule.scheduleEndTime).formatDate("HH:mm")}"
 
-    return mTypography("$scheduleDays $startEndTime",
+    mTypography("$scheduleDays $startEndTime",
         variant = MTypographyVariant.body2,
         color = MTypographyColor.textPrimary,
         gutterBottom = true){
@@ -216,5 +218,16 @@ fun RBuilder.createInformation(icon:String? = null, data: String?, label: String
                 }
             }
         }
+    }
+}
+
+fun RBuilder.circleIndicator(threshold: Float) {
+    mIcon("circle",
+        color = when {
+            threshold > 0.8f -> MIconColor.primary
+            threshold > 0.6f -> MIconColor.inherit
+            else -> MIconColor.error
+        }){
+        css(clazzListItemSecondaryIcons)
     }
 }

@@ -6,10 +6,14 @@ import com.ustadmobile.core.controller.PersonConstants.GENDER_MESSAGE_ID_MAP
 import com.ustadmobile.core.controller.PersonDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.ext.outcomeToString
+import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
+import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
+import com.ustadmobile.util.StyleManager.clazzItemSecondaryDesc
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.StyleManager.defaultMarginTop
@@ -17,6 +21,7 @@ import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.personDetailComponentActionIcon
 import com.ustadmobile.util.StyleManager.personDetailComponentActions
+import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.formatDate
 import com.ustadmobile.view.ext.*
 import kotlinx.coroutines.GlobalScope
@@ -42,6 +47,7 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
     override val viewName: String
         get() = PersonDetailView.VIEW_NAME
 
+    private var clazzList: List<ClazzEnrolmentWithClazzAndAttendance>? = null
 
     override var clazzes: DataSource.Factory<Int, ClazzEnrolmentWithClazzAndAttendance>? = null
         get() = field
@@ -49,7 +55,9 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
             field = value
             GlobalScope.launch {
                 val data = value?.getData(0,1000)
-                console.log(data)
+                setState {
+                    clazzList = data
+                }
             }
         }
 
@@ -170,6 +178,24 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
                                     createInformation("email",entity?.emailAddr,getString(MessageID.email))
                                     createInformation("place",entity?.personAddress,getString(MessageID.address))
                                 }
+
+
+                                val clazzes = clazzList
+                                if(clazzes != null){
+
+                                    umItem(MGridSize.cells12){
+                                        umItem(MGridSize.cells12){
+                                            mTypography(getString(MessageID.classes),
+                                                variant = MTypographyVariant.caption){
+                                                css(alignTextToStart)
+                                            }
+                                        }
+
+                                        renderClazzes(clazzes){
+                                            mPresenter.handleClickClazz(it)
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -204,4 +230,69 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
         }
     }
 
+}
+
+class ClazzEnrolmentWithClazzListComponent(mProps: ListProps<ClazzEnrolmentWithClazzAndAttendance>):
+    UstadList<ClazzEnrolmentWithClazzAndAttendance>(mProps){
+
+    override fun onCreate() {
+        super.onCreate()
+        list = props.entries
+    }
+    override fun RBuilder.renderListItem(item: ClazzEnrolmentWithClazzAndAttendance) {
+        umGridContainer {
+            umItem(MGridSize.cells1){
+                mIcon("people")
+            }
+
+            umItem(MGridSize.cells11){
+                umItem(MGridSize.cells12){
+                    val title = "${item.clazz?.clazzName} (${item.roleToString(this, systemImpl)}) " +
+                            "- ${item.outcomeToString(this,  systemImpl)}"
+                    mTypography(title,
+                        variant = MTypographyVariant.body1){
+                        css(alignTextToStart)
+                    }
+                }
+
+                umItem(MGridSize.cells12){
+                    val dateFormat = "DD/MM/YYYY"
+                    val enrollmentPeriod = "${Date(item.clazzEnrolmentDateJoined).formatDate(dateFormat)} " +
+                            "- ${Date(item.clazzEnrolmentDateLeft).formatDate(dateFormat)}"
+                    mTypography(enrollmentPeriod,
+                        variant = MTypographyVariant.body2){
+                        css(alignTextToStart)
+                    }
+                }
+
+                umItem(MGridSize.cells12){
+                    umGridContainer{
+                        umItem(MGridSize.cells1){
+                            circleIndicator(item.attendance)
+                        }
+
+                        umItem(MGridSize.cells4){
+                            val attendancesPercentage = getString(MessageID.x_percent_attended)
+                                .format(item.attendance * 100)
+                            mTypography(attendancesPercentage,
+                                color = MTypographyColor.textPrimary
+                            ){
+                                css{
+                                    +alignTextToStart
+                                    +clazzItemSecondaryDesc
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fun RBuilder.renderClazzes(clazzList: List<ClazzEnrolmentWithClazzAndAttendance>,
+                           onClick: ((ClazzEnrolmentWithClazzAndAttendance) -> Unit)? = null) = child(ClazzEnrolmentWithClazzListComponent::class) {
+    attrs.entries = clazzList
+    attrs.onClick = onClick
 }

@@ -1410,4 +1410,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     If you are the parent, you need to login to your own existing account or create a new account.
     </string>
 
+    <string name="parent">Parent</string>
+
 </resources>

@@ -83,7 +83,6 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         for(observer in lifecycleObservers){
             observer.onStart(this)
         }
-        title = null
         fabManager?.visible = false
         fabManager?.icon = "add"
         fabManager?.onClickListener = {

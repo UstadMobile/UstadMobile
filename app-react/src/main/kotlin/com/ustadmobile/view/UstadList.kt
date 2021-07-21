@@ -4,6 +4,7 @@ import com.ccfraser.muirwik.components.list.MListItemAlignItems
 import com.ccfraser.muirwik.components.list.alignItems
 import com.ccfraser.muirwik.components.list.mList
 import com.ccfraser.muirwik.components.list.mListItem
+import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultDoubleMarginTop
@@ -23,6 +24,7 @@ import styled.styledDiv
 
 interface ListProps<T>: RProps {
     var entries: List<T>
+    var onClick: ((entry: T) -> Unit)?
 }
 
 abstract class UstadList<T>(mProps: ListProps<T>) : UstadBaseComponent<ListProps<T>,RState>(mProps){
@@ -57,7 +59,7 @@ abstract class UstadList<T>(mProps: ListProps<T>) : UstadBaseComponent<ListProps
                     attrs.button = true
                     attrs.divider = true
                     attrs.onClick = {
-                        handleClickEntry(entry)
+                        props.onClick?.invoke(entry)
                     }
                     renderListItem(entry)
                 }
@@ -66,6 +68,4 @@ abstract class UstadList<T>(mProps: ListProps<T>) : UstadBaseComponent<ListProps
     }
 
     abstract fun RBuilder.renderListItem(item: T)
-
-    fun handleClickEntry(entry: T){}
 }

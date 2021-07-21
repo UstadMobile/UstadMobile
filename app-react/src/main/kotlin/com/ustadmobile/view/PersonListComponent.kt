@@ -42,7 +42,7 @@ class PersonListComponent(mProps: RProps): UstadListComponent<Person, PersonWith
         if(arguments.containsKey(UstadView.ARG_CODE_TABLE)){
             //handle invite with link
         }
-
+        title = getString(MessageID.people)
         mPresenter = PersonListPresenter(this, arguments, this,di,this)
         mPresenter.onCreate(mapOf())
     }

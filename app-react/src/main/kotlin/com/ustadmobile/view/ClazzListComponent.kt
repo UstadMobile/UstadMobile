@@ -18,6 +18,7 @@ import com.ustadmobile.util.StyleManager.clazzListRoleChip
 import com.ustadmobile.util.StyleManager.theme
 import com.ustadmobile.util.ext.breakToWork
 import com.ustadmobile.util.ext.format
+import com.ustadmobile.view.ext.circleIndicator
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
@@ -58,6 +59,7 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
                 showAddEntryOptions = true
             }
         }
+        title = getString(MessageID.classes)
         listType = LIST_TYPE_MULTI_COLUMN
         mPresenter = ClazzListPresenter(this, arguments, this,di,this)
         mPresenter?.onCreate(mapOf())
@@ -126,14 +128,7 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
                 }
 
                 umItem(MGridSize.cells1){
-                    mIcon("circle",
-                        color = when {
-                            item.attendanceAverage > 0.8f -> MIconColor.primary
-                            item.attendanceAverage > 0.6f -> MIconColor.inherit
-                            else -> MIconColor.error
-                        }){
-                        css(clazzListItemSecondaryIcons)
-                    }
+                    circleIndicator(item.attendanceAverage)
                 }
 
                 umItem(MGridSize.cells4){
