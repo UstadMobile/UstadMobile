@@ -26,13 +26,14 @@ class NavControllerJs: UstadNavController {
 
         navStack.removeAll(navStack.subList(splitIndex, navStack.size))
         ReduxAppStateManager.dispatch(ReduxNavStackState(navStack))
+
+        currentBackStackEntry?.arguments?.let { args ->
+            navigate(viewName, args, false)
+        }
     }
 
-    override fun navigate(
-        viewName: String,
-        args: Map<String, String>,
-        goOptions: UstadMobileSystemCommon.UstadGoOptions
-    ) {
+    override fun navigate(viewName: String, args: Map<String, String>,
+                          goOptions: UstadMobileSystemCommon.UstadGoOptions) {
         navStack.add(UstadBackStackEntryJs(viewName, args))
         ReduxAppStateManager.dispatch(ReduxNavStackState(navStack))
 
@@ -40,15 +41,30 @@ class NavControllerJs: UstadNavController {
         if(popUpToViewName != null)
             popBackStack(popUpToViewName, goOptions.popUpToInclusive)
 
-        val params = if(args.isEmpty())  "" else "?${UMFileUtil.mapToQueryString(args)}"
-        if(goOptions.popUpToViewName?.isNotEmpty() == true){
-            window.location.replace("${hashType}$viewName$params")
+        navigate(viewName, args, goOptions.popUpToViewName?.isNotEmpty() == true)
+    }
+
+    private fun navigate(viewName: String, args: Map<String, String>, hasOption: Boolean = false){
+        val params = when {
+            args.isEmpty() -> ""
+            else -> "?${UMFileUtil.mapToQueryString(args)}"
+        }
+
+        if(hasOption){
+            window.location.replace("#$viewName$params")
         }else{
-            window.location.assign("${hashType}$viewName$params")
+            window.location.assign("#$viewName$params")
         }
     }
 
-    companion object {
-        private const val hashType = "#/"
+    fun navigateUp(): Boolean {
+        val destinationToPopTo = when (navStack.size) {
+            1 -> currentBackStackEntry
+            else -> navStack[navStack.lastIndex - 1]
+        }
+        if(destinationToPopTo != null){
+            popBackStack(destinationToPopTo.viewName, true)
+        }
+        return true
     }
 }

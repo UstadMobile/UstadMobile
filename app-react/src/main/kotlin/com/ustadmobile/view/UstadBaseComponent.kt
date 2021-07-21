@@ -4,11 +4,13 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.navigation.NavControllerJs
+import com.ustadmobile.navigation.RouteManager.lookupDestinationName
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.redux.ReduxSnackBarState
@@ -20,6 +22,8 @@ import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.events.Event
@@ -37,11 +41,15 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
 
     val accountManager: UstadAccountManager by instance()
 
+    lateinit var navController: NavControllerJs
+
     private lateinit var progressBarManager: ProgressBarManager
 
     var searchManager: SearchManager? = null
 
     var fabManager: FabManager? = null
+
+    protected lateinit var arguments: Map<String, String>
 
     protected abstract val viewName: String?
 
@@ -49,7 +57,8 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
 
     private var hashChangeListener:(Event) -> Unit = { (it as HashChangeEvent)
         if(viewName == getViewNameFromUrl(it.newURL)){
-            onCreate(urlSearchParamsToMap())
+            arguments = urlSearchParamsToMap()
+            onCreate()
         }
     }
 
@@ -70,7 +79,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
     override val currentState: Int
         get() = lifecycleStatus.value
 
-    open fun onCreate(arguments: Map<String,String>){
+    open fun onCreate(){
         for(observer in lifecycleObservers){
             observer.onStart(this)
         }
@@ -81,6 +90,8 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
             onFabClicked()
         }
         lifecycleStatus.value = DoorLifecycleObserver.STARTED
+        val umController: UstadNavController by instance()
+        navController = umController as NavControllerJs
     }
 
     override fun componentWillMount() {
@@ -97,12 +108,12 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
 
         //Handle both arguments from URL and the ones passed during component rendering
         //i.e from tabs
-        val arguments = when {
+        arguments = when {
             props.asDynamic().arguments != js("undefined") ->
                 props.asDynamic().arguments as Map<String, String>
             else -> urlSearchParamsToMap()
         }
-        onCreate(arguments)
+        onCreate()
     }
 
     override fun componentDidUpdate(prevProps: P, prevState: S, snapshot: Any) {
@@ -113,7 +124,8 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         //are mounted once and when trying to re-mount it's componentDidUpdate is triggered.
         //This will check and make sure the component has changed by checking if the props has changed
         if(propsDidChange){
-            onCreate(props.asDynamic().arguments as Map<String, String>)
+            arguments = props.asDynamic().arguments as Map<String, String>
+            onCreate()
         }
     }
 
@@ -147,6 +159,29 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
 
     open fun getString(messageId: Int): String {
         return if(messageId == 0) "" else systemImpl.getString(messageId, this)
+    }
+
+    fun saveResultToBackStackSavedStateHandle(result: List<*>) {
+        saveResultToBackStackSavedStateHandle(js("JSON.stringify(result)").toString())
+    }
+
+    private fun saveResultToBackStackSavedStateHandle(result: String) {
+        var saveToDestination = arguments[UstadView.ARG_RESULT_DEST_ID]
+        val saveToDestinationViewName = arguments[UstadView.ARG_RESULT_DEST_VIEWNAME]
+
+        if(saveToDestination == null && saveToDestinationViewName != null) {
+            saveToDestination = lookupDestinationName(saveToDestinationViewName)?.view
+        }
+
+        val saveToKey = arguments[UstadView.ARG_RESULT_DEST_KEY]
+
+        if(saveToDestination != null && saveToKey != null) {
+            val destStackEntry = navController.getBackStackEntry(saveToDestination)
+            destStackEntry?.savedStateHandle?.set(saveToKey, result)
+            navController.popBackStack(saveToDestination, false)
+        }else{
+            navController.navigateUp()
+        }
     }
 
     override fun componentWillUnmount() {
