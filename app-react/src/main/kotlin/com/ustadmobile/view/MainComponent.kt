@@ -16,7 +16,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.navigation.UstadDestination
 import com.ustadmobile.navigation.RouteManager.defaultDestination
 import com.ustadmobile.navigation.RouteManager.destinationList
-import com.ustadmobile.navigation.RouteManager.findDestination
+import com.ustadmobile.navigation.RouteManager.lookupDestinationName
 import com.ustadmobile.redux.ReduxAppState
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxAppStateManager.subscribe
@@ -112,7 +112,7 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
      * i.e Side Nav, Bottom nav e.tc
       */
     private fun onDestinationChanged() {
-        val destination = findDestination(getViewNameFromUrl()) ?: defaultDestination
+        val destination = lookupDestinationName(getViewNameFromUrl()) ?: defaultDestination
 
         destination.takeIf { it.labelId != 0 && it.labelId != MessageID.content}?.apply {
             title = getString(labelId)

@@ -50,7 +50,7 @@ object RouteManager {
      * Find destination given view name from URL
      * @param view: Current view name
      */
-    fun findDestination(view: String?): UstadDestination? {
+    fun lookupDestinationName(view: String?): UstadDestination? {
         return destinationList.firstOrNull{
             it.view == view
         }

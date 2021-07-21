@@ -18,6 +18,7 @@ import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextCenter
 import com.ustadmobile.util.StyleManager.contentContainer
+import com.ustadmobile.util.StyleManager.defaultDoubleMarginTop
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.errorTextClass
@@ -127,15 +128,18 @@ class PersonAccountEditComponent(mProps: RProps) : UstadEditComponent<PersonWith
 
     val spacing = MGridSpacing.spacing6
 
-    override fun onCreate(arguments: Map<String, String>) {
-        super.onCreate(arguments)
+    override fun onCreate() {
+        super.onCreate()
         mPresenter = PersonAccountEditPresenter(this, arguments,this, di, this)
         mPresenter.onCreate(mapOf())
     }
 
     override fun RBuilder.render() {
         styledDiv{
-            css(contentContainer)
+            css{
+                +contentContainer
+                +defaultDoubleMarginTop
+            }
             umGridContainer(spacing) {
                 css(alignTextCenter)
 

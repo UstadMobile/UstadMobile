@@ -26,8 +26,8 @@ class SplashComponent (props: RProps): UstadBaseComponent<RProps, RState>(props)
     override val viewName: String
         get() = SplashView.VIEW_NAME
 
-    override fun onCreate(arguments: Map<String, String>) {
-        super.onCreate(arguments)
+    override fun onCreate() {
+        super.onCreate()
         mPresenter = SplashPresenter(this)
         mPresenter.onCreate()
 

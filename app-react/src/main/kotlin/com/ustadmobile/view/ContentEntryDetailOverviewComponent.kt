@@ -86,8 +86,8 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
             field = value
         }
 
-    override fun onCreate(arguments: Map<String, String>) {
-        super.onCreate(arguments)
+    override fun onCreate() {
+        super.onCreate()
         mPresenter = ContentEntryDetailOverviewPresenter(this,arguments, this,di,this)
         mPresenter.onCreate(mapOf())
     }

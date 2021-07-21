@@ -4,6 +4,8 @@ import com.ccfraser.muirwik.components.*
 import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.safeStringify
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.navigation.RouteManager.defaultRoute
 import com.ustadmobile.navigation.RouteManager.destinationList
@@ -16,6 +18,9 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
+import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.RProps

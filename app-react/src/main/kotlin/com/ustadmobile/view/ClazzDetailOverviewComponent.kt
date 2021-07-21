@@ -71,8 +71,8 @@ class ClazzDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ClazzWi
             }
         }
 
-    override fun onCreate(arguments: Map<String, String>) {
-        super.onCreate(arguments)
+    override fun onCreate() {
+        super.onCreate()
         editButtonMode = EditButtonMode.FAB
         mPresenter = ClazzDetailOverviewPresenter(this, arguments, this,
             di, this)
@@ -146,8 +146,8 @@ class ClazzDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ClazzWi
 
 class SchedulesComponent(mProps: ListProps<Schedule>): UstadList<Schedule>(mProps){
 
-    override fun onCreate(arguments: Map<String, String>) {
-        super.onCreate(arguments)
+    override fun onCreate() {
+        super.onCreate()
         list = props.entries
     }
     override fun RBuilder.renderListItem(item: Schedule) {

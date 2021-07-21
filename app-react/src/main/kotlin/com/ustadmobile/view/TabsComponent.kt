@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
 import com.ccfraser.muirwik.components.*
-import com.ustadmobile.navigation.RouteManager.findDestination
+import com.ustadmobile.navigation.RouteManager.lookupDestinationName
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.tabsContainer
 import kotlinx.css.*
@@ -63,7 +63,7 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,RState>(mP
             }
         }
         val selectedTab = props.tabs.first { it.title == selectedTabTitle}
-        val component = findDestination(selectedTab.viewName)?.component
+        val component = lookupDestinationName(selectedTab.viewName)?.component
 
         styledDiv {
             css(tabsContainer)

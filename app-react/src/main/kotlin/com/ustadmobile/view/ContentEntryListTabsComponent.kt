@@ -21,8 +21,8 @@ class ContentEntryListTabsComponent(mProps: RProps) :UstadBaseComponent<RProps, 
 
     private var tabsToRender: List<UstadTab>? = null
 
-    override fun onCreate(arguments: Map<String, String>) {
-        super.onCreate(arguments)
+    override fun onCreate() {
+        super.onCreate()
         val parentUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: MASTER_SERVER_ROOT_ENTRY_UID
 
         val defArgs = "?${ARG_PARENT_ENTRY_UID}=" +

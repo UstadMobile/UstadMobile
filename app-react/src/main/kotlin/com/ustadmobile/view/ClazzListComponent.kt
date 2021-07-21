@@ -48,8 +48,8 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
     override val listPresenter: UstadListPresenter<*, in ClazzWithListDisplayDetails>?
         get() = mPresenter
 
-    override fun onCreate(arguments: Map<String, String>) {
-        super.onCreate(arguments)
+    override fun onCreate() {
+        super.onCreate()
         val accountManager: UstadAccountManager by instance()
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
         fabManager?.text = getString(MessageID.clazz)

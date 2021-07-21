@@ -21,10 +21,12 @@ import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.StyleManager.defaultMarginTop
+import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.errorTextClass
 import com.ustadmobile.view.ext.umEntityAvatar
@@ -224,8 +226,8 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
             }
         }
 
-    override fun onCreate(arguments: Map<String, String>) {
-        super.onCreate(arguments)
+    override fun onCreate() {
+        super.onCreate()
         loading = false
         if(registrationMode.hasFlag(PersonEditView.REGISTER_MODE_ENABLED)) {
             setState {
@@ -240,7 +242,11 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
 
     override fun RBuilder.render() {
         styledDiv {
-            css(contentContainer)
+            css{
+                +contentContainer
+                +defaultPaddingTop
+            }
+
             umGridContainer(MGridSpacing.spacing4) {
                 umItem(MGridSize.cells12, MGridSize.cells4){
                     css{

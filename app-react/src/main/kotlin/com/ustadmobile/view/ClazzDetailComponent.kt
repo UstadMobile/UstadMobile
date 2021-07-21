@@ -55,8 +55,8 @@ class ClazzDetailComponent(mProps: RProps): UstadDetailComponent<Clazz>(mProps),
             }
         }
 
-    override fun onCreate(arguments: Map<String, String>) {
-        super.onCreate(arguments)
+    override fun onCreate() {
+        super.onCreate()
         mPresenter = ClazzDetailPresenter(this, arguments, this,di,this)
         mPresenter?.onCreate(mapOf())
     }

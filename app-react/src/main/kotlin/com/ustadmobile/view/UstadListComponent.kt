@@ -156,8 +156,8 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
             }
         }
 
-    override fun onCreate(arguments: Map<String, String>) {
-        super.onCreate(arguments)
+    override fun onCreate() {
+        super.onCreate()
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
         window.setTimeout({
             searchManager?.searchListener = listPresenter
@@ -411,7 +411,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
     }
 
     override fun finishWithResult(result: List<RT>) {
-        //Save result to back stack here
+        saveResultToBackStackSavedStateHandle(result)
     }
 
     override fun onFabClicked() {

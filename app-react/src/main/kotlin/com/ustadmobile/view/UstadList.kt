@@ -67,7 +67,5 @@ abstract class UstadList<T>(mProps: ListProps<T>) : UstadBaseComponent<ListProps
 
     abstract fun RBuilder.renderListItem(item: T)
 
-    fun handleClickEntry(entry: T){
-
-    }
+    fun handleClickEntry(entry: T){}
 }

@@ -45,8 +45,8 @@ class VideoContentComponent(mProps:RProps):UstadBaseComponent<RProps, RState>(mP
 
     private var containerUid: Long = 0
 
-    override fun onCreate(arguments: Map<String, String>) {
-        super.onCreate(arguments)
+    override fun onCreate() {
+        super.onCreate()
         db = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
         containerUid = arguments[ARG_CONTAINER_UID]?.toLong() ?: 0L
         mPresenter = VideoContentPresenter(this, arguments, this, di)

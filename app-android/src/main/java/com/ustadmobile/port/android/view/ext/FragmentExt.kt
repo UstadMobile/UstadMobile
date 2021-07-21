@@ -50,7 +50,7 @@ fun Fragment.saveResultToBackStackSavedStateHandle(result: String) {
             ?.destinationId?.toString()
     }
 
-    val saveToKey = arguments?.getString(UstadBaseFragment.ARG_RESULT_DEST_KEY)
+    val saveToKey = arguments?.getString(UstadView.ARG_RESULT_DEST_KEY)
     val navController = findNavController()
     if(saveToDestination != null && saveToKey != null) {
         val saveToDestId = saveToDestination.toInt()

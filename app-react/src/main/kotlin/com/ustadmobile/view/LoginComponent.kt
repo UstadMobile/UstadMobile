@@ -116,8 +116,8 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
         }
 
 
-    override fun onCreate(arguments: Map<String, String>) {
-        super.onCreate(arguments)
+    override fun onCreate() {
+        super.onCreate()
         title = getString(MessageID.login)
         mPresenter = Login2Presenter(this, arguments,this, di)
         mPresenter.onCreate(mapOf())

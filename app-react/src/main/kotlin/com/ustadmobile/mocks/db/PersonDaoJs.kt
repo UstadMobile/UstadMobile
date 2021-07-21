@@ -8,8 +8,6 @@ import com.ustadmobile.mocks.DoorLiveDataJs
 import com.ustadmobile.mocks.db.DatabaseJs.Companion.ALLOW_ACCESS
 
 class PersonDaoJs: PersonDao() {
-    
-    private val mPath: String = "people"
 
     override suspend fun insertListAsync(entityList: List<Person>) {
         TODO("Not yetfindPersonAccountByUid implemented")
@@ -36,12 +34,10 @@ class PersonDaoJs: PersonDao() {
     }
 
     override suspend fun findByUsernameAndPasswordHash2(
-        mUsername: String,
+        username: String,
         passwordHash: String
     ): Person? {
-        return ENTRIES.first().apply {
-            username = mUsername
-        }
+        return ENTRIES.first{it.username == username}
     }
 
     override fun insertPersonAuth(personAuth: PersonAuth) {
@@ -57,35 +53,27 @@ class PersonDaoJs: PersonDao() {
     }
 
     override suspend fun personIsAdmin(accountPersonUid: Long): Boolean {
-        return ENTRIES.first().admin
+        return ENTRIES.first{it.personUid == accountPersonUid}.admin
     }
 
     override fun findByUsername(username: String?): Person? {
-        return ENTRIES.first()
+        return ENTRIES.first{it.username == username}
     }
 
     override suspend fun findByUid(uid: Long): Person? {
-        return ENTRIES.first().apply {
-            personUid = uid
-        }
+        return ENTRIES.first{it.personUid == uid}
     }
 
     override suspend fun findPersonAccountByUid(uid: Long): PersonWithAccount? {
-        return ENTRIES.first().apply {
-            personUid = uid
-        }
+        return ENTRIES.first{it.personUid == uid}
     }
 
     override fun findByUidLive(uid: Long): DoorLiveData<Person?> {
-        return DoorLiveDataJs(ENTRIES.first().apply {
-            personUid = uid
-        })
+        return DoorLiveDataJs(ENTRIES.first{it.personUid == uid})
     }
 
     override suspend fun findByUidAsync(uid: Long): Person? {
-        return ENTRIES.first().apply {
-            personUid = uid
-        }
+        return ENTRIES.first{it.personUid == uid}
     }
 
     override suspend fun updateAsync(entity: Person): Int {
@@ -125,12 +113,11 @@ class PersonDaoJs: PersonDao() {
     }
 
     override fun findByUidWithDisplayDetailsLive(
-        mPersonUid: Long,
+        personUid: Long,
         activeUserPersonUid: Long
     ): DoorLiveData<PersonWithPersonParentJoin?> {
-        return DoorLiveDataJs(ENTRIES.first().apply {
-            personUid = mPersonUid
-        }) as DoorLiveData<PersonWithPersonParentJoin?>
+        return DoorLiveDataJs(ENTRIES.first{it.personUid == personUid}
+            .unsafeCast<PersonWithPersonParentJoin>())
     }
 
     override fun insertAuditLog(entity: AuditLog): Long {
@@ -164,6 +151,7 @@ class PersonDaoJs: PersonDao() {
     companion object {
         val ENTRIES = listOf(
             PersonWithAccount().apply {
+                personUid = 1
                 username = "admin"
                 firstNames = "Admin"
                 admin = true
@@ -175,6 +163,7 @@ class PersonDaoJs: PersonDao() {
                 gender = Person.GENDER_OTHER
             },
             PersonWithAccount().apply {
+                personUid = 2
                 username = "janeDoe"
                 firstNames = "Jane"
                 admin = true
@@ -186,6 +175,7 @@ class PersonDaoJs: PersonDao() {
                 gender = Person.GENDER_FEMALE
             },
             PersonWithAccount().apply {
+                personUid = 3
                 username = "johnDoe"
                 firstNames = "John"
                 admin = true

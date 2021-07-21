@@ -12,11 +12,8 @@ abstract class UstadEditComponent<T: Any>(mProps: RProps): UstadBaseComponent<RP
 
     abstract protected val mEditPresenter : UstadEditPresenter<*, T>?
 
-    private lateinit var arguments: Map<String,String>
-
-    override fun onCreate(arguments: Map<String, String>) {
-        super.onCreate(arguments)
-        this.arguments = arguments
+    override fun onCreate() {
+        super.onCreate()
         fabManager?.icon = "check"
         fabManager?.text = getString(MessageID.save)
         fabManager?.visible = true

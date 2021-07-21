@@ -39,7 +39,6 @@ class SplashPresenter(private val view: SplashView): DIAware{
         rootElement?.setAttribute("dir",directionAttributeValue)
 
         val navController: UstadNavController by instance()
-        console.log(navController)
         impl.navController = navController
     }
 

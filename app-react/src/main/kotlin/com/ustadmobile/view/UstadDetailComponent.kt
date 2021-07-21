@@ -19,8 +19,8 @@ abstract class UstadDetailComponent<T: Any>(mProps: RProps) : UstadBaseComponent
             field = value
         }
 
-    override fun onCreate(arguments: Map<String, String>) {
-        super.onCreate(arguments)
+    override fun onCreate() {
+        super.onCreate()
         fabManager?.icon = "edit"
         fabManager?.text = getString(MessageID.edit)
     }

@@ -372,6 +372,9 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         position = Position.relative
         width = LinearDimension("98%")
         height = LinearDimension("120px")
+        media(theme.breakpoints.up(tabletAndHighEnd)){
+            width = LinearDimension("70%")
+        }
     }
 
     val entityImageIconClass by css {

@@ -27,8 +27,8 @@ class WebChunkComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(mPro
             field = value
         }
 
-    override fun onCreate(arguments: Map<String, String>) {
-        super.onCreate(arguments)
+    override fun onCreate() {
+        super.onCreate()
         mPresenter = WebChunkPresenter(this,arguments, this, di)
         mPresenter?.onCreate(mapOf())
     }

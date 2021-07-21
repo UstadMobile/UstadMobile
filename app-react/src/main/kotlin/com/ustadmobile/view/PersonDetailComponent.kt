@@ -19,6 +19,8 @@ import com.ustadmobile.util.StyleManager.personDetailComponentActionIcon
 import com.ustadmobile.util.StyleManager.personDetailComponentActions
 import com.ustadmobile.util.ext.formatDate
 import com.ustadmobile.view.ext.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.css.display
 import kotlinx.css.marginTop
 import kotlinx.css.px
@@ -44,8 +46,10 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
     override var clazzes: DataSource.Factory<Int, ClazzEnrolmentWithClazzAndAttendance>? = null
         get() = field
         set(value) {
-            setState {
-                field = value
+            field = value
+            GlobalScope.launch {
+                val data = value?.getData(0,1000)
+                console.log(data)
             }
         }
 
@@ -74,8 +78,8 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
             }
         }
 
-    override fun onCreate(arguments: Map<String, String>) {
-        super.onCreate(arguments)
+    override fun onCreate() {
+        super.onCreate()
         mPresenter = PersonDetailPresenter(this,arguments,this,di,this)
         mPresenter.onCreate(mapOf())
     }
@@ -148,7 +152,9 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
                                     createInformation(null,
                                         getString(GENDER_MESSAGE_ID_MAP[entity?.gender] ?: 0),
                                         getString(MessageID.field_person_gender))
-                                    createInformation("badge", entity?.personOrgId, getString(MessageID.organization_id))
+                                    if(!entity?.personOrgId.isNullOrBlank()){
+                                        createInformation("badge", entity?.personOrgId, getString(MessageID.organization_id))
+                                    }
                                     createInformation("account_circle", entity?.username, getString(MessageID.username))
                                 }
 

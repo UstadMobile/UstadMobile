@@ -105,7 +105,9 @@ class ContentEntryDaoJs: ContentEntryDao() {
         onlyFolder: Boolean,
         sortOrder: Int
     ): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
-        val entries = ENTRIES.unsafeCast<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>()
+        val entries = ENTRIES.filter {
+            it.entryId?.toLong() == parentUid
+        }.unsafeCast<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>()
         return DataSourceFactoryJs(entries)
     }
 

@@ -1,30 +1,25 @@
 package com.ustadmobile.view
 
 import com.ccfraser.muirwik.components.*
+import com.ccfraser.muirwik.components.button.MButtonVariant
 import com.ccfraser.muirwik.components.button.mButton
 import com.ccfraser.muirwik.components.button.mIconButton
-import com.ccfraser.muirwik.components.dialog.mDialog
-import com.ccfraser.muirwik.components.dialog.mDialogActions
-import com.ccfraser.muirwik.components.dialog.mDialogContent
-import com.ccfraser.muirwik.components.list.mList
-import com.ccfraser.muirwik.components.list.mListItem
-import com.ccfraser.muirwik.components.list.mListItemAvatar
-import com.ccfraser.muirwik.components.list.mListItemText
 import com.ccfraser.muirwik.components.menu.mMenu
 import com.ccfraser.muirwik.components.menu.mMenuItem
 import com.ustadmobile.core.controller.ContentEntryList2Presenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.core.util.ext.determineListMode
 import com.ustadmobile.core.view.ContentEntryList2View
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_SELECT_FOLDER_VISIBLE
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView.Companion.ARG_WEB_PLATFORM
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.displayProperty
+import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
@@ -68,8 +63,8 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
         }
 
 
-    override fun onCreate(arguments: Map<String, String>) {
-        super.onCreate(arguments)
+    override fun onCreate() {
+        super.onCreate()
         fabManager?.text = getString(MessageID.content)
         fabManager?.onClickListener = {
             setState {
@@ -83,6 +78,8 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
     }
 
     override fun RBuilder.renderListItem(item: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
+        val showSelectBtn = arguments.determineListMode().toString() == ListViewMode.PICKER.toString() &&
+                (arguments[ARG_SELECT_FOLDER_VISIBLE]?.toBoolean() == true || item.leaf)
 
         umGridContainer(MGridSpacing.spacing7) {
             umItem(MGridSize.cells4, MGridSize.cells3){
@@ -117,7 +114,7 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
                         }
                         val messageId = CONTENT_ENTRY_TYPE_LABEL_MAP[item.contentTypeFlag] ?: MessageID.untitled
                         val icon = CONTENT_ENTRY_TYPE_ICON_MAP[item.contentTypeFlag] ?: ""
-                        mGridItem {
+                        umItem(MGridSize.cells1) {
                             mAvatar(className = "${StyleManager.name}-contentEntryListContentAvatarClass") {
                                 mIcon(icon, className= "${StyleManager.name}-contentEntryListContentTyeIconClass"){
                                     css{marginTop = 4.px}
@@ -125,8 +122,22 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
                             }
                         }
 
-                        mGridItem {
+                        umItem(MGridSize.cells9) {
                             mTypography(getString(messageId), variant = MTypographyVariant.body2, gutterBottom = true)
+                        }
+
+                        umItem(MGridSize.cells2){
+                            mButton(getString(MessageID.select_item).format(""),
+                                variant = MButtonVariant.outlined,
+                                color = MColor.primary,
+                                onClick = {
+                                    it.stopPropagation()
+                                    mPresenter.onClickSelectContentEntry(item)
+                                }){
+                                css {
+                                    display = displayProperty(showSelectBtn)
+                                }
+                            }
                         }
                     }
                 }

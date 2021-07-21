@@ -14,18 +14,25 @@ class ClazzEnrolmentDaoJs: ClazzEnrolmentDao() {
         personUid: Long,
         clazzUid: Long
     ): ClazzEnrolment? {
-        TODO("Not yet implemented")
+        return ENTRIES.firstOrNull {
+            it.clazzEnrolmentPersonUid == personUid && it.clazzEnrolmentClazzUid == clazzUid
+        }
     }
 
     override fun findAllEnrolmentsByPersonAndClazzUid(
         personUid: Long,
         clazzUid: Long
     ): DataSource.Factory<Int, ClazzEnrolmentWithLeavingReason> {
-        TODO("Not yet implemented")
+        val entries = ENTRIES.firstOrNull {
+            it.clazzEnrolmentPersonUid == personUid && it.clazzEnrolmentClazzUid == clazzUid
+        }.unsafeCast<List<ClazzEnrolmentWithLeavingReason>>()
+        return DataSourceFactoryJs(entries)
     }
 
     override suspend fun findEnrolmentWithLeavingReason(enrolmentUid: Long): ClazzEnrolmentWithLeavingReason? {
-        TODO("Not yet implemented")
+        return ENTRIES.firstOrNull {
+            it.clazzEnrolmentUid == enrolmentUid
+        }.unsafeCast<ClazzEnrolmentWithLeavingReason>()
     }
 
     override suspend fun updateDateLeftByUid(clazzEnrolmentUid: Long, endDate: Long) {
@@ -37,7 +44,7 @@ class ClazzEnrolmentDaoJs: ClazzEnrolmentDao() {
     }
 
     override fun findAllClazzesByPersonWithClazz(personUid: Long): DataSource.Factory<Int, ClazzEnrolmentWithClazzAndAttendance> {
-        return DataSourceFactoryJs(listOf())
+        return DataSourceFactoryJs(ENTRIES.filter { it.clazzEnrolmentPersonUid == personUid})
     }
 
     override suspend fun findMaxEndDateForEnrolment(
@@ -124,5 +131,35 @@ class ClazzEnrolmentDaoJs: ClazzEnrolmentDao() {
 
     override fun update(entity: ClazzEnrolment) {
         TODO("Not yet implemented")
+    }
+
+    companion object {
+        val ENTRIES = listOf(
+            ClazzEnrolmentWithClazzAndAttendance().apply {
+                clazzEnrolmentUid = 1
+                clazzEnrolmentClazzUid = ClazzDaoJs.ENTRIES.first().clazzUid
+                attendance = 0.7f
+                clazzEnrolmentDateJoined = 1623866241000L
+                clazzEnrolmentPersonUid = PersonDaoJs.ENTRIES.first().personUid
+                clazz = ClazzDaoJs.ENTRIES.first()
+            },
+            ClazzEnrolmentWithClazzAndAttendance().apply {
+                clazzEnrolmentUid = 2
+                clazzEnrolmentClazzUid = ClazzDaoJs.ENTRIES[1].clazzUid
+                attendance = 0.2f
+                clazzEnrolmentDateJoined = 1623266241000L
+                clazzEnrolmentPersonUid = PersonDaoJs.ENTRIES[1].personUid
+                clazz = ClazzDaoJs.ENTRIES.last()
+            },
+
+            ClazzEnrolmentWithClazzAndAttendance().apply {
+                clazzEnrolmentUid = 3
+                clazzEnrolmentClazzUid = ClazzDaoJs.ENTRIES.last().clazzUid
+                attendance = 0.9f
+                clazzEnrolmentDateJoined = 1625266241000L
+                clazzEnrolmentPersonUid = PersonDaoJs.ENTRIES[1].personUid
+                clazz = ClazzDaoJs.ENTRIES.last()
+            }
+        )
     }
 }
