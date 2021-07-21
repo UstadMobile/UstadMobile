@@ -3,8 +3,10 @@ package com.ustadmobile.navigation
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.UstadBackStackEntry
 import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.redux.ReduxAppStateManager
 import com.ustadmobile.redux.ReduxNavStackState
+import kotlinx.browser.window
 
 class NavControllerJs: UstadNavController {
 
@@ -31,11 +33,22 @@ class NavControllerJs: UstadNavController {
         args: Map<String, String>,
         goOptions: UstadMobileSystemCommon.UstadGoOptions
     ) {
+        navStack.add(UstadBackStackEntryJs(viewName, args))
+        ReduxAppStateManager.dispatch(ReduxNavStackState(navStack))
+
         val popUpToViewName = goOptions.popUpToViewName
         if(popUpToViewName != null)
             popBackStack(popUpToViewName, goOptions.popUpToInclusive)
 
-        navStack.add(UstadBackStackEntryJs(viewName, args))
-        ReduxAppStateManager.dispatch(ReduxNavStackState(navStack))
+        val params = if(args.isEmpty())  "" else "?${UMFileUtil.mapToQueryString(args)}"
+        if(goOptions.popUpToViewName?.isNotEmpty() == true){
+            window.location.replace("${hashType}$viewName$params")
+        }else{
+            window.location.assign("${hashType}$viewName$params")
+        }
+    }
+
+    companion object {
+        private const val hashType = "#/"
     }
 }
