@@ -312,15 +312,21 @@ open class Role() {
 
 
         /**
-         * Permissions that are automatically granted to a parent via a ScopedGrant
+         * Permissions that are automatically granted to a parent via a ScopedGrant where the
+         * grant scoped is by Person to the personUid of the child
          */
-        const val ROLE_PARENT_PERMISSIONS_DEFAULT: Long =
+        const val ROLE_PARENT_PERSON_PERMISSIONS_DEFAULT: Long =
             PERMISSION_PERSON_SELECT or
             PERMISSION_PERSONCONTACT_SELECT or
             PERMISSION_PERSONSOCIOECONOMIC_SELECT or
             PERMISSION_PERSON_LEARNINGRECORD_SELECT or
             PERMISSION_PERSON_PICTURE_SELECT or
             PERMISSION_RESET_PASSWORD
+
+        const val ROLE_CLAZZ_PARENT_PERMISSION_DEFAULT: Long = PERMISSION_CLAZZ_SELECT or
+                PERMISSION_CLAZZ_OPEN or
+                PERMISSION_PERSON_SELECT or
+                PERMISSION_ASSIGNMENT_SELECT
 
         const val ALL_PERMISSIONS = Long.MAX_VALUE
 

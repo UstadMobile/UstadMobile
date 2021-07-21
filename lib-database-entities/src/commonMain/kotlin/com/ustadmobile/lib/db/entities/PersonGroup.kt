@@ -30,8 +30,10 @@ import kotlinx.serialization.Serializable
                ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1}
                     ${Role.PERMISSION_PERSON_SELECT}
                     ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+               JOIN PersonGroupMember PersonsWithPerm_GroupMember
+                    ON PersonsWithPerm_GroupMember.groupMemberPersonUid = Person.personUid
                JOIN PersonGroup 
-                    ON PersonGroup.groupUid = PersonGroupMember.groupMemberGroupUid
+                    ON PersonGroup.groupUid = PersonsWithPerm_GroupMember.groupMemberGroupUid
          WHERE UserSession.usClientNodeId = :clientId
            AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
         """)
