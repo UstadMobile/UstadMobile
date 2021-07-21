@@ -1,7 +1,10 @@
 package com.ustadmobile.util.ext
 
-import kotlin.text.toCharArray
+import com.ustadmobile.util.urlSearchParamsToMap
 
+/**
+ * Format string as equivalent to String.format in android
+ */
 fun String.format(vararg args: Any): String{
     var placeHolder = this
     val isFloatInterpolation = this.contains("f")
@@ -30,4 +33,22 @@ fun String.joinString(vararg args: Any): String {
 
 fun String.clean(): String{
     return this.replace("\\", "")
+}
+
+/**
+ * Breaks content into words
+ */
+fun String.breakToWork(size: Int = 10): String{
+    val words = this.split("\\s+".toRegex()).map { word ->
+        word.replace("""^[,\.]|[,\.]$""".toRegex(), "")
+    }
+    return words.take(if(words.size < size) words.size else size)
+        .joinToString(" ") + if(words.size > size) "..." else ""
+}
+
+/**
+ * Convert query params to a argument map
+ */
+fun String.toArguments(): Map<String, String>{
+    return urlSearchParamsToMap(this)
 }
