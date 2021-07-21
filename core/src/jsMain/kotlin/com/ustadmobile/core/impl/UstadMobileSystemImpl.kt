@@ -2,6 +2,7 @@ package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.generated.locale.MessageIdMap
 import com.ustadmobile.core.impl.locale.StringsXml
+import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
@@ -30,20 +31,22 @@ actual open class UstadMobileSystemImpl(private val xppFactory: XmlPullParserFac
     private var foreignStringXml: StringsXml? = null
 
     var defaultTranslations: Pair<String,String> = Pair("","")
-    set(value) {
-        val xpp = xppFactory.newPullParser()
-        xpp.setInputString(value.second)
-        defaultStringsXml = StringsXml(xpp,xppFactory,messageIdMapFlipped, value.first)
-        field = value
-    }
+        set(value) {
+            val xpp = xppFactory.newPullParser()
+            xpp.setInputString(value.second)
+            defaultStringsXml = StringsXml(xpp,xppFactory,messageIdMapFlipped, value.first)
+            field = value
+        }
 
     var currentTranslations: Pair<String,String> = Pair("","")
-    set(value) {
-        val xpp = xppFactory.newPullParser()
-        xpp.setInputString(value.second)
-        foreignStringXml = StringsXml(xpp,xppFactory,messageIdMapFlipped, value.first, defaultStringsXml)
-        field = value
-    }
+        set(value) {
+            val xpp = xppFactory.newPullParser()
+            xpp.setInputString(value.second)
+            foreignStringXml = StringsXml(xpp,xppFactory,messageIdMapFlipped, value.first, defaultStringsXml)
+            field = value
+        }
+
+    lateinit var navController: UstadNavController
 
     /**
      * Get a string for use in the UI
@@ -146,8 +149,6 @@ actual open class UstadMobileSystemImpl(private val xppFactory: XmlPullParserFac
 
     actual companion object {
 
-        private const val hashType = "#/"
-
         /**
          * Get an instance of the system implementation - relies on the platform
          * specific factory method
@@ -175,17 +176,11 @@ actual open class UstadMobileSystemImpl(private val xppFactory: XmlPullParserFac
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any,
                            flags: Int,
                            ustadGoOptions: UstadGoOptions) {
-        val params = if(args.isEmpty())  "" else "?${UMFileUtil.mapToQueryString(args)}"
-        if(ustadGoOptions.popUpToViewName?.isNotEmpty() == true){
-            window.location.replace("$hashType$viewName$params")
-        }else{
-            window.location.assign("$hashType$viewName$params")
-        }
+        navController.navigate(viewName,args as Map<String, String>,ustadGoOptions)
     }
 
     actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
-        window.location.replace("$hashType$popUpToViewName")
-        window.history.replaceState(null,"","$hashType$popUpToViewName")
+        navController.popBackStack(popUpToViewName,popUpInclusive)
     }
 
     /**

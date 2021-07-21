@@ -22,19 +22,19 @@ data class UstadTab(var viewName: String, val args: Map<String,String>, var titl
 
 class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,RState>(mProps){
 
-    private lateinit var selectedView: String
+    private lateinit var selectedTabTitle: String
 
     override val viewName: String?
         get() = null
 
     private val tabChangeListener:(Any)-> Unit = {
         setState {
-            selectedView = it.toString()
+            selectedTabTitle = it.toString()
         }
     }
 
     override fun RState.init(props: TabsProps) {
-        selectedView = props.tabs.first().viewName
+        selectedTabTitle = props.tabs.first().title
     }
 
     override fun RBuilder.render() {
@@ -42,7 +42,7 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,RState>(mP
             css{
                 display = displayProperty(props.showTabs)
             }
-            mTabs(selectedView,
+            mTabs(selectedTabTitle,
                 scrollButtons = MTabScrollButtons.auto,
                 variant = MTabVariant.scrollable,
                 onChange = { _, value ->
@@ -53,7 +53,7 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,RState>(mP
                 }
                 attrs.asDynamic().id = "um-tabs"
                 props.tabs.forEachIndexed { _, it ->
-                    mTab(it.title, it.viewName) {
+                    mTab(it.title, it.title) {
                         css {
                             display = Display.block
                             width = LinearDimension("100%")
@@ -62,8 +62,8 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,RState>(mP
                 }
             }
         }
-        val selectedTab = props.tabs.first { it.viewName == selectedView}
-        val component = findDestination(selectedView)?.component
+        val selectedTab = props.tabs.first { it.title == selectedTabTitle}
+        val component = findDestination(selectedTab.viewName)?.component
 
         styledDiv {
             css(tabsContainer)

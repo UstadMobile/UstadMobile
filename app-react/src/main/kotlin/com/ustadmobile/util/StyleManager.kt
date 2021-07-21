@@ -48,6 +48,14 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         marginTop = 2.spacingUnits
     }
 
+    val defaultPaddingTop by css{
+        paddingTop = 2.spacingUnits
+    }
+
+    val defaultDoubleMarginTop  by css{
+        marginTop = 4.spacingUnits
+    }
+
     val errorTextClass by css{
         color = Color(theme.palette.error.main)
         marginLeft = LinearDimension("${if(systemImpl.isRtlActive()) 0 else 16}px")
@@ -282,6 +290,15 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         marginLeft = 2.spacingUnits
         marginRight = 2.spacingUnits
         height = LinearDimension("100vh")
+        overflow = Overflow.scroll
+        paddingBottom = 16.spacingUnits
+        width = LinearDimension("92.5%")
+        media(theme.breakpoints.up(tabletAndHighEnd)){
+            width = LinearDimension("96.5%")
+        }
+    }
+
+    val innerContentContainer by css{
         overflow = Overflow.scroll
         paddingBottom = 16.spacingUnits
         width = LinearDimension("92.5%")
