@@ -65,6 +65,12 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
 
     protected var dbRepo: UmAppDatabase? = null
 
+    var createNewText: Int = MessageID.add_new_content
+        get() = field
+        set(value) {
+            field = value
+        }
+
     private var multiColumnItemSize = MGridSize.cells4
         get() = field
         set(value) {
@@ -125,6 +131,9 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
             showCreateNewItem = value == ListViewAddMode.FIRST_ITEM
             if(value == ListViewAddMode.FAB){
                 fabManager?.visible = value == ListViewAddMode.FAB
+            }
+            fabManager?.onClickListener = {
+                onFabClicked()
             }
             setState {
                 field = value
@@ -308,7 +317,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                 css{
                     marginTop = 3.px
                 }
-                +getString(MessageID.add_new)
+                + getString(createNewText)
             }
         }
     }

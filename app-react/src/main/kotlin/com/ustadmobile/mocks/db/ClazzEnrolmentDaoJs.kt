@@ -4,7 +4,6 @@ import androidx.paging.DataSource
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
-import kotlinx.serialization.builtins.ListSerializer
 
 class ClazzEnrolmentDaoJs: ClazzEnrolmentDao() {
     override fun insertListAsync(entityList: List<ClazzEnrolment>) {
@@ -38,8 +37,7 @@ class ClazzEnrolmentDaoJs: ClazzEnrolmentDao() {
     }
 
     override fun findAllClazzesByPersonWithClazz(personUid: Long): DataSource.Factory<Int, ClazzEnrolmentWithClazzAndAttendance> {
-        return DataSourceFactoryJs<Int,ClazzEnrolmentWithClazzAndAttendance, Any>(null,personUid, "",
-            ListSerializer(ClazzEnrolmentWithClazzAndAttendance.serializer()))
+        return DataSourceFactoryJs(listOf())
     }
 
     override suspend fun findMaxEndDateForEnrolment(

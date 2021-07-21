@@ -6,33 +6,32 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mocks.DoorLiveDataJs
 import com.ustadmobile.mocks.db.DatabaseJs.Companion.ALLOW_ACCESS
-import kotlinx.serialization.builtins.ListSerializer
 import kotlin.js.Date
 
 
 open class ClazzDaoJs: ClazzDao() {
     override fun findByUid(uid: Long): Clazz? {
-        return CLAZZ_LIST.firstOrNull{it.clazzUid == uid}
+        return ENTRIES.firstOrNull{it.clazzUid == uid}
     }
 
     override fun findByUidLive(uid: Long): DoorLiveData<Clazz?> {
-        return DoorLiveDataJs(CLAZZ_LIST.firstOrNull{it.clazzUid == uid})
+        return DoorLiveDataJs(ENTRIES.firstOrNull{it.clazzUid == uid})
     }
 
     override suspend fun findByClazzCode(code: String): Clazz? {
-        return CLAZZ_LIST.firstOrNull{it.clazzCode == code}
+        return ENTRIES.firstOrNull{it.clazzCode == code}
     }
 
     override fun findAllLive(): DoorLiveData<List<Clazz>> {
-        return DoorLiveDataJs(CLAZZ_LIST)
+        return DoorLiveDataJs(ENTRIES)
     }
 
     override fun findAll(): List<Clazz> {
-        return CLAZZ_LIST
+        return ENTRIES
     }
 
     override suspend fun findByUidAsync(uid: Long): Clazz? {
-        return CLAZZ_LIST.firstOrNull{it.clazzUid == uid}
+        return ENTRIES.firstOrNull{it.clazzUid == uid}
     }
 
     override suspend fun findByUidWithHolidayCalendarAsync(uid: Long): ClazzWithHolidayCalendarAndSchool? {
@@ -66,9 +65,7 @@ open class ClazzDaoJs: ClazzDao() {
         permission: Long,
         selectedSchool: Long
     ): DataSource.Factory<Int, ClazzWithListDisplayDetails> {
-        return DataSourceFactoryJs<Int,ClazzWithListDisplayDetails, Any>("entryId",personUid,"clazzList",
-            ListSerializer(ClazzWithListDisplayDetails.serializer())
-        )
+        return DataSourceFactoryJs(ENTRIES)
 
     }
 
@@ -77,7 +74,7 @@ open class ClazzDaoJs: ClazzDao() {
     }
 
     override fun findByClazzName(name: String): List<Clazz> {
-        return CLAZZ_LIST.filter{it.clazzName == name}
+        return ENTRIES.filter{it.clazzName == name}
     }
 
     override suspend fun updateClazzAttendanceAverageAsync(clazzUid: Long) {
@@ -96,10 +93,20 @@ open class ClazzDaoJs: ClazzDao() {
         clazzUid: Long,
         currentTime: Long
     ): DoorLiveData<ClazzWithDisplayDetails?> {
-        val clazz = CLAZZ_LIST.firstOrNull{it.clazzUid == clazzUid}
-        return DoorLiveDataJs((clazz as ClazzWithDisplayDetails).apply {
-            clazzSchool = School()
-        })
+        val clazz = ENTRIES.firstOrNull{it.clazzUid == clazzUid}
+            .unsafeCast<ClazzWithDisplayDetails>()
+            .apply {
+                clazzStartTime = 1626769537000L
+                clazzEndTime = 1628769537000L
+                clazzSchool = School().apply {
+                    schoolName = "Sample school name"
+                }
+                clazzHolidayCalendar = HolidayCalendar().apply {
+                    umCalendarName = "Sample calender name"
+
+                }
+        }
+        return DoorLiveDataJs((clazz))
     }
 
     override fun findClazzesWithEffectiveHolidayCalendarAndFilter(filterUid: Long): List<ClazzWithHolidayCalendarAndSchool> {
@@ -139,11 +146,11 @@ open class ClazzDaoJs: ClazzDao() {
     }
 
     companion object {
-        val CLAZZ_LIST = listOf(
+        val ENTRIES = listOf(
             ClazzWithListDisplayDetails().apply {
                 clazzUid = 1
                 clazzName = "Class 1"
-                clazzDesc = "Sample class one description"
+                clazzDesc = "In descriptive writing, the author does not just tell the reader what was seen, felt, tested, smelled, or heard. Rather, the author describes something from their own experience and, through careful choice of words and phrasing, makes it seem real"
                 numStudents = 3
                 numTeachers = 1
                 teacherNames = "Jane Doe"
@@ -168,7 +175,7 @@ open class ClazzDaoJs: ClazzDao() {
             ClazzWithListDisplayDetails().apply {
                 clazzUid = 3
                 clazzName = "Class 3 - Swahili"
-                clazzDesc = "Sample swahili class one description"
+                clazzDesc = "In descriptive writing, the author does not just tell the reader what was seen, felt, tested, smelled, or heard. Rather, the author describes something from their own experience and, through careful choice of words and phrasing, makes it seem real"
                 numStudents = 20
                 numTeachers = 1
                 teacherNames = "Sam John"

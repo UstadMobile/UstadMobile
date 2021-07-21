@@ -16,6 +16,7 @@ import com.ustadmobile.util.StyleManager.clazzItemSecondaryDesc
 import com.ustadmobile.util.StyleManager.clazzListItemSecondaryIcons
 import com.ustadmobile.util.StyleManager.clazzListRoleChip
 import com.ustadmobile.util.StyleManager.theme
+import com.ustadmobile.util.ext.breakToWork
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
@@ -96,7 +97,7 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
                 css(alignTextToStart)
             }
 
-            mTypography(item.clazzDesc,
+            mTypography(item.clazzDesc?.breakToWork(),
                 variant = MTypographyVariant.body1,
                 color = MTypographyColor.textPrimary
             ){
@@ -159,7 +160,9 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
     override fun RBuilder.renderAddEntryOptionsDialog() {
         if(showAddEntryOptions){
             val options = if(newClazzListOptionVisible)
-                mutableListOf(PopUpOptionItem("add",MessageID.add_a_new_class) { mPresenter?.handleClickCreateNewFab() })
+                mutableListOf(PopUpOptionItem("add",MessageID.add_a_new_class) {
+                    mPresenter?.handleClickCreateNewFab()
+                })
             else mutableListOf()
 
             options.add(PopUpOptionItem("login",MessageID.join_existing_class){ mPresenter?.handleClickJoinClazz()})
