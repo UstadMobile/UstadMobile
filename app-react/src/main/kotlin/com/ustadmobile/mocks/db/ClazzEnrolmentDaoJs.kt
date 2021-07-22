@@ -85,7 +85,18 @@ class ClazzEnrolmentDaoJs: ClazzEnrolmentDao() {
         accountPersonUid: Long,
         currentTime: Long
     ): DataSource.Factory<Int, PersonWithClazzEnrolmentDetails> {
-        TODO("Not yet implemented")
+        val entries = ENTRIES.filter { it.clazzEnrolmentRole ==  roleId}
+        val personList = entries.map {
+            PersonDaoJs.ENTRIES.first {
+                    person -> person.personUid ==  it.clazzEnrolmentPersonUid
+            }.unsafeCast<PersonWithClazzEnrolmentDetails>().apply {
+                attendance = it.attendance
+                earliestJoinDate = it.clazzEnrolmentDateJoined
+                latestDateLeft = it.clazzEnrolmentDateLeft
+                enrolmentRole = it.clazzEnrolmentRole
+            }
+        }
+        return DataSourceFactoryJs(personList)
     }
 
     override suspend fun updateClazzEnrolmentActiveForPersonAndClazz(

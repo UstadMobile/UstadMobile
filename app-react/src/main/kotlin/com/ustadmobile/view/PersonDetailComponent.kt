@@ -11,7 +11,6 @@ import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
-import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.clazzItemSecondaryDesc
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -184,15 +183,11 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
                                 if(clazzes != null){
 
                                     umItem(MGridSize.cells12){
-                                        umItem(MGridSize.cells12){
-                                            mTypography(getString(MessageID.classes),
-                                                variant = MTypographyVariant.caption){
-                                                css(alignTextToStart)
-                                            }
-                                        }
 
-                                        renderClazzes(clazzes){
-                                            mPresenter.handleClickClazz(it)
+                                        createListSectionTitle(getString(MessageID.classes))
+
+                                        renderClazzes(clazzes){ clazz ->
+                                            mPresenter.handleClickClazz(clazz)
                                         }
                                     }
                                 }
@@ -232,13 +227,9 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
 
 }
 
-class ClazzEnrolmentWithClazzListComponent(mProps: ListProps<ClazzEnrolmentWithClazzAndAttendance>):
-    UstadList<ClazzEnrolmentWithClazzAndAttendance>(mProps){
+class ClazzEnrolmentWithClazzSimpleListComponent(mProps: ListProps<ClazzEnrolmentWithClazzAndAttendance>):
+    UstadSimpleList<ListProps<ClazzEnrolmentWithClazzAndAttendance>>(mProps){
 
-    override fun onCreate() {
-        super.onCreate()
-        list = props.entries
-    }
     override fun RBuilder.renderListItem(item: ClazzEnrolmentWithClazzAndAttendance) {
         umGridContainer {
             umItem(MGridSize.cells1){
@@ -292,7 +283,7 @@ class ClazzEnrolmentWithClazzListComponent(mProps: ListProps<ClazzEnrolmentWithC
 }
 
 fun RBuilder.renderClazzes(clazzList: List<ClazzEnrolmentWithClazzAndAttendance>,
-                           onClick: ((ClazzEnrolmentWithClazzAndAttendance) -> Unit)? = null) = child(ClazzEnrolmentWithClazzListComponent::class) {
+                           onClick: ((ClazzEnrolmentWithClazzAndAttendance) -> Unit)? = null) = child(ClazzEnrolmentWithClazzSimpleListComponent::class) {
     attrs.entries = clazzList
-    attrs.onClick = onClick
+    attrs.onEntryClicked = onClick
 }

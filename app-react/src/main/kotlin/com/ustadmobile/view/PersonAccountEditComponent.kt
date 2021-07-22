@@ -252,8 +252,8 @@ class PersonAccountEditComponent(mProps: RProps) : UstadEditComponent<PersonWith
                                     }
                                 }
 
-                                newPasswordLabel.errorText?.let {
-                                    mFormHelperText(it){
+                                newPasswordLabel.errorText?.let { error ->
+                                    mFormHelperText(error){
                                         css(errorTextClass)
                                     }
                                 }
@@ -295,8 +295,8 @@ class PersonAccountEditComponent(mProps: RProps) : UstadEditComponent<PersonWith
                                         )
                                     }
                                 }
-                                confirmPasswordLabel.errorText?.let {
-                                    mFormHelperText(it){
+                                confirmPasswordLabel.errorText?.let { error ->
+                                    mFormHelperText(error){
                                         css(errorTextClass)
                                     }
                                 }

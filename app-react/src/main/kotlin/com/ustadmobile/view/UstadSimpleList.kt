@@ -4,14 +4,13 @@ import com.ccfraser.muirwik.components.list.MListItemAlignItems
 import com.ccfraser.muirwik.components.list.alignItems
 import com.ccfraser.muirwik.components.list.mList
 import com.ccfraser.muirwik.components.list.mListItem
-import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
+import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultDoubleMarginTop
+import com.ustadmobile.util.StyleManager.contentContainerForInnerLists
 import com.ustadmobile.util.StyleManager.horizontalList
-import com.ustadmobile.util.StyleManager.innerContentContainer
 import com.ustadmobile.util.StyleManager.listComponentContainer
 import com.ustadmobile.util.StyleManager.theme
+import com.ustadmobile.view.ext.renderCreateNewItemView
 import kotlinx.css.Color
 import kotlinx.css.LinearDimension
 import kotlinx.css.backgroundColor
@@ -24,12 +23,14 @@ import styled.styledDiv
 
 interface ListProps<T>: RProps {
     var entries: List<T>
-    var onClick: ((entry: T) -> Unit)?
+    var onEntryClicked: ((entry: dynamic) -> Unit)?
+    var createNewItem: CreateNewItem?
+    var presenter: UstadListPresenter<*,*>
 }
 
-abstract class UstadList<T>(mProps: ListProps<T>) : UstadBaseComponent<ListProps<T>,RState>(mProps){
+data class CreateNewItem(var visible: Boolean = false, var labelId: Int = 0, var onClickCreateNew: (() -> Unit)? = null)
 
-    var list: List<T>? = null
+abstract class UstadSimpleList<P: ListProps<*>>(mProps: P) : UstadBaseComponent<P,RState>(mProps){
 
     override val viewName: String?
         get() = ""
@@ -38,8 +39,7 @@ abstract class UstadList<T>(mProps: ListProps<T>) : UstadBaseComponent<ListProps
         styledDiv {
             css{
                 +listComponentContainer
-                +innerContentContainer
-                +defaultDoubleMarginTop
+                +contentContainerForInnerLists
             }
             renderList()
         }
@@ -49,7 +49,20 @@ abstract class UstadList<T>(mProps: ListProps<T>) : UstadBaseComponent<ListProps
         mList {
             css(horizontalList)
 
-            list?.forEach {entry->
+            if(props.createNewItem?.visible == true && props.createNewItem?.labelId != 0){
+                mListItem {
+                    css(StyleManager.listCreateNewContainer)
+                    attrs.alignItems = MListItemAlignItems.flexStart
+                    attrs.button = true
+                    attrs.divider = true
+                    attrs.onClick = {
+                        props.createNewItem?.onClickCreateNew?.invoke()
+                    }
+                    renderCreateNewItemView(getString(props.createNewItem?.labelId ?: 0))
+                }
+            }
+
+            props.entries.forEach {entry->
                 mListItem {
                     css{
                         backgroundColor = Color(theme.palette.background.paper)
@@ -59,7 +72,7 @@ abstract class UstadList<T>(mProps: ListProps<T>) : UstadBaseComponent<ListProps
                     attrs.button = true
                     attrs.divider = true
                     attrs.onClick = {
-                        props.onClick?.invoke(entry)
+                        props.onEntryClicked?.invoke(entry)
                     }
                     renderListItem(entry)
                 }
@@ -67,5 +80,5 @@ abstract class UstadList<T>(mProps: ListProps<T>) : UstadBaseComponent<ListProps
         }
     }
 
-    abstract fun RBuilder.renderListItem(item: T)
+    abstract fun RBuilder.renderListItem(item: dynamic)
 }

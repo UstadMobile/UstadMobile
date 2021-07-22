@@ -3,8 +3,10 @@ package com.ustadmobile.view
 import androidx.paging.DataSource
 import com.ccfraser.muirwik.components.*
 import com.ustadmobile.core.controller.ClazzDetailOverviewPresenter
+import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
@@ -13,7 +15,7 @@ import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultDoubleMarginTop
-import com.ustadmobile.util.StyleManager.defaultMarginTop
+import com.ustadmobile.util.StyleManager.defaultMarginBottom
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.ext.format
@@ -21,8 +23,6 @@ import com.ustadmobile.util.ext.formatDate
 import com.ustadmobile.view.ext.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.css.Cursor
-import kotlinx.css.cursor
 import kotlinx.css.display
 import react.RBuilder
 import react.RProps
@@ -122,20 +122,14 @@ class ClazzDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ClazzWi
 
                 umItem(MGridSize.cells12){
                     css{
-                        +defaultDoubleMarginTop
                         display = displayProperty(!schedules.isNullOrEmpty())
                     }
-                    mTypography(getString(MessageID.schedule),
-                        variant = MTypographyVariant.caption,
-                        color = MTypographyColor.textPrimary,
-                        gutterBottom = true){
-                        css(alignTextToStart)
-                    }
+                    createListSectionTitle(getString(MessageID.schedule))
 
                 }
 
-                schedules?.let {
-                    renderSchedules(it)
+                schedules?.let { schedules ->
+                    renderSchedules(schedules)
                 }
 
             }
@@ -144,17 +138,29 @@ class ClazzDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ClazzWi
 }
 
 
-class SchedulesComponent(mProps: ListProps<Schedule>): UstadList<Schedule>(mProps){
+class SchedulesComponent(mProps: ListProps<Schedule>): UstadSimpleList<ListProps<Schedule>>(mProps){
 
-    override fun onCreate() {
-        super.onCreate()
-        list = props.entries
-    }
     override fun RBuilder.renderListItem(item: Schedule) {
         styledDiv {
-            setScheduleText(item,systemImpl)
+            val frequencyMessageId = ScheduleEditPresenter.FrequencyOption.values()
+                .firstOrNull { it.optionVal == item.scheduleFrequency }?.messageId ?: MessageID.None
+            val dayMessageId = ScheduleEditPresenter.DayOptions.values()
+                .firstOrNull { it.optionVal == item.scheduleDay }?.messageId ?: MessageID.None
+
+            val scheduleDays = "${systemImpl.getString(frequencyMessageId, this)} - ${systemImpl.getString(dayMessageId, this)}"
+
+            val startEndTime = "${Date(item.sceduleStartTime).formatDate("HH:mm")} " +
+                    "- ${Date(item.scheduleEndTime).formatDate("HH:mm")}"
+
+            mTypography("$scheduleDays $startEndTime",
+                variant = MTypographyVariant.body2,
+                color = MTypographyColor.textPrimary,
+                gutterBottom = true){
+                css(StyleManager.alignTextToStart)
+            }
         }
     }
+
 }
 
 fun RBuilder.renderSchedules(schedules: List<Schedule>) = child(SchedulesComponent::class) {

@@ -202,8 +202,8 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
                                 }
 
                             }
-                            passwordLabel.errorText?.let {
-                                mFormHelperText(it){
+                            passwordLabel.errorText?.let { error ->
+                                mFormHelperText(error){
                                     css(errorTextClass)
                                 }
                             }

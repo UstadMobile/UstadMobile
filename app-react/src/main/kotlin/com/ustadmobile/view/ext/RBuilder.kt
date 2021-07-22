@@ -1,6 +1,7 @@
 package com.ustadmobile.view.ext
 
 import com.ccfraser.muirwik.components.*
+import com.ccfraser.muirwik.components.list.mListItemIcon
 import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -11,7 +12,10 @@ import com.ustadmobile.navigation.RouteManager.defaultRoute
 import com.ustadmobile.navigation.RouteManager.destinationList
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.clazzListItemSecondaryIcons
+import com.ustadmobile.util.StyleManager.defaultMarginBottom
+import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.entryItemImageContainer
+import com.ustadmobile.util.StyleManager.listItemCreateNewDiv
 import com.ustadmobile.util.StyleManager.mainComponentErrorPaper
 import com.ustadmobile.util.StyleManager.personListItemAvatar
 import com.ustadmobile.util.ext.formatDate
@@ -142,22 +146,17 @@ fun RBuilder.handleSMS(phoneNumber: String?){
 
 }
 
-fun RBuilder.setScheduleText(schedule: Schedule, systemImpl: UstadMobileSystemImpl) {
-    val frequencyMessageId = ScheduleEditPresenter.FrequencyOption.values()
-        .firstOrNull { it.optionVal == schedule.scheduleFrequency }?.messageId ?: MessageID.None
-    val dayMessageId = ScheduleEditPresenter.DayOptions.values()
-        .firstOrNull { it.optionVal == schedule.scheduleDay }?.messageId ?: MessageID.None
-
-    val scheduleDays = "${systemImpl.getString(frequencyMessageId, this)} - ${systemImpl.getString(dayMessageId, this)}"
-
-    val startEndTime = "${Date(schedule.sceduleStartTime).formatDate("HH:mm")} " +
-            "- ${Date(schedule.scheduleEndTime).formatDate("HH:mm")}"
-
-    mTypography("$scheduleDays $startEndTime",
-        variant = MTypographyVariant.body2,
-        color = MTypographyColor.textPrimary,
-        gutterBottom = true){
-        css(StyleManager.alignTextToStart)
+fun RBuilder.createListSectionTitle(titleText: String){
+    styledDiv {
+        css{
+            +defaultMarginBottom
+            +defaultMarginTop
+        }
+        mTypography(titleText,
+            variant = MTypographyVariant.body2,
+            color = MTypographyColor.textPrimary){
+            css (StyleManager.alignTextToStart)
+        }
     }
 }
 
@@ -229,5 +228,18 @@ fun RBuilder.circleIndicator(threshold: Float) {
             else -> MIconColor.error
         }){
         css(clazzListItemSecondaryIcons)
+    }
+}
+
+fun RBuilder.renderCreateNewItemView(createNewText: String){
+    styledDiv {
+        css(listItemCreateNewDiv)
+        mListItemIcon("add","${StyleManager.name}-listCreateNewIconClass")
+        mTypography(createNewText,variant = MTypographyVariant.button,
+            color = MTypographyColor.textPrimary) {
+            css{
+                marginTop = 4.px
+            }
+        }
     }
 }

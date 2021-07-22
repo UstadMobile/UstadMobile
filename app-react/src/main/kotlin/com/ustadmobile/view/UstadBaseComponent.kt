@@ -1,10 +1,12 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.safeStringify
+import com.ustadmobile.core.util.ext.putResultDestInfo
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -14,7 +16,6 @@ import com.ustadmobile.navigation.RouteManager.lookupDestinationName
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.redux.ReduxSnackBarState
-import com.ustadmobile.redux.ReduxThemeState
 import com.ustadmobile.redux.ReduxToolbarState
 import com.ustadmobile.util.*
 import kotlinx.atomicfu.atomic
@@ -22,8 +23,6 @@ import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.events.Event
@@ -31,6 +30,7 @@ import react.RBuilder
 import react.RComponent
 import react.RProps
 import react.RState
+import kotlin.reflect.KClass
 
 abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(props),
     UstadView, DIAware, DoorLifecycleOwner {
@@ -160,6 +160,11 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         return if(messageId == 0) "" else systemImpl.getString(messageId, this)
     }
 
+    /**
+     * Save the result of a component (e.g. a selection from a list or newly created entity) to the
+     * BackStack SavedStateHandle as specified by ARG_RESULT_DEST_ID and ARG_RESULT_DEST_KEY
+     */
+
     fun saveResultToBackStackSavedStateHandle(result: List<*>) {
         saveResultToBackStackSavedStateHandle(js("JSON.stringify(result)").toString())
     }
@@ -181,6 +186,28 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         }else{
             navController.navigateUp()
         }
+    }
+
+    /**
+     * Navigate to a list view in picker mode for the given entity type and destination view
+     *
+     * @param entityClass The class for the entity type that is going to be selected
+     * @param destinationView The destination view as per the navigation map
+     * @param args optional additional args to pass to the list view
+     * @param destinationResultKey the key to use in the SavedStateHandle
+     */
+    fun navigateToPickEntityFromList(entityClass: KClass<*>, destinationView: String,
+                                     args: MutableMap<String, String> = mutableMapOf(),
+                                     destinationResultKey: String? = entityClass.simpleName,
+                                     overwriteDestination: Boolean? = null,
+                                     navOptions: UstadMobileSystemCommon.UstadGoOptions = UstadMobileSystemCommon.UstadGoOptions()){
+        val currentBackStateEntryVal = navController.currentBackStackEntry
+        if(currentBackStateEntryVal != null && destinationResultKey != null)
+            args.putResultDestInfo(currentBackStateEntryVal, destinationResultKey,
+                overwriteDest = overwriteDestination ?: (this is UstadEditComponent<*>))
+
+        args[UstadView.ARG_LISTMODE] = ListViewMode.PICKER.toString()
+        navController.navigate(destinationView, args, navOptions)
     }
 
     override fun componentWillUnmount() {

@@ -127,8 +127,8 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
                         }
 
                         mTypography(
-                            entity?.author?.let {
-                                getString(MessageID.entry_details_author).joinString(it)
+                            entity?.author?.let { author ->
+                                getString(MessageID.entry_details_author).joinString(author)
                             },
                             variant = MTypographyVariant.h6, gutterBottom = true){
                             css(alignTextToStart)
@@ -149,8 +149,8 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
 
                                 mGridItem {
                                     mTypography(
-                                        entity?.licenseName?.let {
-                                            getString(MessageID.entry_details_license).joinString(it)
+                                        entity?.licenseName?.let { license ->
+                                            getString(MessageID.entry_details_license).joinString(license)
                                         },
                                         variant = MTypographyVariant.subtitle1, gutterBottom = true){
                                         css(alignTextToStart)

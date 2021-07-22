@@ -332,8 +332,8 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
                                         }
                                     }
                                 }
-                                genderLabel.errorText?.let {
-                                    mFormHelperText(it){
+                                genderLabel.errorText?.let { error ->
+                                    mFormHelperText(error){
                                         css(errorTextClass)
                                     }
                                 }
@@ -442,8 +442,8 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
                                     }
                                 }
 
-                                passwordLabel.errorText?.let {
-                                    mFormHelperText(it){
+                                passwordLabel.errorText?.let { error ->
+                                    mFormHelperText(error){
                                         css(errorTextClass)
                                     }
                                 }
@@ -481,8 +481,8 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
                                     }
                                 }
 
-                                confirmPasswordLabel.errorText?.let {
-                                    mFormHelperText(it){
+                                confirmPasswordLabel.errorText?.let { error ->
+                                    mFormHelperText(error){
                                         css(errorTextClass)
                                     }
                                 }

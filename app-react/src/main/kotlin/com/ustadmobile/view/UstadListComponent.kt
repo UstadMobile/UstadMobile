@@ -15,18 +15,16 @@ import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.SelectionOption
 import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.door.ext.concurrentSafeListOf
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.chipSetFilter
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.horizontalList
 import com.ustadmobile.util.StyleManager.listComponentContainer
 import com.ustadmobile.util.StyleManager.listCreateNewContainer
-import com.ustadmobile.util.StyleManager.listItemCreateNewDiv
 import com.ustadmobile.util.StyleManager.selectionContainer
 import com.ustadmobile.util.StyleManager.theme
 import com.ustadmobile.util.ext.format
+import com.ustadmobile.view.ext.renderCreateNewItemView
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.browser.window
@@ -52,8 +50,6 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
 
     protected abstract val listPresenter: UstadListPresenter<*, in DT>?
 
-    private var showCreateNewItem:Boolean = false
-
     private var isEventHandled = false
 
     private var selectedEntries: MutableList<DT> = concurrentSafeListOf()
@@ -66,7 +62,15 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
 
     protected var dbRepo: UmAppDatabase? = null
 
-    var createNewText: Int = MessageID.add_new_content
+    protected var showCreateNewItem:Boolean = false
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
+    var createNewTextId: Int = MessageID.add_new_content
         get() = field
         set(value) {
             field = value
@@ -177,12 +181,14 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
             renderFilters()
             renderMenuOptions()
 
+            renderHeaderView()
+
             if(singleColumnList)
                 renderSingleColumnList()
             else
                 renderMultiColumnList()
 
-            renderOtherLists()
+            renderFooterView()
         }
 
         //Render dialog UI to be shown when fab is clicked
@@ -197,9 +203,9 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                     css(listCreateNewContainer)
                     attrs.alignItems = MGridAlignItems.flexStart
                     attrs.asDynamic().onClick = {
-                        listPresenter?.handleClickCreateNewFab()
+                        handleClickCreateNewEntry()
                     }
-                    renderHeaderView()
+                    renderCreateNewItemView(getString(createNewTextId))
                 }
             }
 
@@ -243,9 +249,9 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                     attrs.button = true
                     attrs.divider = true
                     attrs.onClick = {
-                        listPresenter?.handleClickCreateNewFab()
+                        handleClickCreateNewEntry()
                     }
-                    renderHeaderView()
+                    renderCreateNewItemView(getString(createNewTextId))
                 }
             }
 
@@ -309,47 +315,31 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
 
     abstract fun RBuilder.renderListItem(item: DT)
 
-    open fun RBuilder.renderHeaderView(){
-        styledDiv {
-            css(listItemCreateNewDiv)
-            mListItemIcon("add","${StyleManager.name}-listCreateNewIconClass")
-            mTypography(variant = MTypographyVariant.button,
-                color = MTypographyColor.textPrimary) {
-                css{
-                    marginTop = 3.px
-                }
-                + getString(createNewText)
-            }
-        }
-    }
-
     private fun RBuilder.renderFilters(){
         if(listFilterOptionChips == null) return
-        umItem(MGridSize.cells12) {
+        styledDiv {
             css{
                 margin = "16px"
+                +chipSetFilter
             }
-            styledDiv {
-                css(chipSetFilter)
-                listFilterOptionChips?.forEach { chip ->
-                    val mColor = if(chip == checkedFilterOptionChip) MChipColor.primary
-                    else MChipColor.default
-                    mChip(chip.description,
-                        color = mColor,
-                        onClick = {
-                            setState {
-                                checkedFilterOptionChip = chip
-                            }
+            listFilterOptionChips?.forEach { chip ->
+                val mColor = if(chip == checkedFilterOptionChip) MChipColor.primary
+                else MChipColor.default
+                mChip(chip.description,
+                    color = mColor,
+                    onClick = {
+                        setState {
+                            checkedFilterOptionChip = chip
+                        }
                         listPresenter?.onListFilterOptionSelected(chip)
                     }) {
-                        css {
-                            margin(1.spacingUnits)
-                        }
+                    css {
+                        margin(1.spacingUnits)
                     }
                 }
-                if(checkedFilterOptionChip == null)
-                    checkedFilterOptionChip = listFilterOptionChips?.firstOrNull()
             }
+            if(checkedFilterOptionChip == null)
+                checkedFilterOptionChip = listFilterOptionChips?.firstOrNull()
         }
     }
 
@@ -398,9 +388,15 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
 
     open fun RBuilder.renderEditOptionMenu(){}
 
-    open fun RBuilder.renderOtherLists(){}
+    open fun RBuilder.renderFooterView(){}
+
+    open fun RBuilder.renderHeaderView(){}
 
     abstract fun handleClickEntry(entry: DT)
+
+    open fun handleClickCreateNewEntry(){
+        listPresenter?.handleClickCreateNewFab()
+    }
 
     open fun styleList(): RuleSet? {
         return null
@@ -417,7 +413,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
 
     override fun onFabClicked() {
         super.onFabClicked()
-        listPresenter?.handleClickCreateNewFab()
+        handleClickCreateNewEntry()
     }
 
     override fun componentWillUnmount() {

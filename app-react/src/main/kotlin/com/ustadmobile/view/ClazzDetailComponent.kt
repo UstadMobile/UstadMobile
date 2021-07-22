@@ -11,6 +11,7 @@ import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.clazzDetailExtraInfo
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultMarginTop
+import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.urlSearchParamsToMap
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
@@ -65,7 +66,7 @@ class ClazzDetailComponent(mProps: RProps): UstadDetailComponent<Clazz>(mProps),
     override fun RBuilder.render() {
         styledDiv {
             css{
-                +defaultMarginTop
+                +defaultPaddingTop
                 +contentContainer
             }
             umGridContainer(MGridSpacing.spacing6) {
@@ -79,8 +80,8 @@ class ClazzDetailComponent(mProps: RProps): UstadDetailComponent<Clazz>(mProps),
                             +clazzDetailExtraInfo
                         }
 
-                        tabsToRender?.let {
-                            renderTabs(it)
+                        tabsToRender?.let { tabs ->
+                            renderTabs(tabs)
                         }
                     }
                 }

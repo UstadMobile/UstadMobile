@@ -48,6 +48,10 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         marginTop = 2.spacingUnits
     }
 
+    val defaultMarginBottom  by css{
+        marginBottom = 2.spacingUnits
+    }
+
     val defaultPaddingTop by css{
         paddingTop = 2.spacingUnits
     }
@@ -60,6 +64,14 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         color = Color(theme.palette.error.main)
         marginLeft = LinearDimension("${if(systemImpl.isRtlActive()) 0 else 16}px")
         marginRight= LinearDimension("${if(systemImpl.isRtlActive()) 16 else 0}px")
+    }
+
+    val errorClass by css {
+        color = Color(theme.palette.error.main)
+    }
+
+    val successClass by css {
+        color = Color.green.lighten(500)
     }
 
     val splashComponentContainer by css {
@@ -307,6 +319,11 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         }
     }
 
+    val contentContainerForInnerLists by css{
+        overflow = Overflow.scroll
+        width = LinearDimension("98%")
+    }
+
 
     val listComponentContainer by css {
         display = Display.inlineFlex
@@ -341,6 +358,8 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     val listItemCreateNewDiv by css {
         display = Display.inlineFlex
         marginLeft = 16.px
+        paddingTop = 10.px
+        paddingBottom = 10.px
     }
 
     val listCreateNewIconClass by css {
