@@ -310,20 +310,6 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         }
     }
 
-    val innerContentContainer by css{
-        overflow = Overflow.scroll
-        paddingBottom = 16.spacingUnits
-        width = LinearDimension("92.5%")
-        media(theme.breakpoints.up(tabletAndHighEnd)){
-            width = LinearDimension("96.5%")
-        }
-    }
-
-    val contentContainerForInnerLists by css{
-        overflow = Overflow.scroll
-        width = LinearDimension("98%")
-    }
-
 
     val listComponentContainer by css {
         display = Display.inlineFlex

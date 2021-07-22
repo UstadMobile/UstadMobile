@@ -16,7 +16,7 @@ interface ClazzEnrolmentEditView: UstadEditView<ClazzEnrolmentWithLeavingReason>
 
     companion object {
 
-        const val VIEW_NAME = "ClazzEnrolmentEditView"
+        const val VIEW_NAME = "ClassEnrolmentEditView"
 
     }
 

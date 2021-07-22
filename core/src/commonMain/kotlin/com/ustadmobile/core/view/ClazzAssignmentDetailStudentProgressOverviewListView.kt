@@ -10,7 +10,7 @@ interface ClazzAssignmentDetailStudentProgressOverviewListView: UstadListView<Pe
     var progressSummary: DoorLiveData<AssignmentProgressSummary?>?
 
     companion object {
-        const val VIEW_NAME = "ClazzAssignmentDetailStudentProgressOverviewListView"
+        const val VIEW_NAME = "ClassAssignmentDetailStudentProgressOverviewListView"
     }
 
 }

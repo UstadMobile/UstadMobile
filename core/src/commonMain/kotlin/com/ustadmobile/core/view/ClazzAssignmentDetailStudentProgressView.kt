@@ -15,7 +15,7 @@ interface ClazzAssignmentDetailStudentProgressView: UstadDetailView<ClazzAssignm
     var clazzAssignmentPrivateComments: DataSource.Factory<Int, CommentsWithPerson>?
 
     companion object {
-        const val VIEW_NAME = "ClazzAssignmentDetailStudentProgressListView"
+        const val VIEW_NAME = "ClassAssignmentDetailStudentProgressListView"
     }
 
 }

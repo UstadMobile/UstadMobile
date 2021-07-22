@@ -6,7 +6,6 @@ import com.ccfraser.muirwik.components.list.mList
 import com.ccfraser.muirwik.components.list.mListItem
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.contentContainerForInnerLists
 import com.ustadmobile.util.StyleManager.horizontalList
 import com.ustadmobile.util.StyleManager.listComponentContainer
 import com.ustadmobile.util.StyleManager.theme
@@ -39,7 +38,7 @@ abstract class UstadSimpleList<P: ListProps<*>>(mProps: P) : UstadBaseComponent<
         styledDiv {
             css{
                 +listComponentContainer
-                +contentContainerForInnerLists
+                width = LinearDimension("98%")
             }
             renderList()
         }

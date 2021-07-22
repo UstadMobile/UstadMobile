@@ -222,7 +222,7 @@ private fun RBuilder.createMemberListItem(presenter: ClazzMemberListPresenter,
                         display = displayProperty(pending, true)
                     }
                     umGridContainer(MGridSpacing.spacing4) {
-                        umItem(MGridSize.cells1){
+                        umItem(MGridSize.cells4){
                             mIconButton("check",
                                 onClick = {
                                     presenter.handleClickPendingRequest(item, true)
@@ -231,7 +231,7 @@ private fun RBuilder.createMemberListItem(presenter: ClazzMemberListPresenter,
                                 size = MIconButtonSize.small)
                         }
 
-                        umItem(MGridSize.cells2){
+                        umItem(MGridSize.cells4){
                             mIconButton("close",
                                 onClick = {
                                     presenter.handleClickPendingRequest(item, false)
