@@ -26,6 +26,7 @@ interface OptionsProps: RProps {
     var optionItems: List<PopUpOptionItem>
     var systemImpl: UstadMobileSystemImpl
     var shownAt: Long
+    var onDialogClosed: () -> Unit
 }
 
 class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, RState>(mProps) {
@@ -36,10 +37,7 @@ class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, RSta
 
     override fun RBuilder.render() {
         mDialog(showDialog, onClose = { _, _ ->
-            setState {
-                showDialog = false
-                lastShownAt = props.shownAt
-            }
+            handleDialogClosed()
         }) {
             mDialogContent {
                 css {
@@ -73,13 +71,18 @@ class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, RSta
             mDialogActions {
                 mButton(props.systemImpl.getString(MessageID.cancel, this), color = MColor.primary,
                     onClick = {
-                        setState {
-                            showDialog = false
-                            lastShownAt = props.shownAt
-                        }
+                       handleDialogClosed()
                     }
                 )
             }
+        }
+    }
+
+    private fun handleDialogClosed(){
+        props.onDialogClosed.invoke()
+        setState {
+            showDialog = false
+            lastShownAt = props.shownAt
         }
     }
 
@@ -94,8 +97,9 @@ class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, RSta
 
 fun RBuilder.renderPopUpOptions(systemImpl: UstadMobileSystemImpl,
                                 optionItems: List<PopUpOptionItem>,
-                                shownAt: Long) = child(PopUpOptionsComponent::class) {
+                                shownAt: Long, onDialogClosed: () -> Unit) = child(PopUpOptionsComponent::class) {
     attrs.optionItems = optionItems
     attrs.systemImpl = systemImpl
     attrs.shownAt = shownAt
+    attrs.onDialogClosed = onDialogClosed
 }

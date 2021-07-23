@@ -54,11 +54,6 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
         val accountManager: UstadAccountManager by instance()
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
         fabManager?.text = getString(MessageID.clazz)
-        fabManager?.onClickListener = {
-            setState {
-                showAddEntryOptions = true
-            }
-        }
         title = getString(MessageID.classes)
         listType = LIST_TYPE_MULTI_COLUMN
         mPresenter = ClazzListPresenter(this, arguments, this,di,this)
@@ -148,6 +143,13 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
         }
     }
 
+
+    override fun onFabClicked() {
+        setState {
+            showAddEntryOptions = true
+        }
+    }
+
     override fun handleClickEntry(entry: ClazzWithListDisplayDetails) {
         mPresenter?.onClickClazz(entry)
     }
@@ -160,8 +162,15 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
                 })
             else mutableListOf()
 
-            options.add(PopUpOptionItem("login",MessageID.join_existing_class){ mPresenter?.handleClickJoinClazz()})
-            renderPopUpOptions(systemImpl,options, Date().getTime().toLong())
+            options.add(PopUpOptionItem("login",MessageID.join_existing_class){
+                mPresenter?.handleClickJoinClazz()}
+            )
+            renderPopUpOptions(systemImpl,options, Date().getTime().toLong()){
+                console.log("closed dialog")
+                setState {
+                    showAddEntryOptions = false
+                }
+            }
         }
     }
 

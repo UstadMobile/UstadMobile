@@ -77,8 +77,4 @@ class  FabManager(private val viewId: String = "um-fab", visible: Boolean = fals
         fabView = null
     }
 
-    companion object {
-        private const val VIEW_INIT_TIMEOUT = 1000
-    }
-
 }

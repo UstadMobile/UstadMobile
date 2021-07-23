@@ -66,11 +66,6 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
     override fun onCreate() {
         super.onCreate()
         fabManager?.text = getString(MessageID.content)
-        fabManager?.onClickListener = {
-            setState {
-                showAddEntryOptions = true
-            }
-        }
         arguments.toMutableMap().putAll(mapOf(
             ARG_WEB_PLATFORM to true.toString()))
         mPresenter = ContentEntryList2Presenter(this, arguments, this,di,this)
@@ -149,6 +144,12 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
         mPresenter.onClickContentEntry(entry)
     }
 
+    override fun onFabClicked() {
+        setState {
+            showAddEntryOptions = true
+        }
+    }
+
     override fun showContentEntryAddOptions() {
         setState {
             showAddEntryOptions = true
@@ -177,7 +178,11 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
                 }
             )
 
-            renderPopUpOptions(systemImpl,options, Date().getTime().toLong())
+            renderPopUpOptions(systemImpl,options, Date().getTime().toLong()){
+                setState {
+                    showAddEntryOptions = false
+                }
+            }
         }
     }
 
