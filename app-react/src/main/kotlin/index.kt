@@ -20,6 +20,7 @@ import com.ustadmobile.redux.ReduxAppStateManager.createStore
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.redux.ReduxDiState
 import com.ustadmobile.redux.ReduxThemeState
+import com.ustadmobile.util.BrowserTabTracker
 import com.ustadmobile.util.ThemeManager.createAppTheme
 import com.ustadmobile.view.splashComponent
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
@@ -28,7 +29,6 @@ import io.ktor.client.*
 import io.ktor.client.engine.js.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
-import kotlinext.js.asJsObject
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineDispatcher
@@ -39,7 +39,6 @@ import react.redux.provider
 
 fun main() {
     defaultJsonSerializer()
-    print("{}".asJsObject())
     window.onload = {
         render(document.getElementById("root")) {
 
@@ -50,6 +49,8 @@ fun main() {
             )
 
             val theme = createAppTheme()
+
+            BrowserTabTracker.init()
 
             provider(createStore(diState, ReduxThemeState(theme))){
                 mThemeProvider(theme) {

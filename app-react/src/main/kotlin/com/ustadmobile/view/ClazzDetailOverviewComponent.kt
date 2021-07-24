@@ -6,7 +6,6 @@ import com.ustadmobile.core.controller.ClazzDetailOverviewPresenter
 import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
@@ -14,12 +13,12 @@ import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultDoubleMarginTop
-import com.ustadmobile.util.StyleManager.defaultMarginBottom
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.displayProperty
+import com.ustadmobile.util.Util.copyToClipboard
+import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.util.ext.formatDate
+import com.ustadmobile.util.ext.formattedInHoursAndMinutes
 import com.ustadmobile.view.ext.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -110,10 +109,8 @@ class ClazzDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ClazzWi
                 }
 
                 createInformation("school", entity?.clazzSchool?.schoolName)
-
-                val dateFormat = "DD/MM/YYYYY"
-                val dateTxt = Date(entity?.clazzStartTime ?: 0).formatDate(dateFormat) +
-                        " - ${Date(entity?.clazzEndTime ?: 0).formatDate(dateFormat)}"
+                val dateTxt = Date(entity?.clazzStartTime ?: 0).standardFormat() +
+                        " - ${Date(entity?.clazzEndTime ?: 0).standardFormat()}"
 
                 createInformation("event", dateTxt)
 
@@ -149,8 +146,8 @@ class SchedulesComponent(mProps: ListProps<Schedule>): UstadSimpleList<ListProps
 
             val scheduleDays = "${systemImpl.getString(frequencyMessageId, this)} - ${systemImpl.getString(dayMessageId, this)}"
 
-            val startEndTime = "${Date(item.sceduleStartTime).formatDate("HH:mm")} " +
-                    "- ${Date(item.scheduleEndTime).formatDate("HH:mm")}"
+            val startEndTime = "${Date(item.sceduleStartTime).formattedInHoursAndMinutes()} " +
+                    "- ${Date(item.scheduleEndTime).formattedInHoursAndMinutes()}"
 
             mTypography("$scheduleDays $startEndTime",
                 variant = MTypographyVariant.body2,

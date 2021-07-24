@@ -2,12 +2,8 @@ package com.ustadmobile.view.ext
 
 import com.ccfraser.muirwik.components.*
 import com.ccfraser.muirwik.components.list.mListItemIcon
-import com.ustadmobile.core.controller.ScheduleEditPresenter
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.safeStringify
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.navigation.RouteManager.defaultRoute
 import com.ustadmobile.navigation.RouteManager.destinationList
 import com.ustadmobile.util.StyleManager
@@ -18,14 +14,9 @@ import com.ustadmobile.util.StyleManager.entryItemImageContainer
 import com.ustadmobile.util.StyleManager.listItemCreateNewDiv
 import com.ustadmobile.util.StyleManager.mainComponentErrorPaper
 import com.ustadmobile.util.StyleManager.personListItemAvatar
-import com.ustadmobile.util.ext.formatDate
-import kotlinx.browser.document
-import kotlinx.browser.window
+import com.ustadmobile.util.Util.ASSET_ACCOUNT
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
-import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.RProps
@@ -38,7 +29,6 @@ import styled.css
 import styled.styledDiv
 import styled.styledSpan
 import kotlin.Float
-import kotlin.js.Date
 
 fun RBuilder.appBarSpacer() {
     themeContext.Consumer { theme ->
@@ -88,7 +78,7 @@ fun RBuilder.umItem(xs: MGridSize, sm: MGridSize? = null, lg: MGridSize? = null,
 }
 
 fun RBuilder.umEntityAvatar (src: String? = null,
-                             fallbackSrc: String? = "assets/account.jpg",
+                             fallbackSrc: String? = ASSET_ACCOUNT,
                              iconName: String = "add_a_photo",
                              imgProps: RProps? = null,
                              variant: MAvatarVariant = MAvatarVariant.rounded,
@@ -160,35 +150,10 @@ fun RBuilder.createListSectionTitle(titleText: String){
     }
 }
 
-fun RBuilder.copyToClipboard(text: String, copyHandler:()-> Unit){
-    val secure = js("typeof(navigator.clipboard)!='undefined' " +
-            "&& window.isSecureContext").toString().toBoolean()
-    if(secure){
-        window.navigator.clipboard.writeText(text).then {
-            copyHandler()
-        }
-    }else{
-        val element = document.createElement("textarea")
-        val textArea = element.asDynamic()
-        textArea.value = text
-        textArea.style.position = "fixed"
-        textArea.style.left = "-999999px"
-        textArea.style.top = "-999999px"
-        document.body?.appendChild(textArea)
-        textArea.focus()
-        textArea.select()
-        val copied = document.execCommand("copy")
-        if(copied){
-            copyHandler()
-        }
-        textArea.remove()
-    }
-}
-
 fun RBuilder.createInformation(icon:String? = null, data: String?, label: String? = null, onClick:(() -> Unit)? = null){
     umGridContainer {
         css{
-            +StyleManager.defaultMarginTop
+            +defaultMarginTop
             display = StyleManager.displayProperty(data != "0" || !data.isNullOrEmpty(), true)
         }
         umItem(MGridSize.cells2){
@@ -242,4 +207,10 @@ fun RBuilder.renderCreateNewItemView(createNewText: String){
             }
         }
     }
+}
+
+fun RBuilder.setBitmaskListText(systemImpl: UstadMobileSystemImpl,textBitmaskValue: Long?): String {
+    return BitmaskEditPresenter.FLAGS_AVAILABLE.filter {
+        (it.flagVal and (textBitmaskValue ?:0) ) == it.flagVal
+    }.joinToString { systemImpl.getString(it.messageId, this) }
 }

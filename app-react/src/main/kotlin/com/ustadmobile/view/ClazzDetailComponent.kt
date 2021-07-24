@@ -7,11 +7,10 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.clazzDetailExtraInfo
 import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
+import com.ustadmobile.util.Util.ASSET_ENTRY
 import com.ustadmobile.util.urlSearchParamsToMap
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
@@ -71,7 +70,7 @@ class ClazzDetailComponent(mProps: RProps): UstadDetailComponent<Clazz>(mProps),
             }
             umGridContainer(MGridSpacing.spacing6) {
                 umItem(MGridSize.cells12, MGridSize.cells4){
-                    umEntityAvatar(listItem = true, fallbackSrc = "assets/entry_placeholder.jpeg")
+                    umEntityAvatar(listItem = true, fallbackSrc = ASSET_ENTRY)
                 }
 
                 umItem(MGridSize.cells12, MGridSize.cells8){

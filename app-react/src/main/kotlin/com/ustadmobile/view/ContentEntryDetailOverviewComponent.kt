@@ -20,6 +20,8 @@ import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.contentEntryDetailOverviewComponentOpenBtn
 import com.ustadmobile.util.StyleManager.contentEntryDetailOverviewExtraInfo
 import com.ustadmobile.util.StyleManager.defaultMarginTop
+import com.ustadmobile.util.Util.ASSET_BOOK
+import com.ustadmobile.util.Util.ASSET_FOLDER
 import com.ustadmobile.util.ext.joinString
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
@@ -28,7 +30,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.css.*
-import org.w3c.dom.events.Event
 import react.RBuilder
 import react.RProps
 import react.setState
@@ -103,8 +104,10 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
                     css{
                         flexDirection = FlexDirection.column
                     }
-                    val fallBackSrc = "assets/"+if(entity?.leaf == true) "book.png" else "folder.png"
-                    umEntityAvatar(entity?.thumbnailUrl,fallBackSrc,showIcon = false)
+
+                    umEntityAvatar(entity?.thumbnailUrl,
+                        if(entity?.leaf == true) ASSET_BOOK else ASSET_FOLDER,
+                        showIcon = false)
 
                     mButton(getString(MessageID.open), size = MButtonSize.large
                         ,color = MColor.secondary,variant = MButtonVariant.contained,

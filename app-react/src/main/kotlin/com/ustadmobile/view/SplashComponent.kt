@@ -30,7 +30,6 @@ class SplashComponent (props: RProps): UstadBaseComponent<RProps, RState>(props)
         super.onCreate()
         mPresenter = SplashPresenter(this)
         mPresenter.onCreate()
-
         mPresenter.handleResourceLoading()
     }
 

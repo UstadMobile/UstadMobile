@@ -19,6 +19,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusA
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.displayProperty
+import com.ustadmobile.util.Util
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
@@ -78,8 +79,8 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
 
         umGridContainer(MGridSpacing.spacing7) {
             umItem(MGridSize.cells4, MGridSize.cells3){
-                val fallBackSrc = "assets/" + if(item.leaf) "book.png" else "folder.png"
-                umEntityAvatar(item.thumbnailUrl,fallBackSrc,
+                umEntityAvatar(item.thumbnailUrl,
+                    if(item.leaf) Util.ASSET_BOOK else Util.ASSET_FOLDER,
                     showIcon = false,
                     className = "${StyleManager.name}-entityThumbnailClass")
             }

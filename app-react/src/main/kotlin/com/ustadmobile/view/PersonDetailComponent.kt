@@ -21,7 +21,7 @@ import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.personDetailComponentActionIcon
 import com.ustadmobile.util.StyleManager.personDetailComponentActions
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.util.ext.formatDate
+import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.view.ext.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -40,7 +40,7 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
 
     private lateinit var mPresenter: PersonDetailPresenter
 
-    override val detailPresenter: UstadDetailPresenter<*, *>?
+    override val detailPresenter: UstadDetailPresenter<*, *>
         get() = mPresenter
 
     override val viewName: String
@@ -154,7 +154,7 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
 
                                 umItem(MGridSize.cells12){
                                     createInformation("event",
-                                        Date(entity?.dateOfBirth ?: 0).formatDate("DD/MM/YYYY"),
+                                        Date(entity?.dateOfBirth ?: 0).standardFormat(),
                                         getString(MessageID.birthday))
                                     createInformation(null,
                                         getString(GENDER_MESSAGE_ID_MAP[entity?.gender] ?: 0),
@@ -247,9 +247,8 @@ class ClazzEnrolmentWithClazzSimpleListComponent(mProps: ListProps<ClazzEnrolmen
                 }
 
                 umItem(MGridSize.cells12){
-                    val dateFormat = "DD/MM/YYYY"
-                    val enrollmentPeriod = "${Date(item.clazzEnrolmentDateJoined).formatDate(dateFormat)} " +
-                            "- ${Date(item.clazzEnrolmentDateLeft).formatDate(dateFormat)}"
+                    val enrollmentPeriod = "${Date(item.clazzEnrolmentDateJoined).standardFormat()} " +
+                            "- ${Date(item.clazzEnrolmentDateLeft).standardFormat()}"
                     mTypography(enrollmentPeriod,
                         variant = MTypographyVariant.body2){
                         css(alignTextToStart)

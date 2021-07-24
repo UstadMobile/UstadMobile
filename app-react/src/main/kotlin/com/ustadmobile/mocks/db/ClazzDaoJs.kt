@@ -35,7 +35,10 @@ open class ClazzDaoJs: ClazzDao() {
     }
 
     override suspend fun findByUidWithHolidayCalendarAsync(uid: Long): ClazzWithHolidayCalendarAndSchool? {
-        TODO("Not yet implemented")
+        return ENTRIES.filter { it.clazzUid == uid }
+            .unsafeCast<ClazzWithHolidayCalendarAndSchool>().apply {
+                school = SchoolDaoJs.ENTRIES[0]
+            }
     }
 
     override suspend fun updateAsync(entity: Clazz): Int {

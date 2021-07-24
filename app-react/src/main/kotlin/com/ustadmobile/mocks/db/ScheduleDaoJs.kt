@@ -49,7 +49,7 @@ class ScheduleDaoJs: ScheduleDao() {
     }
 
     override suspend fun findAllSchedulesByClazzUidAsync(clazzUid: Long): List<Schedule> {
-        TODO("Not yet implemented")
+        return ENTRIES.filter { it.scheduleClazzUid == clazzUid }
     }
 
     override suspend fun insertAsync(entity: Schedule): Long {

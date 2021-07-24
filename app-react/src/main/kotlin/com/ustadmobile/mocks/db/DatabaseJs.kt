@@ -115,12 +115,12 @@ class DatabaseJs: UmAppDatabase() , DoorDatabaseSyncRepository{
         get() = ScheduleDaoJs()
     override val scheduledCheckDao: ScheduledCheckDao
         get() = TODO("Not yet implemented")
-    override val holidayCalendarDao: HolidayCalendarDao
-        get() = TODO("Not yet implemented")
+    override val holidayCalendarDao: HolidayCalendarDaoJs
+        get() = HolidayCalendarDaoJs()
     override val holidayDao: HolidayDao
         get() = TODO("Not yet implemented")
     override val schoolDao: SchoolDao
-        get() = TODO("Not yet implemented")
+        get() = SchoolDaoJs()
     override val xLangMapEntryDao: XLangMapEntryDao
         get() = TODO("Not yet implemented")
     override val locallyAvailableContainerDao: LocallyAvailableContainerDao
