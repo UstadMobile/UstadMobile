@@ -75,25 +75,15 @@ class UmAppDatabaseExtTest {
 
         repo.createNewClazzAndGroups(testClazz, mockSystemImpl, context)
 
-        val clazzInDb = db.clazzDao.findByUid(testClazz.clazzUid)
+        val clazzInDb = db.clazzDao.findByUid(testClazz.clazzUid)!!
         Assert.assertEquals("Stored class has same name", testClazz.clazzName,
                 clazzInDb?.clazzName)
 
-        val teacherGroup = db.personGroupDao.findByUid(clazzInDb!!.clazzTeachersPersonGroupUid)
+        val teacherGroup = db.personGroupDao.findByUid(clazzInDb.clazzTeachersPersonGroupUid)
         Assert.assertNotNull("Teacher PersonGroup created", teacherGroup)
 
-        val studentGroup = db.personGroupDao.findByUid(clazzInDb!!.clazzStudentsPersonGroupUid)
+        val studentGroup = db.personGroupDao.findByUid(clazzInDb.clazzStudentsPersonGroupUid)
         Assert.assertNotNull("Student person group created", studentGroup)
-
-        Assert.assertEquals("Teacher group has entity role", 1,
-                db.entityRoleDao.findByEntitiyAndPersonGroupAndRole(
-                        Clazz.TABLE_ID, testClazz.clazzUid, teacherGroup!!.groupUid,
-                        Role.ROLE_CLAZZ_TEACHER_UID.toLong()).size)
-
-        Assert.assertEquals("Student group has entity role", 1,
-                db.entityRoleDao.findByEntitiyAndPersonGroupAndRole(
-                        Clazz.TABLE_ID, testClazz.clazzUid, studentGroup!!.groupUid,
-                        Role.ROLE_CLAZZ_STUDENT_UID.toLong()).size)
     }
 
     @Test
@@ -115,6 +105,35 @@ class UmAppDatabaseExtTest {
         Assert.assertEquals("Person is now teacher group",
                 testClazz.clazzTeachersPersonGroupUid,
                 personGroups.first().groupMemberGroupUid)
+    }
+
+    @Test
+    fun givenExistingClazz_whenEnrolMemberCalledWithParent_thenStudentAndParentAreEnroled() = runBlocking {
+        val testClazz = Clazz("Test name")
+        val testStudent = Person("student", "Student", "Jones")
+        val testParent = Person("parent", "Parent", "Jones")
+
+        repo.createNewClazzAndGroups(testClazz, mockSystemImpl, context)
+        testStudent.personUid = repo.personDao.insert(testStudent)
+        testParent.personUid = repo.personDao.insert(testParent)
+
+        repo.personParentJoinDao.insertAsync(PersonParentJoin().apply {
+            ppjMinorPersonUid = testStudent.personUid
+            ppjParentPersonUid = testParent.personUid
+        })
+
+        repo.enrolPersonIntoClazzAtLocalTimezone(testStudent, testClazz.clazzUid,
+            ClazzEnrolment.ROLE_STUDENT)
+
+        val parentPersonGroups = db.personGroupMemberDao.findAllGroupWherePersonIsIn(
+            testParent.personUid)
+        Assert.assertEquals("Parent is in parents group",
+            testClazz.clazzParentsPersonGroupUid,
+            parentPersonGroups.first().groupMemberGroupUid)
+        val parentEnrolments = db.clazzEnrolmentDao.findAllClazzesByPersonWithClazzAsListAsync(
+            testParent.personUid)
+        Assert.assertEquals("Parent is enroled with parent role in class",
+            ClazzEnrolment.ROLE_PARENT, parentEnrolments.first().clazzEnrolmentRole)
     }
 
 

@@ -36,13 +36,15 @@ import kotlinx.serialization.Serializable
         """
     ],
     syncFindAllQuery = """
-        SELECT PersonGroupMember.* 
+        SELECT PersonsWithPerm_GroupMember.* 
           FROM UserSession
                JOIN PersonGroupMember
                     ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
                ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1}
                     ${Role.PERMISSION_PERSON_SELECT}
                     ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+               JOIN PersonGroupMember PersonsWithPerm_GroupMember
+                    ON PersonsWithPerm_GroupMember.groupMemberPersonUid = Person.personUid     
          WHERE UserSession.usClientNodeId = :clientId
                AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}""")
 @Serializable
