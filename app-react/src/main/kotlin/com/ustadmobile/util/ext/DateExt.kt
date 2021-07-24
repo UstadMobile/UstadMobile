@@ -29,7 +29,8 @@ fun Date.formatDate(format: String = "DD/MMMM/YYYY"): String {
     return moment(utc).local().format(format)
 }
 
-fun Date.formatToHoursAndMinutes(): String {
-    val utc = moment.utc(this).toDate()
-    return moment(utc).local().format("HH:mm")
-}
+fun Date.standardFormat(): String = formatDate("DD/MM/YYYY")
+
+fun Date.formattedInHoursAndMinutes() : String = formatDate("HH:mm")
+
+fun Date.formattedWithFullMonth(): String = formatDate("DD/MMMM/YYYY")

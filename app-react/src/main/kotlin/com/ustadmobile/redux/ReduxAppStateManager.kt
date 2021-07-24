@@ -1,5 +1,6 @@
 package com.ustadmobile.redux
 
+import com.ustadmobile.util.BrowserTabTracker
 import redux.*
 import kotlin.reflect.KProperty1
 
@@ -25,6 +26,9 @@ object ReduxAppStateManager {
     }
 
     private fun reducer(state: ReduxAppState = ReduxAppState(), action: RAction): ReduxAppState {
+
+        BrowserTabTracker.appState = state
+
         return when (action) {
             is ReduxThemeState -> state.copy(appTheme = action)
             is ReduxDiState -> state.copy(appDi = action)
@@ -62,7 +66,7 @@ object ReduxAppStateManager {
      * Create a redux app store where the states will be managed
      */
     fun createStore(diState: ReduxDiState, theme: ReduxThemeState) : Store<ReduxStore, RAction, WrapperAction> {
-      storeState = createStore(
+        storeState = createStore(
           combineReducersInferred(
               mapOf(ReduxStore::appState to ReduxAppStateManager::reducer)
           ),

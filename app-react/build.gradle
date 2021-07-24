@@ -67,6 +67,7 @@ dependencies {
     implementation "com.ustadmobile.door:door-runtime:$version_door"
     implementation "io.ktor:ktor-client-js:$version_ktor"
     implementation "io.ktor:ktor-client-json-js:$version_ktor"
+    implementation npm("browser-session-tabs-tracker","$version_npm_tabtracker")
     implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
 }
 
