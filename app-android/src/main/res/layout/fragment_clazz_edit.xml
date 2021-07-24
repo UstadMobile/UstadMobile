@@ -17,6 +17,9 @@
             name="clazz"
             type="com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool" />
 
+        <variable name="dateTimeMode"
+            type="Integer"/>
+
         <variable
             name="loading"
             type="boolean" />
@@ -31,6 +34,10 @@
 
         <variable
             name="clazzStartDateError"
+            type="String" />
+
+        <variable
+            name="timeZoneId"
             type="String" />
 
         <variable
@@ -140,7 +147,9 @@
                     android:layout_height="wrap_content"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateLong="@={clazz.clazzStartTime}"
+                    app:dateTimeInMillis="@={clazz.clazzStartTime}"
+                    app:timeZoneId="@{timeZoneId}"
+                    app:dateTimeInMillisMode="@{dateTimeMode}"
                     app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -162,7 +171,9 @@
                 >
 
                 <com.google.android.material.textfield.TextInputEditText
-                    app:dateLong="@={clazz.clazzEndTime}"
+                    app:dateTimeInMillis="@={clazz.clazzEndTime}"
+                    app:timeZoneId="@{timeZoneId}"
+                    app:dateTimeInMillisMode="@{dateTimeMode}"
                     app:runOnClickWhenFocused="@{true}"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
