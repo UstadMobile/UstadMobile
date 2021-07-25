@@ -81,7 +81,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
 
         contextRegistration = randomUuid().toString()
 
-        presenterScope.launch {
+        GlobalScope.launch {
 
             try {
                 mountedPath = mounter.mountContainer(activeEndpoint, containerUid)
@@ -130,7 +130,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
         if(accountManager.activeAccount.personUid == 0L)
             return //no one is really logged in
 
-        presenterScope.launch {
+        GlobalScope.launch {
             val contentEntry = db.contentEntryDao.findByUid(contentEntryUid) ?: return@launch
             if(contentEntry.completionCriteria != ContentEntry.COMPLETION_CRITERIA_MIN_SCORE) return@launch
             val completedScore = db.statementDao.findCompletedScoreForSession(contextRegistration)
@@ -153,7 +153,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
 
     override fun onDestroy() {
         super.onDestroy()
-        presenterScope.launch {
+        GlobalScope.launch {
             if(mountedPath.isNotEmpty()){
                 mounter.unMountContainer(mountedEndpoint, mountedPath)
             }
