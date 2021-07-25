@@ -19,6 +19,15 @@ import com.ustadmobile.lib.db.entities.*
 @Repository
 abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
 
+
+    /**
+     *  Gets all the assignments in a clazz
+     *  If you are a student, you will see the total score of the assignment
+     *  and if you have completed all the exercises in the assignment
+     *
+     *  Additionally if you have permission, see the number of students that
+     *  started/completed/non-started each assignment
+     */
     @Query("""
         WITH CtePermissionCheck (hasPermission) 
             AS (SELECT EXISTS( 
@@ -33,63 +42,19 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
         SELECT ClazzAssignment.*, 
         
            (SELECT hasPermission FROM CtePermissionCheck) AS hasMetricsPermission,
-            (SELECT COUNT(*) 
-                        FROM ClazzEnrolment 
-                        WHERE ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid 
-                        AND ClazzEnrolment.clazzEnrolmentActive 
-                        AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-                        AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
-                        AS totalStudents, 
+            
+            $GET_TOTAL_STUDENTS_IN_ASSIGNMENT AS totalStudents, 
         
             (CASE WHEN (SELECT hasPermission 
                           FROM CtePermissionCheck)
-                 THEN (SELECT COUNT(DISTINCT clazzEnrolmentPersonUid)
-                         FROM ClazzEnrolment
-                         
-                        WHERE ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-                          AND ClazzEnrolment.clazzEnrolmentActive
-                          AND ClazzAssignment.caClazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
-                          AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft 
-                          AND NOT EXISTS 
-                              (SELECT statementUid 
-                                 FROM StatementEntity 
-                                WHERE statementContentEntryUid 
-                                   IN (SELECT cacjContentUid 
-                                        FROM ClazzAssignmentContentJoin 
-                                       WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
-                                         AND cacjActive)
-                                  AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
-                                  AND StatementEntity.timestamp
-                                        BETWEEN ClazzAssignment.caStartDate
-                                        AND ClazzAssignment.caGracePeriodDate
-                                  ))
-                ELSE 0 END) AS notStartedStudents,
+                 THEN ($GET_COUNT_NUMBER_OF_STUDENTS_NOT_STARTED_ASSIGNMENT)
+                 ELSE 0 END) AS notStartedStudents,
                 
                   0 as startedStudents,
         
             (CASE WHEN (SELECT hasPermission 
                          FROM CtePermissionCheck)
-                  THEN (SELECT COUNT(DISTINCT clazzEnrolmentPersonUid) 
-                          FROM ClazzEnrolment
-                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
-                           AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-                           AND ClazzEnrolment.clazzEnrolmentActive
-                           AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft 
-                           AND (SELECT COUNT(DISTINCT statementContentEntryUid)
-                                  FROM StatementEntity
-                                 WHERE statementContentEntryUid 
-                                    IN (SELECT cacjContentUid 
-                                          FROM ClazzAssignmentContentJoin 
-                                         WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid)
-                           AND StatementEntity.contentEntryRoot 
-                           AND StatementEntity.resultCompletion
-                           AND StatementEntity.timestamp
-                                        BETWEEN ClazzAssignment.caStartDate
-                                        AND ClazzAssignment.caGracePeriodDate
-                           AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid) = 
-                                    (SELECT COUNT(ClazzAssignmentContentJoin.cacjContentUid) 
-                                       FROM ClazzAssignmentContentJoin 
-                                      WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid)) 
+                  THEN ($GET_COUNT_NUMBER_OF_STUDENTS_COMPLETED_ASSIGNMENT) 
                   ELSE 0 END) AS completedStudents, 
            
             $GET_ALL_ASSIGNMENTS_SCORE_FOR_CURRENT_USER_SQL AS resultScore,
@@ -160,6 +125,12 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
             : DataSource.Factory<Int, ClazzAssignmentWithMetrics>
 
 
+    /**
+     * For a given assignment, check if the student has
+     *  got a score
+     *  has any penalty
+     *  completed all the content
+     */
     @Query("""
         SELECT COALESCE(SUM(ResultSource.cacheMaxScore),0) AS resultMax, 
                COALESCE(SUM(ResultSource.cacheStudentScore),0) AS resultScore, 
@@ -186,7 +157,16 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
      	  ) AS ResultSource
     """)
     abstract suspend fun getStatementScoreProgressForAssignment(caUid: Long, personUid: Long): ContentEntryStatementScoreProgress?
-    
+
+
+    /**
+     * For a given assignment, check if each student has
+     *  got a total score
+     *  total number of attempts
+     *  date started any exercise in the assignment
+     *  last date attempted any exercise in the assignment
+     *  total duration of all attempts
+     */
     @Query("""
          SELECT ResultSource.personUid, ResultSource.firstNames, ResultSource.lastName,
             COALESCE(COUNT(DISTINCT(ResultSource.contextRegistration)),0) AS attempts, 
@@ -299,6 +279,11 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                                           searchText: String, sortOrder: Int):
             DataSource.Factory<Int, PersonWithAttemptsSummary>
 
+
+    /**
+     *  If have permission for assignment, check number of students
+     *  that not-started/started/completed the assignment
+     */
     @Query("""
         WITH CtePermissionCheck (hasPermission) 
             AS (SELECT EXISTS( 
@@ -313,75 +298,28 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                 
         SELECT (SELECT hasPermission FROM CtePermissionCheck) AS hasMetricsPermission,
         
-        (SELECT COUNT(*) 
-                        FROM ClazzEnrolment 
-                        WHERE ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid 
-                        AND ClazzEnrolment.clazzEnrolmentActive 
-                        AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-                        AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
-                        AS totalStudents, 
+        $GET_TOTAL_STUDENTS_IN_ASSIGNMENT AS totalStudents, 
         
             (CASE WHEN (SELECT hasPermission 
                           FROM CtePermissionCheck)
-                 THEN (SELECT COUNT(DISTINCT clazzEnrolmentPersonUid)
-                         FROM ClazzEnrolment
-                         
-                        WHERE ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-                          AND ClazzEnrolment.clazzEnrolmentActive
-                          AND ClazzAssignment.caClazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
-                          AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft 
-                          AND NOT EXISTS 
-                              (SELECT statementUid 
-                                 FROM StatementEntity 
-                                WHERE statementContentEntryUid 
-                                   IN (SELECT cacjContentUid 
-                                        FROM ClazzAssignmentContentJoin 
-                                       WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
-                                         AND ClazzAssignmentContentJoin.cacjActive)
-                                  AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
-                                   AND StatementEntity.timestamp
-                                        BETWEEN ClazzAssignment.caStartDate
-                                        AND ClazzAssignment.caGracePeriodDate
-                                  ))
+                 THEN ($GET_COUNT_NUMBER_OF_STUDENTS_NOT_STARTED_ASSIGNMENT)
                 ELSE 0 END) AS notStartedStudents,
                 
                 0 as startedStudents,
         
             (CASE WHEN (SELECT hasPermission 
                          FROM CtePermissionCheck)
-                  THEN (SELECT COUNT(DISTINCT clazzEnrolmentPersonUid) 
-                          FROM ClazzEnrolment
-                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
-                           AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-                           AND ClazzEnrolment.clazzEnrolmentActive
-                           AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft 
-                           AND (SELECT COUNT(DISTINCT statementContentEntryUid)
-                                  FROM StatementEntity
-                                 WHERE statementContentEntryUid 
-                                    IN (SELECT cacjContentUid 
-                                          FROM ClazzAssignmentContentJoin 
-                                         WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
-                                           AND ClazzAssignmentContentJoin.cacjActive)
-                           AND StatementEntity.contentEntryRoot 
-                           AND StatementEntity.resultCompletion
-                           AND StatementEntity.timestamp
-                                        BETWEEN ClazzAssignment.caStartDate
-                                        AND ClazzAssignment.caGracePeriodDate
-                           AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid) = 
-                                    (SELECT COUNT(ClazzAssignmentContentJoin.cacjContentUid) 
-                                       FROM ClazzAssignmentContentJoin 
-                                      WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid
-                                        AND cacjActive)) 
+                  THEN ($GET_COUNT_NUMBER_OF_STUDENTS_COMPLETED_ASSIGNMENT) 
                   ELSE 0 END) AS completedStudents
 
         
         FROM ClazzAssignment
        WHERE caActive
-         AND caClazzUid = :clazzUid 
-         AND caUid = :uid
+         AND ClazzAssignment.caClazzUid = :clazzUid 
+         AND ClazzAssignment.caUid = :caUid
     """)
     abstract fun getStudentsProgressOnAssignment(clazzUid: Long, accountPersonUid: Long,
-                                                 uid: Long, permission: Long): DoorLiveData<AssignmentProgressSummary?>
+                                                 caUid: Long, permission: Long): DoorLiveData<AssignmentProgressSummary?>
 
 
 
@@ -420,6 +358,67 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                         FROM ClazzAssignmentRollUp 
                        WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
                          AND cachePersonUid = :accountPersonUid),0)
+        """
+
+        private const val GET_COUNT_NUMBER_OF_STUDENTS_NOT_STARTED_ASSIGNMENT = """
+            SELECT COUNT(DISTINCT clazzEnrolmentPersonUid)
+                         FROM ClazzEnrolment
+                         
+                        WHERE ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                          AND ClazzEnrolment.clazzEnrolmentActive
+                          AND ClazzAssignment.caClazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
+                          AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft 
+                          AND NOT EXISTS 
+                              (SELECT statementUid 
+                                 FROM StatementEntity 
+                                WHERE statementContentEntryUid 
+                                   IN (SELECT cacjContentUid 
+                                        FROM ClazzAssignmentContentJoin 
+                                       WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
+                                         AND ClazzAssignmentContentJoin.cacjActive)
+                                  AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
+                                   AND StatementEntity.timestamp
+                                        BETWEEN ClazzAssignment.caStartDate
+                                        AND ClazzAssignment.caGracePeriodDate
+                              )
+        """
+
+        private const val GET_COUNT_NUMBER_OF_STUDENTS_COMPLETED_ASSIGNMENT = """
+            SELECT COUNT(DISTINCT clazzEnrolmentPersonUid) 
+                          FROM ClazzEnrolment
+                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
+                           AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                           AND ClazzEnrolment.clazzEnrolmentActive
+                           AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft 
+                           AND (SELECT COUNT(DISTINCT statementContentEntryUid)
+                                  FROM StatementEntity
+                                 WHERE statementContentEntryUid 
+                                    IN (SELECT cacjContentUid 
+                                          FROM ClazzAssignmentContentJoin 
+                                         WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
+                                           AND ClazzAssignmentContentJoin.cacjActive
+                                        )
+                           AND StatementEntity.contentEntryRoot 
+                           AND StatementEntity.resultCompletion
+                           AND StatementEntity.timestamp
+                                        BETWEEN ClazzAssignment.caStartDate
+                                        AND ClazzAssignment.caGracePeriodDate
+                           AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid) = 
+                                    (SELECT COUNT(ClazzAssignmentContentJoin.cacjContentUid) 
+                                       FROM ClazzAssignmentContentJoin 
+                                      WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid
+                                        AND ClazzAssignmentContentJoin.cacjActive
+                                    )
+        """
+
+
+        private const val GET_TOTAL_STUDENTS_IN_ASSIGNMENT = """
+            (SELECT COUNT(*) 
+                        FROM ClazzEnrolment 
+                        WHERE ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid 
+                        AND ClazzEnrolment.clazzEnrolmentActive 
+                        AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                        AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft)
         """
 
         const val SORT_DEADLINE_ASC = 1
