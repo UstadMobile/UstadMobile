@@ -10,7 +10,11 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 
 interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
 
+    var showCompletionCriteria: Boolean
+
     var licenceOptions: List<ContentEntryEdit2Presenter.LicenceMessageIdOptions>?
+
+    var completionCriteriaOptions: List<ContentEntryEdit2Presenter.CompletionCriteriaMessageIdOption>?
 
     var selectedStorageIndex: Int
 
@@ -33,6 +37,8 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
         const val VIEW_NAME = "ContentEntryEdit2EditView"
 
         const val ARG_IMPORTED_METADATA = "metadata"
+
+        const val ARG_URI = "uri"
 
     }
 

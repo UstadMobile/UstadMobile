@@ -69,7 +69,7 @@ class ParentalConsentManagementFragmentTest : TestCase(){
             username = "olderpit"
         }
 
-        dbRule.insertPersonForActiveUser(parent)
+        dbRule.insertPersonAndStartSession(parent)
 
         runBlocking {
             childPerson = dbRule.repo.insertPersonAndGroup(Person().apply {

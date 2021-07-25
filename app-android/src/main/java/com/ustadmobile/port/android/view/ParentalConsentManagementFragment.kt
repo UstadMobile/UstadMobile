@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonParentJoinWithMinorPerson
 import com.ustadmobile.lib.db.entities.SiteTerms
+import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
 
 
 interface ParentAccountLandingFragmentEventHandler {
@@ -58,13 +59,13 @@ class ParentalConsentManagementFragment: UstadEditFragment<PersonParentJoinWithM
         mBinding = FragmentParentalConsentManagementBinding.inflate(inflater, container, false).also { binding ->
             rootView = binding.root
             binding.eventHandler = this
-            binding.relationshipValue.addTextChangedListener(PersonEditFragment.ClearErrorTextWatcher {
+            binding.relationshipValue.addTextChangedListener(ClearErrorTextWatcher {
                 binding.relationshipFieldError = null
             })
         }
 
         mPresenter = ParentalConsentManagementPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
 
 
         return rootView
@@ -123,6 +124,7 @@ class ParentalConsentManagementFragment: UstadEditFragment<PersonParentJoinWithM
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

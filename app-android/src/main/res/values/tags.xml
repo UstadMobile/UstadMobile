@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="tag_datelong" type="id"/>
+    <item name="tag_calendar" type="id"/>
     <item name="tag_dateusespinner" type="id"/>
     <item name="tag_inverse_binding_listener" type="id"/>
     <item name="tag_timelong" type="id"/>

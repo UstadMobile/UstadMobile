@@ -606,7 +606,7 @@
     <string name="numerical">Ададӣ</string>
     <string name="instructions_for_students">Супоришҳо барои хонандагон</string>
     <string name="not_started">Оғоз нашудаст</string>
-    <string name="started_date">%1$s%оғоз шуд</string>
+    <string name="started_date">Оғоз шуд %1$s%</string>
     <string name="started">Оғоз шуд</string>
     <string name="mixed">Омехта</string>
     <string name="store_description_short">Дастрасӣ ва мубодила мундариҷаи таълимӣ тариқи оффлайн</string>
@@ -886,7 +886,7 @@
     <string name="add_question">Саволро илова намоед</string>
     <string name="edit_holiday">Таҳрири ҷашн</string>
     <string name="edit_holiday_calendar">Таҳрири тақвими ҷашнҳо</string>
-    <string name="date_enroll">Санаи номнавис</string>
+    <string name="date_enroll">Санаи бақайдгирӣ</string>
     <string name="add_a_teacher">Омӯзгорро ворид намоед</string>
     <string name="participant">Иштирокчиён</string>
     <string name="primary_user">Корбари асосӣ</string>
@@ -1028,7 +1028,7 @@
     <string name="last_active">Вуруди охирин</string>
     <plurals name="number_of_attempts">
         <item quantity="one">%d кӯшишҳо</item>
-        <item quantity="other"></item>
+        <item quantity="other"/>
     </plurals>
     <string name="incomplete">Нотамом</string>
     <string name="edit_language">Таҳрири забон</string>
@@ -1036,16 +1036,28 @@
     <string name="percentage_score" formatted="false">Хол %1$s%%</string>
     <plurals name="duration_hours">
         <item quantity="one">%d соатҳо</item>
-        <item quantity="other"></item>
+        <item quantity="other"/>
     </plurals>
     <plurals name="duration_minutes">
         <item quantity="one">%d дақиқаҳо</item>
-        <item quantity="other"></item>
+        <item quantity="other"/>
     </plurals>
     <plurals name="duration_seconds">
         <item quantity="one">%d сонияҳо</item>
-        <item quantity="other"></item>
+        <item quantity="other"/>
     </plurals>
     <string name="undo">Бекор кунед</string>
     <string name="manage_download">Боркуниро идора кунед</string>
+    <string name="what_is_your_date_of_birth">Санаи таваллуди шумо\?</string>
+    <string name="we_sent_a_message_to_your_parent">Мо ба волидайни шумо паём фиристодем (% 1 $ s), то онҳо бақайдгирии шуморо тасдиқ кунанд. Шумо метавонед бо истифода аз логин ва парол, ки пас аз тасдиқи падару модари худ гузоштаед, ворид шавед.</string>
+    <string name="strings_not_allowed">Аломатҳои махсус дар ин ҷой иҷозат дода намешавад</string>
+    <string name="invalid_email">Лутфан, суроғаи почтаи электронӣро ворид кунед</string>
+    <string name="select_account">Суратҳисобро интихоб кунед</string>
+    <string name="opening_link">Кушодани истинод: %1$s</string>
+    <string name="select_account_to_continue">Барои давом додан ҳисобро интихоб кунед</string>
+    <string name="you_are_already_in_class">Хато: шумо аллакай дар синф номнавис шудаед: %1$s</string>
+    <string name="you_are_already_in_school">Хато: шумо аллакай дар мактаб номнавис шудаед: %1$s</string>
+    <string name="join_class">Ба синф ҳамроҳ шавед</string>
+    <string name="join_school">Ба мактаб ҳамроҳ шавед</string>
+    <string name="parents_email_address">Суроғаи почтаи электронии волидайн</string>
 </resources>

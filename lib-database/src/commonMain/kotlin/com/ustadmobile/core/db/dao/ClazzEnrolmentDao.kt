@@ -14,6 +14,10 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS
 @Dao
 abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
 
+    /**
+     * Note: When actually enroling into a class, use UmAppDatbaseExt#processEnrolmentIntoClass
+     * to ensure that permissions, group membership, etc. are taken care of
+     */
     @Insert
     abstract fun insertListAsync(entityList: List<ClazzEnrolment>)
 

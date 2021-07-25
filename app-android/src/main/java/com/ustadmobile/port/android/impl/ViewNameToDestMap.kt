@@ -6,6 +6,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadDestination
 import com.ustadmobile.core.view.*
+import com.ustadmobile.lib.db.entities.ClazzAssignment
 
 @Keep
 class ViewNameToDestMap: DestinationProvider {
@@ -32,17 +33,15 @@ class ViewNameToDestMap: DestinationProvider {
             PersonDetailView.VIEW_NAME to UstadDestination(R.id.person_detail_dest),
             PersonListView.VIEW_NAME to UstadDestination(R.id.person_list_dest),
             SchoolMemberListView.VIEW_NAME to UstadDestination(R.id.schoolmember_list_dest),
-            ClazzWorkListView.VIEW_NAME to UstadDestination(R.id.clazzwork_list_dest),
-            ClazzWorkEditView.VIEW_NAME to UstadDestination(R.id.clazzwork_edit_dest,
-                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
-            ClazzWorkQuestionAndOptionsEditView.VIEW_NAME to UstadDestination(
-                    R.id.clazzworkquestionandoptions_edit_dest,
-                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
-            ClazzWorkDetailView.VIEW_NAME to UstadDestination(R.id.clazzwork_detail_list),
+            ClazzAssignmentListView.VIEW_NAME to UstadDestination(R.id.clazz_assignment_list),
+            ClazzAssignmentEditView.VIEW_NAME to UstadDestination(R.id.clazz_assignment_edit_dest),
+            ClazzAssignmentDetailView.VIEW_NAME to UstadDestination(R.id.clazz_assignment_detail_dest),
+            ClazzAssignmentDetailStudentProgressView.VIEW_NAME to UstadDestination(R.id.clazz_assignment_detail_student_progress),
             ContentEntryEdit2View.VIEW_NAME to UstadDestination(R.id.content_entry_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             ContentEntryListTabsView.VIEW_NAME to UstadDestination(R.id.home_content_dest),
             ContentEntryList2View.VIEW_NAME to UstadDestination(R.id.content_entry_list_dest),
+            ContentEntryList2View.FOLDER_VIEW_NAME to UstadDestination(R.id.content_entry_list_select_folder),
             ContentEntryDetailOverviewView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_overview_dest),
             ContentEntryDetailView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_dest),
             ContentEntryDetailAttemptsListView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_attempt_dest),
@@ -50,15 +49,14 @@ class ViewNameToDestMap: DestinationProvider {
             StatementListView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_session_detail_list_dest),
             ClazzLogEditAttendanceView.VIEW_NAME to UstadDestination(R.id.clazz_log_edit_attendance_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
-            ClazzWorkDetailProgressListView.VIEW_NAME to UstadDestination(R.id.clazzwork_detail_progress_list),
-            ClazzWorkSubmissionMarkingView.VIEW_NAME to UstadDestination(R.id.clazzworksubmission_marking_edit,
-                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             ClazzEnrolmentListView.VIEW_NAME to UstadDestination(R.id.clazz_enrolment_list),
             ClazzEnrolmentEditView.VIEW_NAME to UstadDestination(R.id.clazz_enrolment_edit,
                     hideAccountIcon = true),
             LeavingReasonListView.VIEW_NAME to UstadDestination(R.id.leaving_reason_list),
             LeavingReasonEditView.VIEW_NAME to UstadDestination(R.id.leaving_reason_edit,
                     hideAccountIcon = true),
+            SelectFileView.VIEW_NAME to UstadDestination(R.id.select_file_view),
+            ContentEntryImportLinkView.VIEW_NAME to UstadDestination(R.id.import_link_view),
             VideoPlayerView.VIEW_NAME to UstadDestination(R.id.video_content),
             WebChunkView.VIEW_NAME to UstadDestination(R.id.webchunk_view,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true),

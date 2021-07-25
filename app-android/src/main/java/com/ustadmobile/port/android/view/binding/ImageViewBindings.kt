@@ -5,6 +5,7 @@ import android.net.Uri
 import android.view.View
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
+import androidx.core.widget.ImageViewCompat
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
@@ -13,6 +14,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.isContentComplete
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.door.ext.resolveAttachmentAndroidUri
@@ -83,7 +85,6 @@ fun ImageView.setImageForeignKeyAutoHide(autoHide: Boolean) {
     foreignKeyProps.autoHide = autoHide
 }
 
-
 val ImageView.foreignKeyProps: ImageViewForeignKeyProps
     get(){
         val currentProps = getTag(R.id.tag_imageforeignkey_props) as ImageViewForeignKeyProps?
@@ -107,6 +108,7 @@ fun ImageView.setImageForeignKeyAdapter(foreignKeyAttachmentUriAdapter: ForeignK
  */
 private fun ImageView.updateImageFromForeignKey() {
     val foreignKeyPropsVal = foreignKeyProps
+    val tint = ImageViewCompat.getImageTintList(this)
     val adapter = foreignKeyPropsVal.foreignKeyAttachmentUriAdapter
     if(adapter != null && foreignKeyPropsVal.foreignKeyLoadingOrDisplayed != foreignKeyPropsVal.foreignKey) {
         //something new to load - cancel anything loading now and load this instead
@@ -137,6 +139,7 @@ private fun ImageView.updateImageFromForeignKey() {
                     }else if(uri == null && placeholderVal != null) {
                         //show placeholder
                         setImageDrawable(placeholderVal)
+                        imageTintList = tint
                         foreignKeyPropsVal.imageUriDisplayed = null
                     }
 
@@ -216,24 +219,20 @@ fun ImageView.setImageLookupMap(imageLookupMap: Map<Int, Int>?, imageLookupFallb
     updateFromImageLookupMap()
 }
 
-@BindingAdapter(value=["iconStatusFlag"])
-fun ImageView.setIconOnStatusFlag(statusFlag: Int){
-    when {
-        (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED ->{
+@BindingAdapter(value = ["iconProgressFlag"])
+fun ImageView.setIconOnProgressFlag(progress: ContentEntryStatementScoreProgress?) {
+    when (progress?.isContentComplete()) {
+        StatementEntity.CONTENT_COMPLETE, StatementEntity.CONTENT_PASSED -> {
             setImageResource(R.drawable.ic_content_complete)
             visibility = View.VISIBLE
         }
-        (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED -> {
-            setImageResource(R.drawable.ic_content_complete)
-            visibility = View.VISIBLE
-        }
-        (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED -> {
-            setImageResource(R.drawable.ic_content_complete)
-            visibility = View.VISIBLE
-        }
-        (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED -> {
+        StatementEntity.CONTENT_FAILED -> {
             setImageResource(R.drawable.ic_content_fail)
             visibility = View.VISIBLE
+        }
+        StatementEntity.CONTENT_INCOMPLETE -> {
+            setImageDrawable(null)
+            visibility = View.GONE
         }
         else -> {
             setImageDrawable(null)

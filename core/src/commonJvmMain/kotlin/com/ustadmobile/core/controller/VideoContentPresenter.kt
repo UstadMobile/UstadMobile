@@ -21,14 +21,14 @@ actual class VideoContentPresenter actual constructor(context: Any, arguments: M
 
             if (view.videoParams == null) {
 
-                val containerResult = containerDao.findByUidAsync(containerUid)
+                val containerResult = db.containerDao.findByUidAsync(containerUid)
                 if (containerResult == null) {
                     view.showSnackBar(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, context), {}, 0)
                     view.loading = false
                     return@launch
                 }
                 container = containerResult
-                val result = containerEntryDao.findByContainerAsync(containerUid)
+                val result = db.containerEntryDao.findByContainerAsync(containerUid)
                 var defaultLangName = ""
                 for (entry in result) {
 

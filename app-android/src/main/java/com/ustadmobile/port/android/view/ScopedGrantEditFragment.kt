@@ -51,7 +51,7 @@ class ScopedGrantEditFragment: UstadEditFragment<ScopedGrant>(), ScopedGrantEdit
         }
 
         mPresenter = ScopedGrantEditPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
 
 
         return rootView
@@ -83,6 +83,7 @@ class ScopedGrantEditFragment: UstadEditFragment<ScopedGrant>(), ScopedGrantEdit
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

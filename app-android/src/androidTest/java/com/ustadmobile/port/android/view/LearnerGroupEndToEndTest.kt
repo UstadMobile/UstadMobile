@@ -57,7 +57,7 @@ class LearnerGroupEndToEndTest : TestCase() {
             lastName = "Teacher"
             username = "Ms Teach"
         }
-        dbRule.insertPersonForActiveUser(adminPerson)
+        dbRule.insertPersonAndStartSession(adminPerson)
 
         runBlocking {
             dbRule.repo.grantScopedPermission(adminPerson, Role.ALL_PERMISSIONS,
@@ -141,7 +141,7 @@ class LearnerGroupEndToEndTest : TestCase() {
             PersonListScreen {
                 recycler {
                     childWith<PersonListScreen.Person> {
-                        withDescendant { withId(R.id.item_person_text) }
+                        withDescendant { withText("New Student") }
                     } perform {
                         personName{
                             hasText("New Student")

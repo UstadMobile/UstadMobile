@@ -129,10 +129,10 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
 
         selectedPersonUid = arguments?.getString(ARG_PERSON_UID)?.toLong() ?: 0
         mPresenter = ClazzEnrolmentListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di, viewLifecycleOwner)
+                this, di, viewLifecycleOwner).withViewLifecycle()
         profileHeaderAdapter = ClazzEnrolmentProfileHeaderAdapter(selectedPersonUid, mPresenter)
 
-        clazzHeaderAdapter = SimpleHeadingRecyclerAdapter("Person")
+        clazzHeaderAdapter = SimpleHeadingRecyclerAdapter(getText(R.string.person).toString())
         enrolmentAdapter = ClazzEnrolmentRecyclerAdapter(mPresenter).also {
             enrolmentListObserver = PagedListSubmitObserver(it)
         }

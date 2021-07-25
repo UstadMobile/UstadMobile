@@ -5,20 +5,12 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusA
 
 interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
 
-    fun showContentEntryAddOptions(parentEntryUid: Long)
+    fun showContentEntryAddOptions()
 
     /**
      * Show the download dialog button. If required by the OS, show a permission dialog first
      */
     fun showDownloadDialog(args: Map<String, String>)
-
-    /**
-     * Show ContentEntryList in picker mode so the user can select a folder to move entries to.
-     *
-     * @param selectedContentEntryParentChildJoinUids a string which is a comma separated list of
-     * the selected ContentEntryParentChildJoinUids (e.g. that should be saved to the savedStateHandle)
-     */
-    fun showMoveEntriesFolderPicker(selectedContentEntryParentChildJoinUids: String)
 
     var title: String?
 
@@ -36,13 +28,17 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
 
         const val ARG_DISPLAY_CONTENT_BY_DOWNLOADED = "displayContentByDownloaded"
 
-        const val ARG_CLAZZWORK_FILTER = "clazzworkFilter"
+        const val ARG_CLAZZ_ASSIGNMENT_FILTER = "clazzAssignmentFilter"
 
         const val VIEW_NAME = "ContentEntryListView"
+
+        const val FOLDER_VIEW_NAME = "ContentEntryListFolderView"
 
         const val ARG_MOVING_CONTENT = "SelectedItems"
 
         const val ARG_MOVING_COUNT = "moveCount"
+
+        const val ARG_SELECT_FOLDER_VISIBLE = "selectFolderVisible"
 
     }
 

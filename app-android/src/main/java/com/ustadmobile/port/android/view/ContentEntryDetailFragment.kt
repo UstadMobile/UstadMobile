@@ -1,13 +1,12 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentPagerAdapter
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntryDetailViewpagerBinding
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter
@@ -16,6 +15,7 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.port.android.view.ext.createTabLayoutStrategy
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 
 
@@ -31,6 +31,8 @@ class ContentEntryDetailFragment: UstadDetailFragment<ContentEntry>(), ContentEn
         get() = mPresenter
 
 
+    private var mediator: TabLayoutMediator? = null
+
     override var tabs: List<String>? = null
         get() = field
         set(value) {
@@ -44,17 +46,15 @@ class ContentEntryDetailFragment: UstadDetailFragment<ContentEntry>(), ContentEn
 
             field = value
             mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager,
-                    FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, value, viewNameToFragmentMap,
-                    viewNameToTitleMap.map { it.key to requireContext().getString(it.value) }.toMap())
-            Handler().post {
-                mBinding.also {
-                    if(it == null)
-                        return@also
+                    lifecycle, value, viewNameToFragmentMap)
 
-                    it.fragmentContentEntryDetailViewpager.adapter = mPagerAdapter
-                    it.fragmentContentEntryTabs.tabs.setupWithViewPager(it.fragmentContentEntryDetailViewpager)
-                }
-            }
+            val pager = mBinding?.fragmentContentEntryDetailViewpager ?: return
+            val tabList = mBinding?.fragmentContentEntryTabs?.tabs ?: return
+
+            pager.adapter = mPagerAdapter
+
+            mediator = TabLayoutMediator(tabList, pager, viewNameToTitleMap.createTabLayoutStrategy(value, requireContext()))
+            mediator?.attach()
         }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -69,7 +69,7 @@ class ContentEntryDetailFragment: UstadDetailFragment<ContentEntry>(), ContentEn
         }
 
         mPresenter = ContentEntryDetailPresenter(requireContext(), arguments.toStringMap(),
-                this, di, viewLifecycleOwner)
+                this, di, viewLifecycleOwner).withViewLifecycle()
 
         return rootView
     }
@@ -82,6 +82,8 @@ class ContentEntryDetailFragment: UstadDetailFragment<ContentEntry>(), ContentEn
 
     override fun onDestroyView() {
         super.onDestroyView()
+        mediator?.detach()
+        mediator = null
         mBinding?.fragmentContentEntryDetailViewpager?.adapter = null
         mPagerAdapter = null
         mBinding = null

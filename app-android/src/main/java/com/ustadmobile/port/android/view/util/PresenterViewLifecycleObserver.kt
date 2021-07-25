@@ -24,5 +24,6 @@ class PresenterViewLifecycleObserver(var presenter: UstadBaseController<*>?) : D
 
     override fun onDestroy(owner: LifecycleOwner) {
         presenter?.onDestroy()
+        presenter = null
     }
 }

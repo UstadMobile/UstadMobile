@@ -84,8 +84,7 @@ class DownloadJobPreparerTest {
             nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))
 
         accountManager = di.direct.instance()
-        accountManager.activeAccount = UmAccount(0, "guest", "",
-            "http://localhost:8089/", "Guest", "User")
+        accountManager.activeEndpoint = Endpoint("http://localhost:8089/")
 
         val endpointScope = EndpointScope()
         server = embeddedServer(Netty, 8089) {
@@ -121,8 +120,8 @@ class DownloadJobPreparerTest {
         }
         server.start()
 
-        clientDb = di.on(accountManager.activeAccount).direct.instance(tag = TAG_DB)
-        clientRepo = di.on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
+        clientDb = di.on(accountManager.activeEndpoint).direct.instance(tag = TAG_DB)
+        clientRepo = di.on(accountManager.activeEndpoint).direct.instance(tag = TAG_REPO)
         (clientRepo as DoorDatabaseRepository).connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED
     }
 

@@ -33,7 +33,7 @@ open class XapiPackageTypePlugin : ContentTypePlugin {
 
     companion object {
 
-        private val MIME_TYPES = arrayOf("application/tincan+zip", "application/zip")
+        val MIME_TYPES = arrayOf("application/tincan+zip", "application/zip")
 
         private val FILE_EXTENSIONS = arrayOf("zip")
 

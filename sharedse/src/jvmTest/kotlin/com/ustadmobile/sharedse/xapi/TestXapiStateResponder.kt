@@ -9,6 +9,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
@@ -89,13 +90,19 @@ class TestXapiStateResponder {
                 spy(UstadMobileSystemImpl(XmlPullParserFactory.newInstance(),
                     temporaryFolder.newFolder()))
             }
-            bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
+            bind<UstadAccountManager>() with singleton {
+                UstadAccountManager(instance(), Any(), di)
+            }
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()
                 builder.registerTypeAdapter(Statement::class.java, StatementSerializer())
                 builder.registerTypeAdapter(Statement::class.java, StatementDeserializer())
                 builder.registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
                 builder.create()
+            }
+
+            bind<Pbkdf2Params>() with singleton {
+                Pbkdf2Params()
             }
 
             bindDbAndRepoWithEndpoint(endpointScope)
