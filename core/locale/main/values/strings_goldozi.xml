@@ -111,4 +111,6 @@
     <string name="deactivate_user">Deactivate user</string>
     <string name="user_deactivated">Deactivated user</string>
     <string name="confirm_deactivate_user">Are you sure you want to deactivate this user? You will not be able to activate it again.</string>
+
+    <!-- Report titles -->
 </resources>

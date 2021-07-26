@@ -108,8 +108,7 @@ class SaleItemEditFragment: UstadEditFragment<SaleItemWithProduct>(), SaleItemEd
         }
 
     override fun goToNewSale(saleItem: SaleItemWithProduct) {
-        //TODO :Fix this
-        //navigateToEditEntity(saleItem, R.id.sale_edit_dest, SaleItemWithProduct::class.java)
+
     }
 
     override fun updateTotal(total: Float){

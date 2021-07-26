@@ -193,6 +193,19 @@ fun TextView.setInventoryDescription(stockCount: Int, weNames: String){
     text = context.getString(R.string.x_item_by_y, positiveStock.toString(), weNames)
 }
 
+@BindingAdapter(value = ["customerName", "creatorName"])
+fun TextView.setCustomerAndCreator(customerName: String, creatorName: String?){
+    val customerField =if(creatorName == null && customerName == null){
+        ""
+    }else if(creatorName== null || creatorName.isEmpty() && customerName != null){
+        customerName
+    }else{
+        context.getString(R.string.x_item_by_y, customerName, creatorName)
+    }
+
+    text = customerField
+}
+
 @BindingAdapter("inventoryType")
 fun TextView.getInventoryType(saleUid: Long){
     if(saleUid == 0L){

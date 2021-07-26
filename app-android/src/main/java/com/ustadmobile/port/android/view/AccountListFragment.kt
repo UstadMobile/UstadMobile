@@ -23,7 +23,11 @@ import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 import org.kodein.di.instance
 
-class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickListener {
+interface AccountListFragmentEventHandler{
+    fun handleClickLanguage()
+}
+class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickListener,
+    AccountListFragmentEventHandler {
 
 
     class AccountAdapter(var mPresenter: AccountListPresenter?, val isActiveAccount: Boolean = false):
@@ -242,6 +246,11 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
                         oldItem.endpoint == newItem.endpoint
             }
         }
+
+    }
+
+    override fun handleClickLanguage() {
+        //TODO
 
     }
 
