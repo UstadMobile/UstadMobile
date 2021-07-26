@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view
 
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentPagerAdapter
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.mockito.kotlin.*
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
@@ -21,15 +20,12 @@ class ViewNameListFragmentPagerAdapterRoboElectricTest {
         val viewList = listOf("DummyView?arg=value")
 
         val listPagerAdapter = ViewNameListFragmentPagerAdapter(mock {  },
-                FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT,
-                viewList, mapOf("DummyView" to DummyFragment::class.java),
-                mapOf("DummyView" to "TabTitle"))
+                mock { }, viewList,
+                mapOf("DummyView" to DummyFragment::class.java))
 
-        val fragCreated = listPagerAdapter.getItem(0)
+        val fragCreated = listPagerAdapter.createFragment(0)
         Assert.assertNotNull("Fragment was instantiated", fragCreated)
-        Assert.assertEquals("Page count is as per list", viewList.size, listPagerAdapter.count)
-        Assert.assertEquals("Tab name is returned as expected", "TabTitle",
-                listPagerAdapter.getPageTitle(0))
+        Assert.assertEquals("Page count is as per list", viewList.size, listPagerAdapter.itemCount)
         Assert.assertEquals("Argument set as expected", "value",
                 fragCreated.arguments?.getString("arg"))
     }
@@ -39,11 +35,9 @@ class ViewNameListFragmentPagerAdapterRoboElectricTest {
         val viewList = listOf("NotMappedView?arg=value")
 
         val listPagerAdapter = ViewNameListFragmentPagerAdapter(mock {  },
-                FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT,
-                viewList, mapOf("DummyView" to DummyFragment::class.java),
-                mapOf("DummyView" to "TabTitle"))
+                mock{}, viewList, mapOf("DummyView" to DummyFragment::class.java))
 
-        listPagerAdapter.getItem(0)
+        listPagerAdapter.createFragment(0)
     }
 
 

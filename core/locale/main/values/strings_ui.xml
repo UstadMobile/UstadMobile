@@ -126,7 +126,9 @@
 
     <string name="underRegistrationAgeError">Self-registration of children under 13 is not allowed. Please ask your teacher to register you.</string>
 
-
+    <string name="add_link_description">Add educational content using web link, then use it offline</string>
+    <string name="add_gallery_description">Add video or audio from the device gallery</string>
+    <string name="add_file_description">Add educational content using supported formats e.g. PDF, xAPI, H5P, EPUB</string>
 
     <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>
 
@@ -350,7 +352,7 @@
     <string name="licence_type_cc_by">CC BY</string>
     <!--
     The Creative Commons CC BY SA license as per https://creativecommons.org/licenses/by-sa/4.0/
-    Please see the bottom of the link for some of the official translations available for this title.
+        Please see the bottom of the link for some of the official translations available for this title.
     -->
     <string name="licence_type_cc_by_sa">CC BY SA</string>
 
@@ -547,6 +549,20 @@
     <string name="active">Active</string>
     <string name="class_id">Class ID</string>
     <string name="gender_literal">Gender</string>
+    <string name="country">Country</string>
+    <string name="connectivity">Connectivity</string>
+    <string name="home_internet_access">Home Internet access</string>
+    <string name="mobile_internet_access">Mobile Internet access</string>
+
+    <!-- This is an option when we ask users about their connectivity access -->
+    <string name="connectivity_limited">Limited - I avoid downloading too much</string>
+
+    <!-- This is an option when we ask users about their connectivity access -->
+    <string name="connectivity_full">Full - I download as much as I want</string>
+
+    <!-- This is an option when we ask users about thier connectivity access -->
+    <string name="prefer_not_to_say">Prefer not to say</string>
+
     <!--
     SEL = Social Emotional Learning
     -->
@@ -808,6 +824,30 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="add_a_new_clazzwork">Add a new classwork</string>
     <string name="edit_clazzwork">Edit classwork</string>
 
+    <string name="clazz_assignment">Assignment</string>
+    <string name="new_assignment">New assignment</string>
+    <string name="edit_assignment">Edit assignment</string>
+    <string name="total_score">Total score</string>
+    <string name="late_submission">Late submissions</string>
+    <!-- when assignment is submitted late by student, teacher has option to mark a penalty -->
+    <string name="mark_penalty">Mark penalty</string>
+    <string name="late_submission_penalty">Late submission penalty</string>
+    <string name="end_of_grace_period">End of grace period</string>
+    <string name="allow_class_comments">Allow class comments from students</string>
+    <string name="after_deadline_date_error">Must be after deadline date</string>
+
+    <!-- score points gained from content -->
+    <string name="points">Points</string>
+    <string name="minimum_score">Minimum score</string>
+    <string name="automatic">Automatic</string>
+    <string name="student_marks_content">Student marks themselves</string>
+    <string name="completion_criteria">Completion criteria</string>
+    <string name="mark_complete">Mark complete</string>
+    <!-- this will be shown next to the score if the student has had a
+        penalty applied for submitting his assignment late.
+         %1$s%% will be replaced by the app to show (0-100%) -->
+    <string name="late_penalty">(%1$s%% late penalty)</string>
+
     <string name="marked">marked</string>
     <string name="submitted">submitted</string>
     <string name="not_submitted">not submitted</string>
@@ -984,6 +1024,10 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="video">Video</string>
 
     <string name="content_editor_create_new_category">New folder</string>
+
+    <string name="content_pieces_completed">Content pieces completed</string>
+
+    <string name="content_usage_duration">Content usage duration</string>
 
     <string name="manage_download">Manage download</string>
 
@@ -1255,8 +1299,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <!-- Allows the user to see a list of supported educational websites for importing educational content via a link -->
     <string name="see_supported_sites">See supported sites</string>
 
-    <string name="total_score">Total score</string>
-
     <!-- A section of the class edit screen that allows users to choose what features are enabled
     and what permissions users will have -->
     <string name="class_setup">Class setup</string>
@@ -1305,16 +1347,9 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="alternatively_you_can_download_the_apk">Alternatively, you can download the APK file for manual installation if you want.</string>
 
-    <string name="connectivity">Connectivity</string>
 
-    <string name="home_internet_access">Home Internet access</string>
-
-    <string name="mobile_internet_access">Mobile Internet access</string>
-
-    <!-- This is an option when we ask users about their connectivity access -->
     <string name="full_i_can_download_as_much_as_i_like">Full - I can download as much as I like</string>
 
-    <!-- This is an option when we ask users about their connectivity access -->
     <string name="limited_i_avoid_downloading_too_much">Limited - I avoid downloading too much</string>
 
     <!-- Oops: This is displayed as the title for a screen that appears when an error occurs -->
@@ -1354,5 +1389,27 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="edit_clazzes">Edit classes</string>
 
     <string name="add_new_clazz_to_school">Add new class to school</string>
+
+    <!-- This appears as a notification after the user selects a content piece to add to a class
+    %1$s will be replaced with the title of the content item selected
+    -->
+    <string name="added_to_class_content">%1$s added to class content</string>
+
+    <!--
+    This appears as a notification after the user selects a content piece to add to a class when
+    the user selects something that they had already added before.
+    %1$s will be replaced with the title of the content item selected
+    -->
+    <string name="content_already_added_to_class">%1$s was already in class content</string>
+
+    <string name="your_account_needs_approved">Your account needs to be approved by your parent using the link that was sent.
+    If you are the parent, you need to login to your own existing account or create a new account.
+    </string>
+
+    <string name="adult_account_required">An adult account is required to open this link.
+    If you are the parent, you need to login to your own existing account or create a new account.
+    </string>
+
+    <string name="parent">Parent</string>
 
 </resources>

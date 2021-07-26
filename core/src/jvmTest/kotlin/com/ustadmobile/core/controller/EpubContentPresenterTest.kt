@@ -13,13 +13,12 @@ import com.ustadmobile.core.io.ext.openEntryInputStream
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -86,11 +85,20 @@ class EpubContentPresenterTest {
         }
 
         val accountManager: UstadAccountManager = di.direct.instance()
-        accountManager.activeAccount = UmAccount(42L, "user", "",
-                "http://localhost:4200/", "bob", "jones")
-
         val repo: UmAppDatabase by di.activeRepoInstance()
         val db: UmAppDatabase by di.activeDbInstance()
+
+        val person = runBlocking {
+            repo.insertPersonAndGroup(Person().apply {
+                personUid = 42L
+                username = "user"
+                firstNames = "bob"
+                lastName = "jones"
+            })
+        }
+
+        accountManager.startLocalTestSessionBlocking(person, accountManager.activeEndpoint.url)
+
 
         contentEntry = ContentEntry("Test epub", "test", true, true).apply {
             contentEntryUid = repo.contentEntryDao.insert(this)

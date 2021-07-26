@@ -1,6 +1,8 @@
 
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import org.mockito.kotlin.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
@@ -86,6 +88,21 @@ class PersonDetailPresenterTest {
         accountManager = mock{
             on{activeAccount}.thenReturn(UmAccount(activeAccountUid,"","",serverUrl))
             on{activeAccountLive}.thenReturn(activeAccountLive)
+            on { activeSession }.thenReturn(UserSessionWithPersonAndEndpoint(
+                UserSession().apply {
+                    usPersonUid = activeAccountUid
+                    usStatus = UserSession.STATUS_ACTIVE
+                },
+                Person().apply {
+                    personUid = activeAccountUid
+                    username = "tester"
+                    firstNames = "test"
+                    lastName = "user"
+                },
+                Endpoint(serverUrl)
+            ))
+
+            on { activeEndpoint }.thenReturn(Endpoint(serverUrl))
         }
 
         di = DI {

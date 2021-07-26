@@ -144,7 +144,7 @@ class SiteDetailFragment: UstadDetailFragment<Site>(), SiteDetailView, Workspace
         super.onViewCreated(view, savedInstanceState)
 
         mPresenter = SiteDetailPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
         mPresenter?.onCreate(backStackSavedState)
     }
 

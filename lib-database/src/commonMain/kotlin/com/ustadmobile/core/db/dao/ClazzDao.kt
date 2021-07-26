@@ -70,65 +70,68 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
 
     @Query("""
         SELECT Clazz.*, ClazzEnrolment.*,
-        (SELECT COUNT(*) FROM ClazzEnrolment WHERE 
-        ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND clazzEnrolmentRole 
-        = ${ROLE_STUDENT} AND :currentTime BETWEEN 
-        ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numStudents,
-        (SELECT COUNT(*) FROM ClazzEnrolment WHERE 
-        ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND clazzEnrolmentRole 
-        = ${ROLE_TEACHER} AND :currentTime BETWEEN 
-        ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numTeachers,
-        '' AS teacherNames,
-        0 AS lastRecorded
-        FROM 
-        PersonGroupMember
-        LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-        LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
-        LEFT JOIN Clazz ON 
-            CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = :personUid) AS INTEGER) = 1
-            OR ((Role.rolePermissions &  :permission) > 0 AND EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzUid) 
-            OR ((Role.rolePermissions &  :permission) > 0 AND EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzSchoolUid)
-        LEFT JOIN ClazzEnrolment ON ClazzEnrolment.clazzEnrolmentUid =
-            COALESCE((SELECT ClazzEnrolment.clazzEnrolmentUid FROM ClazzEnrolment
-             WHERE
-             ClazzEnrolment.clazzEnrolmentPersonUid = :personUid
-             AND ClazzEnrolment.clazzEnrolmentActive
-             AND ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid LIMIT 1), 0)
-        WHERE
-        PersonGroupMember.groupMemberPersonUid = :personUid
-        AND PersonGroupMember.groupMemberActive 
-        AND CAST(Clazz.isClazzActive AS INTEGER) = 1
-        AND Clazz.clazzName like :searchQuery
-        AND (Clazz.clazzUid NOT IN (:excludeSelectedClazzList))
-        AND ( :excludeSchoolUid = 0 OR Clazz.clazzUid NOT IN (SELECT cl.clazzUid FROM Clazz AS cl WHERE cl.clazzSchoolUid = :excludeSchoolUid) ) 
-        AND ( :excludeSchoolUid = 0 OR Clazz.clazzSchoolUid = 0 )
-        AND ( :filter != $FILTER_ACTIVE_ONLY OR (:currentTime BETWEEN Clazz.clazzStartTime AND Clazz.clazzEndTime))
-        AND ( :selectedSchool = 0 OR Clazz.clazzSchoolUid = :selectedSchool)
-        GROUP BY Clazz.clazzUid, ClazzEnrolment.clazzEnrolmentUid
-        ORDER BY CASE :sortOrder
-            WHEN $SORT_ATTENDANCE_ASC THEN Clazz.attendanceAverage
-            ELSE 0
-        END ASC,
-        CASE :sortOrder
-            WHEN $SORT_CLAZZNAME_ASC THEN Clazz.clazzName
-            ELSE ''
-        END ASC,
-        CASE :sortOrder
-            WHEN $SORT_ATTENDANCE_DESC THEN Clazz.attendanceAverage
-            ELSE 0
-        END DESC,
-        CASE :sortOrder
-            WHEN $SORT_CLAZZNAME_DESC THEN clazz.Clazzname
-            ELSE ''
-        END DESC
+               (SELECT COUNT(*) 
+                  FROM ClazzEnrolment 
+                 WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
+                   AND clazzEnrolmentRole = ${ROLE_STUDENT} 
+                   AND :currentTime BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
+                       AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numStudents,
+               (SELECT COUNT(*) 
+                  FROM ClazzEnrolment 
+                 WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
+                   AND clazzEnrolmentRole = ${ROLE_TEACHER}
+                   AND :currentTime BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
+                        AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numTeachers,
+               '' AS teacherNames,
+               0 AS lastRecorded
+          FROM PersonGroupMember
+               ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
+                    :permission
+                    ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}          
+               LEFT JOIN ClazzEnrolment 
+                    ON ClazzEnrolment.clazzEnrolmentUid =
+                       COALESCE(
+                       (SELECT ClazzEnrolment.clazzEnrolmentUid 
+                          FROM ClazzEnrolment
+                         WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+                           AND ClazzEnrolment.clazzEnrolmentActive
+                           AND ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid LIMIT 1), 0)
+         WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+           AND PersonGroupMember.groupMemberActive 
+           AND CAST(Clazz.isClazzActive AS INTEGER) = 1
+           AND Clazz.clazzName like :searchQuery
+           AND (Clazz.clazzUid NOT IN (:excludeSelectedClazzList))
+           AND ( :excludeSchoolUid = 0 OR Clazz.clazzUid NOT IN (SELECT cl.clazzUid FROM Clazz AS cl WHERE cl.clazzSchoolUid = :excludeSchoolUid) ) 
+           AND ( :excludeSchoolUid = 0 OR Clazz.clazzSchoolUid = 0 )
+           AND ( :filter != $FILTER_ACTIVE_ONLY OR (:currentTime BETWEEN Clazz.clazzStartTime AND Clazz.clazzEndTime))
+           AND ( :selectedSchool = 0 OR Clazz.clazzSchoolUid = :selectedSchool)
+      GROUP BY Clazz.clazzUid, ClazzEnrolment.clazzEnrolmentUid
+      ORDER BY CASE :sortOrder
+               WHEN $SORT_ATTENDANCE_ASC THEN Clazz.attendanceAverage
+               ELSE 0
+               END ASC,
+               CASE :sortOrder
+               WHEN $SORT_CLAZZNAME_ASC THEN Clazz.clazzName
+               ELSE ''
+               END ASC,
+               CASE :sortOrder
+               WHEN $SORT_ATTENDANCE_DESC THEN Clazz.attendanceAverage
+               ELSE 0
+               END DESC,
+               CASE :sortOrder
+               WHEN $SORT_CLAZZNAME_DESC THEN clazz.Clazzname
+               ELSE ''
+               END DESC
     """)
-    abstract fun findClazzesWithPermission(searchQuery: String, personUid: Long,
-                                           excludeSelectedClazzList: List<Long>,
-                                           excludeSchoolUid: Long, sortOrder: Int, filter: Int,
-                                           currentTime: Long,
-                                           permission: Long,
-                                           selectedSchool: Long)
-            : DataSource.Factory<Int, ClazzWithListDisplayDetails>
+    abstract fun findClazzesWithPermission(
+        searchQuery: String,
+        accountPersonUid: Long,
+        excludeSelectedClazzList: List<Long>,
+        excludeSchoolUid: Long, sortOrder: Int, filter: Int,
+        currentTime: Long,
+        permission: Long,
+        selectedSchool: Long
+    ) : DataSource.Factory<Int, ClazzWithListDisplayDetails>
 
 
     @Query("SELECT Clazz.clazzUid AS uid, Clazz.clazzName AS labelName From Clazz WHERE clazzUid IN (:ids)")
@@ -148,8 +151,18 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     abstract suspend fun updateClazzAttendanceAverageAsync(clazzUid: Long)
 
     /** Check if a permission is present on a specific entity e.g. updateState/modify etc */
-    @Query("SELECT EXISTS(SELECT 1 FROM Clazz WHERE " +
-            "Clazz.clazzUid = :clazzUid AND :accountPersonUid IN ($ENTITY_PERSONS_WITH_PERMISSION))")
+//    @Query("SELECT EXISTS(SELECT 1 FROM Clazz WHERE " +
+//            "Clazz.clazzUid = :clazzUid AND :accountPersonUid IN ($ENTITY_PERSONS_WITH_PERMISSION))")
+    @Query("""
+        SELECT EXISTS( 
+               SELECT PrsGrpMbr.groupMemberPersonUid
+                  FROM Clazz
+                       ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+                          :permission
+                          ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
+                 WHERE Clazz.clazzUid = :clazzUid
+                   AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid)
+    """)
     abstract suspend fun personHasPermissionWithClazz(accountPersonUid: Long, clazzUid: Long,
                                                       permission: Long) : Boolean
 
@@ -197,29 +210,6 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         const val SORT_ATTENDANCE_DESC = 4
 
         const val FILTER_ACTIVE_ONLY = 1
-
-        const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
-            SELECT DISTINCT Person.PersonUid FROM Person
-            LEFT JOIN PersonGroupMember ON Person.personUid = PersonGroupMember.groupMemberPersonUid
-            LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
-            WHERE 
-            CAST(Person.admin AS INTEGER) = 1
-            OR 
-            (
-            ((EntityRole.ertableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzUid) OR
-            (EntityRole.ertableId = ${School.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzSchoolUid)
-            )
-            AND
-            (Role.rolePermissions &  
-        """
-
-        const val ENTITY_PERSONS_WITH_PERMISSION_PT2 = ") > 0)"
-
-        const val ENTITY_PERSONS_WITH_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 :permission $ENTITY_PERSONS_WITH_PERMISSION_PT2"
-
-        const val ENTITY_PERSON_WITH_SELECT_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 " +
-                "${Role.PERMISSION_CLAZZ_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT2"
 
         private const val SELECT_ACTIVE_CLAZZES = "SELECT * FROM Clazz WHERE CAST(isClazzActive AS INTEGER) = 1"
     }

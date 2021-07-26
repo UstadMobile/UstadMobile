@@ -46,7 +46,7 @@ class ContentEntryList2FragmentTest : TestCase() {
 
     @Before
     fun setup() {
-        dbRule.insertPersonForActiveUser(Person().apply {
+        dbRule.insertPersonAndStartSession(Person().apply {
             firstNames = "Test"
             lastName = "User"
             username = "admin"

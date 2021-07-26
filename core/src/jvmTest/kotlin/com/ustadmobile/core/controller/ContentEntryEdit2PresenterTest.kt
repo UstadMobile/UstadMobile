@@ -19,6 +19,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
 import junit.framework.Assert.assertEquals
@@ -170,7 +171,7 @@ class ContentEntryEdit2PresenterTest {
         }
 
         verifyBlocking(contentImportManager, timeout(timeoutInMill)) {
-            queueImportContentFromFile(eq("content://Dummy"), any(), any(), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
+            queueImportContentFromFile(eq("content://Dummy"), any(), any(),eq(ContainerImportJob.Companion.CLIENT_IMPORT_MODE), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
         }
 
 
@@ -195,7 +196,7 @@ class ContentEntryEdit2PresenterTest {
         }
 
         verifyBlocking(contentImportManager, times(0)) {
-            queueImportContentFromFile(eq("content://Dummy"), any(), any(), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
+            queueImportContentFromFile(eq("content://Dummy"), any(), any(), eq(ContainerImportJob.Companion.CLIENT_IMPORT_MODE), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
         }
     }
 
@@ -221,7 +222,7 @@ class ContentEntryEdit2PresenterTest {
         }
 
         verifyBlocking(contentImportManager, timeout(timeoutInMill)) {
-            queueImportContentFromFile(eq("content://Dummy"), any(), any(), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
+            queueImportContentFromFile(eq("content://Dummy"), any(), any(),eq(ContainerImportJob.Companion.CLIENT_IMPORT_MODE), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
         }
 
     }

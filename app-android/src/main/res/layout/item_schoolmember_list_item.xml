@@ -6,6 +6,7 @@
     <data>
         <import type="com.ustadmobile.lib.db.entities.SchoolMemberWithPerson"/>
         <import type="com.ustadmobile.port.android.view.SchoolMemberListFragment"/>
+        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
         <import type="com.ustadmobile.port.android.view.SchoolMemberListFragment.SchoolMemberListRecyclerAdapter"/>
 
         <variable
@@ -32,7 +33,10 @@
         <!-- TODO: Change or remove this icon -->
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/item_schoolmember_list_item_picture"
-            app:personPicturePersonUid="@{schoolMember.person.personUid}"
+            app:imageForeignKey="@{schoolMember.person.personUid}"
+            app:imageForeignKeyAdapter="@{PersonDetailFragment.FOREIGNKEYADAPTER_PERSON}"
+            app:imageForeignKeyPlaceholder="@{@drawable/ic_account_circle_black_24dp}"
+            android:tint="?colorOnIconTint"
             android:layout_width="@dimen/dimen_40dp"
             android:layout_height="@dimen/dimen_40dp"
             android:layout_margin="@dimen/dimen_16dp"

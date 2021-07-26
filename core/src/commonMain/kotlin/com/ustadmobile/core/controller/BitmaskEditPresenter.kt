@@ -12,7 +12,6 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
 
@@ -79,7 +78,7 @@ class BitmaskEditPresenter(context: Any, arguments: Map<String, String>, view: B
 
         val FLAGS_AVAILABLE = listOf(
                 BitmaskFlag(Clazz.CLAZZ_FEATURE_ATTENDANCE, MessageID.attendance, false),
-                BitmaskFlag(Clazz.CLAZZ_FEATURE_CLAZZWORK, MessageID.clazz_work, false)
+                BitmaskFlag(Clazz.CLAZZ_FEATURE_CLAZZ_ASSIGNMENT, MessageID.assignments, false)
         )
     }
 

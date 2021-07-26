@@ -8,7 +8,6 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.tincan.UmAccountActor
@@ -16,6 +15,7 @@ import com.ustadmobile.core.tincan.UmAccountGroupActor
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
@@ -25,6 +25,7 @@ import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
+import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -47,8 +48,7 @@ class XapiPackageContentPresenterTest {
     private lateinit var learnerGroup: LearnerGroup
     private lateinit var context: Any
 
-    val account = UmAccount(42, "username", "fefe1010fe",
-            "http://localhost/")
+    lateinit var userPerson: Person
 
     @JvmField
     @Rule
@@ -73,17 +73,26 @@ class XapiPackageContentPresenterTest {
     @Suppress("BlockingMethodInNonBlockingContext")
     @Before
     fun setup() {
-        val endpointUrl = account.endpointUrl!!
-        endpoint = Endpoint(endpointUrl)
+
 
         di = DI {
             import(ustadTestRule.diModule)
         }
 
-        di.direct.instance<UstadAccountManager>().activeAccount = account
+        val accountManager: UstadAccountManager = di.direct.instance()
 
-        val db: UmAppDatabase by di.on(endpoint).instance(tag = TAG_DB)
+        endpoint = accountManager.activeEndpoint
         val repo: UmAppDatabase by di.on(endpoint).instance(tag = TAG_REPO)
+
+        userPerson = runBlocking {
+            repo.insertPersonAndGroup(Person().apply{
+                username = "username"
+                firstNames = "Jane"
+                lastName = "Doe"
+            })
+        }
+
+        accountManager.startLocalTestSessionBlocking(userPerson, endpoint.url)
 
         context = Any()
 
@@ -118,7 +127,7 @@ class XapiPackageContentPresenterTest {
 
         LearnerGroupMember().apply {
             learnerGroupMemberLgUid = learnerGroup.learnerGroupUid
-            learnerGroupMemberPersonUid = account.personUid
+            learnerGroupMemberPersonUid = userPerson.personUid
             learnerGroupMemberRole = LearnerGroupMember.PRIMARY_ROLE
             repo.learnerGroupMemberDao.insert(this)
         }
@@ -152,7 +161,7 @@ class XapiPackageContentPresenterTest {
     fun givenValidXapiPackage_whenCreated_shouldLoadAndSetTitle() {
         val args = Hashtable<String, String>()
         Assert.assertNotNull(xapiContainer)
-        args.put(UstadView.ARG_CONTAINER_UID, xapiContainer.containerUid.toString())
+        args[UstadView.ARG_CONTAINER_UID] = xapiContainer.containerUid.toString()
         args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
         args[ARG_CLAZZUID] = clazz.clazzUid.toString()
 
@@ -167,7 +176,7 @@ class XapiPackageContentPresenterTest {
             val paramsProvided = UMFileUtil.parseURLQueryString(firstValue)
             val umAccountActor = Json.decodeFromString(UmAccountActor.serializer(), paramsProvided["actor"]!!)
             Assert.assertEquals("Account actor is as expected",
-                    account.username, umAccountActor.account.name)
+                    userPerson.username, umAccountActor.account.name)
             val expectedEndpoint = UMFileUtil.resolveLink(firstValue, "/${UMURLEncoder.encodeUTF8(endpoint.url)}/xapi/$contentEntryUid/${clazz.clazzUid}/")
             Assert.assertEquals("Received expected Xapi endpoint: /endpoint/xapi/contentEntryUid/clazzUid",
                     expectedEndpoint, paramsProvided["endpoint"])
@@ -184,7 +193,7 @@ class XapiPackageContentPresenterTest {
     fun givenValidXapiPackage_whenCreatedWithGroup_shouldLoadAndSetTitle() {
         val args = Hashtable<String, String>()
         Assert.assertNotNull(xapiContainer)
-        args.put(UstadView.ARG_CONTAINER_UID, xapiContainer.containerUid.toString())
+        args[UstadView.ARG_CONTAINER_UID] = xapiContainer.containerUid.toString()
         args[ARG_LEARNER_GROUP_UID] = learnerGroup.learnerGroupUid.toString()
         args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
         args[ARG_CLAZZUID] = clazz.clazzUid.toString()

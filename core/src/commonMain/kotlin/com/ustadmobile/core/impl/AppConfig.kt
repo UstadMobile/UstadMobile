@@ -31,4 +31,8 @@ object AppConfig {
 
     const val KEY_CONTENT_ONLY_MODE = "app.contentonlymode"
 
+    const val KEY_PBKDF2_ITERATIONS = "pbkdf2.iterations"
+
+    const val KEY_PBKDF2_KEYLENGTH = "pbkdf2.keylength"
+
 }

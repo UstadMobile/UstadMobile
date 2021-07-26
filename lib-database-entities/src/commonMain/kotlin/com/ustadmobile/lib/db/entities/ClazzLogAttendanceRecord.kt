@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 @SyncableEntity(tableId = ClazzLogAttendanceRecord.TABLE_ID,
     notifyOnUpdate = [
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${ClazzLogAttendanceRecord.TABLE_ID} AS tableId 
           FROM ChangeLog
             JOIN ClazzLogAttendanceRecord 
@@ -21,25 +21,27 @@ import kotlinx.serialization.Serializable
                     AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT}) > 0
             JOIN PersonGroupMember 
                  ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-            JOIN DeviceSession
-                 ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid    
+            JOIN UserSession
+                 ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+                    AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
         """
     ],
     syncFindAllQuery = """
             SELECT ClazzLogAttendanceRecord.*
-              FROM DeviceSession
+              FROM UserSession
                    JOIN PersonGroupMember 
-                        ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+                        ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
                    JOIN ScopedGrant 
                         ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
                             AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT}) > 0
                    JOIN ClazzLogAttendanceRecord 
                         ON $FROM_SCOPEDGRANT_TO_CLAZZLOGATTENDANCERECORD_JOIN_ON_CLAUSE
-             WHERE DeviceSession.dsDeviceId = :clientId
+             WHERE UserSession.usClientNodeId = :clientId
+                   AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
         """)
 @Entity
 @Serializable
-open class ClazzLogAttendanceRecord() {
+open class ClazzLogAttendanceRecord {
 
     @PrimaryKey(autoGenerate = true)
     var clazzLogAttendanceRecordUid: Long = 0

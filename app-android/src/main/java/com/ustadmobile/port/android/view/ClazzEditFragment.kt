@@ -110,6 +110,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
     override var fieldsEnabled: Boolean = true
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mDataBinding?.fieldsEnabled = value
         }
@@ -133,7 +134,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         setEditFragmentTitle(R.string.add_a_new_class, R.string.edit_clazz)
 
         mPresenter = ClazzEdit2Presenter(requireContext(), arguments.toStringMap(), this@ClazzEditFragment,
-            di, viewLifecycleOwner)
+            di, viewLifecycleOwner).withViewLifecycle()
 
         mDataBinding?.scheduleOneToManyListener = mPresenter?.scheduleOneToManyJoinListener
         mDataBinding?.mPresenter = mPresenter

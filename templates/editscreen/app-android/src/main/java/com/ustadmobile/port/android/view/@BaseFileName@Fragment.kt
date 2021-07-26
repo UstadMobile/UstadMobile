@@ -33,7 +33,7 @@ class @BaseFileName@Fragment: UstadEditFragment<@Entity@>(), @BaseFileName@View,
         }
 
         mPresenter = @BaseFileName@Presenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
 
 
         return rootView
@@ -62,6 +62,7 @@ class @BaseFileName@Fragment: UstadEditFragment<@Entity@>(), @BaseFileName@View,
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

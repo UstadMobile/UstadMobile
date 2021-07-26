@@ -5,13 +5,10 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.ScopedGrant
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.screen.PersonDetailScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
@@ -39,38 +36,44 @@ class PersonDetailFragmentTest : TestCase() {
 
 
 
+    private fun launchFragment(
+        activeUserIsAdmin: Boolean = true,
+        personHasUsername: Boolean = true,
+        activeUserIsPersonDisplayed: Boolean = false
+    ){
 
-    private fun launchFragment(isAdmin: Boolean = true, withUsername: Boolean = true, sameUser: Boolean = false){
-        val mPersonUid:Long = if(sameUser) 42 else 43
-        val person = PersonWithDisplayDetails().apply {
+        dbRule.insertPersonAndStartSession(Person().apply {
+            personUid = UmAppDatabaseAndroidClientRule.DEFAULT_ACTIVE_USER_PERSONUID
             firstNames = "Jones"
             lastName = "Doe"
-            if(withUsername){
-                username = "jones.doe"
-            }
-            personUid = mPersonUid
-            runBlocking { dbRule.repo.insertPersonAndGroup(this@apply) }
-            //dbRule.repo.personDao.insert(this)
-        }
+            username = "jones.doe"
+            admin = activeUserIsAdmin
+        })
 
-        if(!sameUser){
+
+        if(!activeUserIsPersonDisplayed) {
+            //Create an extra person
             runBlocking {
-                val userPerson = dbRule.repo.insertPersonAndGroup(PersonWithDisplayDetails().apply {
-                    firstNames = "Admin"
-                    lastName = "User"
-                    username = "admin.user"
-                    personUid = 42
-                    admin = isAdmin
-                    //dbRule.repo.personDao.insert(this)
+                dbRule.repo.insertPersonAndGroup(Person().apply {
+                    personUid = 43L
+                    firstNames = "Jones"
+                    lastName = "Doe"
+                    if(personHasUsername){
+                        username = "jones.doe"
+                    }
                 })
-
-                if(isAdmin)
-                    dbRule.repo.grantScopedPermission(userPerson, Role.ALL_PERMISSIONS,
-                        ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
             }
         }
 
-        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
+        val displayPersonUid = if(activeUserIsPersonDisplayed) {
+            UmAppDatabaseAndroidClientRule.DEFAULT_ACTIVE_USER_PERSONUID
+        }else {
+            43L
+        }
+
+
+
+        val args = mapOf(UstadView.ARG_ENTITY_UID to displayPersonUid.toString())
         launchFragmentInContainer(themeResId = R.style.UmTheme_App,
             fragmentArgs = args.toBundle()) {
             PersonDetailFragment().also {
@@ -81,10 +84,11 @@ class PersonDetailFragmentTest : TestCase() {
 
     @AdbScreenRecord("given person detail when username is null and account management allowed then should hide create account option")
     @Test
-    fun givenPersonDetails_whenPersonUsernameIsNullAndCanManageAccount_thenCreateAccountShouldHidden(){
+    fun givenPersonDetails_whenPersonUsernameIsNullAndCantManageAccount_thenCreateAccountShouldHidden(){
 
         init{
-            launchFragment(withUsername = false, isAdmin = false)
+            launchFragment(personHasUsername = false, activeUserIsAdmin = false,
+                activeUserIsPersonDisplayed = false)
         }.run {
 
             PersonDetailScreen{
@@ -106,7 +110,7 @@ class PersonDetailFragmentTest : TestCase() {
     @Test
     fun givenPersonDetails_whenOpenedActivePersonDetailPersonAndCanManageAccount_thenChangePasswordShouldBeShown(){
         before {
-            launchFragment(false, sameUser = true)
+            launchFragment(false, activeUserIsPersonDisplayed = true)
         }.after {
 
         }.run {
@@ -128,7 +132,7 @@ class PersonDetailFragmentTest : TestCase() {
     @Test
     fun givenPersonDetailsAndAdminLogged_whenPersonUsernameIsNullAndCanManageAccount_thenCreateAccountShouldBeShown(){
         before {
-            launchFragment(withUsername = false)
+            launchFragment(personHasUsername = false, activeUserIsAdmin = true)
         }.after {
 
         }.run {
@@ -170,7 +174,7 @@ class PersonDetailFragmentTest : TestCase() {
 
 
         before {
-            launchFragment(withUsername = false)
+            launchFragment(personHasUsername = false)
         }.after {
 
         }.run {

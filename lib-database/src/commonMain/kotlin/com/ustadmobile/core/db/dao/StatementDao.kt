@@ -62,23 +62,44 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             MAX(ResultSource.timestamp) AS endDate, 
             SUM(ResultSource.resultDuration) AS duration, 
             MAX(CASE WHEN ResultSource.contentEntryRoot 
-                THEN ResultSource.resultScoreScaled * 100 
-                ELSE 0 END) AS score, 
-            MAX(ResultSource.extensionProgress) AS progress 
+                THEN resultScoreRaw
+                ELSE 0 END) AS resultScore, 
+            MAX(CASE WHEN ResultSource.contentEntryRoot 
+                THEN resultScoreMax
+                ELSE 0 END) AS resultMax,   
+            MAX(CASE WHEN ResultSource.contentEntryRoot 
+                THEN resultScoreScaled
+                ELSE 0 END) AS resultScaled, 
+            MAX(ResultSource.extensionProgress) AS progress,
+            0 AS penalty,
+            'FALSE' AS contentComplete,
+            0 AS success,
+            
+            CASE WHEN ResultSource.resultCompletion 
+                THEN 1 ELSE 0 END AS totalCompletedContent,
+                
+            1 as totalContent, 
+            
+             
+         
+            '' AS latestPrivateComment
         
          FROM (SELECT Person.personUid, Person.firstNames, Person.lastName, 
             StatementEntity.contextRegistration, StatementEntity.timestamp, 
-            StatementEntity.resultDuration, StatementEntity.resultScoreScaled, 
-            StatementEntity.contentEntryRoot, StatementEntity.extensionProgress
+            StatementEntity.resultDuration, StatementEntity.resultScoreRaw, 
+            StatementEntity.resultScoreMax, StatementEntity.resultScoreScaled,
+            StatementEntity.contentEntryRoot, StatementEntity.extensionProgress, 
+            StatementEntity.resultCompletion
             FROM PersonGroupMember
-            ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+            ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
              LEFT JOIN StatementEntity 
                 ON StatementEntity.statementPersonUid = Person.personUid 
                     WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
                         AND PersonGroupMember.groupMemberActive  
                         AND statementContentEntryUid = :contentEntryUid
-                        AND Person.firstNames || ' ' || Person.lastName LIKE :searchText 
-             GROUP BY StatementEntity.statementUid) AS ResultSource 
+                        AND Person.firstNames || ' ' || Person.lastName LIKE :searchText              
+                   GROUP BY StatementEntity.statementUid 
+                   ORDER BY resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC) AS ResultSource 
          GROUP BY ResultSource.personUid 
          ORDER BY CASE(:sortOrder) 
                 WHEN $SORT_FIRST_NAME_ASC THEN ResultSource.firstNames
@@ -103,6 +124,36 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                                                      searchText: String, sortOrder: Int)
             : DataSource.Factory<Int, PersonWithAttemptsSummary>
 
+
+    @Query("""
+        SELECT 
+                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
+                COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
+                COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
+                COALESCE(StatementEntity.extensionProgress,0) AS progress, 
+                COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
+                COALESCE(StatementEntity.resultSuccess, 0) AS success,
+                
+                COALESCE((CASE WHEN resultCompletion 
+                THEN 1 ELSE 0 END),0) AS totalCompletedContent,
+                
+                1 as totalContent, 
+                0 as penalty
+                
+        FROM ContentEntry
+            LEFT JOIN StatementEntity
+							ON StatementEntity.statementUid = 
+                                (SELECT statementUid 
+							       FROM StatementEntity 
+                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
+							        AND StatementEntity.statementPersonUid = :accountPersonUid
+							        AND contentEntryRoot 
+                               ORDER BY resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC LIMIT 1)
+                               
+       WHERE contentEntryUid = :contentEntryUid
+    """)
+    abstract suspend fun getBestScoreForContentForPerson(contentEntryUid: Long, accountPersonUid: Long): ContentEntryStatementScoreProgress?
+
     @Query("""
         SELECT MIN(timestamp) AS startDate, 
             MAX(CASE 
@@ -121,16 +172,24 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             MAX(CASE WHEN contentEntryRoot 
                      THEN resultScoreMax ELSE 0 END) AS resultMax,
             MAX(CASE WHEN contentEntryRoot 
-                     THEN resultScoreScaled ELSE 0 END) AS resultScoreScaled  
+                     THEN resultScoreScaled ELSE 0 END) AS resultScoreScaled,
+                       
+            SUM(CASE WHEN resultCompletion AND StatementEntity.contentEntryRoot 
+                THEN 1 ELSE 0 END) AS totalCompletedContent,
+                
+             1 as totalContent          
+                       
         FROM StatementEntity 
-            LEFT JOIN Person 
-                ON Person.personUid = StatementEntity.statementPersonUid 
+             JOIN ScopedGrant 
+                 ON ${StatementEntity.FROM_STATEMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE}
+                 AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
+             JOIN PersonGroupMember 
+                 ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid  
+                AND PersonGroupMember.groupMemberPersonUid = :accountPersonUid
         WHERE statementContentEntryUid = :contentEntryUid   
-            AND statementPersonUid = :personUid 
-            AND :accountPersonUid 
-                IN (${PersonDao.ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION}) 
+          AND statementPersonUid = :personUid 
         GROUP BY StatementEntity.contextRegistration 
-        ORDER BY startDate DESC
+        ORDER BY startDate DESC, resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC
          """)
     abstract fun findSessionsForPerson(contentEntryUid: Long, accountPersonUid: Long, personUid: Long)
             : DataSource.Factory<Int, PersonWithSessionsDisplay>
@@ -141,8 +200,12 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             verbLangMap.valueLangMap AS verbDisplay, 
             xobjectMap.valueLangMap AS objectDisplay 
         FROM StatementEntity
-                LEFT JOIN Person 
-                    ON StatementEntity.statementPersonUid = Person.personUid 
+                 JOIN ScopedGrant 
+                    ON ${StatementEntity.FROM_STATEMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE}
+                    AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
+                 JOIN PersonGroupMember 
+                    ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid  
+                AND PersonGroupMember.groupMemberPersonUid = :accountPersonUid
                 LEFT JOIN VerbEntity 
                     ON VerbEntity.verbUid = StatementEntity.statementVerbUid 
                 LEFT JOIN XLangMapEntry verbLangMap 
@@ -152,13 +215,72 @@ abstract class StatementDao : BaseDao<StatementEntity> {
          WHERE statementContentEntryUid = :contentEntryUid 
             AND statementPersonUid = :personUid 
             AND contextRegistration = :contextRegistration 
-            AND :accountPersonUid 
-                IN (${PersonDao.ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION}) 
          ORDER BY StatementEntity.timestamp DESC
          """)
     abstract fun findSessionDetailForPerson(contentEntryUid: Long, accountPersonUid: Long,
                                             personUid: Long, contextRegistration: String)
             : DataSource.Factory<Int, StatementWithSessionDetailDisplay>
+
+
+    @Query("""
+        SELECT SUM(resultScoreRaw) AS resultScore, 
+               SUM(resultScoreMax) AS resultMax,
+               MAX(extensionProgress) AS progress,
+               0 as penalty,
+               0 as success,
+               'FALSE' as contentComplete,
+               0 AS resultScaled,
+               COALESCE((CASE WHEN resultCompletion 
+               THEN 1 ELSE 0 END),0) AS totalCompletedContent,
+                
+                1 as totalContent
+               
+         FROM (SELECT * FROM StatementEntity 
+                WHERE contextRegistration = :contextRegistration
+                  AND NOT contentEntryRoot
+                  AND statementVerbUid = ${VerbEntity.VERB_ANSWERED_UID} 
+             GROUP BY xObjectUid)
+    """)
+    abstract fun calculateScoreForSession(contextRegistration: String): ContentEntryStatementScoreProgress?
+
+
+    @Query("""
+        SELECT resultScoreRaw AS resultScore, 
+               resultScoreMax AS resultMax,
+               extensionProgress AS progress,
+               0 AS penalty,
+               resultSuccess AS success,
+               resultCompletion AS contentComplete, 
+               resultScoreScaled AS resultScaled,
+                1 AS totalCompletedContent,
+                1 as totalContent
+               
+          FROM StatementEntity
+         WHERE resultCompletion
+          AND contextRegistration = :contextRegistration
+          AND contentEntryRoot
+     ORDER BY resultScoreScaled DESC, 
+              extensionProgress DESC, 
+              resultSuccess DESC 
+              LIMIT 1
+    """)
+    abstract fun findCompletedScoreForSession(contextRegistration: String): ContentEntryStatementScoreProgress?
+
+
+    @Query("""
+        SELECT contextRegistration 
+          FROM StatementEntity
+         WHERE statementPersonUid = :accountPersonUid
+           AND statementContentEntryUid = :entryUid
+           AND NOT EXISTS (SELECT statementUid FROM StatementEntity
+                            WHERE statementPersonUid = :accountPersonUid
+                             AND statementContentEntryUid = :entryUid
+                             AND (statementVerbUid = ${VerbEntity.VERB_COMPLETED_UID} 
+                                    OR statementVerbUid = ${VerbEntity.VERB_SATISFIED_UID}))
+      ORDER BY timestamp DESC 
+    """)
+    abstract suspend fun findLatestRegistrationStatement(accountPersonUid: Long, entryUid: Long): String?
+
 
     @Serializable
     data class ReportData(var yAxis: Float = 0f, var xAxis: String? = "", var subgroup: String? = "")
