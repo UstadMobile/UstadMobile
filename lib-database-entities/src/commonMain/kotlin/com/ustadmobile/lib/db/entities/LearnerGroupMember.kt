@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 @Entity
 @SyncableEntity(tableId = LearnerGroupMember.TABLE_ID,
     notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${LearnerGroupMember.TABLE_ID} AS tableId 
           FROM ChangeLog
                JOIN LearnerGroupMember 
@@ -16,21 +16,22 @@ import kotlinx.serialization.Serializable
                         AND ChangeLog.chEntityPk = LearnerGroupMember.learnerGroupMemberUid
                JOIN Person 
                     ON Person.personUid = LearnerGroupMember.learnerGroupMemberPersonUid
-               ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+               ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
                     ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}
+                    ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
        """],
     syncFindAllQuery = """
         SELECT LearnerGroupMember.* 
-          FROM DeviceSession
+          FROM UserSession
           JOIN PersonGroupMember
-               ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+               ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
           ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1}
                 ${Role.PERMISSION_PERSON_SELECT}
                 ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
           JOIN LearnerGroupMember
                ON LearnerGroupMember.learnerGroupMemberPersonUid = Person.personUid
-         WHERE DeviceSession.dsDeviceId = :clientId
+         WHERE UserSession.usClientNodeId = :clientId
+           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
     """)
 @Serializable
 open class LearnerGroupMember {

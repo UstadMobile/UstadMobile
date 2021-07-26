@@ -9,10 +9,35 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @SyncableEntity(tableId = TABLE_ID,
-        notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, $TABLE_ID AS tableId
-        FROM DeviceSession 
-    """])
+        notifyOnUpdate = [
+            """
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
+               $TABLE_ID AS tableId 
+          FROM ChangeLog 
+                JOIN ClazzContentJoin
+                     ON ChangeLog.chTableId = $TABLE_ID 
+                            AND ClazzContentJoin.ccjUid = ChangeLog.chEntityPk
+                JOIN Clazz 
+                    ON Clazz.clazzUid = ClazzContentJoin.ccjClazzUid                
+                ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_CLAZZ_CONTENT_SELECT}
+                    ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
+        """
+        ],
+        syncFindAllQuery = """
+        SELECT ClazzContentJoin.* 
+          FROM UserSession
+               JOIN PersonGroupMember 
+                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+               ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_CLAZZ_CONTENT_SELECT} 
+                    ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
+               JOIN ClazzContentJoin    
+                    ON Clazz.clazzUid = ClazzContentJoin.ccjClazzUid  
+         WHERE UserSession.usClientNodeId = :clientId 
+           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+    """
+)
 @Serializable
 class ClazzContentJoin  {
 

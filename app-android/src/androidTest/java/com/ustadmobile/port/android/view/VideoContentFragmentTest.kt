@@ -17,7 +17,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntryProgress
+import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 import com.ustadmobile.port.android.screen.VideoContentScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.letOnFragment
@@ -108,15 +108,16 @@ class VideoContentFragmentTest : TestCase() {
                     isGone()
                 }
 
-                var contentProgress: ContentEntryProgress? = null
-                while(contentProgress == null){
-                    contentProgress = dbRule.db.contentEntryProgressDao
-                            .getProgressByContentAndPerson(container.containerContentEntryUid,
-                                    dbRule.account.personUid)
-                    Thread.sleep(200)
+                runBlocking {
+                    var statement: ContentEntryStatementScoreProgress? = null
+                    while(statement == null){
+                        statement = dbRule.db.statementDao
+                                .getBestScoreForContentForPerson(
+                                        container.containerContentEntryUid, dbRule.account.personUid)
+                    }
+                    Assert.assertEquals("progress started since user pressed play", 0,
+                            statement.progress)
                 }
-                Assert.assertEquals("progress started since user pressed play", 0,
-                        contentProgress.contentEntryProgressProgress)
 
             }
 

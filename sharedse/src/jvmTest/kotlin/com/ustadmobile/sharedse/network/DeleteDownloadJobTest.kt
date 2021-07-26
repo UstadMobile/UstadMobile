@@ -1,38 +1,25 @@
 package com.ustadmobile.sharedse.network
 
-import org.mockito.kotlin.*
-import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerAddOptions
-import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
-import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
-import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.sharedse.util.UstadTestRule
-import com.ustadmobile.util.test.extractTestResourceToFile
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.kodein.di.*
 import org.junit.rules.TemporaryFolder
+import org.kodein.di.*
+import org.mockito.kotlin.mock
 import java.io.File
-import javax.naming.InitialContext
 
 class DeleteDownloadJobTest{
 
@@ -83,8 +70,9 @@ class DeleteDownloadJobTest{
         }
         val cloudMockWebServer = MockWebServer()
         val accountManager: UstadAccountManager by clientDi.instance()
-        accountManager.activeAccount = UmAccount(0, "guest", "",
-                cloudMockWebServer.url("/").toString())
+        runBlocking {
+            accountManager.startGuestSession(cloudMockWebServer.url("/").toString())
+        }
 
         db =  clientDi.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_DB)
         repo = clientDi.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)

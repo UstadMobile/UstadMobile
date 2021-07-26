@@ -40,7 +40,7 @@ class ClazzEnrolmentListFragmentTest : TestCase()  {
     @Before
     fun setup() {
         runBlocking {
-            dbRule.insertPersonForActiveUser(Person().apply {
+            dbRule.insertPersonAndStartSession(Person().apply {
                 firstNames = "Bob"
                 lastName = "Jones"
                 admin = true

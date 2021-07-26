@@ -15,4 +15,12 @@ abstract class ClazzContentJoinDao: BaseDao<ClazzContentJoin> {
                      WHERE ccjContentEntryUid IN (:selectedItem)""")
     abstract suspend fun toggleVisibilityClazzContent(toggleVisibility: Boolean, selectedItem: List<Long>)
 
+    @Query("""
+        SELECT ccjContentEntryUid 
+          FROM ClazzContentJoin
+         WHERE ccjClazzUid = :clazzUid
+           AND ccjActive
+    """)
+    abstract suspend fun listOfEntriesInClazz(clazzUid: Long): List<Long>
+
 }

@@ -14,8 +14,8 @@ import kotlinx.serialization.Serializable
 @Entity
 @SyncableEntity(tableId = TABLE_ID,
         notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, $TABLE_ID AS tableId
-        FROM DeviceSession 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, $TABLE_ID AS tableId
+        FROM UserSession
     """])
 @Serializable
 class ContentEntryContentCategoryJoin() {

@@ -39,8 +39,8 @@ class PersonGroupListFragment(): UstadListViewFragment<PersonGroup, PersonGroupW
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = PersonGroupListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di, viewLifecycleOwner)
-
+                this,  di, viewLifecycleOwner).withViewLifecycle()
+        mDataBinding?.presenter = mPresenter
         mDataRecyclerViewAdapter = PersonGroupListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.new_group)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this, createNewText)

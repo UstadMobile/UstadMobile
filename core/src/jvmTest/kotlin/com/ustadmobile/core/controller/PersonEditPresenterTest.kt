@@ -4,6 +4,7 @@ import org.mockito.kotlin.*
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.years
 import com.ustadmobile.core.account.AccountRegisterOptions
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.EntityRoleDao
@@ -83,6 +84,7 @@ class PersonEditPresenterTest  {
         serverUrl = mockWebServer.url("/").toString()
 
         accountManager = mock{
+            on { activeEndpoint }.thenReturn(Endpoint(serverUrl))
             on{activeAccount}.thenReturn(UmAccount(0L,"","",serverUrl))
         }
 
@@ -220,7 +222,7 @@ class PersonEditPresenterTest  {
 
         verifyBlocking(accountManager, timeout(timeoutInMill)) {
             register(argWhere { it.personUid == person.personUid }, eq(serverUrl),
-                argWhere<AccountRegisterOptions> { it.makeAccountActive == false } )
+                argWhere { it.makeAccountActive } )
         }
     }
 
@@ -255,6 +257,13 @@ class PersonEditPresenterTest  {
 
         val presenter = PersonEditPresenter(context, args, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
+
+        nullableArgumentCaptor<PersonParentJoin>() {
+            verify(mockView, timeout(5000)).approvalPersonParentJoin = capture()
+            firstValue?.ppjEmail = "parent@somewhere.com"
+        }
+
+
         val personToRegister : PersonWithAccount = mockView.captureLastEntityValue(5000)!!
         personToRegister.apply {
             firstNames = "Jane"
@@ -264,15 +273,9 @@ class PersonEditPresenterTest  {
             confirmedPassword = "secret"
         }
 
-        mockView.stub {
-            on { approvalPersonParentJoin  }.thenReturn(PersonParentJoin().apply {
-                ppjEmail = "parent@somewhere.com"
-            })
-        }
-
         presenter.handleClickSave(personToRegister)
 
-        verifyBlocking(accountManager, timeout(timeoutInMill* 1000)) {
+        verifyBlocking(accountManager, timeout(timeoutInMill)) {
             register(argWhere { it.personUid == personToRegister.personUid },
                 eq(serverUrl), argWhere<AccountRegisterOptions> { it.parentJoin?.ppjEmail == "parent@somewhere.com" })
         }

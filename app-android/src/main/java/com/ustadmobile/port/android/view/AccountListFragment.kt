@@ -12,13 +12,13 @@ import com.toughra.ustadmobile.databinding.FragmentAccountListBinding
 import com.toughra.ustadmobile.databinding.ItemAccountAboutBinding
 import com.toughra.ustadmobile.databinding.ItemAccountListBinding
 import com.toughra.ustadmobile.databinding.ItemAccountlistIntentmessageBinding
+import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.controller.AccountListPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 import org.kodein.di.instance
@@ -27,7 +27,7 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
 
 
     class AccountAdapter(var mPresenter: AccountListPresenter?, val isActiveAccount: Boolean = false):
-            ListAdapter<UmAccount, AccountAdapter.AccountViewHolder>(DIFF_CALLBACK_ACCOUNT){
+            ListAdapter<UserSessionWithPersonAndEndpoint, AccountAdapter.AccountViewHolder>(DIFF_CALLBACK_USER_SESSION){
 
         class AccountViewHolder(val binding: ItemAccountListBinding): RecyclerView.ViewHolder(binding.root)
 
@@ -39,9 +39,9 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
 
                 if(!isActiveAccount) {
                     root.setOnClickListener {
-                        val account = this.umaccount
-                        if(account != null)
-                            mPresenter?.handleClickAccount(account)
+                        val session = this.session
+                        if(session != null)
+                            mPresenter?.handleClickUserSession(session)
                     }
 
                     root.background  = ContextCompat.getDrawable(root.context, R.drawable.bg_listitem)
@@ -52,12 +52,19 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         }
 
         override fun onBindViewHolder(holder: AccountViewHolder, position: Int) {
-            val account = getItem(position)
-            holder.binding.umaccount = account
+            val session = getItem(position)
+            holder.binding.session = session
             holder.binding.activeAccount = isActiveAccount
-            val showLogoutAndProfile = isActiveAccount && holder.binding.umaccount?.personUid != 0L
-            holder.binding.logoutBtnVisibility = if(showLogoutAndProfile) View.VISIBLE else View.GONE
-            holder.binding.profileBtnVisibility = if(showLogoutAndProfile) View.VISIBLE else View.GONE
+            holder.binding.logoutBtnVisibility = if(isActiveAccount) {
+                View.VISIBLE
+            }else {
+                View.GONE
+            }
+            holder.binding.profileBtnVisibility = if(isActiveAccount && holder.binding.session?.person?.username != null) {
+                View.VISIBLE
+            }else {
+                View.GONE
+            }
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -69,7 +76,7 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
 
     class IntentMessageViewHolder(val mBinding: ItemAccountlistIntentmessageBinding): RecyclerView.ViewHolder(mBinding.root)
 
-    class IntentMessageAdapter() : ListAdapter<String, IntentMessageViewHolder>(DIFF_CALLBACK_STRING) {
+    class IntentMessageAdapter : ListAdapter<String, IntentMessageViewHolder>(DIFF_CALLBACK_STRING) {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IntentMessageViewHolder {
             return IntentMessageViewHolder(ItemAccountlistIntentmessageBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false))
@@ -104,22 +111,22 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
 
     private var mBinding: FragmentAccountListBinding? = null
 
-    private var mCurrentStoredAccounts: List<UmAccount>? = null
+    private var mCurrentStoredAccounts: List<UserSessionWithPersonAndEndpoint>? = null
 
-    private var mActiveAccount: UmAccount? = null
+    private var mActiveAccount: UserSessionWithPersonAndEndpoint? = null
 
-    private var activeAccountObserver = Observer<UmAccount?> {
+    private var activeAccountObserver = Observer<UserSessionWithPersonAndEndpoint?> {
         mActiveAccount = it
         if(it != null)
             activeAccountAdapter?.submitList(listOf(it))
     }
 
-    private var accountListObserver = Observer<List<UmAccount>?> {
+    private var accountListObserver = Observer<List<UserSessionWithPersonAndEndpoint>?> {
         mCurrentStoredAccounts = it
         otherAccountsAdapter?.submitList(it)
     }
 
-    override var activeAccountLive: DoorLiveData<UmAccount>? = null
+    override var activeAccountLive: DoorLiveData<UserSessionWithPersonAndEndpoint?>? = null
         set(value) {
             field?.removeObserver(activeAccountObserver)
             field = value
@@ -127,7 +134,7 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         }
 
 
-    override var accountListLive: DoorLiveData<List<UmAccount>>? = null
+    override var accountListLive: DoorLiveData<List<UserSessionWithPersonAndEndpoint>>? = null
         set(value) {
             field?.removeObserver(accountListObserver)
             field = value
@@ -163,7 +170,7 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
         // Inflate the layout for this fragment
         val rootView: View
         mBinding = FragmentAccountListBinding.inflate(inflater, container, false).also {
@@ -173,7 +180,7 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         mBinding?.accountListRecycler?.layoutManager = LinearLayoutManager(requireContext())
         val impl: UstadMobileSystemImpl by instance()
         mPresenter = AccountListPresenter(requireContext(),arguments.toStringMap(),this, di,
-            viewLifecycleOwner)
+            viewLifecycleOwner).withViewLifecycle()
 
         val versionText = impl.getVersion(requireContext()) + " - " +
                 UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(requireContext()))
@@ -183,7 +190,7 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
 
         ustadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
                 createNewText = String.format(getString(R.string.add_another),
-                        getString(R.string.account).toLowerCase()))
+                        getString(R.string.account).lowercase()))
         ustadListHeaderRecyclerViewAdapter?.newItemVisible = true
         mIntentMessageAdapter = IntentMessageAdapter()
 
@@ -224,13 +231,15 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
             }
         }
 
-        val DIFF_CALLBACK_ACCOUNT = object: DiffUtil.ItemCallback<UmAccount>() {
-            override fun areItemsTheSame(oldItem: UmAccount, newItem: UmAccount): Boolean {
-                return oldItem.personUid == newItem.personUid
+        val DIFF_CALLBACK_USER_SESSION = object: DiffUtil.ItemCallback<UserSessionWithPersonAndEndpoint>() {
+            override fun areItemsTheSame(oldItem: UserSessionWithPersonAndEndpoint, newItem: UserSessionWithPersonAndEndpoint): Boolean {
+                return oldItem.userSession.usUid == newItem.userSession.usUid
             }
 
-            override fun areContentsTheSame(oldItem: UmAccount, newItem: UmAccount): Boolean {
-                return false
+            override fun areContentsTheSame(oldItem: UserSessionWithPersonAndEndpoint, newItem: UserSessionWithPersonAndEndpoint): Boolean {
+                return oldItem.userSession.usStatus == newItem.userSession.usStatus &&
+                        oldItem.person.fullName() == newItem.person.fullName() &&
+                        oldItem.endpoint == newItem.endpoint
             }
         }
 

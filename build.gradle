@@ -2,10 +2,10 @@
 import org.apache.tools.ant.filters.*
 
 buildscript {
-    ext.version_kotlin = '1.5.10'
+    ext.version_kotlin = '1.5.21'
     ext.version_shadow = "5.2.0"
     ext.version_gradle_versions_plugin = "0.28.0"
-    ext.atomicfu_version = '0.16.1'
+    ext.atomicfu_version = '0.16.2'
 
     repositories {
         google()
@@ -16,7 +16,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.2.1'
+        classpath 'com.android.tools.build:gradle:4.2.2'
         classpath 'com.google.gms:google-services:4.3.8'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
@@ -38,7 +38,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        mavenLocal()
 
         maven {
             url "https://devserver3.ustadmobile.com/maven"
@@ -71,8 +70,8 @@ subprojects {
 
 
 //Major.minor.database version
-version = "7.1.36"
 
+version = "7.3.38"
 group = "com.ustadmobile.app"
 
 /**
@@ -82,19 +81,19 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 305
+    ustadVersionCode = 306
 
-    version_door = "0.0.20"
+    version_door = "0.0.22"
     version_xmlpullparserkmp = '0.0.18'
 
     version_gradle_buildconfig_plugin = "1.1.7"
     version_jacoco_tool = "0.8.5"
     version_kotlin_jvmTarget = "1.8"
-    version_kotlinx_serialization = "1.2.1"
+    version_kotlinx_serialization = "1.2.2"
     version_klock = "2.0.7"
-    version_ktor = "1.6.0"
-    version_coroutines = "1.5.0"
-    version_atomicfu = "0.16.1"
+    version_ktor = "1.6.1"
+    version_coroutines = "1.5.1"
+    version_atomicfu = "0.16.2"
 
     version_junit = "4.13"
     version_nanohttpd = "2.3.1"

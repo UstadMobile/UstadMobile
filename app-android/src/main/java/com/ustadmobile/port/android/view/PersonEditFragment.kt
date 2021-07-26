@@ -30,6 +30,7 @@ import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import kotlinx.coroutines.runBlocking
+import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
 import com.ustadmobile.port.android.view.util.RunAfterTextChangedTextWatcher
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -222,23 +223,10 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }
-
-    class ClearErrorTextWatcher(private val onTextFunction: () -> Unit ):TextWatcher{
-        override fun afterTextChanged(p0: Editable?) {
-
-        }
-
-        override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-
-        }
-
-        override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            onTextFunction()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -260,7 +248,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         }
 
         mPresenter = PersonEditPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+                di, viewLifecycleOwner).withViewLifecycle()
 
         mBinding?.usernameText?.addTextChangedListener(ClearErrorTextWatcher {
             mBinding?.usernameError = null

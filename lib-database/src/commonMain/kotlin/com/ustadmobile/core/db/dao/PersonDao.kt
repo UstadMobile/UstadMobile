@@ -43,13 +43,6 @@ abstract class PersonDao : BaseDao<Person> {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertOrReplace(person: Person)
 
-    @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
-    open suspend fun isUsernameAvailable(username: String): Boolean {
-        val count = findByUsernameCount(username)
-        println("count: " + count)
-        return count == 0
-    }
-
     @Query("SELECT COUNT(*) FROM Person where Person.username = :username")
     abstract suspend fun findByUsernameCount(username: String): Int
 
@@ -125,10 +118,25 @@ abstract class PersonDao : BaseDao<Person> {
     abstract fun insertAccessToken(token: AccessToken)
 
 
-    @Query("SELECT Person.personUid,Person.admin,Person.firstNames, Person.lastName, PersonAuth.passwordHash " +
-            " FROM Person LEFT JOIN PersonAuth ON Person.personUid = PersonAuth.personAuthUid " +
-            "WHERE Person.username = :username")
+    @Query("""
+        SELECT Person.personUid, Person.admin, Person.firstNames, Person.lastName, 
+               PersonAuth.passwordHash
+          FROM Person
+               JOIN PersonAuth
+                    ON Person.personUid = PersonAuth.personAuthUid
+         WHERE Person.username = :username
+    """)
     abstract suspend fun findUidAndPasswordHashAsync(username: String): PersonUidAndPasswordHash?
+
+    @Query("""
+        SELECT Person.*
+          FROM Person
+               JOIN PersonAuth2
+                    ON Person.personUid = PersonAuth2.pauthUid
+         WHERE Person.username = :username 
+               AND PersonAuth2.pauthAuth = :passwordHash
+    """)
+    abstract suspend fun findByUsernameAndPasswordHash2(username: String, passwordHash: String): Person?
 
     @Insert
     abstract fun insertPersonAuth(personAuth: PersonAuth)

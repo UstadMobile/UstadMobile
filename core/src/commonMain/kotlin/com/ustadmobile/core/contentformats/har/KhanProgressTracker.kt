@@ -30,7 +30,7 @@ class ItemData {
     var question: Content? = null
 
     @Serializable
-    inner class Content {
+    class Content {
 
         var content: String? = null
     }

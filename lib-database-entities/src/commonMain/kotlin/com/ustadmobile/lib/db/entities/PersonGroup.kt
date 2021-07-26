@@ -2,14 +2,13 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.ClientSyncManager
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
 @SyncableEntity(tableId = PersonGroup.TABLE_ID,
     notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${PersonGroup.TABLE_ID} AS tableId 
           FROM ChangeLog
                JOIN PersonGroup 
@@ -19,21 +18,24 @@ import kotlinx.serialization.Serializable
                     ON PersonGroupMember.groupMemberGroupUid = PersonGroup.groupUid
                JOIN Person
                     ON PersonGroupMember.groupMemberPersonUid = Person.personUid
-               ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
+               ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
                     ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}     
+                    ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}     
         """],
     syncFindAllQuery = """
         SELECT PersonGroup.*
-          FROM DeviceSession
+          FROM UserSession
                JOIN PersonGroupMember
-                    ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
                ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1}
                     ${Role.PERMISSION_PERSON_SELECT}
                     ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+               JOIN PersonGroupMember PersonsWithPerm_GroupMember
+                    ON PersonsWithPerm_GroupMember.groupMemberPersonUid = Person.personUid
                JOIN PersonGroup 
-                    ON PersonGroup.groupUid = PersonGroupMember.groupMemberGroupUid
-         WHERE DeviceSession.dsDeviceId = :clientId
+                    ON PersonGroup.groupUid = PersonsWithPerm_GroupMember.groupMemberGroupUid
+         WHERE UserSession.usClientNodeId = :clientId
+           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
         """)
 @Serializable
 open class PersonGroup() {
@@ -79,6 +81,8 @@ open class PersonGroup() {
         const val PERSONGROUP_FLAG_STUDENTGROUP = 4
 
         const val PERSONGROUP_FLAG_TEACHERGROUP = 8
+
+        const val PERSONGROUP_FLAG_GUESTPERSON = 16
 
 
     }

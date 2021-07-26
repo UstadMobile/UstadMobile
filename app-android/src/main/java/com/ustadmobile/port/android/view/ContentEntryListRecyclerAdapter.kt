@@ -23,7 +23,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 
 class ContentEntryListRecyclerAdapter(var itemListener: ContentEntryListItemListener?,
-                                      private val pickerMode: String?,
+                                      private val pickerMode: String?, private val selectFolderVisible: Boolean?,
                                       /**
                                        * The lifecycle owner is needed for use of livedata observers
                                        * Unfortunately findViewTreeLifecycleOwner is flaky when used
@@ -68,6 +68,7 @@ class ContentEntryListRecyclerAdapter(var itemListener: ContentEntryListItemList
         itemBinding.itemListener = itemListener
         itemBinding.selectablePagedListAdapter = this
         itemBinding.isPickerMode = pickerMode == ListViewMode.PICKER.toString()
+        itemBinding.selectFolderVisible = selectFolderVisible ?: true
         return ContentEntryListViewHolder(itemBinding)
     }
 

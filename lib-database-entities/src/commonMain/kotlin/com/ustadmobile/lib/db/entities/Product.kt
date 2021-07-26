@@ -15,21 +15,22 @@ import kotlinx.serialization.Serializable
 
         notifyOnUpdate = [
         """
-            SELECT DISTINCT DeviceSession.dsDeviceId as deviceId, $PRODUCT_TABLE_ID as tableId
+            SELECT DISTINCT UserSession.usClientNodeId as deviceId, 
+                $PRODUCT_TABLE_ID as tableId
             FROM ChangeLog 
             JOIN Product ON ChangeLog.chTableId = $PRODUCT_TABLE_ID 
                 AND Product.productUid = ChangeLog.chEntityPk 
             JOIN Person ON Person.personUid = Product.productPersonAdded
                 OR CAST(Person.admin AS INTEGER) = 1 
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+            JOIN UserSession ON UserSession.usPersonUid = Person.personUid
         """
         ],
         syncFindAllQuery = """
-            SELECT Product.* FROM DeviceSession
-             JOIN Person ON Person.personUid = DeviceSession.dsPersonUid
+            SELECT Product.* FROM UserSession
+             JOIN Person ON Person.personUid = UserSession.usPersonUid
              JOIN Product ON Product.productPersonAdded = Person.personUid
                 OR CAST(Person.admin AS INTEGER) = 1
-            WHERE DeviceSession.dsDeviceId = :clientId
+            WHERE UserSession.usClientNodeId = :clientId
         """
         )
 @Serializable

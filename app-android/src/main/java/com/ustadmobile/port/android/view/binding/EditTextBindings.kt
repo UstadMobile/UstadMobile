@@ -15,7 +15,6 @@ import androidx.databinding.adapters.SeekBarBindingAdapter.OnProgressChanged
 import com.google.android.material.textfield.TextInputEditText
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ScheduleEditPresenter
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.systemImpl
 import com.ustadmobile.lib.db.entities.*
 import java.text.MessageFormat
@@ -211,8 +210,13 @@ fun EditText.setCountListener(inverseBindingListener: InverseBindingListener) {
 
 
 @BindingAdapter(value = ["minValue", "setMaxValue"])
-fun EditText.setMinMax(min: String, max: Int){
-    filters =   arrayOf(InputFilterMinMax(Integer.valueOf(min), max))
+fun EditText.setMinMax(min: String, max: Int) {
+    filters = arrayOf(InputFilterMinMax(Integer.valueOf(min), max))
+}
+
+@BindingAdapter(value = ["minValue", "maxValue"])
+fun EditText.setMinMax(min: Int, max: Int){
+    filters = arrayOf(InputFilterMinMax(min, max))
 }
 
 

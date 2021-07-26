@@ -114,7 +114,7 @@ abstract class ProductDao : BaseDao<Product> {
         const val QUERY_PRODUCTS_WITH_INVENTORY = """
             SELECT Product.*, 
                 (
-                SELECT CASE WHEN 
+                SELECT CASE WHEN    
                 CAST(SUM(InventoryItem.inventoryItemQuantity) AS INTEGER) > 0 
                 THEN SUM(InventoryItem.inventoryItemQuantity) ELSE 0 END
                 FROM InventoryItem WHERE

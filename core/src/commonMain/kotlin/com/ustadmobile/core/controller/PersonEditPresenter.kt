@@ -6,7 +6,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.safeParse
@@ -18,23 +17,30 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_PERSON_CUSTOMER
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_PERSON_LE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_PERSON_WE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.lib.db.entities.*
 import io.ktor.client.features.json.*
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 
 
-class PersonEditPresenter(context: Any,
-                          arguments: Map<String, String>, view: PersonEditView, di: DI,
-                          lifecycleOwner: DoorLifecycleOwner)
-    : UstadEditPresenter<PersonEditView, PersonWithAccount>(context, arguments, view, di, lifecycleOwner) {
+class PersonEditPresenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: PersonEditView,
+    di: DI,
+    lifecycleOwner: DoorLifecycleOwner
+) : UstadEditPresenter<PersonEditView, PersonWithAccount>(
+    context,
+    arguments,
+    view,
+    di,
+    lifecycleOwner,
+    activeSessionRequired = !arguments.containsKey(PersonEditView.ARG_REGISTRATION_MODE)) {
 
     private lateinit var serverUrl: String
 
@@ -55,13 +61,13 @@ class PersonEditPresenter(context: Any,
 
     private var regViaLink: Boolean = false
 
-    override fun onCreate(savedState: Map<String, String>?) {
-        super.onCreate(savedState)
-        view.genderOptions = listOf(MessageIdOption(MessageID.female, context, Person.GENDER_FEMALE),
-                MessageIdOption(MessageID.male, context, Person.GENDER_MALE),
-                MessageIdOption(MessageID.other, context, Person.GENDER_OTHER))
+    internal var mPersonParentJoin: PersonParentJoin? = null
 
-        registrationModeFlags = arguments[PersonEditView.ARG_REGISTRATION_MODE]?.toInt() ?: PersonEditView.REGISTER_MODE_NONE
+    override fun onCreate(savedState: Map<String, String>?) {
+        //Setup variables that are used in the onLoad function before calling super (which will
+        // itself call onLoad)
+        registrationModeFlags = arguments[PersonEditView.ARG_REGISTRATION_MODE]?.toInt()
+            ?: PersonEditView.REGISTER_MODE_NONE
 
         regViaLink = arguments[PersonEditView.REGISTER_VIA_LINK]?.toBoolean()?:false
 
@@ -72,13 +78,19 @@ class PersonEditPresenter(context: Any,
         }
 
         nextDestination = arguments[UstadView.ARG_NEXT] ?: impl.getAppConfigString(
-                AppConfig.KEY_FIRST_DEST, ContentEntryListTabsView.VIEW_NAME, context)
+            AppConfig.KEY_FIRST_DEST, ContentEntryListTabsView.VIEW_NAME, context)
                 ?: ContentEntryListTabsView.VIEW_NAME
 
         view.registrationMode = registrationModeFlags
+
+        super.onCreate(savedState)
+
+        view.genderOptions = listOf(MessageIdOption(MessageID.female, context, Person.GENDER_FEMALE),
+                MessageIdOption(MessageID.male, context, Person.GENDER_MALE),
+                MessageIdOption(MessageID.other, context, Person.GENDER_OTHER))
     }
 
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): PersonWithAccount? {
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): PersonWithAccount {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
         val person = withTimeoutOrNull(2000) {
@@ -91,8 +103,9 @@ class PersonEditPresenter(context: Any,
             dbToUse.takeIf { entityUid != 0L }?.personPictureDao?.findByPersonUidAsync(entityUid)
         } ?: PersonPicture()
 
-        if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)) {
-            view.approvalPersonParentJoin = PersonParentJoin()
+        if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR) && db !is DoorDatabaseRepository) {
+            mPersonParentJoin = PersonParentJoin()
+            view.approvalPersonParentJoin = mPersonParentJoin
         }
 
         val loggedInPersonUid = accountManager.activeAccount.personUid
@@ -104,17 +117,14 @@ class PersonEditPresenter(context: Any,
         return person
     }
 
-    override fun onLoadFromJson(bundle: Map<String, String>): PersonWithAccount? {
+    override fun onLoadFromJson(bundle: Map<String, String>): PersonWithAccount {
         super.onLoadFromJson(bundle)
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
-        var editEntity: Person? = null
-        editEntity = if (entityJsonStr != null) {
+        return if(entityJsonStr != null) {
             safeParse(di, PersonWithAccount.serializer(), entityJsonStr)
         } else {
             PersonWithAccount()
         }
-
-        return editEntity
     }
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
@@ -142,7 +152,7 @@ class PersonEditPresenter(context: Any,
         view.loading = true
         view.fieldsEnabled = false
 
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch {
             //reset all errors
             view.usernameError = null
             view.passwordError = null
@@ -190,8 +200,10 @@ class PersonEditPresenter(context: Any,
 
                 val parentEmailError = when {
                     !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR) -> 0
-                    view.approvalPersonParentJoin?.ppjEmail.isNullOrBlank() -> MessageID.field_required_prompt
-                    view.approvalPersonParentJoin?.ppjEmail?.let { EMAIL_VALIDATION_REGEX.matches(it) } != true ->
+                    mPersonParentJoin?.ppjEmail.isNullOrBlank() -> {
+                        MessageID.field_required_prompt
+                    }
+                    mPersonParentJoin?.ppjEmail?.let { EMAIL_VALIDATION_REGEX.matches(it) } != true ->
                         MessageID.invalid_email
                     else -> 0
                 }
@@ -210,9 +222,9 @@ class PersonEditPresenter(context: Any,
                 }
 
                 try {
-                    val umAccount = accountManager.register(entity, serverUrl, AccountRegisterOptions(
-                        makeAccountActive = false,
-                        parentJoin = view.approvalPersonParentJoin
+                    accountManager.register(entity, serverUrl, AccountRegisterOptions(
+                        makeAccountActive = !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR),
+                        parentJoin = mPersonParentJoin
                     ))
 
                     val popUpToViewName = arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.CURRENT_DEST
@@ -222,21 +234,17 @@ class PersonEditPresenter(context: Any,
                             RegisterAgeRedirectView.VIEW_NAME, true)
                         nextDestination = "RegisterMinorWaitForParent"
                         val args = mutableMapOf<String, String>().also {
-                            it.put(RegisterMinorWaitForParentView.ARG_USERNAME,
-                                entity.username ?: "")
-                            it.put(RegisterMinorWaitForParentView.ARG_PARENT_CONTACT,
-                                view.approvalPersonParentJoin?.ppjEmail ?: "")
-                            it.put(RegisterMinorWaitForParentView.ARG_PASSWORD,
-                                entity.newPassword ?: "")
+                            it[RegisterMinorWaitForParentView.ARG_USERNAME] = entity.username ?: ""
+                            it[RegisterMinorWaitForParentView.ARG_PARENT_CONTACT] =
+                                mPersonParentJoin?.ppjEmail ?: ""
+                            it[RegisterMinorWaitForParentView.ARG_PASSWORD] = entity.newPassword ?: ""
                             it.putFromOtherMapIfPresent(arguments, UstadView.ARG_POPUPTO_ON_FINISH)
                         }
 
                         impl.go(RegisterMinorWaitForParentView.VIEW_NAME, args, context, goOptions)
                     }else {
-                        accountManager.activeAccount = umAccount
                         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
                             popUpToViewName, true)
-                        accountManager.activeAccount = umAccount
                         impl.go(nextDestination, mapOf(), context, goOptions)
                     }
                 } catch (e: Exception) {
@@ -370,6 +378,7 @@ class PersonEditPresenter(context: Any,
 
     companion object {
 
+        @Suppress("RegExpRedundantEscape")
         val EMAIL_VALIDATION_REGEX: Regex by lazy(LazyThreadSafetyMode.NONE) {
             Regex("^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$")
         }
