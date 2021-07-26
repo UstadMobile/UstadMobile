@@ -19,22 +19,24 @@ import kotlin.reflect.KProperty1
 
 object ReduxAppStateManager {
 
-    private lateinit var storeState: Store<ReduxStore, RAction, WrapperAction>
+    private var storeState: Store<ReduxStore, RAction, WrapperAction> ? = null
 
     private fun <S, A, R> combineReducersInferred(reducers: Map<KProperty1<S, R>, Reducer<*, A>>): Reducer<S, A> {
         return combineReducers(reducers.mapKeys { it.key.name})
     }
 
     private fun reducer(state: ReduxAppState = ReduxAppState(), action: RAction): ReduxAppState {
-
-        BrowserTabTracker.appState = state
-
         return when (action) {
             is ReduxThemeState -> state.copy(appTheme = action)
             is ReduxDiState -> state.copy(appDi = action)
             is ReduxToolbarState -> state.copy(appToolbar = action)
-            is ReduxNavStackState -> state.copy(navStack = action)
+            is ReduxNavStackState -> {
+                BrowserTabTracker.navStackState = action
+                state.copy(navStack = action)
+
+            }
             is ReduxSnackBarState -> state.copy(appSnackBar = action)
+            is ReduxSerializationState -> state.copy(serialization = action)
             else -> state
         }
     }
@@ -44,7 +46,7 @@ object ReduxAppStateManager {
      * @param action state action to be update (e.g ReduxAppTheme)
      */
     fun dispatch(action: RAction){
-        storeState.dispatch(action)
+        storeState?.dispatch(action)
     }
 
     /**
@@ -52,15 +54,17 @@ object ReduxAppStateManager {
      * @param listener listening part of he app (e.g component)
      */
     fun subscribe(listener: (ReduxStore)-> Unit){
-        storeState.subscribe {
-            listener(storeState.getState())
+        storeState?.subscribe {
+            storeState?.getState()?.let { state ->
+                listener(state)
+            }
         }
     }
 
     /**
      * Get current app state
      */
-    fun getCurrentState() = storeState.getState().appState
+    fun getCurrentState() =  storeState?.getState()?.appState ?: ReduxAppState()
 
     /**
      * Create a redux app store where the states will be managed
@@ -74,6 +78,6 @@ object ReduxAppStateManager {
           rEnhancer())
         dispatch(diState)
         dispatch(theme)
-        return storeState
+        return storeState.unsafeCast<Store<ReduxStore, RAction, WrapperAction>>()
     }
 }
