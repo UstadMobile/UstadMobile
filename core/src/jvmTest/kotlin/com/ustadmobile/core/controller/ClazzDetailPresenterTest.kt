@@ -9,6 +9,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
+import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
@@ -71,19 +72,14 @@ class ClazzDetailPresenterTest {
 
         }
 
-        val roleWithAttendancePermission = Role().apply {
-            roleName = "Officer"
-            rolePermissions = Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT or Role.PERMISSION_CLAZZ_SELECT
-        }
-
         val endpointUrl = accountManager.activeEndpoint.url
         accountManager.startLocalTestSessionBlocking(activePerson, endpointUrl)
 
-        runBlocking { repo.insertPersonWithRole(activePerson, roleWithAttendancePermission,
-                EntityRole().apply {
-                    erTableId = Clazz.TABLE_ID
-                    erEntityUid = testEntity.clazzUid
-                }) }
+        runBlocking {
+            repo.grantScopedPermission(activePerson,
+                Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT or Role.PERMISSION_CLAZZ_SELECT,
+                Clazz.TABLE_ID, testEntity.clazzUid)
+        }
 
         val presenter = ClazzDetailPresenter(Any(),
                 mapOf(ARG_ENTITY_UID to testEntity.clazzUid.toString()), mockView, di,

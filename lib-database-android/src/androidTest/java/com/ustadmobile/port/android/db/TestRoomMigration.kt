@@ -432,4 +432,75 @@ class TestRoomMigration {
     }
 
 
+    @Test
+    fun migrate72to73() {
+        helper.createDatabase(TEST_DB, 72).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 73, true,
+                UmAppDatabase.MIGRATION_72_73)
+    }
+
+
+    @Test
+    fun migrate73to74() {
+        helper.createDatabase(TEST_DB, 73).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 74, true,
+                UmAppDatabase.MIGRATION_73_74)
+    }
+
+    @Test
+    fun migrate74to75() {
+        helper.createDatabase(TEST_DB, 74).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 75, true,
+                UmAppDatabase.MIGRATION_74_75)
+    }
+
+    @Test
+    fun migrate75to76() {
+        helper.createDatabase(TEST_DB, 75).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 76, true,
+                UmAppDatabase.MIGRATION_75_76)
+    }
+
+    @Test
+    fun migrate76to77() {
+        helper.createDatabase(TEST_DB, 76).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 77, true,
+            UmAppDatabase.MIGRATION_76_77)
+    }
+
+    @Test
+    fun migrate77to78() {
+        helper.createDatabase(TEST_DB, 77).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 78, true,
+            UmAppDatabase.MIGRATION_77_78)
+    }
+
+    @Test
+    fun migrate78to79() {
+        helper.createDatabase(TEST_DB, 78).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 79, true,
+            UmAppDatabase.MIGRATION_78_79)
+    }
+
 }

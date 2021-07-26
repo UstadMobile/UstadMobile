@@ -1410,6 +1410,7 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     If you are the parent, you need to login to your own existing account or create a new account.
     </string>
 
+<<<<<<< HEAD
     <string name="blank_report">Blank report</string>
 
     <!-- Report title for a report template showing attendance over time -->
@@ -1441,5 +1442,8 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <!-- Report description for a report showing the number of unique content users over time -->
     <string name="number_of_active_users_over_time">Number of active users over time</string>
 
+=======
+    <string name="parent">Parent</string>
+>>>>>>> primary
 
 </resources>

@@ -129,17 +129,20 @@
         android:id="@+id/schoolmember_list_dest"
         android:name="com.ustadmobile.port.android.view.SchoolMemberListFragment" />
     <fragment
-        android:id="@+id/clazzwork_list_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkListFragment" />
+        android:id="@+id/clazz_assignment_list"
+        android:name="com.ustadmobile.port.android.view.ClazzAssignmentListFragment" />
+
     <fragment
-        android:id="@+id/clazzwork_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkEditFragment" />
+        android:id="@+id/clazz_assignment_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzAssignmentEditFragment" />
+
     <fragment
-        android:id="@+id/clazzworkquestionandoptions_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkQuestionAndOptionsEditFragment" />
+        android:id="@+id/clazz_assignment_detail_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzAssignmentDetailFragment"/>
+
     <fragment
-        android:id="@+id/clazzwork_detail_list"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkDetailFragment" />
+        android:id="@+id/clazz_assignment_detail_student_progress"
+        android:name="com.ustadmobile.port.android.view.ClazzAssignmentDetailStudentProgressFragment"/>
 
     <fragment
         android:id="@+id/home_content_dest"
@@ -198,14 +201,6 @@
         android:id="@+id/content_entry_detail_overview_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntryDetailOverviewFragment"
         android:label="" />
-    <fragment
-        android:id="@+id/clazzwork_detail_progress_list"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkDetailProgressListFragment" />
-
-    <fragment
-        android:id="@+id/clazzworksubmission_marking_edit"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkSubmissionMarkingFragment"
-        />
 
     <fragment
         android:id="@+id/clazz_enrolment_list"

@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import com.ustadmobile.core.account.*
+import com.ustadmobile.core.assignment.setupAssignmentSyncListener
 import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImplAndroid
@@ -116,6 +117,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
                 attachmentFilters += ImageResizeAttachmentFilter("PersonPicture", 1280, 1280)
             }).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
+                it.setupAssignmentSyncListener(context, di)
             }
         }
 

@@ -12,7 +12,38 @@ import kotlinx.serialization.Serializable
     Index(value = ["sgTableId", "sgEntityUid", "sgPermissions", "sgGroupUid"], name = "idx_entity_to_group")]
 )
 
-@SyncableEntity(tableId = TABLE_ID)
+@SyncableEntity(tableId = TABLE_ID,
+    notifyOnUpdate = ["""
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
+               ${ScopedGrant.TABLE_ID} AS tableId 
+          FROM ChangeLog
+               JOIN ScopedGrant ScopedGrantEntity
+                    ON ChangeLog.chTableId = ${ScopedGrant.TABLE_ID} 
+                           AND ChangeLog.chEntityPk = ScopedGrantEntity.sgUid
+               JOIN PersonGroupMember 
+                    ON PersonGroupMember.groupMemberGroupUid = ScopedGrantEntity.sgGroupUid
+               JOIN Person
+                    ON PersonGroupMember.groupMemberPersonUid = Person.personUid
+               ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_PERSON_SELECT}
+                    ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}     
+          """],
+    syncFindAllQuery = """
+        SELECT ScopedGrantWithPerm.*
+          FROM UserSession
+               JOIN PersonGroupMember
+                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+               ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_PERSON_SELECT}
+                    ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+               JOIN PersonGroupMember PersonsWithPerm_GroupMember
+                    ON PersonsWithPerm_GroupMember.groupMemberPersonUid = Person.personUid
+               JOIN ScopedGrant ScopedGrantWithPerm
+                    ON PersonsWithPerm_GroupMember.groupMemberGroupUid = ScopedGrantWithPerm.sgGroupUid
+         WHERE UserSession.usClientNodeId = :clientId
+           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}    
+    """
+)
 @Serializable
 class ScopedGrant {
 
@@ -65,11 +96,17 @@ class ScopedGrant {
 
         const val FLAG_ADMIN_GROUP = 4
 
+        //Indicates that this grant is for a teacher group (e.g. for a class or school)
         const val FLAG_TEACHER_GROUP = 8
 
+        //Indicates that this grant is for a student group (e.g. for a class or school)
         const val FLAG_STUDENT_GROUP = 16
 
+        //Indicates that this grant is the grant for a parent directly over the child
         const val FLAG_PARENT_GRANT = 32
+
+        //Indicates that this grant is for a parents group (e.g. for a class or school)
+        const val FLAG_PARENT_GROUP = 64
 
     }
 }

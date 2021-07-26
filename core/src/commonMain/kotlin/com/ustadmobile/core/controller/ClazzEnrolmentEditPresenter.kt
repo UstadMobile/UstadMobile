@@ -6,12 +6,11 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ext.createPersonGroupAndMemberWithEnrolment
 import com.ustadmobile.core.util.ext.effectiveTimeZone
+import com.ustadmobile.core.util.ext.processEnrolmentIntoClass
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.doorMainDispatcher
 
 import kotlinx.coroutines.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -21,7 +20,6 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_SAVE_TO_DB
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
 
@@ -85,27 +83,26 @@ class ClazzEnrolmentEditPresenter(context: Any,
             clazzEnrolmentRole = selectedRole
         }
 
-        handleRoleOptionsList()
+        setupRoleListOptions()
 
         return clazzEnrolment
     }
 
-    private suspend fun handleRoleOptionsList(){
-        GlobalScope.launch(doorMainDispatcher()){
-            hasAddStudentPermission = repo.clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
-                    selectedClazz,  Role.PERMISSION_CLAZZ_ADD_STUDENT)
-            hasAddTeacherPermission = repo.clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
-                    selectedClazz,  Role.PERMISSION_CLAZZ_ADD_TEACHER)
+    private suspend fun setupRoleListOptions(){
+        hasAddStudentPermission = repo.clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
+                selectedClazz,  Role.PERMISSION_CLAZZ_ADD_STUDENT)
+        hasAddTeacherPermission = repo.clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
+                selectedClazz,  Role.PERMISSION_CLAZZ_ADD_TEACHER)
 
-            val roleList = mutableListOf<RoleMessageIdOption>()
-            if(hasAddStudentPermission){
-                roleList.add(RoleMessageIdOption(RoleOptions.STUDENT, context))
-            }
-            if(hasAddTeacherPermission){
-                roleList.add(RoleMessageIdOption(RoleOptions.TEACHER, context))
-            }
-            view.roleList = roleList.toList()
+        val roleList = mutableListOf<RoleMessageIdOption>()
+        if(hasAddStudentPermission){
+            roleList.add(RoleMessageIdOption(RoleOptions.STUDENT, context))
         }
+        if(hasAddTeacherPermission){
+            roleList.add(RoleMessageIdOption(RoleOptions.TEACHER, context))
+        }
+        view.roleList = roleList.toList()
+
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): ClazzEnrolmentWithLeavingReason? {
@@ -123,8 +120,8 @@ class ClazzEnrolmentEditPresenter(context: Any,
             }
         }
 
-        GlobalScope.launch {
-            handleRoleOptionsList()
+        presenterScope.launch {
+            setupRoleListOptions()
         }
 
         return editEntity
@@ -139,7 +136,7 @@ class ClazzEnrolmentEditPresenter(context: Any,
 
 
     override fun handleClickSave(entity: ClazzEnrolmentWithLeavingReason) {
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch {
 
             // must be filled
             if(entity.clazzEnrolmentRole == 0){
@@ -177,9 +174,10 @@ class ClazzEnrolmentEditPresenter(context: Any,
             view.startDateErrorWithDate = null
             view.endDateError = null
 
-            val saveToDb = arguments[ARG_SAVE_TO_DB]?.toBoolean() ?: false
-            if(saveToDb){
-                repo.createPersonGroupAndMemberWithEnrolment(entity)
+            if(entity.clazzEnrolmentUid == 0L) {
+                repo.processEnrolmentIntoClass(entity)
+            }else {
+                repo.clazzEnrolmentDao.updateAsync(entity)
             }
 
             view.finishWithResult(listOf(entity))

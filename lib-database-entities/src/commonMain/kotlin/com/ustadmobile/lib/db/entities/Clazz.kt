@@ -66,7 +66,7 @@ open class Clazz() {
     var clazzEndTime: Long = Long.MAX_VALUE
 
     //Clazz features
-    var clazzFeatures: Long = (CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_CLAZZWORK)
+    var clazzFeatures: Long = (CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_CLAZZ_ASSIGNMENT)
 
     var clazzSchoolUid : Long = 0L
 
@@ -94,6 +94,8 @@ open class Clazz() {
 
     var clazzPendingStudentsPersonGroupUid: Long = 0
 
+    var clazzParentsPersonGroupUid: Long = 0
+
     /**
      * Code that can be used to join the class
      */
@@ -101,14 +103,14 @@ open class Clazz() {
 
     constructor(clazzName: String) : this() {
         this.clazzName = clazzName
-        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY  or CLAZZ_FEATURE_CLAZZWORK
+        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY  or CLAZZ_FEATURE_CLAZZ_ASSIGNMENT
         this.isClazzActive = true
     }
 
     constructor(clazzName: String, clazzLocationUid: Long) : this() {
         this.clazzName = clazzName
         this.clazzLocationUid = clazzLocationUid
-        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY or CLAZZ_FEATURE_CLAZZWORK
+        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY or CLAZZ_FEATURE_CLAZZ_ASSIGNMENT
         this.isClazzActive = true
     }
 
@@ -117,7 +119,7 @@ open class Clazz() {
         const val TABLE_ID = 6
         const val CLAZZ_FEATURE_ATTENDANCE = 1L
         const val CLAZZ_FEATURE_ACTIVITY = 4L
-        const val CLAZZ_FEATURE_CLAZZWORK = 8L
+        const val CLAZZ_FEATURE_CLAZZ_ASSIGNMENT = 8L
 
         const val CLAZZ_CODE_DEFAULT_LENGTH = 6
 
@@ -138,10 +140,14 @@ open class Clazz() {
                     AND (ScopedGrant.sgPermissions & 
         """
 
-        const val JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2 = """
-                                                     ) > 0
+        const val JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER = """
+                                                       ) > 0
              JOIN PersonGroupMember AS PrsGrpMbr
                    ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
+        """
+
+        const val JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2 = """
+              $JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER                                       
               JOIN UserSession
                    ON UserSession.usPersonUid = PrsGrpMbr.groupMemberPersonUid
                       AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE }

@@ -1,20 +1,9 @@
 package com.ustadmobile.port.android.screen
 
-import androidx.fragment.app.testing.FragmentScenario
-import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.test.espresso.Espresso
-import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.matcher.ViewMatchers
-import io.github.kakaocup.kakao.edit.KTextInputLayout
 import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.util.ext.toBundle
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.port.android.view.PersonAccountEditFragment
-import com.ustadmobile.test.port.android.util.clickOptionMenu
-import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.rules.SystemImplTestNavHostRule
+import io.github.kakaocup.kakao.edit.KTextInputLayout
 
 object PersonAccountEditScreen : KScreen<PersonAccountEditScreen>() {
 

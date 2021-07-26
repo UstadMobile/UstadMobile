@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -126,7 +127,8 @@ class ContentEntryDetailOverviewPresenterTest {
         presenter.handleClickEdit()
 
         verify(systemImpl).go(eq(ContentEntryEdit2View.VIEW_NAME),
-                eq(mapOf(ARG_ENTITY_UID to createdEntry?.contentEntryUid.toString())), any())
+                eq(mapOf(ARG_ENTITY_UID to createdEntry?.contentEntryUid.toString(),
+                UstadView.ARG_LEAF to true.toString())), any())
     }
 
 }

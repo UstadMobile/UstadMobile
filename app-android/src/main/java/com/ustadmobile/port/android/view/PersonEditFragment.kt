@@ -26,6 +26,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.view.PersonAccountEditFragment.Companion.USERNAME_FILTER
 import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
+import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
 import com.ustadmobile.port.android.view.util.RunAfterTextChangedTextWatcher
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -219,20 +220,6 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             field = value
             mBinding?.fieldsEnabled = value
         }
-
-    class ClearErrorTextWatcher(private val onTextFunction: () -> Unit ):TextWatcher{
-        override fun afterTextChanged(p0: Editable?) {
-
-        }
-
-        override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-
-        }
-
-        override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            onTextFunction()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

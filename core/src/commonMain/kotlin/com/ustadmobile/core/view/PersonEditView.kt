@@ -1,7 +1,6 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 
 interface PersonEditView: UstadEditView<PersonWithAccount> {

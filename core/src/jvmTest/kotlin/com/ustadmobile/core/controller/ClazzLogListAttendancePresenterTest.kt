@@ -12,6 +12,7 @@ import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.asPerson
+import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.core.view.UstadView
@@ -19,10 +20,7 @@ import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzLog
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.ext.insertClazzLogs
 import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import kotlinx.coroutines.runBlocking
@@ -100,12 +98,15 @@ class ClazzLogListAttendancePresenterTest {
             it.lastName = "admin"
             it.admin = true
         }
-        accountManager.startLocalTestSessionBlocking(activePerson,
-            accountManager.activeEndpoint.url)
 
         runBlocking {
             repo.insertPersonAndGroup(activePerson)
+            repo.grantScopedPermission(activePerson.personGroupUid, Role.ALL_PERMISSIONS,
+                ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
         }
+
+        accountManager.startLocalTestSessionBlocking(activePerson,
+            accountManager.activeEndpoint.url)
 
         val testClazz = Clazz("Test Clazz").apply {
             clazzTimeZone = "Asia/Dubai"
