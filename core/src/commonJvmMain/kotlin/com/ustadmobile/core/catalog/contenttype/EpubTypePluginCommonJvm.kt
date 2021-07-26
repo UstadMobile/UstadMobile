@@ -1,14 +1,17 @@
 package com.ustadmobile.core.catalog.contenttype
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.alternative
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.xmlpull.v1.XmlPullParserException
+import org.kodein.di.DIAware
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import java.io.File
-import java.io.IOException
 import java.util.*
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
@@ -16,18 +19,16 @@ import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.contentjob.ContentPlugin
 import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.contentjob.SupportedContent
-import com.ustadmobile.core.impl.getOs
-import com.ustadmobile.core.impl.getOsVersion
 import com.ustadmobile.core.io.ext.skipToEntry
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.openInputStream
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.util.getSystemTimeInMillis
 import org.xmlpull.v1.XmlPullParserFactory
 
-class EpubTypePluginCommonJvm(val context: Any) : ContentPlugin {
+class EpubTypePluginCommonJvm(private val endpoint: Endpoint, override val di: DI) : DIAware, ContentPlugin {
 
     val viewName: String
         get() = EpubContentView.VIEW_NAME
@@ -41,12 +42,15 @@ class EpubTypePluginCommonJvm(val context: Any) : ContentPlugin {
     override val jobType: Int
         get() = TODO("Not yet implemented")
 
+
+    private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
+
     override suspend fun canProcess(doorUri: DoorUri): Boolean {
-        return getOpfPath(doorUri) != null
+        return findOpfPath(doorUri) != null
     }
 
     override suspend fun extractMetadata(uri: DoorUri): ContentEntryWithLanguage? {
-        val opfPath = getOpfPath(uri)
+        val opfPath = findOpfPath(uri) ?: return null
         return withContext(Dispatchers.Default) {
             val xppFactory = XmlPullParserFactory.newInstance()
             try {
@@ -77,26 +81,26 @@ class EpubTypePluginCommonJvm(val context: Any) : ContentPlugin {
                     }
                 }
             } catch (e: Exception) {
-                repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, e)
+
             }
         }
     }
 
     override suspend fun processJob(jobItem: ContentJobItem): ProcessResult {
         val container = withContext(Dispatchers.Default) {
-            val uri = jobItem.djiFromUri ?: return@withContext
+            val uri = jobItem.fromUri ?: return@withContext
             val doorUri = DoorUri.parse(uri)
             val container = Container().apply {
                 containerContentEntryUid = jobItem.cjiContentEntryUid
                 cntLastModified = System.currentTimeMillis()
-                this.mimeType = this@EpubTypePluginCommonJvm.supportedMimeTypes.first()
+                this.mimeType = supportedMimeTypes.first()
                 containerUid = repo.containerDao.insert(this)
                 jobItem.cjiContainerUid = containerUid
             }
 
             repo.addEntriesToContainerFromZip(container.containerUid,
                     doorUri,
-                    ContainerAddOptions(storageDirUri = File(containerBaseDir).toDoorUri()), context)
+                    ContainerAddOptions(storageDirUri = File(jobItem.cjiContainerBaseDir).toDoorUri()), context)
 
             val containerWithSize = repo.containerDao.findByUid(container.containerUid) ?: container
 
@@ -106,27 +110,24 @@ class EpubTypePluginCommonJvm(val context: Any) : ContentPlugin {
     }
 
 
-    fun getOpfPath(uri: DoorUri): String? {
+    suspend fun findOpfPath(uri: DoorUri): String? {
         return withContext(Dispatchers.Default) {
             val xppFactory = XmlPullParserFactory.newInstance()
             try {
                 val inputStream = uri.openInputStream(context)
 
                 return@withContext ZipInputStream(inputStream).use {
-                    val metaDataEntry = it.skipToEntry { it.name == OCF_CONTAINER_PATH }
-                    if (metaDataEntry != null) {
-                        val ocfContainer = OcfDocument()
-                        val xpp = xppFactory.newPullParser()
-                        xpp.setInput(it, "UTF-8")
-                        ocfContainer.loadFromParser(xpp)
+                    it.skipToEntry { entry -> entry.name == OCF_CONTAINER_PATH } ?: return@use
 
-                        ocfContainer.rootFiles.firstOrNull()?.fullPath
-                    } else {
-                        null
-                    }
+                    val ocfContainer = OcfDocument()
+                    val xpp = xppFactory.newPullParser()
+                    xpp.setInput(it, "UTF-8")
+                    ocfContainer.loadFromParser(xpp)
+
+                    ocfContainer.rootFiles.firstOrNull()?.fullPath
                 }
             } catch (e: Exception) {
-                repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, e)
+
             }
         }
     }

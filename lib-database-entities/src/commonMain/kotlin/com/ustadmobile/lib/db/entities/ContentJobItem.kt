@@ -18,6 +18,8 @@ data class ContentJobItem(
 
     var cjiContainerUid: Long = 0,
 
+    var cjiContainerBaseDir: String? = null,
+
     var cjiProgress: Long,
 
     var cjiTotal: Long
