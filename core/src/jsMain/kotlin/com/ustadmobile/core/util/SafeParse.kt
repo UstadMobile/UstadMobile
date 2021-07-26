@@ -20,5 +20,5 @@ actual inline fun <reified T> safeStringify(di: DI, strategy: SerializationStrat
 }
 
 actual fun <T : Any> safeParseList(di: DI, strategy: DeserializationStrategy<List<T>>, klass: KClass<T>, str: String): List<T> {
-    return Json.decodeFromString(strategy,str)
+    return Json.decodeFromString(strategy,str).toList()
 }

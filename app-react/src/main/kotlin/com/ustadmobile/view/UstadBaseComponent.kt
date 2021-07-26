@@ -6,11 +6,13 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.putResultDestInfo
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.navigation.NavControllerJs
 import com.ustadmobile.navigation.RouteManager.lookupDestinationName
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
@@ -21,8 +23,11 @@ import com.ustadmobile.util.*
 import kotlinx.atomicfu.atomic
 import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.events.Event
@@ -165,9 +170,16 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
      * BackStack SavedStateHandle as specified by ARG_RESULT_DEST_ID and ARG_RESULT_DEST_KEY
      */
 
-    fun saveResultToBackStackSavedStateHandle(result: List<*>) {
-        saveResultToBackStackSavedStateHandle(js("JSON.stringify(result)").toString())
+    @Suppress("UNUSED_PARAMETER") //result used in js code
+    fun  <T> saveResultToBackStackSavedStateHandle(result: List<T>) {
+        val serializer = getCurrentState().serialization.serializer
+        if(serializer != null){
+            saveResultToBackStackSavedStateHandle(
+                Json.encodeToString(ListSerializer(serializer),
+                    js("result")))
+        }
     }
+
 
     private fun saveResultToBackStackSavedStateHandle(result: String) {
         var saveToDestination = arguments[UstadView.ARG_RESULT_DEST_ID]

@@ -307,10 +307,13 @@ abstract class UstadBaseController<V : UstadView>(
         val currentEntityValue = options.currentEntityValue
         if(currentEntityValue != null) {
             options.arguments[UstadEditView.ARG_ENTITY_JSON] = safeStringify(
-                di, options.serializationStrategy, options.entityClass,currentEntityValue)
+                di, options.serializer, options.entityClass,currentEntityValue)
         }
 
-        ustadNavController.navigate(options.destinationViewName, options.arguments)
+        val goOptions = UstadMobileSystemCommon.UstadGoOptions(
+            serializer = options.serializer)
+
+        ustadNavController.navigate(options.destinationViewName, options.arguments, goOptions)
     }
 
     /**

@@ -5,7 +5,9 @@ import com.ustadmobile.core.impl.nav.UstadBackStackEntry
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.redux.ReduxAppStateManager
+import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxNavStackState
+import com.ustadmobile.redux.ReduxSerializationState
 import kotlinx.browser.window
 
 class NavControllerJs: UstadNavController {
@@ -25,17 +27,19 @@ class NavControllerJs: UstadNavController {
             splitIndex--
 
         navStack.removeAll(navStack.subList(splitIndex, navStack.size))
-        ReduxAppStateManager.dispatch(ReduxNavStackState(navStack))
+        dispatch(ReduxNavStackState(navStack))
 
         currentBackStackEntry?.arguments?.let { args ->
             navigate(viewName, args, false)
         }
     }
 
-    override fun navigate(viewName: String, args: Map<String, String>,
+    override fun navigate(viewName: String,
+                          args: Map<String, String>,
                           goOptions: UstadMobileSystemCommon.UstadGoOptions) {
+        dispatch(ReduxSerializationState(goOptions.serializer))
         navStack.add(UstadBackStackEntryJs(viewName, args))
-        ReduxAppStateManager.dispatch(ReduxNavStackState(navStack))
+        dispatch(ReduxNavStackState(navStack))
 
         val popUpToViewName = goOptions.popUpToViewName
         if(popUpToViewName != null)

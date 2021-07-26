@@ -4,6 +4,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationStrategy
 import kotlin.reflect.KClass
 
@@ -50,7 +51,7 @@ open class OneToManyJoinEditHelperMp<T : Any>(pkGetter: (T) -> Long,
      * this join edit helper is observing.
      */
     fun createNavigateForResultOptions(destinationViewName: String,
-                         serializationStrategy: SerializationStrategy<T>,
+                         serializer: KSerializer<T>,
                          arguments: MutableMap<String, String> = mutableMapOf()) : NavigateForResultOptions<T>{
 
         return NavigateForResultOptions(
@@ -58,7 +59,7 @@ open class OneToManyJoinEditHelperMp<T : Any>(pkGetter: (T) -> Long,
             fromPresenter = editPresenter,
             entityClass = entityClass,
             destinationViewName = destinationViewName,
-            serializationStrategy = serializationStrategy,
+            serializer = serializer,
             destinationResultKey = returnSavedStateKey,
             overwriteDestination = true,
             arguments = arguments)
@@ -73,11 +74,11 @@ open class OneToManyJoinEditHelperMp<T : Any>(pkGetter: (T) -> Long,
      * as used by the JoinEditListener (e.g. what is displayed to the user).
      */
     fun createNavigateForResultListener(editViewName: String,
-                                        serializationStrategy: SerializationStrategy<T>,
+                                        serializer: KSerializer<T>,
                                         arguments: MutableMap<String, String> = mutableMapOf()) : NavigateForResultOneToManyJoinEditListener<T>{
         return NavigateForResultOneToManyJoinEditListener(
             createNavigateForResultOptions(destinationViewName = editViewName,
-                serializationStrategy = serializationStrategy,
+                serializer = serializer,
                 arguments = arguments), this)
     }
 
