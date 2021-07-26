@@ -7,14 +7,13 @@ import com.ustadmobile.redux.ReduxNavStackState
 import kotlinx.browser.localStorage
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.SetSerializer
 import kotlinx.serialization.json.Json
 import kotlin.js.Date
 import kotlin.js.json
 
 @JsModule("browser-session-tabs-tracker")
 @JsNonModule
-external val tabTracker: dynamic
+external val browserTabTrackerModule: dynamic
 
 interface Tracker {
     val newSessionCreated: Boolean
@@ -23,17 +22,17 @@ interface Tracker {
 }
 
 @Serializable
-data class BackStackEntry(var viewName: String = "",
-                          var arguments: Map<String, String> = mapOf(),
-                          var id: Int = 1)
+data class TabState(var viewName: String = "",
+                    var arguments: Map<String, String> = mapOf(),
+                    var id: Int = 1)
 
 object BrowserTabTracker: Tracker {
 
     private const val STATE_STORAGE_KEY = "key_tab_state_tracker"
 
-    private val serializer = ListSerializer(BackStackEntry.serializer())
+    private val serializer = ListSerializer(TabState.serializer())
 
-    private var instance: Tracker = tabTracker.BrowserTabTracker.unsafeCast<Tracker>()
+    private var instance: Tracker = browserTabTrackerModule.BrowserTabTracker.unsafeCast<Tracker>()
 
     override val newSessionCreated: Boolean
         get() = instance.newSessionCreated
@@ -46,7 +45,7 @@ object BrowserTabTracker: Tracker {
 
     var navStackState: ReduxNavStackState
         get() {
-            val tabStateList = getStoredStateList().filter { it.id == tabId }
+            val tabStateList = getStoredTabStateList().filter { it.id == tabId }
             val navState = ReduxNavStackState()
             tabStateList.map {
                 navState.stack.add(UstadBackStackEntryJs(it.viewName, it.arguments))
@@ -55,14 +54,14 @@ object BrowserTabTracker: Tracker {
         }
 
         set(value) {
-            val storedStateList = getStoredStateList()
+            val storedStateList = getStoredTabStateList()
             if(storedStateList.isNullOrEmpty()){
                 localStorage.setItem(STATE_STORAGE_KEY,  "")
             }
 
             storedStateList.removeAll { it.id == tabId  && value.stack.isNotEmpty()}
             value.stack.forEach {
-                storedStateList.add(BackStackEntry(it.viewName, it.arguments, tabId))
+                storedStateList.add(TabState(it.viewName, it.arguments, tabId))
             }
 
             localStorage.setItem(STATE_STORAGE_KEY, Json.encodeToString(
@@ -100,7 +99,7 @@ object BrowserTabTracker: Tracker {
         dispatch(ReduxAppStateManager.getCurrentState().navStack)
     }
 
-    private fun getStoredStateList(): MutableList<BackStackEntry>{
+    private fun getStoredTabStateList(): MutableList<TabState>{
         val storedStateList = localStorage.getItem(STATE_STORAGE_KEY)
         return if(storedStateList.isNullOrEmpty()){
             mutableListOf()

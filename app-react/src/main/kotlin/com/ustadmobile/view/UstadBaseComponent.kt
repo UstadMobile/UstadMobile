@@ -48,6 +48,8 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
 
     lateinit var navController: NavControllerJs
 
+    protected var showAddEntryOptions = false
+
     private lateinit var progressBarManager: ProgressBarManager
 
     var searchManager: SearchManager? = null
@@ -181,7 +183,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
     }
 
 
-    private fun saveResultToBackStackSavedStateHandle(result: String) {
+    fun saveResultToBackStackSavedStateHandle(result: String) {
         var saveToDestination = arguments[UstadView.ARG_RESULT_DEST_ID]
         val saveToDestinationViewName = arguments[UstadView.ARG_RESULT_DEST_VIEWNAME]
 

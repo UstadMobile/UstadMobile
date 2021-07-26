@@ -8,6 +8,7 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.horizontalList
 import com.ustadmobile.util.StyleManager.listComponentContainer
+import com.ustadmobile.util.StyleManager.listComponentContainerWithScroll
 import com.ustadmobile.util.StyleManager.theme
 import com.ustadmobile.view.ext.renderCreateNewItemView
 import kotlinx.css.Color
@@ -24,6 +25,14 @@ interface ListProps<T>: RProps {
     var entries: List<T>
     var onEntryClicked: ((entry: dynamic) -> Unit)?
     var createNewItem: CreateNewItem?
+
+    /**
+     * TRUE if this will be used as a main content of a component
+     * otherwise it will be inner content.
+     * i.e TRUE = Component has this list as only content
+     *     FALSE = Component has other contents and this list include
+     */
+    var mainList: Boolean
     var presenter: UstadListPresenter<*,*>
 }
 
@@ -37,8 +46,12 @@ abstract class UstadSimpleList<P: ListProps<*>>(mProps: P) : UstadBaseComponent<
     override fun RBuilder.render() {
         styledDiv {
             css{
-                +listComponentContainer
-                width = LinearDimension("98%")
+                if(!props.mainList){
+                    +listComponentContainer
+                    width = LinearDimension("98%")
+                }else{
+                    +listComponentContainerWithScroll
+                }
             }
             renderList()
         }

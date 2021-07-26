@@ -22,6 +22,7 @@ import com.ustadmobile.redux.ReduxDiState
 import com.ustadmobile.redux.ReduxThemeState
 import com.ustadmobile.util.BrowserTabTracker
 import com.ustadmobile.util.ThemeManager.createAppTheme
+import com.ustadmobile.util.TimeZonesUtil
 import com.ustadmobile.view.splashComponent
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.XmlSerializer
@@ -39,9 +40,9 @@ import react.redux.provider
 
 fun main() {
     defaultJsonSerializer()
+    BrowserTabTracker.init()
     window.onload = {
         render(document.getElementById("root")) {
-
             val diState = ReduxDiState(
                 DI.lazy {
                     import(diModule)
@@ -49,9 +50,6 @@ fun main() {
             )
 
             val theme = createAppTheme()
-
-            BrowserTabTracker.init()
-
             provider(createStore(diState, ReduxThemeState(theme))){
                 mThemeProvider(theme) {
                     splashComponent()

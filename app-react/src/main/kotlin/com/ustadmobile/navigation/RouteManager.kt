@@ -17,7 +17,7 @@ object RouteManager {
     val destinationList = listOf(
         UstadDestination("library_books", MessageID.content, ContentEntryListTabsView.VIEW_NAME,
             ContentEntryListTabsComponent::class, true),
-        UstadDestination("school", MessageID.schools,SchoolListView.VIEW_NAME, PlaceHolderComponent::class),
+        UstadDestination("school", MessageID.schools,SchoolListView.VIEW_NAME, SchoolListComponent::class),
         UstadDestination("people", MessageID.classes,ClazzList2View.VIEW_NAME, ClazzListComponent::class),
         UstadDestination("person", MessageID.people, PersonListView.VIEW_NAME, PersonListComponent::class),
         UstadDestination("pie_chart", MessageID.reports, ReportListView.VIEW_NAME, PlaceHolderComponent::class, divider = true),
@@ -32,6 +32,7 @@ object RouteManager {
         UstadDestination(view = PersonEditView.VIEW_NAME, component = PersonEditComponent::class),
         UstadDestination(view = XapiPackageContentView.VIEW_NAME, component = XapiPackageContentComponent::class),
         UstadDestination(view = VideoContentView.VIEW_NAME, component = VideoContentComponent::class),
+        UstadDestination(view = TimeZoneListView.VIEW_NAME, component = TimeZoneListComponent::class, showSearch = true),
         UstadDestination(view = WebChunkView.VIEW_NAME, component = WebChunkComponent::class),
         UstadDestination(view = RedirectView.VIEW_NAME, component = RedirectComponent::class),
         UstadDestination(view = ClazzDetailView.VIEW_NAME, component = ClazzDetailComponent::class),

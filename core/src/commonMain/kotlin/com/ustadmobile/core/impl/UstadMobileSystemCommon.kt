@@ -14,6 +14,8 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.door.doorMainDispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerializationStrategy
 import kotlin.js.JsName
 
 /**
@@ -46,7 +48,12 @@ abstract class UstadMobileSystemCommon {
             /**
              * If true, then popup include popUpToViewName.
              */
-            val popUpToInclusive: Boolean = false) {
+            val popUpToInclusive: Boolean = false,
+
+            /**
+             * Serialization strategy, i.e On JS there is no way to serialize without a strategy
+             */
+            val serializer: KSerializer<*>? = null) {
 
         companion object {
             val Default = UstadGoOptions(null, false)

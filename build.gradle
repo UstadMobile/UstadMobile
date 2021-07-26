@@ -91,6 +91,7 @@ ext {
     version_kotlin_react_redux = "7.2.3-pre.204-kotlin-1.5.0"
     version_muirwik_components = "0.8.2"
     version_npm_moment = "^2.29.1"
+    version_npm_timezones = "^1.5.2"
     version_npm_tabtracker = "^2.2.3"
     version_npm_buffer = "^6.0.3"
     version_npm_pbkdf2 = "^3.1.2"
