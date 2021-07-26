@@ -113,4 +113,11 @@
     <string name="confirm_deactivate_user">Are you sure you want to deactivate this user? You will not be able to activate it again.</string>
 
     <!-- Report titles -->
+
+    <string name="report_total_sales_by_location">Total sale amount by location</string>
+    <string name="report_total_sales_by_category">Total sale amount by category</string>
+    <string name="report_total_sales_by_le">Total sale amount by LE</string>
+    <string name="report_total_sales_by_product">Total sale amount by product</string>
+    <string name="report_total_sales_by_day">Total sale amount by day</string>
+    <string name="report_number_sales_by_le">Number of sales by LE</string>
 </resources>
