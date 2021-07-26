@@ -85,8 +85,9 @@ class AuthManager(
         //Check if this is an account for a minor which requires parental consent
         if(authorizedPerson != null &&
             DateTime(authorizedPerson.dateOfBirth).age()  < UstadMobileConstants.MINOR_AGE_THRESHOLD) {
-            val approval = db.personParentJoinDao.findByMinorPersonUid(authorizedPerson.personUid)
-            if(approval != null && approval.ppjStatus != STATUS_APPROVED) {
+            val parentJoins = db.personParentJoinDao.findByMinorPersonUid(authorizedPerson.personUid)
+
+            if(!parentJoins.any { it.ppjStatus == STATUS_APPROVED }) {
                 return AuthResult(null, false,
                     AuthResult.REASON_NEEDS_CONSENT)
             }

@@ -132,7 +132,7 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
                 this, di, viewLifecycleOwner).withViewLifecycle()
         profileHeaderAdapter = ClazzEnrolmentProfileHeaderAdapter(selectedPersonUid, mPresenter)
 
-        clazzHeaderAdapter = SimpleHeadingRecyclerAdapter("Person")
+        clazzHeaderAdapter = SimpleHeadingRecyclerAdapter(getText(R.string.person).toString())
         enrolmentAdapter = ClazzEnrolmentRecyclerAdapter(mPresenter).also {
             enrolmentListObserver = PagedListSubmitObserver(it)
         }

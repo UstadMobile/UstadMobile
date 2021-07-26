@@ -354,17 +354,15 @@ object XapiUtil {
     }
 
     fun insertOrUpdateEntryProgress(statementEntity: StatementEntity, repo: UmAppDatabase, verbEntity: VerbEntity) {
-        var statusFlag = getStatusFlag(verbEntity.urlId)
+        val statusFlag = getStatusFlag(verbEntity.urlId)
         var progress  = statementEntity.extensionProgress
         if(progress == 0 &&
-                (statusFlag == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED ||
+                (statusFlag == StatementEntity.CONTENT_COMPLETE ||
+                        statusFlag == StatementEntity.CONTENT_PASSED ||
                         statementEntity.resultCompletion)){
             progress = 100
-            statusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
             repo.statementDao.updateProgress(statementEntity.statementUid, progress)
         }
-        repo.contentEntryProgressDao.updateProgress(statementEntity.statementContentEntryUid,
-                statementEntity.statementPersonUid, progress, statusFlag)
     }
 
 
@@ -374,13 +372,13 @@ object XapiUtil {
 
     private val statusFlagMap = mapOf(
             "http://adlnet.gov/expapi/verbs/completed"
-                    to ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED,
+                    to StatementEntity.CONTENT_COMPLETE,
             "http://adlnet.gov/expapi/verbs/passed"
-                    to ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED,
+                    to StatementEntity.CONTENT_PASSED,
             "http://adlnet.gov/expapi/verbs/failed"
-                    to ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED,
+                    to StatementEntity.CONTENT_FAILED,
             "https://w3id.org/xapi/adl/verbs/satisfied"
-                    to ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED)
+                    to StatementEntity.CONTENT_COMPLETE)
 
 
     fun Boolean.toInt() = if (this) 1 else 0

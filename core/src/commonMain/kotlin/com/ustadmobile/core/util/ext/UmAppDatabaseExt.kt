@@ -16,10 +16,10 @@ import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.ext.dbType
+import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString
-import kotlinx.coroutines.withTimeoutOrNull
 
 fun UmAppDatabase.runPreload() {
     preload()
@@ -39,60 +39,14 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(clazz: Clazz, impl: UstadMobil
     clazz.clazzPendingStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
             impl.getString(MessageID.pending_requests, context)))
 
+    clazz.clazzParentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
+            impl.getString(MessageID.parent, context)))
+
     clazz.takeIf { it.clazzCode == null }?.clazzCode = randomString(Clazz.CLAZZ_CODE_DEFAULT_LENGTH)
 
     clazz.clazzUid = clazzDao.insertAsync(clazz)
-
-    entityRoleDao.insertAsync(EntityRole(Clazz.TABLE_ID, clazz.clazzUid,
-        clazz.clazzTeachersPersonGroupUid, Role.ROLE_CLAZZ_TEACHER_UID.toLong()))
-    entityRoleDao.insertAsync(EntityRole(Clazz.TABLE_ID, clazz.clazzUid,
-        clazz.clazzStudentsPersonGroupUid, Role.ROLE_CLAZZ_STUDENT_UID.toLong()))
-    entityRoleDao.insertAsync(EntityRole(Clazz.TABLE_ID, clazz.clazzUid,
-        clazz.clazzPendingStudentsPersonGroupUid, Role.ROLE_CLAZZ_STUDENT_PENDING_UID.toLong()))
 }
 
-
-suspend fun UmAppDatabase.createPersonGroupAndMemberWithEnrolment(entity: ClazzEnrolment){
-
-    val clazzWithSchoolVal = clazzDao.getClazzWithSchool(entity.clazzEnrolmentClazzUid)
-    ?: throw IllegalArgumentException("Class does not exist")
-
-    val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
-    entity.clazzEnrolmentDateJoined = DateTime(entity.clazzEnrolmentDateJoined)
-            .toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
-    if(entity.clazzEnrolmentDateLeft != Long.MAX_VALUE){
-        entity.clazzEnrolmentDateLeft = DateTime(entity.clazzEnrolmentDateLeft)
-                .toOffsetByTimezone(clazzTimeZone).localEndOfDay.utc.unixMillisLong
-    }
-
-    if (entity.clazzEnrolmentUid == 0L) {
-        entity.clazzEnrolmentUid = clazzEnrolmentDao.insertAsync(entity)
-    } else {
-        clazzEnrolmentDao.updateAsync(entity)
-    }
-
-    val personGroupUid = when(entity.clazzEnrolmentRole) {
-        ClazzEnrolment.ROLE_TEACHER -> clazzWithSchoolVal.clazzTeachersPersonGroupUid
-        ClazzEnrolment.ROLE_STUDENT -> clazzWithSchoolVal.clazzStudentsPersonGroupUid
-        ClazzEnrolment.ROLE_STUDENT_PENDING -> clazzWithSchoolVal.clazzPendingStudentsPersonGroupUid
-        else -> null
-    }
-
-    if(personGroupUid != null) {
-
-        val list = personGroupMemberDao.checkPersonBelongsToGroup(personGroupUid, entity.clazzEnrolmentPersonUid)
-
-        if(list.isEmpty()){
-            PersonGroupMember().also {
-                it.groupMemberPersonUid = entity.clazzEnrolmentPersonUid
-                it.groupMemberGroupUid = personGroupUid
-                it.groupMemberUid = personGroupMemberDao.insertAsync(it)
-            }
-        }
-
-    }
-
-}
 
 /**
  * Enrol the given person into the given class. The effective date of joining is midnight as per
@@ -104,7 +58,7 @@ suspend fun UmAppDatabase.createPersonGroupAndMemberWithEnrolment(entity: ClazzE
 @Throws(AlreadyEnroledInClassException::class)
 suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Person, clazzUid: Long,
                                                               role: Int,
-                                                              clazzWithSchool: ClazzWithSchool? = null): ClazzEnrolmentWithPerson {
+                                                              clazzWithSchool: ClazzWithSchool? = null): ClazzEnrolment {
     val clazzWithSchoolVal = clazzWithSchool ?: clazzDao.getClazzWithSchool(clazzUid)
         ?: throw IllegalArgumentException("Class does not exist")
 
@@ -117,32 +71,78 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Per
 
     val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
     val joinTime = DateTime.now().toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
-    val clazzMember = ClazzEnrolmentWithPerson().apply {
+    val clazzEnrolment = ClazzEnrolment().apply {
         clazzEnrolmentPersonUid = personToEnrol.personUid
         clazzEnrolmentClazzUid = clazzUid
         clazzEnrolmentRole = role
         clazzEnrolmentActive = true
         clazzEnrolmentDateJoined = joinTime
-        person = personToEnrol
-        clazzEnrolmentUid = clazzEnrolmentDao.insertAsync(this)
     }
 
-    val personGroupUid = when(role) {
+    return processEnrolmentIntoClass(clazzEnrolment, clazzWithSchoolVal)
+}
+
+/**
+ * Process the given enrolment. This will insert the ClazzEnrolment itself and will add the person
+ * being enroled into the PersonGroup according to their role.
+ */
+suspend fun UmAppDatabase.processEnrolmentIntoClass(
+    enrolment: ClazzEnrolment,
+    clazzWithSchool: ClazzWithSchool? = null
+) : ClazzEnrolment {
+
+    val clazzWithSchoolVal = clazzWithSchool ?: clazzDao.getClazzWithSchool(
+        enrolment.clazzEnrolmentClazzUid) ?: throw IllegalArgumentException("Class does not exist")
+    val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
+
+    enrolment.clazzEnrolmentDateJoined = DateTime(enrolment.clazzEnrolmentDateJoined)
+        .toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
+    if(enrolment.clazzEnrolmentDateLeft != Long.MAX_VALUE){
+        enrolment.clazzEnrolmentDateLeft = DateTime(enrolment.clazzEnrolmentDateLeft)
+            .toOffsetByTimezone(clazzTimeZone).localEndOfDay.utc.unixMillisLong
+    }
+
+    enrolment.clazzEnrolmentUid = clazzEnrolmentDao.insertAsync(enrolment)
+
+
+    val personGroupUid = when(enrolment.clazzEnrolmentRole) {
         ClazzEnrolment.ROLE_TEACHER -> clazzWithSchoolVal.clazzTeachersPersonGroupUid
         ClazzEnrolment.ROLE_STUDENT -> clazzWithSchoolVal.clazzStudentsPersonGroupUid
+        ClazzEnrolment.ROLE_PARENT -> clazzWithSchoolVal.clazzParentsPersonGroupUid
         ClazzEnrolment.ROLE_STUDENT_PENDING -> clazzWithSchoolVal.clazzPendingStudentsPersonGroupUid
-        else -> null
+        else -> -1
     }
 
-    if(personGroupUid != null) {
-        val personGroupMember = PersonGroupMember().also {
-            it.groupMemberPersonUid = personToEnrol.personUid
-            it.groupMemberGroupUid = personGroupUid
-            it.groupMemberUid = personGroupMemberDao.insertAsync(it)
+    if(personGroupUid != -1L) {
+        val existingGroupMemberships = personGroupMemberDao.checkPersonBelongsToGroup(
+            personGroupUid, enrolment.clazzEnrolmentPersonUid)
+        personGroupMemberDao.takeIf { existingGroupMemberships.isEmpty() }?.insertAsync(
+            PersonGroupMember().also {
+                it.groupMemberPersonUid = enrolment.clazzEnrolmentPersonUid
+                it.groupMemberGroupUid = personGroupUid
+            })
+    }
+
+    val parentsToEnrol = if(enrolment.clazzEnrolmentRole == ClazzEnrolment.ROLE_STUDENT) {
+        onRepoWithFallbackToDb(2500) {
+            it.personParentJoinDao.findByMinorPersonUidWhereParentNotEnrolledInClazz(
+                enrolment.clazzEnrolmentPersonUid, enrolment.clazzEnrolmentClazzUid)
         }
+    }else {
+        listOf()
     }
 
-    return clazzMember
+    parentsToEnrol.forEach { parentJoin ->
+        onRepoWithFallbackToDb(2500) {
+            it.personDao.findByUid(parentJoin.parentPersonUid)
+        }?.also { parentPerson ->
+            enrolPersonIntoClazzAtLocalTimezone(parentPerson, enrolment.clazzEnrolmentClazzUid,
+                ClazzEnrolment.ROLE_PARENT, clazzWithSchoolVal)
+        }
+
+    }
+
+    return enrolment
 }
 
 /**
@@ -183,11 +183,10 @@ suspend fun UmAppDatabase.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol: Pe
     }
 
     if(personGroupUid != null) {
-        val personGroupMember = PersonGroupMember().also {
+        personGroupMemberDao.insertAsync(PersonGroupMember().also {
             it.groupMemberPersonUid = personToEnrol.personUid
             it.groupMemberGroupUid = personGroupUid
-            it.groupMemberUid = personGroupMemberDao.insertAsync(it)
-        }
+        })
     }
 
     return schoolMember
@@ -467,51 +466,16 @@ suspend fun UmAppDatabase.enrollPersonToSchool(schoolUid: Long,
         }
 
         if(personGroupUid != null) {
-            val personGroupMember = PersonGroupMember().also {
+            personGroupMemberDao.insertAsync(PersonGroupMember().also {
                 it.groupMemberPersonUid = schoolMember.schoolMemberPersonUid
                 it.groupMemberGroupUid = personGroupUid
-                it.groupMemberUid = personGroupMemberDao.insertAsync(it)
-            }
+            })
         }
 
         return schoolMember
     }else{
         return matches[0]
     }
-}
-
-
-suspend fun UmAppDatabase.getQuestionListForView(clazzWorkWithSubmission: ClazzWorkWithSubmission, responsePersonUid : Long)
-        : List<ClazzWorkQuestionAndOptionWithResponse>{
-
-    val questionsAndOptionsWithResponses :List<ClazzWorkQuestionAndOptionWithResponseRow> = withTimeoutOrNull(2000){
-        clazzWorkQuestionDao.findAllQuestionsAndOptionsWithResponse(clazzWorkWithSubmission.clazzWorkUid,
-                responsePersonUid)
-    } ?: listOf()
-
-    val questionsAndOptionsWithResponseList: List<ClazzWorkQuestionAndOptionWithResponse> =
-            questionsAndOptionsWithResponses.groupBy { it.clazzWorkQuestion }.entries
-                    .map {
-                        val questionUid = it.key?.clazzWorkQuestionUid ?: 0L
-
-                        ClazzWorkQuestionAndOptionWithResponse(
-                                clazzWorkWithSubmission ,
-                                it.key ?: ClazzWorkQuestion(),
-                                it.value.map {
-                                    it.clazzWorkQuestionOption ?: ClazzWorkQuestionOption()
-                                },
-                                it.value.map {
-                                    it.clazzWorkQuestionOptionResponse
-                                }.first()?: ClazzWorkQuestionResponse().apply {
-                                    clazzWorkQuestionResponseQuestionUid = questionUid?:0L
-                                    clazzWorkQuestionResponsePersonUid = responsePersonUid
-                                    clazzWorkQuestionResponseClazzWorkUid = clazzWorkWithSubmission.clazzWorkUid
-                                            ?: 0L
-                                })
-                    }
-
-
-    return questionsAndOptionsWithResponseList
 }
 
 /**
@@ -532,7 +496,6 @@ data class ContainerEntryWithMd5Partition(val entriesWithMatchingFile: List<Cont
  *
  * @param containerUid The container uid for which we are linking entries.
  * @param containerEntryFiles The ContainerEntryFile list to check.
- * @param maxListParamSize the maximum number of items in a query parameter list (e.g. to avoid room
  * throwing an exception)
  *
  * @return a pair of
@@ -550,11 +513,9 @@ suspend fun UmAppDatabase.linkExistingContainerEntries(containerUid: Long,
     val alreadyLinkedEntries = containerEntryDao.findByContainerAsync(containerUid)
     val entriesToLink = entriesWithFile
             .filter { entryWithFile ->! alreadyLinkedEntries.any { it.cePath ==  entryWithFile.cePath } }
-            .apply {
-                forEach { entryWithFile ->
-                    entryWithFile.ceUid = 0L
-                    entryWithFile.ceCefUid = existingFiles.first { it.cefMd5 == entryWithFile.cefMd5 }.cefUid
-                }
+            .onEach { entryWithFile ->
+                entryWithFile.ceUid = 0L
+                entryWithFile.ceCefUid = existingFiles.first { it.cefMd5 == entryWithFile.cefMd5 }.cefUid
             }
 
     containerEntryDao.insertListAsync(entriesToLink)

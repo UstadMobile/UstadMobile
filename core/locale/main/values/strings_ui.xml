@@ -1417,4 +1417,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     -->
     <string name="csv">CSV</string>
 
+    <string name="parent">Parent</string>
+
 </resources>

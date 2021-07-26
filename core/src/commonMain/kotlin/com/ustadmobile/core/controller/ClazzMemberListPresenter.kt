@@ -93,7 +93,7 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     }
 
     fun handleClickPendingRequest(enrolmentDetails: PersonWithClazzEnrolmentDetails, approved: Boolean) {
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch {
             try {
                 if (approved) {
                     repo.approvePendingClazzEnrolment(enrolmentDetails, filterByClazzUid)

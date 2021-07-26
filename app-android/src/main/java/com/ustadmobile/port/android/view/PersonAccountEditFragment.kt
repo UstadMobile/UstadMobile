@@ -18,6 +18,7 @@ import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.core.view.PersonAccountEditView.Companion.BLOCK_CHARACTER_SET
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
 
 
 class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonAccountEditView {
@@ -91,19 +92,6 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
     override val mEditPresenter: UstadEditPresenter<*, PersonWithAccount>?
         get() = mPresenter
 
-    class ClearErrorTextWatcher(private val onTextFunction: () -> Unit ):TextWatcher{
-        override fun afterTextChanged(p0: Editable?) {
-
-        }
-
-        override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-
-        }
-
-        override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            onTextFunction()
-        }
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
