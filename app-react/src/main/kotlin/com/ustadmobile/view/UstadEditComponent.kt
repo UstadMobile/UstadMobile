@@ -1,10 +1,13 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.controller.UstadSingleEntityPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.util.ext.saveStateToCurrentBackStackStateHandle
+import kotlinx.browser.window
 import react.RProps
 import react.RState
 
@@ -14,9 +17,17 @@ abstract class UstadEditComponent<T: Any>(mProps: RProps): UstadBaseComponent<RP
 
     override fun onCreate() {
         super.onCreate()
-        fabManager?.icon = "check"
-        fabManager?.text = getString(MessageID.save)
-        fabManager?.visible = true
+        val textId = if(mEditPresenter?.persistenceMode == UstadSingleEntityPresenter.PersistenceMode.DB) {
+            getString(MessageID.save)
+        }else {
+            getString(MessageID.done)
+        }
+
+        window.setTimeout({
+            fabManager?.icon = "check"
+            fabManager?.visible = true
+            fabManager?.text = textId
+        }, STATE_CHANGE_DELAY * 5)
     }
 
     override fun onFabClicked() {
@@ -25,15 +36,21 @@ abstract class UstadEditComponent<T: Any>(mProps: RProps): UstadBaseComponent<RP
         mEditPresenter?.handleClickSave(entityVal)
     }
 
-    override fun finishWithResult(result: List<T>) {}
+    override fun finishWithResult(result: List<T>) {
+        saveResultToBackStackSavedStateHandle(result)
+    }
 
     protected fun setEditTitle(newTitleId: Int, editStringId: Int) {
-        val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        val entityJsonStr = arguments[ARG_ENTITY_JSON]
-        title = if(entityUid != 0L || entityJsonStr != null){
-           getString(editStringId)
-        }else {
-           getString(newTitleId)
-        }
+        window.setTimeout({
+            val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+            val entityJsonStr = arguments[ARG_ENTITY_JSON]
+            title = if(entityUid != 0L || entityJsonStr != null){
+                getString(editStringId)
+            }else {
+                getString(newTitleId)
+            }
+        }, STATE_CHANGE_DELAY * 2)
     }
+
+    protected open fun onSaveStateToBackStackStateHandle() = mEditPresenter?.saveStateToCurrentBackStackStateHandle(navController)
 }

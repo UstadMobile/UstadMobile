@@ -4,7 +4,7 @@ import com.ccfraser.muirwik.components.list.MListItemAlignItems
 import com.ccfraser.muirwik.components.list.alignItems
 import com.ccfraser.muirwik.components.list.mList
 import com.ccfraser.muirwik.components.list.mListItem
-import com.ustadmobile.core.controller.UstadListPresenter
+import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.horizontalList
 import com.ustadmobile.util.StyleManager.listComponentContainer
@@ -33,7 +33,8 @@ interface ListProps<T>: RProps {
      *     FALSE = Component has other contents and this list include
      */
     var mainList: Boolean
-    var presenter: UstadListPresenter<*,*>
+
+    var presenter: UstadBaseController<*>
 }
 
 data class CreateNewItem(var visible: Boolean = false, var labelId: Int = 0, var onClickCreateNew: (() -> Unit)? = null)

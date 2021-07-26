@@ -1,26 +1,29 @@
 package com.ustadmobile.view
 
 import com.ccfraser.muirwik.components.*
+import com.ccfraser.muirwik.components.button.MIconButtonSize
+import com.ccfraser.muirwik.components.button.mIconButton
 import com.ccfraser.muirwik.components.form.MFormControlVariant
 import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
+import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
-import com.ustadmobile.lib.db.entities.Schedule
-import com.ustadmobile.lib.db.entities.ScopedGrantAndName
+import com.ustadmobile.door.ObserverFnWrapper
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.Util.ASSET_ENTRY
 import com.ustadmobile.util.ext.format
+import com.ustadmobile.util.ext.formattedInHoursAndMinutes
 import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.view.ext.*
-import kotlinx.css.marginTop
-import kotlinx.css.px
 import react.RBuilder
 import react.RProps
 import react.setState
@@ -55,9 +58,21 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
 
     private var featureLabel = FieldLabel(text = getString(MessageID.features_enabled))
 
-    override var clazzSchedules: DoorMutableLiveData<List<Schedule>>?
-        get() = TODO("Not yet implemented")
-        set(value) {}
+    private var scheduleList: List<Schedule>? = null
+
+    private val scheduleObserver = ObserverFnWrapper<List<Schedule>?> {
+            setState {
+                scheduleList = it
+            }
+    }
+
+    override var clazzSchedules: DoorMutableLiveData<List<Schedule>>? = null
+        get() = field
+        set(value) {
+            field?.removeObserver(scheduleObserver)
+            field = value
+            value?.observe(this, scheduleObserver)
+        }
 
     override var clazzEndDateError: String? = null
         set(value) {
@@ -73,9 +88,20 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
             }
         }
 
-    override var scopedGrants: DoorLiveData<List<ScopedGrantAndName>>?
-        get() = TODO("Not yet implemented")
-        set(value) {}
+    private var scopeList: List<ScopedGrantAndName>? = null
+
+    private val scopedGrantListObserver = ObserverFnWrapper<List<ScopedGrantAndName>> {
+        setState {
+            scopeList = it
+        }
+    }
+
+    override var scopedGrants: DoorLiveData<List<ScopedGrantAndName>>? = null
+        set(value) {
+            field?.removeObserver(scopedGrantListObserver)
+            field = value
+            field?.observe(this, scopedGrantListObserver)
+        }
 
     override var fieldsEnabled: Boolean = false
         get() = field
@@ -189,6 +215,17 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
 
                     createListSectionTitle(getString(MessageID.schedule))
 
+                    val createNewItem = CreateNewItem(true, MessageID.add_a_schedule){
+                        mPresenter?.scheduleOneToManyJoinListener?.onClickNew()
+                    }
+
+                    mPresenter?.let { presenter ->
+                        scheduleList?.let { schedules ->
+                            renderSchedules(presenter, schedules, createNewItem){
+                                mPresenter?.scheduleOneToManyJoinListener?.onClickEdit(it)
+                            }
+                        }
+                    }
 
                     mTextField(label = "${schoolNameLabel.text}",
                         helperText = schoolNameLabel.errorText,
@@ -272,10 +309,97 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
 
                     createListSectionTitle(getString(MessageID.permissions))
 
+                    mPresenter?.let { presenter ->
+                        scopeList?.let { scopeList ->
+
+                            val newItem = CreateNewItem(true, MessageID.add_person_or_group){
+                                mPresenter?.scopedGrantOneToManyHelper?.onClickNew()
+                            }
+
+                            renderScopedGrants(presenter, scopeList, newItem){ scope ->
+                                mPresenter?.scopedGrantOneToManyHelper?.onClickEdit(scope)
+                            }
+                        }
+                    }
+
                 }
 
             }
         }
     }
 
+}
+
+class ScopeGrantListComponent(mProps: ListProps<ScopedGrantAndName>): UstadSimpleList<ListProps<ScopedGrantAndName>>(mProps){
+
+    override fun RBuilder.renderListItem(item: ScopedGrantAndName) {
+        val showDeleteIcon = item.scopedGrant?.sgFlags?.hasFlag(ScopedGrant.FLAG_NO_DELETE) == true
+        val permissionList = permissionListText(systemImpl,Clazz.TABLE_ID,
+            item.scopedGrant?.sgPermissions ?: 0)
+        val listener = (props.presenter as ClazzEdit2Presenter).scopedGrantOneToManyHelper
+        if(showDeleteIcon){
+            createItemWithIconTitleDescriptionAndIconBtn("admin_panel_settings",
+                "delete",item.name, permissionList){
+                listener.onClickDelete(item)
+            }
+        }else{
+            createItemWithIconTitleAndDescription("admin_panel_settings",
+                item.name, permissionList)
+        }
+    }
+
+}
+
+fun RBuilder.renderScopedGrants(presenter: ClazzEdit2Presenter,
+                             scopes: List<ScopedGrantAndName>,
+                             createNewItem: CreateNewItem = CreateNewItem(),
+                             onEntryClicked: ((ScopedGrantAndName) -> Unit)? = null) = child(ScopeGrantListComponent::class) {
+    attrs.entries = scopes
+    attrs.onEntryClicked = onEntryClicked
+    attrs.createNewItem = createNewItem
+    attrs.presenter = presenter
+}
+
+class ScheduleListComponent(mProps: ListProps<Schedule>): UstadSimpleList<ListProps<Schedule>>(mProps){
+
+    override fun RBuilder.renderListItem(item: Schedule) {
+        umGridContainer {
+            val frequencyMessageId = ScheduleEditPresenter.FrequencyOption.values()
+                .firstOrNull { it.optionVal == item.scheduleFrequency }?.messageId ?: MessageID.None
+            val dayMessageId = ScheduleEditPresenter.DayOptions.values()
+                .firstOrNull { it.optionVal == item.scheduleDay }?.messageId ?: MessageID.None
+
+            val scheduleDays = "${systemImpl.getString(frequencyMessageId, this)} - ${systemImpl.getString(dayMessageId, this)}"
+
+            val startEndTime = "${Date(item.sceduleStartTime).formattedInHoursAndMinutes()} " +
+                    "- ${Date(item.scheduleEndTime).formattedInHoursAndMinutes()}"
+
+            umItem(MGridSize.cells10, MGridSize.cells11){
+                mTypography("$scheduleDays $startEndTime",
+                    variant = MTypographyVariant.body2,
+                    color = MTypographyColor.textPrimary,
+                    gutterBottom = true){
+                    css(alignTextToStart)
+                }
+            }
+
+            umItem(MGridSize.cells2, MGridSize.cells1){
+                mIconButton("delete", size = MIconButtonSize.small, onClick = {
+                    val joinEditListener = (props.presenter as ClazzEdit2Presenter).scheduleOneToManyJoinListener
+                    joinEditListener.onClickDelete(item)
+                })
+            }
+        }
+    }
+
+}
+
+fun RBuilder.renderSchedules(presenter: ClazzEdit2Presenter,
+                             schedules: List<Schedule>,
+                             createNewItem: CreateNewItem = CreateNewItem(),
+                             onEntryClicked: ((Schedule) -> Unit)? = null) = child(ScheduleListComponent::class) {
+    attrs.entries = schedules
+    attrs.onEntryClicked = onEntryClicked
+    attrs.createNewItem = createNewItem
+    attrs.presenter = presenter
 }

@@ -26,6 +26,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import org.w3c.dom.HashChangeEvent
@@ -178,6 +179,8 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
             saveResultToBackStackSavedStateHandle(
                 Json.encodeToString(ListSerializer(serializer),
                     js("result")))
+        }else{
+            throw IllegalStateException("Serializer not provided")
         }
     }
 
@@ -206,12 +209,11 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
      * Navigate to a list view in picker mode for the given entity type and destination view as
      * equivalent to android implementation
      */
-    fun navigateToPickEntityFromList(entityClass: KClass<*>,
-                                     destinationView: String,
+    fun navigateToPickEntityFromList(destinationView: String,
                                      args: MutableMap<String, String> = mutableMapOf(),
-                                     destinationResultKey: String? = entityClass.simpleName,
                                      overwriteDestination: Boolean? = null,
-                                     navOptions: UstadMobileSystemCommon.UstadGoOptions = UstadMobileSystemCommon.UstadGoOptions()){
+                                     navOptions: UstadMobileSystemCommon.UstadGoOptions){
+        val destinationResultKey = navOptions.serializer?.descriptor?.serialName
         val currentBackStateEntryVal = navController.currentBackStackEntry
         if(currentBackStateEntryVal != null && destinationResultKey != null)
             args.putResultDestInfo(currentBackStateEntryVal, destinationResultKey,
@@ -228,12 +230,9 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
      */
     fun <T> navigateToEditEntity(entity: T?,
                                  destinationView: String,
-                                 entityClass: KClass<*>,
-                                 destinationResultKey: String? = entityClass.simpleName,
                                  overwriteDestination: Boolean? = null,
                                  args:MutableMap<String,String> = mutableMapOf(),
-                                 navOptions: UstadMobileSystemCommon.UstadGoOptions = UstadMobileSystemCommon.UstadGoOptions(),
-    ) {
+                                 navOptions: UstadMobileSystemCommon.UstadGoOptions) {
         val backStateEntryVal = navController.currentBackStackEntry
 
         if(backStateEntryVal != null) {
@@ -249,7 +248,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
                 val viewName = lookupDestinationName(currentDestViewName)?.view ?: ""
                 args[UstadView.ARG_RESULT_DEST_ID] = viewName
             }else {
-                destinationResultKey?.let {key ->
+                navOptions.serializer?.descriptor?.serialName?.let {key ->
                     args.putResultDestInfo(backStateEntryVal, key,
                         overwriteDest = overwriteDestination ?: (this is UstadEditComponent<*>))
                 }
@@ -276,6 +275,11 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
     }
 
     companion object {
+
+        val DEFAULT_NAV_OPTION: (serializer: KSerializer<*>) -> UstadMobileSystemCommon.UstadGoOptions = {
+            UstadMobileSystemCommon.UstadGoOptions(serializer = it)
+        }
+
         const val STATE_CHANGE_DELAY = 100
     }
 }

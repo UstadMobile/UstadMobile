@@ -5,55 +5,42 @@ import com.ustadmobile.core.db.dao.HolidayCalendarDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
+import com.ustadmobile.mocks.DoorLiveDataJs
 
 class HolidayCalendarDaoJs: HolidayCalendarDao() {
     override fun findAllHolidaysWithEntriesCount(): DataSource.Factory<Int, HolidayCalendarWithNumEntries> {
         return DataSourceFactoryJs(ENTRIES)
     }
 
-    override fun replaceList(list: List<HolidayCalendar>) {
-        TODO("Not yet implemented")
-    }
+    override fun replaceList(list: List<HolidayCalendar>) {}
 
     override fun findAllHolidaysLiveData(): DoorLiveData<List<HolidayCalendar>> {
-        TODO("Not yet implemented")
+        return DoorLiveDataJs(ENTRIES)
     }
 
     override fun findByUidLive(uid: Long): DoorLiveData<HolidayCalendar?> {
-        TODO("Not yet implemented")
+        return DoorLiveDataJs(ENTRIES.first { it.umCalendarUid == uid })
     }
 
-    override suspend fun updateAsync(entity: HolidayCalendar): Int {
-        TODO("Not yet implemented")
-    }
+    override suspend fun updateAsync(entity: HolidayCalendar): Int { return 1}
 
     override suspend fun findByUid(uid: Long): HolidayCalendar? {
-        TODO("Not yet implemented")
+        return ENTRIES.first { it.umCalendarUid == uid }
     }
 
     override suspend fun findByUidAsync(uid: Long): HolidayCalendar? {
-        TODO("Not yet implemented")
+       return  ENTRIES.first { it.umCalendarUid == uid }
     }
 
-    override fun insert(entity: HolidayCalendar): Long {
-        TODO("Not yet implemented")
-    }
+    override fun insert(entity: HolidayCalendar): Long { return 1}
 
-    override suspend fun insertAsync(entity: HolidayCalendar): Long {
-        TODO("Not yet implemented")
-    }
+    override suspend fun insertAsync(entity: HolidayCalendar): Long { return 1}
 
-    override fun insertList(entityList: List<HolidayCalendar>) {
-        TODO("Not yet implemented")
-    }
+    override fun insertList(entityList: List<HolidayCalendar>) {}
 
-    override fun updateList(entityList: List<HolidayCalendar>) {
-        TODO("Not yet implemented")
-    }
+    override fun updateList(entityList: List<HolidayCalendar>) {}
 
-    override fun update(entity: HolidayCalendar) {
-        TODO("Not yet implemented")
-    }
+    override fun update(entity: HolidayCalendar) {}
 
     companion object {
         val ENTRIES = listOf(

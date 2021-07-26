@@ -7,7 +7,6 @@ import com.ccfraser.muirwik.components.button.mIconButton
 import com.ustadmobile.core.controller.ClazzMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.PersonListView
@@ -172,10 +171,9 @@ class ClazzMemberListComponent(mProps: RProps):UstadListComponent<PersonWithClaz
         }
 
         navigateToPickEntityFromList(
-            ClazzEnrolment::class, PersonListView.VIEW_NAME, args,
+            PersonListView.VIEW_NAME, args,
             overwriteDestination = true,
-            navOptions = UstadMobileSystemCommon.UstadGoOptions(
-                serializer = ClazzEnrolment.serializer())
+            navOptions = DEFAULT_NAV_OPTION(ClazzEnrolment.serializer())
         )
     }
 }

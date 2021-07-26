@@ -153,7 +153,7 @@ class SchedulesComponent(mProps: ListProps<Schedule>): UstadSimpleList<ListProps
                 variant = MTypographyVariant.body2,
                 color = MTypographyColor.textPrimary,
                 gutterBottom = true){
-                css(StyleManager.alignTextToStart)
+                css(alignTextToStart)
             }
         }
     }

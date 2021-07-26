@@ -108,7 +108,7 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
                         }
                         val messageId = CONTENT_ENTRY_TYPE_LABEL_MAP[item.contentTypeFlag] ?: MessageID.untitled
                         val icon = CONTENT_ENTRY_TYPE_ICON_MAP[item.contentTypeFlag] ?: ""
-                        umItem(MGridSize.cells1) {
+                        umItem(MGridSize.cells2, MGridSize.cells1) {
                             mAvatar(className = "${StyleManager.name}-contentEntryListContentAvatarClass") {
                                 mIcon(icon, className= "${StyleManager.name}-contentEntryListContentTyeIconClass"){
                                     css{marginTop = 4.px}
@@ -116,7 +116,7 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
                             }
                         }
 
-                        umItem(MGridSize.cells9) {
+                        umItem(MGridSize.cells8, MGridSize.cells9) {
                             mTypography(getString(messageId), variant = MTypographyVariant.body2, gutterBottom = true)
                         }
 

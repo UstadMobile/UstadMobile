@@ -118,7 +118,7 @@ class DatabaseJs: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val holidayCalendarDao: HolidayCalendarDaoJs
         get() = HolidayCalendarDaoJs()
     override val holidayDao: HolidayDao
-        get() = TODO("Not yet implemented")
+        get() = HolidayDaoJs()
     override val schoolDao: SchoolDao
         get() = SchoolDaoJs()
     override val xLangMapEntryDao: XLangMapEntryDao
