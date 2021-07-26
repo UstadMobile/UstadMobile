@@ -2,9 +2,9 @@ package com.ustadmobile.test.port.android.util
 
 import android.R
 import android.widget.DatePicker
-import com.agoda.kakao.common.views.KView
-import com.agoda.kakao.edit.KEditText
-import com.agoda.kakao.picker.date.KDatePicker
+import io.github.kakaocup.kakao.common.views.KView
+import io.github.kakaocup.kakao.edit.KEditText
+import io.github.kakaocup.kakao.picker.date.KDatePicker
 import org.hamcrest.CoreMatchers
 import java.util.*
 

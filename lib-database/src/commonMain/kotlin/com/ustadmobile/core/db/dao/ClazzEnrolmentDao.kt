@@ -112,6 +112,20 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Query("SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<ClazzEnrolment?>
 
+    @Query("""
+                UPDATE ClazzEnrolment
+                   SET clazzEnrolmentActive = :active,
+                       clazzEnrolmentLastChangedBy = 
+                        (SELECT nodeClientId 
+                          FROM SyncNode 
+                         LIMIT 1) 
+                WHERE clazzEnrolmentPersonUid = :personUid 
+                      AND clazzEnrolmentClazzUid = :clazzUid
+                      AND clazzEnrolmentRole = :roleId""")
+    abstract suspend fun updateClazzEnrolmentActiveForPersonAndClazz(personUid: Long, clazzUid: Long,
+                                                                     roleId: Int, active: Boolean): Int
+
+
     @Query("""SELECT Person.*, (SELECT ((CAST(COUNT(DISTINCT CASE WHEN 
         ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN 
         ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) AS REAL) / 
@@ -131,8 +145,9 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         ClazzEnrolment.clazzEnrolmentPersonUid AND 
         ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
         AND ClazzEnrolment.clazzEnrolmentActive) AS enrolmentRole
+        FROM PersonGroupMember
+        ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2} 
         
-         ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
          WHERE
          PersonGroupMember.groupMemberPersonUid = :accountPersonUid
          AND PersonGroupMember.groupMemberActive 
@@ -167,20 +182,6 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     """)
     abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int, sortOrder: Int, searchText: String? = "%",
                                        filter: Int, accountPersonUid: Long, currentTime: Long): DataSource.Factory<Int, PersonWithClazzEnrolmentDetails>
-
-
-    @Query("""
-                UPDATE ClazzEnrolment
-                   SET clazzEnrolmentActive = :active,
-                       clazzEnrolmentLastChangedBy = 
-                        (SELECT nodeClientId 
-                          FROM SyncNode 
-                         LIMIT 1) 
-                WHERE clazzEnrolmentPersonUid = :personUid 
-                      AND clazzEnrolmentClazzUid = :clazzUid
-                      AND clazzEnrolmentRole = :roleId""")
-    abstract suspend fun updateClazzEnrolmentActiveForPersonAndClazz(personUid: Long, clazzUid: Long,
-                                                                     roleId: Int, active: Boolean): Int
 
 
     @Query("""UPDATE ClazzEnrolment SET clazzEnrolmentActive = :enrolled,

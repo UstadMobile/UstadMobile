@@ -5,14 +5,19 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.util.ext.grantScopedPermission
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
+import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.ScopedGrant
 import com.ustadmobile.port.android.screen.PersonDetailScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import junit.framework.Assert.assertEquals
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 
@@ -33,6 +38,46 @@ class PersonDetailFragmentTest : TestCase() {
     val screenRecordRule = AdbScreenRecordRule()
 
 
+
+
+    private fun launchFragment(isAdmin: Boolean = true, withUsername: Boolean = true, sameUser: Boolean = false){
+        val mPersonUid:Long = if(sameUser) 42 else 43
+        val person = PersonWithDisplayDetails().apply {
+            firstNames = "Jones"
+            lastName = "Doe"
+            if(withUsername){
+                username = "jones.doe"
+            }
+            personUid = mPersonUid
+            runBlocking { dbRule.repo.insertPersonAndGroup(this@apply) }
+            //dbRule.repo.personDao.insert(this)
+        }
+
+        if(!sameUser){
+            runBlocking {
+                val userPerson = dbRule.repo.insertPersonAndGroup(PersonWithDisplayDetails().apply {
+                    firstNames = "Admin"
+                    lastName = "User"
+                    username = "admin.user"
+                    personUid = 42
+                    admin = isAdmin
+                    //dbRule.repo.personDao.insert(this)
+                })
+
+                if(isAdmin)
+                    dbRule.repo.grantScopedPermission(userPerson, Role.ALL_PERMISSIONS,
+                        ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
+            }
+        }
+
+        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
+        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+            fragmentArgs = args.toBundle()) {
+            PersonDetailFragment().also {
+                it.installNavController(systemImplNavRule.navController)
+            }
+        }
+    }
 
     @AdbScreenRecord("given person detail when username is null and account management allowed then should hide create account option")
     @Test
@@ -169,38 +214,6 @@ class PersonDetailFragmentTest : TestCase() {
 
 
 
-
-    private fun launchFragment(isAdmin: Boolean = true, withUsername: Boolean = true, sameUser: Boolean = false){
-        val mPersonUid:Long = if(sameUser) 42 else 43
-        val person = PersonWithDisplayDetails().apply {
-            firstNames = "Jones"
-            lastName = "Doe"
-            if(withUsername){
-                username = "jones.doe"
-            }
-            personUid = mPersonUid
-            dbRule.repo.personDao.insert(this)
-        }
-
-        if(!sameUser){
-            PersonWithDisplayDetails().apply {
-                firstNames = "Admin"
-                lastName = "User"
-                username = "admin.user"
-                personUid = 42
-                admin = isAdmin
-                dbRule.repo.personDao.insert(this)
-            }
-        }
-
-        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
-        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = args.toBundle()) {
-            PersonDetailFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-            }
-        }
-    }
 
 
 }

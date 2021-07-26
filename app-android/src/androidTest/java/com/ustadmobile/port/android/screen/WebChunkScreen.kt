@@ -1,6 +1,6 @@
 package com.ustadmobile.port.android.screen
 
-import com.agoda.kakao.web.KWebView
+import io.github.kakaocup.kakao.web.KWebView
 import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.WebChunkFragment

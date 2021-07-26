@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
+import com.google.gson.Gson
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.networkmanager.defaultGson
@@ -28,7 +29,10 @@ import org.kodein.di.instance
  * BackStack SavedStateHandle as specified by ARG_RESULT_DEST_ID and ARG_RESULT_DEST_KEY
  */
 fun Fragment.saveResultToBackStackSavedStateHandle(result: List<*>) {
-    saveResultToBackStackSavedStateHandle(defaultGson().toJson(result))
+    val di: DI by closestDI()
+    val gson: Gson by di.instance()
+
+    saveResultToBackStackSavedStateHandle(gson.toJson(result))
 }
 
 fun Fragment.saveResultToBackStackSavedStateHandle(result: String) {

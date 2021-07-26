@@ -1,7 +1,7 @@
 package com.ustadmobile.test.port.android.util
 
-import com.agoda.kakao.common.views.KView
-import com.agoda.kakao.text.KTextView
+import io.github.kakaocup.kakao.common.views.KView
+import io.github.kakaocup.kakao.text.KTextView
 
 fun KTextView.setMessageIdOption(message: String) {
 

@@ -17,7 +17,6 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
-import kotlinx.android.synthetic.main.appbar_material_tabs_fixed.view.*
 
 
 class ContentEntryDetailFragment: UstadDetailFragment<ContentEntry>(), ContentEntryDetailView {
@@ -53,7 +52,7 @@ class ContentEntryDetailFragment: UstadDetailFragment<ContentEntry>(), ContentEn
                         return@also
 
                     it.fragmentContentEntryDetailViewpager.adapter = mPagerAdapter
-                    it.root.tabs.setupWithViewPager(it.fragmentContentEntryDetailViewpager)
+                    it.fragmentContentEntryTabs.tabs.setupWithViewPager(it.fragmentContentEntryDetailViewpager)
                 }
             }
         }
@@ -66,7 +65,7 @@ class ContentEntryDetailFragment: UstadDetailFragment<ContentEntry>(), ContentEn
 
         mBinding = FragmentContentEntryDetailViewpagerBinding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.root.tabs.tabGravity = TabLayout.GRAVITY_FILL
+            it.fragmentContentEntryTabs.tabs.tabGravity = TabLayout.GRAVITY_FILL
         }
 
         mPresenter = ContentEntryDetailPresenter(requireContext(), arguments.toStringMap(),

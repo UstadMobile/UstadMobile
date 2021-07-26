@@ -9,30 +9,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.net.toFile
-import androidx.core.os.bundleOf
-import androidx.lifecycle.Observer
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.*
-import com.google.android.material.textfield.TextInputLayout
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPersonEditBinding
-import com.toughra.ustadmobile.databinding.ItemClazzEnrolmentWithClazzEditBinding
 import com.ustadmobile.core.controller.PersonEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ext.observeResult
+import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ClazzEnrolmentEditView
-import com.ustadmobile.core.view.ClazzList2View.Companion.ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST
 import com.ustadmobile.core.view.ClazzMemberListView.Companion.ARG_HIDE_CLAZZES
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_PERMISSION
-import com.ustadmobile.core.view.UstadView.Companion.ARG_GO_TO_COMPLETE
-import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
@@ -41,20 +30,18 @@ import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import kotlinx.coroutines.runBlocking
+import com.ustadmobile.port.android.view.util.RunAfterTextChangedTextWatcher
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.File
 
 interface PersonEditFragmentEventHandler {
 
-    fun onClickNewClazzMemberWithClazz()
-
     fun onClickNewRoleAndAssignment()
     
 }
 
-class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView,
-        PersonEditFragmentEventHandler, EntityRoleItemHandler {
+class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView {
 
     private var mBinding: FragmentPersonEditBinding? = null
 
@@ -64,95 +51,16 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         get() = mPresenter
 
     override var genderOptions: List<MessageIdOption>? = null
-        get() = field
         set(value) {
             field = value
         }
 
-    private data class ClassRoleOption(val roleId: Int, val resultKey: String, val stringId: Int)
-
-    class ClazzEnrolmentWithClazzRecyclerAdapter(val eventHandler: PersonEditFragmentEventHandler,
-            var presenter: PersonEditPresenter?): ListAdapter<ClazzEnrolmentWithClazz,
-            ClazzEnrolmentWithClazzRecyclerAdapter.ClazzEnrolmentWithClazzViewHolder>(
-            DIFFUTIL_CLAZZMEMBER_WITH_CLAZZ) {
-
-        class ClazzEnrolmentWithClazzViewHolder(val binding: ItemClazzEnrolmentWithClazzEditBinding)
-            : RecyclerView.ViewHolder(binding.root)
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzEnrolmentWithClazzViewHolder {
-            val viewHolder = ClazzEnrolmentWithClazzViewHolder(ItemClazzEnrolmentWithClazzEditBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false))
-            viewHolder.binding.mPresenter = presenter
-            viewHolder.binding.mFragment = eventHandler
-            return viewHolder
-        }
-
-        override fun onBindViewHolder(holder: ClazzEnrolmentWithClazzViewHolder, position: Int) {
-            holder.binding.clazzEnrolmentWithClazz = getItem(position)
-        }
-    }
-
-
-    override var clazzList: DoorLiveData<List<ClazzEnrolmentWithClazz>>? = null
-        get() = field
+    override var approvalPersonParentJoin: PersonParentJoin?
+        get() = mBinding?.approvalPersonParentJoin
         set(value) {
-            field?.removeObserver(clazzMemberWithClazzObserver)
-            field = value
-            value?.observe(this, clazzMemberWithClazzObserver)
+            mBinding?.approvalPersonParentJoin = value
         }
 
-    override var rolesAndPermissionsList: DoorLiveData<List<EntityRoleWithNameAndRole>>? = null
-        set(value) {
-            field?.removeObserver(rolesAndPermissionObserver)
-            field = value
-            value?.observe(this, rolesAndPermissionObserver)
-        }
-
-    private var clazzEnrolmentWithClazzRecyclerAdapter: ClazzEnrolmentWithClazzRecyclerAdapter? = null
-
-    private var clazzMemberUstadListHeaderRecyclerViewAdapter: ListHeaderRecyclerViewAdapter? = null
-
-    private var rolesAndPermissionUstadListHeaderRecyclerViewAdapter: ListHeaderRecyclerViewAdapter? = null
-    
-    private val clazzMemberWithClazzObserver = Observer<List<ClazzEnrolmentWithClazz>?> {
-        t -> clazzEnrolmentWithClazzRecyclerAdapter?.submitList(t)
-    }
-
-    private var rolesAndPermissionRecyclerAdapter: EntityRoleRecyclerAdapter? = null
-    private val rolesAndPermissionObserver = Observer<List<EntityRoleWithNameAndRole>?> {
-        t -> rolesAndPermissionRecyclerAdapter?.submitList(t)
-    }
-
-    override fun onClickNewClazzMemberWithClazz()  {
-        onSaveStateToBackStackStateHandle()
-        val listOfClazzSelected = clazzEnrolmentWithClazzRecyclerAdapter
-                ?.currentList?.map { it.clazzEnrolmentClazzUid } ?: listOf()
-        navigateToPickEntityFromList(ClazzEnrolmentWithClazz::class.java, R.id.clazz_list_dest,
-                overwriteDestination = true, args = bundleOf(
-                ARG_FILTER_BY_PERMISSION to Role.PERMISSION_CLAZZ_ADD_STUDENT.toString(),
-                ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST to listOfClazzSelected.joinToString(),
-                ARG_POPUPTO_ON_FINISH to PersonEditView.VIEW_NAME,
-                ARG_GO_TO_COMPLETE to ClazzEnrolmentEditView.VIEW_NAME))
-    }
-
-    override fun onClickNewRoleAndAssignment() {
-        onSaveStateToBackStackStateHandle()
-        navigateToEditEntity(null, R.id.entityrole_edit_dest,
-                EntityRoleWithNameAndRole::class.java, argBundle = bundleOf(
-                    UstadView.ARG_FILTER_BY_PERSONGROUPUID to entity?.personGroupUid))
-
-    }
-
-    override fun handleClickEntityRole(entityRole: EntityRoleWithNameAndRole) {
-        onSaveStateToBackStackStateHandle()
-        navigateToEditEntity(entityRole, R.id.entityrole_edit_dest,
-                EntityRoleWithNameAndRole::class.java)
-    }
-
-
-    override fun handleRemoveEntityRole(entityRole: EntityRoleWithNameAndRole) {
-        mPresenter?.handleRemoveRoleAndPermission(entityRole)
-    }
 
     override var entity: PersonWithAccount? = null
         get() = field
@@ -212,10 +120,16 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             }
         }
 
-    override var registrationMode: Boolean? = null
+    override var registrationMode: Int
+        get() = mBinding?.registrationMode ?: 0
         set(value) {
-            mBinding?.registrationMode = (value == true)
-            field = value
+            mBinding?.registrationMode = value
+        }
+
+    override var parentContactError: String?
+        get() = mBinding?.parentContactError
+        set(value) {
+            mBinding?.parentContactError = value
         }
 
     override var usernameError: String?
@@ -289,11 +203,6 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         }
         get() = mBinding?.firstNamesError
 
-    override var canDelegatePermissions: Boolean? = false
-        set(value) {
-            mBinding?.isAdmin = value?:false
-            field = value
-        }
 
 
     override fun navigateToNextDestination(account: UmAccount?, nextDestination: String) {
@@ -309,12 +218,6 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             navController.navigate(umNextDestination.destinationId,null, navOptions)
         }
     }
-
-    private fun handleInputError(inputView: TextInputLayout?, error: Boolean, hint: String?){
-        inputView?.isErrorEnabled = error
-        inputView?.error = if(error) hint else null
-    }
-
 
     override var fieldsEnabled: Boolean = false
         get() = field
@@ -348,37 +251,16 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
         val rootView: View
         mBinding = FragmentPersonEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.imageViewLifecycleObserver = imageViewLifecycleObserver
-            it.clazzlistRecyclerview.layoutManager = LinearLayoutManager(requireContext())
-            it.rolesAndPermissionsRv.layoutManager = LinearLayoutManager(requireContext())
-            it.isAdmin = canDelegatePermissions?:false
             it.hideClazzes =  arguments?.getString(ARG_HIDE_CLAZZES)?.toBoolean() ?: false
         }
 
         mPresenter = PersonEditPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
-        clazzEnrolmentWithClazzRecyclerAdapter =
-                ClazzEnrolmentWithClazzRecyclerAdapter(this, mPresenter)
-        rolesAndPermissionRecyclerAdapter = EntityRoleRecyclerAdapter(true, this)
-        clazzMemberUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(
-                View.OnClickListener { onClickNewClazzMemberWithClazz() },
-                requireContext().getString(R.string.add_person_to_class)).apply {
-            newItemVisible = true
-        }
-        rolesAndPermissionUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(
-                View.OnClickListener { onClickNewRoleAndAssignment() },
-                requireContext().getString(R.string.add_role_permission)).apply {
-            newItemVisible = true
-        }
-        mBinding?.clazzlistRecyclerview?.adapter = ConcatAdapter(clazzEnrolmentWithClazzRecyclerAdapter,
-                clazzMemberUstadListHeaderRecyclerViewAdapter)
-
-        mBinding?.rolesAndPermissionsRv?.adapter = ConcatAdapter(rolesAndPermissionRecyclerAdapter,
-                rolesAndPermissionUstadListHeaderRecyclerViewAdapter)
 
         mBinding?.usernameText?.addTextChangedListener(ClearErrorTextWatcher {
             mBinding?.usernameError = null
@@ -412,6 +294,10 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         })
 
         mBinding?.usernameText?.filters = arrayOf(USERNAME_FILTER)
+        mBinding?.parentcontactText?.addTextChangedListener(RunAfterTextChangedTextWatcher {
+            parentContactError = null
+        })
+
 
         return rootView
     }
@@ -440,21 +326,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
         mPresenter?.onCreate(backStackSavedState)
 
-        findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
-                ClazzEnrolmentWithClazz::class.java){
-            val clazzEnrolmentSelected = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleAddOrEditClazzMemberWithClazz(clazzEnrolmentSelected.apply {
-                clazzEnrolmentPersonUid = arguments?.getString(UstadView.ARG_ENTITY_UID)?.toLong() ?: 0L
-            })
-        }
-
-        findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
-                EntityRoleWithNameAndRole::class.java ) {
-            val entityRole = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleAddOrEditRoleAndPermission(entityRole)
-        }
-
-        if(registrationMode == true) {
+        if(registrationMode.hasFlag(PersonEditView.REGISTER_MODE_ENABLED)) {
             ustadFragmentTitle = requireContext().getString(R.string.register)
         }else {
             setEditFragmentTitle(R.string.add_a_new_person, R.string.edit_person)
@@ -471,19 +343,4 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
     }
 
-    companion object {
-
-        val DIFFUTIL_CLAZZMEMBER_WITH_CLAZZ =
-                object: DiffUtil.ItemCallback<ClazzEnrolmentWithClazz>() {
-            override fun areItemsTheSame(oldItem: ClazzEnrolmentWithClazz,
-                                         newItem: ClazzEnrolmentWithClazz): Boolean {
-                return oldItem.clazzEnrolmentUid == newItem.clazzEnrolmentUid
-            }
-
-            override fun areContentsTheSame(oldItem: ClazzEnrolmentWithClazz,
-                                            newItem: ClazzEnrolmentWithClazz): Boolean {
-                return oldItem == newItem
-            }
-        }
-    }
 }

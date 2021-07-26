@@ -12,14 +12,12 @@ import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.ByteArrayInputStream
-import java.net.URI
-import java.nio.file.Paths
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
+import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.core.contentformats.har.HarEntry
 import java.util.Base64
 
@@ -169,6 +167,26 @@ private suspend fun UmAppDatabase.insertOrLookupContainerEntryFile(src: InputStr
     return containerFile
 }
 
+suspend fun UmAppDatabase.addContainerFromUri(containerUid: Long, uri: com.ustadmobile.door.DoorUri,
+                                              context: Any, nameInContainer: String,
+                                              addOptions: ContainerAddOptions){
+    val inputStream = uri.openInputStream(context) ?: throw IOException("resource not found: ${uri.getFileName(context)}")
+    val size = uri.getSize(context)
+    val repo = this as? DoorDatabaseRepository
+            ?: throw IllegalStateException("Must use repo for addFileToContainer")
+    val db = repo.db as UmAppDatabase
+    val containerFile = db.insertOrLookupContainerEntryFile(inputStream, size, nameInContainer, addOptions)
+
+    ContainerEntry().apply {
+        this.cePath = nameInContainer
+        this.ceContainerUid = containerUid
+        this.ceCefUid = containerFile.cefUid
+        this.ceUid = db.containerEntryDao.insert(this)
+    }
+
+    containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
+}
+
 suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
     zipInputStream: ZipInputStream, addOptions: ContainerAddOptions) {
 
@@ -201,10 +219,11 @@ suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
 }
 
 actual suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
-                                                              zipUri: DoorUri,
-                                                              addOptions: ContainerAddOptions) {
+                                                              zipUri: com.ustadmobile.door.DoorUri,
+                                                              addOptions: ContainerAddOptions,
+                                                              context: Any) {
     withContext(Dispatchers.IO) {
-        val zipInputStream = ZipInputStream(FileInputStream(zipUri.toFile()))
+        val zipInputStream = ZipInputStream(zipUri.openInputStream(context))
         addEntriesToContainerFromZip(containerUid, zipInputStream, addOptions)
     }
 }

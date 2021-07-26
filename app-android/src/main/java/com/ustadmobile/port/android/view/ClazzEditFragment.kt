@@ -14,10 +14,13 @@ import com.toughra.ustadmobile.databinding.FragmentClazzEditBinding
 import com.toughra.ustadmobile.databinding.ItemScheduleBinding
 import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
+import com.ustadmobile.core.controller.ScopedGrantEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.OneToManyJoinEditListener
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
 
@@ -39,6 +42,12 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         t -> scheduleRecyclerAdapter?.submitList(t)
     }
 
+    private var scopedGrantRecyclerAdapter: ScopedGrantAndNameEditRecyclerViewAdapter? = null
+
+    private val scopedGrantListObserver = Observer<List<ScopedGrantAndName>> {
+        t -> scopedGrantRecyclerAdapter?.submitList(t)
+    }
+
     override var clazzSchedules: DoorMutableLiveData<List<Schedule>>? = null
         set(value) {
             field?.removeObserver(scheduleObserver)
@@ -57,6 +66,14 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             field = value
             mDataBinding?.clazzStartDateError = value
         }
+
+    override var scopedGrants: DoorLiveData<List<ScopedGrantAndName>>? = null
+        set(value) {
+            field?.removeObserver(scopedGrantListObserver)
+            field = value
+            field?.observe(this, scopedGrantListObserver)
+        }
+
 
     class ScheduleRecyclerAdapter(var oneToManyEditListener: OneToManyJoinEditListener<Schedule>?,
                                   var presenter: ClazzEdit2Presenter?): ListAdapter<Schedule, ScheduleRecyclerAdapter.ScheduleViewHolder>(DIFF_CALLBACK_SCHEDULE) {
@@ -125,6 +142,16 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
         scheduleRecyclerView?.adapter = scheduleRecyclerAdapter
         scheduleRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+
+        val permissionList = ScopedGrantEditPresenter.PERMISSION_LIST_MAP[Clazz.TABLE_ID]
+            ?: throw IllegalStateException("ScopedGrantEdit permission list not found!")
+        scopedGrantRecyclerAdapter = ScopedGrantAndNameEditRecyclerViewAdapter(
+            mPresenter?.scopedGrantOneToManyHelper, permissionList)
+
+        mDataBinding?.clazzEditFragmentPermissionsInc?.itemScopedGrantOneToNRecycler?.apply {
+            adapter = scopedGrantRecyclerAdapter
+            layoutManager = LinearLayoutManager(requireContext())
+        }
 
         mPresenter?.onCreate(backStackSavedState)
 

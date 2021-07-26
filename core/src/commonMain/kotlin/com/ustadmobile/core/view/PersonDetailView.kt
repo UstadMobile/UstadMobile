@@ -1,10 +1,7 @@
 package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
-import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazz
-import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
-import com.ustadmobile.lib.db.entities.EntityRoleWithNameAndRole
-import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
+import com.ustadmobile.lib.db.entities.*
 
 interface PersonDetailView: UstadDetailView<PersonWithDisplayDetails> {
 
@@ -15,8 +12,6 @@ interface PersonDetailView: UstadDetailView<PersonWithDisplayDetails> {
     var isAdmin: Boolean
 
     var showCreateAccountVisible: Boolean
-
-    var rolesAndPermissions: DataSource.Factory<Int, EntityRoleWithNameAndRole>?
 
     companion object {
 

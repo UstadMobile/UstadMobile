@@ -34,6 +34,7 @@
 
 
         <include
+            android:id="@+id/fragment_school_tabs_fixed"
             layout="@layout/appbar_material_tabs_fixed"/>
 
         <androidx.viewpager.widget.ViewPager

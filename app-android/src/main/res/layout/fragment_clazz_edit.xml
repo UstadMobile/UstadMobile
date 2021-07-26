@@ -10,6 +10,8 @@
         <import type="com.ustadmobile.core.util.OneToManyJoinEditListener"/>
         <import type="com.ustadmobile.lib.db.entities.Schedule"/>
         <import type="com.ustadmobile.core.controller.ClazzEdit2Presenter"/>
+        <import type="com.ustadmobile.core.model.BitmaskMessageId"/>
+        <import type="java.util.List"/>
 
         <variable
             name="clazz"
@@ -273,11 +275,11 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_clazz_edit_features"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_edit_school_selected"
-                app:layout_constraintBottom_toBottomOf="parent"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_8dp"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -291,6 +293,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
+
+            <include layout="@layout/item_scoped_grant_one_to_many_list"
+                android:id="@+id/clazz_edit_fragment_permissions_inc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_edit_features"
+                app:scopedGrantsOneToManyListener="@{mPresenter.scopedGrantOneToManyHelper}"
+                />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

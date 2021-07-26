@@ -2,27 +2,26 @@
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         maven {
-            url "https://dl.bintray.com/ustadmobile/adbscreenrecord"
+            url "https://devserver3.ustadmobile.com/maven"
         }
     }
 
     dependencies {
         classpath "digital.wup:android-maven-publish:$version_android_maven_publish"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
-        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
     }
 }
 
 plugins {
-    id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha05"
+    id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha06"
 }
 
 apply plugin: 'com.android.library'
 apply plugin: "kotlin-android"
-apply plugin: 'kotlin-android-extensions'
+
 //Jacoco on Android is persistently getting stuck - see https://github.com/arturdm/jacoco-android-gradle-plugin/issues/60.
 // Should be disabled until this is fixed or excluded unless we are specifically running tests for coverage.
 //apply plugin: "jacoco"
@@ -330,7 +329,7 @@ dependencies {
     //Crash reporting
     implementation "ch.acra:acra-http:$version_android_acra"
 
-    implementation 'com.linkedin.android.litr:litr:1.4.3'
+    implementation "com.linkedin.android.litr:litr:$version_android_litr"
 
 
     implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_legacy"
@@ -344,7 +343,8 @@ dependencies {
     implementation "com.squareup.picasso:picasso:$version_android_picasso"
 
     //Page indicator
-    implementation 'com.romandanylyk:pageindicatorview:1.0.0@aar'
+    // Should be replaced with https://github.com/tommybuonomo/dotsindicator
+    //implementation 'com.romandanylyk:pageindicatorview:1.0.0@aar'
 
     // shake detector
     implementation "com.squareup:seismic:$version_android_seismic"
@@ -359,10 +359,7 @@ dependencies {
     //Chart library
     implementation "com.github.PhilJay:MPAndroidChart:$version_mpandroidchart"
 
-    implementation "com.google.android:flexbox:$version_android_flexbox"
-
-    //SVG support for Android
-    implementation 'com.pixplicity.sharp:library:1.1.0'
+    implementation "com.google.android.flexbox:flexbox:$version_android_flexbox"
 
     //Gson for JSON serializing and deserializing
     implementation "com.google.code.gson:gson:$version_gson"
@@ -401,6 +398,12 @@ dependencies {
 
     //HTML editor
     implementation "com.github.wordpress-mobile.WordPress-Aztec-Android:aztec:$version_android_aztec"
+
+    // Dependencies of Aztec: Versions must be fixed to ensure that they point to versions available
+    // on mavenCentral after jcenter shutdown.
+    implementation "org.wordpress:utils:$version_android_wordpress_utils"
+    implementation "com.android.volley:volley:$version_android_volley"
+
 
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"

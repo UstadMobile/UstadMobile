@@ -19,9 +19,6 @@ class ViewNameToDestMap: DestinationProvider {
             HolidayCalendarEditView.VIEW_NAME to UstadDestination(R.id.holidaycalendar_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             SettingsView.VIEW_NAME to UstadDestination(R.id.settings_list_dest),
-            RoleListView.VIEW_NAME to UstadDestination(R.id.role_list_dest),
-            RoleEditView.VIEW_NAME to UstadDestination(R.id.role_edit_dest,
-                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             PersonEditView.VIEW_NAME to UstadDestination(R.id.person_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             PersonEditView.VIEW_NAME_REGISTER to UstadDestination(R.id.person_edit_register_dest,
@@ -86,8 +83,6 @@ class ViewNameToDestMap: DestinationProvider {
             PersonAccountEditView.VIEW_NAME to UstadDestination(R.id.person_account_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             InviteViaLinkView.VIEW_NAME to UstadDestination(R.id.invite_via_link_dest),
-            EntityRoleEditView.VIEW_NAME to UstadDestination(R.id.entityrole_edit_dest,
-                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             LanguageListView.VIEW_NAME to UstadDestination(R.id.language_list_dest),
             LanguageEditView.VIEW_NAME to UstadDestination(R.id.language_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
@@ -130,6 +125,14 @@ class ViewNameToDestMap: DestinationProvider {
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             BitmaskEditView.VIEW_NAME to UstadDestination(R.id.bitmask_edit_dest,
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
+            RegisterMinorWaitForParentView.VIEW_NAME to UstadDestination(R.id.register_minor_wait_for_parent_dest,
+                hideBottomNavigation = true, hideAccountIcon = true),
+            RegisterAgeRedirectView.VIEW_NAME to UstadDestination(R.id.register_age_redirect_dest,
+                hideBottomNavigation = true, hideAccountIcon = true),
+            ParentalConsentManagementView.VIEW_NAME to UstadDestination(R.id.parental_consent_management_dest),
+            ScopedGrantEditView.VIEW_NAME to UstadDestination(R.id.scoped_grant_edit_dest,
+                hideAccountIcon = true),
+            ErrorReportView.VIEW_NAME to UstadDestination(R.id.error_report_dest),
     )
 
     override val navControllerViewId: Int

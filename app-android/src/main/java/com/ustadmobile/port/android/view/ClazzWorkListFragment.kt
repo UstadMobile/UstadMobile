@@ -88,6 +88,11 @@ class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMet
      */
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout) {
+
+            val clazzUid = arguments?.get(UstadView.ARG_CLAZZUID).toString().toLong() ?: 0L
+            val newClazzWork: ClazzWork = ClazzWork().apply {
+                clazzWorkClazzUid = clazzUid
+            }
             navigateToEditEntity(null, R.id.clazzwork_edit_dest, ClazzWork::class.java)
         }else {
             super.onClick(view)

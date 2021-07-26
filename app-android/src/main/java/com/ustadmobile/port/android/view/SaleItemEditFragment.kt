@@ -3,25 +3,19 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.*
-import androidx.core.os.bundleOf
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.textfield.TextInputLayout
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSaleItemEditBinding
 import com.ustadmobile.core.controller.SaleItemEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.toNullableStringMap
+import com.ustadmobile.core.impl.UMAndroidUtil.getCurrentLocale
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SaleItemEditView
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.SaleItem
 import com.ustadmobile.lib.db.entities.SaleItemWithProduct
-import com.ustadmobile.port.android.util.ext.*
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
-import kotlinx.android.synthetic.main.fragment_sale_edit.*
-import com.ustadmobile.core.impl.UMAndroidUtil.getCurrentLocale
+import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 
 interface SaleItemEditFragmentEventHandler {
 

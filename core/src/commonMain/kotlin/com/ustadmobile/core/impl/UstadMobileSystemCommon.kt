@@ -197,6 +197,12 @@ abstract class UstadMobileSystemCommon {
         return valFound ?: defaultVal
     }
 
+    open fun getOrPutAppPref(key: String, context: Any, block: () -> String): String {
+        return getAppPref(key, context) ?: block().also { newValue ->
+            setAppPref(key, newValue, context)
+        }
+    }
+
     /**
      * Must provide the system's default locale (e.g. en_US.UTF-8)
      *

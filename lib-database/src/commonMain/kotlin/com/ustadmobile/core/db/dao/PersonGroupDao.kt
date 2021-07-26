@@ -36,4 +36,17 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
     @Update
     abstract suspend fun updateAsync(entity: PersonGroup) : Int
 
+    @Query("""
+        Select CASE
+               WHEN Person.firstNames IS NOT NULL THEN Person.firstNames
+               ELSE PersonGroup.groupName 
+               END AS name
+          FROM PersonGroup
+               LEFT JOIN Person
+                         ON Person.personGroupUid = PersonGroup.groupUid
+         WHERE PersonGroup.groupUid = :groupUid
+         LIMIT 1
+    """)
+    abstract suspend fun findNameByGroupUid(groupUid: Long): String?
+
 }

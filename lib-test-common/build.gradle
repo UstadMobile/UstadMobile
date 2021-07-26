@@ -72,6 +72,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
                 implementation "io.github.aakira:napier:$version_napier"
+                implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 compileOnly project(":lib-database-entities")
                 compileOnly project(":lib-database")
                 compileOnly "com.ustadmobile.door:door-runtime:$version_door"

@@ -211,8 +211,8 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
                 R.id.content_entry_list_dest,
                 bundleOf(ContentEntryList2View.ARG_CLAZZWORK_FILTER to
                         entity?.clazzWorkUid.toString(),
-                        ContentEntryList2View.ARG_CONTENT_FILTER to
-                                ContentEntryList2View.ARG_LIBRARIES_CONTENT,
+                        ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to
+                                ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
                 UstadView.ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString()))
 
     }

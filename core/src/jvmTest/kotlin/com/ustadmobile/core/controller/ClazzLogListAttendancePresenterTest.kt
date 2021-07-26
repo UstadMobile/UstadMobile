@@ -78,7 +78,7 @@ class ClazzLogListAttendancePresenterTest {
 
 
         val presenter = ClazzLogListAttendancePresenter(context,
-                mapOf(UstadView.ARG_FILTER_BY_CLAZZUID to "42"), mockView, di, mockLifecycleOwner)
+                mapOf(UstadView.ARG_CLAZZUID to "42"), mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
         verify(repoClazzLogDao, timeout(5000)).findByClazzUidAsFactory(42L,
@@ -118,7 +118,7 @@ class ClazzLogListAttendancePresenterTest {
         } }
 
         val presenter = ClazzLogListAttendancePresenter(context,
-                mapOf(UstadView.ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString()), mockView, di,
+                mapOf(UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString()), mockView, di,
                 mockLifecycleOwner)
         presenter.onCreate(null)
         nullableArgumentCaptor<DoorMutableLiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>>() {
@@ -153,7 +153,7 @@ class ClazzLogListAttendancePresenterTest {
         }
 
         val presenter = ClazzLogListAttendancePresenter(context,
-                mapOf(UstadView.ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString()), mockView, di,
+                mapOf(UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString()), mockView, di,
                 mockLifecycleOwner)
         presenter.onCreate(null)
 

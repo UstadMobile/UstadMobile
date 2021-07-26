@@ -26,7 +26,6 @@ class SettingsPresenter(context: Any, arguments: Map<String, String>, view: Sett
         GlobalScope.launch(doorMainDispatcher()){
             val isAdmin = repo.personDao.personIsAdmin(accountManager.activeAccount.personUid)
             view.workspaceSettingsVisible = isAdmin
-            view.rolesVisible = isAdmin
             // TODO check permission
             view.holidayCalendarVisible = true
             view.reasonLeavingVisible = true
@@ -47,14 +46,12 @@ class SettingsPresenter(context: Any, arguments: Map<String, String>, view: Sett
         impl.go(LocationListView.VIEW_NAME, mapOf(), context)
     }
 
-    fun goToRolesList() {
-        impl.go(RoleListView.VIEW_NAME, mapOf(), context)
-    }
 
     fun goToGroupsList() {
         val args = HashMap<String, String>()
         impl.go(PersonGroupListView.VIEW_NAME, args, context)
     }
+
 
     fun goToPeopleList() {
         impl.go(PersonListView.VIEW_NAME, mapOf(), context)

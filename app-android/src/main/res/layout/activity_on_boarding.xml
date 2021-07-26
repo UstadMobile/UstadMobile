@@ -68,12 +68,15 @@
         android:id="@+id/get_started_btn"
         android:text="@string/onboarding_get_started_label"
         android:layout_marginBottom="@dimen/dimen_24dp"
-        app:layout_constraintBottom_toTopOf="@+id/pageIndicatorView"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
+    <!--
+    Needs replaced with
+    https://github.com/tommybuonomo/dotsindicator
     <com.rd.PageIndicatorView
         android:layout_marginBottom="@dimen/dimen_16dp"
         android:id="@+id/pageIndicatorView"
@@ -91,7 +94,7 @@
         app:piv_viewPager="@id/onBoardPagerView"
         attrs:piv_padding="@dimen/dimen_10dp"
         attrs:piv_radius="@dimen/dimen_4dp" />
-
+    -->
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrier_bottom"

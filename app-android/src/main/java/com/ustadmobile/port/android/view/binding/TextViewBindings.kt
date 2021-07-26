@@ -16,8 +16,10 @@ import com.soywiz.klock.DateTimeTz
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.BitmaskFlag
+import com.ustadmobile.core.model.BitmaskMessageId
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.lib.db.entities.*
 import java.util.*
 import com.soywiz.klock.DateFormat as KlockDateFormat
@@ -52,6 +54,18 @@ fun TextView.setBitmaskListText(textBitmaskValue: Long?, textBitmaskFlags: List<
 
     text = textBitmaskFlags.filter { (it.flagVal and textBitmaskValue) == it.flagVal }
             .joinToString { systemImpl.getString(it.messageId, context) }
+}
+
+@BindingAdapter(value = ["bitmaskValue", "flagMessageIds"], requireAll = false)
+fun TextView.setBitmaskListTextFromMap(bitmaskValue: Long?, flagMessageIds: List<BitmaskMessageId>?) {
+    if(bitmaskValue == null || flagMessageIds == null)
+        return
+
+    val impl = systemImpl
+
+    text = flagMessageIds.map { it.toBitmaskFlag(bitmaskValue) }
+        .filter { it.enabled }
+        .joinToString { impl.getString(it.messageId, context) }
 }
 
 /**

@@ -1,20 +1,21 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.IdOption
-import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.impl.NavigateForResultOptions
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FILTER
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DOWNLOADED_CONTENT
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_FOLDER_FILTER
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_CLAZZ
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_OPTION
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_DOWNLOADED
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_PARENT
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_SHOW_ONLY_FOLDER_FILTER
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -23,13 +24,12 @@ import org.kodein.di.DI
 class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, view: ContentEntryList2View,
                                  di: DI, lifecycleOwner: DoorLifecycleOwner,
                                  val contentEntryListItemListener: DefaultContentEntryListItemListener
-                                 = DefaultContentEntryListItemListener(view = view, context = context, di = di))
+                                 = DefaultContentEntryListItemListener(view = view, context = context,
+                                         di = di, clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L))
     : UstadListPresenter<ContentEntryList2View, ContentEntry>(context, arguments, view, di, lifecycleOwner),
         ContentEntryListItemListener by contentEntryListItemListener {
 
-    var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
-
-    private var contentFilter = ARG_LIBRARIES_CONTENT
+    private var contentFilter = ARG_DISPLAY_CONTENT_BY_PARENT
 
     private var onlyFolderFilter = false
 
@@ -46,26 +46,25 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     private var showHiddenEntries = false
 
-    enum class SortOrder(val messageId: Int) {
-        ORDER_NAME_ASC(MessageID.sort_by_name_asc),
-        ORDER_NAME_DSC(MessageID.sort_by_name_desc)
-    }
+    private var selectedClazzUid: Long = 0L
 
-    class ContentEntryListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
+    override val sortOptions: List<SortOrderOption>
+        get() = SORT_OPTIONS
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         contentEntryListItemListener.mListMode = mListMode
         contentEntryListItemListener.presenter = this
-        view.sortOptions = SortOrder.values().toList().map { ContentEntryListSortOption(it, context) }
-        contentFilter = arguments[ARG_CONTENT_FILTER].toString()
-        onlyFolderFilter = arguments[ARG_FOLDER_FILTER]?.toBoolean()?: false
+        selectedSortOption = SORT_OPTIONS[0]
+        contentFilter = arguments[ARG_DISPLAY_CONTENT_BY_OPTION].toString()
+        onlyFolderFilter = arguments[ARG_SHOW_ONLY_FOLDER_FILTER]?.toBoolean() ?: false
         parentEntryUidStack += arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0L
+        selectedClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
         loggedPersonUid = accountManager.activeAccount.personUid
         showHiddenEntries = false
         getAndSetList()
         GlobalScope.launch(doorMainDispatcher()) {
-            if (contentFilter == ARG_LIBRARIES_CONTENT) {
+            if (contentFilter == ARG_DISPLAY_CONTENT_BY_PARENT || contentFilter == ARG_DISPLAY_CONTENT_BY_CLAZZ) {
                 view.editOptionVisible = onCheckUpdatePermission()
                 editVisible.complete(view.editOptionVisible)
             }
@@ -83,23 +82,32 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 Role.PERMISSION_CONTENT_UPDATE)
     }
 
-    private fun getAndSetList(sortOrder: SortOrder = currentSortOrder) {
+    override fun onClickSort(sortOption: SortOrderOption) {
+        super.onClickSort(sortOption)
+        getAndSetList()
+    }
+
+
+    private fun getAndSetList() {
         view.list = when (contentFilter) {
-            ARG_LIBRARIES_CONTENT -> when (sortOrder) {
-                SortOrder.ORDER_NAME_ASC -> repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
-                        parentEntryUid, 0, 0, loggedPersonUid, showHiddenEntries, onlyFolderFilter)
-                SortOrder.ORDER_NAME_DSC -> repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameDesc(
-                        parentEntryUid, 0, 0, loggedPersonUid, showHiddenEntries, onlyFolderFilter)
+            ARG_DISPLAY_CONTENT_BY_PARENT -> {
+                repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByName(
+                        parentEntryUid, 0, 0, loggedPersonUid, showHiddenEntries, onlyFolderFilter,
+                        selectedSortOption?.flag ?: ContentEntryDao.SORT_TITLE_ASC)
             }
-            ARG_DOWNLOADED_CONTENT -> when (sortOrder) {
-                SortOrder.ORDER_NAME_ASC -> db.contentEntryDao.downloadedRootItemsAsc(loggedPersonUid)
-                SortOrder.ORDER_NAME_DSC -> db.contentEntryDao.downloadedRootItemsDesc(loggedPersonUid)
+            ARG_DISPLAY_CONTENT_BY_DOWNLOADED -> {
+                db.contentEntryDao.downloadedRootItems(loggedPersonUid,
+                        selectedSortOption?.flag ?: ContentEntryDao.SORT_TITLE_ASC)
+            }
+            ARG_DISPLAY_CONTENT_BY_CLAZZ -> {
+                repo.contentEntryDao.getClazzContent(selectedClazzUid, loggedPersonUid,
+                        selectedSortOption?.flag ?: ContentEntryDao.SORT_TITLE_ASC)
             }
             else -> null
         }
 
         GlobalScope.launch(doorMainDispatcher()) {
-            db.takeIf {parentEntryUid != 0L } ?.contentEntryDao?.findTitleByUidAsync(parentEntryUid)?.let {titleStr ->
+            db.takeIf { parentEntryUid != 0L }?.contentEntryDao?.findTitleByUidAsync(parentEntryUid)?.let { titleStr ->
                 view.takeIf { titleStr.isNotBlank() }?.title = titleStr
             }
         }
@@ -107,18 +115,40 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     override suspend fun onCheckListSelectionOptions(account: UmAccount?): List<SelectionOption> {
         val isVisible = editVisible.await()
-        return if(isVisible) listOf(SelectionOption.MOVE, SelectionOption.HIDE) else listOf()
+        return when(contentFilter) {
+            ARG_DISPLAY_CONTENT_BY_PARENT -> {
+                if (isVisible) listOf(SelectionOption.MOVE, SelectionOption.HIDE) else listOf()
+            }
+            ARG_DISPLAY_CONTENT_BY_CLAZZ -> {
+                if(isVisible) listOf(SelectionOption.HIDE) else listOf()
+
+            }
+            else -> {
+                listOf()
+            }
+        }
     }
 
     override fun handleSelectionOptionChanged(t: List<ContentEntry>) {
-        if(!view.editOptionVisible){
+        if (!view.editOptionVisible) {
             return
         }
 
-        view.selectionOptions = if(t.all { it.ceInactive })
-            listOf(SelectionOption.MOVE, SelectionOption.UNHIDE)
-        else
-            listOf(SelectionOption.MOVE, SelectionOption.HIDE)
+       when(contentFilter){
+
+            ARG_DISPLAY_CONTENT_BY_PARENT ->{
+                view.selectionOptions = if (t.all { it.ceInactive })
+                    listOf(SelectionOption.MOVE, SelectionOption.UNHIDE)
+                else
+                    listOf(SelectionOption.MOVE, SelectionOption.HIDE)
+            }
+           ARG_DISPLAY_CONTENT_BY_CLAZZ ->{
+                view.selectionOptions = listOf(SelectionOption.HIDE)
+            }
+
+        }
+
+
 
     }
 
@@ -132,7 +162,14 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                     view.showMoveEntriesFolderPicker(listOfSelectedEntries)
                 }
                 SelectionOption.HIDE -> {
-                    repo.contentEntryDao.toggleVisibilityContentEntryItems(true, selectedItem.map { it.contentEntryUid })
+                    when(contentFilter){
+                        ARG_DISPLAY_CONTENT_BY_PARENT ->{
+                            repo.contentEntryDao.toggleVisibilityContentEntryItems(true, selectedItem.map { it.contentEntryUid })
+                        }
+                        ARG_DISPLAY_CONTENT_BY_CLAZZ ->{
+                            repo.clazzContentJoinDao.toggleVisibilityClazzContent(false, selectedItem.map { it.contentEntryUid })
+                        }
+                    }
                 }
                 SelectionOption.UNHIDE -> {
                     repo.contentEntryDao.toggleVisibilityContentEntryItems(false, selectedItem.map { it.contentEntryUid })
@@ -142,16 +179,16 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     }
 
     fun handleMoveContentEntries(parentChildJoinUids: List<Long>, destContentEntryUid: Long) {
-        if(!parentChildJoinUids.isNullOrEmpty()){
+        if (!parentChildJoinUids.isNullOrEmpty()) {
             GlobalScope.launch(doorMainDispatcher()) {
                 repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(destContentEntryUid, parentChildJoinUids)
                 view.showSnackBar(systemImpl.getString(MessageID.moved_x_entries, context).replace("%1\$s",
-                    parentChildJoinUids.size.toString()), actionMessageId = MessageID.open_folder,
-                    action = {
-                        systemImpl.go(ContentEntryList2View.VIEW_NAME,
-                            mapOf(ARG_PARENT_ENTRY_UID to destContentEntryUid.toString(),
-                                    ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT), context)
-                    })
+                        parentChildJoinUids.size.toString()), actionMessageId = MessageID.open_folder,
+                        action = {
+                            systemImpl.go(ContentEntryList2View.VIEW_NAME,
+                                    mapOf(ARG_PARENT_ENTRY_UID to destContentEntryUid.toString(),
+                                            ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_PARENT), context)
+                        })
             }
         }
     }
@@ -164,13 +201,14 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         showContentEntryListByParentUid()
     }
 
-    private fun showContentEntryListByParentUid(){
-        view.list = repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
-                parentEntryUid, 0, 0, loggedPersonUid, false, false)
+    private fun showContentEntryListByParentUid() {
+        view.list = repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByName(
+                parentEntryUid, 0, 0, loggedPersonUid, showHidden = false, onlyFolder = false,
+                sortOrder = selectedSortOption?.flag ?: ContentEntryDao.SORT_TITLE_ASC)
     }
 
-    fun handleOnBackPressed(): Boolean{
-        if(mListMode == ListViewMode.PICKER && parentEntryUidStack.count() > 1){
+    fun handleOnBackPressed(): Boolean {
+        if (mListMode == ListViewMode.PICKER && parentEntryUidStack.count() > 1) {
             parentEntryUidStack.removeAt(parentEntryUidStack.count() - 1)
             showContentEntryListByParentUid()
             return true
@@ -179,16 +217,29 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     }
 
     override fun handleClickCreateNewFab() {
-        view.showContentEntryAddOptions(parentEntryUid)
+        when (contentFilter) {
+            ARG_DISPLAY_CONTENT_BY_CLAZZ -> {
+
+                val args = mutableMapOf(
+                        ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_PARENT,
+                        ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString())
+
+                navigateForResult(
+                        NavigateForResultOptions(this,
+                                null, ContentEntryList2View.VIEW_NAME,
+                                ContentEntry::class,
+                                ContentEntry.serializer(),
+                                SAVEDSTATE_KEY_ENTRY,
+                                arguments = args)
+                )
+            }
+            else -> {
+                view.showContentEntryAddOptions(parentEntryUid)
+            }
+        }
+
     }
 
-    override fun handleClickSortOrder(sortOption: IdOption) {
-        val sortOrder = (sortOption as? ContentEntryListSortOption)?.sortOrder ?: return
-        if (sortOrder != currentSortOrder) {
-            currentSortOrder = sortOrder
-            getAndSetList(currentSortOrder)
-        }
-    }
 
     fun handleClickEditFolder() {
         systemImpl.go(ContentEntryEdit2View.VIEW_NAME,
@@ -198,5 +249,16 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     fun handleClickShowHiddenItems() {
         showHiddenEntries = true
         getAndSetList()
+    }
+
+    companion object {
+
+        const val SAVEDSTATE_KEY_ENTRY = "Clazz_ContentEntry"
+
+        val SORT_OPTIONS = listOf(
+                SortOrderOption(MessageID.title, ContentEntryDao.SORT_TITLE_ASC, true),
+                SortOrderOption(MessageID.title, ContentEntryDao.SORT_TITLE_DESC, false)
+        )
+
     }
 }

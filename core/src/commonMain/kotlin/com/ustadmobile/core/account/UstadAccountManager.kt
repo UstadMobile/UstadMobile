@@ -9,6 +9,7 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.copyOnWriteListOf
@@ -99,10 +100,15 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         get() = _storedAccountsLive
 
 
-    suspend fun register(person: PersonWithAccount, endpointUrl: String, makeAccountActive: Boolean = true): UmAccount = withContext(Dispatchers.Default){
+    suspend fun register(person: PersonWithAccount, endpointUrl: String,
+                         accountRegisterOptions: AccountRegisterOptions = AccountRegisterOptions()): UmAccount = withContext(Dispatchers.Default){
+        val parentVal = accountRegisterOptions.parentJoin
         val httpStmt = httpClient.post<HttpStatement>() {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
             parameter("person",  safeStringify(di, PersonWithAccount.serializer(), person))
+            parameter("endpoint", endpointUrl)
+            if(parentVal != null)
+                parameter("parent", safeStringify(di, PersonParentJoin.serializer(), parentVal))
         }
 
         val (account: UmAccount?, status: Int) = httpStmt.execute { response ->
@@ -115,7 +121,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
         if(status == 200 && account != null) {
             account.endpointUrl = endpointUrl
-            if(makeAccountActive){
+            if(accountRegisterOptions.makeAccountActive){
                 activeAccount = account
             }
             account
