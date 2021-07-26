@@ -1,23 +1,17 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
 import com.ustadmobile.core.controller.HolidayCalendarListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.HolidayCalendarListView
 import com.ustadmobile.core.view.HolidayEditView
+import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
-import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import com.ustadmobile.view.ext.umProfileAvatar
 import react.RBuilder
 import react.RProps
-import styled.css
-import styled.styledDiv
 
 class HolidayCalendarListComponent(mProps: RProps): UstadListComponent<HolidayCalendar, HolidayCalendarWithNumEntries>(mProps),
     HolidayCalendarListView {
@@ -46,10 +40,15 @@ class HolidayCalendarListComponent(mProps: RProps): UstadListComponent<HolidayCa
         )
     }
 
+    override fun handleClickCreateNewEntry() {
+        navigateToEditEntity(null,HolidayEditView.VIEW_NAME,
+            navOptions = DEFAULT_NAV_OPTION(HolidayCalendar.serializer()))
+    }
+
     override val viewName: String
         get() = HolidayCalendarListView.VIEW_NAME
 
     override fun handleClickEntry(entry: HolidayCalendarWithNumEntries) {
-        navigateToEditEntity(entry,HolidayEditView.VIEW_NAME, HolidayCalendar::class)
+        mPresenter?.handleClickEntry(entry as HolidayCalendar)
     }
 }

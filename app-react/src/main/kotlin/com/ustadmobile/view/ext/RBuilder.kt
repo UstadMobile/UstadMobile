@@ -1,10 +1,14 @@
 package com.ustadmobile.view.ext
 
 import com.ccfraser.muirwik.components.*
+import com.ccfraser.muirwik.components.button.MIconButtonSize
+import com.ccfraser.muirwik.components.button.mIconButton
 import com.ccfraser.muirwik.components.list.mListItemIcon
 import com.ustadmobile.core.controller.BitmaskEditPresenter
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.controller.ScopedGrantEditPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.model.BitmaskMessageId
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.navigation.RouteManager.defaultRoute
 import com.ustadmobile.navigation.RouteManager.destinationList
 import com.ustadmobile.util.StyleManager
@@ -16,7 +20,6 @@ import com.ustadmobile.util.StyleManager.listItemCreateNewDiv
 import com.ustadmobile.util.StyleManager.mainComponentErrorPaper
 import com.ustadmobile.util.StyleManager.personListItemAvatar
 import com.ustadmobile.util.Util.ASSET_ACCOUNT
-import com.ustadmobile.util.ext.format
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
 import org.w3c.dom.events.Event
@@ -241,4 +244,53 @@ fun RBuilder.createItemWithIconTitleAndDescription(iconName: String, title: Stri
             }
         }
     }
+}
+
+fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(leftIcon: String,rightIcon: String, title: String?, description: String?, onClick:()-> Unit){
+    umGridContainer(MGridSpacing.spacing4) {
+        umItem(MGridSize.cells2){
+            umProfileAvatar(-1,leftIcon)
+        }
+
+        umItem(MGridSize.cells8){
+            umItem(MGridSize.cells11){
+                mTypography(title,
+                    variant = MTypographyVariant.body1,
+                    color = MTypographyColor.textPrimary){
+                    css (StyleManager.alignTextToStart)
+                }
+            }
+
+            umItem(MGridSize.cells11){
+                mTypography(description,
+                    variant = MTypographyVariant.body2,
+                    color = MTypographyColor.textPrimary){
+                    css (StyleManager.alignTextToStart)
+                }
+            }
+        }
+
+        umItem(MGridSize.cells2){
+            css{
+                alignContent = Align.center
+                alignItems = Align.center
+            }
+
+            mIconButton(rightIcon, size = MIconButtonSize.medium,
+                onClick = {
+                    it.stopPropagation()
+                    onClick.invoke()
+                }
+            ){
+                css(defaultMarginTop)
+            }
+        }
+    }
+}
+
+fun RBuilder.permissionListText(systemImpl: UstadMobileSystemImpl,tableId: Int, bitmaskValue: Long): String? {
+    val flagMessageIds = ScopedGrantEditPresenter.PERMISSION_LIST_MAP[tableId]
+    return flagMessageIds?.map { it.toBitmaskFlag(bitmaskValue) }
+        ?.filter { it.enabled }
+        ?.joinToString { systemImpl.getString(it.messageId, this) }
 }
