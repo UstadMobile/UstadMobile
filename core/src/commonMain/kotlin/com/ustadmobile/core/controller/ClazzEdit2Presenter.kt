@@ -187,7 +187,7 @@ class ClazzEdit2Presenter(context: Any,
             currentEntityValue = entity?.clazzTimeZone,
             destinationViewName = TimeZoneListView.VIEW_NAME,
             entityClass = String::class,
-            serializationStrategy = String.serializer(),
+            serializer = String.serializer(),
             destinationResultKey = RESULT_TIMEZONE_KEY))
     }
 
