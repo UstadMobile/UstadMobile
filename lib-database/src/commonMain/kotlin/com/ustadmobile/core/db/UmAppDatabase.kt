@@ -67,7 +67,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 178)
+], version = 179)
 @MinSyncVersion(160)
 
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
@@ -4509,6 +4509,48 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+
+        val MIGRATION_178_179 = object: DoorMigration(178, 179) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("ALTER TABLE Report ADD COLUMN reportTitleId INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE Report ADD COLUMN reportDescId INTEGER NOT NULL DEFAULT 0")
+
+                if(database.dbType() == DoorDbType.POSTGRES){
+                    //Report Data migration
+
+                    database.execSQL("""
+                        UPDATE Report SET reportTitleId = ${Report.BLANK_REPORT} , reportDescId = ${Report.BLANK_REPORT_DESC} WHERE 
+                            reportUid = ${Report.TEMPLATE_BLANK_REPORT_UID}
+                    """.trimIndent())
+
+
+
+                    database.execSQL("""
+                        UPDATE Report SET reportTitleId = ${Report.CONTENT_USAGE_OVER_TIME} , reportDescId = ${Report.CONTENT_USAGE_OVER_TIME_DESC}  WHERE 
+                            reportUid = ${Report.TEMPLATE_CONTENT_USAGE_OVER_TIME_UID}
+                    """.trimIndent())
+                    database.execSQL("""
+                        UPDATE Report SET reportTitleId = ${Report.UNIQUE_CONTENT_USERS_OVER_TIME} , reportDescId = ${Report.UNIQUE_CONTENT_USERS_OVER_TIME_DESC} WHERE 
+                            reportUid = ${Report.TEMPLATE_UNIQUE_CONTENT_USERS_UID}
+                    """.trimIndent())
+                    database.execSQL("""
+                        UPDATE Report SET reportTitleId = ${Report.ATTENDANCE_OVER_TIME_BY_CLASS} , reportDescId = ${Report.ATTENDANCE_OVER_TIME_BY_CLASS_DESC} WHERE 
+                            reportUid = ${Report.TEMPLATE_ATTENDANCE_OVER_TIME_BY_CLASS_UID}
+                    """.trimIndent())
+                    database.execSQL("""
+                        UPDATE Report SET reportTitleId = ${Report.CONTENT_USAGE_BY_CLASS} , reportDescId = ${Report.CONTENT_USAGE_BY_CLASS_DESC} WHERE 
+                            reportUid = ${Report.TEMPLATE_CONTENT_USAGE_BY_CLASS_UID}
+                    """.trimIndent())
+                    database.execSQL("""
+                        UPDATE Report SET reportTitleId = ${Report.CONTENT_COMPLETION} , reportDescId = ${Report.CONTENT_COMPLETION_DESC} WHERE 
+                            reportUid = ${Report.TEMPLATE_CONTENT_COMPLETION_UID}
+                    """.trimIndent())
+
+
+                }
+            }
+        }
+
         val MIGRATION_164_165 = object: DoorMigration(164, 165) {
             override fun migrate(database: DoorSqlDatabase) {
 
@@ -5335,7 +5377,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_163_164, MIGRATION_164_165, MIGRATION_165_166, MIGRATION_166_167,
                     MIGRATION_168_169, MIGRATION_169_170, MIGRATION_170_171, MIGRATION_171_172,
                     MIGRATION_172_173, MIGRATION_173_174, MIGRATION_174_175, MIGRATION_175_176,
-                    MIGRATION_176_177, MIGRATION_177_178)
+                    MIGRATION_176_177, MIGRATION_177_178, MIGRATION_178_179)
+
 
             return builder
         }
