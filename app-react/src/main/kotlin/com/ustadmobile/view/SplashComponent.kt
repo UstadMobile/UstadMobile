@@ -19,7 +19,7 @@ import styled.styledImg
 
 class SplashComponent (props: RProps): UstadBaseComponent<RProps, RState>(props), SplashView {
 
-    private lateinit var mPresenter: SplashPresenter
+    private var mPresenter: SplashPresenter? = null
 
     private var showMainComponent: Boolean = false
 
@@ -29,8 +29,8 @@ class SplashComponent (props: RProps): UstadBaseComponent<RProps, RState>(props)
     override fun onCreate() {
         super.onCreate()
         mPresenter = SplashPresenter(this)
-        mPresenter.onCreate()
-        mPresenter.handleResourceLoading()
+        mPresenter?.onCreate()
+        mPresenter?.handleResourceLoading()
     }
 
     override var appName: String? = null
@@ -75,7 +75,7 @@ class SplashComponent (props: RProps): UstadBaseComponent<RProps, RState>(props)
     }
 
     override fun componentWillUnmount() {
-        mPresenter.onDestroy()
+        mPresenter?.onDestroy()
     }
 }
 fun RBuilder.splashComponent() = child(SplashComponent::class) {}

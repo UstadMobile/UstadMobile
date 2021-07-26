@@ -5,14 +5,14 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putResultDestInfo
-import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.concurrentSafeListOf
-import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.navigation.NavControllerJs
 import com.ustadmobile.navigation.RouteManager.lookupDestinationName
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
@@ -26,7 +26,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import org.w3c.dom.HashChangeEvent
@@ -202,15 +201,13 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         }
     }
 
+
     /**
-     * Navigate to a list view in picker mode for the given entity type and destination view
-     *
-     * @param entityClass The class for the entity type that is going to be selected
-     * @param destinationView The destination view as per the navigation map
-     * @param args optional additional args to pass to the list view
-     * @param destinationResultKey the key to use in the SavedStateHandle
+     * Navigate to a list view in picker mode for the given entity type and destination view as
+     * equivalent to android implementation
      */
-    fun navigateToPickEntityFromList(entityClass: KClass<*>, destinationView: String,
+    fun navigateToPickEntityFromList(entityClass: KClass<*>,
+                                     destinationView: String,
                                      args: MutableMap<String, String> = mutableMapOf(),
                                      destinationResultKey: String? = entityClass.simpleName,
                                      overwriteDestination: Boolean? = null,
@@ -221,6 +218,47 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
                 overwriteDest = overwriteDestination ?: (this is UstadEditComponent<*>))
 
         args[UstadView.ARG_LISTMODE] = ListViewMode.PICKER.toString()
+        navController.navigate(destinationView, args, navOptions)
+    }
+
+
+    /**
+     * Navigate to an edit view and instruct the destination to save the result to the back stack as
+     * equivalent to android implementation
+     */
+    fun <T> navigateToEditEntity(entity: T?,
+                                 destinationView: String,
+                                 entityClass: KClass<*>,
+                                 destinationResultKey: String? = entityClass.simpleName,
+                                 overwriteDestination: Boolean? = null,
+                                 args:MutableMap<String,String> = mutableMapOf(),
+                                 navOptions: UstadMobileSystemCommon.UstadGoOptions = UstadMobileSystemCommon.UstadGoOptions(),
+    ) {
+        val backStateEntryVal = navController.currentBackStackEntry
+
+        if(backStateEntryVal != null) {
+            //Provide compatibility with multiplatform results
+            val currentDestViewName = backStateEntryVal.arguments[UstadView.ARG_RESULT_DEST_VIEWNAME]
+            val currentDestKey = backStateEntryVal.arguments[UstadView.ARG_RESULT_DEST_KEY]
+
+            val overwriteDestVal = (this is UstadEditComponent<*>)
+
+            if(!overwriteDestVal && currentDestViewName != null && currentDestKey != null){
+                args[UstadView.ARG_RESULT_DEST_VIEWNAME] = currentDestViewName
+                args[UstadView.ARG_RESULT_DEST_KEY] = currentDestKey
+                val viewName = lookupDestinationName(currentDestViewName)?.view ?: ""
+                args[UstadView.ARG_RESULT_DEST_ID] = viewName
+            }else {
+                destinationResultKey?.let {key ->
+                    args.putResultDestInfo(backStateEntryVal, key,
+                        overwriteDest = overwriteDestination ?: (this is UstadEditComponent<*>))
+                }
+            }
+        }
+
+        if(entity != null)
+            args.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON, null, entity)
+
         navController.navigate(destinationView, args, navOptions)
     }
 

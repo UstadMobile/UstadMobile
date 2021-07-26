@@ -7,6 +7,7 @@ import com.ustadmobile.core.view.TimeZoneListView
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.TimeZone
 import com.ustadmobile.util.TimeZonesUtil
+import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import com.ustadmobile.view.ext.umProfileAvatar
@@ -49,6 +50,7 @@ class TimeZoneListComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(
     }
 
     override fun onSearchSubmitted(text: String?) {
+        console.log(text)
         if(text == null){
             return
         }
@@ -72,29 +74,7 @@ class ZonesListComponent(mProps: ListProps<TimeZone>):
     UstadSimpleList<ListProps<TimeZone>>(mProps){
 
     override fun RBuilder.renderListItem(item: TimeZone) {
-       umGridContainer(MGridSpacing.spacing4) {
-           umItem(MGridSize.cells2, MGridSize.cells1){
-               umProfileAvatar(-1,"language")
-           }
-
-           umItem(MGridSize.cells10, MGridSize.cells11){
-               umItem(MGridSize.cells11){
-                   mTypography(item.name,
-                       variant = MTypographyVariant.body1,
-                       color = MTypographyColor.textPrimary){
-                       css (alignTextToStart)
-                   }
-               }
-
-               umItem(MGridSize.cells11){
-                   mTypography(item.timeName,
-                       variant = MTypographyVariant.body2,
-                       color = MTypographyColor.textPrimary){
-                       css (alignTextToStart)
-                   }
-               }
-           }
-       }
+        createItemWithIconTitleAndDescription("language",item.name, item.timeName)
     }
 }
 

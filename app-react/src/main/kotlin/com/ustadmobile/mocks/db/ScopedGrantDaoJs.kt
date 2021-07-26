@@ -26,6 +26,6 @@ class ScopedGrantDaoJs: ScopedGrantDao() {
         tableId: Int,
         entityUid: Long
     ): List<ScopedGrantAndName> {
-        TODO("Not yet implemented")
+        return listOf()
     }
 }

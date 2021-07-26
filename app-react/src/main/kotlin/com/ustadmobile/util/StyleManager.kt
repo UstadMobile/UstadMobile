@@ -14,6 +14,7 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import styled.StyleSheet
+import styled.css
 
 /**
  * Responsible for styling HTML elements, to customize particular
@@ -34,6 +35,15 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
     val alignTextToStart by css {
         textAlign = TextAlign.start
+    }
+
+    val contentAfterIconMarginLeft by css {
+        marginLeft = LinearDimension("2%")
+    }
+
+    val umItemWithIconAndText by css {
+        display = Display.flex
+        flexDirection = FlexDirection.row
     }
 
     val alignTextCenter by css{
@@ -314,6 +324,15 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     val listComponentContainer by css {
         display = Display.inlineFlex
         flexDirection = FlexDirection.column
+    }
+
+    val listComponentContainerWithScroll by css {
+        display = Display.inlineFlex
+        flexDirection = FlexDirection.column
+        height = LinearDimension("100vh")
+        overflow = Overflow.scroll
+        padding(top = 2.spacingUnits, horizontal = 2.spacingUnits, 0.spacingUnits)
+        width = LinearDimension("100%")
     }
 
     val entryListItemContainer by css {

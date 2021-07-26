@@ -3,6 +3,7 @@ package com.ustadmobile.view.ext
 import com.ccfraser.muirwik.components.*
 import com.ccfraser.muirwik.components.list.mListItemIcon
 import com.ustadmobile.core.controller.BitmaskEditPresenter
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.navigation.RouteManager.defaultRoute
 import com.ustadmobile.navigation.RouteManager.destinationList
@@ -15,6 +16,7 @@ import com.ustadmobile.util.StyleManager.listItemCreateNewDiv
 import com.ustadmobile.util.StyleManager.mainComponentErrorPaper
 import com.ustadmobile.util.StyleManager.personListItemAvatar
 import com.ustadmobile.util.Util.ASSET_ACCOUNT
+import com.ustadmobile.util.ext.format
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
 import org.w3c.dom.events.Event
@@ -213,4 +215,30 @@ fun RBuilder.setBitmaskListText(systemImpl: UstadMobileSystemImpl,textBitmaskVal
     return BitmaskEditPresenter.FLAGS_AVAILABLE.filter {
         (it.flagVal and (textBitmaskValue ?:0) ) == it.flagVal
     }.joinToString { systemImpl.getString(it.messageId, this) }
+}
+
+fun RBuilder.createItemWithIconTitleAndDescription(iconName: String, title: String?, description: String?){
+    umGridContainer(MGridSpacing.spacing4) {
+        umItem(MGridSize.cells2, MGridSize.cells1){
+            umProfileAvatar(-1,iconName)
+        }
+
+        umItem(MGridSize.cells10, MGridSize.cells11){
+            umItem(MGridSize.cells11){
+                mTypography(title,
+                    variant = MTypographyVariant.body1,
+                    color = MTypographyColor.textPrimary){
+                    css (StyleManager.alignTextToStart)
+                }
+            }
+
+            umItem(MGridSize.cells11){
+                mTypography(description,
+                    variant = MTypographyVariant.body2,
+                    color = MTypographyColor.textPrimary){
+                    css (StyleManager.alignTextToStart)
+                }
+            }
+        }
+    }
 }

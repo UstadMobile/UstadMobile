@@ -145,7 +145,7 @@ class DatabaseJs: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val personParentJoinDao: PersonParentJoinDao
         get() = TODO("Not yet implemented")
     override val scopedGrantDao: ScopedGrantDao
-        get() = TODO("Not yet implemented")
+        get() = ScopedGrantDaoJs()
     override val errorReportDao: ErrorReportDao
         get() = TODO("Not yet implemented")
     override val personAuth2Dao: PersonAuth2Dao

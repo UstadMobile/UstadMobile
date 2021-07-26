@@ -9,15 +9,15 @@ import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
 class SchoolDaoJs: SchoolDao() {
 
     override suspend fun findByUidAsync(schoolUid: Long): School? {
-        TODO("Not yet implemented")
+        return ENTRIES.first { it.schoolUid == schoolUid }
     }
 
     override suspend fun findByUidWithHolidayCalendarAsync(uid: Long): SchoolWithHolidayCalendar? {
-        TODO("Not yet implemented")
+        return ENTRIES.first { it.schoolHolidayCalendarUid == uid }
     }
 
     override suspend fun findBySchoolCode(code: String): School? {
-        TODO("Not yet implemented")
+        return ENTRIES.first { it.schoolCode == code }
     }
 
     override suspend fun personHasPermissionWithSchool(
@@ -25,7 +25,7 @@ class SchoolDaoJs: SchoolDao() {
         schoolUid: Long,
         permission: Long
     ): Boolean {
-        TODO("Not yet implemented")
+        return true
     }
 
     override fun findAllActiveSchoolWithMemberCountAndLocationName(
@@ -34,7 +34,16 @@ class SchoolDaoJs: SchoolDao() {
         permission: Long,
         sortOrder: Int
     ): DataSource.Factory<Int, SchoolWithMemberCountAndLocation> {
-        TODO("Not yet implemented")
+        val entries = ENTRIES.map {
+            it.unsafeCast<SchoolWithMemberCountAndLocation>().apply {
+                numStudents = (it.schoolUid * 12).toInt()
+                numTeachers = (it.schoolUid * 2).toInt()
+                locationName = "Sample location ${it.schoolUid}"
+                clazzCount = (it.schoolUid * 4).toInt()
+
+            }
+        }
+        return DataSourceFactoryJs(entries)
     }
 
     override suspend fun updateAsync(entity: School): Int {
@@ -67,18 +76,21 @@ class SchoolDaoJs: SchoolDao() {
                 schoolUid = 1
                 schoolName = "Sample school name 1"
                 schoolDesc = "Sample school description to be shown"
+                schoolAddress = "Sample address 1, Dubai"
                 holidayCalendar = HolidayCalendarDaoJs.ENTRIES[0]
             },
             SchoolWithHolidayCalendar().apply {
                 schoolUid = 2
                 schoolName = "Sample school name 2"
                 schoolDesc = "Sample school description two to be shown"
+                schoolAddress = "Sample address 2, Tanzania"
                 holidayCalendar = HolidayCalendarDaoJs.ENTRIES[1]
             },
             SchoolWithHolidayCalendar().apply {
                 schoolUid = 3
                 schoolName = "Sample school name 3"
                 schoolDesc = "Sample school description three to be shown"
+                schoolAddress = "Sample address 3, Kenya"
                 holidayCalendar = HolidayCalendarDaoJs.ENTRIES[2]
             }
         )

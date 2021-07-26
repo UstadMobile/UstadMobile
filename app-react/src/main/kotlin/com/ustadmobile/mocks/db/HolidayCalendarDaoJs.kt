@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 
 class HolidayCalendarDaoJs: HolidayCalendarDao() {
     override fun findAllHolidaysWithEntriesCount(): DataSource.Factory<Int, HolidayCalendarWithNumEntries> {
-        TODO("Not yet implemented")
+        return DataSourceFactoryJs(ENTRIES)
     }
 
     override fun replaceList(list: List<HolidayCalendar>) {
@@ -57,18 +57,21 @@ class HolidayCalendarDaoJs: HolidayCalendarDao() {
 
     companion object {
         val ENTRIES = listOf(
-            HolidayCalendar().apply {
+            HolidayCalendarWithNumEntries().apply {
                 umCalendarUid = 1
                 umCalendarName = "Sample calender 1"
+                numEntries = 2
             },
 
-            HolidayCalendar().apply {
+            HolidayCalendarWithNumEntries().apply {
                 umCalendarUid = 2
                 umCalendarName = "Sample calender 2"
+                numEntries = 1
             },
-            HolidayCalendar().apply {
+            HolidayCalendarWithNumEntries().apply {
                 umCalendarUid = 3
                 umCalendarName = "Sample calender 3"
+                numEntries = 0
             }
         )
     }
