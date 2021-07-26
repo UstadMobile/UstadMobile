@@ -39,8 +39,6 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
 
     private lateinit var mPresenter: ContentEntryList2Presenter
 
-    private var showAddEntryOptions = false
-
     private var showingEditOptions = false
 
     private var anchorElement: Node? = null
@@ -179,7 +177,7 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
                 }
             )
 
-            renderPopUpOptions(systemImpl,options, Date().getTime().toLong()){
+            renderChoices(systemImpl,options, Date().getTime().toLong()){
                 setState {
                     showAddEntryOptions = false
                 }

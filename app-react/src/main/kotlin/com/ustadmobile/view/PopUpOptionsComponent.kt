@@ -19,6 +19,7 @@ import kotlinx.css.width
 import react.*
 import styled.css
 import styled.styledDiv
+import kotlin.js.Date
 
 data class PopUpOptionItem(var icon: String, var primaryText: Int, var secondaryText: Int = 0, val onOptionItemClicked: (() -> Unit)? = null)
 
@@ -95,9 +96,10 @@ class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, RSta
     }
 }
 
-fun RBuilder.renderPopUpOptions(systemImpl: UstadMobileSystemImpl,
-                                optionItems: List<PopUpOptionItem>,
-                                shownAt: Long, onDialogClosed: () -> Unit) = child(PopUpOptionsComponent::class) {
+fun RBuilder.renderChoices(systemImpl: UstadMobileSystemImpl,
+                           optionItems: List<PopUpOptionItem>,
+                           shownAt: Long = Date().getTime().toLong(),
+                           onDialogClosed: () -> Unit) = child(PopUpOptionsComponent::class) {
     attrs.optionItems = optionItems
     attrs.systemImpl = systemImpl
     attrs.shownAt = shownAt

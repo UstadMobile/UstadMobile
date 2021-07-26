@@ -78,7 +78,6 @@ class PersonListComponent(mProps: RProps): UstadListComponent<Person, PersonWith
         }
     }
 
-
     override fun handleClickEntry(entry: PersonWithDisplayDetails) {
         mPresenter.handleClickEntry(entry)
     }

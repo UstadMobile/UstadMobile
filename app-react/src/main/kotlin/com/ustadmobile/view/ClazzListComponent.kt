@@ -15,7 +15,6 @@ import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.clazzItemSecondaryDesc
 import com.ustadmobile.util.StyleManager.clazzListItemSecondaryIcons
 import com.ustadmobile.util.StyleManager.clazzListRoleChip
-import com.ustadmobile.util.StyleManager.theme
 import com.ustadmobile.util.ext.breakToWork
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.circleIndicator
@@ -40,8 +39,6 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
 
     override val displayTypeRepo: Any?
         get() = dbRepo?.clazzDao
-
-    private var showAddEntryOptions = false
 
     override val viewName: String
         get() = ClazzList2View.VIEW_NAME
@@ -143,15 +140,13 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
         }
     }
 
-
+    override fun handleClickEntry(entry: ClazzWithListDisplayDetails) {
+        mPresenter?.onClickClazz(entry)
+    }
     override fun onFabClicked() {
         setState {
             showAddEntryOptions = true
         }
-    }
-
-    override fun handleClickEntry(entry: ClazzWithListDisplayDetails) {
-        mPresenter?.onClickClazz(entry)
     }
 
     override fun RBuilder.renderAddEntryOptionsDialog() {
@@ -165,7 +160,7 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
             options.add(PopUpOptionItem("login",MessageID.join_existing_class){
                 mPresenter?.handleClickJoinClazz()}
             )
-            renderPopUpOptions(systemImpl,options, Date().getTime().toLong()){
+            renderChoices(systemImpl,options, Date().getTime().toLong()){
                 console.log("closed dialog")
                 setState {
                     showAddEntryOptions = false
