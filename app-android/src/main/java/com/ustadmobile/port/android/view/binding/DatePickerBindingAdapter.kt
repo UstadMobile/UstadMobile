@@ -204,18 +204,21 @@ fun EditText.getDateTimeLong(inverseBindingListener: InverseBindingListener){
     }
 }
 
+@Deprecated("Use datePickerBindingAdapter2")
 @BindingAdapter("dateLong")
 fun setDate(et: TextView, date: Long) {
     updateDateOnEditText(et, date, null)
     et.setTag(R.id.tag_datelong, date)
 }
 
+@Deprecated("Use datePickerBindingAdapter2")
 @BindingAdapter("dateTimeLong")
 fun EditText.setDateTime(date: Long){
     calendar.timeInMillis = date
     updateDateWithTimeZone()
 }
 
+@Deprecated("Use datePickerBindingAdapter2")
 @BindingAdapter("timeZoneWithDate")
 fun EditText.setTimeZoneWithDate(timeZone: String?){
     if(timeZone.isNullOrEmpty()){
@@ -227,7 +230,7 @@ fun EditText.setTimeZoneWithDate(timeZone: String?){
 
 
 
-
+@Deprecated("Use datePickerBindingAdapter2")
 @BindingAdapter("dateLongWithExtra", "dateAppend", "datePrepend")
 fun setDateWithExtras(et: TextView, date: Long, append: String?, prepend: String?) {
     val appendString = append ?: ""
@@ -236,12 +239,14 @@ fun setDateWithExtras(et: TextView, date: Long, append: String?, prepend: String
     et.setTag(R.id.tag_datelong, date)
 }
 
+@Deprecated("Use datePickerBindingAdapter2")
 @BindingAdapter("dateTimeLongWithExtra", "dateTimeTimeLongWithExtra", "dateTimeAppend", "dateTimePrepend")
 fun setDateWithDateExtras(et: TextView, date: Long, time: Long, append: String?, prepend: String?) {
     updateDateTimeOnEditTextWithExtra(prepend ?: "", append ?: "", et, date, time)
     et.setTag(R.id.tag_datelong, date)
 }
 
+@Deprecated("Use datePickerBindingAdapter2")
 @BindingAdapter("dateTimeLongString")
 fun setDateWithDateExtras(et: TextView, date: Long) {
     updateDateTimeOnEditText(et, date)
@@ -249,18 +254,16 @@ fun setDateWithDateExtras(et: TextView, date: Long) {
 }
 
 
-
-
 /**
  * Wrapper to handle when the result of the picker is stored on a string (e.g. CustomFieldValue)
  */
+@Deprecated("Use datePickerBindingAdapter2")
 @BindingAdapter("dateLongString")
 fun setDateString(et: TextView, dateLongString: String?) {
     val date = dateLongString?.toLong() ?: 0L
     updateDateOnEditText(et, date)
     et.setTag(R.id.tag_datelong, date)
 }
-
 
 @InverseBindingAdapter(attribute = "dateLong")
 fun getRealValue(et: TextView): Long {
