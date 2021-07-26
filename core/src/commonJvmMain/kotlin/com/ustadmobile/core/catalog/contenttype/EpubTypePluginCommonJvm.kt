@@ -13,10 +13,13 @@ import java.util.*
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
+import com.ustadmobile.core.contentjob.ContentPlugin
 import com.ustadmobile.core.contentjob.ProcessResult
+import com.ustadmobile.core.contentjob.SupportedContent
 import com.ustadmobile.core.impl.getOs
 import com.ustadmobile.core.impl.getOsVersion
 import com.ustadmobile.core.io.ext.skipToEntry
+import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.openInputStream
@@ -24,91 +27,16 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import org.xmlpull.v1.XmlPullParserFactory
 
-class EpubTypePluginCommonJvm(val context: Any) : EpubTypePlugin() {
+class EpubTypePluginCommonJvm(val context: Any) : ContentPlugin {
 
-    /*  suspend fun extractMetadata(uri: String, context: Any): ContentEntry? {
-          return withContext(Dispatchers.Default) {
-              val xppFactory = XmlPullParserFactory.newInstance()
-              try {
+    val viewName: String
+        get() = EpubContentView.VIEW_NAME
 
-                  val doorUri = DoorUri.parse(uri)
-                  val inputStream = doorUri.openInputStream(context)
+    override val supportedMimeTypes: List<String>
+        get() = listOf(*SupportedContent.EPUB_MIME_TYPES)
 
-                  val opfPath: String = ZipInputStream(inputStream).use {
-                      val metaDataEntry = it.skipToEntry { it.name == "META-INF/container.xml" }
-                      if(metaDataEntry != null) {
-                          val ocfContainer = OcfDocument()
-                          val xpp = xppFactory.newPullParser()
-                          xpp.setInput(it, "UTF-8")
-                          ocfContainer.loadFromParser(xpp)
-
-                          ocfContainer.rootFiles.firstOrNull()?.fullPath
-                      }else {
-                          null
-                      }
-                  } ?: return@withContext null
-
-                  return@withContext ZipInputStream(doorUri.openInputStream(context)).use {
-                      val entry = it.skipToEntry { it.name == opfPath } ?: return@use null
-
-                      val xpp = xppFactory.newPullParser()
-                      xpp.setInput(it, "UTF-8")
-                      val opfDocument = OpfDocument()
-                      opfDocument.loadFromOPF(xpp)
-
-                      ContentEntryWithLanguage().apply {
-                          contentFlags = ContentEntry.FLAG_IMPORTED
-                          contentTypeFlag = ContentEntry.TYPE_EBOOK
-                          licenseType = ContentEntry.LICENSE_TYPE_OTHER
-                          title = if(opfDocument.title.isNullOrEmpty()) doorUri.getFileName(context)
-                                  else opfDocument.title
-                          author = opfDocument.getCreator(0)?.creator
-                          description = opfDocument.description
-                          leaf = true
-                          entryId = opfDocument.id.alternative(UUID.randomUUID().toString())
-                          val languageCode = opfDocument.getLanguage(0)
-                          if (languageCode != null) {
-                              this.language = Language().apply {
-                                  iso_639_1_standard = languageCode
-                              }
-                          }
-                      }
-                  }
-              } catch (e: IOException) {
-                  e.printStackTrace()
-              } catch (e: XmlPullParserException) {
-                  e.printStackTrace()
-              }
-
-              null
-          }
-      }*/
-
-    /* suspend fun importToContainer(uri: String, conversionParams: Map<String, String>,
-                                            contentEntryUid: Long, mimeType: String,
-                                            containerBaseDir: String, context: Any,
-                                            db: UmAppDatabase, repo: UmAppDatabase,
-                                            progressListener: (Int) -> Unit): Container {
-
-         return withContext(Dispatchers.Default) {
-
-             val doorUri = DoorUri.parse(uri)
-             val container = Container().apply {
-                 containerContentEntryUid = contentEntryUid
-                 cntLastModified = System.currentTimeMillis()
-                 this.mimeType = mimeType
-                 containerUid = repo.containerDao.insert(this)
-             }
-
-             repo.addEntriesToContainerFromZip(container.containerUid,
-                     doorUri,
-                     ContainerAddOptions(storageDirUri = File(containerBaseDir).toDoorUri()), context)
-
-             val containerWithSize = repo.containerDao.findByUid(container.containerUid) ?: container
-
-             containerWithSize
-         }
-     }*/
+    override val supportedFileExtensions: List<String>
+        get() = listOf(*SupportedContent.EPUB_EXTENSIONS)
 
     override val jobType: Int
         get() = TODO("Not yet implemented")
@@ -185,7 +113,7 @@ class EpubTypePluginCommonJvm(val context: Any) : EpubTypePlugin() {
                 val inputStream = uri.openInputStream(context)
 
                 return@withContext ZipInputStream(inputStream).use {
-                    val metaDataEntry = it.skipToEntry { it.name == "META-INF/container.xml" }
+                    val metaDataEntry = it.skipToEntry { it.name == OCF_CONTAINER_PATH }
                     if (metaDataEntry != null) {
                         val ocfContainer = OcfDocument()
                         val xpp = xppFactory.newPullParser()
@@ -201,5 +129,10 @@ class EpubTypePluginCommonJvm(val context: Any) : EpubTypePlugin() {
                 repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, e)
             }
         }
+    }
+
+    companion object {
+
+        private const val OCF_CONTAINER_PATH = "META-INF/container.xml"
     }
 }

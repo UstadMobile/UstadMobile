@@ -1,8 +1,6 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.core.catalog.contenttype.EpubTypePlugin
-import com.ustadmobile.core.catalog.contenttype.H5PTypePlugin
-import com.ustadmobile.core.catalog.contenttype.XapiPackageTypePlugin
+import com.ustadmobile.core.contentjob.SupportedContent
 
 interface SelectFileView : UstadView {
 
@@ -15,9 +13,9 @@ interface SelectFileView : UstadView {
         const val SELECTION_MODE_GALLERY = "video/*;audio/*"
 
         val SELECTION_MODE_FILE =
-                (EpubTypePlugin.MIME_TYPES +
-                XapiPackageTypePlugin.MIME_TYPES +
-                H5PTypePlugin.MIME_TYPES +
+                (SupportedContent.EPUB_MIME_TYPES +
+                SupportedContent.XAPI_MIME_TYPES +
+                SupportedContent.H5P_EXTENSIONS +
                         "application/octet-stream").joinToString(";")
 
     }
