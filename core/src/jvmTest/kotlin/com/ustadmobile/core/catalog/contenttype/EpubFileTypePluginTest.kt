@@ -19,9 +19,9 @@ class EpubFileTypePluginTest {
                 "/com/ustadmobile/core/contenttype/childrens-literature.epub")
         val tempEpubFile = tmpFolder.newFile()
         tempEpubFile.copyInputStreamToFile(inputStream)
-        val epubPlugin = EpubTypePluginCommonJvm()
+        val epubPlugin = EpubTypePluginCommonJvm(Any())
         runBlocking {
-            val contentEntry = epubPlugin.extractMetadata(tempEpubFile.toURI().toString(), Any())
+            val contentEntry = epubPlugin.extractMetadata(tempEpubFile.toURI().toString())
             Assert.assertEquals("Got ContentEntry with expected title",
                     "A Textbook of Sources for Teachers and Teacher-Training Classes",
                     contentEntry?.title)

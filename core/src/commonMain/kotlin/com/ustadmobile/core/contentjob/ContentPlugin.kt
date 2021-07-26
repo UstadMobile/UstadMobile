@@ -3,6 +3,7 @@ package com.ustadmobile.core.contentjob
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 
 interface ContentPlugin {
@@ -17,8 +18,6 @@ interface ContentPlugin {
 
     suspend fun extractMetadata(uri: DoorUri): ContentEntryWithLanguage?
 
-    //TODO: DownloadJobItem will be renamed to ContentJobItem
-    //ContentJobItem will need fields for jobType, fromUri, toUri
-    suspend fun processJob(jobItem: DownloadJobItem): ProcessResult
+    suspend fun processJob(jobItem: ContentJobItem): ProcessResult
 
 }
