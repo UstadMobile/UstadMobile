@@ -47,8 +47,8 @@ fun String.breakToWork(size: Int = 10): String{
 }
 
 /**
- * Convert query params to a argument map
+ * Convert query params string to argument map
  */
-fun String.toArguments(): Map<String, String>{
+fun String.toArgumentsMap(): Map<String, String>{
     return urlSearchParamsToMap(this)
 }

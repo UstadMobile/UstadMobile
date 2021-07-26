@@ -5,6 +5,8 @@ plugins {
     id 'org.jetbrains.kotlin.js'
 }
 
+apply plugin: 'kotlinx-serialization'
+
 group = rootProject.group
 version = rootProject.version
 
