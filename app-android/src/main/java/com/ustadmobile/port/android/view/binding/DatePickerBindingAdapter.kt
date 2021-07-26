@@ -248,15 +248,7 @@ fun setDateWithDateExtras(et: TextView, date: Long) {
     et.setTag(R.id.tag_datelong, date)
 }
 
-@BindingAdapter("visibleIfDateSet")
-fun View.setVisibilityIfSetDate(date: Long){
-    visibility = if(date == 0L || date == Long.MAX_VALUE) View.GONE else View.VISIBLE
-}
 
-@BindingAdapter("relativeTime")
-fun TextView.setDateWithRelativeTime(date: Long){
-    text = DateUtils.getRelativeTimeSpanString(date)
-}
 
 
 /**
@@ -285,42 +277,7 @@ fun getRealDateTimeZoneValue(et: TextView): Long {
     return (et.getTag(R.id.tag_calendar) as? Calendar)?.timeInMillis ?: 0L
 }
 
-@BindingAdapter("dateUseSpinners")
-fun TextView.setDateUseSpinners(dateUseSpinners: Boolean) {
-    setTag(R.id.tag_dateusespinner, dateUseSpinners)
-}
 
 
-@BindingAdapter("timeInMillis")
-fun DatePicker.setTimeInMillis(timeInMillis: Long) {
-    setTag(R.id.tag_datelong, timeInMillis)
-    initIfReady()
-}
 
-@BindingAdapter("timeInMillisAttrChanged")
-fun DatePicker.setTimeInMillisChangeListener(inverseBindingListener: InverseBindingListener) {
-    setTag(R.id.tag_inverse_binding_listener, inverseBindingListener)
-    initIfReady()
-}
-
-private fun DatePicker.initIfReady() {
-    val bindingListener = getTag(R.id.tag_inverse_binding_listener) as? InverseBindingListener
-    val timeInMillis = getTag(R.id.tag_datelong) as? Long ?: 0L
-
-    val calendar = Calendar.getInstance()
-    calendar.timeInMillis = timeInMillis
-
-    init(calendar[Calendar.YEAR], calendar[Calendar.MONTH], calendar[Calendar.DAY_OF_MONTH]) {_, _, _, _ ->
-        bindingListener?.onChange()
-    }
-}
-
-@InverseBindingAdapter(attribute = "timeInMillis")
-fun DatePicker.getTimeInMillis() : Long{
-    return Calendar.getInstance().also {
-        it[Calendar.YEAR] = this.year
-        it[Calendar.MONTH] = this.month
-        it[Calendar.DAY_OF_MONTH] = this.dayOfMonth
-    }.timeInMillis
-}
 

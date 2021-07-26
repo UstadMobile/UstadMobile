@@ -1,6 +1,8 @@
 package com.ustadmobile.port.android.view.binding
 import android.app.AlertDialog
+import android.text.format.DateUtils
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.DatePicker
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
@@ -86,4 +88,53 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
         }
         builder.show()
     }
+}
+
+@BindingAdapter("visibleIfDateSet")
+fun View.setVisibilityIfSetDate(date: Long){
+    visibility = if(date == 0L || date == Long.MAX_VALUE) View.GONE else View.VISIBLE
+}
+
+
+@BindingAdapter("relativeTime")
+fun TextView.setDateWithRelativeTime(date: Long){
+    text = DateUtils.getRelativeTimeSpanString(date)
+}
+
+@BindingAdapter("dateUseSpinners")
+fun TextView.setDateUseSpinners(dateUseSpinners: Boolean) {
+    setTag(R.id.tag_dateusespinner, dateUseSpinners)
+}
+
+@BindingAdapter("timeInMillis")
+fun DatePicker.setTimeInMillis(timeInMillis: Long) {
+    setTag(R.id.tag_datelong, timeInMillis)
+    initIfReady()
+}
+
+@BindingAdapter("timeInMillisAttrChanged")
+fun DatePicker.setTimeInMillisChangeListener(inverseBindingListener: InverseBindingListener) {
+    setTag(R.id.tag_inverse_binding_listener, inverseBindingListener)
+    initIfReady()
+}
+
+private fun DatePicker.initIfReady() {
+    val bindingListener = getTag(R.id.tag_inverse_binding_listener) as? InverseBindingListener
+    val timeInMillis = getTag(R.id.tag_datelong) as? Long ?: 0L
+
+    val calendar = Calendar.getInstance()
+    calendar.timeInMillis = timeInMillis
+
+    init(calendar[Calendar.YEAR], calendar[Calendar.MONTH], calendar[Calendar.DAY_OF_MONTH]) {_, _, _, _ ->
+        bindingListener?.onChange()
+    }
+}
+
+@InverseBindingAdapter(attribute = "timeInMillis")
+fun DatePicker.getTimeInMillis() : Long{
+    return Calendar.getInstance().also {
+        it[Calendar.YEAR] = this.year
+        it[Calendar.MONTH] = this.month
+        it[Calendar.DAY_OF_MONTH] = this.dayOfMonth
+    }.timeInMillis
 }
