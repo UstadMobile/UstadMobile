@@ -12,6 +12,13 @@
             name="listener"
             type="com.ustadmobile.core.controller.SaleDeliveryItemListener" />
 
+        <variable
+            name="timeZoneId"
+            type="String" />
+
+        <variable name="dateTimeMode"
+            type="Integer"/>
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -38,7 +45,9 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
             android:layout_marginVertical="@dimen/dimen_16dp"
-            app:dateLong="@{saleDelivery.saleDeliveryDate}"
+            app:dateTimeInMillis="@={saleDelivery.saleDeliveryDate}"
+            app:timeZoneId="@{timeZoneId}"
+            app:dateTimeInMillisMode="@{dateTimeMode}"
             app:layout_constraintEnd_toStartOf="@+id/item_saledelivery_delete_iv"
             app:layout_constraintStart_toEndOf="@id/item_saledelivery_image"
             app:layout_constraintTop_toTopOf="parent"

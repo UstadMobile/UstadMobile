@@ -20,6 +20,13 @@
             name="selectablePagedListAdapter"
             type="InventoryTransactionDetailRecyclerAdapter" />
 
+        <variable
+            name="timeZoneId"
+            type="String" />
+
+        <variable name="dateTimeMode"
+            type="Integer"/>
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -51,7 +58,9 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             tools:text="Date"
-            app:dateLong="@{entry.transactionDate}"
+            app:dateTimeInMillis="@={entry.transactionDate}"
+            app:timeZoneId="@{timeZoneId}"
+            app:dateTimeInMillisMode="@{dateTimeMode}"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"

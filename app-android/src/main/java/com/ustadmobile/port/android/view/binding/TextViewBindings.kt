@@ -149,14 +149,6 @@ fun TextView.setTextFromCustomFieldDropDownOption(customFieldValue: CustomFieldV
 }
 
 @SuppressLint("SetTextI18n")
-@BindingAdapter(value = ["textFromDateLong", "textToDateLong"])
-fun TextView.setTextFromToDateLong(textFromDateLong: Long, textToDateLong: Long) {
-    val dateFormat = DateFormat.getDateFormat(context)
-    text = "${if (textFromDateLong > 0) dateFormat.format(textFromDateLong) else ""} -" +
-            " ${if (textToDateLong > 0 && textToDateLong != Long.MAX_VALUE) dateFormat.format(textToDateLong) else ""}"
-}
-
-@SuppressLint("SetTextI18n")
 @BindingAdapter(value = ["enrolmentTextFromDateLong", "enrolmentTextToDateLong"])
 fun TextView.setEnrolmentTextFromToDateLong(textFromDateLong: Long, textToDateLong: Long) {
     val dateFormat = DateFormat.getDateFormat(context)

@@ -11,6 +11,7 @@ import com.toughra.ustadmobile.databinding.ItemSaledeliveryBinding
 import com.ustadmobile.core.controller.SaleDeliveryItemListener
 import com.ustadmobile.lib.db.entities.SaleDelivery
 import com.ustadmobile.lib.db.entities.SaleDeliveryAndItems
+import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 
 
 class SaleDeliveryRecyclerAdapter(var itemListener: SaleDeliveryItemListener?)
@@ -24,12 +25,16 @@ class SaleDeliveryRecyclerAdapter(var itemListener: SaleDeliveryItemListener?)
         val itemBinding = ItemSaledeliveryBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false)
         itemBinding.listener = itemListener
+        itemBinding.dateTimeMode = MODE_START_OF_DAY
+        itemBinding.timeZoneId = "Asia/Kabul"
         return InventoryTransactionDetailHolder(itemBinding)
     }
 
     override fun onBindViewHolder(holder: InventoryTransactionDetailHolder, position: Int) {
         val item = getItem(position)
         holder.itemBinding.saleDelivery = item
+        holder.itemBinding.dateTimeMode = MODE_START_OF_DAY
+        holder.itemBinding.timeZoneId = "Asia/Kabul"
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {

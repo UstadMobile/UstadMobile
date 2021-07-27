@@ -200,6 +200,8 @@ ext {
 
     version_jakartamail="2.0.1"
 
+    version_persian_date_picker_aliab="1.7.1"
+
 }
 
 /*

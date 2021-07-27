@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.SalePaymentEditView
 import com.ustadmobile.lib.db.entities.SalePayment
 import com.ustadmobile.lib.db.entities.SalePaymentWithSaleItems
 import com.ustadmobile.port.android.util.ext.*
+import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 
 
 interface SalePaymentEditFragmentEventHandler {
@@ -65,6 +66,8 @@ class SalePaymentEditFragment: UstadEditFragment<SalePaymentWithSaleItems>(), Sa
         set(value) {
             field = value
             mBinding?.salePayment = value
+            mBinding?.dateTimeMode = MODE_START_OF_DAY
+            mBinding?.timeZoneId = "Asia/Kabul"
         }
 
     override var fieldsEnabled: Boolean = false

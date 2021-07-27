@@ -204,18 +204,21 @@ fun EditText.getDateTimeLong(inverseBindingListener: InverseBindingListener){
     }
 }
 
+@Deprecated("Use datePickerBindingAdapter2")
 @BindingAdapter("dateLong")
 fun setDate(et: TextView, date: Long) {
     updateDateOnEditText(et, date, null)
     et.setTag(R.id.tag_datelong, date)
 }
 
+@Deprecated("Use datePickerBindingAdapter2")
 @BindingAdapter("dateTimeLong")
 fun EditText.setDateTime(date: Long){
     calendar.timeInMillis = date
     updateDateWithTimeZone()
 }
 
+@Deprecated("Use datePickerBindingAdapter2")
 @BindingAdapter("timeZoneWithDate")
 fun EditText.setTimeZoneWithDate(timeZone: String?){
     if(timeZone.isNullOrEmpty()){
@@ -227,7 +230,7 @@ fun EditText.setTimeZoneWithDate(timeZone: String?){
 
 
 
-
+@Deprecated("Use datePickerBindingAdapter2")
 @BindingAdapter("dateLongWithExtra", "dateAppend", "datePrepend")
 fun setDateWithExtras(et: TextView, date: Long, append: String?, prepend: String?) {
     val appendString = append ?: ""
@@ -236,39 +239,31 @@ fun setDateWithExtras(et: TextView, date: Long, append: String?, prepend: String
     et.setTag(R.id.tag_datelong, date)
 }
 
+@Deprecated("Use datePickerBindingAdapter2")
 @BindingAdapter("dateTimeLongWithExtra", "dateTimeTimeLongWithExtra", "dateTimeAppend", "dateTimePrepend")
 fun setDateWithDateExtras(et: TextView, date: Long, time: Long, append: String?, prepend: String?) {
     updateDateTimeOnEditTextWithExtra(prepend ?: "", append ?: "", et, date, time)
     et.setTag(R.id.tag_datelong, date)
 }
 
+@Deprecated("Use datePickerBindingAdapter2")
 @BindingAdapter("dateTimeLongString")
 fun setDateWithDateExtras(et: TextView, date: Long) {
     updateDateTimeOnEditText(et, date)
     et.setTag(R.id.tag_datelong, date)
 }
 
-@BindingAdapter("visibleIfDateSet")
-fun View.setVisibilityIfSetDate(date: Long){
-    visibility = if(date == 0L || date == Long.MAX_VALUE) View.GONE else View.VISIBLE
-}
-
-@BindingAdapter("relativeTime")
-fun TextView.setDateWithRelativeTime(date: Long){
-    text = DateUtils.getRelativeTimeSpanString(date)
-}
-
 
 /**
  * Wrapper to handle when the result of the picker is stored on a string (e.g. CustomFieldValue)
  */
+@Deprecated("Use datePickerBindingAdapter2")
 @BindingAdapter("dateLongString")
 fun setDateString(et: TextView, dateLongString: String?) {
     val date = dateLongString?.toLong() ?: 0L
     updateDateOnEditText(et, date)
     et.setTag(R.id.tag_datelong, date)
 }
-
 
 @InverseBindingAdapter(attribute = "dateLong")
 fun getRealValue(et: TextView): Long {
@@ -285,42 +280,7 @@ fun getRealDateTimeZoneValue(et: TextView): Long {
     return (et.getTag(R.id.tag_calendar) as? Calendar)?.timeInMillis ?: 0L
 }
 
-@BindingAdapter("dateUseSpinners")
-fun TextView.setDateUseSpinners(dateUseSpinners: Boolean) {
-    setTag(R.id.tag_dateusespinner, dateUseSpinners)
-}
 
 
-@BindingAdapter("timeInMillis")
-fun DatePicker.setTimeInMillis(timeInMillis: Long) {
-    setTag(R.id.tag_datelong, timeInMillis)
-    initIfReady()
-}
 
-@BindingAdapter("timeInMillisAttrChanged")
-fun DatePicker.setTimeInMillisChangeListener(inverseBindingListener: InverseBindingListener) {
-    setTag(R.id.tag_inverse_binding_listener, inverseBindingListener)
-    initIfReady()
-}
-
-private fun DatePicker.initIfReady() {
-    val bindingListener = getTag(R.id.tag_inverse_binding_listener) as? InverseBindingListener
-    val timeInMillis = getTag(R.id.tag_datelong) as? Long ?: 0L
-
-    val calendar = Calendar.getInstance()
-    calendar.timeInMillis = timeInMillis
-
-    init(calendar[Calendar.YEAR], calendar[Calendar.MONTH], calendar[Calendar.DAY_OF_MONTH]) {_, _, _, _ ->
-        bindingListener?.onChange()
-    }
-}
-
-@InverseBindingAdapter(attribute = "timeInMillis")
-fun DatePicker.getTimeInMillis() : Long{
-    return Calendar.getInstance().also {
-        it[Calendar.YEAR] = this.year
-        it[Calendar.MONTH] = this.month
-        it[Calendar.DAY_OF_MONTH] = this.dayOfMonth
-    }.timeInMillis
-}
 

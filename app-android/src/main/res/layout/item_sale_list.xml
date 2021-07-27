@@ -18,6 +18,13 @@
         <variable
             name="selectablePagedListAdapter"
             type="SaleListRecyclerAdapter" />
+
+        <variable
+            name="timeZoneId"
+            type="String" />
+
+        <variable name="dateTimeMode"
+            type="Integer"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -73,7 +80,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
-            app:dateLong="@{sale.saleCreationDate}"
+            app:dateTimeInMillis="@={sale.saleCreationDate}"
+            app:timeZoneId="@{timeZoneId}"
+            app:dateTimeInMillisMode="@{dateTimeMode}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/item_sale_amount"
             tools:text="21.01.2020" />

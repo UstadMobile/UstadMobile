@@ -30,6 +30,7 @@ import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import kotlinx.coroutines.runBlocking
+import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
 import com.ustadmobile.port.android.view.util.RunAfterTextChangedTextWatcher
 import org.kodein.di.direct
@@ -72,6 +73,8 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             //for some reason setting the options before (and indepently from) the value causes
             // a databinding problem
             mBinding?.genderOptions = genderOptions
+            mBinding?.dateTimeMode = MODE_START_OF_DAY
+            mBinding?.timeZoneId = "UTC"
             loading = false
         }
 

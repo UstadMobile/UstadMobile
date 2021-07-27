@@ -23,6 +23,13 @@
             name="activityEventHandler"
             type="com.ustadmobile.port.android.view.SalePaymentEditFragmentEventHandler" />
 
+        <variable
+            name="timeZoneId"
+            type="String" />
+
+        <variable name="dateTimeMode"
+            type="Integer"/>
+
     </data>
 
 
@@ -75,7 +82,9 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/fragment_sale_item_edit_delivery_date_tiet"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateLong="@={salePayment.salePaymentPaidDate}"
+                    app:dateTimeInMillis="@={salePayment.salePaymentPaidDate}"
+                    app:timeZoneId="@{timeZoneId}"
+                    app:dateTimeInMillisMode="@{dateTimeMode}"
                     app:runOnClickWhenFocused="@{true}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>

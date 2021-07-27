@@ -12,6 +12,13 @@
             name="listener"
             type="com.ustadmobile.core.controller.SalePaymentItemListener" />
 
+        <variable
+            name="timeZoneId"
+            type="String" />
+
+        <variable name="dateTimeMode"
+            type="Integer"/>
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -39,7 +46,9 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_8dp"
             android:layout_marginVertical="@dimen/dimen_16dp"
-            app:dateLong="@{salePayment.salePaymentPaidDate}"
+            app:dateTimeInMillis="@={salePayment.salePaymentPaidDate}"
+            app:timeZoneId="@{timeZoneId}"
+            app:dateTimeInMillisMode="@{dateTimeMode}"
             app:layout_constraintBottom_toBottomOf="@+id/item_saledelivery_image"
             app:layout_constraintEnd_toStartOf="@+id/item_salepayment_amount"
             app:layout_constraintStart_toEndOf="@id/item_saledelivery_image"

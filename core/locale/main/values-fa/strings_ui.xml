@@ -678,7 +678,7 @@
     <string name="submitted_cap">ارسال گردیده</string>
     <string name="not_submitted_cap">ارسال نگردیده</string>
     <string name="submitliteral">ارسال کردن</string>
-    <string name="x_percent_attended">%1.0 از %% حاضری</string>
+    <string name="x_percent_attended"> %1.0f%% از حاضری</string>
     <string name="add_a_new_clazzwork">علاوه ساختن کار جدید صنفی</string>
     <string name="edit_clazzwork">ویرایش کار صنفی</string>
     <string name="no_submission_required">ضرورت به ارسال نیست</string>

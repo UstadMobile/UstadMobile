@@ -16,6 +16,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SaleItemEditView
 import com.ustadmobile.lib.db.entities.SaleItemWithProduct
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 
 interface SaleItemEditFragmentEventHandler {
 
@@ -105,6 +106,8 @@ class SaleItemEditFragment: UstadEditFragment<SaleItemWithProduct>(), SaleItemEd
                 value?.saleItemPricePerPiece = value?.saleItemProduct?.productBasePrice?:0F
             }
             mBinding?.saleItem = value
+            mBinding?.dateTimeMode = MODE_START_OF_DAY
+            mBinding?.timeZoneId = "Asia/Kabul"
         }
 
     override fun goToNewSale(saleItem: SaleItemWithProduct) {

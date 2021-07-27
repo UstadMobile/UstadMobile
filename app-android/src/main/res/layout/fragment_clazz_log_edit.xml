@@ -35,6 +35,13 @@
             name="activityEventHandler"
             type="com.ustadmobile.port.android.view.ClazzLogEditFragmentEventHandler" />
 
+        <variable name="dateTimeMode"
+            type="Integer"/>
+
+        <variable
+            name="timeZoneId"
+            type="String" />
+
     </data>
 
 
@@ -72,7 +79,9 @@
                     android:layout_height="wrap_content"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateLong="@={date}"
+                    app:dateTimeInMillis="@={date}"
+                    app:timeZoneId="@{timeZoneId}"
+                    app:dateTimeInMillisMode="@{dateTimeMode}"
                     app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>

@@ -50,6 +50,13 @@
             name="presenter"
             type="PersonDetailPresenter" />
 
+        <variable name="dateTimeMode"
+            type="Integer"/>
+
+        <variable
+            name="timeZoneId"
+            type="String" />
+
     </data>
 
     <androidx.core.widget.NestedScrollView
@@ -352,7 +359,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/dimen_8dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
-                app:dateLong="@{person.dateOfBirth}"
+                app:dateTimeInMillis="@{person.dateOfBirth}"
+                app:timeZoneId="@{timeZoneId}"
+                app:dateTimeInMillisMode="@{dateTimeMode}"
                 android:visibility="@{person.dateOfBirth != 0 ? View.VISIBLE : View.GONE}"
                 tools:text="DD/MM/YYYY"
                 app:layout_constraintStart_toEndOf="@+id/fragment_person_detail_dob_imageview"

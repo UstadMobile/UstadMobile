@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemInventorytransactiondetailBinding
 import com.ustadmobile.core.controller.InventoryTransactionDetailListener
 import com.ustadmobile.lib.db.entities.InventoryTransactionDetail
+import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
@@ -25,12 +26,16 @@ class InventoryTransactionDetailRecyclerAdapter(var itemListener: InventoryTrans
                 LayoutInflater.from(parent.context), parent, false)
         itemBinding.itemListener = itemListener
         itemBinding.selectablePagedListAdapter = this
+        itemBinding.dateTimeMode = MODE_START_OF_DAY
+        itemBinding.timeZoneId = "Asia/Kabul"
         return InventoryTransactionDetailHolder(itemBinding)
     }
 
     override fun onBindViewHolder(holder: InventoryTransactionDetailHolder, position: Int) {
         val item = getItem(position)
         holder.itemBinding.entry = item
+        holder.itemBinding.dateTimeMode = MODE_START_OF_DAY
+        holder.itemBinding.timeZoneId = "Asia/Kabul"
         holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
     }
 

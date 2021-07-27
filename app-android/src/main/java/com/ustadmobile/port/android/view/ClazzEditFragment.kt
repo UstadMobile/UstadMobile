@@ -23,6 +23,8 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.view.binding.MODE_END_OF_DAY
+import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 
 
 class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>(), ClazzEdit2View {
@@ -76,7 +78,8 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
 
     class ScheduleRecyclerAdapter(var oneToManyEditListener: OneToManyJoinEditListener<Schedule>?,
-                                  var presenter: ClazzEdit2Presenter?): ListAdapter<Schedule, ScheduleRecyclerAdapter.ScheduleViewHolder>(DIFF_CALLBACK_SCHEDULE) {
+                                  var presenter: ClazzEdit2Presenter?): ListAdapter<Schedule,
+            ScheduleRecyclerAdapter.ScheduleViewHolder>(DIFF_CALLBACK_SCHEDULE) {
 
         class ScheduleViewHolder(val binding: ItemScheduleBinding): RecyclerView.ViewHolder(binding.root)
 
@@ -104,6 +107,9 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         get() = field
         set(value) {
             mDataBinding?.clazz = value
+            mDataBinding?.dateTimeMode = MODE_START_OF_DAY
+            mDataBinding?.dateTimeModeEnd = MODE_END_OF_DAY
+            mDataBinding?.timeZoneId = value?.clazzTimeZone?:value?.school?.schoolTimeZone?:"UTC"
             field = value
         }
 
