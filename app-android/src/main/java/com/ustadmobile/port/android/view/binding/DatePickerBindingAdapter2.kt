@@ -138,10 +138,10 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
                 .setMaxYear(PersianDatePickerDialog.THIS_YEAR)
                 .setMaxMonth(PersianDatePickerDialog.THIS_MONTH)
                 .setMaxDay(PersianDatePickerDialog.THIS_DAY)
-                .setInitDate(1370, 3, 13)
+                .setInitDate(cal.timeInMillis)
                 .setActionTextColor(Color.BLACK)
                 .setTypeFace(typeface)
-                .setTitleType(PersianDatePickerDialog.WEEKDAY_DAY_MONTH_YEAR)
+                .setTitleType(PersianDatePickerDialog.DAY_MONTH_YEAR)
                 .setShowInBottomSheet(true)
                 .setListener(object : PersianPickerListener {
                     override fun onDateSelected(@NotNull persianPickerDate: PersianPickerDate) {
@@ -164,6 +164,14 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
                                         + " converted : " + UMCalendarUtil.getPrettyDateFromLong(persianPickerDate.timestamp, null) ,
                             Toast.LENGTH_SHORT
                         ).show()
+
+                        adapterCalendar.timeInMillis = persianPickerDate.timestamp
+
+                        val persianDate = PersianDateImpl()
+                        persianDate.setDate(adapterCalendar.timeInMillis)
+
+                        text = persianDate.persianLongDate
+                        inverseBindingListener.onChange()
                     }
 
                     override fun onDismissed() {}
