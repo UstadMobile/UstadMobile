@@ -110,7 +110,7 @@ class H5PTypePluginTest {
                 h5pPlugin.processJob(contentJob, ProcessContext(""))
             }
 
-            val container = repo.containerDao.getMostRecentContainerForContentEntry(uid)!!
+            val container = repo.containerDao.findByUid(contentJob.cjiContainerUid)!!
 
             Assert.assertNotNull(container)
 

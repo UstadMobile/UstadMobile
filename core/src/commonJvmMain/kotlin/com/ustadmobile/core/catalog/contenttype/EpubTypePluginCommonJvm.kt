@@ -35,10 +35,10 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
         get() = EpubContentView.VIEW_NAME
 
     override val supportedMimeTypes: List<String>
-        get() = listOf(*SupportedContent.EPUB_MIME_TYPES)
+        get() = SupportedContent.EPUB_MIME_TYPES
 
     override val supportedFileExtensions: List<String>
-        get() = listOf(*SupportedContent.EPUB_EXTENSIONS)
+        get() = SupportedContent.EPUB_EXTENSIONS
 
     override val jobType: Int
         get() = TODO("Not yet implemented")

@@ -1,4 +1,4 @@
 package com.ustadmobile.core.contentjob
 
-class ProcessContext(fileLocation: String) {
+class ProcessContext(val params: Map<String, String>) {
 }

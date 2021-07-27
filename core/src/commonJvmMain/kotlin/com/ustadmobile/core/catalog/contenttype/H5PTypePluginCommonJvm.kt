@@ -58,10 +58,10 @@ class H5PTypePluginCommonJvm(private var context: Any, private val endpoint: End
     get() = XapiPackageContentView.VIEW_NAME
 
     override val supportedMimeTypes: List<String>
-    get() = listOf(*SupportedContent.H5P_MIME_TYPES)
+    get() = SupportedContent.H5P_MIME_TYPES
 
     override val supportedFileExtensions: List<String>
-    get() = listOf(*SupportedContent.H5P_EXTENSIONS)
+    get() = SupportedContent.H5P_EXTENSIONS
 
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
@@ -123,6 +123,8 @@ class H5PTypePluginCommonJvm(private var context: Any, private val endpoint: End
             mimeType = supportedMimeTypes.first()
             containerUid = repo.containerDao.insertAsync(this)
         }
+
+        jobItem.cjiContainerUid = container.containerUid
 
         val containerFolder = jobItem.toUri ?: defaultContainerDir.toURI().toString()
         val containerFolderUri = DoorUri.parse(containerFolder)
