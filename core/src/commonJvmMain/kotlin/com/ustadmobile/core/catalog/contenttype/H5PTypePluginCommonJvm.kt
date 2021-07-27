@@ -84,7 +84,7 @@ class H5PTypePluginCommonJvm(private var context: Any, private val endpoint: End
 
                 val data = String(it.readBytes())
 
-                val json = Json.parseToJsonElement(data) as JsonObject
+                val json = Json.parseToJsonElement(data).jsonObject
 
                 // take the name from the role Author otherwise take last one
                 var author: String? = ""
@@ -120,17 +120,17 @@ class H5PTypePluginCommonJvm(private var context: Any, private val endpoint: End
         val container = Container().apply {
             containerContentEntryUid = jobItem.cjiContentEntryUid
             cntLastModified = System.currentTimeMillis()
-            this.mimeType = supportedMimeTypes.first()
-            containerUid = repo.containerDao.insert(this)
+            mimeType = supportedMimeTypes.first()
+            containerUid = repo.containerDao.insertAsync(this)
         }
 
-        val containerFolder = jobItem.cjiContainerBaseDir ?: defaultContainerDir.path
-
+        val containerFolder = jobItem.toUri ?: defaultContainerDir.toURI().toString()
+        val containerFolderUri = DoorUri.parse(containerFolder)
         val entry = db.contentEntryDao.findByUid(jobItem.cjiContentEntryUid)
 
-        val containerAddOptions = ContainerAddOptions(storageDirUri = File(containerFolder).toDoorUri())
+        val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolderUri)
         repo.addEntriesToContainerFromZip(container.containerUid, doorUri,
-                ContainerAddOptions(storageDirUri = File(containerFolder).toDoorUri(),
+                ContainerAddOptions(storageDirUri = containerFolderUri,
                         fileNamer = PrefixContainerFileNamer("workspace/")), context)
 
         val h5pDistTmpFile = File.createTempFile("h5p-dist", "zip")

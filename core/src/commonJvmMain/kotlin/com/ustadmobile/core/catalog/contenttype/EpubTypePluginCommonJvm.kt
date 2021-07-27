@@ -20,6 +20,7 @@ import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.contentjob.SupportedContent
 import com.ustadmobile.core.io.ext.skipToEntry
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
@@ -42,6 +43,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
     override val jobType: Int
         get() = TODO("Not yet implemented")
 
+    val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
@@ -62,7 +64,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                     val opfDocument = OpfDocument()
                     opfDocument.loadFromOPF(xpp)
 
-                    val entry = ContentEntryWithLanguage().apply {
+                    return@withContext ContentEntryWithLanguage().apply {
                         contentFlags = ContentEntry.FLAG_IMPORTED
                         contentTypeFlag = ContentEntry.TYPE_EBOOK
                         licenseType = ContentEntry.LICENSE_TYPE_OTHER
@@ -79,7 +81,6 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                             }
                         }
                     }
-                    entry
                 }
             } catch (e: Exception) {
                 null
@@ -98,10 +99,12 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                 containerUid = repo.containerDao.insert(this)
                 jobItem.cjiContainerUid = containerUid
             }
+            val containerFolder = jobItem.toUri ?: defaultContainerDir.toURI().toString()
+            val containerFolderUri = DoorUri.parse(containerFolder)
 
             repo.addEntriesToContainerFromZip(container.containerUid,
                     doorUri,
-                    ContainerAddOptions(storageDirUri = File(jobItem.cjiContainerBaseDir).toDoorUri()), context)
+                    ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
             val containerWithSize = repo.containerDao.findByUid(container.containerUid) ?: container
 
@@ -112,24 +115,20 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
 
 
     suspend fun findOpfPath(uri: DoorUri, process: ProcessContext): String? {
-        return withContext(Dispatchers.Default) {
-            val xppFactory = XmlPullParserFactory.newInstance()
-            try {
-                val inputStream = uri.openInputStream(context)
+        val xppFactory = XmlPullParserFactory.newInstance()
+        try {
+            ZipInputStream(uri.openInputStream(context)).use {
+                it.skipToEntry { entry -> entry.name == OCF_CONTAINER_PATH } ?: return null
 
-                ZipInputStream(inputStream).use {
-                    it.skipToEntry { entry -> entry.name == OCF_CONTAINER_PATH } ?: return@use
+                val ocfContainer = OcfDocument()
+                val xpp = xppFactory.newPullParser()
+                xpp.setInput(it, "UTF-8")
+                ocfContainer.loadFromParser(xpp)
 
-                    val ocfContainer = OcfDocument()
-                    val xpp = xppFactory.newPullParser()
-                    xpp.setInput(it, "UTF-8")
-                    ocfContainer.loadFromParser(xpp)
-
-                    ocfContainer.rootFiles.firstOrNull()?.fullPath
-                }
-            } catch (e: Exception) {
-                null
+                return ocfContainer.rootFiles.firstOrNull()?.fullPath
             }
+        } catch (e: Exception) {
+            return null
         }
     }
 

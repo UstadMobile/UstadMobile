@@ -1,12 +1,14 @@
 package com.ustadmobile.core.catalog.contenttype
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentformats.ContentImportManager
-import com.ustadmobile.core.contentformats.ContentImportManagerImpl
+import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
@@ -22,6 +24,8 @@ import java.util.zip.ZipFile
 
 class H5PTypePluginTest {
 
+    private lateinit var h5pPlugin: H5PTypePluginCommonJvm
+
     @JvmField
     @Rule
     val tmpFolder = TemporaryFolder()
@@ -34,8 +38,6 @@ class H5PTypePluginTest {
 
     private lateinit var di: DI
 
-    private lateinit var contentImportManager: ContentImportManager
-
     private lateinit var db: UmAppDatabase
 
     private lateinit var repo: UmAppDatabase
@@ -45,16 +47,11 @@ class H5PTypePluginTest {
 
         di = DI {
             import(ustadTestRule.diModule)
-            bind<ContentImportManager>() with scoped(ustadTestRule.endpointScope!!).singleton {
-                ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm(), H5PTypePluginCommonJvm()),
-                        context, this.context, di)
-            }
         }
         val accountManager: UstadAccountManager by di.instance()
-        contentImportManager =  di.on(accountManager.activeAccount).direct.instance()
         db = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_DB)
         repo = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
-
+        h5pPlugin = H5PTypePluginCommonJvm(Any(), accountManager.activeEndpoint, di)
     }
 
     @Test
@@ -65,9 +62,8 @@ class H5PTypePluginTest {
         val tempH5pFile = File(tempFolder, "dialog-cards-620.h5p")
         tempH5pFile.copyInputStreamToFile(inputStream)
 
-        val h5pPlugin = H5PTypePluginCommonJvm()
         val contentEntry = runBlocking {
-            h5pPlugin.extractMetadata(tempH5pFile.toURI().toString(), Any())
+            h5pPlugin.extractMetadata(DoorUri.parse(tempH5pFile.toURI().toString()), ProcessContext(""))
         }
 //        Assert.assertEquals("Got ContentEntry with expected entryId",
 //                "dialog-cards-620.h5p",
@@ -91,22 +87,11 @@ class H5PTypePluginTest {
         tempH5pFile.copyInputStreamToFile(inputStream)
 
         val containerTmpDir = tmpFolder.newFolder("containerTmpDir")
-
         runBlocking {
-            val metadata = contentImportManager.extractMetadata(tempH5pFile.toURI().toString())!!
-            val contentEntry = metadata.contentEntry
-            val uid = repo.contentEntryDao.insertAsync(metadata.contentEntry)
-            val container = contentImportManager.importFileToContainer(tempH5pFile.toURI().toString(),
-                    metadata.mimeType, uid, containerTmpDir.absolutePath, mapOf()){
+            val contentEntry = h5pPlugin.extractMetadata(DoorUri.parse(tempH5pFile.toURI().toString()), ProcessContext(""))!!
 
-            }!!
             Assert.assertNotNull(contentEntry)
 
-            // Assert Entry
-            //Temporarily disabled
-//            Assert.assertEquals("Got ContentEntry with expected entryId",
-//                    "dialog-cards-620.h5p",
-//                    contentEntry.entryId)
             Assert.assertEquals("Got ContentEntry with expected title",
                     "Dialog Cards",
                     contentEntry.title)
@@ -116,6 +101,16 @@ class H5PTypePluginTest {
             Assert.assertEquals("Got Entry with expected license",
                     ContentEntry.LICENSE_TYPE_OTHER, contentEntry.licenseType)
 
+            val uid = repo.contentEntryDao.insert(contentEntry)
+
+            val contentJob = ContentJobItem(fromUri = tempH5pFile.toURI().toString(),
+                    toUri = containerTmpDir.toURI().toString(), cjiContentEntryUid =  uid)
+
+            runBlocking{
+                h5pPlugin.processJob(contentJob, ProcessContext(""))
+            }
+
+            val container = repo.containerDao.getMostRecentContainerForContentEntry(uid)!!
 
             Assert.assertNotNull(container)
 
@@ -141,11 +136,6 @@ class H5PTypePluginTest {
                     .forEach {
                         Assert.assertNotNull("File exists: $it", db.containerEntryDao.findByPathInContainer(container.containerUid, "workspace/${it.name}"))
                     }
-
-
-
-
-
         }
     }
 
