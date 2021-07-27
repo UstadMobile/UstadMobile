@@ -94,4 +94,22 @@
     <string name="deliver">تحویلول</string>
     <string name="categories_desc">د برخو اضافه کول سمون</string>
     <string name="location_desc">د موقعیتونو اضافه کول او سمون</string>
+    <string name="end_is_before_start_error">پای مخکښې د د پیل نه دی</string>
+    <string name="number_of_sales">د خرصلاو تعداد</string>
+    <string name="image">انځور</string>
+    <string name="csv">CSV</string>
+    <string name="not_delivered">ونه لیږدول شو</string>
+    <string name="not_set">تنظیم شوی نه دی</string>
+    <string name="deactivate_user">د کارند غیرفعاله کول</string>
+    <string name="average_sale_total">د خرصلاو د ټولټال اوسط</string>
+    <string name="confirm_deactivate_user">ایا ډاډه یاست چې دغه کارند غیرفعاله کوئ؟ تاسو به ونه شئ کولای چې بیرته یې فعاله کړئ.</string>
+    <string name="report_total_sales_by_category">د ګټګورئ پر بنسټ د خرصلاو مجموعه</string>
+    <string name="report_total_sales_by_le">د مخکښې متثشبثې ټولټال خرصلاو</string>
+    <string name="report_total_sales_by_product">د تولید پر بنسټ ټولټال خرصلاو</string>
+    <string name="report_total_sales_by_day">د ورځې پر بنسټ د خرصلاو ټولټال</string>
+    <string name="report_number_sales_by_le">د خرصلاو تعدید د مخکښې متشبثې پر بنسټ</string>
+    <string name="sales_total_afs">د خرصلاو ټولټال (افغانۍ)</string>
+    <string name="each_sales_total_afs">د هر یو خرصلاو ټولټال (افغانۍ)</string>
+    <string name="user_deactivated">غیرفعاله شوی کارند</string>
+    <string name="report_total_sales_by_location">د موقعیت پر بنسټ د خرصلاو مجموعه</string>
 </resources>
