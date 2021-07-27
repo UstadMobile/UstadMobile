@@ -40,12 +40,13 @@
         android:id="@+id/fragment_product_edit_edit_scroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        >
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/fragment_product_edit_edit_clx"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/dimen_16dp">
 
 
             <de.hdodenhof.circleimageview.CircleImageView

@@ -185,6 +185,7 @@ class ProductEditFragment: UstadEditFragment<Product>(), ProductEditView,
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

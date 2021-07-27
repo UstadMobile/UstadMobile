@@ -160,6 +160,7 @@ class SaleDeliveryEditFragment: UstadEditFragment<SaleDeliveryAndItems>(), SaleD
 
     override var fieldsEnabled: Boolean = false
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

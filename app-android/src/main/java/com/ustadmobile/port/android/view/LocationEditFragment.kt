@@ -73,6 +73,7 @@ class LocationEditFragment: UstadEditFragment<Location>(), LocationEditView, Loc
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

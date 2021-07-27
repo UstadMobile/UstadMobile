@@ -29,18 +29,10 @@ import org.kodein.di.instance
 
 
 class PersonEditPresenter(
-    context: Any,
-    arguments: Map<String, String>,
-    view: PersonEditView,
-    di: DI,
-    lifecycleOwner: DoorLifecycleOwner
-) : UstadEditPresenter<PersonEditView, PersonWithAccount>(
-    context,
-    arguments,
-    view,
-    di,
-    lifecycleOwner,
-    activeSessionRequired = !arguments.containsKey(PersonEditView.ARG_REGISTRATION_MODE)) {
+    context: Any, arguments: Map<String, String>, view: PersonEditView, di: DI,
+        lifecycleOwner: DoorLifecycleOwner) : UstadEditPresenter<PersonEditView,
+            PersonWithAccount>(context, arguments, view, di, lifecycleOwner,
+            activeSessionRequired = !arguments.containsKey(PersonEditView.ARG_REGISTRATION_MODE)) {
 
     private lateinit var serverUrl: String
 

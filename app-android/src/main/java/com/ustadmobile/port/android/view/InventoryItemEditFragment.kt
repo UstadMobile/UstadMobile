@@ -113,6 +113,7 @@ class InventoryItemEditFragment: UstadEditFragment<InventoryItem>(), InventoryIt
 
     override var fieldsEnabled: Boolean = false
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

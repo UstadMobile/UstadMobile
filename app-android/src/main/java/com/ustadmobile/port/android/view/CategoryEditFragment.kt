@@ -79,6 +79,7 @@ class CategoryEditFragment: UstadEditFragment<Category>(), CategoryEditView{
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

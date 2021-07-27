@@ -120,6 +120,7 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
 
     override var fieldsEnabled: Boolean = false
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }
@@ -127,7 +128,7 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
     override fun addSaleItem() {
         //Go to product list followed by sale item edit
         onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(SaleItemWithProduct::class.java, R.id.product_list_dest,
+        navigateToPickEntityFromList(SaleItemWithProduct::class.java, R.id.home_product_dest,
                 args= bundleOf(ARG_CREATE_SALE to "true")
         )
     }
