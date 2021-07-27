@@ -121,17 +121,6 @@ class PersonDetailPresenter(context: Any,
         }
     }
 
-//    fun handleClickManageParentalConsent() {
-//        val ppjUid = entityLiveData?.getValue()?.parentJoin?.ppjUid ?: 0
-//
-//        if(ppjUid != 0L) {
-//            systemImpl.go(ParentalConsentManagementView.VIEW_NAME,
-//                mapOf(ARG_ENTITY_UID to ppjUid.toString(),
-//                    ARG_NEXT to CURRENT_DEST), context)
-//        }else {
-//            view.showSnackBar(systemImpl.getString(MessageID.error, context))
-//        }
-//    }
 
 
 }
