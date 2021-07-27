@@ -394,6 +394,9 @@ dependencies {
     implementation "org.wordpress:utils:$version_android_wordpress_utils"
     implementation "com.android.volley:volley:$version_android_volley"
 
+    //Persian-Date-Picker
+    implementation "com.github.aliab:Persian-Date-Picker-Dialog:$version_persian_date_picker_aliab"
+
 
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
