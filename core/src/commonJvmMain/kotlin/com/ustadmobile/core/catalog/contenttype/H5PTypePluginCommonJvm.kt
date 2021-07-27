@@ -10,10 +10,10 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.xmlpull.v1.XmlPullParserException
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 import java.io.File
-import java.io.IOException
-import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.io.ext.addFileToContainer
@@ -21,11 +21,14 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.door.ext.openInputStream
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.core.container.PrefixContainerFileNamer
 import com.ustadmobile.core.contentjob.ContentPlugin
+import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.contentjob.SupportedContent
 import com.ustadmobile.core.io.ext.skipToEntry
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import kotlinx.serialization.json.*
@@ -49,7 +52,7 @@ val licenseMap = mapOf(
         "U" to ContentEntry.LICENSE_TYPE_OTHER
 )
 
-class H5PTypePluginCommonJvm(private val endpoint: Endpoint, override val di: DI): DIAware, ContentPlugin {
+class H5PTypePluginCommonJvm(private var context: Any, private val endpoint: Endpoint, override val di: DI): ContentPlugin {
 
         val viewName: String
     get() = XapiPackageContentView.VIEW_NAME
@@ -64,14 +67,16 @@ class H5PTypePluginCommonJvm(private val endpoint: Endpoint, override val di: DI
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
+    val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+
     override val jobType: Int
         get() = TODO("Not yet implemented")
 
-    override suspend fun canProcess(doorUri: DoorUri): Boolean {
+    override suspend fun canProcess(doorUri: DoorUri, process: ProcessContext): Boolean {
         return findH5pEntry(doorUri)
     }
 
-    override suspend fun extractMetadata(uri: DoorUri): ContentEntryWithLanguage? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): ContentEntryWithLanguage? {
         return withContext(Dispatchers.Default) {
             val inputStream = uri.openInputStream(context)
             return@withContext ZipInputStream(inputStream).use {
@@ -109,8 +114,9 @@ class H5PTypePluginCommonJvm(private val endpoint: Endpoint, override val di: DI
         }
     }
 
-    override suspend fun processJob(jobItem: ContentJobItem): ProcessResult {
-
+    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext): ProcessResult {
+        val uri = jobItem.fromUri ?: return ProcessResult(404)
+        val doorUri = DoorUri.parse(uri)
         val container = Container().apply {
             containerContentEntryUid = jobItem.cjiContentEntryUid
             cntLastModified = System.currentTimeMillis()
@@ -118,11 +124,13 @@ class H5PTypePluginCommonJvm(private val endpoint: Endpoint, override val di: DI
             containerUid = repo.containerDao.insert(this)
         }
 
-        val entry = db.contentEntryDao.findByUid(contentEntryUid)
+        val containerFolder = jobItem.cjiContainerBaseDir ?: defaultContainerDir.path
 
-        val containerAddOptions = ContainerAddOptions(storageDirUri = File(jobItem.cjiContainerBaseDir).toDoorUri())
+        val entry = db.contentEntryDao.findByUid(jobItem.cjiContentEntryUid)
+
+        val containerAddOptions = ContainerAddOptions(storageDirUri = File(containerFolder).toDoorUri())
         repo.addEntriesToContainerFromZip(container.containerUid, doorUri,
-                ContainerAddOptions(storageDirUri = File(jobItem.cjiContainerBaseDir).toDoorUri(),
+                ContainerAddOptions(storageDirUri = File(containerFolder).toDoorUri(),
                         fileNamer = PrefixContainerFileNamer("workspace/")), context)
 
         val h5pDistTmpFile = File.createTempFile("h5p-dist", "zip")

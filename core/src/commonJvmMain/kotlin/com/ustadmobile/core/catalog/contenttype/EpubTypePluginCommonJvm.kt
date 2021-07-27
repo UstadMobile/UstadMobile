@@ -6,7 +6,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.alternative
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.kodein.di.DIAware
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -17,6 +16,7 @@ import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.contentjob.ContentPlugin
+import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.contentjob.SupportedContent
 import com.ustadmobile.core.io.ext.skipToEntry
@@ -28,7 +28,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import org.xmlpull.v1.XmlPullParserFactory
 
-class EpubTypePluginCommonJvm(private val endpoint: Endpoint, override val di: DI) : DIAware, ContentPlugin {
+class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: Endpoint, override val di: DI) : ContentPlugin {
 
     val viewName: String
         get() = EpubContentView.VIEW_NAME
@@ -45,12 +45,12 @@ class EpubTypePluginCommonJvm(private val endpoint: Endpoint, override val di: D
 
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
-    override suspend fun canProcess(doorUri: DoorUri): Boolean {
-        return findOpfPath(doorUri) != null
+    override suspend fun canProcess(doorUri: DoorUri, process: ProcessContext): Boolean {
+        return findOpfPath(doorUri, process) != null
     }
 
-    override suspend fun extractMetadata(uri: DoorUri): ContentEntryWithLanguage? {
-        val opfPath = findOpfPath(uri) ?: return null
+    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): ContentEntryWithLanguage? {
+        val opfPath = findOpfPath(uri, process) ?: return null
         return withContext(Dispatchers.Default) {
             val xppFactory = XmlPullParserFactory.newInstance()
             try {
@@ -62,7 +62,7 @@ class EpubTypePluginCommonJvm(private val endpoint: Endpoint, override val di: D
                     val opfDocument = OpfDocument()
                     opfDocument.loadFromOPF(xpp)
 
-                    ContentEntryWithLanguage().apply {
+                    val entry = ContentEntryWithLanguage().apply {
                         contentFlags = ContentEntry.FLAG_IMPORTED
                         contentTypeFlag = ContentEntry.TYPE_EBOOK
                         licenseType = ContentEntry.LICENSE_TYPE_OTHER
@@ -79,14 +79,15 @@ class EpubTypePluginCommonJvm(private val endpoint: Endpoint, override val di: D
                             }
                         }
                     }
+                    entry
                 }
             } catch (e: Exception) {
-
+                null
             }
         }
     }
 
-    override suspend fun processJob(jobItem: ContentJobItem): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext): ProcessResult {
         val container = withContext(Dispatchers.Default) {
             val uri = jobItem.fromUri ?: return@withContext
             val doorUri = DoorUri.parse(uri)
@@ -110,13 +111,13 @@ class EpubTypePluginCommonJvm(private val endpoint: Endpoint, override val di: D
     }
 
 
-    suspend fun findOpfPath(uri: DoorUri): String? {
+    suspend fun findOpfPath(uri: DoorUri, process: ProcessContext): String? {
         return withContext(Dispatchers.Default) {
             val xppFactory = XmlPullParserFactory.newInstance()
             try {
                 val inputStream = uri.openInputStream(context)
 
-                return@withContext ZipInputStream(inputStream).use {
+                ZipInputStream(inputStream).use {
                     it.skipToEntry { entry -> entry.name == OCF_CONTAINER_PATH } ?: return@use
 
                     val ocfContainer = OcfDocument()
@@ -127,7 +128,7 @@ class EpubTypePluginCommonJvm(private val endpoint: Endpoint, override val di: D
                     ocfContainer.rootFiles.firstOrNull()?.fullPath
                 }
             } catch (e: Exception) {
-
+                null
             }
         }
     }
