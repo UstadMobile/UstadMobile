@@ -68,7 +68,7 @@
     <string name="payment_amount">مقدار پرداخت</string>
     <string name="payment_date">تاریخ پرداخت</string>
     <string name="order_due_date">مهلت فرمایش</string>
-    <string name="not_delivered">تحویل داده نشد</string>
+    <string name="not_delivered">تحویلی نشده</string>
     <string name="passwords_dont_match">رمزهای عبور یکسان نیست. دوباره کوشش نمائید.</string>
     <string name="unable_to_update_password">تغییر رمز عبور اجرأ گردیده نتوانست.</string>
     <string name="syncing">همگاه کردن</string>
