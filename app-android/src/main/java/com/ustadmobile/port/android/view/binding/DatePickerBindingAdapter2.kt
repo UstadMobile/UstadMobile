@@ -117,45 +117,33 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_date_picker,
             null, false)
 
-        var cal = adapterCalendar
-        if(!adapterCalendar.timeInMillis.isSet2){
-            cal = Calendar.getInstance()
+        val cal = adapterCalendar
+        val defaultCal = if(!adapterCalendar.timeInMillis.isSet2){
+            Calendar.getInstance()
+        }else{
+            cal
         }
 
         val impl : UstadMobileSystemImpl = (context.applicationContext as DIAware
                                             ).di.direct.instance()
-        val localeString = impl.getLocale(context).toString()
+        val localeString = impl.getLocale(context)
 
-        if(localeString != null && (localeString.startsWith("ps") ||
-                    localeString.startsWith("fa"))){
+        if(localeString.startsWith("ps") || localeString.startsWith("fa")){
 
             val picker: PersianDatePickerDialog = PersianDatePickerDialog(context)
                 .setPositiveButtonString(context.getString(R.string.ok))
                 .setNegativeButton(context.getString(R.string.cancel))
                 .setTodayButton(context.getString(R.string.today))
                 .setTodayButtonVisible(true)
-                .setMinYear(1300)
-                .setMaxYear(PersianDatePickerDialog.THIS_YEAR)
-                .setMaxMonth(PersianDatePickerDialog.THIS_MONTH)
-                .setMaxDay(PersianDatePickerDialog.THIS_DAY)
-                .setInitDate(cal.timeInMillis)
+                .setMinYear(1200)
+                .setMaxYear(1600)
+                .setInitDate(defaultCal.timeInMillis)
                 .setActionTextColor(Color.BLACK)
                 .setTypeFace(typeface)
                 .setTitleType(PersianDatePickerDialog.DAY_MONTH_YEAR)
                 .setShowInBottomSheet(true)
                 .setListener(object : PersianPickerListener {
                     override fun onDateSelected(@NotNull persianPickerDate: PersianPickerDate) {
-                        println("onDateSelected: " + persianPickerDate.getTimestamp()) //675930448000
-                        println("onDateSelected: " + persianPickerDate.getGregorianDate()
-                        ) //Mon Jun 03 10:57:28 GMT+04:30 1991
-                        println( "onDateSelected: " + persianPickerDate.getPersianLongDate()
-                        ) // دوشنبه  13  خرداد  1370
-                        println("onDateSelected: " + persianPickerDate.getPersianMonthName()
-                        ) //خرداد
-                        println("onDateSelected: " + PersianCalendarUtils.isPersianLeapYear(
-                                persianPickerDate.getPersianYear()
-                            )
-                        ) //true
                         Toast.makeText(
                             context,
                             persianPickerDate.getPersianYear().toString() + "/" +
@@ -171,6 +159,7 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
                         persianDate.setDate(adapterCalendar.timeInMillis)
 
                         text = persianDate.persianLongDate
+
                         inverseBindingListener.onChange()
                     }
 
@@ -179,7 +168,6 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
 
             picker.show()
 
-
         }else {
 
             val builder = AlertDialog.Builder(context)
@@ -187,7 +175,7 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
 
             val picker = dialogView.findViewById<DatePicker>(R.id.date_picker)
             picker.init(
-                cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH),
+                defaultCal.get(Calendar.YEAR), defaultCal.get(Calendar.MONTH), defaultCal.get(Calendar.DAY_OF_MONTH),
                 null
             )
 
@@ -232,11 +220,10 @@ fun TextView.setTextFromToDateTimeMillis(textFromDateLong: Long, textToDateLong:
     persianDateTo.setDate(textToDateLong)
     val dateFormat = android.text.format.DateFormat.getDateFormat(context)
 
-    text = if(localeString != null && (localeString.startsWith("ps") ||
-                localeString.startsWith("fa"))){
+    text = if(localeString.startsWith("ps") || localeString.startsWith("fa")){
 
         "${if (textFromDateLong > 0) persianDateFrom.persianLongDate else ""} -" +
-                " ${if (textToDateLong > 0 && textToDateLong != Long.MAX_VALUE) persianDateFrom.persianLongDate else ""}"
+                " ${if (textToDateLong > 0 && textToDateLong != Long.MAX_VALUE) persianDateTo.persianLongDate else ""}"
 
     }else{
         "${if (textFromDateLong > 0) dateFormat.format(textFromDateLong) else ""} -" +
