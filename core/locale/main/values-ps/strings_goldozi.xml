@@ -68,7 +68,7 @@
     <string name="payment_amount">د اداینې مقدار</string>
     <string name="payment_date">د تادیې نیټه</string>
     <string name="order_due_date">د فرمایش ټاکلی نیټه</string>
-    <string name="not_delivered">و نه سپارل شو</string>
+    <string name="not_delivered">ونه لیږدول شو</string>
     <string name="passwords_dont_match">پټ نوم سره ورته نه دي بیا هڅه وکړئ</string>
     <string name="unable_to_update_password">د پټ نوم بیا جوړل ترسره نه شو.</string>
     <string name="syncing">هممهالی کیږی</string>
