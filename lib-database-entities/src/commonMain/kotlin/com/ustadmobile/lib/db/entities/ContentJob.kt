@@ -9,5 +9,7 @@ data class ContentJob(
 
         var cjProgress: Long = 0,
 
-        var cjTotal: Long = 0
+        var cjTotal: Long = 0,
+
+        var params: String? = null
 )

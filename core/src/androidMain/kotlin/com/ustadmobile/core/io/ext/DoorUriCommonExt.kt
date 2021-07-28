@@ -3,6 +3,7 @@ package com.ustadmobile.core.io.ext
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.webkit.MimeTypeMap
+import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.door.DoorUri
 
 actual suspend fun DoorUri.guessMimeType(): String? {
@@ -23,4 +24,8 @@ fun DoorUri.extractVideoResolutionMetadata(context: Context): Pair<Int, Int>{
     metaRetriever.release()
 
     return Pair(originalWidth, originalHeight)
+}
+
+actual suspend fun DoorUri.downloadUrl(processContext: ProcessContext): DoorUri{
+    return this
 }

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.io.ext
 
+import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.door.DoorUri
 
 /**
@@ -9,3 +10,5 @@ import com.ustadmobile.door.DoorUri
 expect suspend fun DoorUri.guessMimeType(): String?
 
 expect suspend fun DoorUri.getSize(context: Any): Long
+
+expect suspend fun DoorUri.downloadUrl(processContext: ProcessContext): DoorUri
