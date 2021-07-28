@@ -61,7 +61,9 @@ class SalePaymentEditPresenter(context: Any,
         if(entity.salePaymentPaidAmount >  (totalSaleAmount - entity.saleDiscount)){
             view.showSnackBar(systemImpl.getString(MessageID.selected_payment_higher, context))
         }else {
-            entity.salePaymentPaidDate = UMCalendarUtil.getDateInMilliPlusDays(0)
+            if(entity.salePaymentPaidDate == 0L){
+                entity.salePaymentPaidDate = UMCalendarUtil.getDateInMilliPlusDays(0)
+            }
             view.finishWithResult(listOf(entity))
         }
     }
