@@ -63,7 +63,7 @@ class H5PTypePluginTest {
         tempH5pFile.copyInputStreamToFile(inputStream)
 
         val contentEntry = runBlocking {
-            h5pPlugin.extractMetadata(DoorUri.parse(tempH5pFile.toURI().toString()), ProcessContext(""))
+            h5pPlugin.extractMetadata(DoorUri.parse(tempH5pFile.toURI().toString()), ProcessContext(mutableMapOf<String,String>()))
         }
 //        Assert.assertEquals("Got ContentEntry with expected entryId",
 //                "dialog-cards-620.h5p",
@@ -88,7 +88,7 @@ class H5PTypePluginTest {
 
         val containerTmpDir = tmpFolder.newFolder("containerTmpDir")
         runBlocking {
-            val contentEntry = h5pPlugin.extractMetadata(DoorUri.parse(tempH5pFile.toURI().toString()), ProcessContext(""))!!
+            val contentEntry = h5pPlugin.extractMetadata(DoorUri.parse(tempH5pFile.toURI().toString()), ProcessContext(mutableMapOf<String,String>()))!!
 
             Assert.assertNotNull(contentEntry)
 
@@ -107,7 +107,7 @@ class H5PTypePluginTest {
                     toUri = containerTmpDir.toURI().toString(), cjiContentEntryUid =  uid)
 
             runBlocking{
-                h5pPlugin.processJob(contentJob, ProcessContext(""))
+                h5pPlugin.processJob(contentJob, ProcessContext(mutableMapOf<String,String>()))
             }
 
             val container = repo.containerDao.findByUid(contentJob.cjiContainerUid)!!

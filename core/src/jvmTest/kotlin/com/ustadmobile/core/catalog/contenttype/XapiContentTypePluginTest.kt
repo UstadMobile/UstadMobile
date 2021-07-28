@@ -48,7 +48,7 @@ class XapiContentTypePluginTest {
 
         val xapiPlugin =  XapiTypePluginCommonJvm(Any(), Endpoint("http://localhost/dummy"), di)
         val contentEntry = runBlocking {
-            xapiPlugin.extractMetadata(DoorUri.parse(tempFile.toURI().toString()), ProcessContext(""))
+            xapiPlugin.extractMetadata(DoorUri.parse(tempFile.toURI().toString()), ProcessContext(mutableMapOf<String,String>()))
         }
 
         Assert.assertEquals("Got expected title",
