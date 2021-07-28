@@ -43,13 +43,28 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
             systemImpl.getString(MessageID.join_school, context)
         }
 
-        if(codeArg.isNotEmpty()) {
-            handleClickDone(codeArg)
-        }else {
-            view.loading = false
+        entityTableId = tableId ?: 0
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        //If the code is in the args, we should make only one attempt to use it
+        //Because it can lead to navigation, this must be done in onStart
+        val codeFromArgsUsed = ustadNavController.currentBackStackEntry?.savedStateHandle
+            ?.get<String>(CODE_FROM_ARGS_USED)?.toBoolean() ?: false
+
+        if(!codeFromArgsUsed) {
+            val codeArg = arguments[UstadView.ARG_CODE] ?:""
+            if(codeArg.isNotEmpty()) {
+                ustadNavController.currentBackStackEntry?.savedStateHandle
+                    ?.set(CODE_FROM_ARGS_USED, true.toString())
+                handleClickDone(codeArg)
+            }else {
+                view.loading = false
+            }
         }
 
-        entityTableId = tableId ?: 0
     }
 
     fun handleClickDone(code: String) {
@@ -59,7 +74,7 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
         }
 
         view.loading = true
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch {
             if(entityTableId == Clazz.TABLE_ID){
                 val clazzToJoin = dbRepo.clazzDao.findByClazzCode(code.trim())
                 val personToEnrol = dbRepo.takeIf { clazzToJoin != null }?.personDao
@@ -113,6 +128,15 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
             }
 
         }
+    }
+
+    companion object {
+
+        /**
+         * Used to remember if the code from the arguments has already been used
+         */
+        const val CODE_FROM_ARGS_USED = "codeEntered"
+
     }
 
 }
