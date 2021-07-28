@@ -97,7 +97,6 @@ fun TextView.setDateTime2(timeInMillis: Long, timeZoneId: String?, dateTimeInMil
         if(localeString.startsWith("ps") ||
             localeString.startsWith("fa")
         ){
-//            persianDate.persianLongDate
             persianDate.persianYear.toString() + "/" +
                     persianDate.persianMonth + "/" +
                     persianDate.persianDay
@@ -140,7 +139,7 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
                 .setInitDate(defaultCal.timeInMillis)
                 .setActionTextColor(Color.BLACK)
                 .setTypeFace(typeface)
-                .setTitleType(PersianDatePickerDialog.DAY_MONTH_YEAR)
+                .setTitleType(PersianDatePickerDialog.NO_TITLE)
                 .setShowInBottomSheet(true)
                 .setListener(object : PersianPickerListener {
                     override fun onDateSelected(@NotNull persianPickerDate: PersianPickerDate) {
@@ -158,7 +157,9 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
                         val persianDate = PersianDateImpl()
                         persianDate.setDate(adapterCalendar.timeInMillis)
 
-                        text = persianDate.persianLongDate
+                        text = persianPickerDate.getPersianYear().toString() + "/" +
+                                persianPickerDate.getPersianMonth() + "/" +
+                                persianPickerDate.getPersianDay()
 
                         inverseBindingListener.onChange()
                     }
@@ -219,11 +220,17 @@ fun TextView.setTextFromToDateTimeMillis(textFromDateLong: Long, textToDateLong:
     val persianDateTo = PersianDateImpl()
     persianDateTo.setDate(textToDateLong)
     val dateFormat = android.text.format.DateFormat.getDateFormat(context)
+    val persianFromText = persianDateFrom.getPersianYear().toString() + "/" +
+            persianDateFrom.getPersianMonth() + "/" +
+            persianDateFrom.getPersianDay()
+    val persianToText = persianDateTo.getPersianYear().toString() + "/" +
+            persianDateTo.getPersianMonth() + "/" +
+            persianDateTo.getPersianDay()
 
     text = if(localeString.startsWith("ps") || localeString.startsWith("fa")){
 
-        "${if (textFromDateLong > 0) persianDateFrom.persianLongDate else ""} -" +
-                " ${if (textToDateLong > 0 && textToDateLong != Long.MAX_VALUE) persianDateTo.persianLongDate else ""}"
+        "${if (textFromDateLong > 0) persianFromText else ""} -" +
+                " ${if (textToDateLong > 0 && textToDateLong != Long.MAX_VALUE) persianToText else ""}"
 
     }else{
         "${if (textFromDateLong > 0) dateFormat.format(textFromDateLong) else ""} -" +

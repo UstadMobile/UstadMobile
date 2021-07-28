@@ -395,7 +395,9 @@ dependencies {
     implementation "com.android.volley:volley:$version_android_volley"
 
     //Persian-Date-Picker
-    implementation "com.github.aliab:Persian-Date-Picker-Dialog:$version_persian_date_picker_aliab"
+    //implementation 'com.github.varunasingh:Persian-Date-Picker-Dialog-Strings:1.7.1'
+    implementation 'com.github.varunasingh:Persian-Date-Picker-Dialog-Strings:primary-SNAPSHOT'
+    //implementation "com.github.aliab:Persian-Date-Picker-Dialog:$version_persian_date_picker_aliab"
 
 
     testImplementation project(":lib-test-common")
