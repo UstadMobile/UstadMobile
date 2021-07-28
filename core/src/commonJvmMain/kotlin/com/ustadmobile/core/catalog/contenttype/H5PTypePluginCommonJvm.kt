@@ -1,5 +1,7 @@
 package com.ustadmobile.core.catalog.contenttype
 
+import com.google.gson.JsonObject
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import com.ustadmobile.core.util.getAssetFromResource
@@ -8,10 +10,10 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.xmlpull.v1.XmlPullParserException
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 import java.io.File
-import java.io.IOException
-import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.io.ext.addFileToContainer
@@ -19,8 +21,19 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.door.ext.openInputStream
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.core.container.PrefixContainerFileNamer
+import com.ustadmobile.core.contentjob.ContentPlugin
+import com.ustadmobile.core.contentjob.ProcessContext
+import com.ustadmobile.core.contentjob.ProcessResult
+import com.ustadmobile.core.contentjob.SupportedContent
+import com.ustadmobile.core.io.ext.skipToEntry
+import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.view.XapiPackageContentView
+import com.ustadmobile.lib.db.entities.ContentJobItem
 import kotlinx.serialization.json.*
+import java.lang.IllegalArgumentException
+import java.util.*
 
 
 val licenseMap = mapOf(
@@ -39,83 +52,85 @@ val licenseMap = mapOf(
         "U" to ContentEntry.LICENSE_TYPE_OTHER
 )
 
-class H5PTypePluginCommonJvm(): H5PTypePlugin() {
+class H5PTypePluginCommonJvm(private var context: Any, private val endpoint: Endpoint, override val di: DI): ContentPlugin {
 
-    override suspend fun extractMetadata(uri: String, context: Any): ContentEntryWithLanguage? {
-        return withContext(Dispatchers.Default){
-            var contentEntry: ContentEntryWithLanguage? = null
-            try {
-                val doorUri = DoorUri.parse(uri)
-                val inputStream = doorUri.openInputStream(context)
+        val viewName: String
+    get() = XapiPackageContentView.VIEW_NAME
 
-                ZipInputStream(inputStream).use {
-                    var zipEntry: ZipEntry? = null
-                    while ({ zipEntry = it.nextEntry; zipEntry }() != null) {
+    override val supportedMimeTypes: List<String>
+    get() = listOf(*SupportedContent.H5P_MIME_TYPES)
 
-                        val fileName = zipEntry?.name
-                        if (fileName?.toLowerCase() == "h5p.json") {
+    override val supportedFileExtensions: List<String>
+    get() = listOf(*SupportedContent.H5P_EXTENSIONS)
 
-                            val data = String(it.readBytes())
+    private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
-                            val json = Json.parseToJsonElement(data) as JsonObject
+    private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-                            // take the name from the role Author otherwise take last one
-                            var author: String? = ""
-                            var name: String? = ""
-                            json["authors"]?.jsonArray?.forEach {
-                                name = it.jsonObject["name"]?.jsonPrimitive?.content ?: ""
-                                val role = it.jsonObject["role"]?.jsonPrimitive?.content ?: ""
-                                if (role == "Author") {
-                                    author = name
-                                }
-                            }
-                            if (author.isNullOrEmpty()) {
-                                author = name
-                            }
+    val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
-                            contentEntry = ContentEntryWithLanguage().apply {
-                                contentFlags = ContentEntry.FLAG_IMPORTED
-                                contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
-                                licenseType = licenseMap[json.jsonObject["license"] ?: ""]
-                                        ?: ContentEntry.LICENSE_TYPE_OTHER
-                                title = if(json.jsonObject["title"]?.jsonPrimitive?.content.isNullOrEmpty())
-                                    doorUri.getFileName(context) else json.jsonObject["title"]?.jsonPrimitive?.content
-                                this.author = author
-                                leaf = true
-                            }
-                            break
-                        }
+    override val jobType: Int
+        get() = TODO("Not yet implemented")
 
+    override suspend fun canProcess(doorUri: DoorUri, process: ProcessContext): Boolean {
+        return findH5pEntry(doorUri)
+    }
+
+    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): ContentEntryWithLanguage? {
+        return withContext(Dispatchers.Default) {
+            val inputStream = uri.openInputStream(context)
+            return@withContext ZipInputStream(inputStream).use {
+                it.skipToEntry { it.name == H5P_PATH } ?: throw IllegalArgumentException("no h5p file")
+
+                val data = String(it.readBytes())
+
+                val json = Json.parseToJsonElement(data) as JsonObject
+
+                // take the name from the role Author otherwise take last one
+                var author: String? = ""
+                var name: String? = ""
+                json["authors"]?.jsonArray?.forEach {
+                    name = it.jsonObject["name"]?.jsonPrimitive?.content ?: ""
+                    val role = it.jsonObject["role"]?.jsonPrimitive?.content ?: ""
+                    if (role == "Author") {
+                        author = name
                     }
                 }
-            } catch (e: IOException) {
-                e.printStackTrace()
-            } catch (e: XmlPullParserException) {
-                e.printStackTrace()
-            }
+                if (author.isNullOrEmpty()) {
+                    author = name
+                }
 
-            contentEntry
+                ContentEntryWithLanguage().apply {
+                    contentFlags = ContentEntry.FLAG_IMPORTED
+                    contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
+                    licenseType = licenseMap[json.jsonObject["license"] ?: ""]
+                            ?: ContentEntry.LICENSE_TYPE_OTHER
+                    title = if(json.jsonObject["title"]?.jsonPrimitive?.content.isNullOrEmpty())
+                        uri.getFileName(context) else json.jsonObject["title"]?.jsonPrimitive?.content
+                    this.author = author
+                    leaf = true
+                }
+            }
         }
     }
 
-    override suspend fun importToContainer(uri: String, conversionParams: Map<String, String>,
-                                           contentEntryUid: Long, mimeType: String, containerBaseDir: String,
-                                           context: Any,
-                                           db: UmAppDatabase, repo: UmAppDatabase,
-                                           progressListener: (Int) -> Unit): Container {
+    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext): ProcessResult {
+        val uri = jobItem.fromUri ?: return ProcessResult(404)
         val doorUri = DoorUri.parse(uri)
         val container = Container().apply {
-            containerContentEntryUid = contentEntryUid
+            containerContentEntryUid = jobItem.cjiContentEntryUid
             cntLastModified = System.currentTimeMillis()
-            this.mimeType = mimeType
+            this.mimeType = supportedMimeTypes.first()
             containerUid = repo.containerDao.insert(this)
         }
 
-        val entry = db.contentEntryDao.findByUid(contentEntryUid)
+        val containerFolder = jobItem.cjiContainerBaseDir ?: defaultContainerDir.path
 
-        val containerAddOptions = ContainerAddOptions(storageDirUri = File(containerBaseDir).toDoorUri())
+        val entry = db.contentEntryDao.findByUid(jobItem.cjiContentEntryUid)
+
+        val containerAddOptions = ContainerAddOptions(storageDirUri = File(containerFolder).toDoorUri())
         repo.addEntriesToContainerFromZip(container.containerUid, doorUri,
-                ContainerAddOptions(storageDirUri = File(containerBaseDir).toDoorUri(),
+                ContainerAddOptions(storageDirUri = File(containerFolder).toDoorUri(),
                         fileNamer = PrefixContainerFileNamer("workspace/")), context)
 
         val h5pDistTmpFile = File.createTempFile("h5p-dist", "zip")
@@ -166,7 +181,22 @@ class H5PTypePluginCommonJvm(): H5PTypePlugin() {
                 "index.html", containerAddOptions)
         tmpIndexHtmlFile.delete()
 
-        return repo.containerDao.findByUid(container.containerUid) ?: container
+        repo.containerDao.findByUid(container.containerUid)
 
+        return ProcessResult(200)
+    }
+
+    suspend fun findH5pEntry(doorUri: DoorUri): Boolean {
+        return withContext(Dispatchers.Default) {
+            val inputStream = doorUri.openInputStream(context)
+            return@withContext ZipInputStream(inputStream).use {
+                it.skipToEntry { entry -> entry.name == H5P_PATH } != null
+            }
+        }
+    }
+
+    companion object {
+
+        private const val H5P_PATH = "h5p.json"
     }
 }
