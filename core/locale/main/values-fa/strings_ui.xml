@@ -800,4 +800,20 @@
     <string name="underRegistrationAgeError">ثبت نام اطفال کمتر 13 سال مجاز نیست. لطفاً از استاد خود بخواهید که شما را ثبت نام نماید.</string>
     <string name="edit_leaving_reason">ویرایش دلیل نتیجه ثبت نام</string>
     <string name="license_type_cc_0">مجوز CC0</string>
+
+    <string name="farvardin">حمل</string>
+    <string name="ordibehesht">ثور</string>
+    <string name="khordad">جوزا</string>
+    <string name="tir">سرطان</string>
+    <string name="mordad">اسد</string>
+    <string name="shahrivar">سنبله</string>
+    <string name="mehr">میزان</string>
+    <string name="aban">عقرب</string>
+    <string name="azar">قوس</string>
+    <string name="dey">جدی</string>
+    <string name="bahman">دلو</string>
+    <string name="esfand">حوت</string>
+
+
+
 </resources>
