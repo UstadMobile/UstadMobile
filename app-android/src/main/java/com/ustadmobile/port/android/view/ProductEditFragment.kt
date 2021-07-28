@@ -31,6 +31,7 @@ import com.ustadmobile.lib.db.entities.ProductPicture
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import java.io.File
@@ -60,11 +61,23 @@ class ProductEditFragment: UstadEditFragment<Product>(), ProductEditView,
     override val mEditPresenter: UstadEditPresenter<*, Product>?
         get() = mPresenter
 
+    private var imageViewLifecycleObserver: ImageViewLifecycleObserver2? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        imageViewLifecycleObserver = ImageViewLifecycleObserver2(
+            requireActivity().activityResultRegistry,null, 1).also {
+            lifecycle.addObserver(it)
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView: View
         mBinding = FragmentProductEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
+            it.imageViewLifecycleObserver = imageViewLifecycleObserver
             it.activityEventHandler = this
         }
 

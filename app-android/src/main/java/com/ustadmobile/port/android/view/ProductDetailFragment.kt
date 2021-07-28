@@ -184,16 +184,27 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
             it.locale = UMAndroidUtil.getCurrentLocale(requireContext())
 
         }
-        mBinding?.fragmentEventHandler = this
+
         val accountManager: UstadAccountManager by instance()
         repo = di.direct.on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
 
-        mPresenter = ProductDetailPresenter(requireContext(), arguments.toStringMap(), this,
-                di, this)
-        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
+
 
         return rootView
     }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        mPresenter = ProductDetailPresenter(requireContext(), arguments.toStringMap(), this,
+            di, this)
+        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
+        mBinding?.fragmentEventHandler = this
+
+
+    }
+
+
 
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter

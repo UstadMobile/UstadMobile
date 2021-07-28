@@ -6,6 +6,7 @@
     <data>
         <import type="android.view.View"/>
         <import type="com.ustadmobile.port.android.view.ProductDetailFragment"/>
+
         <variable
             name="product"
             type="com.ustadmobile.lib.db.entities.ProductWithInventoryCount" />
@@ -42,6 +43,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/activity_product_edit_edit_clx"
+            android:paddingBottom="@dimen/dimen_116dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 

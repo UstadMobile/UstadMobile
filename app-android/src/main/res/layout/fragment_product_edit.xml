@@ -16,13 +16,17 @@
             type="com.ustadmobile.lib.db.entities.ProductPicture"/>
 
         <variable
+            name="imageViewLifecycleObserver"
+            type="com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2" />
+
+
+        <variable
             name="productPictureUri"
             type="String" />
 
         <variable
             name="loading"
             type="boolean" />
-
 
         <variable
             name="fieldsEnabled"
@@ -56,6 +60,7 @@
                 android:layout_marginTop="@dimen/dimen_8dp"
                 app:civ_circle_background_color="?colorSecondary"
                 app:imageUri="@={productPicture.productPictureUri}"
+                app:imageViewLifecycleObserver="@{imageViewLifecycleObserver}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
