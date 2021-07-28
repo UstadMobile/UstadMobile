@@ -46,12 +46,9 @@ class PrototypeLocalizerXmlFilter(val englishStrings: StringsXml,
             }
 
             return true
-        }else if(parser.eventType == XmlPullParser.START_TAG && parser.name == "div") {
-            val propertyName = parser.getAttributeValue("http://www.evolus.vn/Namespace/Pencil",
-                "name")
-
-            if(propertyName == "text")
-                inTextSection = true
+        }else if(parser.eventType == XmlPullParser.START_TAG &&
+            (parser.name == "div" || parser.name == "tspan" || parser.name == "text")) {
+            inTextSection = true
         }
 
         if(parser.eventType == XmlPullParser.END_TAG) {
