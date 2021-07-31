@@ -3,10 +3,12 @@ package com.ustadmobile.port.android
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.clearAllTablesAndResetSync
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -71,8 +73,13 @@ class DownloadJobConnectivityChangeTriggerEventsTest {
 
         nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
             randomUuid().toString())
-        umAppDatabase = UmAppDatabase.getInstance(context, nodeIdAndAuth)
-        umAppDatabase.clearAllTables()
+//        umAppDatabase = UmAppDatabase.getInstance(context, nodeIdAndAuth)
+//        umAppDatabase.clearAllTables()
+
+        umAppDatabase = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class,
+            "UmAppDatabase").build()
+            .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
+
 
         repo = umAppDatabase.asRepository(repositoryConfig(context, "http://localhost/dummy",
             nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))

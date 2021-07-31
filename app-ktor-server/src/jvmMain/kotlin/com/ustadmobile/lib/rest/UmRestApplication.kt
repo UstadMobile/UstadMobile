@@ -9,6 +9,7 @@ import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -160,7 +161,11 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             val dbProperties = appConfig.databasePropertiesFromSection("ktor.database",
                 defaultUrl = "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
             InitialContext().bindDataSourceIfNotExisting(dbHostName, dbProperties)
-            UmAppDatabase.getInstance(Any(), dbHostName, instance<NodeIdAndAuth>(), primary = true)
+            val nodeIdAndAuth: NodeIdAndAuth = instance()
+            DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbHostName)
+                .addSyncCallback(nodeIdAndAuth, true)
+                .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
+                .build()
         }
 
         bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {

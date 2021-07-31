@@ -6,10 +6,12 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import com.ustadmobile.core.io.ext.toContainerEntryWithMd5
 import com.ustadmobile.core.io.ext.toKmpUriString
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -92,9 +94,10 @@ class ContainerFetcherJobOkHttpTest {
         }
 
         val serverNodeIdAndAuth = NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
-        serverDb = UmAppDatabase.getInstance(Any(), "UmAppDatabase", serverNodeIdAndAuth, primary = true).also {
-            it.clearAllTablesAndResetSync(serverNodeIdAndAuth.nodeId, true)
-        }
+        serverDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+            .addSyncCallback(serverNodeIdAndAuth, true)
+            .build()
+            .clearAllTablesAndResetSync(serverNodeIdAndAuth.nodeId, true)
 
         serverRepo = serverDb.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
             serverNodeIdAndAuth.nodeId, serverNodeIdAndAuth.auth, serverHttpClient, serverOkHttpClient))

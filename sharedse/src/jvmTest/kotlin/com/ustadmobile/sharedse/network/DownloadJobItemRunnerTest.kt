@@ -12,6 +12,7 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
+import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
@@ -19,6 +20,7 @@ import com.ustadmobile.core.io.ext.toKmpUriString
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.UMURLEncoder
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
@@ -266,9 +268,10 @@ class DownloadJobItemRunnerTest {
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName, nodeIdAndAuth).also {
-                    it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId)
-                })
+                spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
+                    .addSyncCallback(nodeIdAndAuth, false)
+                    .build()
+                    .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, false))
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
@@ -353,9 +356,10 @@ class DownloadJobItemRunnerTest {
         containerDownloadManager = clientDi.on(accountManager.activeAccount).direct.instance()
 
         serverNodeIdAndAuth = NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
-        serverDb = UmAppDatabase.getInstance(context, serverNodeIdAndAuth).also {
-            it.clearAllTablesAndResetSync(serverNodeIdAndAuth.nodeId)
-        }
+        serverDb = DatabaseBuilder.databaseBuilder(context, UmAppDatabase::class, "UmAppDatabase")
+            .addSyncCallback(serverNodeIdAndAuth, true)
+            .build()
+            .clearAllTablesAndResetSync(serverNodeIdAndAuth.nodeId, true)
 
         //this can be shared as needed
         val httpClient: HttpClient= clientDi.direct.instance()

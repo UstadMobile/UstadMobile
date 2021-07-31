@@ -67,7 +67,8 @@ class IndexPhetContentScraper {
         containerDir.mkdirs()
         this.containerDir = destinationDir
 
-        db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
+        //replace with DI
+        //db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
         repository = db //db!!.getRepository("https://localhost", "")
         contentEntryDao = repository!!.contentEntryDao
         contentParentChildJoinDao = repository!!.contentEntryParentChildJoinDao

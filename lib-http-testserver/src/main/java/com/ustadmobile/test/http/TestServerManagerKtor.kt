@@ -1,6 +1,7 @@
 package com.ustadmobile.test.http
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.door.util.randomUuid
@@ -35,6 +36,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.net.InetAddress
 import kotlin.random.Random.Default.nextInt
 import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.core.db.ext.addSyncCallback
 
 val umRestServerInstances = mutableMapOf<Int, TestApplicationHolder>()
 
@@ -99,9 +101,10 @@ fun Application.testServerManager() {
             val nodeIdAndAuth = NodeIdAndAuth(nextInt(), randomUuid().toString())
             initialContext.bindNewSqliteDataSourceIfNotExisting(dbName, isPrimary = true)
 
-
-            val umDb = UmAppDatabase.getInstance(Any(), dbName, nodeIdAndAuth, true)
-            umDb.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
+            val umDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+                .addSyncCallback(nodeIdAndAuth, true)
+                .build()
+                .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
 
             val umRestServer = embeddedServer(Netty, port = appPort, host= proxyHost, module = {
                 umRestApplication(devMode = true, singletonDbName = dbName)
