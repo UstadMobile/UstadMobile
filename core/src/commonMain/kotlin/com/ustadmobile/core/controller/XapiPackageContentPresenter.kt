@@ -47,6 +47,10 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
 
     private var tinCanXml: TinCanXML? = null
 
+    private var onCreateException: Exception? = null
+
+    private var isStarted: Boolean = false
+
     private var mountedPath: String = ""
 
     private val mounter: ContainerMounter by instance()
@@ -119,10 +123,23 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
                 }
             }catch (e: Exception){
                 if(e !is CancellationException){
-                    view.showSnackBar(systemImpl.getString(MessageID.error_opening_file, context))
+                    if(isStarted){
+                        navigateToErrorScreen(e)
+                    }else{
+                        onCreateException = e
+                    }
                 }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        isStarted = true
+        onCreateException?.also {
+            navigateToErrorScreen(it)
+        }
+        onCreateException = null
     }
 
     override fun onStop() {
@@ -153,7 +170,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
 
     override fun onDestroy() {
         super.onDestroy()
-        GlobalScope.launch {
+        GlobalScope.launch (Dispatchers.Main){
             if(mountedPath.isNotEmpty()){
                 mounter.unMountContainer(mountedEndpoint, mountedPath)
             }
