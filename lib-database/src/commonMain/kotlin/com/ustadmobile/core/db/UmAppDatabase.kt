@@ -4758,7 +4758,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                            siteLcb = (SELECT COALESCE(
                                              (SELECT nodeClientId 
                                                 FROM SyncNode
-                                               LIMIT 1), 0)
+                                               LIMIT 1), 0))
                 """)
                 database.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth2 (  pauthUid  BIGINT  PRIMARY KEY  NOT NULL , pauthMechanism  TEXT , pauthAuth  TEXT , pauthLcsn  BIGINT  NOT NULL , pauthPcsn  BIGINT  NOT NULL , pauthLcb  INTEGER  NOT NULL , pauthLct  BIGINT  NOT NULL )")
                 database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonAuth2_mcsn_seq")
@@ -5091,9 +5091,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             database.execSQL("DROP TABLE IF EXISTS ContentEntryProgress_trk")
         }
 
-        val MIGRATION_75_76 = DoorMigrationSync(75, 76) { database ->
-            database.execSQL("CREATE INDEX IF NOT EXISTS `index_StatementEntity_statementContentEntryUid_statementPersonUid_contentEntryRoot_timestamp_statementLocalChangeSeqNum` ON StatementEntity (`statementContentEntryUid`, `statementPersonUid`, `contentEntryRoot`, `timestamp`, `statementLocalChangeSeqNum`)")
-            database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzAssignment_caClazzUid` ON ClazzAssignment (`caClazzUid`)")
+
+        }
+
+        val MIGRATION_75_76 = object : DoorMigrationSync(75, 76) { database ->
+            database.execSQL("CREATE INDEX IF NOT EXISTS index_StatementEntity_statementContentEntryUid_statementPersonUid_contentEntryRoot_timestamp_statementLocalChangeSeqNum ON StatementEntity (statementContentEntryUid, statementPersonUid, contentEntryRoot, timestamp, statementLocalChangeSeqNum)")
+            database.execSQL("CREATE INDEX IF NOT EXISTS index_ClazzAssignment_caClazzUid ON ClazzAssignment (caClazzUid)")
         }
 
         //Fix adding clazz content permissions for existing teacher and student ScopedGrants.
