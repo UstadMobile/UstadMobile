@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzLogEditView
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.port.android.util.ext.*
+import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 
 
 interface ClazzLogEditFragmentEventHandler {
@@ -40,6 +41,12 @@ class ClazzLogEditFragment: UstadEditFragment<ClazzLog>(), ClazzLogEditView, Cla
         get() = mBinding?.dateError
         set(value) {
             mBinding?.dateError = value
+        }
+
+    override var timeZone: String?
+        get() = mBinding?.timeZoneId
+        set(value) {
+            mBinding?.timeZoneId = value
         }
 
     override var timeError: String?
@@ -76,6 +83,8 @@ class ClazzLogEditFragment: UstadEditFragment<ClazzLog>(), ClazzLogEditView, Cla
         set(value) {
             field = value
             mBinding?.clazzLog = value
+            mBinding?.dateTimeMode = MODE_START_OF_DAY
+
         }
 
     override var fieldsEnabled: Boolean = false

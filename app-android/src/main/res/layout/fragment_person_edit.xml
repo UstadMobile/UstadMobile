@@ -92,9 +92,12 @@
             name="emailError"
             type="String" />
 
+        <variable
+            name="timeZoneId"
+            type="String" />
 
-
-
+        <variable name="dateTimeMode"
+            type="Integer"/>
 
 
     </data>
@@ -274,7 +277,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/birthday"
-                    app:dateLong="@={person.dateOfBirth}"
+                    app:dateTimeInMillis="@={person.dateOfBirth}"
+                    app:timeZoneId="@{timeZoneId}"
+                    app:dateTimeInMillisMode="@{dateTimeMode}"
                     app:dateUseSpinners="@{true}"
                     android:inputType="@{InputType.TYPE_NULL}"
                     android:cursorVisible="false"
