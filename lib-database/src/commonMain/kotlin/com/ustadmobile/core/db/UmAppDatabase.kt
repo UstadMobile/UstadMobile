@@ -5286,13 +5286,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         val MIGRATION_175_176 = object : DoorMigration(175, 176) {
             override fun migrate(database: DoorSqlDatabase) {
-
                 database.execSQL("CREATE INDEX IF NOT EXISTS index_StatementEntity_statementContentEntryUid_statementPersonUid_contentEntryRoot_timestamp_statementLocalChangeSeqNum ON StatementEntity (statementContentEntryUid, statementPersonUid, contentEntryRoot, timestamp, statementLocalChangeSeqNum)")
                 database.execSQL("CREATE INDEX IF NOT EXISTS index_ClazzAssignment_caClazzUid ON ClazzAssignment (caClazzUid)")
-
             }
-
-
         }
 
         //Fix adding clazz content permissions for existing teacher and student ScopedGrants.
