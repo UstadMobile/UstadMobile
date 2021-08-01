@@ -7,18 +7,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.DatePicker
 import android.widget.TextView
-import android.widget.Toast
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMCalendarUtil
 import ir.hamsaa.persiandatepicker.PersianDatePickerDialog
 import ir.hamsaa.persiandatepicker.api.PersianPickerDate
 import ir.hamsaa.persiandatepicker.api.PersianPickerListener
 import ir.hamsaa.persiandatepicker.date.PersianDateImpl
-import ir.hamsaa.persiandatepicker.util.PersianCalendarUtils
 import org.jetbrains.annotations.NotNull
 import org.kodein.di.DIAware
 import org.kodein.di.direct
@@ -87,7 +84,7 @@ fun TextView.setDateTime2(timeInMillis: Long, timeZoneId: String?, dateTimeInMil
 
     val impl : UstadMobileSystemImpl = (context.applicationContext as DIAware
             ).di.direct.instance()
-    val localeString = impl.getLocale(context).toString()
+    val localeString = impl.getDisplayedLocale(context)
     val persianDate = PersianDateImpl()
     persianDate.setDate(adapterCalendar.timeInMillis)
 
@@ -125,7 +122,7 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
 
         val impl : UstadMobileSystemImpl = (context.applicationContext as DIAware
                                             ).di.direct.instance()
-        val localeString = impl.getLocale(context)
+        val localeString = impl.getDisplayedLocale(context)
 
         if(localeString.startsWith("ps") || localeString.startsWith("fa")){
 
@@ -143,14 +140,6 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
                 .setShowInBottomSheet(true)
                 .setListener(object : PersianPickerListener {
                     override fun onDateSelected(@NotNull persianPickerDate: PersianPickerDate) {
-                        Toast.makeText(
-                            context,
-                            persianPickerDate.getPersianYear().toString() + "/" +
-                                    persianPickerDate.getPersianMonth() + "/" +
-                                        persianPickerDate.getPersianDay() + " timestamp: " + persianPickerDate.timestamp
-                                        + " converted : " + UMCalendarUtil.getPrettyDateFromLong(persianPickerDate.timestamp, null) ,
-                            Toast.LENGTH_SHORT
-                        ).show()
 
                         adapterCalendar.timeInMillis = persianPickerDate.timestamp
 
@@ -213,21 +202,22 @@ fun TextView.setDateUseSpinners(dateUseSpinners: Boolean) {
 fun TextView.setTextFromToDateTimeMillis(textFromDateLong: Long, textToDateLong: Long) {
     val impl : UstadMobileSystemImpl = (context.applicationContext as DIAware
             ).di.direct.instance()
-    val localeString = impl.getLocale(context)
-    val persianDateFrom = PersianDateImpl()
-    persianDateFrom.setDate(textFromDateLong)
-
-    val persianDateTo = PersianDateImpl()
-    persianDateTo.setDate(textToDateLong)
-    val dateFormat = android.text.format.DateFormat.getDateFormat(context)
-    val persianFromText = persianDateFrom.getPersianYear().toString() + "/" +
-            persianDateFrom.getPersianMonth() + "/" +
-            persianDateFrom.getPersianDay()
-    val persianToText = persianDateTo.getPersianYear().toString() + "/" +
-            persianDateTo.getPersianMonth() + "/" +
-            persianDateTo.getPersianDay()
+    val localeString = impl.getDisplayedLocale(context)
 
     text = if(localeString.startsWith("ps") || localeString.startsWith("fa")){
+
+        val persianDateTo = PersianDateImpl()
+        persianDateTo.setDate(textToDateLong)
+        val dateFormat = android.text.format.DateFormat.getDateFormat(context)
+
+        val persianDateFrom = PersianDateImpl()
+        persianDateFrom.setDate(textFromDateLong)
+        val persianFromText = persianDateFrom.persianYear.toString() + "/" +
+                persianDateFrom.persianMonth + "/" +
+                persianDateFrom.persianDay
+        val persianToText = persianDateTo.persianYear.toString() + "/" +
+                persianDateTo.persianMonth + "/" +
+                persianDateTo.persianDay
 
         "${if (textFromDateLong > 0) persianFromText else ""} -" +
                 " ${if (textToDateLong > 0 && textToDateLong != Long.MAX_VALUE) persianToText else ""}"
