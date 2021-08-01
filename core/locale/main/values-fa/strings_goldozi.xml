@@ -79,7 +79,6 @@
     <string name="payment_date">تاریخ پرداخت</string>
     <string name="selected_more_than_required">لطفا پیش از مقدار ضرورت انتخاب ننمایید</string>
     <string name="selected_payment_higher">لطفاً پرداخت کمتر از مجموعه فروش را انتخاب نماید</string>
-    <string name="end_is_before_start_error">پایان قبل از شروع است</string>
     <string name="signature">امضاء</string>
     <string name="clear">پاک کردن</string>
     <string name="show_products_to_customer">نمایش محصولات به مشتری</string>

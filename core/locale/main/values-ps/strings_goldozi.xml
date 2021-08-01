@@ -94,7 +94,6 @@
     <string name="deliver">تحویلول</string>
     <string name="categories_desc">د برخو اضافه کول سمون</string>
     <string name="location_desc">د موقعیتونو اضافه کول او سمون</string>
-    <string name="end_is_before_start_error">پای مخکښې د د پیل نه دی</string>
     <string name="number_of_sales">د خرصلاو تعداد</string>
     <string name="image">انځور</string>
     <string name="csv">CSV</string>
