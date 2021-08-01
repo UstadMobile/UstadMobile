@@ -93,6 +93,7 @@ class JoinWithCodePresenterTest {
                 mapOf(UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString(),
                 UstadView.ARG_CODE to clazzToEnrolInto.clazzCode!!), mockView, di)
         presenter.onCreate(null)
+        presenter.onStart()
 
         verifyBlocking(clazzEnrolmentRepoDaoSpy, timeout(5000 * 5000)) {
             insertAsync(argWhere {
@@ -125,6 +126,7 @@ class JoinWithCodePresenterTest {
             mapOf(UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString(),
                 UstadView.ARG_CODE to clazzToEnrolInto.clazzCode!!), mockView, di)
         presenter.onCreate(null)
+        presenter.onStart()
 
         verify(mockView, timeout(5000)).errorText = any()
     }
@@ -145,6 +147,7 @@ class JoinWithCodePresenterTest {
                 UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString()
         ), mockView, di)
         presenter.onCreate(null)
+        presenter.onStart()
         presenter.handleClickDone("wrong")
 
         verify(mockView, timeout(10000)).errorText =
@@ -157,6 +160,7 @@ class JoinWithCodePresenterTest {
                 UstadView.ARG_CODE to "any"
         ), mockView, di)
         presenter.onCreate(null)
+        presenter.onStart()
 
         verify(mockView, timeout(5000)).errorText =
             systemImpl.getString(MessageID.invalid_register_code, context)
