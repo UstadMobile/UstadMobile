@@ -5109,7 +5109,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                            SELECT nodeClientId
                              FROM SyncNode
                             LIMIT 1), 0) 
-                     WHERE (sgFlag & $FLAG_STUDENT_GROUP) = $FLAG_STUDENT_GROUP   
+                     WHERE (sgFlags & $FLAG_STUDENT_GROUP) = $FLAG_STUDENT_GROUP   
                 """)
 
                 val teacherAddPermissions = Role.PERMISSION_CLAZZ_CONTENT_SELECT or
@@ -5121,7 +5121,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                            SELECT nodeClientId
                              FROM SyncNode
                             LIMIT 1), 0) 
-                     WHERE (sgFlag & $FLAG_TEACHER_GROUP) = $FLAG_TEACHER_GROUP   
+                     WHERE (sgFlags & $FLAG_TEACHER_GROUP) = $FLAG_TEACHER_GROUP   
                 """)
 
             }
@@ -5149,7 +5149,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 database.execSQL("""
                     UPDATE Clazz
                        SET clazzParentsPersonGroupUid =
-                           (SELECT personGroupUid 
+                           (SELECT groupUid 
                               FROM PersonGroup
                              WHERE clazzParentsPersonGroupUid = 0
                                AND groupName = ('Class-Parents-' || CAST(Clazz.clazzUid AS TEXT))),
