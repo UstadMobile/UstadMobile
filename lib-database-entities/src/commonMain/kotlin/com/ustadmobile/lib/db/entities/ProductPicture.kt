@@ -6,7 +6,32 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = ProductPicture.TABLE_ID)
+@SyncableEntity(tableId = ProductPicture.TABLE_ID,
+
+    notifyOnUpdate = ["""
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
+               ${ProductPicture.TABLE_ID} AS tableId 
+          FROM ChangeLog
+               JOIN Person ON Person.personUid = UserSession.usPersonUid
+               JOIN ProductPicture 
+                    ON ChangeLog.chTableId = ${ProductPicture.TABLE_ID} 
+                       AND ChangeLog.chEntityPk = ProductPicture.productPictureUid
+                JOIN UserSession
+                   ON UserSession.usPersonUid = Person.personUid
+               """],
+    syncFindAllQuery = """
+        SELECT ProductPicture.*
+          FROM UserSession
+            JOIN Person ON Person.personUid = UserSession.usPersonUid
+            JOIN Product ON Product.productPersonAdded = Person.personUid
+                OR CAST(Person.admin AS INTEGER) = 1
+            JOIN ProductPicture
+                ON ProductPicture.productPictureProductUid = Product.productUid
+                OR CAST(Person.admin AS INTEGER) = 1
+         WHERE UserSession.usClientNodeId = :clientId
+        """
+
+    )
 @Serializable
 @EntityWithAttachment
 open class ProductPicture() {
