@@ -204,11 +204,12 @@ fun TextView.setTextFromToDateTimeMillis(textFromDateLong: Long, textToDateLong:
             ).di.direct.instance()
     val localeString = impl.getDisplayedLocale(context)
 
+    val dateFormat = android.text.format.DateFormat.getDateFormat(context)
+
     text = if(localeString.startsWith("ps") || localeString.startsWith("fa")){
 
         val persianDateTo = PersianDateImpl()
         persianDateTo.setDate(textToDateLong)
-        val dateFormat = android.text.format.DateFormat.getDateFormat(context)
 
         val persianDateFrom = PersianDateImpl()
         persianDateFrom.setDate(textFromDateLong)
