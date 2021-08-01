@@ -11,6 +11,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.RegisterAgeRedirectView
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 
 class RegisterAgeRedirectFragment() : UstadBaseFragment(), RegisterAgeRedirectView {
 

@@ -27,6 +27,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -149,6 +150,8 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithPersonParentJoin>(), P
             field = value
             mBinding?.person = value
             ustadFragmentTitle = value?.fullName()
+            mBinding?.dateTimeMode = MODE_START_OF_DAY
+            mBinding?.timeZoneId = "UTC"
         }
 
 
