@@ -4729,7 +4729,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                                siteLcb = (SELECT COALESCE(
                                                  (SELECT nodeClientId 
                                                     FROM SyncNode
-                                                   LIMIT 1), 0)
+                                                   LIMIT 1), 0))
                     """)
                     database.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth2 (  pauthUid  BIGINT  PRIMARY KEY  NOT NULL , pauthMechanism  TEXT , pauthAuth  TEXT , pauthLcsn  BIGINT  NOT NULL , pauthPcsn  BIGINT  NOT NULL , pauthLcb  INTEGER  NOT NULL , pauthLct  BIGINT  NOT NULL )")
                     database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonAuth2_mcsn_seq")
@@ -5089,8 +5089,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         val MIGRATION_75_76 = object : DoorMigration(75, 76) {
             override fun migrate(database: DoorSqlDatabase) {
 
-                database.execSQL("CREATE INDEX IF NOT EXISTS `index_StatementEntity_statementContentEntryUid_statementPersonUid_contentEntryRoot_timestamp_statementLocalChangeSeqNum` ON StatementEntity (`statementContentEntryUid`, `statementPersonUid`, `contentEntryRoot`, `timestamp`, `statementLocalChangeSeqNum`)")
-                database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzAssignment_caClazzUid` ON ClazzAssignment (`caClazzUid`)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_StatementEntity_statementContentEntryUid_statementPersonUid_contentEntryRoot_timestamp_statementLocalChangeSeqNum ON StatementEntity (statementContentEntryUid, statementPersonUid, contentEntryRoot, timestamp, statementLocalChangeSeqNum)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_ClazzAssignment_caClazzUid ON ClazzAssignment (caClazzUid)")
 
             }
 
