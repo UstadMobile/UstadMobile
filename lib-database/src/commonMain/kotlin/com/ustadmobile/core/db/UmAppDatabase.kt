@@ -303,34 +303,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         const val TAG_REPO = DoorTag.TAG_REPO
 
-//        private val namedInstances = mutableMapOf<String, UmAppDatabase>()
-
-//        @JsName("getInstance")
-//        fun getInstance(context: Any, nodeIdAndAuth: NodeIdAndAuth, primary: Boolean = false) = lazy {
-//            getInstance(context, "UmAppDatabase", nodeIdAndAuth, primary)
-//        }.value
-
-//        @JsName("getInstanceWithDbName")
-//        @Synchronized
-//        fun getInstance(context: Any, dbName: String,
-//                        nodeIdAndAuth: NodeIdAndAuth, primary: Boolean = false): UmAppDatabase {
-//            var db = namedInstances[dbName]
-//
-//            if (db == null) {
-//                var builder = DatabaseBuilder.databaseBuilder(
-//                        context, UmAppDatabase::class, dbName)
-////                builder = addMigrations(builder)
-////                    .addMigrations(migrate67to68(nodeIdAndAuth.nodeId))
-////                    .addCallback(DoorSyncableDatabaseCallback2(nodeIdAndAuth.nodeId,
-////                        UmAppDatabase::class.syncableTableIdMap, primary))
-//                db = builder.build()
-//                namedInstances[dbName] = db
-//            }
-//
-//            return db
-//        }
-
-
         val MIGRATION_32_33 = DoorMigrationSync(32, 33) { database ->
 
             database.execSQL("""ALTER TABLE ScrapeQueueItem ADD COLUMN errorCode INTEGER NOT NULL DEFAULT 0""".trimMargin())
