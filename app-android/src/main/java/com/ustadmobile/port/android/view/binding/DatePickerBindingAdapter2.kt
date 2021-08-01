@@ -12,6 +12,7 @@ import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.min
 import ir.hamsaa.persiandatepicker.PersianDatePickerDialog
 import ir.hamsaa.persiandatepicker.api.PersianPickerDate
 import ir.hamsaa.persiandatepicker.api.PersianPickerListener
@@ -27,6 +28,8 @@ import java.util.*
 
 const val MODE_START_OF_DAY = 1
 const val MODE_END_OF_DAY = 2
+
+const val TWELVE_HOURS_IN_MS = 43200000
 
 private val TextView.adapterCalendar: Calendar
     get() {
@@ -51,22 +54,20 @@ private val TextView.adapterDateFormat: DateFormat
 val Long.isSet2: Boolean
     get(){
         return (
-                (this < -43200000 || this > 43200000)  &&
-                (this < (Long.MAX_VALUE - 43200000)  )
+                (this < -TWELVE_HOURS_IN_MS || this > TWELVE_HOURS_IN_MS)  &&
+                (this < (Long.MAX_VALUE - TWELVE_HOURS_IN_MS)  )
                 )
     }
 
 @BindingAdapter(value = ["dateTimeInMillis", "timeZoneId", "dateTimeInMillisMode"])
 fun TextView.setDateTime2(timeInMillis: Long, timeZoneId: String?, dateTimeInMillisMode: Int) {
     val timeZone = TimeZone.getTimeZone(timeZoneId?:"UTC")
-    val formattedTimeInMillis = if (timeInMillis == Long.MAX_VALUE){
-        Long.MAX_VALUE - 43200000
-    }else{
-        timeInMillis
-    }
+
     adapterCalendar.also {
         it.timeZone = timeZone
-        it.timeInMillis = formattedTimeInMillis
+
+        //If Long.MAX_VALUE is used, it gets wrapped (so avoid using anything within 12 hours of Long.MAX)
+        it.timeInMillis = min(timeInMillis, Long.MAX_VALUE - TWELVE_HOURS_IN_MS)
 
         if(dateTimeInMillisMode == MODE_START_OF_DAY) {
             it.set(Calendar.HOUR_OF_DAY, 0)
@@ -85,21 +86,16 @@ fun TextView.setDateTime2(timeInMillis: Long, timeZoneId: String?, dateTimeInMil
     val impl : UstadMobileSystemImpl = (context.applicationContext as DIAware
             ).di.direct.instance()
     val localeString = impl.getDisplayedLocale(context)
-    val persianDate = PersianDateImpl()
-    persianDate.setDate(adapterCalendar.timeInMillis)
-
-    text = if(!adapterCalendar.timeInMillis.isSet2){
-        ""
-    }else{
-        if(localeString.startsWith("ps") ||
-            localeString.startsWith("fa")
-        ){
+    text = when {
+        !adapterCalendar.timeInMillis.isSet2 -> ""
+        (localeString.startsWith("fa") || localeString.startsWith("ps")) -> {
+            val persianDate = PersianDateImpl()
+            persianDate.setDate(adapterCalendar.timeInMillis)
             persianDate.persianYear.toString() + "/" +
                     persianDate.persianMonth + "/" +
                     persianDate.persianDay
-        }else {
-            adapterDateFormat.format(Date(adapterCalendar.timeInMillis))
         }
+        else -> adapterDateFormat.format(Date(adapterCalendar.timeInMillis))
     }
 }
 
@@ -114,11 +110,6 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
             null, false)
 
         val cal = adapterCalendar
-        val defaultCal = if(!adapterCalendar.timeInMillis.isSet2){
-            Calendar.getInstance()
-        }else{
-            cal
-        }
 
         val impl : UstadMobileSystemImpl = (context.applicationContext as DIAware
                                             ).di.direct.instance()
@@ -133,7 +124,10 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
                 .setTodayButtonVisible(true)
                 .setMinYear(1200)
                 .setMaxYear(1600)
-                .setInitDate(defaultCal.timeInMillis)
+                .apply {
+                    if(cal.timeInMillis.isSet2)
+                        setInitDate(cal.timeInMillis)
+                }
                 .setActionTextColor(Color.BLACK)
                 .setTypeFace(typeface)
                 .setTitleType(PersianDatePickerDialog.NO_TITLE)
@@ -164,8 +158,8 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
                 .setView(dialogView)
 
             val picker = dialogView.findViewById<DatePicker>(R.id.date_picker)
-            picker.init(
-                defaultCal.get(Calendar.YEAR), defaultCal.get(Calendar.MONTH), defaultCal.get(Calendar.DAY_OF_MONTH),
+            picker.takeIf { cal.timeInMillis.isSet2 }?.init(
+                cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH),
                 null
             )
 
