@@ -7,18 +7,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.DatePicker
 import android.widget.TextView
-import android.widget.Toast
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMCalendarUtil
-import ir.hamsaa.persiandatepicker.PersianDatePickerDialog
+import com.ustadmobile.core.util.min
+import ir.hamsaa.persiandatepicker.PersianDatePickerDialog 
 import ir.hamsaa.persiandatepicker.api.PersianPickerDate
 import ir.hamsaa.persiandatepicker.api.PersianPickerListener
 import ir.hamsaa.persiandatepicker.date.PersianDateImpl
-import ir.hamsaa.persiandatepicker.util.PersianCalendarUtils
 import org.jetbrains.annotations.NotNull
 import org.kodein.di.DIAware
 import org.kodein.di.direct
@@ -30,6 +28,8 @@ import java.util.*
 
 const val MODE_START_OF_DAY = 1
 const val MODE_END_OF_DAY = 2
+
+const val TWELVE_HOURS_IN_MS = 43200000
 
 private val TextView.adapterCalendar: Calendar
     get() {
@@ -54,22 +54,20 @@ private val TextView.adapterDateFormat: DateFormat
 val Long.isSet2: Boolean
     get(){
         return (
-                (this < -43200000 || this > 43200000)  &&
-                        (this < (Long.MAX_VALUE - 43200000)  )
+                (this < -TWELVE_HOURS_IN_MS || this > TWELVE_HOURS_IN_MS)  &&
+                (this < (Long.MAX_VALUE - TWELVE_HOURS_IN_MS)  )
                 )
     }
 
 @BindingAdapter(value = ["dateTimeInMillis", "timeZoneId", "dateTimeInMillisMode"])
 fun TextView.setDateTime2(timeInMillis: Long, timeZoneId: String?, dateTimeInMillisMode: Int) {
     val timeZone = TimeZone.getTimeZone(timeZoneId?:"UTC")
-    val formattedTimeInMillis = if (timeInMillis == Long.MAX_VALUE){
-        Long.MAX_VALUE - 43200000
-    }else{
-        timeInMillis
-    }
+
     adapterCalendar.also {
         it.timeZone = timeZone
-        it.timeInMillis = formattedTimeInMillis
+
+        //If Long.MAX_VALUE is used, it gets wrapped (so avoid using anything within 12 hours of Long.MAX)
+        it.timeInMillis = min(timeInMillis, Long.MAX_VALUE - TWELVE_HOURS_IN_MS)
 
         if(dateTimeInMillisMode == MODE_START_OF_DAY) {
             it.set(Calendar.HOUR_OF_DAY, 0)
@@ -87,22 +85,17 @@ fun TextView.setDateTime2(timeInMillis: Long, timeZoneId: String?, dateTimeInMil
 
     val impl : UstadMobileSystemImpl = (context.applicationContext as DIAware
             ).di.direct.instance()
-    val localeString = impl.getLocale(context).toString()
-    val persianDate = PersianDateImpl()
-    persianDate.setDate(adapterCalendar.timeInMillis)
-
-    text = if(!adapterCalendar.timeInMillis.isSet2){
-        ""
-    }else{
-        if(localeString.startsWith("ps") ||
-            localeString.startsWith("fa")
-        ){
+    val localeString = impl.getDisplayedLocale(context)
+    text = when {
+        !adapterCalendar.timeInMillis.isSet2 -> ""
+        (localeString.startsWith("fa") || localeString.startsWith("ps")) -> {
+            val persianDate = PersianDateImpl()
+            persianDate.setDate(adapterCalendar.timeInMillis)
             persianDate.persianYear.toString() + "/" +
                     persianDate.persianMonth + "/" +
                     persianDate.persianDay
-        }else {
-            adapterDateFormat.format(Date(adapterCalendar.timeInMillis))
         }
+        else -> adapterDateFormat.format(Date(adapterCalendar.timeInMillis))
     }
 }
 
@@ -117,15 +110,10 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
             null, false)
 
         val cal = adapterCalendar
-        val defaultCal = if(!adapterCalendar.timeInMillis.isSet2){
-            Calendar.getInstance()
-        }else{
-            cal
-        }
 
         val impl : UstadMobileSystemImpl = (context.applicationContext as DIAware
-                ).di.direct.instance()
-        val localeString = impl.getLocale(context)
+                                            ).di.direct.instance()
+        val localeString = impl.getDisplayedLocale(context)
 
         if(localeString.startsWith("ps") || localeString.startsWith("fa")){
 
@@ -136,21 +124,16 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
                 .setTodayButtonVisible(true)
                 .setMinYear(1200)
                 .setMaxYear(1600)
-                .setInitDate(defaultCal.timeInMillis)
+                .apply {
+                    if(cal.timeInMillis.isSet2)
+                        setInitDate(cal.timeInMillis)
+                }
                 .setActionTextColor(Color.BLACK)
                 .setTypeFace(typeface)
                 .setTitleType(PersianDatePickerDialog.NO_TITLE)
                 .setShowInBottomSheet(true)
                 .setListener(object : PersianPickerListener {
                     override fun onDateSelected(@NotNull persianPickerDate: PersianPickerDate) {
-                        Toast.makeText(
-                            context,
-                            persianPickerDate.getPersianYear().toString() + "/" +
-                                    persianPickerDate.getPersianMonth() + "/" +
-                                    persianPickerDate.getPersianDay() + " timestamp: " + persianPickerDate.timestamp
-                                    + " converted : " + UMCalendarUtil.getPrettyDateFromLong(persianPickerDate.timestamp, null) ,
-                            Toast.LENGTH_SHORT
-                        ).show()
 
                         adapterCalendar.timeInMillis = persianPickerDate.timestamp
 
@@ -175,8 +158,8 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
                 .setView(dialogView)
 
             val picker = dialogView.findViewById<DatePicker>(R.id.date_picker)
-            picker.init(
-                defaultCal.get(Calendar.YEAR), defaultCal.get(Calendar.MONTH), defaultCal.get(Calendar.DAY_OF_MONTH),
+            picker.takeIf { cal.timeInMillis.isSet2 }?.init(
+                cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH),
                 null
             )
 
@@ -213,21 +196,23 @@ fun TextView.setDateUseSpinners(dateUseSpinners: Boolean) {
 fun TextView.setTextFromToDateTimeMillis(textFromDateLong: Long, textToDateLong: Long) {
     val impl : UstadMobileSystemImpl = (context.applicationContext as DIAware
             ).di.direct.instance()
-    val localeString = impl.getLocale(context)
-    val persianDateFrom = PersianDateImpl()
-    persianDateFrom.setDate(textFromDateLong)
+    val localeString = impl.getDisplayedLocale(context)
 
-    val persianDateTo = PersianDateImpl()
-    persianDateTo.setDate(textToDateLong)
     val dateFormat = android.text.format.DateFormat.getDateFormat(context)
-    val persianFromText = persianDateFrom.getPersianYear().toString() + "/" +
-            persianDateFrom.getPersianMonth() + "/" +
-            persianDateFrom.getPersianDay()
-    val persianToText = persianDateTo.getPersianYear().toString() + "/" +
-            persianDateTo.getPersianMonth() + "/" +
-            persianDateTo.getPersianDay()
 
     text = if(localeString.startsWith("ps") || localeString.startsWith("fa")){
+
+        val persianDateTo = PersianDateImpl()
+        persianDateTo.setDate(textToDateLong)
+
+        val persianDateFrom = PersianDateImpl()
+        persianDateFrom.setDate(textFromDateLong)
+        val persianFromText = persianDateFrom.persianYear.toString() + "/" +
+                persianDateFrom.persianMonth + "/" +
+                persianDateFrom.persianDay
+        val persianToText = persianDateTo.persianYear.toString() + "/" +
+                persianDateTo.persianMonth + "/" +
+                persianDateTo.persianDay
 
         "${if (textFromDateLong > 0) persianFromText else ""} -" +
                 " ${if (textToDateLong > 0 && textToDateLong != Long.MAX_VALUE) persianToText else ""}"
@@ -240,38 +225,3 @@ fun TextView.setTextFromToDateTimeMillis(textFromDateLong: Long, textToDateLong:
 
 }
 
-
-//TODO: Update Datepicker to take in timezones
-
-@BindingAdapter("timeInMillis")
-fun DatePicker.setTimeInMillis(timeInMillis: Long) {
-    setTag(R.id.tag_datelong, timeInMillis)
-    initIfReady()
-}
-
-@BindingAdapter("timeInMillisAttrChanged")
-fun DatePicker.setTimeInMillisChangeListener(inverseBindingListener: InverseBindingListener) {
-    setTag(R.id.tag_inverse_binding_listener, inverseBindingListener)
-    initIfReady()
-}
-
-private fun DatePicker.initIfReady() {
-    val bindingListener = getTag(R.id.tag_inverse_binding_listener) as? InverseBindingListener
-    val timeInMillis = getTag(R.id.tag_datelong) as? Long ?: 0L
-
-    val calendar = Calendar.getInstance()
-    calendar.timeInMillis = timeInMillis
-
-    init(calendar[Calendar.YEAR], calendar[Calendar.MONTH], calendar[Calendar.DAY_OF_MONTH]) {_, _, _, _ ->
-        bindingListener?.onChange()
-    }
-}
-
-@InverseBindingAdapter(attribute = "timeInMillis")
-fun DatePicker.getTimeInMillis() : Long{
-    return Calendar.getInstance().also {
-        it[Calendar.YEAR] = this.year
-        it[Calendar.MONTH] = this.month
-        it[Calendar.DAY_OF_MONTH] = this.dayOfMonth
-    }.timeInMillis
-}
