@@ -96,4 +96,21 @@
     <string name="product_description">توضیحات محصول</string>
     <string name="product_price">قیمت محصول (افغانی)</string>
     <string name="deliver">تحویل</string>
+    <string name="sales_total_afs">کل فروشات( افغانی)</string>
+    <string name="average_sale_total">حدوسط کل فروش</string>
+    <string name="image">تصویر</string>
+    <string name="not_set">تنظیم نشده</string>
+    <string name="deactivate_user">غیر فعال کردن کاربر</string>
+    <string name="user_deactivated">کاربر غیر فعال شده</string>
+    <string name="number_of_sales">تعداد فروشات</string>
+    <string name="csv">CSV</string>
+    <string name="report_total_sales_by_category">مبلغ کل فروش بر اساس کتگوری</string>
+    <string name="report_total_sales_by_product">مبلغ کل فروش به اساس محصول</string>
+    <string name="report_total_sales_by_day">مبلغ کل فروش به اساس روز</string>
+    <string name="report_number_sales_by_le">تعداد فروش توسط متشبث پیشتاز</string>
+    <string name="each_sales_total_afs">مجموعه هر یک فروش (افغانی)</string>
+    <string name="not_delivered">تحویلی نشده</string>
+    <string name="confirm_deactivate_user">آیا مطمئن هستید که میخواهید این کاربر را غیرفعال کنید؟ دیگر نمیتوانید آن را فعال کنید.</string>
+    <string name="report_total_sales_by_location">مبلغ کل فروش بر اساس موقعیت</string>
+    <string name="report_total_sales_by_le">مبلغ کل فروش به اساس متشبث پیشتاز</string>
 </resources>
