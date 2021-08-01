@@ -150,9 +150,8 @@ fun Route.personAuthRegisterRoute() {
                         println(emailText)
                         println(subjectText)
 
-                        //TODO: SET UP EMAIL SENDING THINGI
                         val notificationSender: NotificationSender by closestDI().instance()
-                        //notificationSender.sendEmail(adminUserEmail, subjectText, emailText)
+                        notificationSender.sendEmail(adminUserEmail, subjectText, emailText)
 
                     }else{
                         //Should we do something here?
