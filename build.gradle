@@ -70,7 +70,7 @@ subprojects {
 
 
 //Major.minor.database version
-version = "0.3.37"
+version = "0.3.39"
 group = "com.ustadmobile.app"
 
 /**
@@ -80,7 +80,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 215
+    ustadVersionCode = 216
 
     version_door = "0.0.22"
     version_xmlpullparserkmp = '0.0.18'
@@ -195,6 +195,8 @@ ext {
     version_js_yarn="1.13.0"
 
     version_jakartamail="2.0.1"
+
+    version_persian_date_picker_aliab="1.7.1"
 
 }
 

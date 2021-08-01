@@ -26,6 +26,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.view.PersonAccountEditFragment.Companion.USERNAME_FILTER
 import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
+import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
 import com.ustadmobile.port.android.view.util.RunAfterTextChangedTextWatcher
 import org.kodein.di.direct
@@ -68,6 +69,8 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             //for some reason setting the options before (and indepently from) the value causes
             // a databinding problem
             mBinding?.genderOptions = genderOptions
+            mBinding?.dateTimeMode = MODE_START_OF_DAY
+            mBinding?.timeZoneId = "UTC"
             loading = false
         }
 

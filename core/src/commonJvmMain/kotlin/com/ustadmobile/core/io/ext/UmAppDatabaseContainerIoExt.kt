@@ -79,7 +79,7 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
 
         val entryPath = addOptions.fileNamer.nameContainerFile(relPath, file.toKmpUriString())
         val compress = addOptions.compressionFilter.shouldCompress(entryPath,
-                file.toDoorUri().guessMimeType())
+                file.toDoorUri().guessMimeType(null))
 
         val md5Sum = withContext(Dispatchers.IO) {
             if(compress) {
@@ -171,7 +171,7 @@ suspend fun UmAppDatabase.addContainerFromUri(containerUid: Long, uri: com.ustad
                                               context: Any, nameInContainer: String,
                                               addOptions: ContainerAddOptions){
     val inputStream = uri.openInputStream(context) ?: throw IOException("resource not found: ${uri.getFileName(context)}")
-    val size = uri.getSize(context)
+    val size = uri.getSize(context, null)
     val repo = this as? DoorDatabaseRepository
             ?: throw IllegalStateException("Must use repo for addFileToContainer")
     val db = repo.db as UmAppDatabase

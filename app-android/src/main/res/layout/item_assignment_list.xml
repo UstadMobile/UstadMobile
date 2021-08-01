@@ -21,6 +21,13 @@
             name="selectablePagedListAdapter"
             type="AssignmentListRecyclerAdapter" />
 
+        <variable name="dateTimeMode"
+            type="Integer"/>
+
+        <variable
+            name="timeZoneId"
+            type="String" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -108,7 +115,9 @@
             app:layout_constraintStart_toEndOf="@+id/item_clazz_assignment_deadline_icon"
             app:layout_constraintTop_toBottomOf="@+id/line2_description"
             app:visibleIfDateSet="@{assignment.caDeadlineDate}"
-            app:dateLong="@{assignment.caDeadlineDate}"
+            app:dateTimeInMillis="@{assignment.caDeadlineDate}"
+            app:timeZoneId="@{timeZoneId}"
+            app:dateTimeInMillisMode="@{dateTimeMode}"
             tools:text="17/10/2021"
             />
 

@@ -8,12 +8,16 @@ import io.github.aakira.napier.Napier
 import com.linkedin.android.litr.MediaTransformer
 import com.linkedin.android.litr.TransformationListener
 import com.linkedin.android.litr.analytics.TrackTransformationInfo
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
+import com.ustadmobile.core.contentjob.ProcessContext
+import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addContainerFromUri
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.io.ext.extractVideoResolutionMetadata
 import com.ustadmobile.core.io.ext.guessMimeType
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
@@ -23,59 +27,54 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.lib.db.entities.ContentJobItem
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 import java.io.File
 import java.nio.file.Files
 
 
-class VideoTypePluginAndroid : VideoTypePlugin() {
+class VideoTypePluginAndroid(private var context: Any, private val endpoint: Endpoint, override val di: DI) : VideoTypePlugin() {
 
     private val VIDEO_ANDROID = "VideoPluginAndroid"
 
-    override suspend fun extractMetadata(uri: String, context: Any): ContentEntryWithLanguage? {
-        return withContext(Dispatchers.Default) {
-            val doorUri = DoorUri.parse(uri)
+    private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
-            val fileName = doorUri.getFileName(context)
+    private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-            if (!fileExtensions.any { fileName.endsWith(it, true) }) {
-                return@withContext null
-            }
-            
-            val fileVideoDimensions = doorUri.extractVideoResolutionMetadata(context as Context)
+    val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
-            if(fileVideoDimensions.first == 0 || fileVideoDimensions.second == 0){
-                return@withContext null
-            }
 
-            ContentEntryWithLanguage().apply {
-                this.title = fileName
-                this.leaf = true
-                this.contentTypeFlag = ContentEntry.TYPE_VIDEO
-            }
-        }
+    override suspend fun canProcess(doorUri: DoorUri, process: ProcessContext): Boolean {
+        return getEntry(doorUri, process) != null
     }
 
-    override suspend fun importToContainer(uri: String, conversionParams: Map<String, String>,
-                                           contentEntryUid: Long, mimeType: String, containerBaseDir: String,
-                                           context: Any, db: UmAppDatabase, repo: UmAppDatabase, progressListener: (Int) -> Unit): Container {
-        return withContext(Dispatchers.Default) {
+    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): ContentEntryWithLanguage? {
+        return getEntry(uri, process)
+    }
 
+    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext): ProcessResult {
+        withContext(Dispatchers.Default) {
+
+            val uri = jobItem.fromUri ?: throw IllegalStateException("missing uri")
             val videoUri = DoorUri.parse(uri)
             val newVideo = File(Files.createTempDirectory("tmp").toFile(),
                     videoUri.getFileName(context))
-            val compressVideo: Boolean = conversionParams["compress"]?.toBoolean() ?: false
+            val compressVideo: Boolean = process.params["compress"]?.toBoolean() ?: false
 
             Napier.d(tag = VIDEO_ANDROID, message = "conversion Params compress video is $compressVideo")
 
-            if(compressVideo) {
+            if (compressVideo) {
 
                 Napier.d(tag = VIDEO_ANDROID, message = "start import for new video file $newVideo.name")
 
-                val dimensionsArray = conversionParams["dimensions"]?.split("x") ?: listOf()
+                val dimensionsArray = process.params["dimensions"]?.split("x") ?: listOf()
                 val storageDimensions = videoUri.extractVideoResolutionMetadata(context as Context)
-                val originalVideoDimensions = if(dimensionsArray.isEmpty()){
+                val originalVideoDimensions = if (dimensionsArray.isEmpty()) {
                     storageDimensions
-                }else{
+                } else {
                     val aspectRatio = dimensionsArray[0].toFloat() / dimensionsArray[1].toFloat()
                     Pair(storageDimensions.first, (storageDimensions.first / aspectRatio).toInt())
                 }
@@ -92,20 +91,20 @@ class VideoTypePluginAndroid : VideoTypePlugin() {
                 }
 
                 val audioCodecInfo = MediaExtractor().useThenRelease {
-                    it.setDataSource(context, videoUri.uri, null)
+                    it.setDataSource(context as Context, videoUri.uri, null)
                     it.getFirstAudioCodecInfo()
                 }
 
                 val audioTarget = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC,
-                    audioCodecInfo.sampleRate, audioCodecInfo.channelCount).apply {
+                        audioCodecInfo.sampleRate, audioCodecInfo.channelCount).apply {
                     setInteger(MediaFormat.KEY_BIT_RATE, AUDIO_BIT_RATE)
                 }
 
                 val videoCompleted = CompletableDeferred<Boolean>()
 
-                val mediaTransformer = MediaTransformer(context)
+                val mediaTransformer = MediaTransformer(context as Context)
 
-                mediaTransformer.transform(contentEntryUid.toString(), videoUri.uri, newVideo.path,
+                mediaTransformer.transform(jobItem.cjiContentEntryUid.toString(), videoUri.uri, newVideo.path,
                         videoTarget, audioTarget, object : TransformationListener {
                     override fun onStarted(id: String) {
                         Napier.d(tag = VIDEO_ANDROID, message = "started transform")
@@ -113,7 +112,7 @@ class VideoTypePluginAndroid : VideoTypePlugin() {
 
                     override fun onProgress(id: String, progress: Float) {
                         Napier.d(tag = VIDEO_ANDROID, message = "progress at value ${progress * 100}")
-                        progressListener.invoke((progress * 100).toInt())
+                        jobItem.cjiProgress = (progress * 100).toLong()
                     }
 
                     override fun onCompleted(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
@@ -146,23 +145,53 @@ class VideoTypePluginAndroid : VideoTypePlugin() {
 
 
             val container = Container().apply {
-                containerContentEntryUid = contentEntryUid
+                containerContentEntryUid = jobItem.cjiContentEntryUid
                 cntLastModified = System.currentTimeMillis()
-                this.mimeType = mimeType
+                mimeType = supportedMimeTypes.first()
                 containerUid = repo.containerDao.insert(this)
             }
 
-            if(compressVideo){
+            jobItem.cjiContainerUid = container.containerUid
+
+            val containerFolder = jobItem.toUri ?: defaultContainerDir.toURI().toString()
+            val containerFolderUri = DoorUri.parse(containerFolder)
+
+            if (compressVideo) {
                 repo.addFileToContainer(container.containerUid, newVideo.toDoorUri(), newVideo.name,
-                    ContainerAddOptions(File(containerBaseDir).toDoorUri()))
-            }else{
+                        ContainerAddOptions(containerFolderUri))
+            } else {
                 repo.addContainerFromUri(container.containerUid, videoUri, context,
                         videoUri.getFileName(context),
-                        ContainerAddOptions(File(containerBaseDir).toDoorUri()))
+                        ContainerAddOptions(containerFolderUri))
             }
             newVideo.delete()
 
             repo.containerDao.findByUid(container.containerUid) ?: container
         }
+        return ProcessResult(200)
     }
+
+    suspend fun getEntry(doorUri: DoorUri, process: ProcessContext): ContentEntryWithLanguage? {
+        return withContext(Dispatchers.Default) {
+
+            val fileName = doorUri.getFileName(context)
+
+            if (!supportedFileExtensions.any { fileName.endsWith(it, true) }) {
+                return@withContext null
+            }
+
+            val fileVideoDimensions = doorUri.extractVideoResolutionMetadata(context as Context)
+
+            if(fileVideoDimensions.first == 0 || fileVideoDimensions.second == 0){
+                return@withContext null
+            }
+
+            ContentEntryWithLanguage().apply {
+                this.title = fileName
+                this.leaf = true
+                this.contentTypeFlag = ContentEntry.TYPE_VIDEO
+            }
+        }
+    }
+
 }
