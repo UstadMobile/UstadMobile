@@ -1,10 +1,7 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.account.AdultAccountRequiredException
-import com.ustadmobile.core.account.ConsentNotGrantedException
+import com.ustadmobile.core.account.*
 import io.github.aakira.napier.Napier
-import com.ustadmobile.core.account.UnauthorizedException
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -126,7 +123,10 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                 } catch(e: ConsentNotGrantedException) {
                     view.errorMessage = impl.getString(MessageID.your_account_needs_approved,
                         context)
-                }catch(e: Exception) {
+                }catch(e: AccountNotApprovedException) {
+                    view.errorMessage = impl.getString(MessageID.account_not_approved, context)
+                }
+                catch(e: Exception) {
                     view.errorMessage = impl.getString(MessageID.login_network_error, context)
                 }finally {
                     view.inProgress = false

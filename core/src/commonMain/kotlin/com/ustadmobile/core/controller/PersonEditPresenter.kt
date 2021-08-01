@@ -215,7 +215,8 @@ class PersonEditPresenter(
 
                 try {
                     accountManager.register(entity, serverUrl, AccountRegisterOptions(
-                        makeAccountActive = !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR),
+                        //makeAccountActive = !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR),
+                        makeAccountActive = false,
                         parentJoin = mPersonParentJoin
                     ))
 
@@ -281,9 +282,6 @@ class PersonEditPresenter(
                         }
                         //Assign WE Group to the Logged in LE
                         entity?.personWeGroupUid = leWeGroup.groupUid
-
-
-
                     }
                 }
 

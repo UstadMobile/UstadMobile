@@ -120,4 +120,6 @@
     <string name="report_total_sales_by_product">Total sale amount by product</string>
     <string name="report_total_sales_by_day">Total sale amount by day</string>
     <string name="report_number_sales_by_le">Number of sales by LE</string>
+
+    <string name="account_not_approved">Your account has not been approved yet.</string>
 </resources>

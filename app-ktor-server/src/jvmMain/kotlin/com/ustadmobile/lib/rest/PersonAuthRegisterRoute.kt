@@ -55,7 +55,12 @@ fun Route.personAuthRegisterRoute() {
 
             if(authResult.success && authorizedPerson != null) {
                 if(maxDateOfBirth == 0L || authorizedPerson.dateOfBirth < maxDateOfBirth) {
-                    call.respond(HttpStatusCode.OK, authorizedPerson.toUmAccount(""))
+                    //If not active ie not approved in most cases or removed.
+                    if(!authorizedPerson.active){
+                        call.respond(HttpStatusCode.Unauthorized, authorizedPerson.toUmAccount(""))
+                    }else {
+                        call.respond(HttpStatusCode.OK, authorizedPerson.toUmAccount(""))
+                    }
                 }else {
                     call.respond(HttpStatusCode.Conflict, "")
                 }
@@ -99,9 +104,60 @@ fun Route.personAuthRegisterRoute() {
                 return@post
             }
 
+
             if(existingPerson == null) {
                 mPerson.apply {
+                    //Only LEs can sign up but their accounts would be inactive.
+                    mPerson.personGoldoziType = Person.GOLDOZI_TYPE_LE
+                    mPerson.active = false
+
+                    if(mPerson?.personWeGroupUid == 0L){
+                        //Create a WE Group for this LE
+                        val leWeGroup = PersonGroup().apply {
+                            groupName = mPerson?.fullName() + "'s WE group"
+                            personGroupFlag = PersonGroup.PERSONGROUP_FLAG_DEFAULT
+                            groupUid = repo.personGroupDao.insertAsync(this)
+                        }
+                        //Assign WE Group to the Logged in LE
+                        mPerson?.personWeGroupUid = leWeGroup.groupUid
+                    }
                     personUid = repo.insertPersonAndGroup(mPerson).personUid
+
+                    //Send email
+                    //1. Get admin email.
+                    //2. Get LE user details : username, full name, dob, registration id
+                    //3. Create url with /approvele/ endpoint
+                    //4. Create email text and subject text.
+                    //5. Send the email to admin's email address
+
+                    val systemImpl: UstadMobileSystemImpl by closestDI().instance()
+                    val adminUserEmail = db.personDao.findByUsername("admin")?.emailAddr?:""
+                    if(adminUserEmail.isNotEmpty()){
+                        val linkUrl = UMFileUtil.joinPaths(registerRequest.endpointUrl,
+                            "approvele") + "?personUid=" + personUid
+
+                        val subjectText = systemImpl.getString(mLangCode, MessageID.new_le_request, Any())
+                            .replace("%1\$s", mPerson.fullName())
+
+                        val emailText = systemImpl.getString(mLangCode,
+                                MessageID.approve_le_request_email, Any())
+                            .replace("%1\$s", mPerson.fullName())
+                            .replace("%2\$s", mPerson.personOrgId?:"")
+                            .replace("%3\$s", mPerson.username?:"")
+                            .replace("%4\$s", linkUrl)
+
+
+                        println(emailText)
+                        println(subjectText)
+
+                        //TODO: SET UP EMAIL SENDING THINGI
+                        val notificationSender: NotificationSender by closestDI().instance()
+                        //notificationSender.sendEmail(adminUserEmail, subjectText, emailText)
+
+                    }else{
+                        //Should we do something here?
+                    }
+
                 }
             } else {
                 repo.personDao.update(mPerson)
@@ -133,6 +189,13 @@ fun Route.personAuthRegisterRoute() {
                 val notificationSender: NotificationSender by closestDI().instance()
                 notificationSender.sendEmail(mParentContactVal, subjectText, emailText)
             }
+
+
+
+
+
+
+
 
             val authParams: Pbkdf2Params = di.direct.instance()
 

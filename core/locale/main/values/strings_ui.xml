@@ -1460,4 +1460,18 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="bahman">bahman</string>
     <string name="esfand">esfand</string>
 
+    <string name="new_le_request">New LE account creation request - %1$s</string>
+
+    <string name="approve_le_request_email">Dear Admin,
+        Please review a new LE user request.
+        Name: %1$s
+        Organisation id: %2$s
+        Username: %3$s
+
+        Click the url below to approve this user.
+        %4$s
+
+        Thank you.
+
+    </string>
 </resources>

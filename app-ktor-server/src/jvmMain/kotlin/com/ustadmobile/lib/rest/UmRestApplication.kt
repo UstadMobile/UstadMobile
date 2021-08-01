@@ -303,6 +303,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             resource("/", "/static/getappredirect/index.html")
         }
         GetAppRoute()
+        ApproveLERoute()
         if (devMode) {
             DevModeRoute()
         }

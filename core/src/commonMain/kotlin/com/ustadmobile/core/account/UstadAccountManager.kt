@@ -323,6 +323,8 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
             throw ConsentNotGrantedException("Parental consent required but not granted")
         }else if(loginResponse.status == HttpStatusCode.Conflict) {
             throw AdultAccountRequiredException("Adult account required, credentials for child account")
+        }else if(loginResponse.status.value == 401){
+            throw AccountNotApprovedException("Account not approved.")
         }else if(loginResponse.status.value != 200){
             throw IllegalStateException("Server error - response ${loginResponse.status.value}")
         }
