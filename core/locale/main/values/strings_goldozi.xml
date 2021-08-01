@@ -77,7 +77,6 @@
     <string name="save_sale_before_delivery">Please save this sale before adding a delivery</string>
     <string name="selected_more_than_required">Please do not select more than the required amount</string>
     <string name="selected_payment_higher">Please select payment lower than total sale</string>
-    <string name="end_is_before_start_error">End is before start</string>
     <string name="signature">Signature</string>
     <string name="clear">Clear</string>
     <string name="welcome_goldozi">Welcome to Goldozi</string>
