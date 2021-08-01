@@ -19,11 +19,12 @@ import com.ustadmobile.core.contentjob.ContentPlugin
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.contentjob.SupportedContent
+import com.ustadmobile.core.io.ext.getLocalUri
 import com.ustadmobile.core.io.ext.skipToEntry
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.EpubContentView
+import com.ustadmobile.core.io.ext.guessMimeType
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
@@ -48,6 +49,10 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
     override suspend fun canProcess(doorUri: DoorUri, process: ProcessContext): Boolean {
+        val mimeType = doorUri.guessMimeType(di)
+        if(mimeType != null && !supportedMimeTypes.contains(mimeType)){
+            return false
+        }
         return findOpfPath(doorUri, process) != null
     }
 
@@ -56,7 +61,10 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
         return withContext(Dispatchers.Default) {
             val xppFactory = XmlPullParserFactory.newInstance()
             try {
-                ZipInputStream(uri.openInputStream(context)).use {
+
+                val localUri = process.getLocalUri(uri, context, di)
+
+                ZipInputStream(localUri.openInputStream(context)).use {
                     it.skipToEntry { it.name == opfPath } ?: return@use null
 
                     val xpp = xppFactory.newPullParser()
@@ -68,7 +76,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                         contentFlags = ContentEntry.FLAG_IMPORTED
                         contentTypeFlag = ContentEntry.TYPE_EBOOK
                         licenseType = ContentEntry.LICENSE_TYPE_OTHER
-                        title = if (opfDocument.title.isNullOrEmpty()) uri.getFileName(context)
+                        title = if (opfDocument.title.isNullOrEmpty()) localUri.getFileName(context)
                         else opfDocument.title
                         author = opfDocument.getCreator(0)?.creator
                         description = opfDocument.description
@@ -117,7 +125,10 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
     suspend fun findOpfPath(uri: DoorUri, process: ProcessContext): String? {
         val xppFactory = XmlPullParserFactory.newInstance()
         try {
-            ZipInputStream(uri.openInputStream(context)).use {
+
+            val localUri = process.getLocalUri(uri, context,di)
+
+            ZipInputStream(localUri.openInputStream(context)).use {
                 it.skipToEntry { entry -> entry.name == OCF_CONTAINER_PATH } ?: return null
 
                 val ocfContainer = OcfDocument()

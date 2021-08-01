@@ -60,9 +60,12 @@ class EpubFileTypePluginTest {
         val tempEpubFile = tmpFolder.newFile()
         tempEpubFile.copyInputStreamToFile(inputStream)
 
+        val tempFolder = tmpFolder.newFolder("newFolder")
+        val tempUri = DoorUri.parse(tempFolder.toURI().toString())
+
         val epubPlugin = EpubTypePluginCommonJvm(Any(), Endpoint("http://localhost/dummy"), di)
         runBlocking {
-            val contentEntry = epubPlugin.extractMetadata(DoorUri.parse(tempEpubFile.toURI().toString()), ProcessContext(mutableMapOf<String,String>()))
+            val contentEntry = epubPlugin.extractMetadata(DoorUri.parse(tempEpubFile.toURI().toString()), ProcessContext(tempUri, params = mutableMapOf<String,String>()))
             Assert.assertEquals("Got ContentEntry with expected title",
                     "A Textbook of Sources for Teachers and Teacher-Training Classes",
                     contentEntry?.title)
@@ -82,16 +85,19 @@ class EpubFileTypePluginTest {
         response.setBody(buffer)
 
         mockWebServer.enqueue(response)
+        mockWebServer.enqueue(response)
 
         val containerTmpDir = tmpFolder.newFolder("containerTmpDir")
+        val tempFolder = tmpFolder.newFolder("newFolder")
+        val tempUri = DoorUri.parse(tempFolder.toURI().toString())
         val accountManager: UstadAccountManager by di.instance()
         val repo: UmAppDatabase = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
 
-        val epubPlugin = EpubTypePluginCommonJvm(Any(), Endpoint("http://localhost/dummy"), di)
+        val epubPlugin = EpubTypePluginCommonJvm(Any(), accountManager.activeEndpoint, di)
         runBlocking{
 
             val doorUri = DoorUri.parse(mockWebServer.url("children.epub").toString())
-            val processContext = ProcessContext(mutableMapOf<String,String>())
+            val processContext = ProcessContext(tempUri, params = mutableMapOf<String,String>())
             val isValid = epubPlugin.canProcess(doorUri, processContext)
 
             Assert.assertTrue("valid epub", isValid)

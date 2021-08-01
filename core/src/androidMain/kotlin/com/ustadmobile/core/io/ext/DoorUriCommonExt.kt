@@ -5,14 +5,15 @@ import android.media.MediaMetadataRetriever
 import android.webkit.MimeTypeMap
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.door.DoorUri
+import org.kodein.di.DI
 
-actual suspend fun DoorUri.guessMimeType(): String? {
+actual suspend fun DoorUri.guessMimeType(di: DI?): String? {
     return MimeTypeMap.getFileExtensionFromUrl(this.toString())?.let { extension ->
         MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
     }
 }
 
-actual suspend fun DoorUri.getSize(context: Any): Long {
+actual suspend fun DoorUri.getSize(context: Any, di: DI?): Long {
     return (context as Context).contentResolver.openAssetFileDescriptor(uri, "r")?.length ?: -1
 }
 
@@ -24,8 +25,4 @@ fun DoorUri.extractVideoResolutionMetadata(context: Context): Pair<Int, Int>{
     metaRetriever.release()
 
     return Pair(originalWidth, originalHeight)
-}
-
-actual suspend fun DoorUri.downloadUrl(processContext: ProcessContext): DoorUri{
-    return this
 }
