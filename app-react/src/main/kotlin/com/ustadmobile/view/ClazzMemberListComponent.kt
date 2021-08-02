@@ -1,9 +1,6 @@
 package com.ustadmobile.view
 
 import androidx.paging.DataSource
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.button.MIconButtonSize
-import com.ccfraser.muirwik.components.button.mIconButton
 import com.ustadmobile.core.controller.ClazzMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -14,19 +11,10 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.alignTextToStart
-import com.ustadmobile.util.StyleManager.clazzItemSecondaryDesc
 import com.ustadmobile.util.StyleManager.defaultMarginTop
-import com.ustadmobile.util.StyleManager.displayProperty
-import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.css.display
-import kotlinx.css.paddingBottom
-import kotlinx.css.paddingTop
-import kotlinx.css.px
 import react.RBuilder
 import react.RProps
 import react.setState
@@ -106,9 +94,8 @@ class ClazzMemberListComponent(mProps: RProps):UstadListComponent<PersonWithClaz
     }
 
     override fun RBuilder.renderListItem(item: PersonWithClazzEnrolmentDetails) {
-        mPresenter?.let { presenter ->
-            createMemberListItem(presenter, item, getString(MessageID.x_percent_attended))
-        }
+        createListItemWithPersonAttendanceAndPendingRequests(item.personUid, item.fullName(), attendance = item.attendance,
+            attendanceLabel = getString(MessageID.x_percent_attended), student = false)
     }
 
     override fun RBuilder.renderFooterView() {
@@ -178,76 +165,6 @@ class ClazzMemberListComponent(mProps: RProps):UstadListComponent<PersonWithClaz
     }
 }
 
-
-private fun RBuilder.createMemberListItem(presenter: ClazzMemberListPresenter,
-                                          item: PersonWithClazzEnrolmentDetails,
-                                          percentageAttended: String,
-                                          pending: Boolean = false){
-    umGridContainer(MGridSpacing.spacing5) {
-        css{
-            paddingTop = 4.px
-            paddingBottom = 4.px
-        }
-        umItem(MGridSize.cells3, MGridSize.cells2){
-            umProfileAvatar(item.personUid, "person")
-        }
-
-        umItem(MGridSize.cells9, MGridSize.cells10){
-            umItem(MGridSize.cells12){
-                mTypography("${item.firstNames} ${item.lastName}",
-                    variant = MTypographyVariant.h6,
-                    color = MTypographyColor.textPrimary){
-                    css (alignTextToStart)
-                }
-            }
-
-            umGridContainer{
-                umItem(MGridSize.cells1){
-                    circleIndicator(item.attendance)
-                }
-
-                umItem(MGridSize.cells8){
-                    val attendancesPercentage = percentageAttended.format(item.attendance * 100)
-                    mTypography(attendancesPercentage,
-                        color = MTypographyColor.textPrimary
-                    ){
-                        css{
-                            +alignTextToStart
-                            +clazzItemSecondaryDesc
-                        }
-                    }
-
-                }
-
-                umItem(MGridSize.cells3){
-                    css{
-                        display = displayProperty(pending, true)
-                    }
-                    umGridContainer(MGridSpacing.spacing4) {
-                        umItem(MGridSize.cells4){
-                            mIconButton("check",
-                                onClick = {
-                                    presenter.handleClickPendingRequest(item, true)
-                                },
-                                className = "${StyleManager.name}-successClass",
-                                size = MIconButtonSize.small)
-                        }
-
-                        umItem(MGridSize.cells4){
-                            mIconButton("close",
-                                onClick = {
-                                    presenter.handleClickPendingRequest(item, false)
-                                },
-                                className = "${StyleManager.name}-errorClass",
-                                size = MIconButtonSize.small)
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 interface MemberListProps: ListProps<PersonWithClazzEnrolmentDetails>{
     var pending: Boolean
 }
@@ -256,10 +173,14 @@ class MembersListComponent(mProps: MemberListProps):
     UstadSimpleList<MemberListProps>(mProps){
 
     override fun RBuilder.renderListItem(item: PersonWithClazzEnrolmentDetails) {
-        createMemberListItem(
-            props.presenter as ClazzMemberListPresenter,
-            item, getString(MessageID.x_percent_attended),
-            props.pending)
+        val presenter = props.presenter as ClazzMemberListPresenter
+        createListItemWithPersonAttendanceAndPendingRequests(item.personUid, item.fullName(),props.pending,item.attendance,
+            getString(MessageID.x_percent_attended),
+            onClickAccept = {
+                presenter.handleClickPendingRequest(item, true)
+            }, onClickDecline = {
+                presenter.handleClickPendingRequest(item, false)
+            })
     }
 }
 

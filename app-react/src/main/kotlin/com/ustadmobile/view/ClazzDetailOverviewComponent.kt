@@ -109,6 +109,7 @@ class ClazzDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ClazzWi
                 }
 
                 createInformation("school", entity?.clazzSchool?.schoolName)
+
                 val dateTxt = Date(entity?.clazzStartTime ?: 0).standardFormat() +
                         " - ${Date(entity?.clazzEndTime ?: 0).standardFormat()}"
 
@@ -126,40 +127,38 @@ class ClazzDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ClazzWi
                 }
 
                 schedules?.let { schedules ->
-                    renderSchedules(schedules)
+                    child(SchedulesComponent::class) {
+                        attrs.entries = schedules
+                    }
                 }
 
             }
         }
     }
-}
 
 
-class SchedulesComponent(mProps: ListProps<Schedule>): UstadSimpleList<ListProps<Schedule>>(mProps){
+    class SchedulesComponent(mProps: ListProps<Schedule>): UstadSimpleList<ListProps<Schedule>>(mProps){
 
-    override fun RBuilder.renderListItem(item: Schedule) {
-        styledDiv {
-            val frequencyMessageId = ScheduleEditPresenter.FrequencyOption.values()
-                .firstOrNull { it.optionVal == item.scheduleFrequency }?.messageId ?: MessageID.None
-            val dayMessageId = ScheduleEditPresenter.DayOptions.values()
-                .firstOrNull { it.optionVal == item.scheduleDay }?.messageId ?: MessageID.None
+        override fun RBuilder.renderListItem(item: Schedule) {
+            styledDiv {
+                val frequencyMessageId = ScheduleEditPresenter.FrequencyOption.values()
+                    .firstOrNull { it.optionVal == item.scheduleFrequency }?.messageId ?: MessageID.None
+                val dayMessageId = ScheduleEditPresenter.DayOptions.values()
+                    .firstOrNull { it.optionVal == item.scheduleDay }?.messageId ?: MessageID.None
 
-            val scheduleDays = "${systemImpl.getString(frequencyMessageId, this)} - ${systemImpl.getString(dayMessageId, this)}"
+                val scheduleDays = "${systemImpl.getString(frequencyMessageId, this)} - ${systemImpl.getString(dayMessageId, this)}"
 
-            val startEndTime = "${Date(item.sceduleStartTime).formattedInHoursAndMinutes()} " +
-                    "- ${Date(item.scheduleEndTime).formattedInHoursAndMinutes()}"
+                val startEndTime = "${Date(item.sceduleStartTime).formattedInHoursAndMinutes()} " +
+                        "- ${Date(item.scheduleEndTime).formattedInHoursAndMinutes()}"
 
-            mTypography("$scheduleDays $startEndTime",
-                variant = MTypographyVariant.body2,
-                color = MTypographyColor.textPrimary,
-                gutterBottom = true){
-                css(alignTextToStart)
+                mTypography("$scheduleDays $startEndTime",
+                    variant = MTypographyVariant.body2,
+                    color = MTypographyColor.textPrimary,
+                    gutterBottom = true){
+                    css(alignTextToStart)
+                }
             }
         }
+
     }
-
-}
-
-fun RBuilder.renderSchedules(schedules: List<Schedule>) = child(SchedulesComponent::class) {
-    attrs.entries = schedules
 }

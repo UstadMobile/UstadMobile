@@ -69,7 +69,6 @@ open class ClazzDaoJs: ClazzDao() {
         selectedSchool: Long
     ): DataSource.Factory<Int, ClazzWithListDisplayDetails> {
         return DataSourceFactoryJs(ENTRIES)
-
     }
 
     override suspend fun getClassNamesFromListOfIds(ids: List<Long>): List<UidAndLabel> {

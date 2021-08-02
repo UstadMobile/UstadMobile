@@ -12,8 +12,8 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
-import com.ustadmobile.util.StyleManager.clazzItemSecondaryDesc
-import com.ustadmobile.util.StyleManager.clazzListItemSecondaryIcons
+import com.ustadmobile.util.StyleManager.gridListSecondaryItemDesc
+import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
 import com.ustadmobile.util.StyleManager.clazzListRoleChip
 import com.ustadmobile.util.ext.breakToWork
 import com.ustadmobile.util.ext.format
@@ -52,7 +52,7 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
         fabManager?.text = getString(MessageID.clazz)
         title = getString(MessageID.classes)
-        listType = LIST_TYPE_MULTI_COLUMN
+        listTypeSingleColumn = false
         mPresenter = ClazzListPresenter(this, arguments, this,di,this)
         mPresenter?.onCreate(mapOf())
     }
@@ -101,7 +101,7 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
             umGridContainer{
                 umItem(MGridSize.cells1){
                     mIcon("people", color = MIconColor.inherit){
-                        css(clazzListItemSecondaryIcons)
+                        css(gridListSecondaryItemIcons)
                     }
                 }
 
@@ -113,7 +113,7 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
                     ){
                         css{
                             +alignTextToStart
-                            +clazzItemSecondaryDesc
+                            +gridListSecondaryItemDesc
                         }
                     }
 
@@ -131,7 +131,7 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
                     ){
                         css{
                             +alignTextToStart
-                            +clazzItemSecondaryDesc
+                            +gridListSecondaryItemDesc
                         }
                     }
 
@@ -161,7 +161,6 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
                 mPresenter?.handleClickJoinClazz()}
             )
             renderChoices(systemImpl,options, Date().getTime().toLong()){
-                console.log("closed dialog")
                 setState {
                     showAddEntryOptions = false
                 }
