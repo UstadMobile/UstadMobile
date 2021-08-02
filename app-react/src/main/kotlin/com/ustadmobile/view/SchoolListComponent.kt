@@ -9,18 +9,18 @@ import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
-import com.ustadmobile.util.StyleManager.contentAfterIconMarginLeft
-import com.ustadmobile.util.StyleManager.defaultMarginTop
-import com.ustadmobile.util.StyleManager.umItemWithIconAndText
+import com.ustadmobile.util.StyleManager.displayProperty
+import com.ustadmobile.util.StyleManager.gridListSecondaryItemDesc
+import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
+import com.ustadmobile.util.ext.breakToWork
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import com.ustadmobile.view.ext.umProfileAvatar
+import com.ustadmobile.view.ext.*
 import kotlinx.css.*
 import react.RBuilder
 import react.RProps
 import react.setState
 import styled.css
+import styled.styledDiv
 import kotlin.js.Date
 
 class SchoolListComponent(mProps: RProps) : UstadListComponent<School, SchoolWithMemberCountAndLocation>(mProps),
@@ -48,6 +48,7 @@ class SchoolListComponent(mProps: RProps) : UstadListComponent<School, SchoolWit
 
     override fun onCreate() {
         super.onCreate()
+        listTypeSingleColumn = false
         fabManager?.text = getString(MessageID.school)
         mPresenter = SchoolListPresenter(this, arguments,
             this, di, this)
@@ -57,59 +58,77 @@ class SchoolListComponent(mProps: RProps) : UstadListComponent<School, SchoolWit
     }
 
     override fun RBuilder.renderListItem(item: SchoolWithMemberCountAndLocation) {
-        umGridContainer(MGridSpacing.spacing5) {
+
+        styledDiv {
             css{
-                paddingTop = 4.px
-                paddingBottom = 4.px
-            }
-            umItem(MGridSize.cells3, MGridSize.cells1){
-                umProfileAvatar(item.schoolUid, "school")
+                position = Position.relative
             }
 
-            umItem(MGridSize.cells9, MGridSize.cells11){
-                umItem(MGridSize.cells12){
-                    mTypography(item.schoolName,
-                        variant = MTypographyVariant.h6,
-                        color = MTypographyColor.textPrimary){
-                        css (StyleManager.alignTextToStart)
+            umEntityAvatar(
+                className = "${StyleManager.name}-clazzItemClass",
+                listItem = true,
+                fallbackSrc = "assets/entry_placeholder.jpeg")
+
+        }
+        styledDiv {
+            css {
+                padding(2.spacingUnits)
+            }
+
+            mTypography(item.schoolName,
+                variant = MTypographyVariant.h6,
+                color = MTypographyColor.textPrimary){
+                css(alignTextToStart)
+            }
+
+            mTypography(item.schoolDesc?.breakToWork(),
+                variant = MTypographyVariant.body1,
+                color = MTypographyColor.textPrimary
+            ){
+                css{
+                    display = displayProperty(item.schoolDesc != null, true)
+                    +alignTextToStart
+                }
+            }
+
+            umGridContainer{
+                umItem(MGridSize.cells1){
+                    mIcon("place", color = MIconColor.inherit){
+                        css(gridListSecondaryItemIcons)
                     }
                 }
 
-               mGridContainer {
-                   css(defaultMarginTop)
-                   umItem(MGridSize.cells12, MGridSize.cells6){
-                       css(umItemWithIconAndText)
+                umItem(MGridSize.cells11){
+                    mTypography(item.schoolAddress,
+                        color = MTypographyColor.textPrimary
+                    ){
+                        css{
+                            +alignTextToStart
+                            +gridListSecondaryItemDesc
+                        }
+                    }
 
-                       mIcon("place",fontSize = MIconFontSize.small)
+                }
 
-                       mTypography(item.schoolAddress, variant = MTypographyVariant.body1,
-                           paragraph = true,
-                           color = MTypographyColor.textPrimary){
-                           css{
-                               +alignTextToStart
-                               +contentAfterIconMarginLeft
-                           }
-                       }
-                   }
+                umItem(MGridSize.cells1){
+                    mIcon("people", color = MIconColor.inherit){
+                        css(gridListSecondaryItemIcons)
+                    }
+                }
 
-                   umItem(MGridSize.cells12, MGridSize.cells6){
-                       css(umItemWithIconAndText)
+                umItem(MGridSize.cells11){
+                    val numOfStudentTeachers = getString(MessageID.x_teachers_y_students)
+                        .format(item.numTeachers, item.numStudents)
+                    mTypography(numOfStudentTeachers,
+                        color = MTypographyColor.textPrimary
+                    ){
+                        css{
+                            +alignTextToStart
+                            +gridListSecondaryItemDesc
+                        }
+                    }
 
-                       mIcon("people",fontSize = MIconFontSize.small)
-
-                       val numOfStudentTeachers = getString(MessageID.x_teachers_y_students)
-                           .format(item.numTeachers, item.numStudents)
-                       mTypography(numOfStudentTeachers, variant = MTypographyVariant.body1,
-                           paragraph = true,
-                           color = MTypographyColor.textPrimary){
-                           css{
-                               +alignTextToStart
-                               +contentAfterIconMarginLeft
-                           }
-                       }
-                   }
-               }
-
+                }
             }
         }
     }

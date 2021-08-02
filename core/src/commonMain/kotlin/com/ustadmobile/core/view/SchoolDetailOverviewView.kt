@@ -13,7 +13,7 @@ interface SchoolDetailOverviewView: UstadDetailView<SchoolWithHolidayCalendar> {
 
     companion object {
 
-        const val VIEW_NAME = "SchoolWithHolidayCalendarDetailView"
+        const val VIEW_NAME = "SchoolDetailOverviewView"
 
     }
 

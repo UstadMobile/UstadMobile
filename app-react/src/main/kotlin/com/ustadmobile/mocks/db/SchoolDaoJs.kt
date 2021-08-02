@@ -13,7 +13,7 @@ class SchoolDaoJs: SchoolDao() {
     }
 
     override suspend fun findByUidWithHolidayCalendarAsync(uid: Long): SchoolWithHolidayCalendar? {
-        return ENTRIES.first { it.schoolHolidayCalendarUid == uid }
+        return ENTRIES.first { it.schoolUid == uid }
     }
 
     override suspend fun findBySchoolCode(code: String): School? {

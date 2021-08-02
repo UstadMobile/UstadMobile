@@ -9,8 +9,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.paging.PagedListAdapter
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ConcatAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemSchoolmemberListItemBinding
@@ -28,7 +28,6 @@ import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
-import com.ustadmobile.port.android.view.util.PresenterViewLifecycleObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMemberWithPerson>(),
