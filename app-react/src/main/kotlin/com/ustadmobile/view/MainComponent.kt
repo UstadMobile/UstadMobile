@@ -11,6 +11,7 @@ import com.ccfraser.muirwik.components.list.mListItemWithIcon
 import com.ccfraser.muirwik.components.styles.up
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
+import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.navigation.UstadDestination
@@ -153,37 +154,35 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
 
                                 umGridContainer {
 
-                                    umItem(MGridSize.cells10, MGridSize.cells5){
-                                        css{marginTop = 4.px}
-                                        mToolbarTitle(appState.appToolbar.title ?: "")
+                                    mHidden(xsDown = true) {
+                                        umItem(MGridSize.cells1, MGridSize.cells5){
+                                            css{marginTop = 4.px}
+                                            mToolbarTitle(appState.appToolbar.title ?: "")
+                                        }
                                     }
 
-                                    mHidden(xsDown = true) {
-                                        umItem(MGridSize.cells6){
+                                    umItem(MGridSize.cells10,MGridSize.cells6){
+
+                                        styledDiv {
+
+                                            css{
+                                                +mainComponentSearch
+                                                display = displayProperty(currentDestination.showSearch)
+                                            }
 
                                             styledDiv {
+                                                css(mainComponentSearchIcon)
+                                                mIcon("search")
+                                            }
 
-                                                css{
-                                                    +mainComponentSearch
-                                                    media(theme.breakpoints.up(tabletAndHighEnd)){
-                                                        display = displayProperty(currentDestination.showSearch)
-                                                    }
-                                                }
+                                            val inputProps = object: RProps {
+                                                val className = "${StyleManager.name}-mainComponentInputSearchClass"
+                                                val id = "um-search"
+                                            }
 
-                                                styledDiv {
-                                                    css(mainComponentSearchIcon)
-                                                    mIcon("search")
-                                                }
-
-                                                val inputProps = object: RProps {
-                                                    val className = "${StyleManager.name}-mainComponentInputSearchClass"
-                                                    val id = "um-search"
-                                                }
-
-                                                mInput(placeholder = "${getString(MessageID.search)}...",
-                                                    disableUnderline = true) {
-                                                    attrs.inputProps = inputProps
-                                                }
+                                            mInput(placeholder = "${getString(MessageID.search)}...",
+                                                disableUnderline = true) {
+                                                attrs.inputProps = inputProps
                                             }
                                         }
                                     }
@@ -196,7 +195,9 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
                                             }
 
                                             attrs {
-                                                onClick = {}
+                                                onClick = {
+                                                    systemImpl.go(AccountListView.VIEW_NAME, mapOf(), this)
+                                                }
                                             }
 
                                             mAvatar{

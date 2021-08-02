@@ -232,8 +232,11 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
                     }
                     umItem(MGridSize.cells12, gridSizeOnCenterOnMdDown,gridSizeOnCenterLgUp) {
                         mButton(getString(MessageID.login),
-                            size = MButtonSize.large, disabled = inProgress
-                            ,color = MColor.secondary,variant = MButtonVariant.contained, onClick = {
+                            size = MButtonSize.large,
+                            disabled = inProgress
+                            ,color = MColor.secondary,
+                            variant = MButtonVariant.contained,
+                            onClick = {
                                 mPresenter.handleLogin(username, password)
                             }){
                             css {
