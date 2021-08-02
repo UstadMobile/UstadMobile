@@ -166,7 +166,7 @@ class PersonDaoJs: PersonDao() {
                 personUid = 2
                 username = "janeDoe"
                 firstNames = "Jane"
-                admin = true
+                admin = false
                 emailAddr = "jane@users.com"
                 phoneNum = "+255 71242 5886"
                 personAddress = "Proper, Dodoma"
@@ -178,7 +178,7 @@ class PersonDaoJs: PersonDao() {
                 personUid = 3
                 username = "johnDoe"
                 firstNames = "John"
-                admin = true
+                admin = false
                 emailAddr = "john@users.com"
                 phoneNum = "+255 71242 5886"
                 personAddress = "Proper, Dodoma"

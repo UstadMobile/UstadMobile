@@ -494,12 +494,12 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         top = 10.px
     }
 
-    val clazzListItemSecondaryIcons by css {
+    val gridListSecondaryItemIcons by css {
         marginTop = 4.px
         fontSize = LinearDimension("1em")
     }
 
-    val clazzItemSecondaryDesc by css {
+    val gridListSecondaryItemDesc by css {
         marginTop = 4.px
         fontSize = LinearDimension("0.68rem")
     }

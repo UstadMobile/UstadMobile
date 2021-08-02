@@ -10,7 +10,7 @@ import com.ustadmobile.util.StyleManager.horizontalList
 import com.ustadmobile.util.StyleManager.listComponentContainer
 import com.ustadmobile.util.StyleManager.listComponentContainerWithScroll
 import com.ustadmobile.util.StyleManager.theme
-import com.ustadmobile.view.ext.renderCreateNewItemView
+import com.ustadmobile.view.ext.createCreateNewItem
 import kotlinx.css.Color
 import kotlinx.css.LinearDimension
 import kotlinx.css.backgroundColor
@@ -71,7 +71,7 @@ abstract class UstadSimpleList<P: ListProps<*>>(mProps: P) : UstadBaseComponent<
                     attrs.onClick = {
                         props.createNewItem?.onClickCreateNew?.invoke()
                     }
-                    renderCreateNewItemView(getString(props.createNewItem?.labelId ?: 0))
+                    createCreateNewItem(getString(props.createNewItem?.labelId ?: 0))
                 }
             }
 

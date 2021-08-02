@@ -7,19 +7,19 @@ import com.ccfraser.muirwik.components.list.mListItemIcon
 import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.ScopedGrantEditPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.model.BitmaskMessageId
-import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.navigation.RouteManager.defaultRoute
 import com.ustadmobile.navigation.RouteManager.destinationList
 import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.clazzListItemSecondaryIcons
 import com.ustadmobile.util.StyleManager.defaultMarginBottom
 import com.ustadmobile.util.StyleManager.defaultMarginTop
+import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.entryItemImageContainer
+import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
 import com.ustadmobile.util.StyleManager.listItemCreateNewDiv
 import com.ustadmobile.util.StyleManager.mainComponentErrorPaper
 import com.ustadmobile.util.StyleManager.personListItemAvatar
 import com.ustadmobile.util.Util.ASSET_ACCOUNT
+import com.ustadmobile.util.ext.format
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
 import org.w3c.dom.events.Event
@@ -129,15 +129,15 @@ fun RBuilder.umProfileAvatar(attachmentId: Long, fallback: String){
 }
 
 
-fun RBuilder.handleCall(phoneNumber: String?){
+fun RBuilder.onClickCall(phoneNumber: String?){
 
 }
 
-fun RBuilder.handleMail(email: String?){
+fun RBuilder.onClickEmail(email: String?){
 
 }
 
-fun RBuilder.handleSMS(phoneNumber: String?){
+fun RBuilder.onClickSMS(phoneNumber: String?){
 
 }
 
@@ -159,7 +159,7 @@ fun RBuilder.createInformation(icon:String? = null, data: String?, label: String
     umGridContainer {
         css{
             +defaultMarginTop
-            display = StyleManager.displayProperty(data != "0" || !data.isNullOrEmpty(), true)
+            display = displayProperty(data != "0" && !data.isNullOrEmpty(), true)
         }
         umItem(MGridSize.cells2){
             if(icon != null){
@@ -190,18 +190,18 @@ fun RBuilder.createInformation(icon:String? = null, data: String?, label: String
     }
 }
 
-fun RBuilder.circleIndicator(threshold: Float) {
+fun RBuilder.circleIndicator(threshold: kotlin.Float) {
     mIcon("circle",
         color = when {
             threshold > 0.8f -> MIconColor.primary
             threshold > 0.6f -> MIconColor.inherit
             else -> MIconColor.error
         }){
-        css(clazzListItemSecondaryIcons)
+        css(gridListSecondaryItemIcons)
     }
 }
 
-fun RBuilder.renderCreateNewItemView(createNewText: String){
+fun RBuilder.createCreateNewItem(createNewText: String){
     styledDiv {
         css(listItemCreateNewDiv)
         mListItemIcon("add","${StyleManager.name}-listCreateNewIconClass")
@@ -283,6 +283,132 @@ fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(leftIcon: String,right
                 }
             ){
                 css(defaultMarginTop)
+            }
+        }
+    }
+}
+
+fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(personUid: Long, fullName: String,
+                                                                  pending: Boolean = false,
+                                                                  attendance: kotlin.Float = -1f,
+                                                                  attendanceLabel: String? = null,
+                                                                  student: Boolean = true,
+                                                                  onClickDecline: (() -> Unit)? = null,
+                                                                  onClickAccept: (() -> Unit)? = null){
+    umGridContainer(MGridSpacing.spacing5) {
+        css{
+            paddingTop = 4.px
+            paddingBottom = 4.px
+            width = LinearDimension("100%")
+        }
+
+        umItem(MGridSize.cells3, MGridSize.cells2){
+            umProfileAvatar(personUid, "person")
+        }
+
+        umItem(MGridSize.cells9, MGridSize.cells10){
+            umItem(MGridSize.cells12){
+                mTypography(fullName,
+                    variant = MTypographyVariant.h6,
+                    color = MTypographyColor.textPrimary){
+                    css (StyleManager.alignTextToStart)
+                }
+            }
+
+            umGridContainer{
+                css{
+                    display = displayProperty(student, true)
+                }
+
+                if(attendance >= 0f){
+                    umItem(MGridSize.cells1){
+                        circleIndicator(attendance)
+                    }
+                }
+
+                umItem(MGridSize.cells8){
+                    mTypography(attendanceLabel?.format(attendance * 100),
+                        color = MTypographyColor.textPrimary
+                    ){
+                        css{
+                            +StyleManager.alignTextToStart
+                            +StyleManager.gridListSecondaryItemDesc
+                        }
+                    }
+
+                }
+
+                umItem(MGridSize.cells3){
+                    css{
+                        display = displayProperty(pending, true)
+                        paddingLeft = 5.spacingUnits
+                    }
+                    umGridContainer(MGridSpacing.spacing4) {
+                        umItem(MGridSize.cells4){
+                            mIconButton("check",
+                                onClick = {
+                                    onClickAccept?.invoke()
+                                },
+                                className = "${StyleManager.name}-successClass",
+                                size = MIconButtonSize.small)
+                        }
+
+                        umItem(MGridSize.cells4){
+                            mIconButton("close",
+                                onClick = {
+                                    onClickDecline?.invoke()
+                                },
+                                className = "${StyleManager.name}-errorClass",
+                                size = MIconButtonSize.small)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fun RBuilder.createListItemWithAttendance(iconName: String, title: String,
+                                          subTitle: String, attendance: Float = -1f,
+                                          attendanceLabel: String){
+    umGridContainer {
+        umItem(MGridSize.cells2){
+            umProfileAvatar(-1, iconName)
+        }
+
+        umItem(MGridSize.cells10){
+            umItem(MGridSize.cells12){
+                mTypography(title,
+                    variant = MTypographyVariant.body1){
+                    css(StyleManager.alignTextToStart)
+                }
+            }
+
+            umItem(MGridSize.cells12){
+                mTypography(subTitle,
+                    variant = MTypographyVariant.body2){
+                    css(StyleManager.alignTextToStart)
+                }
+            }
+
+            umItem(MGridSize.cells12){
+                umGridContainer{
+                    umItem(MGridSize.cells1){
+                        circleIndicator(attendance)
+                    }
+
+                    umItem(MGridSize.cells4){
+                        mTypography(attendanceLabel.format(attendance * 100),
+                            color = MTypographyColor.textPrimary
+                        ){
+                            css{
+                                +StyleManager.alignTextToStart
+                                +StyleManager.gridListSecondaryItemDesc
+                            }
+                        }
+
+                    }
+                }
             }
         }
     }

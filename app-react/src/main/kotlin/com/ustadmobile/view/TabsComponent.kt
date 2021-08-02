@@ -64,7 +64,6 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,RState>(mP
         }
         val selectedTab = props.tabs.first { it.title == selectedTabTitle}
         val component = lookupDestinationName(selectedTab.viewName)?.component
-
         styledDiv {
             css(tabsContainer)
             if(component != null){

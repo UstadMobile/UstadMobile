@@ -24,7 +24,7 @@ import com.ustadmobile.util.StyleManager.listCreateNewContainer
 import com.ustadmobile.util.StyleManager.selectionContainer
 import com.ustadmobile.util.StyleManager.theme
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.view.ext.renderCreateNewItemView
+import com.ustadmobile.view.ext.createCreateNewItem
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.browser.window
@@ -84,7 +84,11 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
             }
         }
 
-    protected var listType: Int = LIST_TYPE_SINGLE_COLUMN
+    /**
+     * Flag to indicate whether the list should be multi (Grid Layout)
+     * or single column (Linear Layout)
+     */
+    protected var listTypeSingleColumn: Boolean = true
         get() = field
         set(value) {
             setState {
@@ -133,15 +137,15 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
     override var addMode: ListViewAddMode = ListViewAddMode.NONE
         get() = field
         set(value) {
-            showCreateNewItem = value == ListViewAddMode.FIRST_ITEM
-            if(value == ListViewAddMode.FAB){
-                fabManager?.visible = value == ListViewAddMode.FAB
-            }
-            fabManager?.onClickListener = {
-                onFabClicked()
-            }
             setState {
                 field = value
+            }
+            showCreateNewItem = value == ListViewAddMode.FIRST_ITEM
+            window.setTimeout({
+                fabManager?.visible = value == ListViewAddMode.FAB
+            }, STATE_CHANGE_DELAY)
+            fabManager?.onClickListener = {
+                onFabClicked()
             }
         }
 
@@ -170,20 +174,20 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
     }
 
     override fun RBuilder.render() {
-        val singleColumnList = listType == LIST_TYPE_SINGLE_COLUMN
         styledDiv {
             css{
-                if(singleColumnList){
+                if(listTypeSingleColumn){
                     +listComponentContainer
                 }
                 +contentContainer
             }
             renderFilters()
+
             renderMenuOptions()
 
             renderHeaderView()
 
-            if(singleColumnList)
+            if(listTypeSingleColumn)
                 renderSingleColumnList()
             else
                 renderMultiColumnList()
@@ -205,7 +209,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                     attrs.asDynamic().onClick = {
                         handleClickCreateNewEntry()
                     }
-                    renderCreateNewItemView(getString(createNewTextId))
+                    createCreateNewItem(getString(createNewTextId))
                 }
             }
 
@@ -251,7 +255,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                     attrs.onClick = {
                         handleClickCreateNewEntry()
                     }
-                    renderCreateNewItemView(getString(createNewTextId))
+                    createCreateNewItem(getString(createNewTextId))
                 }
             }
 
@@ -343,6 +347,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
         }
     }
 
+
     private fun RBuilder.renderMenuOptions(){
         val hideOptions = selectedEntries.isNullOrEmpty() or !showEditOptionsMenu
         umGridContainer {
@@ -388,9 +393,9 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
 
     open fun RBuilder.renderEditOptionMenu(){}
 
-    open fun RBuilder.renderFooterView(){}
-
     open fun RBuilder.renderHeaderView(){}
+
+    open fun RBuilder.renderFooterView(){}
 
     abstract fun handleClickEntry(entry: DT)
 
@@ -428,16 +433,5 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                 SelectionOption.MOVE to "drive_file_move",
                 SelectionOption.HIDE to "visibility",
                 SelectionOption.UNHIDE to "visibility_of")
-
-        /**
-         * List type on which list item cover the entire row
-         */
-        const val LIST_TYPE_SINGLE_COLUMN = 1
-
-        /**
-         * List type on which list item cover
-         * just a fraction of space and it might have two or more columns
-         */
-        const val LIST_TYPE_MULTI_COLUMN = 2
     }
 }

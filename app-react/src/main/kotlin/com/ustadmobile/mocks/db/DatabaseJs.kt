@@ -79,7 +79,7 @@ class DatabaseJs: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val xObjectDao: XObjectDao
         get() = TODO("Not yet implemented")
     override val reportDao: ReportDao
-        get() = TODO("Not yet implemented")
+        get() = ReportDaoJs()
     override val containerImportJobDao: ContainerImportJobDao
         get() = TODO("Not yet implemented")
     override val statementDao: StatementDao
@@ -126,7 +126,7 @@ class DatabaseJs: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val locallyAvailableContainerDao: LocallyAvailableContainerDao
         get() = TODO("Not yet implemented")
     override val schoolMemberDao: SchoolMemberDao
-        get() = TODO("Not yet implemented")
+        get() = SchoolMemberDaoJs()
     override val clazzAssignmentDao: ClazzAssignmentDao
         get() = TODO("Not yet implemented")
     override val clazzAssignmentContentJoinDao: ClazzAssignmentContentJoinDao

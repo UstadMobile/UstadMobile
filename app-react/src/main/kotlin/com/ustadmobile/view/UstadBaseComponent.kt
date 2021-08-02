@@ -261,6 +261,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         navController.navigate(destinationView, args, navOptions)
     }
 
+
     override fun componentWillUnmount() {
         for(observer in lifecycleObservers){
             observer.onStop(this)

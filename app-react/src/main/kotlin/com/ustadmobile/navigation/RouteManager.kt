@@ -17,12 +17,13 @@ object RouteManager {
     val destinationList = listOf(
         UstadDestination("library_books", MessageID.content, ContentEntryListTabsView.VIEW_NAME,
             ContentEntryListTabsComponent::class, true),
-        UstadDestination("school", MessageID.schools,SchoolListView.VIEW_NAME, SchoolListComponent::class),
-        UstadDestination("people", MessageID.classes,ClazzList2View.VIEW_NAME, ClazzListComponent::class),
-        UstadDestination("person", MessageID.people, PersonListView.VIEW_NAME, PersonListComponent::class),
-        UstadDestination("pie_chart", MessageID.reports, ReportListView.VIEW_NAME, PlaceHolderComponent::class, divider = true),
+        UstadDestination("school", MessageID.schools,SchoolListView.VIEW_NAME, SchoolListComponent::class, showSearch = true),
+        UstadDestination("people", MessageID.classes,ClazzList2View.VIEW_NAME, ClazzListComponent::class, showSearch = true),
+        UstadDestination("person", MessageID.people, PersonListView.VIEW_NAME, PersonListComponent::class, showSearch = true),
+        UstadDestination("pie_chart", MessageID.reports, ReportListView.VIEW_NAME, ReportListComponent::class, divider = true),
         UstadDestination("settings", MessageID.settings, SettingsView.VIEW_NAME, PlaceHolderComponent::class),
         UstadDestination(view = ContentEntryList2View.VIEW_NAME, component = ContentEntryListComponent::class),
+        UstadDestination(view = AccountListView.VIEW_NAME, component = AccountListComponent::class),
         UstadDestination(view = Login2View.VIEW_NAME, labelId = MessageID.login, component = LoginComponent::class, showNavigation = false),
         UstadDestination(view = ContentEntryDetailView.VIEW_NAME, component = ContentEntryDetailComponent::class),
         UstadDestination(view = ContentEntryDetailOverviewView.VIEW_NAME, component = ContentEntryDetailOverviewComponent::class),
@@ -40,8 +41,11 @@ object RouteManager {
         UstadDestination(view = RedirectView.VIEW_NAME, component = RedirectComponent::class),
         UstadDestination(view = ClazzDetailView.VIEW_NAME, component = ClazzDetailComponent::class),
         UstadDestination(view = ClazzEdit2View.VIEW_NAME, component = ClazzEditComponent::class),
-        UstadDestination(view = ClazzMemberListView.VIEW_NAME, component = ClazzMemberListComponent::class),
+        UstadDestination(view = ClazzMemberListView.VIEW_NAME, component = ClazzMemberListComponent::class, showSearch = true),
         UstadDestination(view = ClazzDetailOverviewView.VIEW_NAME, component = ClazzDetailOverviewComponent::class),
+        UstadDestination(view = SchoolDetailView.VIEW_NAME, component = SchoolDetailComponent::class),
+        UstadDestination(view = SchoolDetailOverviewView.VIEW_NAME, component = SchoolDetailOverviewComponent::class),
+        UstadDestination(view = SchoolMemberListView.VIEW_NAME, component = SchoolMemberListComponent::class, showSearch = true),
         UstadDestination(labelId= MessageID.accounts, view = AccountListView.VIEW_NAME, component = PlaceHolderComponent::class)
     )
 

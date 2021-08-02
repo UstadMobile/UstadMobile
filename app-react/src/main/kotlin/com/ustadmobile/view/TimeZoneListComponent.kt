@@ -1,16 +1,11 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
 import com.ustadmobile.core.controller.OnSearchSubmitted
 import com.ustadmobile.core.controller.TimeZoneListPresenter
 import com.ustadmobile.core.view.TimeZoneListView
-import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.TimeZone
 import com.ustadmobile.util.TimeZonesUtil
 import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import com.ustadmobile.view.ext.umProfileAvatar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -19,7 +14,6 @@ import react.RBuilder
 import react.RProps
 import react.RState
 import react.setState
-import styled.css
 
 class TimeZoneListComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(mProps) , TimeZoneListView,
     OnSearchSubmitted {
@@ -50,7 +44,6 @@ class TimeZoneListComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(
     }
 
     override fun onSearchSubmitted(text: String?) {
-        console.log(text)
         if(text == null){
             return
         }

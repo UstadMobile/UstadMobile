@@ -119,7 +119,7 @@ class ScopedGrantOneToManyHelper(
             currentEntityValue = null,
             destinationViewName = PersonListView.VIEW_NAME,
             entityClass = ScopedGrant::class,
-            serializer = ScopedGrant.serializer(),
+            serializationStrategy = ScopedGrant.serializer(),
             destinationResultKey = SAVEDSTATE_KEY_SCOPEDGRANT_RESULTS,
             arguments = args))
 
@@ -136,7 +136,7 @@ class ScopedGrantOneToManyHelper(
             currentEntityValue = joinedEntity.scopedGrant,
             destinationViewName = ScopedGrantEditView.VIEW_NAME,
             entityClass = ScopedGrant::class,
-            serializer = ScopedGrant.serializer(),
+            serializationStrategy = ScopedGrant.serializer(),
             destinationResultKey = SAVEDSTATE_KEY_SCOPEDGRANT_RESULTS,
             arguments = args
         ))

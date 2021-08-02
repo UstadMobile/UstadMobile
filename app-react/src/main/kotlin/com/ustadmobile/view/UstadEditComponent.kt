@@ -23,11 +23,11 @@ abstract class UstadEditComponent<T: Any>(mProps: RProps): UstadBaseComponent<RP
             getString(MessageID.done)
         }
 
+        fabManager?.icon = "check"
+        fabManager?.text = textId
         window.setTimeout({
-            fabManager?.icon = "check"
             fabManager?.visible = true
-            fabManager?.text = textId
-        }, STATE_CHANGE_DELAY * 5)
+        }, STATE_CHANGE_DELAY)
     }
 
     override fun onFabClicked() {

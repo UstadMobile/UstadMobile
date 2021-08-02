@@ -2,7 +2,6 @@ package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.controller.UstadEditPresenter
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationStrategy
 import kotlin.reflect.KClass
 
@@ -27,7 +26,7 @@ class NavigateForResultOptions<T : Any>(
     val currentEntityValue: T?,
     val destinationViewName: String,
     val entityClass: KClass<T>,
-    val serializer: KSerializer<T>,
+    val serializationStrategy: SerializationStrategy<T>,
     val destinationResultKey: String? = null,
     overwriteDestination: Boolean? = null,
     val arguments: MutableMap<String, String> = mutableMapOf()) {
@@ -37,7 +36,7 @@ class NavigateForResultOptions<T : Any>(
     fun copy(newEntityValue: T?,
              newArguments: MutableMap<String, String> = arguments
     ) = NavigateForResultOptions(fromPresenter,
-        newEntityValue, destinationViewName, entityClass, serializer,
+        newEntityValue, destinationViewName, entityClass, serializationStrategy,
         destinationResultKey, overwriteDestination, newArguments)
 }
 

@@ -12,7 +12,7 @@ import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import com.ustadmobile.util.StyleManager.alignTextToStart
-import com.ustadmobile.util.StyleManager.clazzItemSecondaryDesc
+import com.ustadmobile.util.StyleManager.gridListSecondaryItemDesc
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.StyleManager.defaultMarginTop
@@ -102,15 +102,15 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
                     umGridContainer(MGridSpacing.spacing4) {
                         createAction("call",MessageID.call, MGridSize.cells4, MGridSize.cells2,
                             entity?.phoneNum != null){
-                            handleCall(entity?.phoneNum)
+                            onClickCall(entity?.phoneNum)
                         }
                         createAction("message",MessageID.text, MGridSize.cells4, MGridSize.cells2,
                             entity?.phoneNum != null){
-                            handleSMS(entity?.phoneNum)
+                            onClickSMS(entity?.phoneNum)
                         }
                         createAction("email",MessageID.email, MGridSize.cells4, MGridSize.cells2,
                             entity?.emailAddr != null){
-                            handleMail(entity?.emailAddr)
+                            onClickEmail(entity?.emailAddr)
                         }
                         createAction("vpn_key",MessageID.change_password, MGridSize.cells6, MGridSize.cells3,
                             changePasswordVisible){
@@ -179,15 +179,18 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
                                 }
 
 
-                                val clazzes = clazzList
-                                if(clazzes != null){
+                                if(clazzList != null){
 
                                     umItem(MGridSize.cells12){
 
                                         createListSectionTitle(getString(MessageID.classes))
-
-                                        renderClazzes(clazzes){ clazz ->
-                                            mPresenter.handleClickClazz(clazz)
+                                        clazzList?.let { clazzes ->
+                                            child(ClazzEnrolmentWithClazzSimpleListComponent::class){
+                                                attrs.entries = clazzes
+                                                attrs.onEntryClicked = { clazz ->
+                                                    mPresenter.handleClickClazz(clazz)
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -225,64 +228,21 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
         }
     }
 
-}
+    class ClazzEnrolmentWithClazzSimpleListComponent(mProps: ListProps<ClazzEnrolmentWithClazzAndAttendance>):
+        UstadSimpleList<ListProps<ClazzEnrolmentWithClazzAndAttendance>>(mProps){
 
-class ClazzEnrolmentWithClazzSimpleListComponent(mProps: ListProps<ClazzEnrolmentWithClazzAndAttendance>):
-    UstadSimpleList<ListProps<ClazzEnrolmentWithClazzAndAttendance>>(mProps){
+        override fun RBuilder.renderListItem(item: ClazzEnrolmentWithClazzAndAttendance) {
 
-    override fun RBuilder.renderListItem(item: ClazzEnrolmentWithClazzAndAttendance) {
-        umGridContainer {
-            umItem(MGridSize.cells1){
-                mIcon("people")
-            }
+            val title = "${item.clazz?.clazzName} (${item.roleToString(this, systemImpl)}) " +
+                    "- ${item.outcomeToString(this,  systemImpl)}"
 
-            umItem(MGridSize.cells11){
-                umItem(MGridSize.cells12){
-                    val title = "${item.clazz?.clazzName} (${item.roleToString(this, systemImpl)}) " +
-                            "- ${item.outcomeToString(this,  systemImpl)}"
-                    mTypography(title,
-                        variant = MTypographyVariant.body1){
-                        css(alignTextToStart)
-                    }
-                }
+            val enrollmentPeriod = "${Date(item.clazzEnrolmentDateJoined).standardFormat()} " +
+                    "- ${Date(item.clazzEnrolmentDateLeft).standardFormat()}"
 
-                umItem(MGridSize.cells12){
-                    val enrollmentPeriod = "${Date(item.clazzEnrolmentDateJoined).standardFormat()} " +
-                            "- ${Date(item.clazzEnrolmentDateLeft).standardFormat()}"
-                    mTypography(enrollmentPeriod,
-                        variant = MTypographyVariant.body2){
-                        css(alignTextToStart)
-                    }
-                }
 
-                umItem(MGridSize.cells12){
-                    umGridContainer{
-                        umItem(MGridSize.cells1){
-                            circleIndicator(item.attendance)
-                        }
+            createListItemWithAttendance("people", title, enrollmentPeriod,
+                item.attendance, getString(MessageID.x_percent_attended))
 
-                        umItem(MGridSize.cells4){
-                            val attendancesPercentage = getString(MessageID.x_percent_attended)
-                                .format(item.attendance * 100)
-                            mTypography(attendancesPercentage,
-                                color = MTypographyColor.textPrimary
-                            ){
-                                css{
-                                    +alignTextToStart
-                                    +clazzItemSecondaryDesc
-                                }
-                            }
-
-                        }
-                    }
-                }
-            }
         }
     }
-}
-
-fun RBuilder.renderClazzes(clazzList: List<ClazzEnrolmentWithClazzAndAttendance>,
-                           onClick: ((ClazzEnrolmentWithClazzAndAttendance) -> Unit)? = null) = child(ClazzEnrolmentWithClazzSimpleListComponent::class) {
-    attrs.entries = clazzList
-    attrs.onEntryClicked = onClick
 }
