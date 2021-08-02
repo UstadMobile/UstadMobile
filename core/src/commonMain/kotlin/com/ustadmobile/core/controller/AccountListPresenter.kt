@@ -63,7 +63,7 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
                 newList.removeAll { it.endpoint.url != endpointFilter }
             }
 
-            arguments[UstadView.ARG_MAX_DATE_OF_BIRTH]?.also { maxDateOfBirthStr ->
+            arguments[ARG_MAX_DATE_OF_BIRTH]?.also { maxDateOfBirthStr ->
                 val maxDateOfBirth = maxDateOfBirthStr.toLong()
                 newList.removeAll { it.person.dateOfBirth > maxDateOfBirth }
             }
