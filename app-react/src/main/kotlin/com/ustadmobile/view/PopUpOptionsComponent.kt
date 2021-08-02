@@ -5,6 +5,7 @@ import com.ccfraser.muirwik.components.button.mButton
 import com.ccfraser.muirwik.components.dialog.mDialog
 import com.ccfraser.muirwik.components.dialog.mDialogActions
 import com.ccfraser.muirwik.components.dialog.mDialogContent
+import com.ccfraser.muirwik.components.dialog.mDialogTitle
 import com.ccfraser.muirwik.components.list.mList
 import com.ccfraser.muirwik.components.list.mListItem
 import com.ccfraser.muirwik.components.list.mListItemAvatar
@@ -21,12 +22,13 @@ import styled.css
 import styled.styledDiv
 import kotlin.js.Date
 
-data class PopUpOptionItem(var icon: String, var primaryText: Int, var secondaryText: Int = 0, val onOptionItemClicked: (() -> Unit)? = null)
+data class PopUpOptionItem(var icon: String?, var primaryText: Int, var secondaryText: Int = 0, val onOptionItemClicked: (() -> Unit)? = null)
 
 interface OptionsProps: RProps {
     var optionItems: List<PopUpOptionItem>
     var systemImpl: UstadMobileSystemImpl
     var shownAt: Long
+    var title: String?
     var onDialogClosed: () -> Unit
 }
 
@@ -40,6 +42,9 @@ class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, RSta
         mDialog(showDialog, onClose = { _, _ ->
             handleDialogClosed()
         }) {
+            if(props.title != null){
+                mDialogTitle("${props.title}")
+            }
             mDialogContent {
                 css {
                     width = 25.pc
@@ -48,17 +53,20 @@ class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, RSta
                     css {
                         width = LinearDimension("100%")
                     }
-                    mList {
 
+                    mList {
                         props.optionItems.forEach { option ->
-                            mListItem(button = true,
-                                onClick = { option.onOptionItemClicked?.invoke() }
-                            ) {
-                                mListItemAvatar {
-                                    mAvatar {
-                                        mIcon(option.icon)
+                            mListItem(
+                                button = true,
+                                onClick = { option.onOptionItemClicked?.invoke() }) {
+                                if(option.icon != null){
+                                    mListItemAvatar {
+                                        mAvatar {
+                                            mIcon("${option.icon}")
+                                        }
                                     }
                                 }
+
                                 mListItemText(
                                     primary = props.systemImpl.getString(option.primaryText, this),
                                     secondary = if(option.secondaryText != 0)
@@ -99,9 +107,11 @@ class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, RSta
 fun RBuilder.renderChoices(systemImpl: UstadMobileSystemImpl,
                            optionItems: List<PopUpOptionItem>,
                            shownAt: Long = Date().getTime().toLong(),
+                           title: String? = null,
                            onDialogClosed: () -> Unit) = child(PopUpOptionsComponent::class) {
     attrs.optionItems = optionItems
     attrs.systemImpl = systemImpl
     attrs.shownAt = shownAt
     attrs.onDialogClosed = onDialogClosed
+    attrs.title = title
 }
