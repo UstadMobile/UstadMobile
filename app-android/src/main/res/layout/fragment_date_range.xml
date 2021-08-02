@@ -54,6 +54,13 @@
             name="relToOptions"
             type="java.util.List&lt;IdOption&gt;" />
 
+        <variable name="dateTimeMode"
+            type="Integer"/>
+
+        <variable
+            name="timeZoneId"
+            type="String" />
+
     </data>
 
 
@@ -118,7 +125,9 @@
                     android:cursorVisible="false"
                     android:hint="@string/from"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateLong="@={dateRangeMoment.fromMoment.fixedTime}"
+                    app:dateTimeInMillis="@={dateRangeMoment.fromMoment.fixedTime}"
+                    app:timeZoneId="@{timeZoneId}"
+                    app:dateTimeInMillisMode="@{dateTimeMode}"
                     app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -262,7 +271,9 @@
                     android:cursorVisible="false"
                     android:hint="@string/toC"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateLong="@={dateRangeMoment.toMoment.fixedTime}"
+                    app:dateTimeInMillis="@={dateRangeMoment.toMoment.fixedTime}"
+                    app:timeZoneId="@{timeZoneId}"
+                    app:dateTimeInMillisMode="@{dateTimeMode}"
                     app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>

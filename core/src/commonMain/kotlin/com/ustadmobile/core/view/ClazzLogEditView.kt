@@ -11,6 +11,8 @@ interface ClazzLogEditView: UstadEditView<ClazzLog> {
     //The time (ms since midnight)
     var time: Long
 
+    var timeZone : String?
+
     var dateError: String?
 
     var timeError: String?

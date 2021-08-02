@@ -36,4 +36,9 @@
 
     <item name="tag_imageview_inversebindinglistener" type="id"/>
 
+    <item name="tag_dateadapter_calendar" type="id"/>
+
+    <item name="tag_dateadapter_dateformatter" type="id"/>
+
+
 </resources>

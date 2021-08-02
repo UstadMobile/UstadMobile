@@ -9,4 +9,6 @@ class ClazzEnrolmentWithLeavingReason : ClazzEnrolment() {
     @Embedded
     var leavingReason: LeavingReason? = null
 
+    var timeZone : String? = null
+
 }

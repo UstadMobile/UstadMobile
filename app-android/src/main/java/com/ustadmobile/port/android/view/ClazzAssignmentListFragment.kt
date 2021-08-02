@@ -19,13 +19,18 @@ class ClazzAssignmentListFragment(): UstadListViewFragment<ClazzAssignmentWithMe
     override val listPresenter: UstadListPresenter<*, in ClazzAssignmentWithMetrics>?
         get() = mPresenter
 
+    override var clazzTimeZone: String?
+        get() = (mDataRecyclerViewAdapter as? AssignmentListRecyclerAdapter)?.clazzTimeZone
+        set(value) {
+            (mDataRecyclerViewAdapter as? AssignmentListRecyclerAdapter)?.clazzTimeZone = value
+        }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = ClazzAssignmentListPresenter(requireContext(), arguments.toStringMap(),
                 this, di, viewLifecycleOwner)
 
-        mDataRecyclerViewAdapter = AssignmentListRecyclerAdapter(mPresenter)
+        mDataRecyclerViewAdapter = AssignmentListRecyclerAdapter(mPresenter, clazzTimeZone)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         return view
