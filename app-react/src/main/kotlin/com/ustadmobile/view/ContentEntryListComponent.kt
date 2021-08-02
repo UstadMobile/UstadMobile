@@ -65,8 +65,6 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
     override fun onCreate() {
         super.onCreate()
         fabManager?.text = getString(MessageID.content)
-        arguments.toMutableMap().putAll(mapOf(
-            ARG_WEB_PLATFORM to true.toString()))
         mPresenter = ContentEntryList2Presenter(this, arguments, this,di,this)
         mPresenter.onCreate(mapOf())
     }

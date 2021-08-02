@@ -10,7 +10,6 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.util.urlSearchParamsToMap
 import react.RBuilder
 import react.RProps
-import react.setState
 
 class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentEntry>(mProps), ContentEntryDetailView {
 
