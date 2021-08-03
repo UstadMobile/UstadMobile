@@ -60,7 +60,8 @@ object UstadMobileConstants {
             "ar" to "العربية",
             "bn" to "বাংলা",
             "ne" to "नेपाली",
-            "my" to "မြန်မာစာ")
+            "my" to "မြန်မာစာ",
+            "ru" to "Русский язык")
 
     /**
      * Anyone under this age is considered a minor. They can only register with the consent of a

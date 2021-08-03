@@ -4617,6 +4617,22 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                                FROM EntityRole
                                     JOIN Role ON EntityRole.erRoleUid = Role.roleUid     
                     """.trimIndent())
+
+                    database.execSQL("""
+                        INSERT INTO ScopedGrant(sgUid, sgPcsn, sgLcsn, sgLcb, sgLct, sgTableId, 
+                                    sgEntityUid, sgPermissions, sgGroupUid, sgIndex, sgFlags)
+                             SELECT Person.personUid AS sgUid, 0 AS sgPcsn, 0 AS sgLcsn, 0 AS sgLcb, 
+                                    $updateTime AS sgLct, 
+                                    ${ScopedGrant.ALL_TABLES} as sgTableId,
+                                    ${ScopedGrant.ALL_ENTITIES} AS sgEntityUid,
+                                    ${Role.ALL_PERMISSIONS} AS sgPermissions,
+                                    Person.personGroupUid AS sgGroupUid,
+                                    0 AS sgFlags,
+                                    0 AS sgIndex
+                               FROM Person
+                              WHERE CAST(Person.admin AS INTEGER) = 1      
+                                          
+                    """.trimIndent())
                 }
             }
         }
@@ -5173,9 +5189,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
                     MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
                     MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67,
-                    MIGRATION_68_69, MIGRATION_69_70, MIGRATION_70_71, MIGRATION_72_73,
-                    MIGRATION_73_74, MIGRATION_74_75, MIGRATION_75_76, MIGRATION_76_77,
-                    MIGRATION_77_78, MIGRATION_78_79)
+                    MIGRATION_68_69, MIGRATION_69_70, MIGRATION_70_71, MIGRATION_71_72,
+                    MIGRATION_72_73, MIGRATION_73_74, MIGRATION_74_75, MIGRATION_75_76,
+                    MIGRATION_76_77, MIGRATION_77_78, MIGRATION_78_79)
 
             return builder
         }
