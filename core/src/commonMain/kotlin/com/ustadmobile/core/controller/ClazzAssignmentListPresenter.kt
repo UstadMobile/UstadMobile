@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.dao.ClazzAssignmentDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -32,6 +33,8 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
 
     var searchText: String? = null
 
+    private var clazzTimeZone: String? = null
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0L
@@ -42,6 +45,9 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
             repo.clazzAssignmentRollUpDao.cacheBestStatements(
                     clazzUid, 0,
                     0)
+
+            clazzTimeZone = repo.clazzDao.getClazzWithSchool(clazzUid)?.effectiveTimeZone() ?: "UTC"
+            view.clazzTimeZone = clazzTimeZone
             updateListOnView()
         }
     }
@@ -52,6 +58,9 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
     }
 
     private fun updateListOnView() {
+
+
+
         view.list = repo.clazzAssignmentDao.getAllAssignments(clazzUid, systemTimeInMillis(),
                 mLoggedInPersonUid, selectedSortOption?.flag ?: 0,
                 searchText.toQueryLikeParam(), Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)

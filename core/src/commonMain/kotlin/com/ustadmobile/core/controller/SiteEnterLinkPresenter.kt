@@ -87,7 +87,7 @@ class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view:
     }
 
     fun handleClickCreateNewSite() {
-        impl.openLinkInBrowser("https://www.ustadmobile.com/hosting/", context)
+        impl.openLinkInBrowser("https://www.ustadmobile.com/", context)
     }
 
 

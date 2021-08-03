@@ -325,6 +325,8 @@ open class ClazzEnrolment()  {
          */
         const val ROLE_STUDENT_PENDING = 1002
 
+        const val ROLE_PARENT = 1003
+
         const val OUTCOME_IN_PROGRESS = 200
 
         const val OUTCOME_GRADUATED = 201

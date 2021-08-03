@@ -63,7 +63,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 76)
+], version = 79)
 @MinSyncVersion(60)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -4315,6 +4315,44 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_78_79 = object: DoorMigration(78, 79) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("ALTER TABLE Report ADD COLUMN reportTitleId INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE Report ADD COLUMN reportDescId INTEGER NOT NULL DEFAULT 0")
+
+                if(database.dbType() == DoorDbType.POSTGRES){
+                    //Report Data migration
+
+                    database.execSQL("""
+                        UPDATE Report SET reportTitleId = ${Report.BLANK_REPORT} , reportDescId = ${Report.BLANK_REPORT_DESC} WHERE 
+                            reportUid = ${Report.TEMPLATE_BLANK_REPORT_UID}
+                    """.trimIndent())
+                    database.execSQL("""
+                        UPDATE Report SET reportTitleId = ${Report.CONTENT_USAGE_OVER_TIME} , reportDescId = ${Report.CONTENT_USAGE_OVER_TIME_DESC}  WHERE 
+                            reportUid = ${Report.TEMPLATE_CONTENT_USAGE_OVER_TIME_UID}
+                    """.trimIndent())
+                    database.execSQL("""
+                        UPDATE Report SET reportTitleId = ${Report.UNIQUE_CONTENT_USERS_OVER_TIME} , reportDescId = ${Report.UNIQUE_CONTENT_USERS_OVER_TIME_DESC} WHERE 
+                            reportUid = ${Report.TEMPLATE_UNIQUE_CONTENT_USERS_UID}
+                    """.trimIndent())
+                    database.execSQL("""
+                        UPDATE Report SET reportTitleId = ${Report.ATTENDANCE_OVER_TIME_BY_CLASS} , reportDescId = ${Report.ATTENDANCE_OVER_TIME_BY_CLASS_DESC} WHERE 
+                            reportUid = ${Report.TEMPLATE_ATTENDANCE_OVER_TIME_BY_CLASS_UID}
+                    """.trimIndent())
+                    database.execSQL("""
+                        UPDATE Report SET reportTitleId = ${Report.CONTENT_USAGE_BY_CLASS} , reportDescId = ${Report.CONTENT_USAGE_BY_CLASS_DESC} WHERE 
+                            reportUid = ${Report.TEMPLATE_CONTENT_USAGE_BY_CLASS_UID}
+                    """.trimIndent())
+                    database.execSQL("""
+                        UPDATE Report SET reportTitleId = ${Report.CONTENT_COMPLETION} , reportDescId = ${Report.CONTENT_COMPLETION_DESC} WHERE 
+                            reportUid = ${Report.TEMPLATE_CONTENT_COMPLETION_UID}
+                    """.trimIndent())
+
+
+                }
+            }
+        }
+
         val MIGRATION_64_65 = object: DoorMigration(64, 65) {
             override fun migrate(database: DoorSqlDatabase) {
 
@@ -4691,7 +4729,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                                siteLcb = (SELECT COALESCE(
                                                  (SELECT nodeClientId 
                                                     FROM SyncNode
-                                                   LIMIT 1), 0)
+                                                   LIMIT 1), 0))
                     """)
                     database.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth2 (  pauthUid  BIGINT  PRIMARY KEY  NOT NULL , pauthMechanism  TEXT , pauthAuth  TEXT , pauthLcsn  BIGINT  NOT NULL , pauthPcsn  BIGINT  NOT NULL , pauthLcb  INTEGER  NOT NULL , pauthLct  BIGINT  NOT NULL )")
                     database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonAuth2_mcsn_seq")
@@ -5048,15 +5086,81 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         }
 
-        val MIGRATION_75_76 = object : DoorMigration(75, 76) {
+        val MIGRATION_75_76 = object: DoorMigration(75, 76) {
             override fun migrate(database: DoorSqlDatabase) {
-
-                database.execSQL("CREATE INDEX IF NOT EXISTS `index_StatementEntity_statementContentEntryUid_statementPersonUid_contentEntryRoot_timestamp_statementLocalChangeSeqNum` ON StatementEntity (`statementContentEntryUid`, `statementPersonUid`, `contentEntryRoot`, `timestamp`, `statementLocalChangeSeqNum`)")
-                database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzAssignment_caClazzUid` ON ClazzAssignment (`caClazzUid`)")
-
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_StatementEntity_statementContentEntryUid_statementPersonUid_contentEntryRoot_timestamp_statementLocalChangeSeqNum ON StatementEntity (statementContentEntryUid, statementPersonUid, contentEntryRoot, timestamp, statementLocalChangeSeqNum)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_ClazzAssignment_caClazzUid ON ClazzAssignment (caClazzUid)")
             }
+        }
+
+        //Fix adding clazz content permissions for existing teacher and student ScopedGrants.
+        val MIGRATION_76_77 = object : DoorMigration(76, 77) {
+            override fun migrate(database: DoorSqlDatabase) {
+                if(database.dbType() == DoorDbType.POSTGRES) {
+                    database.execSQL("""
+                        UPDATE ScopedGrant 
+                           SET sgPermissions = (sgPermissions | ${Role.PERMISSION_CLAZZ_CONTENT_SELECT}),
+                               sgLcb = COALESCE((
+                               SELECT nodeClientId
+                                 FROM SyncNode
+                                LIMIT 1), 0) 
+                         WHERE (sgFlags & $FLAG_STUDENT_GROUP) = $FLAG_STUDENT_GROUP   
+                    """)
+
+                    val teacherAddPermissions = Role.PERMISSION_CLAZZ_CONTENT_SELECT or
+                            Role.PERMISSION_CLAZZ_CONTENT_UPDATE
+                    database.execSQL("""
+                        UPDATE ScopedGrant 
+                           SET sgPermissions = (sgPermissions | ${teacherAddPermissions}),
+                               sgLcb = COALESCE((
+                               SELECT nodeClientId
+                                 FROM SyncNode
+                                LIMIT 1), 0) 
+                         WHERE (sgFlags & $FLAG_TEACHER_GROUP) = $FLAG_TEACHER_GROUP   
+                    """)
+
+                }
+            }
+        }
 
 
+        val MIGRATION_77_78 = object: DoorMigration(77, 78) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("ALTER TABLE Clazz ADD COLUMN clazzParentsPersonGroupUid INTEGER NOT NULL DEFAULT 0")
+
+                if(database.dbType() == DoorDbType.POSTGRES) {
+                    //Create a new PersonGroup for each class for the parents group
+                    database.execSQL("""
+                        INSERT INTO PersonGroup (groupMasterCsn, groupLocalCsn, 
+                                    groupLastChangedBy, groupLct, groupName, groupActive, 
+                                    personGroupFlag)
+                             SELECT 0 AS groupMasterCsn, 0 AS groupLocalCsn,
+                                    (SELECT nodeClientId FROM SyncNode LIMIT 1) AS groupLastChangedBy,
+                                    0 AS groupLct,
+                                    ('Class-Parents-' || CAST(Clazz.clazzUid AS TEXT)) AS groupName,
+                                    true AS groupActive,
+                                    ${PersonGroup.PERSONGROUP_FLAG_PARENT_GROUP} AS personGroupFlag
+                               FROM Clazz
+                    """)
+
+                    database.execSQL("""
+                        UPDATE Clazz
+                           SET clazzParentsPersonGroupUid =
+                               (SELECT groupUid 
+                                  FROM PersonGroup
+                                 WHERE clazzParentsPersonGroupUid = 0
+                                   AND groupName = ('Class-Parents-' || CAST(Clazz.clazzUid AS TEXT))),
+                               clazzLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1)    
+                    """)
+
+                    database.execSQL("""
+                        UPDATE PersonGroup
+                           SET groupName = 'Parents'
+                         WHERE personGroupFlag =  ${PersonGroup.PERSONGROUP_FLAG_PARENT_GROUP}
+                           AND groupName LIKE 'Class-Parents%'  
+                    """)
+                }
+            }
         }
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
@@ -5070,9 +5174,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
                     MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67,
                     MIGRATION_68_69, MIGRATION_69_70, MIGRATION_70_71, MIGRATION_72_73,
-                    MIGRATION_73_74, MIGRATION_74_75, MIGRATION_75_76)
-
-
+                    MIGRATION_73_74, MIGRATION_74_75, MIGRATION_75_76, MIGRATION_76_77,
+                    MIGRATION_77_78, MIGRATION_78_79)
 
             return builder
         }

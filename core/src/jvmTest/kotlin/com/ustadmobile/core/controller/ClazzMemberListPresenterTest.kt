@@ -10,9 +10,7 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDao
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.util.ext.createNewClazzAndGroups
-import com.ustadmobile.core.util.ext.createPersonGroupAndMemberWithEnrolment
-import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
@@ -118,13 +116,9 @@ class ClazzMemberListPresenterTest {
         }
 
         runBlocking {
-            repo.insertPersonWithRole(activePerson,
-            Role().apply {
-                rolePermissions = Role.PERMISSION_CLAZZ_ADD_STUDENT or Role.PERMISSION_CLAZZ_ADD_TEACHER
-            }, EntityRole().apply {
-                erTableId = Clazz.TABLE_ID
-                erEntityUid = testClazz.clazzUid
-            })
+            repo.grantScopedPermission(activePerson,
+                Role.PERMISSION_CLAZZ_ADD_STUDENT or Role.PERMISSION_CLAZZ_ADD_TEACHER,
+                Clazz.TABLE_ID, testClazz.clazzUid)
         }
 
         val endpointUrl = accountManager.activeEndpoint.url
@@ -170,15 +164,11 @@ class ClazzMemberListPresenterTest {
             personUid = pendingPerson.personUid
         }
         runBlocking {
-            repo.createPersonGroupAndMemberWithEnrolment(enrolment)
+            repo.processEnrolmentIntoClass(enrolment)
 
-            repo.insertPersonWithRole(activePerson,
-                    Role().apply {
-                        rolePermissions = Role.PERMISSION_CLAZZ_ADD_STUDENT or Role.PERMISSION_CLAZZ_ADD_TEACHER
-                    }, EntityRole().apply {
-                erTableId = Clazz.TABLE_ID
-                erEntityUid = testClazz.clazzUid
-            })
+            repo.grantScopedPermission(activePerson,
+                Role.PERMISSION_CLAZZ_ADD_STUDENT or Role.PERMISSION_CLAZZ_ADD_TEACHER,
+                Clazz.TABLE_ID, testClazz.clazzUid)
         }
 
         val endpointUrl = accountManager.activeEndpoint.url

@@ -1410,4 +1410,38 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     If you are the parent, you need to login to your own existing account or create a new account.
     </string>
 
+    <string name="blank_report">Blank report</string>
+
+    <!-- Report title for a report template showing attendance over time -->
+    <string name="attendance_over_time_by_class">Attendance over time by class</string>
+
+    <!-- Report description for a report template showing attendance over time -->
+    <string name="percentage_of_students_attending_over_time">Percentage of students attending over time</string>
+
+    <!-- Report title for a report showing number of students who completed educational content -->
+    <string name="content_completion">Content completion</string>
+
+    <!-- Report description for a report showing number of students who completed educational content -->
+    <string name="number_of_students_completed_time">Number of students who have completed selected content</string>
+
+    <!-- Report title for a report showing the content usage duration by class -->
+    <string name="content_usage_by_class">Content usage by class</string>
+    <!-- Report description for a report showing the content usage duration by class -->
+    <string name="total_content_usage_duration_class">Total content usage duration subgroup by class</string>
+
+    <!-- Report title for a report showing total content usage duration over time -->
+    <string name="content_usage_over_time">Content usage over time</string>
+
+    <!-- Report description for a report showing total content usage duration over time -->
+    <string name="total_content_duration_gender">Total content usage duration over time (disaggregated by gender)</string>
+
+    <!-- Report title for a report showing the number of unique content users over time -->
+    <string name="unique_content_users_over_time">Unique content users over time</string>
+
+    <!-- Report description for a report showing the number of unique content users over time -->
+    <string name="number_of_active_users_over_time">Number of active users over time</string>
+
+    <string name="parent">Parent</string>
+
+
 </resources>
