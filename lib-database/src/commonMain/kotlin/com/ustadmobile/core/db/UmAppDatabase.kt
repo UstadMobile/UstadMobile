@@ -4617,6 +4617,22 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                                FROM EntityRole
                                     JOIN Role ON EntityRole.erRoleUid = Role.roleUid     
                     """.trimIndent())
+
+                    database.execSQL("""
+                        INSERT INTO ScopedGrant(sgUid, sgPcsn, sgLcsn, sgLcb, sgLct, sgTableId, 
+                                    sgEntityUid, sgPermissions, sgGroupUid, sgIndex, sgFlags)
+                             SELECT Person.personUid AS sgUid, 0 AS sgPcsn, 0 AS sgLcsn, 0 AS sgLcb, 
+                                    $updateTime AS sgLct, 
+                                    ${ScopedGrant.ALL_TABLES} as sgTableId,
+                                    ${ScopedGrant.ALL_ENTITIES} AS sgEntityUid,
+                                    ${Role.ALL_PERMISSIONS} AS sgPermissions,
+                                    Person.personGroupUid AS sgGroupUid,
+                                    0 AS sgFlags,
+                                    0 AS sgIndex
+                               FROM Person
+                              WHERE CAST(Person.admin AS INTEGER) = 1      
+                                          
+                    """.trimIndent())
                 }
             }
         }
