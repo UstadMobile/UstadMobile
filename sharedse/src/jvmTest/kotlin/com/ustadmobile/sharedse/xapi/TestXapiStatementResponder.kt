@@ -18,8 +18,11 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.door.ext.writeToFile
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
@@ -29,7 +32,6 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatement
 import com.ustadmobile.port.sharedse.impl.http.XapiStatementResponder
 import com.ustadmobile.port.sharedse.impl.http.XapiStatementResponder.Companion.URI_PARAM_ENDPOINT
 import com.ustadmobile.util.test.checkJndiSetup
-import com.ustadmobile.util.test.extractTestResourceToFile
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.*
@@ -48,6 +50,7 @@ import java.io.IOException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import javax.naming.InitialContext
+import kotlin.random.Random
 
 class TestXapiStatementResponder {
 
@@ -71,10 +74,17 @@ class TestXapiStatementResponder {
         checkJndiSetup()
         val endpointScope = EndpointScope()
         di = DI {
-            bind<UstadMobileSystemImpl>() with singleton {
-                spy(UstadMobileSystemImpl(XmlPullParserFactory.newInstance()))
+            bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
+                NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
             }
-            bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
+
+            bind<UstadMobileSystemImpl>() with singleton {
+                spy(UstadMobileSystemImpl(XmlPullParserFactory.newInstance(),
+                    temporaryFolder.newFolder()))
+            }
+            bind<UstadAccountManager>() with singleton {
+                UstadAccountManager(instance(), Any(), di)
+            }
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()
                 builder.registerTypeAdapter(Statement::class.java, StatementSerializer())
@@ -97,18 +107,20 @@ class TestXapiStatementResponder {
                 }
             }
 
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope!!).singleton {
+            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName).also {
+                val nodeIdAndAuth: NodeIdAndAuth = instance()
+                spy(UmAppDatabase.getInstance(Any(), dbName, nodeIdAndAuth).also {
                     it.clearAllTables()
                     it.preload()
                 })
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
+                val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(Any(),
-                    context.url, instance(), instance())))
+                    context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, instance(), instance())))
             }
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
@@ -120,7 +132,7 @@ class TestXapiStatementResponder {
 
 
         accountManager = di.direct.instance()
-        db = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_DB)
+        db = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
 
         mockUriResource = mock<RouterNanoHTTPD.UriResource> {
             on { initParameter(0, DI::class.java) }.thenReturn(di)

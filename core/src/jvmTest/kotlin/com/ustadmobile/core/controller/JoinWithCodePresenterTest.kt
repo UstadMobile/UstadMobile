@@ -11,11 +11,13 @@ import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
@@ -57,21 +59,22 @@ class JoinWithCodePresenterTest {
         accountManager = di.direct.instance()
         systemImpl = di.direct.instance()
 
-        val currentEndpoint = accountManager.activeAccount.endpointUrl
-        accountManager.activeAccount = UmAccount(42L, "testuser",
-                endpointUrl = currentEndpoint)
-
+        val currentEndpoint = accountManager.activeEndpoint.url
         val repo: UmAppDatabase by di.activeRepoInstance()
+
+        val activeUser = runBlocking {
+            repo.insertPersonAndGroup(Person().apply {
+                firstNames = "Test"
+                lastName = "User"
+                username = "testuser"
+            })
+        }
+
+        accountManager.startLocalTestSessionBlocking(activeUser, accountManager.activeEndpoint.url)
+
 
         clazzEnrolmentRepoDaoSpy = spy(repo.clazzEnrolmentDao)
         whenever(repo.clazzEnrolmentDao).thenReturn(clazzEnrolmentRepoDaoSpy)
-
-        repo.personDao.insert(Person().apply {
-            firstNames = "Test"
-            lastName = "User"
-            username = "testuser"
-            personUid = accountManager.activeAccount.personUid
-        })
 
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
@@ -90,6 +93,7 @@ class JoinWithCodePresenterTest {
                 mapOf(UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString(),
                 UstadView.ARG_CODE to clazzToEnrolInto.clazzCode!!), mockView, di)
         presenter.onCreate(null)
+        presenter.onStart()
 
         verifyBlocking(clazzEnrolmentRepoDaoSpy, timeout(5000 * 5000)) {
             insertAsync(argWhere {
@@ -122,6 +126,7 @@ class JoinWithCodePresenterTest {
             mapOf(UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString(),
                 UstadView.ARG_CODE to clazzToEnrolInto.clazzCode!!), mockView, di)
         presenter.onCreate(null)
+        presenter.onStart()
 
         verify(mockView, timeout(5000)).errorText = any()
     }
@@ -142,6 +147,7 @@ class JoinWithCodePresenterTest {
                 UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString()
         ), mockView, di)
         presenter.onCreate(null)
+        presenter.onStart()
         presenter.handleClickDone("wrong")
 
         verify(mockView, timeout(10000)).errorText =
@@ -154,6 +160,7 @@ class JoinWithCodePresenterTest {
                 UstadView.ARG_CODE to "any"
         ), mockView, di)
         presenter.onCreate(null)
+        presenter.onStart()
 
         verify(mockView, timeout(5000)).errorText =
             systemImpl.getString(MessageID.invalid_register_code, context)

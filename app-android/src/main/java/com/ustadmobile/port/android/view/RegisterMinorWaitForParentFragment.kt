@@ -48,7 +48,7 @@ class RegisterMinorWaitForParentFragment: UstadBaseFragment(), RegisterMinorWait
         super.onViewCreated(view, savedInstanceState)
 
         mPresenter = RegisterMinorWaitForParentPresenter(requireContext(), arguments.toStringMap(),
-            this, di)
+            this, di).withViewLifecycle()
         mBinding?.presenter = mPresenter
         mPresenter?.onCreate(null)
     }

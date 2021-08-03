@@ -21,19 +21,20 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- Required to use BLE scanning for peer devices -->
 
-    <!-- Location permissions required for BLE scanning and WiFi scanning -->
-    <!--
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    -->
 
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> <!-- To obtain wifi lock to avoid wifi powering down during download -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- To obtain wifi lock to avoid wifi powering down during download -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <!-- Required to show download progress indicator -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!-- Remove permission requested by wordpress utils -->
+    <uses-permission
+        android:name="android.permission.GET_ACCOUNTS"
+        tools:node="remove" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -90,10 +91,6 @@
         <activity
             android:name="com.ustadmobile.port.android.view.AboutActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-
-        <service
-            android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
-            android:enabled="true" />
 
         <activity
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"

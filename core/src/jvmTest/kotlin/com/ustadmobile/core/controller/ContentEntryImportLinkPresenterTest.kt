@@ -8,6 +8,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ContentEntryImportLinkView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.UmAccount
 import io.ktor.client.*
@@ -64,7 +65,7 @@ class ContentEntryImportLinkPresenterTest {
         }
 
 
-        presenter = ContentEntryImportLinkPresenter(context, mapOf(), mockView, di)
+        presenter = ContentEntryImportLinkPresenter(context, mapOf(UstadView.ARG_RESULT_DEST_KEY to ""), mockView, di)
 
 
 
@@ -75,7 +76,7 @@ class ContentEntryImportLinkPresenterTest {
 
         var importedContentEntryMetaData = ImportedContentEntryMetaData(
                 ContentEntryWithLanguage(), "application/epub+zip",
-                "file://abc.zip", "googleDriveScraper")
+                "content://abc.zip", "googleDriveScraper")
 
         var response = MockResponse().setResponseCode(200).setHeader("Content-Type", "application/json")
             .setBody(Buffer().write(

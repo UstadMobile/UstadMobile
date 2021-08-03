@@ -16,7 +16,10 @@ import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.rest.ContainerDownload
@@ -41,6 +44,7 @@ import org.kodein.di.ktor.DIFeature
 import org.kodein.di.ktor.di
 import org.kodein.type.TypeToken
 import org.kodein.type.erased
+import kotlin.random.Random
 
 class DownloadJobPreparerTest {
 
@@ -73,14 +77,14 @@ class DownloadJobPreparerTest {
 
         val httpClient: HttpClient = di.direct.instance()
         val okHttpClient: OkHttpClient = di.direct.instance()
-        serverDb = UmAppDatabase.getInstance(Any())
-        serverDb.clearAllTables()
+        val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
+        serverDb = UmAppDatabase.getInstance(Any(), nodeIdAndAuth, primary = true)
+        serverDb.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
         serverRepo = serverDb.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
-            httpClient, okHttpClient))
+            nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))
 
         accountManager = di.direct.instance()
-        accountManager.activeAccount = UmAccount(0, "guest", "",
-            "http://localhost:8089/", "Guest", "User")
+        accountManager.activeEndpoint = Endpoint("http://localhost:8089/")
 
         val endpointScope = EndpointScope()
         server = embeddedServer(Netty, 8089) {
@@ -116,8 +120,8 @@ class DownloadJobPreparerTest {
         }
         server.start()
 
-        clientDb = di.on(accountManager.activeAccount).direct.instance(tag = TAG_DB)
-        clientRepo = di.on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
+        clientDb = di.on(accountManager.activeEndpoint).direct.instance(tag = TAG_DB)
+        clientRepo = di.on(accountManager.activeEndpoint).direct.instance(tag = TAG_REPO)
         (clientRepo as DoorDatabaseRepository).connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED
     }
 

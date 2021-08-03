@@ -36,20 +36,20 @@ interface ContentTypePlugin {
     val fileExtensions: Array<String>
 
     /**
-     * This should extract metadata from the file with the given path. This must switch to using a
+     * This should extract metadata from the given uri. This must switch to using a
      * background coroutine context (e.g. withContext(Dispatchers.Default). This MUST validate the
      * content of the underlying data.
      *
      * @return ContentEntryWithLanguage if successful and this can be imported, null otherwise
      */
-    suspend fun extractMetadata(filePath: String): ContentEntryWithLanguage?
+    suspend fun extractMetadata(uri: String, context: Any): ContentEntryWithLanguage?
 
     /**
      * This should import the content itself into a Container. This may involve performing
      * additional compression and conversion on the Container (e.g. converting a video into a
      * mobile-optimized codec, converting images inside an EPUB to webp, etc).
      *
-     * @param filePath path to the file that should be imported
+     * @param uri that should be imported
      * @param conversionParams a string map of parameters that can be used to control import settings
      * @param db to create containerManager
      * @param repo to create containerManager
@@ -59,7 +59,7 @@ interface ContentTypePlugin {
      * @throws IOException if an underlying IOError happens, or other exceptions could be thrown in
      * case of invalid data. importToContainer should only be called after validating with extractMetadata
      */
-    suspend fun importToContainer(filePath: String, conversionParams: Map<String, String>,
+    suspend fun importToContainer(uri: String, conversionParams: Map<String, String>,
                                   contentEntryUid: Long, mimeType: String,
                                   containerBaseDir: String,
                                   context: Any, db: UmAppDatabase,

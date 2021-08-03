@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.HolidayEditView
 import com.ustadmobile.lib.db.entities.Holiday
+import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 
 class HolidayEditFragment(): UstadEditFragment<Holiday>(), HolidayEditView {
 
@@ -37,7 +38,7 @@ class HolidayEditFragment(): UstadEditFragment<Holiday>(), HolidayEditView {
         setEditFragmentTitle(R.string.add_a_holiday, R.string.edit_holiday)
 
         mPresenter = HolidayEditPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+                di, viewLifecycleOwner).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
     }
 
@@ -56,11 +57,14 @@ class HolidayEditFragment(): UstadEditFragment<Holiday>(), HolidayEditView {
         set(value) {
             field = value
             mBinding?.holiday = value
+            mBinding?.dateTimeMode = MODE_START_OF_DAY
+            mBinding?.timeZoneId = "UTC"
         }
 
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

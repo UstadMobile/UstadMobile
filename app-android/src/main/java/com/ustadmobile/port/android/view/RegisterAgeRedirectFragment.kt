@@ -11,6 +11,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.RegisterAgeRedirectView
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 
 class RegisterAgeRedirectFragment() : UstadBaseFragment(), RegisterAgeRedirectView {
 
@@ -35,7 +36,7 @@ class RegisterAgeRedirectFragment() : UstadBaseFragment(), RegisterAgeRedirectVi
         super.onViewCreated(view, savedInstanceState)
 
         mPresenter = RegisterAgeRedirectPresenter(requireContext(), arguments.toStringMap(),
-            this, di)
+            this, di).withViewLifecycle()
         mBinding?.presenter = mPresenter
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
     }

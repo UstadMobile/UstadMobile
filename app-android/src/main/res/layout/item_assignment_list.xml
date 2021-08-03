@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics"/>
+        <import type="android.view.View"/>
+        <import type="com.ustadmobile.port.android.view.ClazzAssignmentListFragment"/>
+        <import type="com.ustadmobile.port.android.view.AssignmentListRecyclerAdapter"/>
+
+        <variable
+            name="assignment"
+            type="ClazzAssignmentWithMetrics" />
+
+        <variable
+            name="itemListener"
+            type="com.ustadmobile.core.controller.ClazzAssignmentListItemListener" />
+
+        <variable
+            name="selectablePagedListAdapter"
+            type="AssignmentListRecyclerAdapter" />
+
+        <variable name="dateTimeMode"
+            type="Integer"/>
+
+        <variable
+            name="timeZoneId"
+            type="String" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:selectableViewHelper="@{selectablePagedListAdapter}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, assignment)}"
+        app:onSelectableItemClicked="@{() -> itemListener.onClickAssignment(assignment)}"
+        android:background="@drawable/bg_listitem"
+        >
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_clazz_assignment_newitemicon"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            app:tint="?colorOnIconTint"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_outline_assignment_outline_24" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/content_progress_fail_correct"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:scaleType="fitCenter"
+            android:translationX="2dp"
+            android:translationY="-16dp"
+            android:src="@drawable/ic_content_complete"
+            android:visibility="@{assignment.studentScore.contentComplete ? View.VISIBLE : View.GONE}"
+            app:layout_constraintEnd_toEndOf="@id/item_clazz_assignment_newitemicon"
+            app:layout_constraintTop_toBottomOf="@id/item_clazz_assignment_newitemicon" />
+
+        <!-- Line 1-->
+        <TextView
+            android:id="@+id/line1_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:text="@{assignment.caTitle}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/item_clazz_assignment_newitemicon"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Assignment Title" />
+
+        <!-- Line 2-->
+        <TextView
+            android:id="@+id/line2_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@+id/line1_title"
+            app:layout_constraintTop_toBottomOf="@+id/line1_title"
+            android:text="@{assignment.caDescription}"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+            tools:text="Description"
+            />
+
+
+        <androidx.appcompat.widget.AppCompatImageView
+            tools:text="20/12/2021"
+            android:id="@+id/item_clazz_assignment_deadline_icon"
+            app:tint="?colorOnIconTint"
+            app:srcCompat="@drawable/ic_calendar_today_24px_"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            app:visibleIfDateSet="@{assignment.caDeadlineDate}"
+            app:layout_constraintStart_toStartOf="@+id/line1_title"
+            app:layout_constraintTop_toBottomOf="@+id/line2_description"
+            app:layout_constraintBottom_toBottomOf="@+id/line3_deadline"
+            />
+
+
+        <TextView
+            android:id="@+id/line3_deadline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/dimen_5dp"
+            android:paddingEnd="@dimen/dimen_5dp"
+            app:layout_constraintStart_toEndOf="@+id/item_clazz_assignment_deadline_icon"
+            app:layout_constraintTop_toBottomOf="@+id/line2_description"
+            app:visibleIfDateSet="@{assignment.caDeadlineDate}"
+            app:dateTimeInMillis="@{assignment.caDeadlineDate}"
+            app:timeZoneId="@{timeZoneId}"
+            app:dateTimeInMillisMode="@{dateTimeMode}"
+            tools:text="17/10/2021"
+            />
+
+        <TextView
+            tools:text="100%"
+            app:drawableStartCompat="@drawable/ic_baseline_emoji_events_24"
+            android:drawablePadding="@dimen/dimen_4dp"
+            app:drawableTint="?colorOnIconTint"
+            android:layout_marginStart="@dimen/dimen_12dp"
+            android:id="@+id/item_person_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:scorePercentage="@{assignment.studentScore}"
+            app:showScoreVisibility="@{assignment.studentScore}"
+            app:layout_constraintStart_toEndOf="@+id/line3_deadline"
+            app:layout_constraintTop_toBottomOf="@id/line2_description"
+            android:layout_marginBottom="@dimen/dimen_16dp" />
+
+        <TextView
+            android:paddingStart="@dimen/dimen_5dp"
+            android:paddingEnd="@dimen/dimen_5dp"
+            tools:text="(4/4)"
+            android:id="@+id/item_person_score_results"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text='@{"(" + assignment.studentScore.resultScore + &quot;/&quot; + assignment.studentScore.resultMax + ")"}'
+            app:showScoreVisibility="@{assignment.studentScore}"
+            app:layout_constraintStart_toEndOf="@+id/item_person_progress"
+            app:layout_constraintTop_toBottomOf="@+id/line2_description"
+            android:layout_marginBottom="@dimen/dimen_16dp" />
+
+
+        <TextView
+            android:id="@+id/line3_progress_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:visibility="@{assignment.progressSummary.hasMetricsPermission ? View.VISIBLE : View.GONE}"
+            android:text="@{@string/three_num_items_with_name_with_comma(assignment.progressSummary.notStartedStudents, @string/not_started, assignment.progressSummary.calculateStartedStudents(), @string/started, assignment.progressSummary.completedStudents, @string/completed)}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/line1_title"
+            app:layout_constraintTop_toBottomOf="@+id/line3_deadline"
+            tools:text="1 not started, 2 started, 2 completed" />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

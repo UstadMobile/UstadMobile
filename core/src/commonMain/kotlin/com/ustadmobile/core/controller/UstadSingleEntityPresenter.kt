@@ -5,25 +5,28 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.nav.navigateToErrorScreen
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadSingleEntityView
 import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.concurrentSafeListOf
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlinx.serialization.DeserializationStrategy
 import org.kodein.di.*
 import kotlin.jvm.Volatile
 import kotlin.reflect.KClass
 
 abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>(
-        context: Any,
-        arguments: Map<String, String>,
-        view: V, di: DI,
-        val lifecycleOwner: DoorLifecycleOwner): UstadBaseController<V>(context, arguments, view, di) {
+    context: Any,
+    arguments: Map<String, String>,
+    view: V,
+    di: DI,
+    val lifecycleOwner: DoorLifecycleOwner,
+    activeSessionRequired: Boolean = true
+): UstadBaseController<V>(
+    context, arguments, view, di, activeSessionRequired
+) {
 
     fun interface OnLoadDataCompletedListener {
         fun onLoadDataCompleted(editPresenter: UstadSingleEntityPresenter<*, *>)
@@ -31,6 +34,10 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
 
     @Volatile
     private var dataLoadCompleted: Boolean = false
+
+    private var onCreateException: Exception? = null
+
+    private var isStarted: Boolean = false
 
     protected var entity: RT? = null
 
@@ -73,7 +80,7 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
         }else if(persistenceMode == PersistenceMode.DB) {
             view.loading = true
             (view as? UstadEditView<*>)?.fieldsEnabled = false
-            GlobalScope.launch(doorMainDispatcher()) {
+            presenterScope.launch {
                 try {
                     listOf(db, repo).forEach {
                         entity = onLoadEntityFromDb(it)
@@ -84,12 +91,19 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
                     (view as? UstadEditView<*>)?.fieldsEnabled = true
                     onLoadDataComplete()
                 }catch(e: Exception) {
-                    navigateToErrorScreen(e)
+                    if(e !is CancellationException) {
+                        if(isStarted){
+                            navigateToErrorScreen(e)
+                        }else{
+                            onCreateException = e
+                        }
+                    }
                 }
             }
         }else if(persistenceMode == PersistenceMode.JSON){
             entity = onLoadFromJson(arguments)
             view.entity = entity
+            (view as? UstadEditView<*>)?.fieldsEnabled = true
             onLoadDataComplete()
         }else if(persistenceMode == PersistenceMode.LIVEDATA) {
             entityLiveData = onLoadLiveData(repo)
@@ -106,6 +120,15 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
                 }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        isStarted = true
+        onCreateException?.also {
+            navigateToErrorScreen(it)
+        }
+        onCreateException = null
     }
 
     /**

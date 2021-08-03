@@ -17,25 +17,45 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract suspend fun insertListAsync(entityList: List<ContentEntry>)
 
     @Query("""
-        SELECT DISTINCT ContentEntry.*, ContentEntryStatus.*, Container.*, ContentEntryProgress.*, 
+        SELECT DISTINCT ContentEntry.*, Container.*, 
                0 AS cepcjUid, 0 as cepcjChildContentEntryUid, 0 AS cepcjParentContentEntryUid, 
                0 as childIndex, 0 AS cepcjLocalChangeSeqNum, 0 AS cepcjMasterChangeSeqNum, 
-               0 AS cepcjLastChangedBy, 0 as cepcjLct
+               0 AS cepcjLastChangedBy, 0 as cepcjLct, 
+               COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
+               COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
+               COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
+               COALESCE(StatementEntity.extensionProgress,0) AS progress,  
+               COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
+               COALESCE(StatementEntity.resultSuccess, 0) AS success,
+               COALESCE((CASE WHEN StatementEntity.resultCompletion 
+                THEN 1 ELSE 0 END),0) AS totalCompletedContent,
+                
+                1 as totalContent, 
+               
+               
+               0 as penalty
           FROM DownloadJob 
-                LEFT JOIN ContentEntry 
-                ON  DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid 
-                
-                LEFT JOIN ContentEntryProgress 
-                ON ContentEntryProgress.contentEntryProgressContentEntryUid = ContentEntry.contentEntryUid 
-                AND ContentEntryProgress.contentEntryProgressPersonUid = :personUid 
-                AND ContentEntryProgress.contentEntryProgressActive 
-                
-                LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid 
-                LEFT JOIN Container ON Container.containerUid = 
-                            (SELECT containerUid 
-                               FROM Container 
-                              WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
-                           ORDER BY cntLastModified DESC LIMIT 1) 
+                    LEFT JOIN ContentEntry 
+                    ON DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid 
+                    
+                    LEFT JOIN StatementEntity
+							ON StatementEntity.statementUid = 
+                                (SELECT statementUid 
+							       FROM StatementEntity 
+                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
+							        AND StatementEntity.statementPersonUid = :personUid
+							        AND contentEntryRoot 
+                               ORDER BY resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC LIMIT 1)
+                    
+                    LEFT JOIN ContentEntryStatus 
+                    ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid 
+                    
+                    LEFT JOIN Container 
+                    ON Container.containerUid = 
+                        (SELECT containerUid 
+                           FROM Container 
+                          WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
+                       ORDER BY cntLastModified DESC LIMIT 1) 
         WHERE DownloadJob.djStatus < ${JobStatus.CANCELED} 
      ORDER BY CASE(:sortOrder)
                         WHEN $SORT_TITLE_ASC THEN ContentEntry.title
@@ -147,44 +167,60 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("findBySourceUrlWithContentEntryStatusAsync")
     abstract suspend fun findBySourceUrlWithContentEntryStatusAsync(sourceUrl: String): ContentEntry?
 
-    @Query("""SELECT ContentEntry.*,ContentEntryStatus.*, ContentEntryParentChildJoin.*, 
-                           Container.*, ContentEntryProgress.* 
-                     FROM ContentEntry 
-                          LEFT JOIN ContentEntryParentChildJoin 
-                          ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
-                          
-                          LEFT JOIN ContentEntryProgress 
-                          ON ContentEntryProgress.contentEntryProgressContentEntryUid = ContentEntry.contentEntryUid 
-                          AND ContentEntryProgress.contentEntryProgressPersonUid = :personUid 
-                          AND ContentEntryProgress.contentEntryProgressActive 
-                          
-                          LEFT JOIN ContentEntryStatus 
-                          ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid
-                          
-                          LEFT JOIN Container 
-                          ON Container.containerUid = (SELECT containerUid 
-                                                         FROM Container 
-                                                        WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
-                                                     ORDER BY cntLastModified DESC LIMIT 1)
-                   WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid 
-                     AND (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam) 
-                     AND (NOT ContentEntry.ceInactive OR ContentEntry.ceInactive = :showHidden) 
-                     AND (NOT ContentEntry.leaf OR NOT ContentEntry.leaf = :onlyFolder) 
-                     AND (ContentEntry.publik OR :personUid != 0) 
-                     AND (:categoryParam0 = 0 OR :categoryParam0 
-                            IN (SELECT ceccjContentCategoryUid 
-                                  FROM ContentEntryContentCategoryJoin 
-                                 WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) 
-                ORDER BY ContentEntryParentChildJoin.childIndex, 
-                        CASE(:sortOrder)
-                        WHEN $SORT_TITLE_ASC THEN ContentEntry.title
-                        ELSE ''
-                        END ASC,
-                        CASE(:sortOrder)
-                        WHEN $SORT_TITLE_DESC THEN ContentEntry.title
-                        ELSE ''
-                        END DESC, 
-                        ContentEntry.contentEntryUid""")
+    @Query("""
+            SELECT ContentEntry.*, ContentEntryParentChildJoin.*, Container.*,
+                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
+                COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
+                COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
+                COALESCE(StatementEntity.extensionProgress,0) AS progress, 
+                COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
+                COALESCE(StatementEntity.resultSuccess, 0) AS success,
+                COALESCE((CASE WHEN StatementEntity.resultCompletion 
+                THEN 1 ELSE 0 END),0) AS totalCompletedContent,
+                
+                1 as totalContent, 
+                
+                0 as penalty
+            FROM ContentEntry 
+                    LEFT JOIN ContentEntryParentChildJoin 
+                    ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
+                    
+                    LEFT JOIN StatementEntity
+							ON StatementEntity.statementUid = 
+                                (SELECT statementUid 
+							       FROM StatementEntity 
+                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
+							        AND StatementEntity.statementPersonUid = :personUid
+							        AND contentEntryRoot 
+                               ORDER BY resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC LIMIT 1)
+                    
+                    LEFT JOIN Container 
+                    ON Container.containerUid = 
+                        (SELECT containerUid 
+                           FROM Container 
+                          WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
+                       ORDER BY cntLastModified DESC LIMIT 1)
+            WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid 
+            AND 
+            (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam) 
+            AND (NOT ContentEntry.ceInactive OR ContentEntry.ceInactive = :showHidden) 
+            AND (NOT ContentEntry.leaf OR NOT ContentEntry.leaf = :onlyFolder) 
+            AND (ContentEntry.publik OR :personUid != 0) 
+            AND 
+            (:categoryParam0 = 0 OR :categoryParam0 
+                IN (SELECT ceccjContentCategoryUid 
+                      FROM ContentEntryContentCategoryJoin 
+                     WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) 
+            ORDER BY ContentEntryParentChildJoin.childIndex,
+                     CASE(:sortOrder)
+                     WHEN $SORT_TITLE_ASC THEN ContentEntry.title
+                     ELSE ''
+                     END ASC,
+                     CASE(:sortOrder)
+                     WHEN $SORT_TITLE_DESC THEN ContentEntry.title
+                     ELSE ''
+                     END DESC,             
+                     ContentEntry.contentEntryUid""")
     @JsName("getChildrenByParentUidWithCategoryFilterOrderByNameAsc")
     abstract fun getChildrenByParentUidWithCategoryFilterOrderByName(parentUid: Long, langParam: Long,
                                                                      categoryParam0: Long, personUid: Long,
@@ -196,7 +232,18 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
     @Query("""
                SELECT ContentEntry.*,ContentEntryStatus.*, ContentEntryParentChildJoin.*, 
-                           Container.*, ContentEntryProgress.* 
+                           Container.*,      
+                      COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
+                      COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
+                      COALESCE(StatementEntity.extensionProgress,0) AS progress, 
+                      COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
+                      COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
+                      COALESCE(StatementEntity.resultSuccess, 0) AS success,
+                      COALESCE((CASE WHEN StatementEntity.resultCompletion 
+                        THEN 1 ELSE 0 END),0) AS totalCompletedContent,
+                
+                      1 as totalContent, 
+                      0 as penalty
                  FROM ClazzContentJoin
                           LEFT JOIN ContentEntry  
                           ON ccjContentEntryUid = contentEntryUid
@@ -205,10 +252,14 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                           LEFT JOIN ContentEntryParentChildJoin 
                           ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
                           
-                          LEFT JOIN ContentEntryProgress 
-                          ON ContentEntryProgress.contentEntryProgressContentEntryUid = ContentEntry.contentEntryUid 
-                          AND ContentEntryProgress.contentEntryProgressPersonUid = :personUid 
-                          AND ContentEntryProgress.contentEntryProgressActive 
+                           LEFT JOIN StatementEntity
+							ON StatementEntity.statementUid = 
+                                (SELECT statementUid 
+							       FROM StatementEntity 
+                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
+							        AND StatementEntity.statementPersonUid = :personUid
+							        AND contentEntryRoot 
+                               ORDER BY resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC LIMIT 1)
                           
                           LEFT JOIN ContentEntryStatus 
                           ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid
@@ -339,13 +390,13 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
         const val ENTITY_PERSONS_WITH_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 :permission $ENTITY_PERSONS_WITH_PERMISSION_PT2"
 
         const val ALL_ENTRIES_RECURSIVE_SQL = """WITH RECURSIVE ContentEntry_recursive(
-            contentEntryUid, title, ceInactive, contentFlags, description, entryId, author, publisher, licenseType, licenseName, licenseUrl, sourceUrl, thumbnailUrl, lastModified, primaryLanguageUid, languageVariantUid, leaf, publik, contentTypeFlag, contentEntryLocalChangeSeqNum, contentEntryMasterChangeSeqNum, contentEntryLastChangedBy, contentEntryLct,
+            contentEntryUid, title, ceInactive, contentFlags, description, entryId, author, publisher, licenseType, licenseName, licenseUrl, sourceUrl, thumbnailUrl, lastModified, primaryLanguageUid, languageVariantUid, leaf, publik,  completionCriteria, minScore, contentOwner, contentTypeFlag, contentEntryLocalChangeSeqNum, contentEntryMasterChangeSeqNum, contentEntryLastChangedBy, contentEntryLct,
             
             cepcjUid, cepcjChildContentEntryUid, cepcjParentContentEntryUid, childIndex, cepcjLocalChangeSeqNum, cepcjMasterChangeSeqNum, cepcjLastChangedBy, cepcjLct,
             
             containerUid, cntLocalCsn, cntMasterCsn, cntLastModBy, fileSize, containerContentEntryUid, cntLastModified, mimeType, remarks, mobileOptimized, cntNumEntries, cntLct
             ) AS (
-            SELECT ContentEntry.contentEntryUid, ContentEntry.title, ContentEntry.ceInactive, ContentEntry.contentFlags, ContentEntry.description, ContentEntry.entryId, ContentEntry.author, ContentEntry.publisher, ContentEntry.licenseType, ContentEntry.licenseName, ContentEntry.licenseUrl, ContentEntry.sourceUrl, ContentEntry.thumbnailUrl, ContentEntry.lastModified, ContentEntry.primaryLanguageUid, ContentEntry.languageVariantUid, ContentEntry.leaf, ContentEntry.publik, ContentEntry.contentTypeFlag, ContentEntry.contentEntryLocalChangeSeqNum, ContentEntry.contentEntryMasterChangeSeqNum, ContentEntry.contentEntryLastChangedBy, ContentEntry.contentEntryLct,
+            SELECT ContentEntry.contentEntryUid, ContentEntry.title, ContentEntry.ceInactive, ContentEntry.contentFlags, ContentEntry.description, ContentEntry.entryId, ContentEntry.author, ContentEntry.publisher, ContentEntry.licenseType, ContentEntry.licenseName, ContentEntry.licenseUrl, ContentEntry.sourceUrl, ContentEntry.thumbnailUrl, ContentEntry.lastModified, ContentEntry.primaryLanguageUid, ContentEntry.languageVariantUid, ContentEntry.leaf, ContentEntry.publik, ContentEntry.completionCriteria, ContentEntry.minScore, ContentEntry.contentOwner, ContentEntry.contentTypeFlag, ContentEntry.contentEntryLocalChangeSeqNum, ContentEntry.contentEntryMasterChangeSeqNum, ContentEntry.contentEntryLastChangedBy, ContentEntry.contentEntryLct,
             ContentEntryParentChildJoin.cepcjUid, ContentEntryParentChildJoin.cepcjChildContentEntryUid, ContentEntryParentChildJoin.cepcjParentContentEntryUid, ContentEntryParentChildJoin.childIndex, ContentEntryParentChildJoin.cepcjLocalChangeSeqNum, ContentEntryParentChildJoin.cepcjMasterChangeSeqNum, ContentEntryParentChildJoin.cepcjLastChangedBy, ContentEntryParentChildJoin.cepcjLct,
             Container.containerUid, Container.cntLocalCsn, Container.cntMasterCsn, Container.cntLastModBy, Container.fileSize, Container.containerContentEntryUid, Container.cntLastModified, Container.mimeType, Container.remarks, Container.mobileOptimized, Container.cntNumEntries, Container.cntLct
             FROM 
@@ -354,7 +405,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             LEFT JOIN Container ON Container.containerUid = (SELECT COALESCE((SELECT containerUid FROM Container WHERE containerContentEntryUid = ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1), 0))
             WHERE ContentEntry.contentEntryUid = :contentEntryUid
             UNION
-            SELECT ContentEntry.contentEntryUid, ContentEntry.title, ContentEntry.ceInactive, ContentEntry.contentFlags, ContentEntry.description, ContentEntry.entryId, ContentEntry.author, ContentEntry.publisher, ContentEntry.licenseType, ContentEntry.licenseName, ContentEntry.licenseUrl, ContentEntry.sourceUrl, ContentEntry.thumbnailUrl, ContentEntry.lastModified, ContentEntry.primaryLanguageUid, ContentEntry.languageVariantUid, ContentEntry.leaf, ContentEntry.publik, ContentEntry.contentTypeFlag, ContentEntry.contentEntryLocalChangeSeqNum, ContentEntry.contentEntryMasterChangeSeqNum, ContentEntry.contentEntryLastChangedBy, ContentEntry.contentEntryLct,
+            SELECT ContentEntry.contentEntryUid, ContentEntry.title, ContentEntry.ceInactive, ContentEntry.contentFlags, ContentEntry.description, ContentEntry.entryId, ContentEntry.author, ContentEntry.publisher, ContentEntry.licenseType, ContentEntry.licenseName, ContentEntry.licenseUrl, ContentEntry.sourceUrl, ContentEntry.thumbnailUrl, ContentEntry.lastModified, ContentEntry.primaryLanguageUid, ContentEntry.languageVariantUid, ContentEntry.leaf, ContentEntry.publik, ContentEntry.completionCriteria, ContentEntry.minScore, ContentEntry.contentOwner, ContentEntry.contentTypeFlag, ContentEntry.contentEntryLocalChangeSeqNum, ContentEntry.contentEntryMasterChangeSeqNum, ContentEntry.contentEntryLastChangedBy, ContentEntry.contentEntryLct,
             ContentEntryParentChildJoin.cepcjUid, ContentEntryParentChildJoin.cepcjChildContentEntryUid, ContentEntryParentChildJoin.cepcjParentContentEntryUid, ContentEntryParentChildJoin.childIndex, ContentEntryParentChildJoin.cepcjLocalChangeSeqNum, ContentEntryParentChildJoin.cepcjMasterChangeSeqNum, ContentEntryParentChildJoin.cepcjLastChangedBy, ContentEntryParentChildJoin.cepcjLct, 
             Container.containerUid, Container.cntLocalCsn, Container.cntMasterCsn, Container.cntLastModBy, Container.fileSize, Container.containerContentEntryUid, Container.cntLastModified, Container.mimeType, Container.remarks, Container.mobileOptimized, Container.cntNumEntries, Container.cntLct
             FROM 

@@ -18,6 +18,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.ext.insertPersonWithRole
+import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -132,9 +133,8 @@ class ClazzListPresenterTest {
         }
 
         val accountManager = di.direct.instance<UstadAccountManager>()
-        val endpointUrl = accountManager.activeAccount.endpointUrl
-        accountManager.activeAccount = UmAccount(activePerson.personUid, activePerson.username,
-                "", endpointUrl, activePerson.firstNames, activePerson.lastName)
+        val endpointUrl = accountManager.activeEndpoint.url
+        accountManager.startLocalTestSessionBlocking(activePerson, endpointUrl)
 
         val presenter = ClazzListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)

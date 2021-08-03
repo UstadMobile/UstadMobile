@@ -8,9 +8,22 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemReportTemplateListBinding
 import com.ustadmobile.core.controller.ReportTemplateListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportTemplateListView
 import com.ustadmobile.lib.db.entities.Report
+import com.ustadmobile.lib.db.entities.Report.Companion.BLANK_REPORT
+import com.ustadmobile.lib.db.entities.Report.Companion.BLANK_REPORT_DESC
+import com.ustadmobile.lib.db.entities.Report.Companion.CONTENT_USAGE_OVER_TIME
+import com.ustadmobile.lib.db.entities.Report.Companion.CONTENT_USAGE_OVER_TIME_DESC
+import com.ustadmobile.lib.db.entities.Report.Companion.UNIQUE_CONTENT_USERS_OVER_TIME
+import com.ustadmobile.lib.db.entities.Report.Companion.UNIQUE_CONTENT_USERS_OVER_TIME_DESC
+import com.ustadmobile.lib.db.entities.Report.Companion.ATTENDANCE_OVER_TIME_BY_CLASS
+import com.ustadmobile.lib.db.entities.Report.Companion.ATTENDANCE_OVER_TIME_BY_CLASS_DESC
+import com.ustadmobile.lib.db.entities.Report.Companion.CONTENT_USAGE_BY_CLASS
+import com.ustadmobile.lib.db.entities.Report.Companion.CONTENT_USAGE_BY_CLASS_DESC
+import com.ustadmobile.lib.db.entities.Report.Companion.CONTENT_COMPLETION
+import com.ustadmobile.lib.db.entities.Report.Companion.CONTENT_COMPLETION_DESC
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -55,7 +68,7 @@ class ReportTemplateListFragment(): UstadListViewFragment<Report, Report>(),
         ustadFragmentTitle = getString(R.string.choose_template, context)
 
         mPresenter = ReportTemplateListPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+                di, viewLifecycleOwner).withViewLifecycle()
 
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter()
         mDataRecyclerViewAdapter = ReportTemplateRecyclerAdapter(mPresenter)
@@ -83,6 +96,23 @@ class ReportTemplateListFragment(): UstadListViewFragment<Report, Report>(),
 
 
     companion object {
+
+
+        val REPORT_TITLE_TO_ID : HashMap<Int, Int> = hashMapOf(
+            BLANK_REPORT to MessageID.blank_report,
+            BLANK_REPORT_DESC to MessageID.start_from_scratch ,
+            CONTENT_USAGE_OVER_TIME to MessageID.content_usage_over_time,
+            CONTENT_USAGE_OVER_TIME_DESC to MessageID.total_content_usage_duration_class ,
+            UNIQUE_CONTENT_USERS_OVER_TIME to MessageID.unique_content_users_over_time,
+            UNIQUE_CONTENT_USERS_OVER_TIME_DESC to MessageID.number_of_active_users_over_time ,
+            ATTENDANCE_OVER_TIME_BY_CLASS to MessageID.attendance_over_time_by_class,
+            ATTENDANCE_OVER_TIME_BY_CLASS_DESC to MessageID.percentage_of_students_attending_over_time ,
+            CONTENT_USAGE_BY_CLASS to MessageID.content_usage_by_class,
+            CONTENT_USAGE_BY_CLASS_DESC to MessageID.total_content_usage_duration_class ,
+            CONTENT_COMPLETION to MessageID.content_completion,
+            CONTENT_COMPLETION_DESC to MessageID.number_of_students_completed_time
+        )
+
 
         val DIFF_CALLBACK: DiffUtil.ItemCallback<Report> = object
             : DiffUtil.ItemCallback<Report>() {

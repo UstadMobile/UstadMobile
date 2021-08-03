@@ -79,7 +79,7 @@ class LanguageEditFragmentTest : TestCase(){
 
 
                 val languageList = dbRule.db.languageDao.findAllLanguageLive().waitUntilWithFragmentScenario(fragmentScenario) {
-                    it.isNotEmpty()
+                    it.firstOrNull()?.name == "Russian"
                 }
 
                 Assert.assertEquals("Language data set", "Russian",

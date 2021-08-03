@@ -14,6 +14,10 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS
 @Dao
 abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
 
+    /**
+     * Note: When actually enroling into a class, use UmAppDatbaseExt#processEnrolmentIntoClass
+     * to ensure that permissions, group membership, etc. are taken care of
+     */
     @Insert
     abstract fun insertListAsync(entityList: List<ClazzEnrolment>)
 
@@ -28,16 +32,24 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         AND clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS} LIMIT 1""")
     abstract suspend fun findByPersonUidAndClazzUidAsync(personUid: Long, clazzUid: Long): ClazzEnrolment?
 
-    @Query("""SELECT ClazzEnrolment.*, LeavingReason.* FROM ClazzEnrolment LEFT JOIN
+    @Query("""SELECT ClazzEnrolment.*, LeavingReason.*, 
+         COALESCE(Clazz.clazzTimeZone, COALESCE(School.schoolTimeZone, 'UTC')) as timeZone
+         FROM ClazzEnrolment LEFT JOIN
         LeavingReason ON LeavingReason.leavingReasonUid = ClazzEnrolment.clazzEnrolmentLeavingReasonUid
+        LEFT JOIN Clazz ON Clazz.clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
+        LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
         WHERE clazzEnrolmentPersonUid = :personUid 
         AND ClazzEnrolment.clazzEnrolmentActive 
         AND clazzEnrolmentClazzUid = :clazzUid ORDER BY clazzEnrolmentDateLeft DESC""")
     abstract fun findAllEnrolmentsByPersonAndClazzUid(personUid: Long, clazzUid: Long):
             DataSource.Factory<Int, ClazzEnrolmentWithLeavingReason>
 
-    @Query("""SELECT ClazzEnrolment.*, LeavingReason.* FROM ClazzEnrolment LEFT JOIN
+    @Query("""SELECT ClazzEnrolment.*, LeavingReason.*,
+         COALESCE(Clazz.clazzTimeZone, COALESCE(School.schoolTimeZone, 'UTC')) as timeZone
+         FROM ClazzEnrolment LEFT JOIN
         LeavingReason ON LeavingReason.leavingReasonUid = ClazzEnrolment.clazzEnrolmentLeavingReasonUid
+        LEFT JOIN Clazz ON Clazz.clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
+        LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
         WHERE ClazzEnrolment.clazzEnrolmentUid = :enrolmentUid""")
     abstract suspend fun findEnrolmentWithLeavingReason(enrolmentUid: Long): ClazzEnrolmentWithLeavingReason?
 

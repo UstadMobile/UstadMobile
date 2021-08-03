@@ -1,9 +1,10 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.AdultAccountRequiredException
+import com.ustadmobile.core.account.ConsentNotGrantedException
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -19,24 +20,17 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
-import com.ustadmobile.door.DoorDatabaseSyncRepository
-import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.Site
 import io.ktor.client.*
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
-import org.kodein.di.direct
 import org.kodein.di.instance
-import org.kodein.di.on
 
 class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2View,
                       di: DI)
-    : UstadBaseController<Login2View>(context, arguments, view, di) {
+    : UstadBaseController<Login2View>(context, arguments, view, di, activeSessionRequired = false) {
 
     private  lateinit var nextDestination: String
 
@@ -75,7 +69,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
             view.loading = true
             view.inProgress = true
 
-           siteLoadJob = GlobalScope.launch(doorMainDispatcher()) {
+           siteLoadJob = presenterScope.launch {
                while(workSpace == null) {
                    try {
                        val site = httpClient.verifySite(serverUrl, 10000)
@@ -106,7 +100,6 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
      * or at least removing the login screen itself from the stack).
      */
     private fun goToNextDestAfterLoginOrGuestSelected() {
-        impl.setAppPref(PREFKEY_USER_LOGGED_IN, "true", context)
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
                 arguments[ARG_POPUPTO_ON_FINISH] ?: UstadView.ROOT_DEST,
                 false)
@@ -120,20 +113,22 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         view.isEmptyPassword = password == null || password.isEmpty()
 
         if(username != null && username.isNotEmpty() && password != null && password.isNotEmpty()){
-            GlobalScope.launch(doorMainDispatcher()) {
+            presenterScope.launch {
                 try {
-                    val umAccount = accountManager.login(username.trim(),
-                            password.trim() ,serverUrl)
-                    view.inProgress = false
-                    view.loading = false
-
-                    val accountRepo: UmAppDatabase =  di.on(umAccount).direct.instance(tag = DoorTag.TAG_REPO)
-                    (accountRepo as DoorDatabaseSyncRepository).invalidateAllTables()
+                    accountManager.login(username.trim(), password.trim(), serverUrl,
+                        arguments[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong() ?: 0L)
                     goToNextDestAfterLoginOrGuestSelected()
-                } catch (e: Exception) {
-                    view.errorMessage = impl.getString(if(e is UnauthorizedException)
-                        MessageID.wrong_user_pass_combo else
-                        MessageID.login_network_error , context)
+                }catch(e: AdultAccountRequiredException) {
+                    view.errorMessage = impl.getString(MessageID.adult_account_required, context)
+                } catch(e: UnauthorizedException) {
+                    view.errorMessage = impl.getString(MessageID.wrong_user_pass_combo,
+                        context)
+                } catch(e: ConsentNotGrantedException) {
+                    view.errorMessage = impl.getString(MessageID.your_account_needs_approved,
+                        context)
+                }catch(e: Exception) {
+                    view.errorMessage = impl.getString(MessageID.login_network_error, context)
+                }finally {
                     view.inProgress = false
                     view.loading = false
                     view.clearFields()
@@ -159,9 +154,10 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
     }
 
     fun handleConnectAsGuest(){
-        accountManager.activeAccount = UmAccount(0L,"guest",
-                "",serverUrl,"Guest","User")
-        goToNextDestAfterLoginOrGuestSelected()
+        presenterScope.launch {
+            accountManager.startGuestSession(serverUrl)
+            goToNextDestAfterLoginOrGuestSelected()
+        }
     }
 
     override fun onDestroy() {
@@ -171,13 +167,4 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         siteLoadJob = null
     }
 
-    companion object {
-
-        /**
-         * This preference key is used to track whether or not a user has ever logged in or
-         * selected to continue as a guest.
-         */
-        const val PREFKEY_USER_LOGGED_IN = "loggedIn"
-
-    }
 }

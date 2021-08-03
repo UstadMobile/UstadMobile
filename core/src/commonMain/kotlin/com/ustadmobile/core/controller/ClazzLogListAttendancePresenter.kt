@@ -83,7 +83,7 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
         view.sortOptions = SortOrder.values().toList().map { ClazzLogListSortOption(it, context) }
         view.graphData = graphDisplayData
 
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch {
             val hasAttendancePermission = repo.clazzDao.personHasPermissionWithClazz(
                     accountManager.activeAccount.personUid, clazzUidFilter,
                     Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT)
@@ -113,7 +113,7 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
     }
 
     private fun updateListOnView() {
-        GlobalScope.launch {
+        presenterScope.launch {
             clazzWithSchool = repo.clazzDao.getClazzWithSchool(clazzUidFilter)
             withContext((doorMainDispatcher())) {
                 clazzTimeZone = clazzWithSchool?.effectiveTimeZone() ?: "UTC"

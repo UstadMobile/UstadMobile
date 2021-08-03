@@ -17,8 +17,8 @@ import kotlinx.serialization.Serializable
 @Entity
 @SyncableEntity(tableId = TABLE_ID,
         notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, $TABLE_ID AS tableId 
-        FROM DeviceSession 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, $TABLE_ID AS tableId 
+        FROM UserSession 
     """])
 @Serializable
 open class ContentEntry() {
@@ -103,7 +103,19 @@ open class ContentEntry() {
      */
     var ceInactive: Boolean = false
 
+    /**
+     *  Represents if the entry is marked as completed by the content, student or min score
+     */
+    var completionCriteria: Int = COMPLETION_CRITERIA_AUTOMATIC
+
+    /**
+     * Minimum score for content to mark as complete if completion criteria is set to min score
+     */
+    var minScore: Int = 0
+
     var contentTypeFlag: Int = 0
+
+    var contentOwner: Long = 0
 
     @LocalChangeSeqNum
     var contentEntryLocalChangeSeqNum: Long = 0
@@ -174,6 +186,10 @@ open class ContentEntry() {
         const val FLAG_CONTENT_EDITOR = 2
 
         const val FLAG_SCRAPPED = 4
+
+        const val COMPLETION_CRITERIA_AUTOMATIC = 0
+        const val COMPLETION_CRITERIA_MIN_SCORE = 1
+        const val COMPLETION_CRITERIA_MARKED_BY_STUDENT = 2
     }
 
     override fun equals(other: Any?): Boolean {
@@ -199,6 +215,8 @@ open class ContentEntry() {
         if (publik != other.publik) return false
         if (ceInactive != other.ceInactive) return false
         if (contentTypeFlag != other.contentTypeFlag) return false
+        if (completionCriteria != other.completionCriteria) return false
+        if (minScore != other.minScore) return false
         if (contentEntryLocalChangeSeqNum != other.contentEntryLocalChangeSeqNum) return false
         if (contentEntryMasterChangeSeqNum != other.contentEntryMasterChangeSeqNum) return false
         if (contentEntryLastChangedBy != other.contentEntryLastChangedBy) return false
@@ -226,6 +244,8 @@ open class ContentEntry() {
         result = 31 * result + publik.hashCode()
         result = 31 * result + ceInactive.hashCode()
         result = 31 * result + contentTypeFlag
+        result = 31 * result + completionCriteria
+        result = 31 * result + minScore
         result = 31 * result + contentEntryLocalChangeSeqNum.hashCode()
         result = 31 * result + contentEntryMasterChangeSeqNum.hashCode()
         result = 31 * result + contentEntryLastChangedBy

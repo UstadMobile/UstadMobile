@@ -24,11 +24,12 @@ import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
 import kotlinx.coroutines.runBlocking
 import com.ustadmobile.core.util.ext.captureLastEntityValue
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.test.waitUntil
 import org.kodein.di.DI
-import com.ustadmobile.core.util.ext.toUmAccount
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import org.kodein.di.instance
 
 
@@ -78,17 +79,18 @@ class ParentalConsentManagementPresenterTest {
 
         //TODO: insert any entities required for all tests
 
-        parentPerson = Person().apply {
-            firstNames = "Pit"
-            lastName = "The Older"
-            dateOfBirth = (systemTimeInMillis() - 30 * 365 * 24 * 60 * 60 * 1000L)
-            personUid = repo.personDao.insert(this)
+        parentPerson = runBlocking {
+            repo.insertPersonAndGroup(Person().apply {
+                firstNames = "Pit"
+                lastName = "The Older"
+                dateOfBirth = (systemTimeInMillis() - 30 * 365 * 24 * 60 * 60 * 1000L)
+            })
         }
 
         val accountManager: UstadAccountManager by di.instance()
 
-        val activeEndpoint: String = accountManager.activeAccount.endpointUrl
-        accountManager.activeAccount = parentPerson.toUmAccount(activeEndpoint)
+        val activeEndpoint: String = accountManager.activeEndpoint.url
+        accountManager.startLocalTestSessionBlocking(parentPerson, activeEndpoint)
 
         minorPerson = Person().apply {
             firstNames = "Pit"
@@ -110,7 +112,7 @@ class ParentalConsentManagementPresenterTest {
         val repo: UmAppDatabase by di.activeRepoInstance()
         val accountManager: UstadAccountManager by di.instance()
 
-        val activeEndpoint: String = accountManager.activeAccount.endpointUrl
+        val activeEndpoint: String = accountManager.activeEndpoint.url
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to personParentJoin.ppjUid.toString())
         val presenter = ParentalConsentManagementPresenter(context,
@@ -154,8 +156,8 @@ class ParentalConsentManagementPresenterTest {
             presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
 
-        val initialEntity = mockView.captureLastEntityValue(5000 * 1000)!!
-        initialEntity?.ppjStatus = PersonParentJoin.STATUS_APPROVED
+        val initialEntity = mockView.captureLastEntityValue(5000)!!
+        initialEntity.ppjStatus = PersonParentJoin.STATUS_APPROVED
 
         presenter.handleClickSave(initialEntity)
 

@@ -3,8 +3,8 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
-import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
+import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
+import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
 import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1
 import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2
 import com.ustadmobile.lib.db.entities.Clazz.Companion.TABLE_ID
@@ -14,26 +14,27 @@ import kotlinx.serialization.Serializable
 @SyncableEntity(tableId = TABLE_ID,
     notifyOnUpdate = [
         """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                $TABLE_ID AS tableId 
           FROM ChangeLog 
                 JOIN Clazz
                      ON ChangeLog.chTableId = $TABLE_ID 
                             AND Clazz.clazzUid = ChangeLog.chEntityPk
-                $JOIN_FROM_CLAZZ_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1
+                $JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
                     ${Role.PERMISSION_CLAZZ_SELECT}
-                    $JOIN_FROM_CLAZZ_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2
+                    $JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
         """
     ],
     syncFindAllQuery = """
         SELECT Clazz.* 
-          FROM DeviceSession
+          FROM UserSession
                JOIN PersonGroupMember 
-                    ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
                $JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1
                     ${Role.PERMISSION_CLAZZ_SELECT} 
                     $JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2
-         WHERE DeviceSession.dsDeviceId = :clientId
+         WHERE UserSession.usClientNodeId = :clientId 
+           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
     """
 )
 @Serializable
@@ -65,7 +66,7 @@ open class Clazz() {
     var clazzEndTime: Long = Long.MAX_VALUE
 
     //Clazz features
-    var clazzFeatures: Long = (CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_CLAZZWORK)
+    var clazzFeatures: Long = (CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_CLAZZ_ASSIGNMENT)
 
     var clazzSchoolUid : Long = 0L
 
@@ -93,6 +94,8 @@ open class Clazz() {
 
     var clazzPendingStudentsPersonGroupUid: Long = 0
 
+    var clazzParentsPersonGroupUid: Long = 0
+
     /**
      * Code that can be used to join the class
      */
@@ -100,14 +103,14 @@ open class Clazz() {
 
     constructor(clazzName: String) : this() {
         this.clazzName = clazzName
-        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY  or CLAZZ_FEATURE_CLAZZWORK
+        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY  or CLAZZ_FEATURE_CLAZZ_ASSIGNMENT
         this.isClazzActive = true
     }
 
     constructor(clazzName: String, clazzLocationUid: Long) : this() {
         this.clazzName = clazzName
         this.clazzLocationUid = clazzLocationUid
-        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY or CLAZZ_FEATURE_CLAZZWORK
+        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY or CLAZZ_FEATURE_CLAZZ_ASSIGNMENT
         this.isClazzActive = true
     }
 
@@ -116,7 +119,7 @@ open class Clazz() {
         const val TABLE_ID = 6
         const val CLAZZ_FEATURE_ATTENDANCE = 1L
         const val CLAZZ_FEATURE_ACTIVITY = 4L
-        const val CLAZZ_FEATURE_CLAZZWORK = 8L
+        const val CLAZZ_FEATURE_CLAZZ_ASSIGNMENT = 8L
 
         const val CLAZZ_CODE_DEFAULT_LENGTH = 6
 
@@ -131,18 +134,23 @@ open class Clazz() {
                                 AND ScopedGrant.sgEntityUid = Clazz.clazzSchoolUid))
         """
 
-        const val JOIN_FROM_CLAZZ_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1 = """
+        const val JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1 = """
             JOIN ScopedGrant
                  ON $JOIN_SCOPEDGRANT_ON_CLAUSE
                     AND (ScopedGrant.sgPermissions & 
         """
 
-        const val JOIN_FROM_CLAZZ_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2 = """
-                                                     ) > 0
+        const val JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER = """
+                                                       ) > 0
              JOIN PersonGroupMember AS PrsGrpMbr
                    ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
-              JOIN DeviceSession
-                   ON DeviceSession.dsPersonUid = PrsGrpMbr.groupMemberPersonUid
+        """
+
+        const val JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2 = """
+              $JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER                                       
+              JOIN UserSession
+                   ON UserSession.usPersonUid = PrsGrpMbr.groupMemberPersonUid
+                      AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE }
         """
 
         const val JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1 = """

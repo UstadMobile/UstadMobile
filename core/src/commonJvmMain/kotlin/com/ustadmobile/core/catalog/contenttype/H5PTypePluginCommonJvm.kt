@@ -10,15 +10,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParserException
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.io.IOException
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.io.ext.addFileToContainer
+import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
+import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.core.container.PrefixContainerFileNamer
 import kotlinx.serialization.json.*
 
@@ -41,12 +41,14 @@ val licenseMap = mapOf(
 
 class H5PTypePluginCommonJvm(): H5PTypePlugin() {
 
-    override suspend fun extractMetadata(filePath: String): ContentEntryWithLanguage? {
+    override suspend fun extractMetadata(uri: String, context: Any): ContentEntryWithLanguage? {
         return withContext(Dispatchers.Default){
             var contentEntry: ContentEntryWithLanguage? = null
             try {
-                val file = File(filePath.removePrefix("file://"))
-                ZipInputStream(FileInputStream(file)).use {
+                val doorUri = DoorUri.parse(uri)
+                val inputStream = doorUri.openInputStream(context)
+
+                ZipInputStream(inputStream).use {
                     var zipEntry: ZipEntry? = null
                     while ({ zipEntry = it.nextEntry; zipEntry }() != null) {
 
@@ -77,7 +79,7 @@ class H5PTypePluginCommonJvm(): H5PTypePlugin() {
                                 licenseType = licenseMap[json.jsonObject["license"] ?: ""]
                                         ?: ContentEntry.LICENSE_TYPE_OTHER
                                 title = if(json.jsonObject["title"]?.jsonPrimitive?.content.isNullOrEmpty())
-                                    file.nameWithoutExtension else json.jsonObject["title"]?.jsonPrimitive?.content
+                                    doorUri.getFileName(context) else json.jsonObject["title"]?.jsonPrimitive?.content
                                 this.author = author
                                 leaf = true
                             }
@@ -96,16 +98,15 @@ class H5PTypePluginCommonJvm(): H5PTypePlugin() {
         }
     }
 
-    override suspend fun importToContainer(filePath: String, conversionParams: Map<String, String>,
+    override suspend fun importToContainer(uri: String, conversionParams: Map<String, String>,
                                            contentEntryUid: Long, mimeType: String, containerBaseDir: String,
                                            context: Any,
                                            db: UmAppDatabase, repo: UmAppDatabase,
                                            progressListener: (Int) -> Unit): Container {
-        val file = File(filePath)
+        val doorUri = DoorUri.parse(uri)
         val container = Container().apply {
             containerContentEntryUid = contentEntryUid
             cntLastModified = System.currentTimeMillis()
-            fileSize = file.length()
             this.mimeType = mimeType
             containerUid = repo.containerDao.insert(this)
         }
@@ -113,16 +114,16 @@ class H5PTypePluginCommonJvm(): H5PTypePlugin() {
         val entry = db.contentEntryDao.findByUid(contentEntryUid)
 
         val containerAddOptions = ContainerAddOptions(storageDirUri = File(containerBaseDir).toDoorUri())
-        repo.addEntriesToContainerFromZip(container.containerUid, File(filePath).toDoorUri(),
+        repo.addEntriesToContainerFromZip(container.containerUid, doorUri,
                 ContainerAddOptions(storageDirUri = File(containerBaseDir).toDoorUri(),
-                    fileNamer = PrefixContainerFileNamer("workspace/")))
+                        fileNamer = PrefixContainerFileNamer("workspace/")), context)
 
         val h5pDistTmpFile = File.createTempFile("h5p-dist", "zip")
-        val h5pDistIn = getAssetFromResource("/com/ustadmobile/sharedse/h5p/dist.zip", context)
+        val h5pDistIn = getAssetFromResource("/com/ustadmobile/core/h5p/dist.zip", context, this::class)
                 ?: throw IllegalStateException("Could not find h5p dist file")
         h5pDistIn.writeToFile(h5pDistTmpFile)
         repo.addEntriesToContainerFromZip(container.containerUid, h5pDistTmpFile.toDoorUri(),
-                containerAddOptions)
+                containerAddOptions, context)
         h5pDistTmpFile.delete()
 
 
@@ -132,7 +133,7 @@ class H5PTypePluginCommonJvm(): H5PTypePlugin() {
             <tincan xmlns="http://projecttincan.com/tincan.xsd">
                 <activities>
                     <activity id="${entry?.entryId ?: ""}" type="http://adlnet.gov/expapi/activities/module">
-                        <name>${entry?.title ?: "" }</name>
+                        <name>${entry?.title ?: ""}</name>
                         <description lang="en-US">${entry?.description ?: ""}</description>
                         <launch lang="en-us">index.html</launch>
                     </activity>
@@ -148,15 +149,24 @@ class H5PTypePluginCommonJvm(): H5PTypePlugin() {
 
 
         // generate index.html
+        val index = """
+            <html>
+            <head>
+                <meta charset="utf-8" />
+                <script type="text/javascript" src="dist/main.bundle.js"></script>
+            </head>
+            <body>
+            <div id="h5p-container" data-workspace="workspace"></div>
+            </body>
+            </html>
+        """.trimIndent()
         val tmpIndexHtmlFile = File.createTempFile("h5p-index", "html")
-        val h5pIndexIn = getAssetFromResource("/com/ustadmobile/sharedse/h5p/index.html", context)
-                ?: throw IllegalStateException("Could not open h5p index.html file")
-        h5pIndexIn.writeToFile(tmpIndexHtmlFile)
+        tmpIndexHtmlFile.writeText(index)
         repo.addFileToContainer(container.containerUid, tmpIndexHtmlFile.toDoorUri(),
-            "index.html", containerAddOptions)
+                "index.html", containerAddOptions)
         tmpIndexHtmlFile.delete()
 
-        return container
+        return repo.containerDao.findByUid(container.containerUid) ?: container
 
     }
 }

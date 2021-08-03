@@ -218,8 +218,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/dimen_8dp"
                     android:layout_weight="1"
-                    app:textFromDateLong="@{clazz.clazzStartTime}"
-                    app:textToDateLong="@{clazz.clazzEndTime}"
+                    app:dateTimeMillisFrom="@{clazz.clazzStartTime}"
+                    app:dateTimeMillisTo="@{clazz.clazzEndTime}"
                     tools:text="Start Date - End Date" />
             </LinearLayout>
 

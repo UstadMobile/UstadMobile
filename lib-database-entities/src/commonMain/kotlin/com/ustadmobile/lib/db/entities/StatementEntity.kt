@@ -2,36 +2,45 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
-@Entity
+@Entity(indices = [
+    // index used to cache the best assignments from the statements
+    Index(value = ["statementContentEntryUid","statementPersonUid","contentEntryRoot",
+                    "timestamp","statementLocalChangeSeqNum"])
+])
 @SyncableEntity(tableId = StatementEntity.TABLE_ID,
     notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, 
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${StatementEntity.TABLE_ID} AS tableId 
           FROM ChangeLog
-               JOIN StatementEntity 
-                    ON ChangeLog.chTableId = ${StatementEntity.TABLE_ID} 
-                        AND ChangeLog.chEntityPk = StatementEntity.statementUid
-               JOIN Person 
-                    ON Person.personUid = StatementEntity.statementPersonUid
-               ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_DEVICESESSION_VIA_SCOPEDGRANT_PT2}
+            JOIN StatementEntity 
+                 ON ChangeLog.chTableId = ${StatementEntity.TABLE_ID} 
+                    AND ChangeLog.chEntityPk = StatementEntity.statementUid
+            JOIN ScopedGrant 
+                 ON ${StatementEntity.FROM_STATEMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE}
+                    AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
+            JOIN PersonGroupMember 
+                 ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+            JOIN UserSession
+                 ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+                    AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
                 """],
     syncFindAllQuery = """
         SELECT StatementEntity.* 
-          FROM DeviceSession
+          FROM UserSession
                JOIN PersonGroupMember 
-                    ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
-               ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
-                    ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
-               JOIN StatementEntity
-                    ON StatementEntity.statementPersonUid = Person.personUid
-         WHERE DeviceSession.dsDeviceId = :clientId"""
+                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+               JOIN ScopedGrant 
+                    ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+                    AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
+               JOIN StatementEntity 
+                        ON ${StatementEntity.FROM_SCOPEDGRANT_TO_STATEMENT_JOIN_ON_CLAUSE}
+         WHERE UserSession.usClientNodeId = :clientId
+               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}"""
 )
 @Serializable
 open class StatementEntity {
@@ -128,8 +137,50 @@ open class StatementEntity {
 
         const val RESULT_UNSET = 0.toByte()
 
-        const val RESULT_SUCCESS = 1.toByte()
+        const val RESULT_SUCCESS = 2.toByte()
 
-        const val RESULT_FAILURE = 2.toByte()
+        const val RESULT_FAILURE = 1.toByte()
+
+        const val CONTENT_COMPLETE = 100
+
+        const val CONTENT_INCOMPLETE = 101
+
+        const val CONTENT_PASSED = 102
+
+        const val CONTENT_FAILED = 103
+
+
+        const val FROM_STATEMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE = """
+            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+             OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = StatementEntity.statementPersonUid)
+             OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = StatementEntity.statementClazzUid)
+             OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = (
+                    SELECT clazzSchoolUid
+                      FROM Clazz
+                     WHERE clazzUid = StatementEntity.statementClazzUid))
+             )
+        """
+
+
+        const val FROM_SCOPEDGRANT_TO_STATEMENT_JOIN_ON_CLAUSE = """
+            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+             OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = StatementEntity.statementPersonUid)
+             OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = StatementEntity.statementClazzUid)
+             OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = (
+                    SELECT clazzSchoolUid
+                      FROM Clazz 
+                     WHERE clazzUid = StatementEntity.statementClazzUid))
+            )         
+        """
+
+
     }
 }

@@ -17,8 +17,8 @@ class VerbDisplay {
 @Entity
 @SyncableEntity(tableId = TABLE_ID,
     notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${VerbEntity.TABLE_ID} AS tableId
-        FROM DeviceSession """])
+        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, ${VerbEntity.TABLE_ID} AS tableId
+        FROM UserSession"""])
 @Serializable
 class VerbEntity() {
 
