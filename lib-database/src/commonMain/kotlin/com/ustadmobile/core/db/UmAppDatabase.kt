@@ -5079,9 +5079,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             database.execSQL("DROP TABLE IF EXISTS ContentEntryProgress_trk")
         }
 
-
-        }
-
         val MIGRATION_75_76 = DoorMigrationSync(75, 76) { database ->
             database.execSQL("CREATE INDEX IF NOT EXISTS index_StatementEntity_statementContentEntryUid_statementPersonUid_contentEntryRoot_timestamp_statementLocalChangeSeqNum ON StatementEntity (statementContentEntryUid, statementPersonUid, contentEntryRoot, timestamp, statementLocalChangeSeqNum)")
             database.execSQL("CREATE INDEX IF NOT EXISTS index_ClazzAssignment_caClazzUid ON ClazzAssignment (caClazzUid)")
