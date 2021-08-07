@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
@@ -51,7 +51,7 @@ abstract class ContentEntryRelatedEntryJoinDao : BaseDao<ContentEntryRelatedEntr
         AND ContentEntryRelatedEntryJoin.relType = $REL_TYPE_TRANSLATED_VERSION
         ORDER BY Language.name""")
     @JsName("findAllTranslationsWithContentEntryUid")
-    abstract fun findAllTranslationsWithContentEntryUid(contentEntryUid: Long): DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage>
+    abstract fun findAllTranslationsWithContentEntryUid(contentEntryUid: Long): DoorDataSourceFactory<Int, ContentEntryRelatedEntryJoinWithLanguage>
 
     @Update
     abstract override fun update(entity: ContentEntryRelatedEntryJoin)

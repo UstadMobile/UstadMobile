@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.DoorLiveData
@@ -66,7 +66,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                         ELSE ''
                         END DESC""")
     @JsName("downloadedRootItemsAsc")
-    abstract fun downloadedRootItems(personUid: Long, sortOrder: Int): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+    abstract fun downloadedRootItems(personUid: Long, sortOrder: Int): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
     @Query("SELECT ContentEntry.*, Language.* FROM ContentEntry LEFT JOIN Language ON Language.langUid = ContentEntry.primaryLanguageUid " +
             "WHERE ContentEntry.contentEntryUid=:entryUuid"
@@ -90,7 +90,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
     @JsName("getChildrenByParentUid")
-    abstract fun getChildrenByParentUid(parentUid: Long): DataSource.Factory<Int, ContentEntry>
+    abstract fun getChildrenByParentUid(parentUid: Long): DoorDataSourceFactory<Int, ContentEntry>
 
     @Query("SELECT ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
@@ -225,7 +225,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract fun getChildrenByParentUidWithCategoryFilterOrderByName(parentUid: Long, langParam: Long,
                                                                      categoryParam0: Long, personUid: Long,
                                                                      showHidden: Boolean, onlyFolder: Boolean,
-                                                                     sortOrder: Int): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+                                                                     sortOrder: Int): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
 
@@ -280,7 +280,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                         ELSE ''
                         END DESC
     """)
-    abstract fun getClazzContent(clazzUid: Long,  personUid: Long, sortOrder: Int): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+    abstract fun getClazzContent(clazzUid: Long,  personUid: Long, sortOrder: Int): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
     @Update
@@ -324,7 +324,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract suspend fun getRecursiveDownloadTotals(contentEntryUid: Long): DownloadJobSizeInfo?
 
     @Query(ALL_ENTRIES_RECURSIVE_SQL)
-    abstract fun getAllEntriesRecursively(contentEntryUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndMostRecentContainer>
+    abstract fun getAllEntriesRecursively(contentEntryUid: Long): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndMostRecentContainer>
 
     @Query(ALL_ENTRIES_RECURSIVE_SQL)
     abstract fun getAllEntriesRecursivelyAsList(contentEntryUid: Long): List<ContentEntryWithParentChildJoinAndMostRecentContainer>

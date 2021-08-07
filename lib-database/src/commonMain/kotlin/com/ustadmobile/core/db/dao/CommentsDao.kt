@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.Repository
@@ -28,7 +28,7 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
       ORDER BY Comments.commentsDateTimeAdded DESC 
     """)
     abstract fun findPublicByEntityTypeAndUidLive(entityType: Int, entityUid: Long):
-            DataSource.Factory<Int, CommentsWithPerson>
+            DoorDataSourceFactory<Int, CommentsWithPerson>
 
 
     @Query("""
@@ -45,7 +45,7 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
     """)
     abstract fun findPrivateByEntityTypeAndUidAndForPersonLive(entityType: Int, entityUid: Long,
                                                             personUid: Long):
-            DataSource.Factory<Int, CommentsWithPerson>
+            DoorDataSourceFactory<Int, CommentsWithPerson>
 
 
     @Query("""
@@ -61,7 +61,7 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
     """)
     abstract fun findPrivateByEntityTypeAndUidAndForPersonLive2(entityType: Int, entityUid: Long,
                                                                personUid: Long):
-            DataSource.Factory<Int, CommentsWithPerson>
+            DoorDataSourceFactory<Int, CommentsWithPerson>
 
     @Query("""
         SELECT Comments.*, Person.* FROM Comments
@@ -76,7 +76,7 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
     """)
     abstract fun findPrivateByEntityTypeAndUidAndPersonLive(entityType: Int, entityUid: Long,
                                                                 personUid: Long):
-            DataSource.Factory<Int, CommentsWithPerson>
+            DoorDataSourceFactory<Int, CommentsWithPerson>
 
 
     /*
@@ -105,7 +105,7 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
     """)
     abstract fun findPrivateCommentsByEntityTypeAndUidAndPersonAndPersonToLive(
             entityType: Int, entityUid: Long, personFrom: Long):
-            DataSource.Factory<Int, CommentsWithPerson>
+            DoorDataSourceFactory<Int, CommentsWithPerson>
 
     @Query("""
         SELECT Comments.*, Person.* FROM Comments

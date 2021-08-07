@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -203,7 +203,7 @@ abstract class PersonDao : BaseDao<Person> {
     @Query(SQL_SELECT_LIST_WITH_PERMISSION)
     abstract fun findPersonsWithPermission(timestamp: Long, excludeClazz: Long,
                                                  excludeSchool: Long, excludeSelected: List<Long>,
-                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): DataSource.Factory<Int, PersonWithDisplayDetails>
+                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): DoorDataSourceFactory<Int, PersonWithDisplayDetails>
 
     @Query(SQL_SELECT_LIST_WITH_PERMISSION)
     abstract fun findPersonsWithPermissionAsList(timestamp: Long, excludeClazz: Long,

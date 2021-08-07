@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
@@ -35,7 +35,7 @@ abstract class LanguageDao : BaseDao<Language> {
             ELSE ''
         END DESC
     """)
-    abstract fun findLanguagesAsSource(sortOrder: Int, searchText: String): DataSource.Factory<Int, Language>
+    abstract fun findLanguagesAsSource(sortOrder: Int, searchText: String): DoorDataSourceFactory<Int, Language>
 
     @Query("""SELECT * FROM Language""")
     abstract fun findLanguagesList(): List<Language>

@@ -64,7 +64,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 79)
+], version = 80)
 @MinSyncVersion(60)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -5150,6 +5150,23 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_79_80 = DoorMigrationStatementList(79, 80) { database ->
+            if(database.dbType() == DoorDbType.SQLITE) {
+                listOf(
+                    "ALTER TABLE XLangMapEntry RENAME to XLangMapEntry_OLD",
+                    "CREATE TABLE IF NOT EXISTS XLangMapEntry (  verbLangMapUid  INTEGER  NOT NULL , objectLangMapUid  INTEGER  NOT NULL , languageLangMapUid  INTEGER  NOT NULL , languageVariantLangMapUid  INTEGER  NOT NULL , valueLangMap  TEXT , statementLangMapMasterCsn  INTEGER  NOT NULL , statementLangMapLocalCsn  INTEGER  NOT NULL , statementLangMapLcb  INTEGER  NOT NULL , statementLangMapLct  INTEGER  NOT NULL , statementLangMapUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )",
+                    "INSERT INTO XLangMapEntry (verbLangMapUid, objectLangMapUid, languageLangMapUid, languageVariantLangMapUid, valueLangMap, statementLangMapMasterCsn, statementLangMapLocalCsn, statementLangMapLcb, statementLangMapLct, statementLangMapUid) SELECT verbLangMapUid, objectLangMapUid, languageLangMapUid, languageVariantLangMapUid, valueLangMap, statementLangMapMasterCsn, statementLangMapLocalCsn, statementLangMapLcb, statementLangMapLct, statementLangMapUid FROM XLangMapEntry_OLD",
+                    "DROP TABLE XLangMapEntry_OLD",
+                    "CREATE INDEX index_XLangMapEntry_verbLangMapUid ON XLangMapEntry (verbLangMapUid)",
+                ) + DoorSqlGenerator.generateSyncableEntityInsertTriggersSqlite("XLangMapEntry",
+                    74, "statementLangMapUid", "statementLangMapLocalCsn", "statementLangMapMasterCsn"
+                ) + DoorSqlGenerator.generateSyncableEntityUpdateTriggersSqlite("XLangMapEntry",
+                    74, "statementLangMapUid", "statementLangMapLocalCsn", "statementLangMapMasterCsn")
+            }else {
+                listOf()
+            }
+        }
+
         fun migrationList(nodeId: Int) = listOf<DoorMigration>(
             MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
             MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
@@ -5162,7 +5179,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67, migrate67to68(nodeId),
             MIGRATION_68_69, MIGRATION_69_70, MIGRATION_70_71, MIGRATION_71_72,
             MIGRATION_72_73, MIGRATION_73_74, MIGRATION_74_75, MIGRATION_75_76,
-            MIGRATION_76_77, MIGRATION_77_78, MIGRATION_78_79)
+            MIGRATION_76_77, MIGRATION_77_78, MIGRATION_78_79, MIGRATION_78_79
+        )
 
         internal fun migrate67to68(nodeId: Int)= DoorMigrationSync(67, 68) { database ->
             if (database.dbType() == DoorDbType.SQLITE) {
