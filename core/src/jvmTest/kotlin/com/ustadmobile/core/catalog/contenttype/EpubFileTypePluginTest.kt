@@ -76,16 +76,10 @@ class EpubFileTypePluginTest {
     @Test
     fun givenValidEpubLink_whenExtractMetadataAndProcessJobComplete_thenDataShouldBeDownloaded(){
 
-        val newStream = javaClass.getResourceAsStream("/com/ustadmobile/core/contenttype/childrens-literature.epub")
-        val source = newStream.source().buffer()
-        val buffer = Buffer()
-        source.readAll(buffer)
-
-        val response = MockResponse().setResponseCode(200).setHeader("Content-Type", "application/epub+zip")
-        response.setBody(buffer)
-
-        mockWebServer.enqueue(response)
-        mockWebServer.enqueue(response)
+        mockWebServer.enqueue(MockResponse().setResponseCode(200).setHeader("Content-Type", "application/epub+zip").setBody(""))
+        mockWebServer.enqueue(createResponse("/com/ustadmobile/core/contenttype/childrens-literature.epub"))
+        mockWebServer.enqueue(createResponse("/com/ustadmobile/core/contenttype/childrens-literature.epub"))
+        
 
         val containerTmpDir = tmpFolder.newFolder("containerTmpDir")
         val tempFolder = tmpFolder.newFolder("newFolder")
@@ -123,7 +117,18 @@ class EpubFileTypePluginTest {
 
         }
 
+    }
 
+    fun createResponse(fileLocation: String): MockResponse {
+        val newStream = javaClass.getResourceAsStream(fileLocation)
+        val source = newStream.source().buffer()
+        val buffer = Buffer()
+        source.readAll(buffer)
+
+        val response = MockResponse().setResponseCode(200).setHeader("Content-Type", "application/epub+zip")
+        response.setBody(buffer)
+
+        return response
     }
 
 }
