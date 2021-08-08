@@ -5,15 +5,26 @@ import android.media.MediaMetadataRetriever
 import android.webkit.MimeTypeMap
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.toFile
+import com.ustadmobile.door.ext.writeToFile
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.internal.closeQuietly
 import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
+import java.io.IOException
 
-actual suspend fun DoorUri.guessMimeType(di: DI?): String? {
+actual suspend fun DoorUri.guessMimeType(di: DI): String? {
     return MimeTypeMap.getFileExtensionFromUrl(this.toString())?.let { extension ->
         MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
     }
 }
 
-actual suspend fun DoorUri.getSize(context: Any, di: DI?): Long {
+actual suspend fun DoorUri.getSize(context: Any, di: DI): Long {
     return (context as Context).contentResolver.openAssetFileDescriptor(uri, "r")?.length ?: -1
 }
 

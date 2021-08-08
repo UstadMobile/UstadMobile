@@ -3,6 +3,8 @@ package com.ustadmobile.core.catalog.contenttype
 import com.ustadmobile.core.account.Endpoint
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.container.ContainerAddOptions
+import com.ustadmobile.core.contentjob.ContentJobProgressListener
+import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.db.UmAppDatabase
@@ -38,11 +40,11 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
         return getEntry(doorUri, process) != null
     }
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): ContentEntryWithLanguage? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
         return getEntry(uri, process)
     }
 
-    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
         withContext(Dispatchers.Default) {
 
             val uri = jobItem.fromUri ?: throw IllegalArgumentException("no uri found")
@@ -73,7 +75,8 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
             val containerFolderUri = DoorUri.parse(containerFolder)
 
             repo.addFileToContainer(container.containerUid, newVideo.toDoorUri(), newVideo.name,
-                    ContainerAddOptions(containerFolderUri))
+                    ContainerAddOptions(containerFolderUri),
+                    di)
 
             container
         }
@@ -82,7 +85,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
         return ProcessResult(200)
     }
 
-    suspend fun getEntry(uri: DoorUri, process: ProcessContext): ContentEntryWithLanguage? {
+    suspend fun getEntry(uri: DoorUri, process: ProcessContext): MetadataResult? {
         return withContext(Dispatchers.Default){
             val file = uri.toFile()
 
@@ -96,11 +99,12 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
                 return@withContext null
             }
 
-            ContentEntryWithLanguage().apply {
+            val entry = ContentEntryWithLanguage().apply {
                 this.title = file.nameWithoutExtension
                 this.leaf = true
                 this.contentTypeFlag = ContentEntry.TYPE_VIDEO
             }
+            MetadataResult(entry)
         }
     }
 

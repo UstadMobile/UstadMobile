@@ -1,6 +1,5 @@
 package com.ustadmobile.core.catalog.contenttype
 
-import com.google.gson.JsonObject
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
@@ -23,10 +22,7 @@ import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.core.container.PrefixContainerFileNamer
-import com.ustadmobile.core.contentjob.ContentPlugin
-import com.ustadmobile.core.contentjob.ProcessContext
-import com.ustadmobile.core.contentjob.ProcessResult
-import com.ustadmobile.core.contentjob.SupportedContent
+import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.io.ext.skipToEntry
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.XapiPackageContentView
@@ -69,14 +65,14 @@ class H5PTypePluginCommonJvm(private var context: Any, private val endpoint: End
 
     val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
-    override val jobType: Int
+    override val pluginId: Int
         get() = TODO("Not yet implemented")
 
     override suspend fun canProcess(doorUri: DoorUri, process: ProcessContext): Boolean {
         return findH5pEntry(doorUri)
     }
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): ContentEntryWithLanguage? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
         return withContext(Dispatchers.Default) {
             val inputStream = uri.openInputStream(context)
             return@withContext ZipInputStream(inputStream).use {
@@ -100,7 +96,7 @@ class H5PTypePluginCommonJvm(private var context: Any, private val endpoint: End
                     author = name
                 }
 
-                ContentEntryWithLanguage().apply {
+                val entry = ContentEntryWithLanguage().apply {
                     contentFlags = ContentEntry.FLAG_IMPORTED
                     contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
                     licenseType = licenseMap[json.jsonObject["license"] ?: ""]
@@ -110,11 +106,12 @@ class H5PTypePluginCommonJvm(private var context: Any, private val endpoint: End
                     this.author = author
                     leaf = true
                 }
+                MetadataResult(entry)
             }
         }
     }
 
-    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
         val uri = jobItem.fromUri ?: return ProcessResult(404)
         val doorUri = DoorUri.parse(uri)
         val container = Container().apply {
@@ -161,7 +158,7 @@ class H5PTypePluginCommonJvm(private var context: Any, private val endpoint: End
         val tmpTinCanFile = File.createTempFile("h5p-tincan", "xml")
         tmpTinCanFile.writeText(tinCan)
         repo.addFileToContainer(container.containerUid, tmpTinCanFile.toDoorUri(),
-                "tincan.xml", containerAddOptions)
+                "tincan.xml", containerAddOptions, di)
         tmpTinCanFile.delete()
 
 
@@ -180,7 +177,7 @@ class H5PTypePluginCommonJvm(private var context: Any, private val endpoint: End
         val tmpIndexHtmlFile = File.createTempFile("h5p-index", "html")
         tmpIndexHtmlFile.writeText(index)
         repo.addFileToContainer(container.containerUid, tmpIndexHtmlFile.toDoorUri(),
-                "index.html", containerAddOptions)
+                "index.html", containerAddOptions, di)
         tmpIndexHtmlFile.delete()
 
         repo.containerDao.findByUid(container.containerUid)

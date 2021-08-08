@@ -8,22 +8,16 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.xmlpull.v1.XmlPullParserException
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import java.io.File
 import java.io.IOException
-import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
-import com.ustadmobile.core.contentjob.ContentPlugin
-import com.ustadmobile.core.contentjob.ProcessContext
-import com.ustadmobile.core.contentjob.ProcessResult
-import com.ustadmobile.core.contentjob.SupportedContent
+import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.io.ext.skipToEntry
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
@@ -45,7 +39,7 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
     override val supportedFileExtensions:  List<String>
         get() = SupportedContent.ZIP_EXTENSIONS
 
-    override val jobType: Int
+    override val pluginId: Int
         get() = TODO("Not yet implemented")
 
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
@@ -58,7 +52,7 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
         return findTincanEntry(doorUri)
     }
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): ContentEntryWithLanguage? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
         return withContext(Dispatchers.Default) {
             val inputStream = uri.openInputStream(context)
             return@withContext ZipInputStream(inputStream).use {
@@ -70,7 +64,7 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
                 val activity = TinCanXML.loadFromXML(xpp).launchActivity
                         ?: throw IOException("TinCanXml from name has no launchActivity!")
 
-                ContentEntryWithLanguage().apply {
+                val entry = ContentEntryWithLanguage().apply {
                     contentFlags = ContentEntry.FLAG_IMPORTED
                     licenseType = ContentEntry.LICENSE_TYPE_OTHER
                     title =  if(activity.name.isNullOrEmpty())
@@ -80,11 +74,12 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
                     leaf = true
                     entryId = activity.id
                 }
+                MetadataResult(entry)
             }
         }
     }
 
-    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
         val uri = jobItem.fromUri ?: return ProcessResult(404)
         val doorUri = DoorUri.parse(uri)
         val container = Container().apply {

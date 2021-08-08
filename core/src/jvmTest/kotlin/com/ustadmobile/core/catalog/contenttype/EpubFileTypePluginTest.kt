@@ -3,14 +3,13 @@ package com.ustadmobile.core.catalog.contenttype
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentjob.ContentJobProgressListener
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.networkmanager.ContainerUploadManager
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploadManagerCommonJvm
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -23,7 +22,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
-import java.io.File
 
 class EpubFileTypePluginTest {
 
@@ -65,10 +63,10 @@ class EpubFileTypePluginTest {
 
         val epubPlugin = EpubTypePluginCommonJvm(Any(), Endpoint("http://localhost/dummy"), di)
         runBlocking {
-            val contentEntry = epubPlugin.extractMetadata(DoorUri.parse(tempEpubFile.toURI().toString()), ProcessContext(tempUri, params = mutableMapOf<String,String>()))
+            val metadata = epubPlugin.extractMetadata(DoorUri.parse(tempEpubFile.toURI().toString()), ProcessContext(tempUri, params = mutableMapOf<String,String>()))
             Assert.assertEquals("Got ContentEntry with expected title",
                     "A Textbook of Sources for Teachers and Teacher-Training Classes",
-                    contentEntry?.title)
+                    metadata!!.entry.title)
         }
 
     }
@@ -96,19 +94,23 @@ class EpubFileTypePluginTest {
 
             Assert.assertTrue("valid epub", isValid)
 
-            val entry = epubPlugin.extractMetadata(doorUri, processContext)!!
+            val metadata = epubPlugin.extractMetadata(doorUri, processContext)!!
 
             Assert.assertEquals("Got ContentEntry with expected title",
                     "A Textbook of Sources for Teachers and Teacher-Training Classes",
-                    entry.title)
+                    metadata.entry.title)
 
-            val uid = repo.contentEntryDao.insert(entry)
+            val uid = repo.contentEntryDao.insert(metadata.entry)
 
             val job = ContentJobItem(fromUri = doorUri.uri.toString(),
                                     toUri = containerTmpDir.toURI().toString(),
                                     cjiContentEntryUid = uid)
 
-            epubPlugin.processJob(job, processContext)
+            epubPlugin.processJob(job, processContext, object: ContentJobProgressListener{
+                override fun onProgress(contentJobItem: ContentJobItem) {
+
+                }
+            })
 
             val container = repo.containerDao.findByUid(job.cjiContainerUid)!!
 

@@ -69,7 +69,7 @@ class UmAppDatabaseContainerIoExtTest {
 
 
         runBlocking {
-            repo.addDirToContainer(container.containerUid, tmpDir.toDoorUri(), true,
+            repo.addDirToContainer(container.containerUid, tmpDir.toDoorUri(), true, di,
                 ContainerAddOptions(containerFilesDir.toDoorUri()))
         }
 

@@ -18,9 +18,7 @@ actual suspend fun ProcessContext.getLocalUri(fileUri: DoorUri, context: Any, di
         // download it
         val destFile = File(tempDirUri.toFile(), fileUri.getFileName(context))
         val destUri = DoorUri.parse(destFile.toURI().toString())
-        fileUri.downloadUrl(tempDirUri, destUri, di){
-
-        }
+        fileUri.downloadUrlIfRemote(destUri, di)
 
         // cache it
         localUri = destUri

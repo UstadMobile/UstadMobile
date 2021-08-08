@@ -10,13 +10,14 @@ import com.linkedin.android.litr.TransformationListener
 import com.linkedin.android.litr.analytics.TrackTransformationInfo
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
+import com.ustadmobile.core.contentjob.ContentJobProgressListener
+import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addContainerFromUri
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.io.ext.extractVideoResolutionMetadata
-import com.ustadmobile.core.io.ext.guessMimeType
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.ext.toDoorUri
@@ -51,11 +52,11 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
         return getEntry(doorUri, process) != null
     }
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): ContentEntryWithLanguage? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
         return getEntry(uri, process)
     }
 
-    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
         withContext(Dispatchers.Default) {
 
             val uri = jobItem.fromUri ?: throw IllegalStateException("missing uri")
@@ -158,9 +159,10 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
             if (compressVideo) {
                 repo.addFileToContainer(container.containerUid, newVideo.toDoorUri(), newVideo.name,
-                        ContainerAddOptions(containerFolderUri))
+                        ContainerAddOptions(containerFolderUri),
+                        di)
             } else {
-                repo.addContainerFromUri(container.containerUid, videoUri, context,
+                repo.addContainerFromUri(container.containerUid, videoUri, context, di,
                         videoUri.getFileName(context),
                         ContainerAddOptions(containerFolderUri))
             }
@@ -171,7 +173,7 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
         return ProcessResult(200)
     }
 
-    suspend fun getEntry(doorUri: DoorUri, process: ProcessContext): ContentEntryWithLanguage? {
+    suspend fun getEntry(doorUri: DoorUri, process: ProcessContext): MetadataResult? {
         return withContext(Dispatchers.Default) {
 
             val fileName = doorUri.getFileName(context)
@@ -186,11 +188,12 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
                 return@withContext null
             }
 
-            ContentEntryWithLanguage().apply {
+            val entry =ContentEntryWithLanguage().apply {
                 this.title = fileName
                 this.leaf = true
                 this.contentTypeFlag = ContentEntry.TYPE_VIDEO
             }
+            MetadataResult(entry)
         }
     }
 

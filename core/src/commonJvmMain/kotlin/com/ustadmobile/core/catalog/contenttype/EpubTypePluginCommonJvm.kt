@@ -15,18 +15,15 @@ import java.util.*
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
-import com.ustadmobile.core.contentjob.ContentPlugin
-import com.ustadmobile.core.contentjob.ProcessContext
-import com.ustadmobile.core.contentjob.ProcessResult
-import com.ustadmobile.core.contentjob.SupportedContent
+import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.io.ext.getLocalUri
 import com.ustadmobile.core.io.ext.skipToEntry
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.EpubContentView
-import com.ustadmobile.core.io.ext.guessMimeType
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.core.io.ext.guessMimeType
 import com.ustadmobile.lib.db.entities.*
 import org.xmlpull.v1.XmlPullParserFactory
 
@@ -41,7 +38,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
     override val supportedFileExtensions: List<String>
         get() = SupportedContent.EPUB_EXTENSIONS
 
-    override val jobType: Int
+    override val pluginId: Int
         get() = TODO("Not yet implemented")
 
     val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
@@ -56,7 +53,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
         return findOpfPath(doorUri, process) != null
     }
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): ContentEntryWithLanguage? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
         val opfPath = findOpfPath(uri, process) ?: return null
         return withContext(Dispatchers.Default) {
             val xppFactory = XmlPullParserFactory.newInstance()
@@ -72,7 +69,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                     val opfDocument = OpfDocument()
                     opfDocument.loadFromOPF(xpp)
 
-                    return@withContext ContentEntryWithLanguage().apply {
+                    val entry = ContentEntryWithLanguage().apply {
                         contentFlags = ContentEntry.FLAG_IMPORTED
                         contentTypeFlag = ContentEntry.TYPE_EBOOK
                         licenseType = ContentEntry.LICENSE_TYPE_OTHER
@@ -89,6 +86,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                             }
                         }
                     }
+                    return@withContext MetadataResult(entry)
                 }
             } catch (e: Exception) {
                 null
@@ -96,10 +94,13 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
         }
     }
 
-    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
         val container = withContext(Dispatchers.Default) {
-            val uri = jobItem.fromUri ?: return@withContext
-            val doorUri = DoorUri.parse(uri)
+
+            val jobUri = jobItem.fromUri ?: return@withContext
+            val uri = DoorUri.parse(jobUri)
+            val localUri = process.getLocalUri(uri, context, di)
+
             val container = Container().apply {
                 containerContentEntryUid = jobItem.cjiContentEntryUid
                 cntLastModified = System.currentTimeMillis()
@@ -111,7 +112,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
             val containerFolderUri = DoorUri.parse(containerFolder)
 
             repo.addEntriesToContainerFromZip(container.containerUid,
-                    doorUri,
+                    localUri,
                     ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
             val containerWithSize = repo.containerDao.findByUid(container.containerUid) ?: container
