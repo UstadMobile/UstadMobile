@@ -70,7 +70,8 @@ class IndexEtekkathoScraper {
         containerDir.mkdirs()
 
         containerDirectory = containerDir
-        db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
+        //replace this with di
+        //db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
         repository = db //db!!.getRepository("https://localhost", "")
         contentEntryDao = repository!!.contentEntryDao
         contentParentChildJoinDao = repository!!.contentEntryParentChildJoinDao

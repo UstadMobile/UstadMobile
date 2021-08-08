@@ -5,6 +5,8 @@ import com.soywiz.klock.DateTime
 import com.soywiz.klock.days
 import com.soywiz.klock.parse
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.ext.addSyncCallback
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -40,8 +42,10 @@ class TestClazzLogCreator {
     fun setup() {
         checkJndiSetup()
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
-        db = UmAppDatabase.Companion.getInstance(Any(), nodeIdAndAuth)
-        db.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, false)
+        db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+            .addSyncCallback(nodeIdAndAuth, primary = false)
+            .build()
+            .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, false)
 
         okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp) {

@@ -2,11 +2,11 @@ package com.ustadmobile.port.android
 
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorObserver
-import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -20,11 +20,7 @@ import okhttp3.OkHttpClient
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.android.di
-import org.kodein.di.direct
-import org.kodein.di.instance
+import org.kodein.di.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 
@@ -68,14 +64,15 @@ class DownloadJobConnectivityChangeTriggerEventsTest {
         val di: DI = (context.applicationContext as DIAware).di
         val httpClient: HttpClient = di.direct.instance()
         val okHttpClient: OkHttpClient = di.direct.instance()
+        val accountManager: UstadAccountManager = di.direct.instance()
 
         nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
             randomUuid().toString())
-        umAppDatabase = UmAppDatabase.getInstance(context, nodeIdAndAuth)
-        umAppDatabase.clearAllTables()
 
-        repo = umAppDatabase.asRepository(repositoryConfig(context, "http://localhost/dummy",
-            nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))
+        umAppDatabase = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
+
+
+        repo = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_REPO)
 
         entry = ContentEntry("title 2", "title 2", leaf = true, publik = true)
         entry.contentEntryUid = repo.contentEntryDao.insert(entry)

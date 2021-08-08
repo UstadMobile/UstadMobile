@@ -6,7 +6,9 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
@@ -75,9 +77,10 @@ class ContainerDownloadManagerTest {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName, nodeIdAndAuth).also {
-                    it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, false)
-                })
+                spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+                    .addSyncCallback(nodeIdAndAuth, false)
+                    .build()
+                    .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, false))
             }
 
             bind<HttpClient>() with singleton {

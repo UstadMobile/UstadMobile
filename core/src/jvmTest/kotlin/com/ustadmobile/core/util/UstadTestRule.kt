@@ -10,14 +10,17 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
+import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.view.ContainerMounter
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -82,8 +85,6 @@ class UstadTestRule: TestWatcher() {
 
     lateinit var tempFolder: File
 
-    lateinit var nodeIdAndAuth: NodeIdAndAuth
-
     private val xppFactory = XmlPullParserFactory.newInstance().also {
         it.isNamespaceAware = true
     }
@@ -91,8 +92,6 @@ class UstadTestRule: TestWatcher() {
 
     override fun starting(description: Description?) {
         tempFolder = Files.createTempDirectory("ustadtestrule").toFile()
-
-        nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
 
         endpointScope = EndpointScope()
         systemImplSpy = spy(UstadMobileSystemImpl(xppFactory, tempFolder))
@@ -114,18 +113,29 @@ class UstadTestRule: TestWatcher() {
             bind<UstadAccountManager>() with singleton {
                 UstadAccountManager(instance(), Any(), di)
             }
+
+            bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
+                NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
+            }
+
             bind<UmAppDatabase>(tag = TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName, nodeIdAndAuth).also {
-                    it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, isPrimary = false)
-                })
+                val nodeIdAndAuth: NodeIdAndAuth = instance()
+                spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
+                    .addSyncCallback(nodeIdAndAuth, primary = false)
+                    .build()
+                    .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, isPrimary = false))
             }
 
             bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope).singleton {
+                val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(
                     Any(), context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
-                    instance(), instance()))
+                    instance(), instance()
+                ) {
+                    attachmentsDir = File(tempFolder, "attachments").absolutePath
+                })
                 ).also {
                     it.siteDao.insert(Site().apply {
                         siteName = "Test"

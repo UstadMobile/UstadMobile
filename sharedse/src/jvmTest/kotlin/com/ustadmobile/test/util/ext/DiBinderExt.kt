@@ -3,6 +3,8 @@ package com.ustadmobile.test.util.ext
 import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.ext.addSyncCallback
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -26,10 +28,11 @@ fun DI.Builder.bindDbAndRepoWithEndpoint(endpointScope: EndpointScope, clientMod
         val dbName = sanitizeDbNameFromUrl(context.url)
         val nodeIdAndAuth: NodeIdAndAuth = instance()
         InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-        spy(UmAppDatabase.getInstance(Any(), dbName, nodeIdAndAuth).also {
-            it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId)
-            it.preload()
-        })
+        spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
+            .addSyncCallback(nodeIdAndAuth, false)
+            .build()
+            .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId)
+            .also { it.preload() })
     }
 
     bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.Repository
@@ -15,7 +15,7 @@ abstract class LearnerGroupDao : BaseDao<LearnerGroup> {
             LEFT JOIN GroupLearningSession ON 
             GroupLearningSession.groupLearningSessionLearnerGroupUid = LearnerGroup.learnerGroupUid 
             WHERE GroupLearningSession.groupLearningSessionContentUid = :contentEntryUid""")
-    abstract fun findGroupsForEntryAsync(contentEntryUid: Long): DataSource.Factory<Int, LearnerGroup>
+    abstract fun findGroupsForEntryAsync(contentEntryUid: Long): DoorDataSourceFactory<Int, LearnerGroup>
 
     @Query("""SELECT LearnerGroup.* FROM LearnerGroup 
             LEFT JOIN GroupLearningSession ON 

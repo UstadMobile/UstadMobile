@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 
 
@@ -10,9 +10,9 @@ interface ClazzAssignmentDetailStudentProgressView: UstadDetailView<ClazzAssignm
     var studentScore: ContentEntryStatementScoreProgress?
 
     var clazzAssignmentContent
-            : DataSource.Factory<Int, ContentWithAttemptSummary>?
+            : DoorDataSourceFactory<Int, ContentWithAttemptSummary>?
 
-    var clazzAssignmentPrivateComments: DataSource.Factory<Int, CommentsWithPerson>?
+    var clazzAssignmentPrivateComments: DoorDataSourceFactory<Int, CommentsWithPerson>?
 
     companion object {
         const val VIEW_NAME = "ClazzAssignmentDetailStudentProgressListView"

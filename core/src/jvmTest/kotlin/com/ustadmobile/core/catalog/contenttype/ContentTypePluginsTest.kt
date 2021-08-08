@@ -4,7 +4,9 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.util.randomUuid
@@ -20,6 +22,8 @@ import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
 import kotlin.random.Random
 import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.clearAllTablesAndResetSync
 
 class ContentTypePluginsTest {
 
@@ -41,6 +45,10 @@ class ContentTypePluginsTest {
 
     private lateinit var okHttpClient: OkHttpClient
 
+    private lateinit var db: UmAppDatabase
+
+    private lateinit var repo: UmAppDatabase
+
     @Before
     fun setup(){
 
@@ -56,8 +64,9 @@ class ContentTypePluginsTest {
         httpClient = di.direct.instance()
 
         val accountManager: UstadAccountManager by di.instance()
-        contentImportManager =  di.on(accountManager.activeAccount).direct.instance()
-
+        contentImportManager =  di.on(accountManager.activeEndpoint).direct.instance()
+        db = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
+        repo = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_REPO)
     }
 
 
@@ -69,15 +78,6 @@ class ContentTypePluginsTest {
         tempEpubFile.copyInputStreamToFile(inputStream)
 
         val containerTmpDir = temporaryFolder.newFolder("containerTmpDir")
-
-        val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
-        val db = UmAppDatabase.getInstance(context, nodeIdAndAuth)
-        db.clearAllTables()
-        val dbRepo = db.asRepository(repositoryConfig(context, "http://localhost/dummy",
-            nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient
-        ){
-            attachmentsDir = containerTmpDir.absolutePath
-        })
 
         runBlocking {
             //TODO: Make this more rigorous
@@ -99,9 +99,6 @@ class ContentTypePluginsTest {
     fun givenUnsupportedFileFormat_whenImported_shouldReturnNull(){
         val emptyFile = temporaryFolder.newFile("empty.zip")
 
-        val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
-        val db = UmAppDatabase.getInstance(context, nodeIdAndAuth)
-        db.clearAllTables()
 
         val contentEntry =  runBlocking {
            contentImportManager.extractMetadata(emptyFile.toURI().toString())?.contentEntry

@@ -46,6 +46,7 @@ import com.ustadmobile.sharedse.network.containeruploader.ContainerUploadManager
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
+import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_ITERATIONS
 import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_KEYLENGTH
@@ -68,8 +69,8 @@ import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.lib.db.entities.ContainerImportJob
 import kotlinx.coroutines.asCoroutineDispatcher
 import java.util.concurrent.Executors
 
@@ -98,12 +99,13 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<UmAppDatabase>(tag = TAG_DB) with scoped(EndpointScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
-            UmAppDatabase.getInstance(context = applicationContext, dbName = dbName,
-                nodeIdAndAuth = instance()
-            ).also {
-                val networkManager: NetworkManagerBle = di.direct.instance()
-                it.connectivityStatusDao.commitLiveConnectivityStatus(networkManager.connectivityStatus)
-            }
+            DatabaseBuilder.databaseBuilder(applicationContext, UmAppDatabase::class, dbName)
+                .addSyncCallback(instance(), true)
+                .build()
+                .also {
+                    val networkManager: NetworkManagerBle = di.direct.instance()
+                    it.connectivityStatusDao.commitLiveConnectivityStatus(networkManager.connectivityStatus)
+                }
         }
 
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {

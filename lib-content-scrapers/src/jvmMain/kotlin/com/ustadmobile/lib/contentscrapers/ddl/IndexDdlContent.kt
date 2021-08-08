@@ -54,7 +54,8 @@ class IndexDdlContent {
         containerDir.mkdirs()
         this.containerDir = containerDir
 
-        db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
+        //THIS NEEDS REPLACED WITH DI
+        //db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
         val repository = db
         contentEntryDao = repository.contentEntryDao
         contentParentChildJoinDao = repository.contentEntryParentChildJoinDao

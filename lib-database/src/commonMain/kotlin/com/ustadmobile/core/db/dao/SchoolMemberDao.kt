@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
@@ -63,7 +63,7 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
                                                         sortOrder: Int,
                                                         searchQuery: String,
                                                         accountPersonUid: Long)
-            : DataSource.Factory<Int, SchoolMemberWithPerson>
+            : DoorDataSourceFactory<Int, SchoolMemberWithPerson>
 
     @Query("""SELECT SchoolMember.*, Person.* FROM SchoolMember
         LEFT JOIN Person ON Person.personUid = SchoolMember.schoolMemberPersonUid

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
@@ -17,7 +17,7 @@ abstract class  HolidayCalendarDao : BaseDao<HolidayCalendar> {
                AND CAST(holActive AS INTEGER) = 1) AS numEntries 
              FROM HolidayCalendar WHERE CAST(umCalendarActive AS INTEGER) = 1 AND 
              umCalendarCategory = ${HolidayCalendar.CATEGORY_HOLIDAY}""")
-    abstract fun findAllHolidaysWithEntriesCount(): DataSource.Factory<Int, HolidayCalendarWithNumEntries>
+    abstract fun findAllHolidaysWithEntriesCount(): DoorDataSourceFactory<Int, HolidayCalendarWithNumEntries>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(list: List<HolidayCalendar>)

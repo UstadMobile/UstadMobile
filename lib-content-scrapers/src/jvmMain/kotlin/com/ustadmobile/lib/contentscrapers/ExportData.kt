@@ -13,7 +13,7 @@ import kotlin.system.exitProcess
 
 class ExportData(private val containerUid: Long, val path: String) {
 
-    var db: UmAppDatabase = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
+    var db: UmAppDatabase = TODO("UmAppDatabase.getInstance(Any(), replaceMeWithDi())")
 
     init {
         val destDir = File(path)

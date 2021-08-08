@@ -12,8 +12,11 @@ import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
+import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.ContainerMounter
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -32,6 +35,8 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import okhttp3.OkHttpClient
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
@@ -104,10 +109,11 @@ class UstadTestRule: TestWatcher() {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName, nodeIdAndAuth).also {
-                    it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId)
-                    it.preload()
-                })
+                spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
+                    .addSyncCallback(nodeIdAndAuth, false)
+                    .build()
+                    .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId)
+                    .also { it.preload() })
             }
 
             bind<HttpClient>() with singleton{
@@ -144,6 +150,10 @@ class UstadTestRule: TestWatcher() {
                 builder.registerTypeAdapter(Statement::class.java, StatementDeserializer())
                 builder.registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
                 builder.create()
+            }
+
+            bind<CoroutineScope>(tag = DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with singleton {
+                GlobalScope
             }
         }
     }

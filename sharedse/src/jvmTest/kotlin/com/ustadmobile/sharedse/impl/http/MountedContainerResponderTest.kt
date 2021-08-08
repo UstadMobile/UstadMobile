@@ -3,11 +3,14 @@ package com.ustadmobile.sharedse.impl.http
 import org.mockito.kotlin.mock
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.io.ext.openEntryInputStream
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.clearAllTablesAndResetSync
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.door.util.randomUuid
@@ -62,7 +65,10 @@ class MountedContainerResponderTest {
         nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
             randomUuid().toString())
 
-        db = UmAppDatabase.getInstance(Any(), nodeIdAndAuth)
+        db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+            .addSyncCallback(nodeIdAndAuth, false)
+            .build()
+            .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, false)
         okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp) {
             install(JsonFeature)

@@ -10,8 +10,10 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.networkmanager.DownloadJobPreparer
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
@@ -78,8 +80,10 @@ class DownloadJobPreparerTest {
         val httpClient: HttpClient = di.direct.instance()
         val okHttpClient: OkHttpClient = di.direct.instance()
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
-        serverDb = UmAppDatabase.getInstance(Any(), nodeIdAndAuth, primary = true)
-        serverDb.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
+        serverDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+            .addSyncCallback(nodeIdAndAuth, true)
+            .build()
+            .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
         serverRepo = serverDb.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
             nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))
 

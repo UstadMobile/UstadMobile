@@ -20,7 +20,7 @@ data class XLangMapEntry(
         var objectLangMapUid: Long = 0L,
         var languageLangMapUid: Long = 0L,
         var languageVariantLangMapUid: Long = 0L,
-        var valueLangMap: String = "",
+        var valueLangMap: String? = "",
 
         @MasterChangeSeqNum
         var statementLangMapMasterCsn: Int = 0,

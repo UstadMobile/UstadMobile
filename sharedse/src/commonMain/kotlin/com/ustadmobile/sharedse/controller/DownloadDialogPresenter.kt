@@ -35,11 +35,13 @@ import org.kodein.di.instance
 import org.kodein.di.on
 
 
-class DownloadDialogPresenter(context: Any,
-                              arguments: Map<String, String>, view: DownloadDialogView,
-                              di: DI,
-                              private val lifecycleOwner: DoorLifecycleOwner)
-    : UstadBaseController<DownloadDialogView>(context, arguments, view, di), DoorObserver<DownloadJob?> {
+class DownloadDialogPresenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: DownloadDialogView,
+    di: DI,
+    private val lifecycleOwner: DoorLifecycleOwner
+) : UstadBaseController<DownloadDialogView>(context, arguments, view, di), DoorObserver<DownloadJob?> {
 
     private var deleteFileOptions = false
 
@@ -107,7 +109,7 @@ class DownloadDialogPresenter(context: Any,
         contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0L
         Napier.i("Starting download presenter for $contentEntryUid")
         view.setWifiOnlyOptionVisible(false)
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch {
             downloadJobItemLiveData = containerDownloadManager.getDownloadJobItemByContentEntryUid(
                     contentEntryUid)
             downloadJobCompletable.complete(true)
@@ -169,7 +171,7 @@ class DownloadDialogPresenter(context: Any,
         if(!t.isStatusPausedOrQueuedOrDownloading() && currentJobSizeTotals == null
                 && !jobSizeLoading.compareAndSet(true, true)) {
             view.setBottomPositiveButtonEnabled(false)
-            GlobalScope.launch {
+            presenterScope.launch {
                 try {
                     val sizeTotals = if(t != null) {
                         appDatabase.downloadJobDao.getDownloadSizeInfo(t.djUid)
