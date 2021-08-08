@@ -40,7 +40,7 @@ import java.util.*
 
 
 
-class KhanVideoScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : YoutubeScraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
+class KhanVideoScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint,override val di: DI) : YoutubeScraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
 
     private var tempDir: File? = null
@@ -178,7 +178,7 @@ class KhanVideoScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid
                 val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolder.toDoorUri())
                 runBlocking {
                     repo.addDirToContainer(container.containerUid, tempDir!!.toDoorUri(),
-                            true, containerAddOptions)
+                            true, di, containerAddOptions)
                 }
                 if (!eTag.isNullOrEmpty()) {
                     val etagContainer = ContainerETag(container.containerUid, eTag)

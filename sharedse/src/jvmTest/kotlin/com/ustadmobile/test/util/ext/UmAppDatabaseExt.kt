@@ -18,7 +18,7 @@ suspend fun insertContainerFromResources(db: UmAppDatabase, repo: UmAppDatabase,
         val entryTmpFile = File(resTmpDir, filename)
         db::class.java.getResourceAsStream(resourceName).writeToFile(entryTmpFile)
         repo.addFileToContainer(container.containerUid, entryTmpFile.toDoorUri(),
-            entryTmpFile.name, ContainerAddOptions(storageDirUri = containerTmpDir.toDoorUri()))
+                entryTmpFile.name, ContainerAddOptions(storageDirUri = containerTmpDir.toDoorUri()), di)
     }
 
     return container

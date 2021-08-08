@@ -95,9 +95,9 @@ class MountedContainerResponderTest {
         runBlocking {
             val containerAddOptions = ContainerAddOptions(containerTmpDir.toDoorUri())
             repo.addFileToContainer(container.containerUid, tmpFiles[0].toDoorUri(),
-                    "subfolder/testfile1.png", containerAddOptions)
+                    "subfolder/testfile1.png", containerAddOptions, di)
             repo.addFileToContainer(container.containerUid, tmpFiles[1].toDoorUri(),
-                    "subfolder/test file2.png", containerAddOptions)
+                    "subfolder/test file2.png", containerAddOptions, di)
         }
     }
 
