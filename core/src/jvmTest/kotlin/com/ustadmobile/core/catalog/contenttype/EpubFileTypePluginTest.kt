@@ -8,6 +8,7 @@ import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorUri
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import kotlinx.coroutines.runBlocking
@@ -46,6 +47,7 @@ class EpubFileTypePluginTest {
         }
 
         mockWebServer = MockWebServer()
+        mockWebServer.dispatcher = ContentDispatcher()
         mockWebServer.start()
 
     }
@@ -74,43 +76,30 @@ class EpubFileTypePluginTest {
     @Test
     fun givenValidEpubLink_whenExtractMetadataAndProcessJobComplete_thenDataShouldBeDownloaded(){
 
-        mockWebServer.enqueue(MockResponse().setResponseCode(200).setHeader("Content-Type", "application/epub+zip").setBody(""))
-        mockWebServer.enqueue(createResponse("/com/ustadmobile/core/contenttype/childrens-literature.epub"))
-        mockWebServer.enqueue(createResponse("/com/ustadmobile/core/contenttype/childrens-literature.epub"))
-        
-
         val containerTmpDir = tmpFolder.newFolder("containerTmpDir")
         val tempFolder = tmpFolder.newFolder("newFolder")
         val tempUri = DoorUri.parse(tempFolder.toURI().toString())
         val accountManager: UstadAccountManager by di.instance()
         val repo: UmAppDatabase = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
 
+
         val epubPlugin = EpubTypePluginCommonJvm(Any(), accountManager.activeEndpoint, di)
         runBlocking{
 
-            val doorUri = DoorUri.parse(mockWebServer.url("children.epub").toString())
+            val doorUri = DoorUri.parse(mockWebServer.url("/com/ustadmobile/core/contenttype/childrens-literature.epub").toString())
             val processContext = ProcessContext(tempUri, params = mutableMapOf<String,String>())
-            val isValid = epubPlugin.canProcess(doorUri, processContext)
 
-            Assert.assertTrue("valid epub", isValid)
-
-            val metadata = epubPlugin.extractMetadata(doorUri, processContext)!!
-
-            Assert.assertEquals("Got ContentEntry with expected title",
-                    "A Textbook of Sources for Teachers and Teacher-Training Classes",
-                    metadata.entry.title)
-
-            val uid = repo.contentEntryDao.insert(metadata.entry)
+            val uid = repo.contentEntryDao.insert(ContentEntry().apply{
+                title = "hello"
+            })
 
             val job = ContentJobItem(fromUri = doorUri.uri.toString(),
                                     toUri = containerTmpDir.toURI().toString(),
-                                    cjiContentEntryUid = uid)
+                                    cjiParentContentEntryUid = uid)
 
-            epubPlugin.processJob(job, processContext, object: ContentJobProgressListener{
-                override fun onProgress(contentJobItem: ContentJobItem) {
+            epubPlugin.processJob(job, processContext) {
 
-                }
-            })
+            }
 
             val container = repo.containerDao.findByUid(job.cjiContainerUid)!!
 
@@ -119,18 +108,6 @@ class EpubFileTypePluginTest {
 
         }
 
-    }
-
-    fun createResponse(fileLocation: String): MockResponse {
-        val newStream = javaClass.getResourceAsStream(fileLocation)
-        val source = newStream.source().buffer()
-        val buffer = Buffer()
-        source.readAll(buffer)
-
-        val response = MockResponse().setResponseCode(200).setHeader("Content-Type", "application/epub+zip")
-        response.setBody(buffer)
-
-        return response
     }
 
 }

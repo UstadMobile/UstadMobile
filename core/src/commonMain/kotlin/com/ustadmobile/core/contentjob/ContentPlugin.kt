@@ -15,8 +15,6 @@ interface ContentPlugin : DIAware {
 
     val supportedFileExtensions: List<String>
 
-    suspend fun canProcess(doorUri: DoorUri, process: ProcessContext): Boolean
-
     suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult?
 
     suspend fun processJob(

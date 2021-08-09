@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.alternative
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.ustadmobile.core.io.ext.guessMimeType
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -16,6 +17,7 @@ import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.contentjob.*
+import com.ustadmobile.core.contentjob.ext.processMetadata
 import com.ustadmobile.core.io.ext.getLocalUri
 import com.ustadmobile.core.io.ext.skipToEntry
 import com.ustadmobile.core.util.DiTag
@@ -23,7 +25,6 @@ import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.core.io.ext.guessMimeType
 import com.ustadmobile.lib.db.entities.*
 import org.xmlpull.v1.XmlPullParserFactory
 
@@ -45,23 +46,29 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
 
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
-    override suspend fun canProcess(doorUri: DoorUri, process: ProcessContext): Boolean {
-        val mimeType = doorUri.guessMimeType(context, di)
-        if(mimeType != null && !supportedMimeTypes.contains(mimeType)){
-            return false
-        }
-        return findOpfPath(doorUri, process) != null
-    }
 
     override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
-        val opfPath = findOpfPath(uri, process) ?: return null
+        val mimeType = uri.guessMimeType(context, di)
+        if(mimeType != null && !supportedMimeTypes.contains(mimeType)){
+            return null
+        }
         return withContext(Dispatchers.Default) {
             val xppFactory = XmlPullParserFactory.newInstance()
             try {
-
                 val localUri = process.getLocalUri(uri, context, di)
+                val opfPath = ZipInputStream(localUri.openInputStream(context)).use {
+                    it.skipToEntry { entry -> entry.name == OCF_CONTAINER_PATH } ?: return@use null
 
-                ZipInputStream(localUri.openInputStream(context)).use {
+                    val ocfContainer = OcfDocument()
+                    val xpp = xppFactory.newPullParser()
+                    xpp.setInput(it, "UTF-8")
+                    ocfContainer.loadFromParser(xpp)
+
+                   return@use ocfContainer.rootFiles.firstOrNull()?.fullPath
+                } ?: return@withContext null
+
+                return@withContext  ZipInputStream(localUri.openInputStream(context)).use {
+
                     it.skipToEntry { it.name == opfPath } ?: return@use null
 
                     val xpp = xppFactory.newPullParser()
@@ -86,7 +93,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                             }
                         }
                     }
-                    return@withContext MetadataResult(entry)
+                    return@use MetadataResult(entry)
                 }
             } catch (e: Exception) {
                 null
@@ -95,14 +102,15 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
     }
 
     override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+        val jobUri = jobItem.fromUri ?: return ProcessResult(404)
         val container = withContext(Dispatchers.Default) {
 
-            val jobUri = jobItem.fromUri ?: return@withContext
             val uri = DoorUri.parse(jobUri)
             val localUri = process.getLocalUri(uri, context, di)
+            val contentEntryUid = processMetadata(jobItem, process, context,endpoint)
 
             val container = Container().apply {
-                containerContentEntryUid = jobItem.cjiContentEntryUid
+                containerContentEntryUid = contentEntryUid
                 cntLastModified = System.currentTimeMillis()
                 this.mimeType = supportedMimeTypes.first()
                 containerUid = repo.containerDao.insert(this)
