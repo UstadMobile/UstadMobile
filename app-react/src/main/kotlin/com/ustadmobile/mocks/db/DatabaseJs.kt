@@ -104,7 +104,7 @@ class DatabaseJs: UmAppDatabase() , DoorDatabaseSyncRepository{
     override val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
         get() = TODO("Not yet implemented")
     override val clazzLogDao: ClazzLogDao
-        get() = TODO("Not yet implemented")
+        get() = ClazzLogDaoJs()
     override val customFieldDao: CustomFieldDao
         get() = TODO("Not yet implemented")
     override val customFieldValueDao: CustomFieldValueDao

@@ -14,7 +14,6 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import styled.StyleSheet
-import styled.css
 
 /**
  * Responsible for styling HTML elements, to customize particular
@@ -152,11 +151,18 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
             else -> drawerWidth.px
         }
         width = fullWidth
-        media(theme.breakpoints.up(Breakpoint.md)) {
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
             width = fullWidth - when {
                 systemImpl.isRtlActive() -> 0.px
                 else -> drawerWidth.px
             }
+        }
+    }
+
+    val attendance by css {
+        marginRight = 0.spacingUnits
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            marginRight = 2.spacingUnits
         }
     }
 

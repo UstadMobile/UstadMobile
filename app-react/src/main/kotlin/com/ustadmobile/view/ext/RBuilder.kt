@@ -220,26 +220,32 @@ fun RBuilder.setBitmaskListText(systemImpl: UstadMobileSystemImpl,textBitmaskVal
     }.joinToString { systemImpl.getString(it.messageId, this) }
 }
 
-fun RBuilder.createItemWithIconTitleAndDescription(iconName: String, title: String?, description: String?){
+fun RBuilder.createItemWithIconTitleAndDescription(iconName: String, title: String? = null,
+                                                   description: String? = null,
+                                                   scaleOnLargeSmall: Boolean = false){
     umGridContainer(MGridSpacing.spacing4) {
-        umItem(MGridSize.cells2, MGridSize.cells1){
+        umItem(MGridSize.cells2, if(scaleOnLargeSmall) MGridSize.cells3 else MGridSize.cells1){
             umProfileAvatar(-1,iconName)
         }
 
-        umItem(MGridSize.cells10, MGridSize.cells11){
-            umItem(MGridSize.cells11){
-                mTypography(title,
-                    variant = MTypographyVariant.body1,
-                    color = MTypographyColor.textPrimary){
-                    css (StyleManager.alignTextToStart)
+        umItem(MGridSize.cells10, if(scaleOnLargeSmall) MGridSize.cells9 else MGridSize.cells11){
+            if(title != null){
+                umItem(MGridSize.cells11){
+                    mTypography(title,
+                        variant = MTypographyVariant.body1,
+                        color = MTypographyColor.textPrimary){
+                        css (StyleManager.alignTextToStart)
+                    }
                 }
             }
 
-            umItem(MGridSize.cells11){
-                mTypography(description,
-                    variant = MTypographyVariant.body2,
-                    color = MTypographyColor.textPrimary){
-                    css (StyleManager.alignTextToStart)
+            if(description != null){
+                umItem(MGridSize.cells11){
+                    mTypography(description,
+                        variant = MTypographyVariant.body2,
+                        color = MTypographyColor.textPrimary){
+                        css (StyleManager.alignTextToStart)
+                    }
                 }
             }
         }

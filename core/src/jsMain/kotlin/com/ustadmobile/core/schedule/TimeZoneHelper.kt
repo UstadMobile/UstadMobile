@@ -23,9 +23,13 @@ private fun getOffset(format: String): Int{
     val offset = when {
         format.indexOf("EDT") != -1 -> "-4"
         format.indexOf("EST") != -1 -> "-5"
-        else -> format.substring(format.indexOf("T")+1)
+        else -> when {
+            format.endsWith("UTC") -> format
+            else -> format.substring(format.indexOf("T")+1)
+        }
     }
-    val hours = offset.substringBefore(":")
-    val minutes = offset.substringAfter(":","0")
+    val timePars = format.split(":")
+    val hours = timePars[0]
+    val minutes = timePars[1]
     return js("(parseInt(hours) + (minutes/60)) * 60").toString().toInt()
 }

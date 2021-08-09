@@ -116,7 +116,9 @@ open class ClazzDaoJs: ClazzDao() {
     }
 
     override suspend fun getClazzWithSchool(clazzUid: Long): ClazzWithSchool? {
-        TODO("Not yet implemented")
+        return ENTRIES.firstOrNull { it.clazzUid == clazzUid }.unsafeCast<ClazzWithSchool>().apply {
+            //school = SchoolDaoJs.ENTRIES[0]
+        }
     }
 
     override fun insert(entity: Clazz): Long {
