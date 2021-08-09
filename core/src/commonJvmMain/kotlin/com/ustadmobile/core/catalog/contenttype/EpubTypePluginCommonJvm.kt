@@ -46,7 +46,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
     override suspend fun canProcess(doorUri: DoorUri, process: ProcessContext): Boolean {
-        val mimeType = doorUri.guessMimeType(di)
+        val mimeType = doorUri.guessMimeType(context, di)
         if(mimeType != null && !supportedMimeTypes.contains(mimeType)){
             return false
         }

@@ -547,7 +547,7 @@ class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
             contentInputStream.writeToFile(harExtraFile)
             val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolder.toDoorUri())
             repo.addFileToContainer(scraperResult.containerUid, harExtraFile.toDoorUri(),
-                    harExtraFile.name, containerAddOptions, di)
+                    harExtraFile.name, Any(), di, containerAddOptions)
             harExtraFile.delete()
         }
 

@@ -75,8 +75,9 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
             val containerFolderUri = DoorUri.parse(containerFolder)
 
             repo.addFileToContainer(container.containerUid, newVideo.toDoorUri(), newVideo.name,
-                    ContainerAddOptions(containerFolderUri),
-                    di)
+                    context,
+                    di,
+                    ContainerAddOptions(containerFolderUri))
 
             container
         }

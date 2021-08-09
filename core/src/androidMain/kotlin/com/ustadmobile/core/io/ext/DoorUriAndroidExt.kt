@@ -1,12 +1,11 @@
 package com.ustadmobile.core.io.ext
 
+import android.R.attr
+import android.content.ContentResolver
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.webkit.MimeTypeMap
-import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.ext.toFile
-import com.ustadmobile.door.ext.writeToFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -18,14 +17,56 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.IOException
 
-actual suspend fun DoorUri.guessMimeType(di: DI): String? {
-    return MimeTypeMap.getFileExtensionFromUrl(this.toString())?.let { extension ->
-        MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+
+
+
+actual suspend fun DoorUri.guessMimeType(context: Any, di: DI): String? {
+    if(isRemote()){
+        withContext(Dispatchers.IO){
+            var response: Response? = null
+            try {
+                val okHttpClient: OkHttpClient = di.direct.instance()
+                val okRequest = Request.Builder().url(uri.toString()).head().build()
+                response = okHttpClient.newCall(okRequest).execute()
+                response.header("Content-Type")
+            }catch (io: IOException){
+                throw io
+            }catch (e: Exception) {
+                return@withContext null
+            }finally {
+                response?.closeQuietly()
+            }
+        }
+    }else if(ContentResolver.SCHEME_CONTENT == uri.scheme){
+        val cr: ContentResolver = (context as Context ).contentResolver
+        return cr.getType(uri)
+    }else{
+       return MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+               MimeTypeMap.getFileExtensionFromUrl(uri.toString()).lowercase())
     }
 }
 
 actual suspend fun DoorUri.getSize(context: Any, di: DI): Long {
-    return (context as Context).contentResolver.openAssetFileDescriptor(uri, "r")?.length ?: -1
+    return if(isRemote()){
+        withContext(Dispatchers.IO){
+            var response: Response? = null
+            try {
+                val okHttpClient: OkHttpClient = di.direct.instance()
+                val okRequest = Request.Builder().url(uri.toString()).head().build()
+                response = okHttpClient.newCall(okRequest).execute()
+                val length = response.header("Content-Length")
+                length?.toLong() ?: -1
+            }catch (io: IOException){
+                throw io
+            }catch (e: Exception) {
+                return@withContext -1
+            }finally {
+                response?.closeQuietly()
+            }
+        }
+    } else{
+        (context as Context).contentResolver.openAssetFileDescriptor(uri, "r")?.length ?: -1
+    }
 }
 
 fun DoorUri.extractVideoResolutionMetadata(context: Context): Pair<Int, Int>{

@@ -196,13 +196,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             ScraperManager(endpoint = context, di = di)
         }
 
-        bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
-            ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm(),
-                    XapiTypePluginCommonJvm(), VideoTypePluginJvm(),
-                    H5PTypePluginCommonJvm()), Any(),
-                    context, di)
-        }
-
         bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {
             UploadSessionManager(context, di)
         }

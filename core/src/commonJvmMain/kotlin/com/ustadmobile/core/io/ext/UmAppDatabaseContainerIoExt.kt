@@ -23,7 +23,7 @@ import com.ustadmobile.core.contentformats.har.HarEntry
 import java.util.Base64
 
 actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: DoorUri,
-                                                   recursive: Boolean, di: DI,
+                                                   recursive: Boolean, context:Any, di: DI,
                                                    addOptions: ContainerAddOptions) {
 
     val repo = this as? DoorDatabaseRepository
@@ -32,7 +32,7 @@ actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: D
 
     dirUri.toFile().listFiles()?.forEach { childFile ->
         db.addFileToContainerInternal(containerUid, childFile, recursive, addOptions,
-                "",
+                "", context = context,
                 di = di)
     }
 
@@ -40,12 +40,12 @@ actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: D
 }
 
 actual suspend fun UmAppDatabase.addFileToContainer(containerUid: Long, fileUri: com.ustadmobile.door.DoorUri,
-                                                    pathInContainer: String, addOptions: ContainerAddOptions, di: DI) {
+                                                    pathInContainer: String, context: Any, di: org.kodein.di.DI, addOptions: ContainerAddOptions) {
     val repo = this as? DoorDatabaseRepository
             ?: throw IllegalStateException("Must use repo for addFileToContainer")
     val db = repo.db as UmAppDatabase
     db.addFileToContainerInternal(containerUid, fileUri.toFile(), false,
-            addOptions, "", pathInContainer, di)
+            addOptions, "", pathInContainer, context,  di)
 }
 
 
@@ -70,6 +70,7 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
                                                              addOptions: ContainerAddOptions,
                                                              relativePathPrefix: String,
                                                              fixedPath: String? = null,
+                                                             context: Any,
                                                              di: DI) {
 
     val storageDirFile = addOptions.storageDirUri.toFile()
@@ -82,7 +83,7 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
 
         val entryPath = addOptions.fileNamer.nameContainerFile(relPath, file.toKmpUriString())
         val compress = addOptions.compressionFilter.shouldCompress(entryPath,
-                file.toDoorUri().guessMimeType(di))
+                file.toDoorUri().guessMimeType(context, di))
 
         val md5Sum = withContext(Dispatchers.IO) {
             if(compress) {
@@ -127,7 +128,7 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
     }else if(recursive && file.isDirectory) {
         file.listFiles()?.forEach { childFile ->
             addFileToContainerInternal(containerUid, childFile, true, addOptions,
-                    relativePathPrefix = "$relativePathPrefix${file.name}/",
+                    relativePathPrefix = "$relativePathPrefix${file.name}/", context = context,
                     di = di)
         }
     }
@@ -257,7 +258,7 @@ suspend fun UmAppDatabase.addEntryToContainerFromResource(containerUid: kotlin.L
         val tmpFile = File(addOptions.storageDirUri.toFile(), "${systemTimeInMillis()}.tmp")
         val resourceIn = javaClass.getResourceAsStream(resourcePath) ?: throw IOException("resource not found: $resourcePath")
         resourceIn.writeToFile(tmpFile)
-        addFileToContainer(containerUid, tmpFile.toDoorUri(), pathInContainer, addOptions, di)
+        addFileToContainer(containerUid, tmpFile.toDoorUri(), pathInContainer, Any(), di, addOptions)
         tmpFile.takeIf { it.exists() }?.delete()
     }
 }

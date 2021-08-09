@@ -96,7 +96,7 @@ class DeleteDownloadJobTest{
 
         runBlocking {
             repo.addFileToContainer(containerOfStandAlone.containerUid, commonFile.toDoorUri(),
-                    "testfile1.png", ContainerAddOptions(containerTmpDir.toDoorUri()), di)
+                    "testfile1.png", Any(), clientDi, ContainerAddOptions(containerTmpDir.toDoorUri()))
         }
 
         standAloneCommonContainerEntry =  db.containerEntryDao.findByPathInContainer(
@@ -161,9 +161,9 @@ class DeleteDownloadJobTest{
 
         runBlocking {
             repo.addFileToContainer(containerchildofparent.containerUid,
-                    zombieFile.toDoorUri(), "testfile2.png", ContainerAddOptions(containerTmpDir.toDoorUri()), di)
+                    zombieFile.toDoorUri(), "testfile2.png", Any(), clientDi, ContainerAddOptions(containerTmpDir.toDoorUri()))
             repo.addFileToContainer(containerchildofparent.containerUid,
-                    commonFile.toDoorUri(), "testfile1.png", ContainerAddOptions(containerTmpDir.toDoorUri()), di)
+                    commonFile.toDoorUri(), "testfile1.png", Any(), clientDi, ContainerAddOptions(containerTmpDir.toDoorUri()))
         }
 
         commonFileContainerEntry = db.containerEntryDao.findByPathInContainer(

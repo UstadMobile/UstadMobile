@@ -80,7 +80,7 @@ class KhanLiteVideoScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntr
             val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolder.toDoorUri())
             runBlocking {
                 repo.addFileToContainer(container.containerUid, tempFile.toDoorUri(),
-                        tempFile.name, containerAddOptions, di)
+                        tempFile.name, Any(), di, containerAddOptions)
             }
             if (!headRequestValues.mimeType.isNullOrEmpty()) {
                 val etagContainer = ContainerETag(container.containerUid, headRequestValues.etag)

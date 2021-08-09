@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.io.ext.openEntryInputStream
+import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
@@ -20,6 +21,9 @@ import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder
 import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder.Companion.PARAM_CONTAINERUID_INDEX
 import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder.Companion.PARAM_DB_INDEX
 import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder.Companion.PARAM_FILTERS_INDEX
+import com.ustadmobile.sharedse.network.ContainerDownloadManagerImpl
+import com.ustadmobile.sharedse.network.NetworkManagerBle
+import com.ustadmobile.sharedse.util.UstadTestRule
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.HttpClient
@@ -32,11 +36,19 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.junit.*
 import org.junit.rules.TemporaryFolder
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.scoped
+import org.kodein.di.singleton
 import java.io.File
 import java.io.IOException
 import kotlin.random.Random
 
 class MountedContainerResponderTest {
+
+    @JvmField
+    @Rule
+    var ustadTestRule = UstadTestRule()
 
     private lateinit var containerTmpDir: File
 
@@ -64,6 +76,10 @@ class MountedContainerResponderTest {
         containerTmpDir = temporaryFolder.newFolder("TestMountedContainerResponder-containerTmp")
         nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
             randomUuid().toString())
+
+        val clientDi = DI {
+            import(ustadTestRule.diModule)
+        }
 
         db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
             .addSyncCallback(nodeIdAndAuth, false)
@@ -95,9 +111,9 @@ class MountedContainerResponderTest {
         runBlocking {
             val containerAddOptions = ContainerAddOptions(containerTmpDir.toDoorUri())
             repo.addFileToContainer(container.containerUid, tmpFiles[0].toDoorUri(),
-                    "subfolder/testfile1.png", containerAddOptions, di)
+                    "subfolder/testfile1.png", Any(), clientDi, containerAddOptions)
             repo.addFileToContainer(container.containerUid, tmpFiles[1].toDoorUri(),
-                    "subfolder/test file2.png", containerAddOptions, di)
+                    "subfolder/test file2.png", Any(), clientDi, containerAddOptions)
         }
     }
 

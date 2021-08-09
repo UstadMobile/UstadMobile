@@ -11,9 +11,9 @@ expect suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long
                                                               context: Any)
 
 expect suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: DoorUri,
-                                                   recursive: Boolean = true, di: DI,
+                                                   recursive: Boolean = true, context: Any, di: DI,
                                                    addOptions: ContainerAddOptions)
 
 expect suspend fun UmAppDatabase.addFileToContainer(containerUid: Long, fileUri: DoorUri,
-                                                    pathInContainer: String, addOptions: ContainerAddOptions, di: DI)
+                                                    pathInContainer: String, context: Any, di: DI, addOptions: ContainerAddOptions)
 

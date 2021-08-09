@@ -159,8 +159,9 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
             if (compressVideo) {
                 repo.addFileToContainer(container.containerUid, newVideo.toDoorUri(), newVideo.name,
-                        ContainerAddOptions(containerFolderUri),
-                        di)
+                        context,
+                        di,
+                        ContainerAddOptions(containerFolderUri))
             } else {
                 repo.addContainerFromUri(container.containerUid, videoUri, context, di,
                         videoUri.getFileName(context),

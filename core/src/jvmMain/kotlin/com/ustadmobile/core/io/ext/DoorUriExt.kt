@@ -16,7 +16,7 @@ import okhttp3.Response
 import okhttp3.internal.closeQuietly
 import java.io.IOException
 
-actual suspend fun DoorUri.guessMimeType(di: DI): String? {
+actual suspend fun DoorUri.guessMimeType(context: Any, di: DI): String? {
     return if(isRemote()){
         withContext(Dispatchers.IO){
             var response: Response? = null

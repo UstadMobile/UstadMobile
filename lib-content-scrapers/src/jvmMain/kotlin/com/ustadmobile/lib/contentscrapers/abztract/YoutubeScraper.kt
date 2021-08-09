@@ -124,7 +124,7 @@ open class YoutubeScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
         val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolder.toDoorUri())
         runBlocking {
             repo.addFileToContainer(container.containerUid, videoFile.toDoorUri(),
-                    videoFile.name, containerAddOptions, di)
+                    videoFile.name, Any(), di, containerAddOptions)
         }
 
         showContentEntry()

@@ -201,7 +201,7 @@ abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                 contentInputStream.writeToFile(harContentfile)
                 val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolder.toDoorUri())
                 repo.addFileToContainer(container.containerUid, harContentfile.toDoorUri(),
-                        harContentfile.name, containerAddOptions, di)
+                        harContentfile.name, Any(), di, containerAddOptions)
                 harContentfile.delete()
             }
         }

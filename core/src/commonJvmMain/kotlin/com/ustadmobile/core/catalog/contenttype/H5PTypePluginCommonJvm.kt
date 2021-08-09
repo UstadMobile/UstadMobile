@@ -158,7 +158,7 @@ class H5PTypePluginCommonJvm(private var context: Any, private val endpoint: End
         val tmpTinCanFile = File.createTempFile("h5p-tincan", "xml")
         tmpTinCanFile.writeText(tinCan)
         repo.addFileToContainer(container.containerUid, tmpTinCanFile.toDoorUri(),
-                "tincan.xml", containerAddOptions, di)
+                "tincan.xml", context, di, containerAddOptions)
         tmpTinCanFile.delete()
 
 
@@ -177,7 +177,7 @@ class H5PTypePluginCommonJvm(private var context: Any, private val endpoint: End
         val tmpIndexHtmlFile = File.createTempFile("h5p-index", "html")
         tmpIndexHtmlFile.writeText(index)
         repo.addFileToContainer(container.containerUid, tmpIndexHtmlFile.toDoorUri(),
-                "index.html", containerAddOptions, di)
+                "index.html", context, di, containerAddOptions)
         tmpIndexHtmlFile.delete()
 
         repo.containerDao.findByUid(container.containerUid)
