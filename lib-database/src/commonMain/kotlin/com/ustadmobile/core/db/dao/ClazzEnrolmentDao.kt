@@ -1,11 +1,12 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
@@ -42,7 +43,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         AND ClazzEnrolment.clazzEnrolmentActive 
         AND clazzEnrolmentClazzUid = :clazzUid ORDER BY clazzEnrolmentDateLeft DESC""")
     abstract fun findAllEnrolmentsByPersonAndClazzUid(personUid: Long, clazzUid: Long):
-            DataSource.Factory<Int, ClazzEnrolmentWithLeavingReason>
+            DoorDataSourceFactory<Int, ClazzEnrolmentWithLeavingReason>
 
     @Query("""SELECT ClazzEnrolment.*, LeavingReason.*,
          COALESCE(Clazz.clazzTimeZone, COALESCE(School.schoolTimeZone, 'UTC')) as timeZone
@@ -85,7 +86,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         AND ClazzEnrolment.clazzEnrolmentActive
         ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
     """)
-    abstract fun findAllClazzesByPersonWithClazz(personUid: Long): DataSource.Factory<Int, ClazzEnrolmentWithClazzAndAttendance>
+    abstract fun findAllClazzesByPersonWithClazz(personUid: Long): DoorDataSourceFactory<Int, ClazzEnrolmentWithClazzAndAttendance>
 
     @Query("""SELECT COALESCE(MAX(clazzEnrolmentDateLeft),0) FROM ClazzEnrolment WHERE 
         ClazzEnrolment.clazzEnrolmentPersonUid = :selectedPerson 
@@ -192,8 +193,9 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                 ELSE 0
             END DESC
     """)
+    @QueryLiveTables(value = ["Clazz", "Person", "ClazzEnrolment", "PersonGroupMember", "ScopedGrant"])
     abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int, sortOrder: Int, searchText: String? = "%",
-                                       filter: Int, accountPersonUid: Long, currentTime: Long): DataSource.Factory<Int, PersonWithClazzEnrolmentDetails>
+                                       filter: Int, accountPersonUid: Long, currentTime: Long): DoorDataSourceFactory<Int, PersonWithClazzEnrolmentDetails>
 
 
     @Query("""UPDATE ClazzEnrolment SET clazzEnrolmentActive = :enrolled,

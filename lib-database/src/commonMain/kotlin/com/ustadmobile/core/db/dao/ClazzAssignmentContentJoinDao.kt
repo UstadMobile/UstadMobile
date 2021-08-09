@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Transaction
@@ -18,7 +18,7 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
 
     @Query(FINDBY_CLAZZ_ASSIGNMENT_UID)
     abstract fun findAllContentByClazzAssignmentUidDF(clazzAssignmentUid: Long, personUid : Long)
-            : DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+            : DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
     @Query("""
@@ -87,7 +87,7 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
     """)
     abstract fun findAllContentWithAttemptsByClazzAssignmentUid(clazzAssignmentUid: Long,
                                                                personUid: Long, accountPersonUid: Long):
-            DataSource.Factory<Int, ContentWithAttemptSummary>
+            DoorDataSourceFactory<Int, ContentWithAttemptSummary>
 
     @Query("""
         UPDATE ClazzAssignmentContentJoin 

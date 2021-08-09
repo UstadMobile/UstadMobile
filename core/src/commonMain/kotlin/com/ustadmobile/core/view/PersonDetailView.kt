@@ -1,11 +1,11 @@
 package com.ustadmobile.core.view
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 
 interface PersonDetailView: UstadDetailView<PersonWithPersonParentJoin> {
 
-    var clazzes: DataSource.Factory<Int, ClazzEnrolmentWithClazzAndAttendance>?
+    var clazzes: DoorDataSourceFactory<Int, ClazzEnrolmentWithClazzAndAttendance>?
 
     var changePasswordVisible: Boolean
 

@@ -1,10 +1,11 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
@@ -50,7 +51,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     @Query("SELECT * FROM Clazz WHERE clazzSchoolUid = :schoolUid " +
             "AND CAST(isClazzActive AS INTEGER) = 1 ")
     abstract fun findAllClazzesBySchoolLive(schoolUid: Long)
-            : DataSource.Factory<Int,Clazz>
+            : DoorDataSourceFactory<Int,Clazz>
 
 
     @Query("UPDATE Clazz SET clazzSchoolUid = :schoolUid, " +
@@ -123,6 +124,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
                ELSE ''
                END DESC
     """)
+    @QueryLiveTables(["Clazz", "ClazzEnrolment", "ScopedGrant", "PersonGroupMember"])
     abstract fun findClazzesWithPermission(
         searchQuery: String,
         accountPersonUid: Long,
@@ -131,7 +133,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         currentTime: Long,
         permission: Long,
         selectedSchool: Long
-    ) : DataSource.Factory<Int, ClazzWithListDisplayDetails>
+    ) : DoorDataSourceFactory<Int, ClazzWithListDisplayDetails>
 
 
     @Query("SELECT Clazz.clazzUid AS uid, Clazz.clazzName AS labelName From Clazz WHERE clazzUid IN (:ids)")

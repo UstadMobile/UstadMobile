@@ -3,7 +3,9 @@ package com.ustadmobile.core.util.ext
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -40,9 +42,10 @@ class UmAppDatabaseExtTest {
     @Before
     fun setup() {
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
-        db = UmAppDatabase.getInstance(context, nodeIdAndAuth).also {
-            it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, false)
-        }
+        db = DatabaseBuilder.databaseBuilder(context, UmAppDatabase::class, "UmAppDatabase")
+            .addSyncCallback(nodeIdAndAuth, false)
+            .build()
+            .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, false)
 
         okHttpClient = OkHttpClient()
 

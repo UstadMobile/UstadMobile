@@ -5,7 +5,9 @@ import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.door.ext.clearAllTablesAndResetSync
@@ -59,9 +61,10 @@ class TestApacheIndexer {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName, nodeIdAndAuth, true).also {
-                    it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
-                })
+                spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+                    .addSyncCallback(nodeIdAndAuth, true)
+                    .build()
+                    .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true))
             }
             bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
                 containerDir

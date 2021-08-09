@@ -131,7 +131,7 @@ class DownloadDialogPresenterTest {
             presenter.onStart()
             presenter.handleStorageOptionSelection(storageDirs[0])
 
-            verifyBlocking(contentEntrySpy, timeout(5000 * 50000)) { getRecursiveDownloadTotals(contentEntrySet.rootEntry.contentEntryUid) }
+            verifyBlocking(contentEntrySpy, timeout(5000)) { getRecursiveDownloadTotals(contentEntrySet.rootEntry.contentEntryUid) }
 
             verify(mockedDialogView, timeout(5000)).setStatusText(any(),
                     eq(2), eq(UMFileUtil.formatFileSize(1000)))
@@ -176,7 +176,7 @@ class DownloadDialogPresenterTest {
             presenter.onStart()
             presenter.handleStorageOptionSelection(storageDirs[0])
 
-            verify(mockedDialogView, timeout(5000).atLeastOnce()).setWarningTextVisible(true)
+            verify(mockedDialogView, timeout(5000 * 5000).atLeastOnce()).setWarningTextVisible(true)
             verify(mockedDialogView, timeout(5000).atLeastOnce()).setWarningText(
                     MessageID.insufficient_space.toString())
             verify(mockedDialogView, timeout(5000).atLeastOnce()).setBottomPositiveButtonEnabled(false)

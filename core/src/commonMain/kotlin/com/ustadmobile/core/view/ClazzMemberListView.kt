@@ -1,13 +1,16 @@
 package com.ustadmobile.core.view
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithPerson
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 
 interface ClazzMemberListView: UstadListView<PersonWithClazzEnrolmentDetails, PersonWithClazzEnrolmentDetails> {
 
-    var studentList: DataSource.Factory<Int, PersonWithClazzEnrolmentDetails>?
+    var studentList: DoorDataSourceFactory<Int, PersonWithClazzEnrolmentDetails>?
 
-    var pendingStudentList: DataSource.Factory<Int, PersonWithClazzEnrolmentDetails>?
+    var pendingStudentList: DoorDataSourceFactory<Int, PersonWithClazzEnrolmentDetails>?
 
     var addTeacherVisible: Boolean
 
@@ -17,7 +20,7 @@ interface ClazzMemberListView: UstadListView<PersonWithClazzEnrolmentDetails, Pe
 
         const val ARG_HIDE_CLAZZES = "hideClazzes"
 
-        const val VIEW_NAME = "ClassMemberListView"
+        const val VIEW_NAME = "ClazzMemberListView"
     }
 
 }

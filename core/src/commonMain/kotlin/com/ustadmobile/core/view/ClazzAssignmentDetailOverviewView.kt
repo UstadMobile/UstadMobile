@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 
 
@@ -8,12 +8,12 @@ interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignment> {
 
     var clazzMetrics: ContentEntryStatementScoreProgress?
     var clazzAssignmentContent
-            : DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?
+            : DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?
 
     var timeZone: String?
 
-    var clazzAssignmentClazzComments: DataSource.Factory<Int, CommentsWithPerson>?
-    var clazzAssignmentPrivateComments: DataSource.Factory<Int, CommentsWithPerson>?
+    var clazzAssignmentClazzComments: DoorDataSourceFactory<Int, CommentsWithPerson>?
+    var clazzAssignmentPrivateComments: DoorDataSourceFactory<Int, CommentsWithPerson>?
 
     var showPrivateComments: Boolean
 

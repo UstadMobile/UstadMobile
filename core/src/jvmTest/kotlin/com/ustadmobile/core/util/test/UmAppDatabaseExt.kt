@@ -2,7 +2,6 @@ package com.ustadmobile.core.util.test
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ChangeListenerRequest
-import com.ustadmobile.door.DoorDatabase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeoutOrNull
 

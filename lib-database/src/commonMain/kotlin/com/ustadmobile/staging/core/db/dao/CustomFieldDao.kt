@@ -1,6 +1,5 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update

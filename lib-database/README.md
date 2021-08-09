@@ -50,3 +50,12 @@ database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzMember_trk_clientId_epk
 
 
 
+## Replacing DataSource.Factory with DoorDataSourceFactory
+
+```
+find ./lib-database/src/commonMain/ -name \*.kt -print0 | xargs -0 sed -i 's/ DataSource.Factory/ DoorDataSource.Factory/g'
+find ./lib-database/src/commonMain/ -name \*.kt -print0 | xargs -0 sed -i 's/import androidx.paging.DataSource/import com.ustadmobile.door.DoorDataSource/g'
+
+find ./core/ -name \*.kt -print0 | xargs -0 sed -i 's/ DataSource.Factory/ DoorDataSourceFactory/g'
+find ./core/ -name \*.kt -print0 | xargs -0 sed -i 's/import androidx.paging.DataSource/import com.ustadmobile.door.DoorDataSourceFactory/g'
+```

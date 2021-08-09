@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -8,6 +8,7 @@ import androidx.room.RawQuery
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.SimpleDoorQuery
+import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.serialization.Serializable
@@ -38,7 +39,8 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     }
 
     @RawQuery(observedEntities = [StatementEntity::class, Person::class, XLangMapEntry::class])
-    abstract fun getListResults(query: DoorQuery): DataSource.Factory<Int, StatementEntityWithDisplayDetails>
+    @QueryLiveTables(["StatementEntity", "Person", "XLangMapEntry"])
+    abstract fun getListResults(query: DoorQuery): DoorDataSourceFactory<Int, StatementEntityWithDisplayDetails>
 
 
     // This is required because of above raw query
@@ -122,7 +124,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
          """)
     abstract fun findPersonsWithContentEntryAttempts(contentEntryUid: Long, accountPersonUid: Long,
                                                      searchText: String, sortOrder: Int)
-            : DataSource.Factory<Int, PersonWithAttemptsSummary>
+            : DoorDataSourceFactory<Int, PersonWithAttemptsSummary>
 
 
     @Query("""
@@ -192,7 +194,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
         ORDER BY startDate DESC, resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC
          """)
     abstract fun findSessionsForPerson(contentEntryUid: Long, accountPersonUid: Long, personUid: Long)
-            : DataSource.Factory<Int, PersonWithSessionsDisplay>
+            : DoorDataSourceFactory<Int, PersonWithSessionsDisplay>
 
 
     @Query("""
@@ -219,7 +221,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
          """)
     abstract fun findSessionDetailForPerson(contentEntryUid: Long, accountPersonUid: Long,
                                             personUid: Long, contextRegistration: String)
-            : DataSource.Factory<Int, StatementWithSessionDetailDisplay>
+            : DoorDataSourceFactory<Int, StatementWithSessionDetailDisplay>
 
 
     @Query("""

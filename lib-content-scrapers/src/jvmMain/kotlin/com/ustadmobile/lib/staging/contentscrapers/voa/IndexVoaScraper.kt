@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao.Companion.STATUS_RUNNING
+import com.ustadmobile.core.db.dao.ScrapeRunDao
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 
@@ -182,7 +183,9 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
             UMLogUtil.logInfo(args[0])
 
             try {
-                val runDao = UmAppDatabase.getInstance(Any(), replaceMeWithDi()).scrapeRunDao
+                //Replace this with DI
+                lateinit var runDao: ScrapeRunDao
+                //val runDao = UmAppDatabase.getInstance(Any(), replaceMeWithDi()).scrapeRunDao
 
                 scrapeFromRoot(File(args[0]), File(args[1]), 0)
             } catch (e: Exception) {
@@ -209,7 +212,9 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
             destinationDir.mkdirs()
             containerDir.mkdirs()
 
-            val db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
+            //Replace this with DI
+            lateinit var db: UmAppDatabase
+            //val db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
             val repository = db// db.getRepository("https://localhost", "")
             contentEntryDao = repository.contentEntryDao
             contentParentChildJoinDao = repository.contentEntryParentChildJoinDao

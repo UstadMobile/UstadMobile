@@ -1,6 +1,8 @@
 package com.ustadmobile.lib.contentscrapers
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.ext.addSyncCallback
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.clearAllTablesAndResetSync
 import com.ustadmobile.door.util.randomUuid
@@ -63,8 +65,10 @@ class TestCK12ContentScraper {
     fun setup() {
         ContentScraperUtil.checkIfPathsToDriversExist()
         nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
-        db = UmAppDatabase.getInstance(Any(), nodeIdAndAuth, true)
-        db.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
+        db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+            .addSyncCallback(nodeIdAndAuth, true)
+            .build()
+            .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
     }
 
 
@@ -328,9 +332,6 @@ class TestCK12ContentScraper {
 
     @Test
     fun test() {
-
-        var db = UmAppDatabase.getInstance(Any(), nodeIdAndAuth, true)
-
         val entry = ContentEntry()
         entry.contentEntryUid = -102
         entry.leaf = true

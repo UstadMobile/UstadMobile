@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
@@ -34,7 +34,7 @@ abstract class ScheduleDao : BaseDao<Schedule>, OneToManyJoinDao<Schedule> {
     abstract suspend fun findByUidAsync(uid: Long) : Schedule?
 
     @Query("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND CAST(scheduleActive AS INTEGER) = 1 ")
-    abstract fun findAllSchedulesByClazzUid(clazzUid: Long): DataSource.Factory<Int, Schedule>
+    abstract fun findAllSchedulesByClazzUid(clazzUid: Long): DoorDataSourceFactory<Int, Schedule>
 
     @Query("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND CAST(scheduleActive AS INTEGER) = 1")
     abstract fun findAllSchedulesByClazzUidAsList(clazzUid: Long): List<Schedule>

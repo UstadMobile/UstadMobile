@@ -1,7 +1,11 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
-import androidx.room.*
+import com.ustadmobile.door.DoorDataSourceFactory
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
 import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.QueryLiveTables
@@ -199,7 +203,7 @@ abstract class PersonDao : BaseDao<Person> {
     @Query(SQL_SELECT_LIST_WITH_PERMISSION)
     abstract fun findPersonsWithPermission(timestamp: Long, excludeClazz: Long,
                                                  excludeSchool: Long, excludeSelected: List<Long>,
-                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): DataSource.Factory<Int, PersonWithDisplayDetails>
+                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): DoorDataSourceFactory<Int, PersonWithDisplayDetails>
 
     @Query(SQL_SELECT_LIST_WITH_PERMISSION)
     abstract fun findPersonsWithPermissionAsList(timestamp: Long, excludeClazz: Long,

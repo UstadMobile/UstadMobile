@@ -83,7 +83,8 @@ class IndexPrathamContentScraper {
         ContentScraperUtil.setChromeDriverLocation()
         val cookie = loginPratham()
 
-        db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
+
+        //db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
         repository = db //db!!.getRepository("https://localhost", "")
         contentEntryDao = repository!!.contentEntryDao
         contentParentChildJoinDao = repository!!.contentEntryParentChildJoinDao

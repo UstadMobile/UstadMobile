@@ -14,6 +14,7 @@ import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ParentalConsentManagementView
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag
@@ -65,9 +66,10 @@ class PersonAuthRegisterRouteTest {
 
                 bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
                     val nodeIdAndAuth : NodeIdAndAuth = instance()
-                    UmAppDatabase.getInstance(Any(), nodeIdAndAuth, primary = true).also {
-                        it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, isPrimary = true)
-                    }
+                    DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+                        .build().also {
+                            it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, isPrimary = true)
+                        }
                 }
 
                 bind<NotificationSender>() with singleton {

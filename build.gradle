@@ -71,7 +71,7 @@ subprojects {
 
 
 //Major.minor.database version
-version = "0.3.39"
+version = "0.3.40"
 group = "com.ustadmobile.app"
 
 /**
@@ -81,7 +81,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 216
+    ustadVersionCode = 217
 
     version_kotlin_react = "17.0.2-pre.204-kotlin-1.5.0"
     version_kotlin_react_router_dom = "5.2.0-pre.204-kotlin-1.5.0"
@@ -97,7 +97,7 @@ ext {
     version_npm_pbkdf2 = "^3.1.2"
     version_npm_google_charts = "^3.0.15"
 
-    version_door = "0.0.23-js"
+    version_door = "0.0.32"
     version_xmlpullparserkmp = '0.0.19'
 
     version_gradle_buildconfig_plugin = "1.1.7"

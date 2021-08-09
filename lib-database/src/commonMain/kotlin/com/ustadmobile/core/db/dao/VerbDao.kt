@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -42,12 +42,12 @@ abstract class VerbDao : BaseDao<VerbEntity> {
     @Query("""SELECT VerbEntity.verbUid, VerbEntity.urlId, XLangMapEntry.valueLangMap AS display 
          FROM VerbEntity LEFT JOIN XLangMapEntry on XLangMapEntry.verbLangMapUid = VerbEntity.verbUid WHERE 
          VerbEntity.verbUid NOT IN (:uidList) ORDER BY display ASC""")
-    abstract fun findAllVerbsAsc(uidList: List<Long>): DataSource.Factory<Int, VerbDisplay>
+    abstract fun findAllVerbsAsc(uidList: List<Long>): DoorDataSourceFactory<Int, VerbDisplay>
 
     @Query("""SELECT VerbEntity.verbUid, VerbEntity.urlId, XLangMapEntry.valueLangMap AS display 
          FROM VerbEntity LEFT JOIN XLangMapEntry on XLangMapEntry.verbLangMapUid = VerbEntity.verbUid WHERE 
         VerbEntity.verbUid NOT IN (:uidList) ORDER BY display DESC""")
-    abstract fun findAllVerbsDesc(uidList: List<Long>): DataSource.Factory<Int, VerbDisplay>
+    abstract fun findAllVerbsDesc(uidList: List<Long>): DoorDataSourceFactory<Int, VerbDisplay>
 
 
 }

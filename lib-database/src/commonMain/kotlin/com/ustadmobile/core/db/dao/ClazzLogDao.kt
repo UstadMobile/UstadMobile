@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.QueryLiveTables
@@ -29,7 +29,7 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
         WHERE clazzLogClazzUid = :clazzUid
         AND clazzLog.clazzLogStatusFlag != :excludeStatus
         ORDER BY ClazzLog.logDate DESC""")
-    abstract fun findByClazzUidAsFactory(clazzUid: Long, excludeStatus: Int): DataSource.Factory<Int, ClazzLog>
+    abstract fun findByClazzUidAsFactory(clazzUid: Long, excludeStatus: Int): DoorDataSourceFactory<Int, ClazzLog>
 
 
     //Used by the attendance recording screen to allow the user to go next/prev between days.

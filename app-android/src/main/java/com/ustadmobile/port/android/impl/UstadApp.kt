@@ -32,7 +32,6 @@ import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunn
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
 import com.ustadmobile.core.util.ContentEntryOpener
-import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DoorDatabaseRepository
@@ -41,7 +40,6 @@ import com.ustadmobile.door.NanoHttpdCall
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.android.generated.MessageIDMap
@@ -57,20 +55,23 @@ import com.ustadmobile.sharedse.network.*
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploadManagerCommonJvm
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
+import com.ustadmobile.core.db.ext.addSyncCallback
+import com.ustadmobile.core.util.DiTag
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
 import okhttp3.OkHttpClient
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
+import com.ustadmobile.door.DatabaseBuilder
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import java.util.concurrent.Executors
 
 /**
@@ -98,12 +99,13 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<UmAppDatabase>(tag = TAG_DB) with scoped(EndpointScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
-            UmAppDatabase.getInstance(context = applicationContext, dbName = dbName,
-                nodeIdAndAuth = instance()
-            ).also {
-                val networkManager: NetworkManagerBle = di.direct.instance()
-                it.connectivityStatusDao.commitLiveConnectivityStatus(networkManager.connectivityStatus)
-            }
+            DatabaseBuilder.databaseBuilder(applicationContext, UmAppDatabase::class, dbName)
+                .addSyncCallback(instance(), true)
+                .build()
+                .also {
+                    val networkManager: NetworkManagerBle = di.direct.instance()
+                    it.connectivityStatusDao.commitLiveConnectivityStatus(networkManager.connectivityStatus)
+                }
         }
 
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
