@@ -1,6 +1,6 @@
 package com.ustadmobile.mocks.db
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.core.db.dao.LanguageDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Language
@@ -13,7 +13,7 @@ class LanguageDaoJs: LanguageDao() {
     override fun findLanguagesAsSource(
         sortOrder: Int,
         searchText: String
-    ): DataSource.Factory<Int, Language> {
+    ): DoorDataSourceFactory<Int, Language> {
         TODO("Not yet implemented")
     }
 

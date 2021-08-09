@@ -1,6 +1,6 @@
 package com.ustadmobile.mocks.db
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
@@ -96,7 +96,7 @@ class PersonDaoJs: PersonDao() {
         accountPersonUid: Long,
         sortOrder: Int,
         searchText: String?
-    ): DataSource.Factory<Int, PersonWithDisplayDetails> {
+    ): DoorDataSourceFactory<Int, PersonWithDisplayDetails> {
         return DataSourceFactoryJs(ENTRIES.unsafeCast<List<PersonWithDisplayDetails>>())
     }
 

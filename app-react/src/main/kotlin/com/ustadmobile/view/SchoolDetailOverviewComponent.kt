@@ -1,12 +1,14 @@
 package com.ustadmobile.view
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ccfraser.muirwik.components.*
 import com.ustadmobile.core.controller.SchoolDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.SchoolDetailOverviewView
+import com.ustadmobile.door.ObserverFnWrapper
+import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.util.StyleManager
@@ -44,17 +46,18 @@ class SchoolDetailOverviewComponent(mProps: RProps): UstadDetailComponent<School
 
     private var schoolClazzList: List<ClazzWithListDisplayDetails>? = null
 
-    override var schoolClazzes: DataSource.Factory<Int, ClazzWithListDisplayDetails>? = null
+    private val observer = ObserverFnWrapper<List<ClazzWithListDisplayDetails>>{
+        setState {
+            schoolClazzList = it
+        }
+    }
+
+    override var schoolClazzes: DoorDataSourceFactory<Int, ClazzWithListDisplayDetails>? = null
         set(value) {
             field = value
-            GlobalScope.launch {
-                val data = value?.getData(0, 1000)
-                if(data != null){
-                    setState {
-                        schoolClazzList = data
-                    }
-                }
-            }
+            val liveData = value?.getData(0,Int.MAX_VALUE)
+            liveData?.removeObserver(observer)
+            liveData?.observe(lifecycleOwner, observer)
         }
 
     override var schoolCodeVisible: Boolean = false

@@ -1,6 +1,6 @@
 package com.ustadmobile.mocks.db
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao
 import com.ustadmobile.lib.db.entities.*
 
@@ -20,7 +20,7 @@ class ContentEntryRelatedEntryJoinDaoJs: ContentEntryRelatedEntryJoinDao() {
         TODO("Not yet implemented")
     }
 
-    override fun findAllTranslationsWithContentEntryUid(contentEntryUid: Long): DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage> {
+    override fun findAllTranslationsWithContentEntryUid(contentEntryUid: Long): DoorDataSourceFactory<Int, ContentEntryRelatedEntryJoinWithLanguage> {
         val entries = ContentEntryDaoJs.ENTRIES.filter { it.leaf }
             .unsafeCast<List<ContentEntryRelatedEntryJoinWithLanguage>>()
         entries.mapIndexed { index, it ->

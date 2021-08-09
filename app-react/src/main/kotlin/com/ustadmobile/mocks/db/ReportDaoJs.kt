@@ -1,6 +1,6 @@
 package com.ustadmobile.mocks.db
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorQuery
@@ -17,7 +17,7 @@ class ReportDaoJs: ReportDao() {
         personUid: Long,
         sortOrder: Int,
         isTemplate: Boolean
-    ): DataSource.Factory<Int, Report> {
+    ): DoorDataSourceFactory<Int, Report> {
         return DataSourceFactoryJs(ENTRIES.filter { it.isTemplate == isTemplate })
     }
 

@@ -1,6 +1,6 @@
 package com.ustadmobile.mocks.db
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.core.db.dao.SchoolMemberDao
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.SchoolMember
@@ -31,7 +31,7 @@ class SchoolMemberDaoJs: SchoolMemberDao() {
         sortOrder: Int,
         searchQuery: String,
         accountPersonUid: Long
-    ): DataSource.Factory<Int, SchoolMemberWithPerson> {
+    ): DoorDataSourceFactory<Int, SchoolMemberWithPerson> {
         val entries = ENTRIES.filter { it.schoolMemberSchoolUid == schoolUid
                 && it.schoolMemberRole == role}
         return DataSourceFactoryJs(entries)

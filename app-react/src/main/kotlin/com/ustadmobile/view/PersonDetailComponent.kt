@@ -1,6 +1,5 @@
 package com.ustadmobile.view
 
-import androidx.paging.DataSource
 import com.ccfraser.muirwik.components.*
 import com.ustadmobile.core.controller.PersonConstants.GENDER_MESSAGE_ID_MAP
 import com.ustadmobile.core.controller.PersonDetailPresenter
@@ -9,10 +8,11 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.outcomeToString
 import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.core.view.PersonDetailView
+import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import com.ustadmobile.util.StyleManager.alignTextToStart
-import com.ustadmobile.util.StyleManager.gridListSecondaryItemDesc
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.StyleManager.defaultMarginTop
@@ -20,11 +20,8 @@ import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.personDetailComponentActionIcon
 import com.ustadmobile.util.StyleManager.personDetailComponentActions
-import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.view.ext.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.css.display
 import kotlinx.css.marginTop
 import kotlinx.css.px
@@ -46,18 +43,21 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
     override val viewName: String
         get() = PersonDetailView.VIEW_NAME
 
-    private var clazzList: List<ClazzEnrolmentWithClazzAndAttendance>? = null
+    private var classList: List<ClazzEnrolmentWithClazzAndAttendance>? = null
 
-    override var clazzes: DataSource.Factory<Int, ClazzEnrolmentWithClazzAndAttendance>? = null
+    private val observer = ObserverFnWrapper<List<ClazzEnrolmentWithClazzAndAttendance>>{
+        setState {
+            classList = it
+        }
+    }
+
+    override var clazzes: DoorDataSourceFactory<Int, ClazzEnrolmentWithClazzAndAttendance>? = null
         get() = field
         set(value) {
             field = value
-            GlobalScope.launch {
-                val data = value?.getData(0,1000)
-                setState {
-                    clazzList = data
-                }
-            }
+            val liveData = value?.getData(0,Int.MAX_VALUE)
+            liveData?.removeObserver(observer)
+            liveData?.observe(lifecycleOwner, observer)
         }
 
     override var changePasswordVisible: Boolean = false
@@ -179,12 +179,12 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
                                 }
 
 
-                                if(clazzList != null){
+                                if(classList != null){
 
                                     umItem(MGridSize.cells12){
 
                                         createListSectionTitle(getString(MessageID.classes))
-                                        clazzList?.let { clazzes ->
+                                        classList?.let { clazzes ->
                                             child(ClazzEnrolmentWithClazzSimpleListComponent::class){
                                                 attrs.entries = clazzes
                                                 attrs.onEntryClicked = { clazz ->

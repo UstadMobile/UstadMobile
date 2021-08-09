@@ -1,6 +1,6 @@
 package com.ustadmobile.mocks.db
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
@@ -49,7 +49,7 @@ open class ClazzDaoJs: ClazzDao() {
         TODO("Not yet implemented")
     }
 
-    override fun findAllClazzesBySchoolLive(schoolUid: Long): DataSource.Factory<Int, Clazz> {
+    override fun findAllClazzesBySchoolLive(schoolUid: Long): DoorDataSourceFactory<Int, Clazz> {
         TODO("Not yet implemented")
     }
 
@@ -67,7 +67,7 @@ open class ClazzDaoJs: ClazzDao() {
         currentTime: Long,
         permission: Long,
         selectedSchool: Long
-    ): DataSource.Factory<Int, ClazzWithListDisplayDetails> {
+    ): DoorDataSourceFactory<Int, ClazzWithListDisplayDetails> {
         return DataSourceFactoryJs(ENTRIES)
     }
 

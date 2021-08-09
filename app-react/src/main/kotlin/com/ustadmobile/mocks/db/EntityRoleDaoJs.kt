@@ -1,6 +1,6 @@
 package com.ustadmobile.mocks.db
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.core.db.dao.EntityRoleDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.EntityRole
@@ -35,7 +35,7 @@ class EntityRoleDaoJs: EntityRoleDao() {
         TODO("Not yet implemented")
     }
 
-    override fun filterByPersonWithExtra(personGroupUid: Long): DataSource.Factory<Int, EntityRoleWithNameAndRole> {
+    override fun filterByPersonWithExtra(personGroupUid: Long): DoorDataSourceFactory<Int, EntityRoleWithNameAndRole> {
         return DataSourceFactoryJs(listOf())
     }
 

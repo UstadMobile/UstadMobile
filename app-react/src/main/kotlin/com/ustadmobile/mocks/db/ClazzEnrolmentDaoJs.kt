@@ -1,6 +1,6 @@
 package com.ustadmobile.mocks.db
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
@@ -22,7 +22,7 @@ class ClazzEnrolmentDaoJs: ClazzEnrolmentDao() {
     override fun findAllEnrolmentsByPersonAndClazzUid(
         personUid: Long,
         clazzUid: Long
-    ): DataSource.Factory<Int, ClazzEnrolmentWithLeavingReason> {
+    ): DoorDataSourceFactory<Int, ClazzEnrolmentWithLeavingReason> {
         val entries = ENTRIES.firstOrNull {
             it.clazzEnrolmentPersonUid == personUid && it.clazzEnrolmentClazzUid == clazzUid
         }.unsafeCast<List<ClazzEnrolmentWithLeavingReason>>()
@@ -43,7 +43,7 @@ class ClazzEnrolmentDaoJs: ClazzEnrolmentDao() {
         TODO("Not yet implemented")
     }
 
-    override fun findAllClazzesByPersonWithClazz(personUid: Long): DataSource.Factory<Int, ClazzEnrolmentWithClazzAndAttendance> {
+    override fun findAllClazzesByPersonWithClazz(personUid: Long): DoorDataSourceFactory<Int, ClazzEnrolmentWithClazzAndAttendance> {
         return DataSourceFactoryJs(ENTRIES.filter { it.clazzEnrolmentPersonUid == personUid})
     }
 
@@ -84,7 +84,7 @@ class ClazzEnrolmentDaoJs: ClazzEnrolmentDao() {
         filter: Int,
         accountPersonUid: Long,
         currentTime: Long
-    ): DataSource.Factory<Int, PersonWithClazzEnrolmentDetails> {
+    ): DoorDataSourceFactory<Int, PersonWithClazzEnrolmentDetails> {
         val entries = ENTRIES.filter { it.clazzEnrolmentRole ==  roleId}
         val personList = entries.map {
             PersonDaoJs.ENTRIES.first {

@@ -56,6 +56,8 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
 
     var fabManager: FabManager? = null
 
+    lateinit var lifecycleOwner: DoorLifecycleOwner
+
     protected lateinit var arguments: Map<String, String>
 
     protected abstract val viewName: String?
@@ -95,9 +97,11 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         fabManager?.onClickListener = {
             onFabClicked()
         }
+
         lifecycleStatus.value = DoorLifecycleObserver.STARTED
         val umController: UstadNavController by instance()
         navController = umController as NavControllerJs
+        lifecycleOwner = this
     }
 
     override fun componentWillMount() {

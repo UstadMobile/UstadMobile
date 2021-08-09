@@ -1,6 +1,6 @@
 package com.ustadmobile.mocks.db
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.core.db.dao.SchoolDao
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
@@ -33,7 +33,7 @@ class SchoolDaoJs: SchoolDao() {
         personUid: Long,
         permission: Long,
         sortOrder: Int
-    ): DataSource.Factory<Int, SchoolWithMemberCountAndLocation> {
+    ): DoorDataSourceFactory<Int, SchoolWithMemberCountAndLocation> {
         val entries = ENTRIES.map {
             it.unsafeCast<SchoolWithMemberCountAndLocation>().apply {
                 numStudents = (it.schoolUid * 12).toInt()

@@ -1,6 +1,6 @@
 package com.ustadmobile.view
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ccfraser.muirwik.components.*
 import com.ccfraser.muirwik.components.button.MButtonSize
 import com.ccfraser.muirwik.components.button.MButtonVariant
@@ -9,6 +9,7 @@ import com.ustadmobile.core.controller.ContentEntryDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
+import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
@@ -49,16 +50,19 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
     override val detailPresenter: UstadDetailPresenter<*, *>
         get() = mPresenter
 
-    override var availableTranslationsList: DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage>? = null
+    private val observer = ObserverFnWrapper<List<ContentEntryRelatedEntryJoinWithLanguage>>{
+        setState {
+            translations = it
+        }
+    }
+
+    override var availableTranslationsList: DoorDataSourceFactory<Int, ContentEntryRelatedEntryJoinWithLanguage>? = null
         get() = field
         set(value) {
             field = value
-            GlobalScope.launch(Dispatchers.Main) {
-                val relatedTrans = value?.getData(0,100)
-                setState {
-                    translations = relatedTrans
-                }
-            }
+            val liveData = value?.getData(0,Int.MAX_VALUE)
+            liveData?.removeObserver(observer)
+            liveData?.observe(lifecycleOwner, observer)
         }
 
     override var downloadJobItem: DownloadJobItem? = null

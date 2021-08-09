@@ -1,6 +1,6 @@
 package com.ustadmobile.mocks.db
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.core.db.dao.ScheduleDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Schedule
@@ -36,7 +36,7 @@ class ScheduleDaoJs: ScheduleDao() {
         TODO("Not yet implemented")
     }
 
-    override fun findAllSchedulesByClazzUid(clazzUid: Long): DataSource.Factory<Int, Schedule> {
+    override fun findAllSchedulesByClazzUid(clazzUid: Long): DoorDataSourceFactory<Int, Schedule> {
         return DataSourceFactoryJs(ENTRIES)
     }
 

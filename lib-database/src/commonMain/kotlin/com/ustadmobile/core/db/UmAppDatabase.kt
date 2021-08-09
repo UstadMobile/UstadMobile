@@ -3,12 +3,11 @@ package com.ustadmobile.core.db
 import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.*
-import com.ustadmobile.door.migration.*
 import com.ustadmobile.door.annotation.MinSyncVersion
 import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
-import com.ustadmobile.door.ext.syncableTableIdMap
+import com.ustadmobile.door.migration.*
 import com.ustadmobile.door.util.DoorSqlGenerator
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -17,8 +16,6 @@ import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_STUDENT_GROUP
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_TEACHER_GROUP
 import com.ustadmobile.lib.util.randomString
 import kotlin.js.JsName
-import kotlin.jvm.Synchronized
-import kotlin.jvm.Volatile
 
 @Database(entities = [NetworkNode::class, DownloadJobItemHistory::class,
     ClazzLog::class, ClazzLogAttendanceRecord::class,

@@ -1,6 +1,6 @@
 package com.ustadmobile.mocks.db
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
@@ -18,7 +18,7 @@ class ContentEntryDaoJs: ContentEntryDao() {
     override fun downloadedRootItems(
         personUid: Long,
         sortOrder: Int
-    ): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
+    ): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
         return DataSourceFactoryJs(listOf())
     }
 
@@ -42,7 +42,7 @@ class ContentEntryDaoJs: ContentEntryDao() {
         return ENTRIES.firstOrNull { it.contentEntryUid == contentEntryUid }?.title
     }
 
-    override fun getChildrenByParentUid(parentUid: Long): DataSource.Factory<Int, ContentEntry> {
+    override fun getChildrenByParentUid(parentUid: Long): DoorDataSourceFactory<Int, ContentEntry> {
         TODO("Not yet implemented")
     }
 
@@ -104,7 +104,7 @@ class ContentEntryDaoJs: ContentEntryDao() {
         showHidden: Boolean,
         onlyFolder: Boolean,
         sortOrder: Int
-    ): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
+    ): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
         val entries = ENTRIES.filter {
             it.entryId?.toLong() == parentUid
         }.unsafeCast<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>()
@@ -115,7 +115,7 @@ class ContentEntryDaoJs: ContentEntryDao() {
         clazzUid: Long,
         personUid: Long,
         sortOrder: Int
-    ): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
+    ): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
         val entries = ENTRIES.unsafeCast<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>()
         return DataSourceFactoryJs(entries)
     }
@@ -144,7 +144,7 @@ class ContentEntryDaoJs: ContentEntryDao() {
         TODO("Not yet implemented")
     }
 
-    override fun getAllEntriesRecursively(contentEntryUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndMostRecentContainer> {
+    override fun getAllEntriesRecursively(contentEntryUid: Long): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndMostRecentContainer> {
         TODO("Not yet implemented")
     }
 

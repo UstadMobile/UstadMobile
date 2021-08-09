@@ -1,11 +1,12 @@
 package com.ustadmobile.view
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.core.controller.SchoolMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.SchoolMemberListView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.SchoolMember
 import com.ustadmobile.lib.db.entities.SchoolMemberWithPerson
@@ -48,17 +49,18 @@ class SchoolMemberListComponent(mProps: RProps): UstadListComponent<SchoolMember
 
     private var pendingStudents: List<SchoolMemberWithPerson>? = null
 
-    override var pendingStudentList: DataSource.Factory<Int, SchoolMemberWithPerson>? = null
+    private val observer = ObserverFnWrapper<List<SchoolMemberWithPerson>>{
+        setState {
+            pendingStudents = it
+        }
+    }
+
+    override var pendingStudentList: DoorDataSourceFactory<Int, SchoolMemberWithPerson>? = null
         set(value) {
             field = value
-            GlobalScope.launch {
-                val data = value?.getData(0, 1000)
-                if(data != null){
-                    setState {
-                        pendingStudents = data
-                    }
-                }
-            }
+            val liveData = value?.getData(0,Int.MAX_VALUE)
+            liveData?.removeObserver(observer)
+            liveData?.observe(lifecycleOwner, observer)
         }
 
     override fun onCreate() {

@@ -1,9 +1,11 @@
 package com.ustadmobile.view
 
-import androidx.paging.DataSource
 import com.ccfraser.muirwik.components.*
 import com.ccfraser.muirwik.components.button.mIconButton
-import com.ccfraser.muirwik.components.list.*
+import com.ccfraser.muirwik.components.list.MListItemAlignItems
+import com.ccfraser.muirwik.components.list.alignItems
+import com.ccfraser.muirwik.components.list.mList
+import com.ccfraser.muirwik.components.list.mListItem
 import com.ustadmobile.core.controller.OnSortOptionSelected
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
@@ -14,6 +16,8 @@ import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.SelectionOption
 import com.ustadmobile.core.view.UstadListView
+import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.util.StyleManager.chipSetFilter
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -28,9 +32,6 @@ import com.ustadmobile.view.ext.createCreateNewItem
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.browser.window
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.css.*
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -104,17 +105,20 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
         isEventHandled = true
     }
 
+    private val dataObserver = ObserverFnWrapper<List<DT>>{
+        setState {
+            listItems = it
+        }
+    }
 
-    override var list: DataSource.Factory<Int, DT>? = null
+
+    override var list: DoorDataSourceFactory<Int, DT>? = null
         get() = field
         set(value) {
-            GlobalScope.launch(Dispatchers.Main) {
-                val items = value?.getData(0,0)
-                setState {
-                    listItems = items?: concurrentSafeListOf()
-                }
-            }
             field = value
+            val liveData = value?.getData(0,Int.MAX_VALUE)
+            liveData?.removeObserver(dataObserver)
+            liveData?.observe(lifecycleOwner, dataObserver)
         }
 
 

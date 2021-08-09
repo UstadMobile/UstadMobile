@@ -1,6 +1,6 @@
 package com.ustadmobile.mocks.db
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.core.db.dao.HolidayCalendarDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.HolidayCalendar
@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 import com.ustadmobile.mocks.DoorLiveDataJs
 
 class HolidayCalendarDaoJs: HolidayCalendarDao() {
-    override fun findAllHolidaysWithEntriesCount(): DataSource.Factory<Int, HolidayCalendarWithNumEntries> {
+    override fun findAllHolidaysWithEntriesCount(): DoorDataSourceFactory<Int, HolidayCalendarWithNumEntries> {
         return DataSourceFactoryJs(ENTRIES)
     }
 

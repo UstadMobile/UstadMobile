@@ -1,6 +1,6 @@
 package com.ustadmobile.mocks.db
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.core.db.dao.ClazzLogDao
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ClazzLog
@@ -26,7 +26,7 @@ class ClazzLogDaoJs: ClazzLogDao() {
     override fun findByClazzUidAsFactory(
         clazzUid: Long,
         excludeStatus: Int
-    ): DataSource.Factory<Int, ClazzLog> {
+    ): DoorDataSourceFactory<Int, ClazzLog> {
         return DataSourceFactoryJs(ENTRIES)
     }
 

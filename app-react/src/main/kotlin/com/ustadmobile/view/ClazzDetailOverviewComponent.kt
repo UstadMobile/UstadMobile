@@ -1,6 +1,6 @@
 package com.ustadmobile.view
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ccfraser.muirwik.components.*
 import com.ustadmobile.core.controller.ClazzDetailOverviewPresenter
 import com.ustadmobile.core.controller.ScheduleEditPresenter
@@ -8,6 +8,7 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.core.view.EditButtonMode
+import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.util.StyleManager
@@ -43,15 +44,19 @@ class ClazzDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ClazzWi
 
     private var schedules: List<Schedule>? = null
 
-    override var scheduleList: DataSource.Factory<Int, Schedule>? = null
+    private val observer = ObserverFnWrapper<List<Schedule>>{
+        setState {
+            schedules = it
+        }
+    }
+
+
+    override var scheduleList: DoorDataSourceFactory<Int, Schedule>? = null
         set(value) {
             field = value
-            GlobalScope.launch {
-                val data = value?.getData(0,1000)
-                setState {
-                    schedules = data
-                }
-            }
+            val liveData = value?.getData(0,Int.MAX_VALUE)
+            liveData?.removeObserver(observer)
+            liveData?.observe(lifecycleOwner, observer)
         }
 
     override var clazzCodeVisible: Boolean = false

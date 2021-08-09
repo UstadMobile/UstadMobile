@@ -1,6 +1,6 @@
 package com.ustadmobile.view
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.core.controller.ClazzMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -8,13 +8,12 @@ import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.view.ext.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import react.RBuilder
 import react.RProps
 import react.setState
@@ -37,32 +36,34 @@ class ClazzMemberListComponent(mProps: RProps):UstadListComponent<PersonWithClaz
 
     private lateinit var students: List<PersonWithClazzEnrolmentDetails>
 
-    override var studentList: DataSource.Factory<Int, PersonWithClazzEnrolmentDetails>? = null
+    private val studentListObserver = ObserverFnWrapper<List<PersonWithClazzEnrolmentDetails>>{
+        setState {
+            students = it
+        }
+    }
+
+    override var studentList: DoorDataSourceFactory<Int, PersonWithClazzEnrolmentDetails>? = null
         set(value) {
             field = value
-            GlobalScope.launch {
-                val data = value?.getData(0, 1000)
-                setState {
-                    if(data != null){
-                        students = data
-                    }
-                }
-            }
+            val liveData = value?.getData(0,Int.MAX_VALUE)
+            liveData?.removeObserver(studentListObserver)
+            liveData?.observe(lifecycleOwner, studentListObserver)
         }
 
     private lateinit var pendingStudents: List<PersonWithClazzEnrolmentDetails>
 
-    override var pendingStudentList: DataSource.Factory<Int, PersonWithClazzEnrolmentDetails>? = null
+    private val pendingStudentObserver = ObserverFnWrapper<List<PersonWithClazzEnrolmentDetails>>{
+        setState {
+            pendingStudents = it
+        }
+    }
+
+    override var pendingStudentList: DoorDataSourceFactory<Int, PersonWithClazzEnrolmentDetails>? = null
         set(value) {
             field = value
-            GlobalScope.launch {
-                val data = value?.getData(0, 1000)
-                setState {
-                    if(data != null){
-                        pendingStudents = data
-                    }
-                }
-            }
+            val liveData = value?.getData(0,Int.MAX_VALUE)
+            liveData?.removeObserver(pendingStudentObserver)
+            liveData?.observe(lifecycleOwner, pendingStudentObserver)
         }
 
     override var addTeacherVisible: Boolean = false

@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.*
 import com.ustadmobile.door.daos.ISyncHelperEntitiesDao
+import com.ustadmobile.door.jdbc.DataSource
 import kotlin.reflect.KClass
 
 class DatabaseJs: UmAppDatabase() , DoorDatabaseSyncRepository{
@@ -152,11 +153,17 @@ class DatabaseJs: UmAppDatabase() , DoorDatabaseSyncRepository{
         get() = TODO("Not yet implemented")
     override val userSessionDao: UserSessionDao
         get() = TODO("Not yet implemented")
+    override val dataSource: DataSource
+        get() = TODO("Not yet implemented")
     override val dbVersion: Int
         get() = TODO("Not yet implemented")
 
     override fun clearAllTables() {
 
+    }
+
+    override fun createAllTables(): List<String> {
+        TODO("Not yet implemented")
     }
 
     override val clientId: Int
