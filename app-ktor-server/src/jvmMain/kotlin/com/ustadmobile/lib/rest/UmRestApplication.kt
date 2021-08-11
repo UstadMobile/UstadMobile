@@ -149,6 +149,11 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             containerDir.takeIf { !it.exists() }?.mkdirs()
             containerDir
         }
+        bind<File>(tag = DiTag.TAG_TORRENT_DIR) with scoped(EndpointScope.Default).singleton {
+            val torrentDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), "torrent")
+            torrentDir.takeIf { !it.exists() }?.mkdirs()
+            torrentDir
+        }
 
         bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {
             apiKey
@@ -289,6 +294,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         UmAppDatabase_KtorRoute(true)
         SiteRoute()
         ContentEntryLinkImporter()
+        TorrentFileRoute()
         /*
           This is a temporary redirect approach for users who open an app link but don't
           have the app installed. Because the uri scheme of views is #ViewName?args, this

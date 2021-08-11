@@ -184,14 +184,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
             ContainerUploadManagerCommonJvm(di, context)
         }
 
-        bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
-            ContentImportManagerImplAndroid(listOf(EpubTypePluginCommonJvm(),
-                    XapiTypePluginCommonJvm(), VideoTypePluginAndroid(),
-                    H5PTypePluginCommonJvm()), applicationContext,
-                    context, di)
-        }
-
-
         bind<Gson>() with singleton {
             val builder = GsonBuilder()
             builder.registerTypeAdapter(Statement::class.java, StatementSerializer())

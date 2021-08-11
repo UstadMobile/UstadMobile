@@ -51,6 +51,9 @@ kotlin {
                 implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
                 implementation "io.github.bonigarcia:webdrivermanager:$version_chrome_manager"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
+                implementation "commons-cli:commons-cli:$version_apache_commons_cli"
+                implementation 'com.github.SamihMustafa.bt:bt-core:1.9.5'
+
 
                 implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
                 implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
