@@ -68,10 +68,14 @@ import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import com.ustadmobile.core.impl.di.commonJvmDiModule
+import com.ustadmobile.core.torrent.UstadCommunicationManager
+import com.ustadmobile.core.torrent.UstadTorrentManager
+import com.ustadmobile.core.torrent.UstadTorrentManagerImpl
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import kotlinx.coroutines.asCoroutineDispatcher
+import java.net.InetAddress
 import java.util.concurrent.Executors
 
 /**
@@ -225,6 +229,14 @@ open class UstadApp : BaseUstadApp(), DIAware {
             ViewNameToDestMap()
         }
 
+        bind<UstadTorrentManager>() with scoped(EndpointScope.Default).singleton {
+            UstadTorrentManagerImpl(endpoint = context, di = di)
+        }
+
+        bind<UstadCommunicationManager>() with singleton {
+            UstadCommunicationManager()
+        }
+
         bind<Pbkdf2Params>() with singleton {
             val systemImpl: UstadMobileSystemImpl = instance()
             val numIterations = systemImpl.getAppConfigInt(KEY_PBKDF2_ITERATIONS,
@@ -247,6 +259,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<BleGattServer>()
             instance<NetworkManagerBle>()
             instance<EmbeddedHTTPD>()
+            instance<UstadCommunicationManager>()
 
             Picasso.setSingletonInstance(Picasso.Builder(applicationContext)
                     .downloader(OkHttp3Downloader(instance<OkHttpClient>()))

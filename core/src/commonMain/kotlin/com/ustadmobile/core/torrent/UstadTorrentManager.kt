@@ -2,7 +2,7 @@ package com.ustadmobile.core.torrent
 
 import org.kodein.di.DIAware
 
-interface SeedManager : DIAware {
+interface UstadTorrentManager : DIAware {
 
     suspend fun start()
 

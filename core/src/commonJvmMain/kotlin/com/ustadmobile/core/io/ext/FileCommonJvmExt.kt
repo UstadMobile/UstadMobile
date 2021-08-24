@@ -11,3 +11,17 @@ fun File.siteDataSubDir(siteEndpoint: Endpoint): File {
     return File(File(this, UstadMobileSystemCommon.SUBDIR_SITEDATA_NAME),
             sanitizeDbNameFromUrl(siteEndpoint.url))
 }
+
+fun File.isParentOf(parent: File): Boolean {
+    val parentNormalized = parent.normalize()
+    var parentToCheck = this.parentFile
+    do{
+        if(parentToCheck?.normalize() == parentNormalized)
+            return true
+
+        parentToCheck = parentToCheck?.parentFile
+
+    }while (parentToCheck != null)
+
+    return false
+}
