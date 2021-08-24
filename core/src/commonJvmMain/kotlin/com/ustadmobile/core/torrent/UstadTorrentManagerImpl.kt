@@ -23,6 +23,8 @@ class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : Ust
 
     private val communicationManager = di.direct.instance<UstadCommunicationManager>()
 
+    var torrentDeferred: CompletableDeferred<TorrentManager>? = null
+
     val pieceStorage: FairPieceStorageFactory by lazy {
         FairPieceStorageFactory.INSTANCE
     }
@@ -33,8 +35,6 @@ class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : Ust
         }?.forEach { torrentFile ->
             addTorrent(torrentFile.nameWithoutExtension.toLong())
         }
-
-        communicationManager.start(InetAddress.getByName("0.0.0.0"))
     }
 
     override suspend fun addTorrent(containerUid: Long) {
@@ -58,7 +58,7 @@ class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : Ust
             containerInfoHashMap[containerUid] = metadataProvider.torrentMetadata.hexInfoHash
             val manager = communicationManager.addTorrent(metadataProvider, pieceStorage)
 
-            val torrentDeferred = CompletableDeferred<TorrentManager>(launch(Dispatchers.Default){
+            torrentDeferred = CompletableDeferred<TorrentManager>(launch(Dispatchers.Default){
                 while(true){
                     delay(100)
                     if(!isActive){

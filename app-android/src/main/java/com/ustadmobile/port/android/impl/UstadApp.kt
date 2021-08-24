@@ -259,7 +259,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<BleGattServer>()
             instance<NetworkManagerBle>()
             instance<EmbeddedHTTPD>()
-            instance<UstadCommunicationManager>()
+            instance<UstadCommunicationManager>().start(InetAddress.getByName("0.0.0.0"))
 
             Picasso.setSingletonInstance(Picasso.Builder(applicationContext)
                     .downloader(OkHttp3Downloader(instance<OkHttpClient>()))
