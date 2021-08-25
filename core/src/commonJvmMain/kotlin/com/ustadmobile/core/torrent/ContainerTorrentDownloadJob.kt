@@ -14,6 +14,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import io.ktor.client.*
 import io.ktor.client.request.*
+import kotlinx.coroutines.*
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -43,10 +44,10 @@ class ContainerTorrentDownloadJob(private val endpoint: Endpoint, override val d
     override val supportedFileExtensions: List<String>
         get() = listOf(".container")
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
+    override suspend fun extractMetadata(doorUri: DoorUri, process: ProcessContext): MetadataResult? {
 
         // check valid uri format, valid endpoint, valid container
-        val containerUid = uri.uri.toString().substringAfterLast("/").toLong()
+        val containerUid = doorUri.uri.toString().substringAfterLast("/").toLong()
 
         val container = repo.containerDao.findByUid(containerUid) ?: return null
 
@@ -92,10 +93,29 @@ class ContainerTorrentDownloadJob(private val endpoint: Endpoint, override val d
 
         ustadTorrentManager.addTorrent(containerUid)
 
+        val torrentDeferred = CompletableDeferred<Boolean>()
+        val torrentListener = object: TorrentDownloadListener{
+            override fun onComplete() {
+                torrentDeferred.complete(true)
+            }
+        }
+        GlobalScope.launch(Dispatchers.Default){
+            while(true){
+                delay(100)
+                if(!isActive){
+                    torrentDeferred.completeExceptionally(CancellationException())
+                }
+            }
+        }
+
+        ustadTorrentManager.addDownloadListener(containerUid, torrentListener)
+        torrentDeferred.await()
+        ustadTorrentManager.removeDownloadListener(containerUid, torrentListener)
 
         return ProcessResult(200)
-
     }
+
+
 
     companion object {
 

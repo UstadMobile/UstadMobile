@@ -51,6 +51,7 @@ import org.kodein.di.ktor.DIFeature
 import java.io.File
 import java.net.InetAddress
 import kotlin.random.Random
+import kotlin.test.assertTrue
 
 
 class TestUstadTorrentManager {
@@ -88,9 +89,6 @@ class TestUstadTorrentManager {
 
     @Before
     fun setup() {
-
-        val absPath = File("/tmp/junit123/./123")
-        absPath.mkdirs()
 
         val okHttpClient = OkHttpClient()
 
@@ -267,12 +265,25 @@ class TestUstadTorrentManager {
     fun test(){
 
         runBlocking {
+
             containerDownloadJob.processJob(ContentJobItem(cjiContainerUid = serverContainer.containerUid),
                     ProcessContext(DoorUri.parse(""), params = mutableMapOf())){
+
             }
 
+            var downloadComplete = false
+            val containerFiles = File(containerClientFolder, serverContainer.containerUid.toString())
+            val fileList = containerFiles.listFiles()
+            fileList?.forEach {
 
-
+                if(it.name.endsWith(".part")){
+                    return@forEach
+                }
+                downloadComplete = true
+            }
+            assertTrue(downloadComplete)
+            server.stop(10, 10)
+            seedManager.stop()
         }
 
     }

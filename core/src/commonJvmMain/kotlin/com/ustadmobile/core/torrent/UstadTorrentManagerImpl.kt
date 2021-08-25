@@ -9,8 +9,9 @@ import kotlinx.coroutines.*
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.File
-import java.net.InetAddress
 
 
 class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : UstadTorrentManager {
@@ -21,9 +22,14 @@ class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : Ust
 
     private var containerInfoHashMap = mutableMapOf<Long, String>()
 
+    private var containerManagerMap = mutableMapOf<Long, TorrentManager>()
+
+    private var containerListenerMap = mutableMapOf<Long, DownloadListenerAdapter>()
+
     private val communicationManager = di.direct.instance<UstadCommunicationManager>()
 
-    var torrentDeferred: CompletableDeferred<TorrentManager>? = null
+    // lock add and removeTorrent
+    private val torrentLock = Mutex()
 
     val pieceStorage: FairPieceStorageFactory by lazy {
         FairPieceStorageFactory.INSTANCE
@@ -33,7 +39,9 @@ class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : Ust
         torrentDir.listFiles { file: File ->
             file.name.endsWith(".torrent")
         }?.forEach { torrentFile ->
-            addTorrent(torrentFile.nameWithoutExtension.toLong())
+            torrentLock.withLock {
+                addTorrent(torrentFile.nameWithoutExtension.toLong())
+            }
         }
     }
 
@@ -57,47 +65,22 @@ class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : Ust
             // add to map for ref
             containerInfoHashMap[containerUid] = metadataProvider.torrentMetadata.hexInfoHash
             val manager = communicationManager.addTorrent(metadataProvider, pieceStorage)
-
-            torrentDeferred = CompletableDeferred<TorrentManager>(launch(Dispatchers.Default){
-                while(true){
-                    delay(100)
-                    if(!isActive){
-                        torrentDeferred?.completeExceptionally(CancellationException())
-                    }
-                }
-            })
-
-            manager.addListener(object: TorrentListener{
-                override fun peerConnected(peerInformation: PeerInformation?) {
-
-                }
-
-                override fun peerDisconnected(peerInformation: PeerInformation?) {
-                }
-
-                override fun pieceDownloaded(pieceInformation: PieceInformation?, peerInformation: PeerInformation?) {
-                }
-
-                override fun downloadComplete() {
-                    torrentDeferred?.complete(manager)
-                }
-
-                override fun pieceReceived(pieceInformation: PieceInformation?, peerInformation: PeerInformation?) {
-                }
-
-                override fun downloadFailed(cause: Throwable?) {
-                    if (cause != null) {
-                        torrentDeferred?.completeExceptionally(cause)
-                    }
-                }
-
-                override fun validationComplete(validpieces: Int, totalpieces: Int) {
-
-                }
-
-            })
+            containerManagerMap[containerUid] = manager
 
         }
+    }
+
+    override fun addDownloadListener(containerUid: Long, downloadListener: TorrentDownloadListener) {
+        val manager = containerManagerMap[containerUid]
+        val adapter = DownloadListenerAdapter(downloadListener)
+        containerListenerMap[containerUid] = adapter
+        manager?.addListener(adapter)
+    }
+
+    override fun removeDownloadListener(containerUid: Long, downloadListener: TorrentDownloadListener) {
+        val manager = containerManagerMap.remove(containerUid)
+        val adapter = containerListenerMap.remove(containerUid)
+        manager?.removeListener(adapter)
     }
 
     override suspend fun removeTorrent(containerUid: Long) {
@@ -106,7 +89,11 @@ class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : Ust
     }
 
     override suspend fun stop() {
-        communicationManager.stop()
+        containerInfoHashMap.keys.toList().forEach {
+            torrentLock.withLock {
+                removeTorrent(it)
+            }
+        }
     }
 
 }

@@ -42,8 +42,6 @@ import io.ktor.request.*
 import io.ktor.routing.*
 import jakarta.mail.Authenticator
 import jakarta.mail.PasswordAuthentication
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature

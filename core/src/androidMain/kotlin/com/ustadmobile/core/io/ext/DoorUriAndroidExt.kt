@@ -22,7 +22,7 @@ import java.io.IOException
 
 actual suspend fun DoorUri.guessMimeType(context: Any, di: DI): String? {
     if(isRemote()){
-        withContext(Dispatchers.IO){
+        return withContext(Dispatchers.IO){
             var response: Response? = null
             try {
                 val okHttpClient: OkHttpClient = di.direct.instance()
