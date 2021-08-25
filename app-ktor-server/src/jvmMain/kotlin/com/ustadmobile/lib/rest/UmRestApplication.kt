@@ -298,7 +298,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             }
 
             instance<Scheduler>().start()
-            instance<Tracker>().start(true)
+            val tracker = instance<Tracker>()
+            //needed to announce urls
+            tracker.setAcceptForeignTorrents(true)
+            tracker.start(true)
             instance<UstadCommunicationManager>().start(InetAddress.getByName("0.0.0.0"))
         }
     }
@@ -312,6 +315,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         SiteRoute()
         ContentEntryLinkImporter()
         TorrentFileRoute()
+        TorrentTrackerRoute()
         /*
           This is a temporary redirect approach for users who open an app link but don't
           have the app installed. Because the uri scheme of views is #ViewName?args, this

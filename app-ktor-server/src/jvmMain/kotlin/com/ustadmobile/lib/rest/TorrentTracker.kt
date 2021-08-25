@@ -14,12 +14,16 @@ class TorrentTracker(val endpoint: Endpoint, override val di: DI): DIAware {
     fun start(){
         val torrentDir = di.on(endpoint).direct.instance<File>(DiTag.TAG_TORRENT_DIR)
         torrentDir.listFiles()?.forEach {
-            addTorrent(it)
+            addTorrentFile(it)
         }
     }
 
-    fun addTorrent(torrentFile: File){
+    fun addTorrentFile(torrentFile: File){
         tracker.announce(TrackedTorrent.load(torrentFile))
+    }
+
+    fun addTorrentInfoHash(infoHash: ByteArray){
+        tracker.announce(TrackedTorrent(infoHash))
     }
 
     fun stop(){
