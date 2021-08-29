@@ -3,10 +3,14 @@ package com.ustadmobile.core.catalog.contenttype
 import com.ustadmobile.core.account.Endpoint
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.container.ContainerAddOptions
+import com.ustadmobile.core.contentjob.ContentJobProgressListener
+import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
+import com.ustadmobile.core.contentjob.ext.processMetadata
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
+import com.ustadmobile.core.io.ext.getLocalUri
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ShrinkUtils
 import com.ustadmobile.core.util.ext.fitWithin
@@ -34,19 +38,17 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
 
     val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
-    override suspend fun canProcess(doorUri: DoorUri, process: ProcessContext): Boolean {
-        return getEntry(doorUri, process) != null
-    }
-
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): ContentEntryWithLanguage? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
         return getEntry(uri, process)
     }
 
-    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
         withContext(Dispatchers.Default) {
 
-            val uri = jobItem.fromUri ?: throw IllegalArgumentException("no uri found")
-            val videoFile = DoorUri.parse(uri).toFile()
+            val uri = jobItem.fromUri ?: throw IllegalStateException("missing uri")
+            val videoUri = DoorUri.parse(uri)
+            val videoFile = process.getLocalUri(videoUri, context, di).toFile()
+            val contentEntryUid = processMetadata(jobItem, process, context, endpoint)
             var newVideo = File(videoFile.parentFile, "new${videoFile.nameWithoutExtension}.mp4")
 
             val compressVideo: Boolean = process.params["compress"]?.toBoolean() ?: false
@@ -62,7 +64,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
             }
 
             val container = Container().apply {
-                containerContentEntryUid = jobItem.cjiContentEntryUid
+                containerContentEntryUid = contentEntryUid
                 cntLastModified = System.currentTimeMillis()
                 fileSize = newVideo.length()
                 this.mimeType = supportedMimeTypes.first()
@@ -73,6 +75,8 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
             val containerFolderUri = DoorUri.parse(containerFolder)
 
             repo.addFileToContainer(container.containerUid, newVideo.toDoorUri(), newVideo.name,
+                    context,
+                    di,
                     ContainerAddOptions(containerFolderUri))
 
             container
@@ -82,7 +86,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
         return ProcessResult(200)
     }
 
-    suspend fun getEntry(uri: DoorUri, process: ProcessContext): ContentEntryWithLanguage? {
+    suspend fun getEntry(uri: DoorUri, process: ProcessContext): MetadataResult? {
         return withContext(Dispatchers.Default){
             val file = uri.toFile()
 
@@ -96,11 +100,12 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
                 return@withContext null
             }
 
-            ContentEntryWithLanguage().apply {
+            val entry = ContentEntryWithLanguage().apply {
                 this.title = file.nameWithoutExtension
                 this.leaf = true
                 this.contentTypeFlag = ContentEntry.TYPE_VIDEO
             }
+            MetadataResult(entry)
         }
     }
 

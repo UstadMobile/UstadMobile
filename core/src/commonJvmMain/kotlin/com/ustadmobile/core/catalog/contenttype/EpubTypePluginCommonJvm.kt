@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.alternative
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.ustadmobile.core.io.ext.guessMimeType
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -15,15 +16,12 @@ import java.util.*
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
-import com.ustadmobile.core.contentjob.ContentPlugin
-import com.ustadmobile.core.contentjob.ProcessContext
-import com.ustadmobile.core.contentjob.ProcessResult
-import com.ustadmobile.core.contentjob.SupportedContent
+import com.ustadmobile.core.contentjob.*
+import com.ustadmobile.core.contentjob.ext.processMetadata
 import com.ustadmobile.core.io.ext.getLocalUri
 import com.ustadmobile.core.io.ext.skipToEntry
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.EpubContentView
-import com.ustadmobile.core.io.ext.guessMimeType
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.DoorTag
@@ -41,30 +39,36 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
     override val supportedFileExtensions: List<String>
         get() = SupportedContent.EPUB_EXTENSIONS
 
-    override val jobType: Int
+    override val pluginId: Int
         get() = TODO("Not yet implemented")
 
     val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
-    override suspend fun canProcess(doorUri: DoorUri, process: ProcessContext): Boolean {
-        val mimeType = doorUri.guessMimeType(di)
-        if(mimeType != null && !supportedMimeTypes.contains(mimeType)){
-            return false
-        }
-        return findOpfPath(doorUri, process) != null
-    }
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): ContentEntryWithLanguage? {
-        val opfPath = findOpfPath(uri, process) ?: return null
+    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
+        val mimeType = uri.guessMimeType(context, di)
+        if(mimeType != null && !supportedMimeTypes.contains(mimeType)){
+            return null
+        }
         return withContext(Dispatchers.Default) {
             val xppFactory = XmlPullParserFactory.newInstance()
             try {
-
                 val localUri = process.getLocalUri(uri, context, di)
+                val opfPath = ZipInputStream(localUri.openInputStream(context)).use {
+                    it.skipToEntry { entry -> entry.name == OCF_CONTAINER_PATH } ?: return@use null
 
-                ZipInputStream(localUri.openInputStream(context)).use {
+                    val ocfContainer = OcfDocument()
+                    val xpp = xppFactory.newPullParser()
+                    xpp.setInput(it, "UTF-8")
+                    ocfContainer.loadFromParser(xpp)
+
+                   return@use ocfContainer.rootFiles.firstOrNull()?.fullPath
+                } ?: return@withContext null
+
+                return@withContext  ZipInputStream(localUri.openInputStream(context)).use {
+
                     it.skipToEntry { it.name == opfPath } ?: return@use null
 
                     val xpp = xppFactory.newPullParser()
@@ -72,7 +76,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                     val opfDocument = OpfDocument()
                     opfDocument.loadFromOPF(xpp)
 
-                    return@withContext ContentEntryWithLanguage().apply {
+                    val entry = ContentEntryWithLanguage().apply {
                         contentFlags = ContentEntry.FLAG_IMPORTED
                         contentTypeFlag = ContentEntry.TYPE_EBOOK
                         licenseType = ContentEntry.LICENSE_TYPE_OTHER
@@ -89,6 +93,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                             }
                         }
                     }
+                    return@use MetadataResult(entry)
                 }
             } catch (e: Exception) {
                 null
@@ -96,12 +101,16 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
         }
     }
 
-    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+        val jobUri = jobItem.fromUri ?: return ProcessResult(404)
         val container = withContext(Dispatchers.Default) {
-            val uri = jobItem.fromUri ?: return@withContext
-            val doorUri = DoorUri.parse(uri)
+
+            val uri = DoorUri.parse(jobUri)
+            val localUri = process.getLocalUri(uri, context, di)
+            val contentEntryUid = processMetadata(jobItem, process, context,endpoint)
+
             val container = Container().apply {
-                containerContentEntryUid = jobItem.cjiContentEntryUid
+                containerContentEntryUid = contentEntryUid
                 cntLastModified = System.currentTimeMillis()
                 this.mimeType = supportedMimeTypes.first()
                 containerUid = repo.containerDao.insert(this)
@@ -111,7 +120,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
             val containerFolderUri = DoorUri.parse(containerFolder)
 
             repo.addEntriesToContainerFromZip(container.containerUid,
-                    doorUri,
+                    localUri,
                     ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
             val containerWithSize = repo.containerDao.findByUid(container.containerUid) ?: container

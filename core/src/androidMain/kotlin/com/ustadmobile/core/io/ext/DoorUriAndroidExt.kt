@@ -1,24 +1,28 @@
 package com.ustadmobile.core.io.ext
 
+import android.R.attr
+import android.content.ContentResolver
+import android.content.Context
+import android.media.MediaMetadataRetriever
+import android.webkit.MimeTypeMap
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.ext.toFile
-import io.ktor.client.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
-import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
-import java.nio.file.Files
-import java.nio.file.Paths
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.internal.closeQuietly
+import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
 import java.io.IOException
 
+
+
+
 actual suspend fun DoorUri.guessMimeType(context: Any, di: DI): String? {
-    return if(isRemote()){
-        withContext(Dispatchers.IO){
+    if(isRemote()){
+        return withContext(Dispatchers.IO){
             var response: Response? = null
             try {
                 val okHttpClient: OkHttpClient = di.direct.instance()
@@ -33,8 +37,12 @@ actual suspend fun DoorUri.guessMimeType(context: Any, di: DI): String? {
                 response?.closeQuietly()
             }
         }
+    }else if(ContentResolver.SCHEME_CONTENT == uri.scheme){
+        val cr: ContentResolver = (context as Context ).contentResolver
+        return cr.getType(uri)
     }else{
-        Files.probeContentType(Paths.get(this.uri))
+       return MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+               MimeTypeMap.getFileExtensionFromUrl(uri.toString()).lowercase())
     }
 }
 
@@ -56,7 +64,17 @@ actual suspend fun DoorUri.getSize(context: Any, di: DI): Long {
                 response?.closeQuietly()
             }
         }
-    }else{
-        toFile().length()
+    } else{
+        (context as Context).contentResolver.openAssetFileDescriptor(uri, "r")?.length ?: -1
     }
+}
+
+fun DoorUri.extractVideoResolutionMetadata(context: Context): Pair<Int, Int>{
+    val metaRetriever = MediaMetadataRetriever()
+    metaRetriever.setDataSource(context, this.uri)
+    val originalHeight = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt() ?: 0
+    val originalWidth = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt() ?: 0
+    metaRetriever.release()
+
+    return Pair(originalWidth, originalHeight)
 }

@@ -43,8 +43,6 @@ import com.ustadmobile.sharedse.network.*
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploadManagerCommonJvm
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
@@ -68,10 +66,14 @@ import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import com.ustadmobile.core.impl.di.commonJvmDiModule
+import com.ustadmobile.core.torrent.UstadCommunicationManager
+import com.ustadmobile.core.torrent.UstadTorrentManager
+import com.ustadmobile.core.torrent.UstadTorrentManagerImpl
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.*
+import java.net.InetAddress
 import java.util.concurrent.Executors
 
 /**
@@ -120,6 +122,9 @@ open class UstadApp : BaseUstadApp(), DIAware {
             }).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
                 it.setupAssignmentSyncListener(context, di)
+                GlobalScope.launch {
+                    di.on(context).direct.instance<UstadTorrentManager>().start()
+                }
             }
         }
 
@@ -184,14 +189,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
             ContainerUploadManagerCommonJvm(di, context)
         }
 
-        bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
-            ContentImportManagerImplAndroid(listOf(EpubTypePluginCommonJvm(),
-                    XapiTypePluginCommonJvm(), VideoTypePluginAndroid(),
-                    H5PTypePluginCommonJvm()), applicationContext,
-                    context, di)
-        }
-
-
         bind<Gson>() with singleton {
             val builder = GsonBuilder()
             builder.registerTypeAdapter(Statement::class.java, StatementSerializer())
@@ -233,6 +230,14 @@ open class UstadApp : BaseUstadApp(), DIAware {
             ViewNameToDestMap()
         }
 
+        bind<UstadTorrentManager>() with scoped(EndpointScope.Default).singleton {
+            UstadTorrentManagerImpl(endpoint = context, di = di)
+        }
+
+        bind<UstadCommunicationManager>() with singleton {
+            UstadCommunicationManager()
+        }
+
         bind<Pbkdf2Params>() with singleton {
             val systemImpl: UstadMobileSystemImpl = instance()
             val numIterations = systemImpl.getAppConfigInt(KEY_PBKDF2_ITERATIONS,
@@ -255,6 +260,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<BleGattServer>()
             instance<NetworkManagerBle>()
             instance<EmbeddedHTTPD>()
+            instance<UstadCommunicationManager>().start(InetAddress.getByName("0.0.0.0"))
 
             Picasso.setSingletonInstance(Picasso.Builder(applicationContext)
                     .downloader(OkHttp3Downloader(instance<OkHttpClient>()))

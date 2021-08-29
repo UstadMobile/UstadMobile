@@ -9,16 +9,18 @@ import org.kodein.di.DIAware
 
 interface ContentPlugin : DIAware {
 
-    val jobType: Int
+    val pluginId: Int
 
     val supportedMimeTypes: List<String>
 
     val supportedFileExtensions: List<String>
 
-    suspend fun canProcess(doorUri: DoorUri, process: ProcessContext): Boolean
+    suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult?
 
-    suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): ContentEntryWithLanguage?
-
-    suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext): ProcessResult
+    suspend fun processJob(
+            jobItem: ContentJobItem,
+            process: ProcessContext,
+            progress: ContentJobProgressListener)
+    : ProcessResult
 
 }

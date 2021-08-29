@@ -8,22 +8,19 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.xmlpull.v1.XmlPullParserException
+import com.ustadmobile.core.io.ext.guessMimeType
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import java.io.File
 import java.io.IOException
-import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
-import com.ustadmobile.core.contentjob.ContentPlugin
-import com.ustadmobile.core.contentjob.ProcessContext
-import com.ustadmobile.core.contentjob.ProcessResult
-import com.ustadmobile.core.contentjob.SupportedContent
+import com.ustadmobile.core.contentjob.*
+import com.ustadmobile.core.contentjob.ext.processMetadata
+import com.ustadmobile.core.io.ext.getLocalUri
 import com.ustadmobile.core.io.ext.skipToEntry
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
@@ -31,7 +28,6 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import org.xmlpull.v1.XmlPullParserFactory
-import java.lang.IllegalArgumentException
 
 
 class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: Endpoint, override val di: DI) : ContentPlugin {
@@ -39,13 +35,13 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
     val viewName: String
         get() = XapiPackageContentView.VIEW_NAME
 
-    override val supportedMimeTypes:  List<String>
+    override val supportedMimeTypes: List<String>
         get() = SupportedContent.XAPI_MIME_TYPES
 
-    override val supportedFileExtensions:  List<String>
+    override val supportedFileExtensions: List<String>
         get() = SupportedContent.ZIP_EXTENSIONS
 
-    override val jobType: Int
+    override val pluginId: Int
         get() = TODO("Not yet implemented")
 
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
@@ -54,15 +50,16 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
 
     val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
-    override suspend fun canProcess(doorUri: DoorUri, process: ProcessContext): Boolean {
-        return findTincanEntry(doorUri)
-    }
-
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): ContentEntryWithLanguage? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
+        val mimeType = uri.guessMimeType(context, di)
+        if (mimeType != null && !supportedMimeTypes.contains(mimeType)) {
+            return null
+        }
         return withContext(Dispatchers.Default) {
-            val inputStream = uri.openInputStream(context)
+            val localUri = process.getLocalUri(uri, context, di)
+            val inputStream = localUri.openInputStream(context)
             return@withContext ZipInputStream(inputStream).use {
-                it.skipToEntry { it.name == TINCAN_FILENAME } ?: throw IllegalArgumentException("no h5p file")
+                it.skipToEntry { it.name == TINCAN_FILENAME } ?: return@withContext null
 
                 val xppFactory = XmlPullParserFactory.newInstance()
                 val xpp = xppFactory.newPullParser()
@@ -70,48 +67,47 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
                 val activity = TinCanXML.loadFromXML(xpp).launchActivity
                         ?: throw IOException("TinCanXml from name has no launchActivity!")
 
-                ContentEntryWithLanguage().apply {
+                val entry = ContentEntryWithLanguage().apply {
                     contentFlags = ContentEntry.FLAG_IMPORTED
                     licenseType = ContentEntry.LICENSE_TYPE_OTHER
-                    title =  if(activity.name.isNullOrEmpty())
+                    title = if (activity.name.isNullOrEmpty())
                         uri.getFileName(context) else activity.name
                     contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
                     description = activity.desc
                     leaf = true
                     entryId = activity.id
                 }
+                MetadataResult(entry)
             }
         }
     }
 
-    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
         val uri = jobItem.fromUri ?: return ProcessResult(404)
-        val doorUri = DoorUri.parse(uri)
-        val container = Container().apply {
-            containerContentEntryUid = jobItem.cjiContentEntryUid
-            cntLastModified = System.currentTimeMillis()
-            mimeType = supportedMimeTypes.first()
-            containerUid = repo.containerDao.insertAsync(this)
+        val container = withContext(Dispatchers.Default) {
+
+            val contentEntryUid = processMetadata(jobItem, process,context, endpoint)
+            val localUri = process.getLocalUri(DoorUri.parse(uri), context, di)
+
+            val container = Container().apply {
+                containerContentEntryUid = contentEntryUid
+                cntLastModified = System.currentTimeMillis()
+                mimeType = supportedMimeTypes.first()
+                containerUid = repo.containerDao.insertAsync(this)
+                jobItem.cjiContainerUid = containerUid
+            }
+            val containerFolder = jobItem.toUri ?: defaultContainerDir.toURI().toString()
+            val containerFolderUri = DoorUri.parse(containerFolder)
+
+            repo.addEntriesToContainerFromZip(container.containerUid,
+                    localUri,
+                    ContainerAddOptions(storageDirUri = containerFolderUri), context)
+
+            repo.containerDao.findByUid(container.containerUid)
+
         }
-        val containerFolder = jobItem.toUri ?: defaultContainerDir.toURI().toString()
-        val containerFolderUri = DoorUri.parse(containerFolder)
-
-        repo.addEntriesToContainerFromZip(container.containerUid,
-                doorUri,
-                ContainerAddOptions(storageDirUri = containerFolderUri), context)
-
-        repo.containerDao.findByUid(container.containerUid)
 
         return ProcessResult(200)
-    }
-
-    suspend fun findTincanEntry(doorUri: DoorUri): Boolean {
-        return withContext(Dispatchers.Default) {
-            val inputStream = doorUri.openInputStream(context)
-            return@withContext ZipInputStream(inputStream).use {
-                it.skipToEntry { entry -> entry.name == TINCAN_FILENAME } != null
-            }
-        }
     }
 
     companion object {

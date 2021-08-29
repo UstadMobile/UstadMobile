@@ -3,6 +3,7 @@ package com.ustadmobile.core.io.ext
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorUri
+import org.kodein.di.DI
 
 expect suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
                                                               zipUri: DoorUri,
@@ -10,9 +11,9 @@ expect suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long
                                                               context: Any)
 
 expect suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: DoorUri,
-                                                   recursive: Boolean = true,
+                                                   recursive: Boolean = true, context: Any, di: DI,
                                                    addOptions: ContainerAddOptions)
 
 expect suspend fun UmAppDatabase.addFileToContainer(containerUid: Long, fileUri: DoorUri,
-                                                    pathInContainer: String, addOptions: ContainerAddOptions)
+                                                    pathInContainer: String, context: Any, di: DI, addOptions: ContainerAddOptions)
 
