@@ -17,3 +17,5 @@ expect suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: D
 expect suspend fun UmAppDatabase.addFileToContainer(containerUid: Long, fileUri: DoorUri,
                                                     pathInContainer: String, context: Any, di: DI, addOptions: ContainerAddOptions)
 
+
+expect suspend fun UmAppDatabase.addTorrentFileFromContainer(containerUid: Long, torrentDirUri: DoorUri)

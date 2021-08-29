@@ -6,11 +6,9 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.alternative
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import com.ustadmobile.core.io.ext.guessMimeType
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
-import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import java.io.File
 import java.util.*
 import java.util.zip.ZipInputStream
@@ -18,8 +16,7 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ext.processMetadata
-import com.ustadmobile.core.io.ext.getLocalUri
-import com.ustadmobile.core.io.ext.skipToEntry
+import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.door.DoorUri
@@ -42,7 +39,9 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
     override val pluginId: Int
         get() = TODO("Not yet implemented")
 
-    val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+    private val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+
+    private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
 
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
@@ -122,6 +121,8 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
             repo.addEntriesToContainerFromZip(container.containerUid,
                     localUri,
                     ContainerAddOptions(storageDirUri = containerFolderUri), context)
+
+            repo.addTorrentFileFromContainer(container.containerUid, DoorUri.parse(torrentDir.toURI().toString()))
 
             val containerWithSize = repo.containerDao.findByUid(container.containerUid) ?: container
 

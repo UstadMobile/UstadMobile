@@ -10,6 +10,7 @@ import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.contentjob.ext.processMetadata
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
+import com.ustadmobile.core.io.ext.addTorrentFileFromContainer
 import com.ustadmobile.core.io.ext.getLocalUri
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ShrinkUtils
@@ -37,6 +38,8 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
     val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+
+    val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
 
     override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
         return getEntry(uri, process)
@@ -78,6 +81,8 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
                     context,
                     di,
                     ContainerAddOptions(containerFolderUri))
+
+            repo.addTorrentFileFromContainer(container.containerUid, DoorUri.parse(torrentDir.toURI().toString()))
 
             container
         }

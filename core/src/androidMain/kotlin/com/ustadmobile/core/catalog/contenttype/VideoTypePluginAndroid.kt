@@ -16,10 +16,7 @@ import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.contentjob.ext.processMetadata
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.ext.addContainerFromUri
-import com.ustadmobile.core.io.ext.addFileToContainer
-import com.ustadmobile.core.io.ext.extractVideoResolutionMetadata
-import com.ustadmobile.core.io.ext.getLocalUri
+import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.ext.toDoorUri
@@ -36,7 +33,6 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
-import java.nio.file.Files
 
 
 class VideoTypePluginAndroid(private var context: Any, private val endpoint: Endpoint, override val di: DI) : VideoTypePlugin() {
@@ -47,7 +43,9 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+    private val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+
+    private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
 
     override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
         return getEntry(uri, process)
@@ -61,7 +59,9 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
             val localUri = process.getLocalUri(videoUri, context, di)
             val contentEntryUid = processMetadata(jobItem, process,context, endpoint)
 
-            val newVideo = File(Files.createTempDirectory("tmp").toFile(),
+
+            val videoTempDir = makeTempDir(prefix = "tmp")
+            val newVideo = File(videoTempDir,
                     localUri.getFileName(context))
             val compressVideo: Boolean = process.params["compress"]?.toBoolean() ?: false
 
@@ -168,7 +168,9 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
                         localUri.getFileName(context),
                         ContainerAddOptions(containerFolderUri))
             }
-            newVideo.delete()
+            videoTempDir.delete()
+
+            repo.addTorrentFileFromContainer(container.containerUid, DoorUri.parse(torrentDir.toURI().toString()))
 
             repo.containerDao.findByUid(container.containerUid) ?: container
         }

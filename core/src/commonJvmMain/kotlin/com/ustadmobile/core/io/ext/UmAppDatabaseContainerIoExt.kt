@@ -1,5 +1,7 @@
 package com.ustadmobile.core.io.ext
 
+import com.turn.ttorrent.common.creation.MetadataBuilder
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.encodeBase64
@@ -46,6 +48,27 @@ actual suspend fun UmAppDatabase.addFileToContainer(containerUid: Long, fileUri:
     val db = repo.db as UmAppDatabase
     db.addFileToContainerInternal(containerUid, fileUri.toFile(), false,
             addOptions, "", pathInContainer, context,  di)
+}
+
+actual suspend fun UmAppDatabase.addTorrentFileFromContainer(containerUid: Long, torrentDirUri: com.ustadmobile.door.DoorUri){
+
+    val torrentServerFolder = torrentDirUri.toFile()
+
+    val torrentFile = File(torrentServerFolder, "$containerUid.torrent")
+
+    val fileList = containerEntryDao.findByContainer(containerUid)
+
+    val torrentBuilder = MetadataBuilder()
+            .setDirectoryName("container$containerUid")
+            .setCreatedBy("UstadMobile")
+
+    fileList.forEach {
+        val path = it.containerEntryFile?.cefPath ?: return@forEach
+        torrentBuilder.addFile(File(path))
+    }
+
+    torrentFile.writeBytes(torrentBuilder.buildBinary())
+
 }
 
 

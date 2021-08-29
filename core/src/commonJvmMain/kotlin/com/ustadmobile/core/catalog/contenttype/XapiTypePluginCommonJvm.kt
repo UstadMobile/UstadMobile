@@ -8,16 +8,13 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import com.ustadmobile.core.io.ext.guessMimeType
-import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import java.io.File
 import java.io.IOException
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ext.processMetadata
-import com.ustadmobile.core.io.ext.getLocalUri
-import com.ustadmobile.core.io.ext.skipToEntry
+import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.DoorUri
@@ -48,7 +45,9 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+    private val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+
+    private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
 
     override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
         val mimeType = uri.guessMimeType(context, di)
@@ -102,6 +101,8 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
             repo.addEntriesToContainerFromZip(container.containerUid,
                     localUri,
                     ContainerAddOptions(storageDirUri = containerFolderUri), context)
+
+            repo.addTorrentFileFromContainer(container.containerUid, DoorUri.parse(torrentDir.toURI().toString()))
 
             repo.containerDao.findByUid(container.containerUid)
 

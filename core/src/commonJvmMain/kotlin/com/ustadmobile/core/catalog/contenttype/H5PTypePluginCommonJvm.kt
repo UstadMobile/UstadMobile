@@ -2,7 +2,6 @@ package com.ustadmobile.core.catalog.contenttype
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import com.ustadmobile.core.util.getAssetFromResource
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -15,18 +14,15 @@ import org.kodein.di.on
 import java.io.File
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
-import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.core.io.ext.guessMimeType
 import com.ustadmobile.core.container.PrefixContainerFileNamer
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ext.processMetadata
-import com.ustadmobile.core.io.ext.getLocalUri
-import com.ustadmobile.core.io.ext.skipToEntry
+import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.lib.db.entities.ContentJobItem
@@ -65,7 +61,9 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+    private val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+
+    private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
 
     override val pluginId: Int
         get() = TODO("Not yet implemented")
@@ -187,6 +185,8 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
             repo.addFileToContainer(container.containerUid, tmpIndexHtmlFile.toDoorUri(),
                     "index.html", context, di, containerAddOptions)
             tmpIndexHtmlFile.delete()
+
+            repo.addTorrentFileFromContainer(container.containerUid, DoorUri.parse(torrentDir.toURI().toString()))
 
             repo.containerDao.findByUid(container.containerUid)
 
