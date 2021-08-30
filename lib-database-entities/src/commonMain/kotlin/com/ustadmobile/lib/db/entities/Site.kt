@@ -37,15 +37,10 @@ open class Site {
     var authSalt: String? = null
 
     /**
-     * Could be a simple number - e.g. "6969" - in which case it should be understood that the
-     * tracker is on the same server as the endpoint itself, and just change the port
-     *
-     *  e.g. endpoint = https://sitename.server.com/endpoint with torrentTracker = "6969"
-     *    trackerUrl = http://sitename.server.com:6969/announce
      *
      *  e.g. endpoint = https://sitename.server.com/endpoint with torrentTracker = http://sitename.otherserver.com:6970/
      *     trackerUrl = http://sitename.otherserver.com:6970/announce
      */
-    var torrentTracker: String? = null
+    var torrentAnnounceUrl: String? = null
 
 }

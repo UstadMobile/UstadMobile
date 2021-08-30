@@ -50,9 +50,9 @@ import org.quartz.impl.StdSchedulerFactory
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.net.InetAddress
+import java.net.URL
 import java.nio.file.Files
 import javax.naming.InitialContext
-import kotlin.random.Random
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -104,8 +104,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
     val dbMode = dbModeOverride ?:
         appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
-    val trackerPort = appConfig.propertyOrNull("ktor.ustad.trackerPort")
-            ?.getString()?.toIntOrNull() ?: Random.nextInt(1024, 65353)
+    val trackerAnnounceUrlConfig: String = appConfig.propertyOrNull("ktor.ustad.trackerAnnounceUrl")?.getString() ?: ""
+    val trackerAnnounceUrl = URL(trackerAnnounceUrlConfig)
     val dataDirPath = File(environment.config.propertyOrNull("ktor.ustad.datadir")?.getString() ?: "data")
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
 
@@ -207,7 +207,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         }
 
         bind<Tracker>() with singleton {
-            Tracker(trackerPort)
+            Tracker(trackerAnnounceUrl.port, trackerAnnounceUrl.toString())
         }
 
         bind<TorrentTracker>() with scoped(EndpointScope.Default).singleton {
@@ -302,7 +302,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             //needed to announce urls
             tracker.setAcceptForeignTorrents(true)
             tracker.start(true)
-            instance<UstadCommunicationManager>().start(InetAddress.getByName("0.0.0.0"))
+            instance<UstadCommunicationManager>().start(InetAddress.getByName(trackerAnnounceUrl.host))
         }
     }
 

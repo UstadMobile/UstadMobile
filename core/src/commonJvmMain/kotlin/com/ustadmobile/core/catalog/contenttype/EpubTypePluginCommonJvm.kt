@@ -1,5 +1,6 @@
 package com.ustadmobile.core.catalog.contenttype
 
+import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.db.UmAppDatabase
@@ -8,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.direct
 import org.kodein.di.on
 import java.io.File
 import java.util.*
@@ -17,6 +19,7 @@ import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ext.processMetadata
 import com.ustadmobile.core.io.ext.*
+import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.door.DoorUri
@@ -45,6 +48,9 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
 
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
+    private val tracker: Tracker = di.direct.instance<Tracker>()
+
+    private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
     override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
         val mimeType = uri.guessMimeType(context, di)
@@ -122,7 +128,11 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                     localUri,
                     ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
-            repo.addTorrentFileFromContainer(container.containerUid, DoorUri.parse(torrentDir.toURI().toString()))
+            repo.addTorrentFileFromContainer(container.containerUid,
+                    DoorUri.parse(torrentDir.toURI().toString()),
+                    tracker.announceUrl)
+
+            ustadTorrentManager.addTorrent(container.containerUid)
 
             val containerWithSize = repo.containerDao.findByUid(container.containerUid) ?: container
 

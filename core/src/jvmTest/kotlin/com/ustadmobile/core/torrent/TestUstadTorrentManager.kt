@@ -237,21 +237,19 @@ class TestUstadTorrentManager {
         val clientContainer = Container().apply {
             containerUid = repo.containerDao.insert(this)
         }
-        val clientContainerFiles = File(containerClientFolder,"${clientContainer.containerUid}")
-        clientContainerFiles.mkdirs()
         runBlocking {
             repo.addEntryToContainerFromResource(clientContainer.containerUid,
                     this::class.java, "/com/ustadmobile/core/contentformats/epub/image_1.jpg",
                     "image1", localDi,
-                    ContainerAddOptions(clientContainerFiles.toDoorUri()))
+                    ContainerAddOptions(containerClientFolder.toDoorUri()))
             repo.addEntryToContainerFromResource(clientContainer.containerUid,
                     this::class.java, "/com/ustadmobile/core/contentformats/epub/image_2.jpg",
                     "image2", localDi,
-                    ContainerAddOptions(clientContainerFiles.toDoorUri()))
+                    ContainerAddOptions(containerClientFolder.toDoorUri()))
             repo.addEntryToContainerFromResource(clientContainer.containerUid,
                     this::class.java, "/com/ustadmobile/core/contentformats/epub/image_3.jpg",
                     "image3", localDi,
-                    ContainerAddOptions(clientContainerFiles.toDoorUri()))
+                    ContainerAddOptions(containerClientFolder.toDoorUri()))
         }
 
         GlobalScope.launch {

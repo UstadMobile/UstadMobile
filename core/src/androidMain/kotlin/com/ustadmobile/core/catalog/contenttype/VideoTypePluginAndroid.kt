@@ -8,6 +8,7 @@ import io.github.aakira.napier.Napier
 import com.linkedin.android.litr.MediaTransformer
 import com.linkedin.android.litr.TransformationListener
 import com.linkedin.android.litr.analytics.TrackTransformationInfo
+import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.ContentJobProgressListener
@@ -17,6 +18,7 @@ import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.contentjob.ext.processMetadata
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.*
+import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.ext.toDoorUri
@@ -30,6 +32,7 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
@@ -46,6 +49,10 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
     private val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
     private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
+
+    private val tracker: Tracker = di.direct.instance()
+
+    private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
     override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
         return getEntry(uri, process)
@@ -170,7 +177,11 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
             }
             videoTempDir.delete()
 
-            repo.addTorrentFileFromContainer(container.containerUid, DoorUri.parse(torrentDir.toURI().toString()))
+            repo.addTorrentFileFromContainer(container.containerUid,
+                    DoorUri.parse(torrentDir.toURI().toString()),
+                    tracker.announceUrl)
+
+            ustadTorrentManager.addTorrent(container.containerUid)
 
             repo.containerDao.findByUid(container.containerUid) ?: container
         }

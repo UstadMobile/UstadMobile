@@ -1,5 +1,6 @@
 package com.ustadmobile.core.catalog.contenttype
 
+import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.getAssetFromResource
@@ -9,6 +10,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
@@ -23,6 +25,7 @@ import com.ustadmobile.core.container.PrefixContainerFileNamer
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ext.processMetadata
 import com.ustadmobile.core.io.ext.*
+import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.lib.db.entities.ContentJobItem
@@ -64,6 +67,10 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
     private val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
     private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
+
+    private val tracker: Tracker = di.direct.instance<Tracker>()
+
+    private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
     override val pluginId: Int
         get() = TODO("Not yet implemented")
@@ -186,7 +193,11 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
                     "index.html", context, di, containerAddOptions)
             tmpIndexHtmlFile.delete()
 
-            repo.addTorrentFileFromContainer(container.containerUid, DoorUri.parse(torrentDir.toURI().toString()))
+            repo.addTorrentFileFromContainer(container.containerUid,
+                    DoorUri.parse(torrentDir.toURI().toString()),
+                    tracker.announceUrl)
+
+            ustadTorrentManager.addTorrent(container.containerUid)
 
             repo.containerDao.findByUid(container.containerUid)
 
