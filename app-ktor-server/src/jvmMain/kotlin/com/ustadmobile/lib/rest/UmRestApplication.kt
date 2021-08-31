@@ -3,6 +3,7 @@ package com.ustadmobile.lib.rest
 import com.google.gson.Gson
 import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.*
+import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.db.ext.addSyncCallback
@@ -173,6 +174,9 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {
             ServerUpdateNotificationManagerImpl()
         }
+        bind<EpubTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton {
+            EpubTypePluginCommonJvm(Any(), context, di)
+        }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
@@ -315,6 +319,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         SiteRoute()
         ContentEntryLinkImporter()
         TorrentFileRoute()
+        StartFile()
         /*
           This is a temporary redirect approach for users who open an app link but don't
           have the app installed. Because the uri scheme of views is #ViewName?args, this

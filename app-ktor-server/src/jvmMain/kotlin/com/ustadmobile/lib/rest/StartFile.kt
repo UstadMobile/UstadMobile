@@ -26,9 +26,9 @@ fun Route.StartFile(){
 
         val di : DI by closestDI()
         val repo: UmAppDatabase = di.on(call).direct.instance(DoorTag.TAG_REPO)
-        val epubPlugin: H5PTypePluginCommonJvm = di.on(call).direct.instance()
+        val epubPlugin: EpubTypePluginCommonJvm = di.on(call).direct.instance()
 
-        val epub = File("/home/ustad/server/english.h5p")
+        val epub = File("/home/ustad/server/test.epub")
         val tempDir = Files.createTempDirectory("tmp").toFile()
         val processContext = ProcessContext(DoorUri.parse(tempDir.toURI().toString()),
                 params = mutableMapOf())

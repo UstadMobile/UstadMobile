@@ -65,9 +65,9 @@ actual suspend fun UmAppDatabase.addTorrentFileFromContainer(
 
     val fileList = db.containerEntryDao.findByContainer(containerUid)
 
-    val sortedList = fileList.sortedBy {
-        it.containerEntryFile?.cefMd5
-    }
+    val sortedList = fileList
+            .distinctBy { it.containerEntryFile?.cefMd5 }
+            .sortedBy { it.containerEntryFile?.cefMd5 }
 
     val torrentBuilder = MetadataBuilder()
             .addTracker(trackerUrl)
