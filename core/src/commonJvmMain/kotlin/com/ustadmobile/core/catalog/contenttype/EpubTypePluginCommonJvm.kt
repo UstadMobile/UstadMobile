@@ -37,7 +37,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
         get() = SupportedContent.EPUB_EXTENSIONS
 
     override val pluginId: Int
-        get() = TODO("Not yet implemented")
+        get() = PLUGIN_ID
 
     private val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
@@ -92,7 +92,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                             }
                         }
                     }
-                    return@use MetadataResult(entry)
+                    return@use MetadataResult(entry, PLUGIN_ID)
                 }
             } catch (e: Exception) {
                 null
@@ -156,5 +156,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
     companion object {
 
         private const val OCF_CONTAINER_PATH = "META-INF/container.xml"
+
+        const val PLUGIN_ID = 2
     }
 }

@@ -20,7 +20,7 @@ interface ContentPlugin : DIAware {
     suspend fun processJob(
             jobItem: ContentJobItem,
             process: ProcessContext,
-            progress: ContentJobProgressListener)
-    : ProcessResult
+            progress: ContentJobProgressListener
+    ) : ProcessResult
 
 }

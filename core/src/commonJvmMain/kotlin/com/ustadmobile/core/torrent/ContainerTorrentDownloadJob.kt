@@ -34,17 +34,17 @@ class ContainerTorrentDownloadJob(private val endpoint: Endpoint, override val d
 
     private val torrentDir = di.direct.instance<File>(tag = DiTag.TAG_TORRENT_DIR)
 
-    private val ustadTorrentManager: UstadTorrentManagerImpl = di.direct.instance<UstadTorrentManager>() as UstadTorrentManagerImpl
+    private val ustadTorrentManager: UstadTorrentManager = di.direct.instance<UstadTorrentManager>()
 
     override val pluginId: Int
-        get() = TODO("Not yet implemented")
+        get() = PLUGIN_ID
 
     override val supportedMimeTypes: List<String>
         get() = listOf("application/ustad-container")
     override val supportedFileExtensions: List<String>
         get() = listOf(".container")
 
-    override suspend fun extractMetadata(doorUri: DoorUri, process: ProcessContext): MetadataResult? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
 
         // check valid uri format, valid endpoint, valid container
         val containerUid = doorUri.uri.toString().substringAfterLast("/").toLong()
@@ -54,7 +54,7 @@ class ContainerTorrentDownloadJob(private val endpoint: Endpoint, override val d
         val contentEntry = repo.contentEntryDao.findByUid(container.containerContentEntryUid)
                 ?: throw IllegalArgumentException("no entry found from container")
 
-        return MetadataResult(contentEntry as ContentEntryWithLanguage)
+        return MetadataResult(contentEntry as ContentEntryWithLanguage, PLUGIN_ID)
     }
 
     override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
@@ -121,6 +121,7 @@ class ContainerTorrentDownloadJob(private val endpoint: Endpoint, override val d
 
         internal const val CONTAINER_ENTRY_LIST_PATH = "ContainerEntryList/findByContainerWithMd5"
 
+        const val PLUGIN_ID = 10
     }
 
 }
