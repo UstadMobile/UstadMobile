@@ -1,5 +1,6 @@
 package com.ustadmobile.core.catalog.contenttype
 
+import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
@@ -15,6 +16,7 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ext.processMetadata
 import com.ustadmobile.core.io.ext.*
+import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.DoorUri
@@ -22,6 +24,7 @@ import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.direct
 import org.kodein.di.on
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import org.xmlpull.v1.XmlPullParserFactory
@@ -38,6 +41,7 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
     override val supportedFileExtensions: List<String>
         get() = SupportedContent.ZIP_EXTENSIONS
 
+
     override val pluginId: Int
         get() = PLUGIN_ID
 
@@ -48,6 +52,10 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
     private val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
     private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
+
+    private val tracker: Tracker = di.direct.instance<Tracker>()
+
+    private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
     override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
         val mimeType = uri.guessMimeType(context, di)
@@ -102,7 +110,10 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
                     localUri,
                     ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
-            repo.addTorrentFileFromContainer(container.containerUid, DoorUri.parse(torrentDir.toURI().toString()))
+            repo.addTorrentFileFromContainer(container.containerUid,
+                    DoorUri.parse(torrentDir.toURI().toString()), tracker.announceUrl)
+
+            ustadTorrentManager.addTorrent(container.containerUid)
 
             repo.containerDao.findByUid(container.containerUid)
 

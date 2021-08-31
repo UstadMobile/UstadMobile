@@ -1,7 +1,7 @@
 package com.ustadmobile.core.catalog.contenttype
 
+import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.Endpoint
-import io.github.aakira.napier.Napier
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.ContentJobProgressListener
 import com.ustadmobile.core.contentjob.MetadataResult
@@ -12,6 +12,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.io.ext.addTorrentFileFromContainer
 import com.ustadmobile.core.io.ext.getLocalUri
+import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ShrinkUtils
 import com.ustadmobile.core.util.ext.fitWithin
@@ -23,13 +24,14 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJobItem
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
-import java.lang.IllegalArgumentException
 
 class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoint, override val di: DI): VideoTypePlugin() {
 
@@ -40,6 +42,10 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
     val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
     val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
+
+    private val tracker: Tracker = di.direct.instance()
+
+    private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
     override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
         return getEntry(uri, process)
@@ -82,7 +88,10 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
                     di,
                     ContainerAddOptions(containerFolderUri))
 
-            repo.addTorrentFileFromContainer(container.containerUid, DoorUri.parse(torrentDir.toURI().toString()))
+            repo.addTorrentFileFromContainer(container.containerUid,
+                    DoorUri.parse(torrentDir.toURI().toString()), tracker.announceUrl)
+
+            ustadTorrentManager.addTorrent(container.containerUid)
 
             container
         }

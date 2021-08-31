@@ -22,6 +22,7 @@ import java.util.zip.ZipInputStream
 import com.ustadmobile.door.ext.openInputStream
 import org.kodein.di.DI
 import com.ustadmobile.core.contentformats.har.HarEntry
+import com.ustadmobile.core.util.createSymLink
 import java.util.Base64
 
 actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: DoorUri,
@@ -50,19 +51,30 @@ actual suspend fun UmAppDatabase.addFileToContainer(containerUid: Long, fileUri:
             addOptions, "", pathInContainer, context,  di)
 }
 
-actual suspend fun UmAppDatabase.addTorrentFileFromContainer(containerUid: Long, torrentDirUri: com.ustadmobile.door.DoorUri){
+actual suspend fun UmAppDatabase.addTorrentFileFromContainer(
+        containerUid: Long,
+        torrentDirUri: com.ustadmobile.door.DoorUri,
+        trackerUrl: String){
 
+    val repo = this as? DoorDatabaseRepository
+            ?: throw IllegalStateException("Must use repo for addTorrentFileFromContainer")
+    val db = repo.db as UmAppDatabase
     val torrentServerFolder = torrentDirUri.toFile()
 
     val torrentFile = File(torrentServerFolder, "$containerUid.torrent")
 
-    val fileList = containerEntryDao.findByContainer(containerUid)
+    val fileList = db.containerEntryDao.findByContainer(containerUid)
+
+    val sortedList = fileList.sortedBy {
+        it.containerEntryFile?.cefMd5
+    }
 
     val torrentBuilder = MetadataBuilder()
+            .addTracker(trackerUrl)
             .setDirectoryName("container$containerUid")
             .setCreatedBy("UstadMobile")
 
-    fileList.forEach {
+    sortedList.forEach {
         val path = it.containerEntryFile?.cefPath ?: return@forEach
         torrentBuilder.addFile(File(path))
     }
@@ -97,6 +109,8 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
                                                              di: DI) {
 
     val storageDirFile = addOptions.storageDirUri.toFile()
+    val containerDirFolder = File(storageDirFile, containerUid.toString())
+    containerDirFolder.mkdirs()
 
     if(file.isFile) {
         //add the file
@@ -124,7 +138,7 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
         var containerFile = containerEntryFileDao.findEntryByMd5Sum(md5Sum.encodeBase64())
 
         if(containerFile == null) {
-            val finalDestFile = File(storageDirFile, md5Hex)
+            val finalDestFile = File(containerDirFolder, md5Hex)
             if(!compress && addOptions.moveFiles) {
                 if(!file.renameTo(finalDestFile))
                     throw IOException("Could not rename $file to $finalDestFile")
@@ -136,6 +150,14 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
             containerFile = finalDestFile.toContainerEntryFile(totalSize = file.length(),
                     md5Sum =  md5Sum, gzipped = compress).apply {
                 this.cefUid = containerEntryFileDao.insertAsync(this)
+            }
+        }else{
+            val oldPath = containerFile.cefPath
+            if(oldPath != null){
+                val target = File(containerDirFolder, File(oldPath).name)
+                if(!target.exists()){
+                    createSymLink(oldPath, target.path)
+                }
             }
         }
 
@@ -171,17 +193,22 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
  */
 private suspend fun UmAppDatabase.insertOrLookupContainerEntryFile(src: InputStream,
                                                                    originalLength: Long,
+                                                                   containerUid: Long,
                                                                    pathInContainer: String,
                                                                    addOptions: ContainerAddOptions) : ContainerEntryFile {
 
     val storageDirFile = addOptions.storageDirUri.toFile()
+
+    val containerDirFolder = File(storageDirFile, containerUid.toString())
+    containerDirFolder.mkdirs()
+
     val tmpFile = File(storageDirFile, "${systemTimeInMillis()}.tmp")
     val gzip = addOptions.compressionFilter.shouldCompress(pathInContainer, null)
     val md5Sum = src.writeToFileAndGetMd5(tmpFile, gzip)
 
     var containerFile = containerEntryFileDao.findEntryByMd5Sum(md5Sum.encodeBase64())
     if(containerFile == null) {
-        val finalDestFile = File(storageDirFile, md5Sum.toHexString())
+        val finalDestFile = File(containerDirFolder, md5Sum.toHexString())
         if(!tmpFile.renameTo(finalDestFile))
             throw IOException("Could not rename $tmpFile to $finalDestFile")
 
@@ -189,6 +216,13 @@ private suspend fun UmAppDatabase.insertOrLookupContainerEntryFile(src: InputStr
             this.cefUid = containerEntryFileDao.insert(this)
         }
     }else {
+        val oldPath = containerFile.cefPath
+        if(oldPath != null){
+            val target = File(containerDirFolder, File(oldPath).name)
+            if(!target.exists()){
+                createSymLink(oldPath, target.path)
+            }
+        }
         tmpFile.delete()
     }
 
@@ -203,7 +237,7 @@ suspend fun UmAppDatabase.addContainerFromUri(containerUid: Long, uri: com.ustad
     val repo = this as? DoorDatabaseRepository
             ?: throw IllegalStateException("Must use repo for addFileToContainer")
     val db = repo.db as UmAppDatabase
-    val containerFile = db.insertOrLookupContainerEntryFile(inputStream, size, nameInContainer, addOptions)
+    val containerFile = db.insertOrLookupContainerEntryFile(inputStream, size, containerUid, nameInContainer, addOptions)
 
     ContainerEntry().apply {
         this.cePath = nameInContainer
@@ -227,7 +261,7 @@ suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
                 val zipEntryVal = zipEntry ?: throw IllegalStateException("ZipEntry is not null in loop")
                 val nameInZip = zipEntryVal.name
                 val containerFile = db.insertOrLookupContainerEntryFile(zipIn, zipEntryVal.size,
-                        nameInZip, addOptions)
+                        containerUid, nameInZip, addOptions)
 
                 val entryPath = addOptions.fileNamer.nameContainerFile(nameInZip, nameInZip)
 

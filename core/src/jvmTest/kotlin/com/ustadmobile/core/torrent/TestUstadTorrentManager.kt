@@ -2,6 +2,7 @@ package com.ustadmobile.core.torrent
 
 import com.google.gson.Gson
 import com.turn.ttorrent.common.creation.MetadataBuilder
+import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
@@ -27,6 +28,7 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.rest.ContainerDownload
 import com.ustadmobile.lib.rest.TorrentFileRoute
+import com.ustadmobile.lib.rest.TorrentTracker
 import io.ktor.application.*
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
@@ -50,6 +52,7 @@ import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
 import java.io.File
 import java.net.InetAddress
+import java.net.URL
 import kotlin.random.Random
 import kotlin.test.assertTrue
 
@@ -111,6 +114,7 @@ class TestUstadTorrentManager {
         serverRepo = serverDb.asRepository(RepositoryConfig.repositoryConfig(Any(), "http://localhost/",
                 nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))
         val endpointScope = EndpointScope()
+
         val torrentServerFolder = File(serverFolder, "torrent")
         torrentServerFolder.mkdirs()
         val containerServerFolder = File(serverFolder,"container")
@@ -119,21 +123,21 @@ class TestUstadTorrentManager {
         serverContainer = Container().apply {
             containerUid = serverRepo.containerDao.insert(this)
         }
-        val containerFiles = File(containerServerFolder,"${serverContainer.containerUid}")
-        containerFiles.mkdirs()
         runBlocking {
             serverRepo.addEntriesToContainerFromZipResource(serverContainer.containerUid, this::class.java,
                     "/com/ustadmobile/core/contentformats/epub/test.epub",
-                    ContainerAddOptions(containerFiles.toDoorUri()))
+                    ContainerAddOptions(containerServerFolder.toDoorUri()))
         }
+
+        val trackerUrl = URL("http://127.0.0.1:8000/announce")
 
         val torrentFile = File(torrentServerFolder, "${serverContainer.containerUid}.torrent")
 
         val fileList = serverDb.containerEntryDao.findByContainer(serverContainer.containerUid)
 
         val epubTorrentBuilder = MetadataBuilder()
-                .addTracker("http://192.168.1.118:8000/announce")
-                .setDirectoryName("container")
+                .addTracker(trackerUrl.toString())
+                .setDirectoryName("container${serverContainer.containerUid}")
                 .setCreatedBy("UstadMobile")
 
         fileList.forEach {
@@ -144,17 +148,17 @@ class TestUstadTorrentManager {
 
 
         server = embeddedServer(Netty, 8089) {
-            install(DIFeature) {
+             install(DIFeature) {
                 registerContextTranslator { call: ApplicationCall ->
                     Endpoint("localhost")
                 }
-
                 bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
                     serverDb
                 }
 
                 bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
                     serverRepo
+
                 }
 
                 bind<Gson>() with singleton {
@@ -173,12 +177,27 @@ class TestUstadTorrentManager {
                 bind<UstadCommunicationManager>() with singleton {
                     UstadCommunicationManager()
                 }
+                bind<Tracker>() with singleton {
+                    Tracker(trackerUrl.port, trackerUrl.toString())
+                }
+                bind<TorrentTracker>() with scoped(EndpointScope.Default).singleton {
+                    TorrentTracker(endpoint = context, di)
+                }
                 onReady {
-                    instance<UstadCommunicationManager>().start(InetAddress.getByName("192.168.1.118"))
+                    val tracker = instance<Tracker>()
+                    //needed to announce urls
+                    tracker.setAcceptForeignTorrents(true)
+                    tracker.start(true)
+                    instance<UstadCommunicationManager>().start(InetAddress.getByName(trackerUrl.host))
                     GlobalScope.launch {
+                        val torrentTracker: TorrentTracker = di.on(Endpoint("localhost")).direct.instance()
+                        torrentTracker.start()
+
                         val ustadTorrentManager: UstadTorrentManager = di.on(Endpoint("localhost")).direct.instance()
                         ustadTorrentManager.start()
+
                     }
+
                 }
             }
 
@@ -222,7 +241,7 @@ class TestUstadTorrentManager {
                 ContainerTorrentDownloadJob(endpoint = context, di = di)
             }
             onReady {
-                instance<UstadCommunicationManager>().start(InetAddress.getByName("192.168.1.118"))
+                instance<UstadCommunicationManager>().start(InetAddress.getByName(trackerUrl.host))
             }
         }
 
@@ -237,21 +256,19 @@ class TestUstadTorrentManager {
         val clientContainer = Container().apply {
             containerUid = repo.containerDao.insert(this)
         }
-        val clientContainerFiles = File(containerClientFolder,"${clientContainer.containerUid}")
-        clientContainerFiles.mkdirs()
         runBlocking {
             repo.addEntryToContainerFromResource(clientContainer.containerUid,
                     this::class.java, "/com/ustadmobile/core/contentformats/epub/image_1.jpg",
                     "image1", localDi,
-                    ContainerAddOptions(clientContainerFiles.toDoorUri()))
+                    ContainerAddOptions(containerClientFolder.toDoorUri()))
             repo.addEntryToContainerFromResource(clientContainer.containerUid,
                     this::class.java, "/com/ustadmobile/core/contentformats/epub/image_2.jpg",
                     "image2", localDi,
-                    ContainerAddOptions(clientContainerFiles.toDoorUri()))
+                    ContainerAddOptions(containerClientFolder.toDoorUri()))
             repo.addEntryToContainerFromResource(clientContainer.containerUid,
                     this::class.java, "/com/ustadmobile/core/contentformats/epub/image_3.jpg",
                     "image3", localDi,
-                    ContainerAddOptions(clientContainerFiles.toDoorUri()))
+                    ContainerAddOptions(containerClientFolder.toDoorUri()))
         }
 
         GlobalScope.launch {
