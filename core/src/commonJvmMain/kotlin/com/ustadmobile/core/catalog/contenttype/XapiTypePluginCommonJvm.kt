@@ -43,7 +43,7 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
 
 
     override val pluginId: Int
-        get() = TODO("Not yet implemented")
+        get() = PLUGIN_ID
 
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
@@ -84,7 +84,7 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
                     leaf = true
                     entryId = activity.id
                 }
-                MetadataResult(entry)
+                MetadataResult(entry, PLUGIN_ID)
             }
         }
     }
@@ -128,6 +128,8 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
     companion object {
 
         const val TINCAN_FILENAME = "tincan.xml"
+
+        const val PLUGIN_ID = 8
 
     }
 }

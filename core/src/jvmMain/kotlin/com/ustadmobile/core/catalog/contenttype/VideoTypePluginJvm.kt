@@ -122,7 +122,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
                 this.leaf = true
                 this.contentTypeFlag = ContentEntry.TYPE_VIDEO
             }
-            MetadataResult(entry)
+            MetadataResult(entry, VideoTypePlugin.PLUGIN_ID)
         }
     }
 

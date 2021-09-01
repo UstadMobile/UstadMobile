@@ -52,6 +52,7 @@ import kotlin.jvm.Volatile
     ClazzAssignmentRollUp::class,
     PersonAuth2::class,
     UserSession::class,
+    ContentJob::class, ContentJobItem::class,
 
     //Door Helper entities
     SqliteChangeSeqNums::class,
@@ -64,7 +65,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 80)
+], version = 81)
 @MinSyncVersion(60)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -292,6 +293,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val personAuth2Dao: PersonAuth2Dao
 
     abstract val userSessionDao: UserSessionDao
+
+    abstract val contentJobItemDao: ContentJobItemDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO

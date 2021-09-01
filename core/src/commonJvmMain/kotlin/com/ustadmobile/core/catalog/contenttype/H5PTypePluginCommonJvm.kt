@@ -76,7 +76,7 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
     private val gson: Gson = di.direct.instance()
 
     override val pluginId: Int
-        get() = TODO("Not yet implemented")
+        get() = PLUGIN_ID
 
     override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
         val mimeType = uri.guessMimeType(context, di)
@@ -117,7 +117,7 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
                     this.author = author
                     leaf = true
                 }
-                MetadataResult(entry)
+                MetadataResult(entry, EpubTypePluginCommonJvm.PLUGIN_ID)
             }
         }
     }
@@ -213,5 +213,7 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
     companion object {
 
         private const val H5P_PATH = "h5p.json"
+
+        const val PLUGIN_ID = 3
     }
 }
