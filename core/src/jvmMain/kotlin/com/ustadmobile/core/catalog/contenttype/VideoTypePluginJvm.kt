@@ -1,5 +1,6 @@
 package com.ustadmobile.core.catalog.contenttype
 
+import com.google.gson.Gson
 import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
@@ -20,10 +21,7 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.toFile
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.db.entities.*
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -44,6 +42,8 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
     val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
 
     private val tracker: Tracker = di.direct.instance()
+
+    private val gson: Gson = di.direct.instance()
 
     private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
@@ -88,8 +88,11 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
                     di,
                     ContainerAddOptions(containerFolderUri))
 
-            repo.addTorrentFileFromContainer(container.containerUid,
-                    DoorUri.parse(torrentDir.toURI().toString()), tracker.announceUrl)
+            repo.addTorrentFileFromContainer(
+                    container.containerUid,
+                    DoorUri.parse(torrentDir.toURI().toString()),
+                    tracker.announceUrl, containerFolderUri
+            )
 
             ustadTorrentManager.addTorrent(container.containerUid)
 

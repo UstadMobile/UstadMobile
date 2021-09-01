@@ -20,4 +20,5 @@ expect suspend fun UmAppDatabase.addFileToContainer(containerUid: Long, fileUri:
 
 expect suspend fun UmAppDatabase.addTorrentFileFromContainer(containerUid: Long,
                                                              torrentDirUri: DoorUri,
-                                                             trackerUrl: String)
+                                                             trackerUrl: String,
+                                                             containerFolderUri: DoorUri)

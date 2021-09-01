@@ -1,7 +1,6 @@
 package com.ustadmobile.core.torrent
 
 import com.google.gson.Gson
-import com.turn.ttorrent.common.creation.MetadataBuilder
 import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
@@ -30,6 +29,7 @@ import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.rest.ContainerDownload
 import com.ustadmobile.lib.rest.TorrentFileRoute
 import com.ustadmobile.lib.rest.TorrentTracker
+import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
 import io.ktor.application.*
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
@@ -136,8 +136,10 @@ class TestUstadTorrentManager {
         val trackerUrl = URL("http://127.0.0.1:8000/announce")
 
         runBlocking {
-            serverRepo.addTorrentFileFromContainer(serverContainer.containerUid,
-                    torrentServerFolder.toDoorUri(), trackerUrl.toString())
+            serverRepo.addTorrentFileFromContainer(
+                    serverContainer.containerUid,
+                    torrentServerFolder.toDoorUri(), trackerUrl.toString(), containerServerFolder.toDoorUri()
+            )
         }
 
         server = embeddedServer(Netty, 8089) {
@@ -274,6 +276,7 @@ class TestUstadTorrentManager {
                 downloadComplete = true
             }
             assertTrue(downloadComplete)
+            db.assertContainerEqualToOther(serverContainer.containerUid, serverDb)
         }
 
     }
@@ -314,6 +317,7 @@ class TestUstadTorrentManager {
                 downloadComplete = true
             }
             assertTrue(downloadComplete)
+            db.assertContainerEqualToOther(serverContainer.containerUid, serverDb)
         }
     }
 

@@ -110,8 +110,11 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
                     localUri,
                     ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
-            repo.addTorrentFileFromContainer(container.containerUid,
-                    DoorUri.parse(torrentDir.toURI().toString()), tracker.announceUrl)
+            repo.addTorrentFileFromContainer(
+                    container.containerUid,
+                    DoorUri.parse(torrentDir.toURI().toString()),
+                    tracker.announceUrl, containerFolderUri
+            )
 
             ustadTorrentManager.addTorrent(container.containerUid)
 

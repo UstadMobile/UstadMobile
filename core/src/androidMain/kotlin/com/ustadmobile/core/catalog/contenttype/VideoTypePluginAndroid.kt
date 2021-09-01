@@ -4,6 +4,7 @@ import android.content.Context
 import android.media.MediaCodecInfo
 import android.media.MediaExtractor
 import android.media.MediaFormat
+import com.google.gson.Gson
 import io.github.aakira.napier.Napier
 import com.linkedin.android.litr.MediaTransformer
 import com.linkedin.android.litr.TransformationListener
@@ -45,6 +46,8 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
+
+    private val gson: Gson = di.direct.instance()
 
     private val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
@@ -177,9 +180,11 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
             }
             videoTempDir.delete()
 
-            repo.addTorrentFileFromContainer(container.containerUid,
+            repo.addTorrentFileFromContainer(
+                    container.containerUid,
                     DoorUri.parse(torrentDir.toURI().toString()),
-                    tracker.announceUrl)
+                    tracker.announceUrl, containerFolderUri
+            )
 
             ustadTorrentManager.addTorrent(container.containerUid)
 
