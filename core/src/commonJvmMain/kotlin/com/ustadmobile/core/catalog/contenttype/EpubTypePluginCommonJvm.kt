@@ -107,7 +107,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
     }
 
     override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
-        val jobUri = jobItem.fromUri ?: return ProcessResult(404)
+        val jobUri = jobItem.sourceUri ?: return ProcessResult(404)
         val container = withContext(Dispatchers.Default) {
 
             val uri = DoorUri.parse(jobUri)

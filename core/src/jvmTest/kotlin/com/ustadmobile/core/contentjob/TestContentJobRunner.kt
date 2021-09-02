@@ -107,6 +107,19 @@ class TestContentJobRunner {
         Assert.assertTrue("Job completed", done)
     }
 
+    fun givenJobStartsWithoutAcceptableConnectivity_whenConnectivityAcceptable_thenShouldRunJobItems() {
+
+    }
+
+    fun givenJobCreated_whenJobItemFails_thenShouldRetry() {
+
+    }
+
+    fun givenJobCreated_whenJobItemFailsAndExceedsAllowableAttempts_thenShouldFail() {
+
+    }
+
+
     companion object {
         val TEST_PLUGIN_ID = 42
     }

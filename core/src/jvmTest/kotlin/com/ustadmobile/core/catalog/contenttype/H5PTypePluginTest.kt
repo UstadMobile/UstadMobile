@@ -1,7 +1,6 @@
 package com.ustadmobile.core.catalog.contenttype
 
 
-import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentjob.ProcessContext
@@ -115,7 +114,7 @@ class H5PTypePluginTest {
                 title = "hello"
             })
 
-            val job = ContentJobItem(fromUri = doorUri.uri.toString(),
+            val job = ContentJobItem(sourceUri = doorUri.uri.toString(),
                     toUri = containerTmpDir.toURI().toString(),
                     cjiParentContentEntryUid = uid)
 

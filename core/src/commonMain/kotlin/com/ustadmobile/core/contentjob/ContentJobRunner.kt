@@ -3,23 +3,22 @@ package com.ustadmobile.core.contentjob
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.EventCollator
 import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.core.util.ext.emptyRecursively
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
-import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
-import kotlinx.atomicfu.atomic
+import com.ustadmobile.lib.db.entities.ContentJobItemProgressUpdate
+import com.ustadmobile.lib.db.entities.toProgressUpdate
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
-import kotlinx.coroutines.sync.Mutex
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
-import kotlin.coroutines.CoroutineContext
 import kotlin.jvm.Volatile
 import kotlin.math.min
 
@@ -42,6 +41,8 @@ class ContentJobRunner(
     private val db: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_DB)
 
     private val contentPluginManager: ContentPluginManager by on(endpoint).instance()
+
+    private val eventCollator = EventCollator(1000, this::commitProgressUpdates)
 
     @ExperimentalCoroutinesApi
     private fun CoroutineScope.produceJobs() = produce<ContentJobItem> {
@@ -84,6 +85,9 @@ class ContentJobRunner(
                 plugin.processJob(item, processContext, this@ContentJobRunner)
                 println("Processor #$id completed job #${item.cjiUid}")
             }catch(e: Exception) {
+                if(e is CancellationException)
+                    throw e
+
                 e.printStackTrace()
             }finally {
                 activeJobItemIds -= item.cjiUid
@@ -99,7 +103,13 @@ class ContentJobRunner(
     private var jobItemProducer : ReceiveChannel<ContentJobItem>? = null
 
     override fun onProgress(contentJobItem: ContentJobItem) {
+        GlobalScope.launch {
+            eventCollator.send(contentJobItem.toProgressUpdate())
+        }
+    }
 
+    private suspend fun commitProgressUpdates(updates: List<ContentJobItemProgressUpdate>) {
+        db.contentJobItemDao.commitProgressUpdates(updates)
     }
 
 

@@ -18,7 +18,6 @@ import com.ustadmobile.core.util.ShrinkUtils
 import com.ustadmobile.core.util.ext.fitWithin
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -54,7 +53,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
     override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
         withContext(Dispatchers.Default) {
 
-            val uri = jobItem.fromUri ?: throw IllegalStateException("missing uri")
+            val uri = jobItem.sourceUri ?: throw IllegalStateException("missing uri")
             val videoUri = DoorUri.parse(uri)
             val videoFile = process.getLocalUri(videoUri, context, di).toFile()
             val contentEntryUid = processMetadata(jobItem, process, context, endpoint)
@@ -119,7 +118,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
                 this.leaf = true
                 this.contentTypeFlag = ContentEntry.TYPE_VIDEO
             }
-            MetadataResult(entry, VideoTypePlugin.PLUGIN_ID)
+            MetadataResult(entry, PLUGIN_ID)
         }
     }
 

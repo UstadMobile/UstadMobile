@@ -61,7 +61,7 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
     override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, jobProgress: ContentJobProgressListener): ProcessResult {
         withContext(Dispatchers.Default) {
 
-            val uri = jobItem.fromUri ?: throw IllegalStateException("missing uri")
+            val uri = jobItem.sourceUri ?: throw IllegalStateException("missing uri")
             val videoUri = DoorUri.parse(uri)
             val localUri = process.getLocalUri(videoUri, context, di)
             val contentEntryUid = processMetadata(jobItem, process,context, endpoint)

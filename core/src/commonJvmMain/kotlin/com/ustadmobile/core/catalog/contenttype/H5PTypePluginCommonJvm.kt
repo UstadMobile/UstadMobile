@@ -120,7 +120,7 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
     }
 
     override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
-        val jobUri = jobItem.fromUri ?: return ProcessResult(404)
+        val jobUri = jobItem.sourceUri ?: return ProcessResult(404)
         val container = withContext(Dispatchers.Default) {
 
             val doorUri = DoorUri.parse(jobUri)

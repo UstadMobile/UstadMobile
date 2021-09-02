@@ -17,18 +17,21 @@ data class ContentJobItem(
      *  - Web resource that needs scraped e.g. https://khanacademy.org/topic/exercise
      *  - A local file URI e.g. file:///dir/file.epub
      */
-    var fromUri: String? = null,
-
-    /**
-     * Directory where the resulting container files should be saved. If null, then this means
-     * use the default container storage directory.
-     */
-    var toUri: String? = null,
+    var sourceUri: String? = null,
 
     var cjiIsLeaf: Boolean = true,
 
+    /**
+     * Where the ContentEntryUid is set to 0, this indicates that the job must extract metadata
+     * from the sourceUri and generate a new ContentEntry.
+     */
     var cjiContentEntryUid: Long = 0,
 
+    /**
+     * The ParentContentEntryUid can be set when the ContentEntryUid is 0. The job runner will
+     * then create a ContentEntryParentChildJoin to the specified parent when it creates the
+     * ContentEntry itself.
+     */
     var cjiParentContentEntryUid: Long = 0,
 
     var cjiContainerUid: Long = 0,

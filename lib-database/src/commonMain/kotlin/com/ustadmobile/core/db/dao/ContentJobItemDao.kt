@@ -3,11 +3,13 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Transaction
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.db.entities.ContentJobItem.Companion.ACCEPT_NONE
 import com.ustadmobile.lib.db.entities.ContentJobItem.Companion.ACCEPT_UNMETERED
+import com.ustadmobile.lib.db.entities.ContentJobItemProgressUpdate
 
 @Dao
 abstract class ContentJobItemDao {
@@ -50,8 +52,27 @@ abstract class ContentJobItemDao {
         SELECT NOT EXISTS(
                SELECT cjiUid 
                  FROM ContentJobItem
-                WHERE cjiStatus < ${JobStatus.COMPLETE_MIN}) 
+                WHERE cjiJobUid = :jobUid
+                  AND cjiStatus < ${JobStatus.COMPLETE_MIN}) 
     """)
     abstract suspend fun isJobDone(jobUid: Long): Boolean
+
+    @Query("""
+        UPDATE ContentJobItem
+           SET cjiProgress = :cjiProgress,
+               cjiTotal = :cjiTotal
+         WHERE cjiUid = :cjiUid     
+    """)
+    abstract suspend fun updateItemProgress(cjiUid: Long, cjiProgress: Long, cjiTotal: Long)
+
+    @Transaction
+    open suspend fun commitProgressUpdates(updates: List<ContentJobItemProgressUpdate>) {
+        updates.forEach {
+            updateItemProgress(it.cjiUid, it.cjiProgress, it.cjiTotal)
+        }
+    }
+
+
+
 
 }

@@ -17,6 +17,7 @@ import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_STUDENT_GROUP
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_TEACHER_GROUP
 import com.ustadmobile.lib.util.randomString
 import kotlin.js.JsName
+import kotlin.jvm.JvmField
 import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
 
@@ -5170,6 +5171,25 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        @JvmField
+        val fooVar = 2
+
+        val MIGRATION_80_81 = DoorMigrationStatementList(80, 81) { database ->
+            if(database.dbType() == DoorDbType.SQLITE) {
+                listOf(
+                    "CREATE TABLE IF NOT EXISTS ContentJob (  toUri  TEXT , cjProgress  INTEGER  NOT NULL , cjTotal  INTEGER  NOT NULL , params  TEXT , cjUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )",
+                    "CREATE TABLE IF NOT EXISTS ContentJobItem (  cjiJobUid  INTEGER  NOT NULL , sourceUri  TEXT , cjiIsLeaf  INTEGER  NOT NULL , cjiContentEntryUid  INTEGER  NOT NULL , cjiParentContentEntryUid  INTEGER  NOT NULL , cjiContainerUid  INTEGER  NOT NULL , cjiProgress  INTEGER  NOT NULL , cjiTotal  INTEGER  NOT NULL , cjiStatus  INTEGER  NOT NULL , cjiConnectivityAcceptable  INTEGER  NOT NULL , cjiPluginId  INTEGER  NOT NULL , cjiUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )",
+                    "ALTER TABLE Site ADD COLUMN torrentAnnounceUrl TEXT"
+                )
+            }else {
+                listOf(
+                    "CREATE TABLE IF NOT EXISTS ContentJob (  toUri  TEXT , cjProgress  BIGINT  NOT NULL , cjTotal  BIGINT  NOT NULL , params  TEXT , cjUid  BIGSERIAL  PRIMARY KEY  NOT NULL )",
+                    "CREATE TABLE IF NOT EXISTS ContentJobItem (  cjiJobUid  BIGINT  NOT NULL , sourceUri  TEXT , cjiIsLeaf  BOOL  NOT NULL , cjiContentEntryUid  BIGINT  NOT NULL , cjiParentContentEntryUid  BIGINT  NOT NULL , cjiContainerUid  BIGINT  NOT NULL , cjiProgress  BIGINT  NOT NULL , cjiTotal  BIGINT  NOT NULL , cjiStatus  INTEGER  NOT NULL , cjiConnectivityAcceptable  INTEGER  NOT NULL , cjiPluginId  INTEGER  NOT NULL , cjiUid  BIGSERIAL  PRIMARY KEY  NOT NULL )",
+                    "ALTER TABLE Site ADD COLUMN torrentAnnounceUrl TEXT"
+                )
+            }
+        }
+
         fun migrationList(nodeId: Int) = listOf<DoorMigration>(
             MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
             MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
@@ -5182,7 +5202,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67, migrate67to68(nodeId),
             MIGRATION_68_69, MIGRATION_69_70, MIGRATION_70_71, MIGRATION_71_72,
             MIGRATION_72_73, MIGRATION_73_74, MIGRATION_74_75, MIGRATION_75_76,
-            MIGRATION_76_77, MIGRATION_77_78, MIGRATION_78_79, MIGRATION_78_79
+            MIGRATION_76_77, MIGRATION_77_78, MIGRATION_78_79, MIGRATION_78_79,
+            MIGRATION_79_80, MIGRATION_80_81
         )
 
         internal fun migrate67to68(nodeId: Int)= DoorMigrationSync(67, 68) { database ->

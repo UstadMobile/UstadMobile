@@ -14,7 +14,7 @@ import org.kodein.di.on
 
 suspend fun ContentPlugin.processMetadata(contentJob: ContentJobItem, process: ProcessContext, context: Any, endpoint: Endpoint): Long{
     if(contentJob.cjiContentEntryUid == 0L){
-        val uri = contentJob.fromUri ?: throw IllegalStateException("missing uri")
+        val uri = contentJob.sourceUri ?: throw IllegalStateException("missing uri")
         val doorUri = DoorUri.parse(uri)
         val localUri = process.getLocalUri(doorUri, context, di)
         val metadata = extractMetadata(localUri, process) ?: throw IllegalArgumentException("missing metadata")

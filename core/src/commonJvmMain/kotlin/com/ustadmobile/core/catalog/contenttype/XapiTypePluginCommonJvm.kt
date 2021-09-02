@@ -90,7 +90,7 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
     }
 
     override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
-        val uri = jobItem.fromUri ?: return ProcessResult(404)
+        val uri = jobItem.sourceUri ?: return ProcessResult(404)
         val container = withContext(Dispatchers.Default) {
 
             val contentEntryUid = processMetadata(jobItem, process,context, endpoint)

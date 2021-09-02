@@ -47,7 +47,7 @@ class ContainerTorrentDownloadJob(private val endpoint: Endpoint, override val d
     override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
 
         // check valid uri format, valid endpoint, valid container
-        val containerUid = doorUri.uri.toString().substringAfterLast("/").toLong()
+        val containerUid = uri.uri.toString().substringAfterLast("/").toLong()
 
         val container = repo.containerDao.findByUid(containerUid) ?: return null
 
