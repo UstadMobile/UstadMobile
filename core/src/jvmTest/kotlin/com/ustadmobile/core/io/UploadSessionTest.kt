@@ -64,9 +64,6 @@ class UploadSessionTest {
         Napier.baseDebugIfNotEnabled()
         di = DI {
             import(ustadTestRule.diModule)
-            bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(ustadTestRule.endpointScope).singleton {
-                temporaryFolder.newFolder()
-            }
         }
 
         val siteUrl: String = di.direct.instance<UstadAccountManager>().activeAccount.endpointUrl

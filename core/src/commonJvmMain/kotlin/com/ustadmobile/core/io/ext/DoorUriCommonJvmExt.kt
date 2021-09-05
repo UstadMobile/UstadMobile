@@ -38,3 +38,12 @@ actual suspend fun DoorUri.downloadUrlIfRemote(destination: DoorUri, di: DI) {
         }
     }
 }
+
+
+actual suspend fun DoorUri.emptyRecursively() {
+    withContext(Dispatchers.IO) {
+        toFile().listFiles()?.forEach {
+            it.deleteRecursively()
+        }
+    }
+}

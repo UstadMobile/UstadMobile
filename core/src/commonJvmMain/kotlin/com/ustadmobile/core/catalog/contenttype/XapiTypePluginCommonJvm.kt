@@ -50,8 +50,6 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
 
     private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
 
-    private val tracker: Tracker = di.direct.instance<Tracker>()
-
     private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
     override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
@@ -93,6 +91,8 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
 
             val contentEntryUid = processMetadata(jobItem, process,context, endpoint)
             val localUri = process.getLocalUri(DoorUri.parse(uri), context, di)
+            val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
+                    ?: throw IllegalArgumentException("missing tracker url")
 
             val container = Container().apply {
                 containerContentEntryUid = contentEntryUid
@@ -111,7 +111,7 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
             repo.addTorrentFileFromContainer(
                     container.containerUid,
                     DoorUri.parse(torrentDir.toURI().toString()),
-                    tracker.announceUrl, containerFolderUri
+                    trackerUrl, containerFolderUri
             )
 
             ustadTorrentManager.addTorrent(container.containerUid)

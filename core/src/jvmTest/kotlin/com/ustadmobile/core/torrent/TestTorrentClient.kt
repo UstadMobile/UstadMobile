@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -78,8 +79,10 @@ class TestTorrentClient {
         }
 
         runBlocking {
-            containerDownloadJob.processJob(ContentJobItem(cjiContainerUid = 225824306785447936),
-                    ProcessContext(DoorUri.parse(""), params = mutableMapOf())){
+            containerDownloadJob.processJob(ContentJobItemAndContentJob().apply{
+                contentJobItem = ContentJobItem(cjiContainerUid = 225824306785447936)
+            },
+                ProcessContext(DoorUri.parse(""), params = mutableMapOf())){
             }
         }
 

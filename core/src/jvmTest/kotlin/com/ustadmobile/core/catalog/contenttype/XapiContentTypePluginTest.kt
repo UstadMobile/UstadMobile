@@ -8,7 +8,9 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockWebServer
@@ -92,15 +94,19 @@ class XapiContentTypePluginTest {
                 title = "hello"
             })
 
-            val job = ContentJobItem(sourceUri = doorUri.uri.toString(),
-                    toUri = containerTmpDir.toURI().toString(),
+            val jobItem = ContentJobItem(sourceUri = doorUri.uri.toString(),
                     cjiParentContentEntryUid = uid)
+            val job = ContentJob(toUri = containerTmpDir.toURI().toString())
+            val jobAndItem = ContentJobItemAndContentJob().apply{
+                this.contentJob = job
+                this.contentJobItem = jobItem
+            }
 
-            xapiPlugin.processJob(job, processContext) {
+            xapiPlugin.processJob(jobAndItem, processContext) {
 
             }
 
-            val container = repo.containerDao.findByUid(job.cjiContainerUid)!!
+            val container = repo.containerDao.findByUid(jobItem.cjiContainerUid)!!
 
             Assert.assertNotNull(container)
 

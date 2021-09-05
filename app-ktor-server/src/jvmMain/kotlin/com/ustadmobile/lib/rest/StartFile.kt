@@ -6,7 +6,9 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import io.ktor.application.*
 import io.ktor.response.*
 import io.ktor.routing.*
@@ -35,10 +37,14 @@ fun Route.StartFile(){
         val containerFolder: File = closestDI().on(context).direct.instance(DiTag.TAG_DEFAULT_CONTAINER_DIR)
         if(metadataResult != null){
             val uid = repo.contentEntryDao.insert(metadataResult.entry)
-            val job = ContentJobItem(fromUri = epub.toURI().toString(),
-                    toUri = containerFolder.toURI().toString(),
-                    cjiContentEntryUid = uid)
-            epubPlugin.processJob(job, processContext){
+            val jobItem = ContentJobItem(sourceUri = epub.toURI().toString(),
+                    cjiParentContentEntryUid = uid)
+            val job = ContentJob(toUri = containerFolder.toURI().toString())
+            val jobAndItem = ContentJobItemAndContentJob().apply{
+                this.contentJob = job
+                this.contentJobItem = jobItem
+            }
+            epubPlugin.processJob(jobAndItem, processContext){
             }
             call.respond("OK")
         }

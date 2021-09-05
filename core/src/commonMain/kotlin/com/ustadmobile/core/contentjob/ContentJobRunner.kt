@@ -5,7 +5,7 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.EventCollator
 import com.ustadmobile.core.util.createTemporaryDir
-import com.ustadmobile.core.util.ext.emptyRecursively
+import com.ustadmobile.core.io.ext.emptyRecursively
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.lib.db.entities.ContentJobItem

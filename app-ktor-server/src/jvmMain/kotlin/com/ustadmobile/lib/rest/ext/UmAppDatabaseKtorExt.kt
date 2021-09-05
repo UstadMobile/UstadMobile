@@ -22,16 +22,20 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
 
-internal fun UmAppDatabase.insertDefaultSite() {
+internal fun UmAppDatabase.insertDefaultSite(trackerUrl: String) {
     val (db, repo) = requireDbAndRepo()
-    if(db.siteDao.getSite() == null) {
+    val site = db.siteDao.getSite()
+    if(site == null) {
         repo.siteDao.insert(Site().apply {
             siteUid = 1L
             siteName = "My Site"
             guestLogin = false
             registrationAllowed = false
             authSalt = randomString(20)
+            torrentAnnounceUrl = trackerUrl
         })
+    }else if(site.torrentAnnounceUrl != trackerUrl){
+        throw Exception("tracker url not same, this cannot be changed")
     }
 }
 
@@ -81,8 +85,8 @@ suspend fun UmAppDatabase.initAdminUser(
     }
 }
 
-fun UmAppDatabase.ktorInitRepo() {
-    insertDefaultSite()
+fun UmAppDatabase.ktorInitRepo(trackerUrl: String) {
+    insertDefaultSite(trackerUrl)
 
     runBlocking {
         roleDao.insertDefaultRolesIfRequired()
