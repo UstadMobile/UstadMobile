@@ -29,6 +29,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
+import java.lang.IllegalArgumentException
 
 class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoint, override val di: DI): VideoTypePlugin() {
 
@@ -50,10 +51,11 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
         return getEntry(uri, process)
     }
 
-    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+        val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
         withContext(Dispatchers.Default) {
 
-            val uri = jobItem.sourceUri ?: throw IllegalStateException("missing uri")
+            val uri = contentJobItem.sourceUri ?: throw IllegalStateException("missing uri")
             val videoUri = DoorUri.parse(uri)
             val videoFile = process.getLocalUri(videoUri, context, di).toFile()
             val contentEntryUid = processMetadata(jobItem, process, context, endpoint)
@@ -79,7 +81,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
                 containerUid = repo.containerDao.insert(this)
             }
 
-            val containerFolder = jobItem.toUri ?: defaultContainerDir.toURI().toString()
+            val containerFolder = jobItem.contentJob?.toUri ?: defaultContainerDir.toURI().toString()
             val containerFolderUri = DoorUri.parse(containerFolder)
 
             repo.addFileToContainer(container.containerUid, newVideo.toDoorUri(), newVideo.name,

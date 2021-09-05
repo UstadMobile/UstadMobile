@@ -27,6 +27,7 @@ import kotlinx.serialization.json.Json
 import com.ustadmobile.core.contentformats.har.HarEntry
 import com.ustadmobile.core.torrent.ContainerTorrentDownloadJob.Companion.MANIFEST_FILE_NAME
 import com.ustadmobile.core.util.createSymLink
+import com.ustadmobile.lib.db.entities.ContainerManifest
 import java.util.Base64
 
 actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: DoorUri,
@@ -68,6 +69,8 @@ actual suspend fun UmAppDatabase.addTorrentFileFromContainer(
 
     val torrentFile = File(torrentServerFolder, "$containerUid.torrent")
 
+    val container = containerDao.findByUid(containerUid)
+
     val fileList = db.containerEntryDao.findByContainer(containerUid)
 
     val containerFolder = containerFolderUri.toFile()
@@ -97,9 +100,9 @@ actual suspend fun UmAppDatabase.addTorrentFileFromContainer(
         torrentBuilder.addFile(File(path))
     }
 
+    val containerManifest = ContainerManifest(container, entryFileMap)
     val manifestJson: String =  Json.encodeToString(
-            MapSerializer(String.serializer(), ListSerializer(String.serializer())),
-            entryFileMap)
+            ContainerManifest.serializer(), containerManifest)
     manifestFile.writeText(manifestJson)
 
     torrentBuilder.addFile(manifestFile)

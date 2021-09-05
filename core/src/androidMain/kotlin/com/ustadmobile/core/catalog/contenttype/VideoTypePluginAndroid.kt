@@ -23,15 +23,12 @@ import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -61,10 +58,11 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
         return getEntry(uri, process)
     }
 
-    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, jobProgress: ContentJobProgressListener): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, jobProgress: ContentJobProgressListener): ProcessResult {
+        val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
         withContext(Dispatchers.Default) {
 
-            val uri = jobItem.sourceUri ?: throw IllegalStateException("missing uri")
+            val uri = contentJobItem.sourceUri ?: throw IllegalStateException("missing uri")
             val videoUri = DoorUri.parse(uri)
             val localUri = process.getLocalUri(videoUri, context, di)
             val contentEntryUid = processMetadata(jobItem, process,context, endpoint)
@@ -115,7 +113,7 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
                 val mediaTransformer = MediaTransformer(context as Context)
 
-                mediaTransformer.transform(jobItem.cjiContentEntryUid.toString(), localUri.uri, newVideo.path,
+                mediaTransformer.transform(contentJobItem.cjiContentEntryUid.toString(), localUri.uri, newVideo.path,
                         videoTarget, audioTarget, object : TransformationListener {
                     override fun onStarted(id: String) {
                         Napier.d(tag = VIDEO_ANDROID, message = "started transform")
@@ -123,8 +121,8 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
                     override fun onProgress(id: String, progress: Float) {
                         Napier.d(tag = VIDEO_ANDROID, message = "progress at value ${progress * 100}")
-                        jobItem.cjiProgress = (progress * 100).toLong()
-                        jobProgress.onProgress(jobItem)
+                        contentJobItem.cjiProgress = (progress * 100).toLong()
+                        jobProgress.onProgress(contentJobItem)
                     }
 
                     override fun onCompleted(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
@@ -163,9 +161,9 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
                 containerUid = repo.containerDao.insert(this)
             }
 
-            jobItem.cjiContainerUid = container.containerUid
+            contentJobItem.cjiContainerUid = container.containerUid
 
-            val containerFolder = jobItem.toUri ?: defaultContainerDir.toURI().toString()
+            val containerFolder = jobItem.contentJob?.toUri ?: defaultContainerDir.toURI().toString()
             val containerFolderUri = DoorUri.parse(containerFolder)
 
             if (compressVideo) {
@@ -215,7 +213,7 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
                 this.leaf = true
                 this.contentTypeFlag = ContentEntry.TYPE_VIDEO
             }
-            MetadataResult(entry)
+            MetadataResult(entry, pluginId)
         }
     }
 

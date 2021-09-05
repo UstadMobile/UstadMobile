@@ -9,6 +9,7 @@ import com.ustadmobile.core.util.directActiveDbInstance
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
@@ -50,9 +51,9 @@ class TestContentJobRunner {
         }
 
         override suspend fun processJob(
-            jobItem: ContentJobItem,
-            process: ProcessContext,
-            progress: ContentJobProgressListener
+                jobItem: ContentJobItemAndContentJob,
+                process: ProcessContext,
+                progress: ContentJobProgressListener
         ): ProcessResult {
             delay(400)
 

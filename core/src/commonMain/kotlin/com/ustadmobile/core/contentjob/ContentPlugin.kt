@@ -1,10 +1,7 @@
 package com.ustadmobile.core.contentjob
 
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.lib.db.entities.ContentJobItem
-import com.ustadmobile.lib.db.entities.DownloadJobItem
+import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DIAware
 
 interface ContentPlugin : DIAware {
@@ -18,7 +15,7 @@ interface ContentPlugin : DIAware {
     suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult?
 
     suspend fun processJob(
-            jobItem: ContentJobItem,
+            jobItem: ContentJobItemAndContentJob,
             process: ProcessContext,
             progress: ContentJobProgressListener
     ) : ProcessResult

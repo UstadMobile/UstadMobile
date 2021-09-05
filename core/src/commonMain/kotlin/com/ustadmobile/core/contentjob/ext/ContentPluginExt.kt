@@ -9,29 +9,31 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import org.kodein.di.instance
 import org.kodein.di.on
 
-suspend fun ContentPlugin.processMetadata(contentJob: ContentJobItem, process: ProcessContext, context: Any, endpoint: Endpoint): Long{
-    if(contentJob.cjiContentEntryUid == 0L){
-        val uri = contentJob.sourceUri ?: throw IllegalStateException("missing uri")
+suspend fun ContentPlugin.processMetadata(contentJob: ContentJobItemAndContentJob, process: ProcessContext, context: Any, endpoint: Endpoint): Long{
+    val contentJobItem = contentJob.contentJobItem ?: throw IllegalArgumentException("missing job item")
+    if(contentJobItem.cjiContentEntryUid == 0L){
+        val uri = contentJobItem.sourceUri ?: throw IllegalStateException("missing uri")
         val doorUri = DoorUri.parse(uri)
         val localUri = process.getLocalUri(doorUri, context, di)
         val metadata = extractMetadata(localUri, process) ?: throw IllegalArgumentException("missing metadata")
         val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
-        contentJob.cjiContentEntryUid = repo.contentEntryDao.insert(metadata.entry)
+        contentJobItem.cjiContentEntryUid = repo.contentEntryDao.insert(metadata.entry)
 
-        if(contentJob.cjiParentContentEntryUid == 0L){
-            return contentJob.cjiContentEntryUid
+        if(contentJobItem.cjiParentContentEntryUid == 0L){
+            return contentJobItem.cjiContentEntryUid
         }
 
         ContentEntryParentChildJoin().apply {
-            cepcjParentContentEntryUid = contentJob.cjiParentContentEntryUid
-            cepcjChildContentEntryUid = contentJob.cjiContentEntryUid
+            cepcjParentContentEntryUid = contentJobItem.cjiParentContentEntryUid
+            cepcjChildContentEntryUid = contentJobItem.cjiContentEntryUid
             cepcjUid = repo.contentEntryParentChildJoinDao.insert(this)
         }
 
-        return contentJob.cjiContentEntryUid
+        return contentJobItem.cjiContentEntryUid
     }
-    return contentJob.cjiContentEntryUid
+    return contentJobItem.cjiContentEntryUid
 }

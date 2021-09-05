@@ -13,14 +13,9 @@ import com.ustadmobile.core.util.ext.base64EncodedToHexString
 import com.ustadmobile.core.util.ext.maxQueryParamListSize
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.lib.db.entities.ContainerEntry
-import com.ustadmobile.lib.db.entities.ContainerEntryFile
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_NONE
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.lib.db.entities.ContentJobItem
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -68,9 +63,9 @@ class ContainerTorrentDownloadJob(private val endpoint: Endpoint, override val d
         return MetadataResult(contentEntry as ContentEntryWithLanguage, PLUGIN_ID)
     }
 
-    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
-
-        val containerUid = jobItem.cjiContainerUid
+    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+        val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
+        val containerUid = contentJobItem.cjiContainerUid
 
         // check if torrent file already exists
         val torrentFile = File(torrentDir, "$containerUid.torrent")
@@ -80,7 +75,7 @@ class ContainerTorrentDownloadJob(private val endpoint: Endpoint, override val d
             torrentFile.writeBytes(torrentFileStream.readBytes())
         }
 
-        val downloadFolderPath = jobItem.toUri ?: containerDir.path
+        val downloadFolderPath = jobItem.contentJob?.toUri ?: containerDir.path
 
         val containerFilesFolder = File(downloadFolderPath, containerUid.toString())
         containerFilesFolder.mkdirs()
@@ -145,9 +140,9 @@ class ContainerTorrentDownloadJob(private val endpoint: Endpoint, override val d
         if(!manifestFile.exists()) throw IllegalArgumentException("no manifest file found")
 
         val manifestJson = manifestFile.readText()
-        val manifest: Map<String, List<String>> = Json.decodeFromString(MapSerializer(String.serializer(),
-                ListSerializer(String.serializer())), manifestJson)
-        manifest.entries.forEach { entry ->
+        val manifest: ContainerManifest = Json.decodeFromString(
+                ContainerManifest.serializer(), manifestJson)
+        manifest.entryMap?.entries?.forEach { entry ->
             if(entry.key == MANIFEST_FILE_NAME){
                 return@forEach
             }

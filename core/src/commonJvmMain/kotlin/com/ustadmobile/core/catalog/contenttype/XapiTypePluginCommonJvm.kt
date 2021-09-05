@@ -4,9 +4,6 @@ import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -22,11 +19,11 @@ import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.direct
 import org.kodein.di.on
-import com.ustadmobile.lib.db.entities.ContentJobItem
 import org.xmlpull.v1.XmlPullParserFactory
 
 
@@ -89,8 +86,9 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
         }
     }
 
-    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
-        val uri = jobItem.sourceUri ?: return ProcessResult(404)
+    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+        val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("mising job item")
+        val uri = contentJobItem.sourceUri ?: return ProcessResult(404)
         val container = withContext(Dispatchers.Default) {
 
             val contentEntryUid = processMetadata(jobItem, process,context, endpoint)
@@ -101,9 +99,9 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
                 cntLastModified = System.currentTimeMillis()
                 mimeType = supportedMimeTypes.first()
                 containerUid = repo.containerDao.insertAsync(this)
-                jobItem.cjiContainerUid = containerUid
+                contentJobItem.cjiContainerUid = containerUid
             }
-            val containerFolder = jobItem.toUri ?: defaultContainerDir.toURI().toString()
+            val containerFolder = jobItem.contentJob?.toUri ?: defaultContainerDir.toURI().toString()
             val containerFolderUri = DoorUri.parse(containerFolder)
 
             repo.addEntriesToContainerFromZip(container.containerUid,

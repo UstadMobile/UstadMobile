@@ -5,9 +5,6 @@ import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.getAssetFromResource
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
@@ -29,7 +26,7 @@ import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.XapiPackageContentView
-import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.serialization.json.*
 import java.util.*
 
@@ -122,8 +119,9 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
         }
     }
 
-    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
-        val jobUri = jobItem.sourceUri ?: return ProcessResult(404)
+    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+        val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
+        val jobUri = contentJobItem.sourceUri ?: return ProcessResult(404)
         val container = withContext(Dispatchers.Default) {
 
             val doorUri = DoorUri.parse(jobUri)
@@ -137,11 +135,11 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
                 containerUid = repo.containerDao.insertAsync(this)
             }
 
-            jobItem.cjiContainerUid = container.containerUid
+            contentJobItem.cjiContainerUid = container.containerUid
 
-            val containerFolder = jobItem.toUri ?: defaultContainerDir.toURI().toString()
+            val containerFolder = jobItem.contentJob?.toUri ?: defaultContainerDir.toURI().toString()
             val containerFolderUri = DoorUri.parse(containerFolder)
-            val entry = db.contentEntryDao.findByUid(jobItem.cjiContentEntryUid)
+            val entry = db.contentEntryDao.findByUid(contentJobItem.cjiContentEntryUid)
 
             val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolderUri)
             repo.addEntriesToContainerFromZip(container.containerUid, localUri,

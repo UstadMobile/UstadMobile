@@ -1,14 +1,12 @@
 package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
-import com.ustadmobile.core.catalog.contenttype.H5PTypePluginCommonJvm
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentJobItem
-import io.github.aakira.napier.Napier
 import io.ktor.application.*
 import io.ktor.response.*
 import io.ktor.routing.*

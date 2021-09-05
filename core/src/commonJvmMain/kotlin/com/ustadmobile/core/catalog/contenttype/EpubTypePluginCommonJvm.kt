@@ -109,8 +109,9 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
         }
     }
 
-    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
-        val jobUri = jobItem.sourceUri ?: return ProcessResult(404)
+    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+        val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
+        val jobUri = contentJobItem.sourceUri ?: return ProcessResult(404)
         val container = withContext(Dispatchers.Default) {
 
             val uri = DoorUri.parse(jobUri)
@@ -122,9 +123,9 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                 cntLastModified = System.currentTimeMillis()
                 this.mimeType = supportedMimeTypes.first()
                 containerUid = repo.containerDao.insert(this)
-                jobItem.cjiContainerUid = containerUid
+                contentJobItem.cjiContainerUid = containerUid
             }
-            val containerFolder = jobItem.toUri ?: defaultContainerDir.toURI().toString()
+            val containerFolder = jobItem.contentJob?.toUri ?: defaultContainerDir.toURI().toString()
             val containerFolderUri = DoorUri.parse(containerFolder)
 
             repo.addEntriesToContainerFromZip(container.containerUid,
