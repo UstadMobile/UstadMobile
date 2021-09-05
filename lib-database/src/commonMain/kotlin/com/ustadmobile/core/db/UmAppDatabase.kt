@@ -297,6 +297,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     abstract val contentJobItemDao: ContentJobItemDao
 
+    abstract val contentJobDao: ContentJobDao
+
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO
 
