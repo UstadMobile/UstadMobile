@@ -13,9 +13,14 @@ data class ContentJobItem(
 
     /**
      * Where data is being taken from, this could be
-     *  - Web plain file URI e.g. https://server.com/dir/file.epub
-     *  - Web resource that needs scraped e.g. https://khanacademy.org/topic/exercise
-     *  - A local file URI e.g. file:///dir/file.epub
+     *  - ContentEntry (leaf)
+     *     e.g. https://servfer.com/endpoint/umapp/index.html#ContentEntryDetail?entityUid=1234
+     *  - A plain HTTP file that can be imported
+     *     e.g. https://server.com/dir/file.epub
+     *  - Web resource that needs scraped
+     *     e.g. https://khanacademy.org/topic/exercise
+     *  - A local file URI that can be imported
+     *     e.g. file:///dir/file.epub
      */
     var sourceUri: String? = null,
 
@@ -34,6 +39,9 @@ data class ContentJobItem(
      */
     var cjiParentContentEntryUid: Long = 0,
 
+    /**
+     * The Container UID might be specified
+     */
     var cjiContainerUid: Long = 0,
 
     var cjiProgress: Long = 0,

@@ -30,6 +30,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
 import java.lang.IllegalArgumentException
+import com.ustadmobile.door.ext.toDoorUri
 
 class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoint, override val di: DI): VideoTypePlugin() {
 

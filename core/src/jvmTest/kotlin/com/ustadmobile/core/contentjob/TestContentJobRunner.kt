@@ -57,7 +57,8 @@ class TestContentJobRunner {
         ): ProcessResult {
             delay(400)
 
-            db.contentJobItemDao.updateItemStatus(jobItem.cjiUid, JobStatus.COMPLETE)
+            db.contentJobItemDao.updateItemStatus(jobItem.contentJobItem?.cjiUid ?: 0,
+                JobStatus.COMPLETE)
             return ProcessResult(200)
         }
     }
@@ -94,6 +95,7 @@ class TestContentJobRunner {
 
         runBlocking {
             db.contentJobItemDao.insertJobItems(jobItems)
+
         }
 
         val runner = ContentJobRunner(2, endpoint, di, 5)

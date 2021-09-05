@@ -9,6 +9,7 @@ import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.db.entities.ContentJobItem.Companion.ACCEPT_NONE
 import com.ustadmobile.lib.db.entities.ContentJobItem.Companion.ACCEPT_UNMETERED
+import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItemProgressUpdate
 
 @Dao
@@ -21,8 +22,10 @@ abstract class ContentJobItemDao {
                         FROM ConnectivityStatus 
                        LIMIT 1), 0))
                        
-        SELECT ContentJobItem.*
+        SELECT ContentJobItem.*, ContentJob.*
           FROM ContentJobItem
+               JOIN ContentJob
+               ON ContentJobItem.cjiJobUid = ContentJob.cjUid
          WHERE ContentJobItem.cjiJobUid = :contentJobUid
            AND ContentJobItem.cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.COMPLETE_MIN}
            AND (
@@ -32,7 +35,7 @@ abstract class ContentJobItemDao {
                 )
          LIMIT :limit
     """)
-    abstract suspend fun findNextItemsInQueue(contentJobUid: Long, limit: Int) : List<ContentJobItem>
+    abstract suspend fun findNextItemsInQueue(contentJobUid: Long, limit: Int) : List<ContentJobItemAndContentJob>
 
     @Insert
     abstract suspend fun insertJobItem(jobItem: ContentJobItem) : Long
