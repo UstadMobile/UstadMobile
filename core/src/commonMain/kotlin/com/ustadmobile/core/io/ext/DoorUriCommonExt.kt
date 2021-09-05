@@ -14,3 +14,9 @@ expect suspend fun DoorUri.getSize(context: Any, di: DI): Long
 expect suspend fun DoorUri.downloadUrlIfRemote(destination: DoorUri, di: DI)
 
 expect suspend fun DoorUri.isRemote(): Boolean
+
+/**
+ * Where the receiver DoorUri is a directory, delete all its contents recursively, but do
+ * not delete the directory itself
+ */
+expect suspend fun DoorUri.emptyRecursively()
