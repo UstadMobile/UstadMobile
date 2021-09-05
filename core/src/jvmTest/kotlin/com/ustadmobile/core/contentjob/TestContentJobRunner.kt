@@ -8,6 +8,7 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveDbInstance
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import kotlinx.coroutines.delay
@@ -95,7 +96,7 @@ class TestContentJobRunner {
 
         runBlocking {
             db.contentJobItemDao.insertJobItems(jobItems)
-
+            db.contentJobDao.insertAsync(ContentJob(cjUid = 2L))
         }
 
         val runner = ContentJobRunner(2, endpoint, di, 5)
