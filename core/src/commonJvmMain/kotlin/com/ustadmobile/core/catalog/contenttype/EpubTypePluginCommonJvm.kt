@@ -1,5 +1,6 @@
 package com.ustadmobile.core.catalog.contenttype
 
+import com.google.gson.Gson
 import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
@@ -49,6 +50,8 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
     private val tracker: Tracker = di.direct.instance<Tracker>()
+
+    private val gson: Gson = di.direct.instance()
 
     private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
@@ -128,9 +131,11 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                     localUri,
                     ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
-            repo.addTorrentFileFromContainer(container.containerUid,
+            repo.addTorrentFileFromContainer(
+                    container.containerUid,
                     DoorUri.parse(torrentDir.toURI().toString()),
-                    tracker.announceUrl)
+                    tracker.announceUrl, containerFolderUri
+            )
 
             ustadTorrentManager.addTorrent(container.containerUid)
 

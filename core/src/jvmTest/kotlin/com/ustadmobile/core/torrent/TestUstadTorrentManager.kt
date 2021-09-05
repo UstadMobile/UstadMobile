@@ -1,7 +1,6 @@
 package com.ustadmobile.core.torrent
 
 import com.google.gson.Gson
-import com.turn.ttorrent.common.creation.MetadataBuilder
 import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
@@ -13,6 +12,7 @@ import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.io.ext.addEntryToContainerFromResource
+import com.ustadmobile.core.io.ext.addTorrentFileFromContainer
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DatabaseBuilder
@@ -29,6 +29,7 @@ import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.rest.ContainerDownload
 import com.ustadmobile.lib.rest.TorrentFileRoute
 import com.ustadmobile.lib.rest.TorrentTracker
+import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
 import io.ktor.application.*
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
@@ -54,6 +55,7 @@ import java.io.File
 import java.net.InetAddress
 import java.net.URL
 import kotlin.random.Random
+import kotlin.test.AfterTest
 import kotlin.test.assertTrue
 
 
@@ -90,6 +92,8 @@ class TestUstadTorrentManager {
 
     private lateinit var serverRepo: UmAppDatabase
 
+    private var fileToDownloadPath = "/com/ustadmobile/core/contentformats/english.h5p"
+
     @Before
     fun setup() {
 
@@ -125,27 +129,18 @@ class TestUstadTorrentManager {
         }
         runBlocking {
             serverRepo.addEntriesToContainerFromZipResource(serverContainer.containerUid, this::class.java,
-                    "/com/ustadmobile/core/contentformats/epub/test.epub",
+                    fileToDownloadPath,
                     ContainerAddOptions(containerServerFolder.toDoorUri()))
         }
 
         val trackerUrl = URL("http://127.0.0.1:8000/announce")
 
-        val torrentFile = File(torrentServerFolder, "${serverContainer.containerUid}.torrent")
-
-        val fileList = serverDb.containerEntryDao.findByContainer(serverContainer.containerUid)
-
-        val epubTorrentBuilder = MetadataBuilder()
-                .addTracker(trackerUrl.toString())
-                .setDirectoryName("container${serverContainer.containerUid}")
-                .setCreatedBy("UstadMobile")
-
-        fileList.forEach {
-            epubTorrentBuilder.addFile(File(it.containerEntryFile!!.cefPath!!))
+        runBlocking {
+            serverRepo.addTorrentFileFromContainer(
+                    serverContainer.containerUid,
+                    torrentServerFolder.toDoorUri(), trackerUrl.toString(), containerServerFolder.toDoorUri()
+            )
         }
-
-        torrentFile.writeBytes(epubTorrentBuilder.buildBinary())
-
 
         server = embeddedServer(Netty, 8089) {
              install(DIFeature) {
@@ -253,24 +248,6 @@ class TestUstadTorrentManager {
         seedManager = localDi.on(accountManager.activeEndpoint).direct.instance()
         containerDownloadJob = localDi.on(accountManager.activeEndpoint).direct.instance()
 
-        val clientContainer = Container().apply {
-            containerUid = repo.containerDao.insert(this)
-        }
-        runBlocking {
-            repo.addEntryToContainerFromResource(clientContainer.containerUid,
-                    this::class.java, "/com/ustadmobile/core/contentformats/epub/image_1.jpg",
-                    "image1", localDi,
-                    ContainerAddOptions(containerClientFolder.toDoorUri()))
-            repo.addEntryToContainerFromResource(clientContainer.containerUid,
-                    this::class.java, "/com/ustadmobile/core/contentformats/epub/image_2.jpg",
-                    "image2", localDi,
-                    ContainerAddOptions(containerClientFolder.toDoorUri()))
-            repo.addEntryToContainerFromResource(clientContainer.containerUid,
-                    this::class.java, "/com/ustadmobile/core/contentformats/epub/image_3.jpg",
-                    "image3", localDi,
-                    ContainerAddOptions(containerClientFolder.toDoorUri()))
-        }
-
         GlobalScope.launch {
             seedManager.start()
         }
@@ -279,7 +256,7 @@ class TestUstadTorrentManager {
 
 
     @Test
-    fun test(){
+    fun givenNoFilesOnClientThenContainerDownloadJobsDownloadsEverything(){
 
         runBlocking {
 
@@ -299,10 +276,57 @@ class TestUstadTorrentManager {
                 downloadComplete = true
             }
             assertTrue(downloadComplete)
-            server.stop(10, 10)
-            seedManager.stop()
+            db.assertContainerEqualToOther(serverContainer.containerUid, serverDb)
         }
 
+    }
+
+    @Test
+    fun givenSomeFilesAlreadyExistInAnotherContainerthenContainerDownloadDownloadsPartially(){
+
+        val clientContainer = Container().apply {
+            containerUid = repo.containerDao.insert(this)
+        }
+        runBlocking {
+            repo.addEntryToContainerFromResource(clientContainer.containerUid,
+                    this::class.java, "/com/ustadmobile/core/contentformats/epub/image_1.jpg",
+                    "image1", localDi,
+                    ContainerAddOptions(containerClientFolder.toDoorUri()))
+            repo.addEntryToContainerFromResource(clientContainer.containerUid,
+                    this::class.java, "/com/ustadmobile/core/contentformats/epub/image_2.jpg",
+                    "image2", localDi,
+                    ContainerAddOptions(containerClientFolder.toDoorUri()))
+            repo.addEntryToContainerFromResource(clientContainer.containerUid,
+                    this::class.java, "/com/ustadmobile/core/contentformats/epub/image_3.jpg",
+                    "image3", localDi,
+                    ContainerAddOptions(containerClientFolder.toDoorUri()))
+
+            containerDownloadJob.processJob(ContentJobItem(cjiContainerUid = serverContainer.containerUid),
+                    ProcessContext(DoorUri.parse(""), params = mutableMapOf())){
+
+            }
+
+            var downloadComplete = false
+            val containerFiles = File(containerClientFolder, serverContainer.containerUid.toString())
+            val fileList = containerFiles.listFiles()
+            fileList?.forEach {
+
+                if(it.name.endsWith(".part")){
+                    return@forEach
+                }
+                downloadComplete = true
+            }
+            assertTrue(downloadComplete)
+            db.assertContainerEqualToOther(serverContainer.containerUid, serverDb)
+        }
+    }
+
+    @AfterTest
+    fun after(){
+        server.stop(10, 10)
+        runBlocking {
+            seedManager.stop()
+        }
     }
 
 }

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.catalog.contenttype
 
+import com.google.gson.Gson
 import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
@@ -71,6 +72,8 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
     private val tracker: Tracker = di.direct.instance<Tracker>()
 
     private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
+
+    private val gson: Gson = di.direct.instance()
 
     override val pluginId: Int
         get() = PLUGIN_ID
@@ -193,9 +196,11 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
                     "index.html", context, di, containerAddOptions)
             tmpIndexHtmlFile.delete()
 
-            repo.addTorrentFileFromContainer(container.containerUid,
+            repo.addTorrentFileFromContainer(
+                    container.containerUid,
                     DoorUri.parse(torrentDir.toURI().toString()),
-                    tracker.announceUrl)
+                    tracker.announceUrl, containerFolderUri
+            )
 
             ustadTorrentManager.addTorrent(container.containerUid)
 
