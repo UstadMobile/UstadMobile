@@ -66,6 +66,7 @@ import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import com.ustadmobile.core.impl.di.commonJvmDiModule
+import com.ustadmobile.core.torrent.ContainerTorrentDownloadJob
 import com.ustadmobile.core.torrent.UstadCommunicationManager
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.torrent.UstadTorrentManagerImpl
@@ -236,6 +237,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<UstadCommunicationManager>() with singleton {
             UstadCommunicationManager()
+        }
+
+        bind<ContainerTorrentDownloadJob>() with scoped(EndpointScope.Default).singleton {
+            ContainerTorrentDownloadJob(endpoint = context, di = di)
         }
 
         bind<Pbkdf2Params>() with singleton {

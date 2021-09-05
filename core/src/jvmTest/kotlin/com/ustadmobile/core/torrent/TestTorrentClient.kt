@@ -25,43 +25,15 @@ class TestTorrentClient {
 
     @JvmField
     @Rule
-    val temporaryFolder = TemporaryFolder()
-
-
-    @JvmField
-    @Rule
     var ustadTestRule = UstadTestRule()
-
 
     @Before
     fun setup() {
 
-        val clientFolder = temporaryFolder.newFolder("clientFolder")
-        val torrentClientFolder =  File(clientFolder, "torrent")
-        torrentClientFolder.mkdirs()
-
-        val containerClientFolder =  File(clientFolder, "container")
-        containerClientFolder.mkdirs()
-
         localDi = DI {
             import(ustadTestRule.diModule)
-            bind<File>(tag = DiTag.TAG_TORRENT_DIR) with scoped(ustadTestRule.endpointScope).singleton {
-                torrentClientFolder
-            }
-            bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(ustadTestRule.endpointScope).singleton {
-                containerClientFolder
-            }
-            bind<UstadTorrentManager>() with scoped(ustadTestRule.endpointScope).singleton {
-                UstadTorrentManagerImpl(endpoint = context, di = di)
-            }
-            bind<UstadCommunicationManager>() with singleton {
-                UstadCommunicationManager()
-            }
             bind<ContainerTorrentDownloadJob>() with scoped(ustadTestRule.endpointScope).singleton {
                 ContainerTorrentDownloadJob(endpoint = context, di = di)
-            }
-            onReady {
-                instance<UstadCommunicationManager>().start(InetAddress.getByName("0.0.0.0"))
             }
         }
 
