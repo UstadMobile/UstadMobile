@@ -73,6 +73,7 @@ import com.ustadmobile.core.torrent.UstadTorrentManagerImpl
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.DoorTag
 import kotlinx.coroutines.*
 import java.net.InetAddress
 import java.util.concurrent.Executors
@@ -127,6 +128,11 @@ open class UstadApp : BaseUstadApp(), DIAware {
                     di.on(context).direct.instance<UstadTorrentManager>().start()
                 }
             }
+        }
+
+        bind<ConnectivityLiveData>() with scoped(EndpointScope.Default).singleton {
+            val db: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_DB)
+            ConnectivityLiveData(db.connectivityStatusDao.statusLive())
         }
 
         bind<EmbeddedHTTPD>() with singleton {

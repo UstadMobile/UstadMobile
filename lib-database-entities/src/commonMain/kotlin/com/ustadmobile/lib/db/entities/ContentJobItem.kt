@@ -56,7 +56,12 @@ data class ContentJobItem(
      * The plugin id can be set if known. If not known, the runner will guess using the source
      * uri.
      */
-    var cjiPluginId: Int = 0
+    var cjiPluginId: Int = 0,
+
+    /**
+     * The number of attempts made so far
+     */
+    var cjiAttemptCount: Int = 0
 
 ) {
     companion object {

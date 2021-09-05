@@ -7,6 +7,7 @@ import androidx.room.Transaction
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.db.entities.ContentJobItem.Companion.ACCEPT_METERED
 import com.ustadmobile.lib.db.entities.ContentJobItem.Companion.ACCEPT_NONE
 import com.ustadmobile.lib.db.entities.ContentJobItem.Companion.ACCEPT_UNMETERED
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
@@ -32,6 +33,8 @@ abstract class ContentJobItemDao {
                 ((cjiConnectivityAcceptable & $ACCEPT_NONE) = $ACCEPT_NONE)
                 OR (((cjiConnectivityAcceptable & $ACCEPT_UNMETERED) = $ACCEPT_UNMETERED) 
                      AND (SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_UNMETERED})
+                OR (((cjiConnectivityAcceptable & $ACCEPT_METERED) = $ACCEPT_METERED) 
+                     AND (SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_METERED})
                 )
          LIMIT :limit
     """)
@@ -76,6 +79,13 @@ abstract class ContentJobItemDao {
     }
 
 
+    @Query("""
+        UPDATE ContentJobItem
+           SET cjiStatus = :status,
+               cjiAttemptCount = :attemptCount
+         WHERE cjiUid = :cjiUid      
+    """)
+    abstract suspend fun updateJobItemAttemptCountAndStatus(cjiUid: Long, attemptCount: Int, status: Int)
 
 
 }

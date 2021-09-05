@@ -66,7 +66,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 81)
+], version = 82)
 @MinSyncVersion(60)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -5192,6 +5192,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val f = 'f'
+
+        val MIGRATION_81_82 = DoorMigrationStatementList(81, 82) { database ->
+            listOf("ALTER TABLE ContentJobItem ADD COLUMN cjiAttemptCount INTEGER NOT NULL DEFAULT 0")
+        }
+
         fun migrationList(nodeId: Int) = listOf<DoorMigration>(
             MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
             MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
@@ -5205,7 +5211,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             MIGRATION_68_69, MIGRATION_69_70, MIGRATION_70_71, MIGRATION_71_72,
             MIGRATION_72_73, MIGRATION_73_74, MIGRATION_74_75, MIGRATION_75_76,
             MIGRATION_76_77, MIGRATION_77_78, MIGRATION_78_79, MIGRATION_78_79,
-            MIGRATION_79_80, MIGRATION_80_81
+            MIGRATION_79_80, MIGRATION_80_81, MIGRATION_81_82
         )
 
         internal fun migrate67to68(nodeId: Int)= DoorMigrationSync(67, 68) { database ->

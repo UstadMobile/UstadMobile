@@ -6,12 +6,12 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.EventCollator
 import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.core.io.ext.emptyRecursively
+import com.ustadmobile.core.networkmanager.ConnectivityLiveData
+import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
-import com.ustadmobile.lib.db.entities.ContentJobItem
-import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
-import com.ustadmobile.lib.db.entities.ContentJobItemProgressUpdate
-import com.ustadmobile.lib.db.entities.toProgressUpdate
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -30,8 +30,9 @@ class ContentJobRunner(
     val jobId: Long,
     endpoint: Endpoint,
     override val di: DI,
-    val numProcessors: Int = DEFAULT_NUM_PROCESSORS
-) : DIAware, ContentJobProgressListener{
+    val numProcessors: Int = DEFAULT_NUM_PROCESSORS,
+    val maxItemAttempts: Int = DEFAULT_NUM_RETRIES
+) : DIAware, ContentJobProgressListener, DoorObserver<ConnectivityStatus?>{
 
     data class ContentJobResult(val status: Int)
 
@@ -45,30 +46,41 @@ class ContentJobRunner(
 
     private val eventCollator = EventCollator(1000, this::commitProgressUpdates)
 
+    private val connectivityLiveData: ConnectivityLiveData by on(endpoint).instance()
+
     @ExperimentalCoroutinesApi
     private fun CoroutineScope.produceJobs() = produce<ContentJobItemAndContentJob> {
         var done : Boolean
-        do {
-            checkQueueSignalChannel.receive()
-
-            //Check queue and filter out any duplicates that are being actively processed
-            val queueItems = db.contentJobItemDao.findNextItemsInQueue(jobId, numProcessors * 2).filter {
-                (it.contentJobItem?.cjiUid ?: 0) !in activeJobItemIds
+        try {
+            withContext(doorMainDispatcher()) {
+                connectivityLiveData.liveData.observeForever(this@ContentJobRunner)
             }
 
-            val numJobsToAdd = min(numProcessors - activeJobItemIds.size, queueItems.size)
+            do {
+                checkQueueSignalChannel.receive()
 
-            for(i in 0 until numJobsToAdd) {
-                val contentJobItemUid = queueItems[i].contentJobItem?.cjiUid ?: 0L
-                activeJobItemIds +=  contentJobItemUid
-                db.contentJobItemDao.updateItemStatus(contentJobItemUid, JobStatus.RUNNING)
-                send(queueItems[i])
+                //Check queue and filter out any duplicates that are being actively processed
+                val queueItems = db.contentJobItemDao.findNextItemsInQueue(jobId, numProcessors * 2).filter {
+                    (it.contentJobItem?.cjiUid ?: 0) !in activeJobItemIds
+                }
+
+                val numJobsToAdd = min(numProcessors - activeJobItemIds.size, queueItems.size)
+
+                for(i in 0 until numJobsToAdd) {
+                    val contentJobItemUid = queueItems[i].contentJobItem?.cjiUid ?: 0L
+                    activeJobItemIds +=  contentJobItemUid
+                    db.contentJobItemDao.updateItemStatus(contentJobItemUid, JobStatus.RUNNING)
+                    send(queueItems[i])
+                }
+
+                done = db.contentJobItemDao.isJobDone(jobId)
+            }while(!done)
+        }finally {
+            withContext(NonCancellable + doorMainDispatcher()) {
+                connectivityLiveData.liveData.removeObserver(this@ContentJobRunner)
             }
-
-            done = db.contentJobItemDao.isJobDone(jobId)
-        }while(!done)
-
-        close()
+            close()
+        }
     }
 
     private fun CoroutineScope.launchProcessor(id: Int, channel: ReceiveChannel<ContentJobItemAndContentJob>) = launch {
@@ -94,6 +106,18 @@ class ContentJobRunner(
             }catch(e: Exception) {
                 if(e is CancellationException)
                     throw e
+
+                //something went wrong
+                val finalStatus = if(e is FatalContentJobException ||
+                        item.contentJobItem?.cjiAttemptCount ?: maxItemAttempts >= maxItemAttempts) {
+                    JobStatus.FAILED
+                }else {
+                    JobStatus.QUEUED //requeue for another try
+                }
+
+                db.contentJobItemDao.updateJobItemAttemptCountAndStatus(
+                    item.contentJobItem?.cjiUid ?: 0,
+                    (item.contentJobItem?.cjiAttemptCount ?: 0) + 1, finalStatus)
 
                 e.printStackTrace()
             }finally {
@@ -135,13 +159,22 @@ class ContentJobRunner(
         }
 
         //TODO: get the final status by doing a query
-        return ContentJobResult(200)
+        return ContentJobResult(JobStatus.COMPLETE)
     }
 
+    override fun onChanged(t: ConnectivityStatus?) {
+        GlobalScope.launch {
+            if(t != null){
+                checkQueueSignalChannel.send(true)
+            }
+        }
+    }
 
     companion object {
 
         const val DEFAULT_NUM_PROCESSORS = 10
+
+        const val DEFAULT_NUM_RETRIES = 5
 
     }
 }

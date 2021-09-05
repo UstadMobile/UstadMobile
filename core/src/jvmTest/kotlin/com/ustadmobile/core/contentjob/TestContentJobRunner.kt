@@ -4,14 +4,17 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveDbInstance
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import kotlin.test.Test
@@ -75,6 +78,11 @@ class TestContentJobRunner {
                     }
                 }
             }
+
+            bind<ConnectivityLiveData>() with scoped(ustadTestRule.endpointScope).singleton {
+                val db : UmAppDatabase = on(context).instance(tag = DoorTag.TAG_DB)
+                ConnectivityLiveData(db.connectivityStatusDao.statusLive())
+            }
         }
 
         val accountManager: UstadAccountManager = di.direct.instance()
@@ -111,10 +119,39 @@ class TestContentJobRunner {
         Assert.assertTrue("Job completed", done)
     }
 
-    fun givenJobStartsWithoutAcceptableConnectivity_whenConnectivityAcceptable_thenShouldRunJobItems() {
+    @Test
+    fun givenJobStartsWithoutAcceptableConnectivity_whenConnectivityAcceptable_thenShouldRunJobItem() {
+        runBlocking {
+            db.contentJobDao.insertAsync(ContentJob(cjUid = 2))
+            db.contentJobItemDao.insertJobItem(ContentJobItem().apply {
+                this.cjiJobUid = 2
+                cjiConnectivityAcceptable = ContentJobItem.ACCEPT_UNMETERED
+                cjiStatus = JobStatus.QUEUED
+                cjiPluginId = TEST_PLUGIN_ID
+            })
+            db.connectivityStatusDao.insert(
+                ConnectivityStatus(ConnectivityStatus.STATE_METERED,
+                    true, null))
 
+            val runner = ContentJobRunner(2, endpoint, di)
+            var doneBeforeConnectivityChange = true
+            launch {
+                delay(1000)
+                doneBeforeConnectivityChange = db.contentJobItemDao.isJobDone(2)
+                db.connectivityStatusDao.insert(
+                    ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED,
+                        true, null))
+            }
+            runner.runJob()
+
+            val done = db.contentJobItemDao.isJobDone(2)
+            Assert.assertTrue("Job completed now", done)
+            Assert.assertFalse("Job was not done until connectivity status changed",
+                doneBeforeConnectivityChange)
+        }
     }
 
+    @Test
     fun givenJobCreated_whenJobItemFails_thenShouldRetry() {
 
     }
@@ -123,6 +160,7 @@ class TestContentJobRunner {
 
     }
 
+    //TODO: test calling extract metadata when needed, getting plugin type when needed
 
     companion object {
         val TEST_PLUGIN_ID = 42
