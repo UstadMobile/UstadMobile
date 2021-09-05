@@ -191,10 +191,6 @@ class UstadTestRule: TestWatcher() {
             bind<UstadCommunicationManager>() with singleton {
                 UstadCommunicationManager()
             }
-            bind<TorrentTracker>() with scoped(EndpointScope.Default).singleton {
-                TorrentTracker(endpoint = context, di)
-            }
-
             bind<XmlPullParserFactory>(tag = DiTag.XPP_FACTORY_NSUNAWARE) with singleton {
                 XmlPullParserFactory.newInstance()
             }
@@ -216,9 +212,6 @@ class UstadTestRule: TestWatcher() {
             onReady {
                 instance<UstadCommunicationManager>().start(InetAddress.getByName(trackerUrl.host))
                 GlobalScope.launch {
-                    val torrentTracker: TorrentTracker = di.on(Endpoint("localhost")).direct.instance()
-                    torrentTracker.start()
-
                     val ustadTorrentManager: UstadTorrentManager = di.on(Endpoint("localhost")).direct.instance()
                     ustadTorrentManager.start()
 
