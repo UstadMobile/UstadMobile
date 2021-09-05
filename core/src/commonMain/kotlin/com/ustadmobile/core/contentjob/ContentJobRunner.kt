@@ -30,7 +30,7 @@ class ContentJobRunner(
     val jobId: Long,
     endpoint: Endpoint,
     override val di: DI,
-    val numProcessors: Int
+    val numProcessors: Int = DEFAULT_NUM_PROCESSORS
 ) : DIAware, ContentJobProgressListener{
 
     data class ContentJobResult(val status: Int)
@@ -139,4 +139,9 @@ class ContentJobRunner(
     }
 
 
+    companion object {
+
+        const val DEFAULT_NUM_PROCESSORS = 10
+
+    }
 }
