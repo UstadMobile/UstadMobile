@@ -38,13 +38,11 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
 
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
+    private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
+
     val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
     val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
-
-    private val tracker: Tracker = di.direct.instance()
-
-    private val gson: Gson = di.direct.instance()
 
     private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
@@ -61,6 +59,8 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
             val videoFile = process.getLocalUri(videoUri, context, di).toFile()
             val contentEntryUid = processMetadata(jobItem, process, context, endpoint)
             var newVideo = File(videoFile.parentFile, "new${videoFile.nameWithoutExtension}.mp4")
+            val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
+                    ?: throw IllegalArgumentException("missing tracker url")
 
             val compressVideo: Boolean = process.params["compress"]?.toBoolean() ?: false
 
@@ -93,7 +93,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
             repo.addTorrentFileFromContainer(
                     container.containerUid,
                     DoorUri.parse(torrentDir.toURI().toString()),
-                    tracker.announceUrl, containerFolderUri
+                    trackerUrl, containerFolderUri
             )
 
             ustadTorrentManager.addTorrent(container.containerUid)

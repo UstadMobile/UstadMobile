@@ -44,13 +44,9 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    private val gson: Gson = di.direct.instance()
-
     private val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
     private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
-
-    private val tracker: Tracker = di.direct.instance()
 
     private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
@@ -66,6 +62,8 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
             val videoUri = DoorUri.parse(uri)
             val localUri = process.getLocalUri(videoUri, context, di)
             val contentEntryUid = processMetadata(jobItem, process,context, endpoint)
+            val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
+                    ?: throw IllegalArgumentException("missing tracker url")
 
 
             val videoTempDir = makeTempDir(prefix = "tmp")
@@ -181,7 +179,7 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
             repo.addTorrentFileFromContainer(
                     container.containerUid,
                     DoorUri.parse(torrentDir.toURI().toString()),
-                    tracker.announceUrl, containerFolderUri
+                    trackerUrl, containerFolderUri
             )
 
             ustadTorrentManager.addTorrent(container.containerUid)

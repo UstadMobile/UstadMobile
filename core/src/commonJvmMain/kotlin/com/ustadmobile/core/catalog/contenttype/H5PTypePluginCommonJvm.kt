@@ -66,11 +66,7 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
 
     private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
 
-    private val tracker: Tracker = di.direct.instance<Tracker>()
-
     private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
-
-    private val gson: Gson = di.direct.instance()
 
     override val pluginId: Int
         get() = PLUGIN_ID
@@ -127,6 +123,8 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
             val doorUri = DoorUri.parse(jobUri)
             val contentEntryUid = processMetadata(jobItem, process, context, endpoint)
             val localUri = process.getLocalUri(doorUri, context, di)
+            val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
+                    ?: throw IllegalArgumentException("missing tracker url")
 
             val container = Container().apply {
                 containerContentEntryUid = contentEntryUid
@@ -197,7 +195,7 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
             repo.addTorrentFileFromContainer(
                     container.containerUid,
                     DoorUri.parse(torrentDir.toURI().toString()),
-                    tracker.announceUrl, containerFolderUri
+                    trackerUrl, containerFolderUri
             )
 
             ustadTorrentManager.addTorrent(container.containerUid)

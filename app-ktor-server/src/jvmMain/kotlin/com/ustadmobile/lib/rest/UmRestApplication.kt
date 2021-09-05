@@ -192,7 +192,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             //Add listener that will end sessions when authentication has been updated
             repo.addSyncListener(PersonAuth2::class, EndSessionPersonAuth2SyncListener(repo))
             repo.preload()
-            repo.ktorInitRepo()
+            repo.ktorInitRepo(trackerAnnounceUrl.toURI().toString())
             runBlocking {
                 repo.initAdminUser(context, di)
                 di.on(context).direct.instance<TorrentTracker>().start()

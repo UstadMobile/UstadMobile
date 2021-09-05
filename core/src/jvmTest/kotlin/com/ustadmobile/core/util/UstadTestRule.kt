@@ -147,6 +147,7 @@ class UstadTestRule: TestWatcher() {
                     it.siteDao.insert(Site().apply {
                         siteName = "Test"
                         authSalt = randomString(16)
+                        torrentAnnounceUrl = trackerUrl.toURI().toString()
                     })
                 }
             }
@@ -190,9 +191,6 @@ class UstadTestRule: TestWatcher() {
             bind<UstadCommunicationManager>() with singleton {
                 UstadCommunicationManager()
             }
-            bind<Tracker>() with singleton {
-                Tracker(trackerUrl.port, trackerUrl.toString())
-            }
             bind<TorrentTracker>() with scoped(EndpointScope.Default).singleton {
                 TorrentTracker(endpoint = context, di)
             }
@@ -216,10 +214,6 @@ class UstadTestRule: TestWatcher() {
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
 
             onReady {
-                val tracker = instance<Tracker>()
-                //needed to announce urls
-                tracker.setAcceptForeignTorrents(true)
-                tracker.start(true)
                 instance<UstadCommunicationManager>().start(InetAddress.getByName(trackerUrl.host))
                 GlobalScope.launch {
                     val torrentTracker: TorrentTracker = di.on(Endpoint("localhost")).direct.instance()
