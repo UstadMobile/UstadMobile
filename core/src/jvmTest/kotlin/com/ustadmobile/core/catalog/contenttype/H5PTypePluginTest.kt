@@ -9,7 +9,9 @@ import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockWebServer
@@ -114,15 +116,19 @@ class H5PTypePluginTest {
                 title = "hello"
             })
 
-            val job = ContentJobItem(sourceUri = doorUri.uri.toString(),
-                    toUri = containerTmpDir.toURI().toString(),
+            val jobItem = ContentJobItem(sourceUri = doorUri.uri.toString(),
                     cjiParentContentEntryUid = uid)
+            val job = ContentJob(toUri = containerTmpDir.toURI().toString())
+            val jobAndItem = ContentJobItemAndContentJob().apply{
+                this.contentJob = job
+                this.contentJobItem = jobItem
+            }
 
-            h5pPlugin.processJob(job, processContext) {
+            h5pPlugin.processJob(jobAndItem, processContext) {
 
             }
-            println("entry uid = ${job.cjiContentEntryUid}")
-           val contentEntry = repo.contentEntryDao.findByUid(job.cjiContentEntryUid)!!
+            println("entry uid = ${jobItem.cjiContentEntryUid}")
+           val contentEntry = repo.contentEntryDao.findByUid(jobItem.cjiContentEntryUid)!!
 
             Assert.assertNotNull(contentEntry)
 
@@ -136,7 +142,7 @@ class H5PTypePluginTest {
                     ContentEntry.LICENSE_TYPE_OTHER, contentEntry.licenseType)
 
 
-            val container = repo.containerDao.findByUid(job.cjiContainerUid)!!
+            val container = repo.containerDao.findByUid(jobItem.cjiContainerUid)!!
 
             Assert.assertNotNull(container)
 

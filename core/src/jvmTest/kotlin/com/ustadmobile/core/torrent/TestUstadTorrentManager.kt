@@ -26,6 +26,7 @@ import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import com.ustadmobile.lib.rest.ContainerDownload
 import com.ustadmobile.lib.rest.TorrentFileRoute
 import com.ustadmobile.lib.rest.TorrentTracker
@@ -108,7 +109,6 @@ class TestUstadTorrentManager {
         }
 
         val serverFolder = temporaryFolder.newFolder("serverFolder")
-        val clientFolder = temporaryFolder.newFolder("clientFolder")
 
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
         serverDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
@@ -211,32 +211,10 @@ class TestUstadTorrentManager {
         }
         server.start()
 
-
-        torrentClientFolder =  File(clientFolder, "torrent")
-        torrentClientFolder.mkdirs()
-
-        containerClientFolder =  File(clientFolder, "container")
-        containerClientFolder.mkdirs()
-
         localDi = DI {
             import(ustadTestRule.diModule)
-            bind<File>(tag = DiTag.TAG_TORRENT_DIR) with scoped(ustadTestRule.endpointScope).singleton {
-                torrentClientFolder
-            }
-            bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(ustadTestRule.endpointScope).singleton {
-                containerClientFolder
-            }
-            bind<UstadTorrentManager>() with scoped(ustadTestRule.endpointScope).singleton {
-                UstadTorrentManagerImpl(endpoint = context, di = di)
-            }
-            bind<UstadCommunicationManager>() with singleton {
-                UstadCommunicationManager()
-            }
             bind<ContainerTorrentDownloadJob>() with scoped(ustadTestRule.endpointScope).singleton {
                 ContainerTorrentDownloadJob(endpoint = context, di = di)
-            }
-            onReady {
-                instance<UstadCommunicationManager>().start(InetAddress.getByName(trackerUrl.host))
             }
         }
 
@@ -247,6 +225,8 @@ class TestUstadTorrentManager {
         repo = localDi.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_REPO)
         seedManager = localDi.on(accountManager.activeEndpoint).direct.instance()
         containerDownloadJob = localDi.on(accountManager.activeEndpoint).direct.instance()
+        torrentClientFolder = localDi.on(accountManager.activeEndpoint).direct.instance(tag = DiTag.TAG_TORRENT_DIR)
+        containerClientFolder = localDi.on(accountManager.activeEndpoint).direct.instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
         GlobalScope.launch {
             seedManager.start()
@@ -260,23 +240,25 @@ class TestUstadTorrentManager {
 
         runBlocking {
 
-            containerDownloadJob.processJob(ContentJobItem(cjiContainerUid = serverContainer.containerUid),
-                    ProcessContext(DoorUri.parse(""), params = mutableMapOf())){
+            containerDownloadJob.processJob(ContentJobItemAndContentJob().apply {
+                contentJobItem = ContentJobItem(cjiContainerUid = serverContainer.containerUid)
+            }, ProcessContext(DoorUri.parse(""), params = mutableMapOf())){
 
             }
 
-            var downloadComplete = false
-            val containerFiles = File(containerClientFolder, serverContainer.containerUid.toString())
-            val fileList = containerFiles.listFiles()
-            fileList?.forEach {
 
-                if(it.name.endsWith(".part")){
-                    return@forEach
+                var downloadComplete = false
+                val containerFiles = File(containerClientFolder, serverContainer.containerUid.toString())
+                val fileList = containerFiles.listFiles()
+                fileList?.forEach {
+
+                    if(it.name.endsWith(".part")){
+                        return@forEach
+                    }
+                    downloadComplete = true
                 }
-                downloadComplete = true
-            }
-            assertTrue(downloadComplete)
-            db.assertContainerEqualToOther(serverContainer.containerUid, serverDb)
+                assertTrue(downloadComplete)
+                db.assertContainerEqualToOther(serverContainer.containerUid, serverDb)
         }
 
     }
@@ -301,7 +283,9 @@ class TestUstadTorrentManager {
                     "image3", localDi,
                     ContainerAddOptions(containerClientFolder.toDoorUri()))
 
-            containerDownloadJob.processJob(ContentJobItem(cjiContainerUid = serverContainer.containerUid),
+            containerDownloadJob.processJob(ContentJobItemAndContentJob().apply {
+                contentJobItem = ContentJobItem(cjiContainerUid = serverContainer.containerUid)
+            },
                     ProcessContext(DoorUri.parse(""), params = mutableMapOf())){
 
             }
