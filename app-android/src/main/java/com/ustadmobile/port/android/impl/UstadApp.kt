@@ -133,6 +133,11 @@ open class UstadApp : BaseUstadApp(), DIAware {
                 }
             }
         }
+        bind<File>() with scoped(EndpointScope.Default).singleton{
+            val torrentDir = File(applicationContext.filesDir.siteDataSubDir(context), "torrent")
+            torrentDir.mkdirs()
+            torrentDir
+        }
 
         bind<ConnectivityLiveData>() with scoped(EndpointScope.Default).singleton {
             val db: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_DB)
