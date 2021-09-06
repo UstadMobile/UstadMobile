@@ -113,7 +113,7 @@ class UstadTestRule: TestWatcher() {
         }
 
 
-        val trackerUrl = URL("http://127.0.0.1:8000/announce")
+        val trackerUrl = URL("http://127.0.0.1:6677/announce")
 
         diModule = DI.Module("UstadTestRule") {
             bind<UstadMobileSystemImpl>() with singleton { systemImplSpy }

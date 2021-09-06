@@ -65,7 +65,7 @@ class H5PTypePluginTest {
         endpointScope = EndpointScope()
         di = DI {
             import(ustadTestRule.diModule)
-            val trackerUrl = URL("http://127.0.0.1:8000/announce")
+            val trackerUrl = URL("http://127.0.0.1:6677/announce")
             bind<UstadTorrentManager>() with scoped(endpointScope).singleton {
                 UstadTorrentManagerImpl(endpoint = context, di = di)
             }
