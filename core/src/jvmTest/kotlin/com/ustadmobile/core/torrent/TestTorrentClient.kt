@@ -28,7 +28,7 @@ class TestTorrentClient {
     @Rule
     var ustadTestRule = UstadTestRule()
 
-    @Before
+    //@Before
     fun setup() {
 
         localDi = DI {
@@ -55,7 +55,7 @@ class TestTorrentClient {
 
     }
 
-    @Test
+    //@Test
     fun test(){
 
         val accountManager: UstadAccountManager by localDi.instance()
