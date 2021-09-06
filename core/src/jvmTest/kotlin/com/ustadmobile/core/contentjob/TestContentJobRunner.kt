@@ -9,10 +9,7 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveDbInstance
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.lib.db.entities.ConnectivityStatus
-import com.ustadmobile.lib.db.entities.ContentJob
-import com.ustadmobile.lib.db.entities.ContentJobItem
-import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -50,8 +47,11 @@ class TestContentJobRunner {
         override suspend fun extractMetadata(
             uri: DoorUri,
             process: ProcessContext
-        ): MetadataResult? {
-            return null
+        ): MetadataResult {
+            return MetadataResult(ContentEntryWithLanguage().apply {
+                title = uri.toString().substringAfterLast("/")
+                description = "Desc"
+            }, TEST_PLUGIN_ID)
         }
 
         override suspend fun processJob(
@@ -59,7 +59,7 @@ class TestContentJobRunner {
                 process: ProcessContext,
                 progress: ContentJobProgressListener
         ): ProcessResult {
-            delay(400)
+            delay(100)
 
             db.contentJobItemDao.updateItemStatus(jobItem.contentJobItem?.cjiUid ?: 0,
                 JobStatus.COMPLETE)
@@ -75,6 +75,12 @@ class TestContentJobRunner {
                 mock{
                     on { getPluginById(any()) }.thenAnswer {
                         DummyPlugin(di, context)
+                    }
+
+                    onBlocking { extractMetadata(any()) }.thenAnswer {
+                        runBlocking { DummyPlugin(di, context).extractMetadata(
+                            it.getArgument(0) as DoorUri, mock {})
+                        }
                     }
                 }
             }
@@ -98,7 +104,7 @@ class TestContentJobRunner {
                 cjiConnectivityAcceptable = ContentJobItem.ACCEPT_ANY
                 cjiStatus = JobStatus.QUEUED
                 cjiPluginId = TEST_PLUGIN_ID
-
+                sourceUri = "dummy:///test_$it"
             }
         }
 
@@ -117,6 +123,13 @@ class TestContentJobRunner {
         }
 
         Assert.assertTrue("Job completed", done)
+        val allJobItems = runBlocking { db.contentJobItemDao.findAll() }
+        allJobItems.forEach {
+            Assert.assertNotEquals("ContentJobItem contentEntryUid != 0 after completion",
+                0L, it.cjiContentEntryUid)
+            Assert.assertNotNull("ContentEntry created from extractMetadata",
+                db.contentEntryDao.findByUid(it.cjiContentEntryUid))
+        }
     }
 
     @Test
@@ -128,6 +141,7 @@ class TestContentJobRunner {
                 cjiConnectivityAcceptable = ContentJobItem.ACCEPT_UNMETERED
                 cjiStatus = JobStatus.QUEUED
                 cjiPluginId = TEST_PLUGIN_ID
+                sourceUri = "dummy:///test"
             })
             db.connectivityStatusDao.insert(
                 ConnectivityStatus(ConnectivityStatus.STATE_METERED,
