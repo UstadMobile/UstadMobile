@@ -129,8 +129,14 @@ open class UstadApp : BaseUstadApp(), DIAware {
                 }
             }
         }
-        bind<File>() with scoped(EndpointScope.Default).singleton{
+        bind<File>(tag = DiTag.TAG_TORRENT_DIR) with scoped(EndpointScope.Default).singleton{
             val torrentDir = File(applicationContext.filesDir.siteDataSubDir(context), "torrent")
+            torrentDir.mkdirs()
+            torrentDir
+        }
+
+        bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton{
+            val torrentDir = File(applicationContext.filesDir.siteDataSubDir(context), "container")
             torrentDir.mkdirs()
             torrentDir
         }

@@ -119,7 +119,7 @@ class PersonAuthRegisterRouteTest {
         }) {
             val di: DI by closestDI { this.application }
             val repo: UmAppDatabase by di.on(Endpoint("localhost")).instance(tag = DoorTag.TAG_REPO)
-            repo.insertDefaultSite()
+            repo.insertDefaultSite("")
 
             testFn()
         }
