@@ -57,6 +57,7 @@ import java.net.InetAddress
 import java.net.URL
 import kotlin.random.Random
 import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.assertTrue
 
 
@@ -84,18 +85,15 @@ class TestUstadTorrentManager {
 
     private lateinit var repo: UmAppDatabase
 
-    private lateinit var seedManager: UstadTorrentManager
-
     private lateinit var containerDownloadJob: ContainerTorrentDownloadJob
 
     private lateinit var serverDb: UmAppDatabase
-
 
     private lateinit var serverRepo: UmAppDatabase
 
     private var fileToDownloadPath = "/com/ustadmobile/core/contentformats/english.h5p"
 
-    //@Before
+    @Before
     fun setup() {
 
         val okHttpClient = OkHttpClient()
@@ -133,7 +131,7 @@ class TestUstadTorrentManager {
                     ContainerAddOptions(containerServerFolder.toDoorUri()))
         }
 
-        val trackerUrl = URL("http://127.0.0.1:8000/announce")
+        val trackerUrl = URL("http://127.0.0.1:6677/announce")
 
         runBlocking {
             serverRepo.addTorrentFileFromContainer(
@@ -142,7 +140,7 @@ class TestUstadTorrentManager {
             )
         }
 
-        server = embeddedServer(Netty, 8089) {
+        server = embeddedServer(Netty, 7711) {
              install(DIFeature) {
                 registerContextTranslator { call: ApplicationCall ->
                     Endpoint("localhost")
@@ -154,10 +152,6 @@ class TestUstadTorrentManager {
                 bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
                     serverRepo
 
-                }
-
-                bind<Gson>() with singleton {
-                    Gson()
                 }
                 bind<File>(tag = DiTag.TAG_TORRENT_DIR) with scoped(endpointScope).singleton {
                     torrentServerFolder
@@ -216,7 +210,6 @@ class TestUstadTorrentManager {
             bind<ContainerTorrentDownloadJob>() with scoped(ustadTestRule.endpointScope).singleton {
                 ContainerTorrentDownloadJob(endpoint = context, di = di)
             }
-            val trackerUrl = URL("http://127.0.0.1:8000/announce")
             bind<UstadTorrentManager>() with scoped(endpointScope).singleton {
                 UstadTorrentManagerImpl(endpoint = context, di = di)
             }
@@ -225,60 +218,38 @@ class TestUstadTorrentManager {
             }
             onReady {
                 instance<UstadCommunicationManager>().start(InetAddress.getByName(trackerUrl.host))
-                GlobalScope.launch {
-                    val ustadTorrentManager: UstadTorrentManager = di.on(Endpoint("localhost")).direct.instance()
-                    ustadTorrentManager.start()
-
-                }
             }
         }
 
         val accountManager: UstadAccountManager by localDi.instance()
-        accountManager.activeEndpoint = Endpoint("http://localhost:8089/")
+        accountManager.activeEndpoint = Endpoint("http://localhost:7711/")
 
         db = localDi.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
         repo = localDi.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_REPO)
-        seedManager = localDi.on(accountManager.activeEndpoint).direct.instance()
         containerDownloadJob = localDi.on(accountManager.activeEndpoint).direct.instance()
         torrentClientFolder = localDi.on(accountManager.activeEndpoint).direct.instance(tag = DiTag.TAG_TORRENT_DIR)
         containerClientFolder = localDi.on(accountManager.activeEndpoint).direct.instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
-        GlobalScope.launch {
-            seedManager.start()
-        }
-
     }
 
 
-    //@Test
+    @Test
     fun givenNoFilesOnClientThenContainerDownloadJobsDownloadsEverything(){
 
         runBlocking {
+
 
             containerDownloadJob.processJob(ContentJobItemAndContentJob().apply {
                 contentJobItem = ContentJobItem(cjiContainerUid = serverContainer.containerUid)
             }, ProcessContext(DoorUri.parse(""), params = mutableMapOf())){
 
             }
-
-
-                var downloadComplete = false
-                val containerFiles = File(containerClientFolder, serverContainer.containerUid.toString())
-                val fileList = containerFiles.listFiles()
-                fileList?.forEach {
-
-                    if(it.name.endsWith(".part")){
-                        return@forEach
-                    }
-                    downloadComplete = true
-                }
-                assertTrue(downloadComplete)
-                db.assertContainerEqualToOther(serverContainer.containerUid, serverDb)
+            db.assertContainerEqualToOther(serverContainer.containerUid, serverDb)
         }
 
     }
 
-    //@Test
+    @Test
     fun givenSomeFilesAlreadyExistInAnotherContainerthenContainerDownloadDownloadsPartially(){
 
         val clientContainer = Container().apply {
@@ -320,12 +291,9 @@ class TestUstadTorrentManager {
         }
     }
 
-    //@AfterTest
+    @AfterTest
     fun after(){
         server.stop(10, 10)
-        runBlocking {
-            seedManager.stop()
-        }
     }
 
 }
