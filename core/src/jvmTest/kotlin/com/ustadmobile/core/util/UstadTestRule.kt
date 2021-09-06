@@ -130,6 +130,7 @@ class UstadTestRule: TestWatcher() {
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
+                    .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                     .addSyncCallback(nodeIdAndAuth, primary = false)
                     .build()
                     .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, isPrimary = false))
