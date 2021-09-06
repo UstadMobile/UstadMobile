@@ -18,6 +18,7 @@ import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
 import java.io.File
 import java.net.InetAddress
+import java.net.URL
 
 class TestTorrentClient {
 
@@ -34,6 +35,21 @@ class TestTorrentClient {
             import(ustadTestRule.diModule)
             bind<ContainerTorrentDownloadJob>() with scoped(ustadTestRule.endpointScope).singleton {
                 ContainerTorrentDownloadJob(endpoint = context, di = di)
+            }
+            val trackerUrl = URL("http://127.0.0.1:8000/announce")
+            bind<UstadTorrentManager>() with scoped(ustadTestRule.endpointScope).singleton {
+                UstadTorrentManagerImpl(endpoint = context, di = di)
+            }
+            bind<UstadCommunicationManager>() with singleton {
+                UstadCommunicationManager()
+            }
+            onReady {
+                instance<UstadCommunicationManager>().start(InetAddress.getByName(trackerUrl.host))
+                GlobalScope.launch {
+                    val ustadTorrentManager: UstadTorrentManager = di.on(Endpoint("localhost")).direct.instance()
+                    ustadTorrentManager.start()
+
+                }
             }
         }
 

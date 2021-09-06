@@ -216,6 +216,21 @@ class TestUstadTorrentManager {
             bind<ContainerTorrentDownloadJob>() with scoped(ustadTestRule.endpointScope).singleton {
                 ContainerTorrentDownloadJob(endpoint = context, di = di)
             }
+            val trackerUrl = URL("http://127.0.0.1:8000/announce")
+            bind<UstadTorrentManager>() with scoped(endpointScope).singleton {
+                UstadTorrentManagerImpl(endpoint = context, di = di)
+            }
+            bind<UstadCommunicationManager>() with singleton {
+                UstadCommunicationManager()
+            }
+            onReady {
+                instance<UstadCommunicationManager>().start(InetAddress.getByName(trackerUrl.host))
+                GlobalScope.launch {
+                    val ustadTorrentManager: UstadTorrentManager = di.on(Endpoint("localhost")).direct.instance()
+                    ustadTorrentManager.start()
+
+                }
+            }
         }
 
         val accountManager: UstadAccountManager by localDi.instance()

@@ -1,9 +1,11 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Context
 import android.content.res.Configuration
 import android.media.session.PlaybackState.STATE_BUFFERING
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.test.core.app.ApplicationProvider
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.ui.PlayerView
@@ -30,6 +32,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import org.kodein.di.DIAware
 
 
 @AdbScreenRecord("Video Content Screen Test")
@@ -57,11 +60,12 @@ class VideoContentFragmentTest : TestCase() {
     @Suppress("BlockingMethodInNonBlockingContext")
     @Before
     fun setup() {
+        val localDi = (ApplicationProvider.getApplicationContext<Context>() as DIAware).di
         runBlocking {
             container = dbRule.repo.insertVideoContent()
             dbRule.repo.addEntryToContainerFromResource(container.containerUid, this::class.java,
                     "/com/ustadmobile/app/android/video.mp4", "video.mp4",
-                    ContainerAddOptions(temporaryFolder.newFolder().toDoorUri()))
+                    localDi, ContainerAddOptions(temporaryFolder.newFolder().toDoorUri()))
         }
     }
 

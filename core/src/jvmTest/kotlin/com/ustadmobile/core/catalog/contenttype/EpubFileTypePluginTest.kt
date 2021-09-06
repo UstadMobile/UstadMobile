@@ -5,6 +5,9 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.torrent.UstadCommunicationManager
+import com.ustadmobile.core.torrent.UstadTorrentManager
+import com.ustadmobile.core.torrent.UstadTorrentManagerImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -12,6 +15,8 @@ import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
@@ -20,6 +25,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
+import java.net.InetAddress
+import java.net.URL
 
 class EpubFileTypePluginTest {
 
@@ -43,6 +50,20 @@ class EpubFileTypePluginTest {
         endpointScope = EndpointScope()
         di = DI {
             import(ustadTestRule.diModule)
+            val trackerUrl = URL("http://127.0.0.1:8000/announce")
+            bind<UstadTorrentManager>() with scoped(endpointScope).singleton {
+                UstadTorrentManagerImpl(endpoint = context, di = di)
+            }
+            bind<UstadCommunicationManager>() with singleton {
+                UstadCommunicationManager()
+            }
+            onReady {
+                instance<UstadCommunicationManager>().start(InetAddress.getByName(trackerUrl.host))
+                GlobalScope.launch {
+                    val ustadTorrentManager: UstadTorrentManager = di.on(Endpoint("localhost")).direct.instance()
+                    ustadTorrentManager.start()
+                }
+            }
         }
 
         mockWebServer = MockWebServer()
