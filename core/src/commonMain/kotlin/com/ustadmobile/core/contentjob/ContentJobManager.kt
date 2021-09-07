@@ -3,7 +3,8 @@ package com.ustadmobile.core.contentjob
 import com.ustadmobile.core.account.Endpoint
 
 /**
- * Enqueue a content job. This uses WorkManager on Android, or Quartz on JVM
+ * ContentJobManager will enqueue a ContentJob using WorkManager on Android or Quartz on JVM. The
+ * implementation can then be retrieved via DI (or mocked in tests as required).
  */
 interface ContentJobManager  {
 

@@ -4,6 +4,8 @@ import com.google.gson.Gson
 import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
+import com.ustadmobile.core.contentjob.ContentJobManager
+import com.ustadmobile.core.contentjob.ContentJobManagerJvm
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.db.ext.addSyncCallback
@@ -262,6 +264,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
         bind<AuthManager>() with scoped(EndpointScope.Default).singleton {
             AuthManager(context, di)
+        }
+
+        bind<ContentJobManager>() with singleton {
+            ContentJobManagerJvm(di)
         }
 
         try {

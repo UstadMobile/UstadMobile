@@ -87,5 +87,17 @@ abstract class ContentJobItemDao {
     """)
     abstract suspend fun updateJobItemAttemptCountAndStatus(cjiUid: Long, attemptCount: Int, status: Int)
 
+    @Query("""
+        UPDATE ContentJobITem
+           SET cjiContentEntryUid = :contentEntryUid
+         WHERE cjiUid = :cjiUid  
+    """)
+    abstract suspend fun updateContentEntryUid(cjiUid: Long, contentEntryUid: Long)
+
+    @Query("""
+        SELECT * 
+          FROM ContentJobItem
+    """)
+    abstract suspend fun findAll(): List<ContentJobItem>
 
 }

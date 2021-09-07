@@ -16,6 +16,8 @@ import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
+import com.ustadmobile.core.contentjob.ContentJobManager
+import com.ustadmobile.core.contentjob.ContentJobManagerAndroid
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
@@ -103,8 +105,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<UmAppDatabase>(tag = TAG_DB) with scoped(EndpointScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
-            val db = DatabaseBuilder.databaseBuilder(applicationContext, UmAppDatabase::class, dbName)
-                .addSyncCallback(instance(), true)
+            val nodeIdAndAuth: NodeIdAndAuth = instance()
+            DatabaseBuilder.databaseBuilder(applicationContext, UmAppDatabase::class, dbName)
+                .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
+                .addSyncCallback(nodeIdAndAuth, false)
                 .build()
                 .also {
                     val networkManager: NetworkManagerBle = di.direct.instance()
@@ -186,6 +190,9 @@ open class UstadApp : BaseUstadApp(), DIAware {
             DeletePreparationRequesterAndroidImpl(applicationContext, context)
         }
 
+        bind<ContentJobManager>() with singleton {
+            ContentJobManagerAndroid(applicationContext)
+        }
 
         bind<ContainerDownloadRunner>() with factory { arg: DownloadJobItemRunnerDIArgs ->
             DownloadJobItemRunner(arg.downloadJobItem,

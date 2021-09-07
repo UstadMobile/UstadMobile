@@ -8,6 +8,7 @@ import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.core.io.ext.emptyRecursively
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
@@ -36,11 +37,17 @@ class ContentJobRunner(
 
     data class ContentJobResult(val status: Int)
 
-    private val checkQueueSignalChannel = Channel<Boolean>(numProcessors + 1)
+    /**
+     * Sending anything on this channel will result in one queue check. If there is an available
+     * processor, one new item will be started.
+     */
+    private val checkQueueSignalChannel = Channel<Boolean>(Channel.UNLIMITED)
 
     private val activeJobItemIds = concurrentSafeListOf<Long>()
 
     private val db: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_DB)
+
+    private val repo: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
     private val contentPluginManager: ContentPluginManager by on(endpoint).instance()
 
@@ -58,20 +65,23 @@ class ContentJobRunner(
 
             do {
                 checkQueueSignalChannel.receive()
+                val numProcessorsAvailable = numProcessors - activeJobItemIds.size
+                if(numProcessorsAvailable > 0) {
+                    //Check queue and filter out any duplicates that are being actively processed
+                    val queueItems = db.contentJobItemDao.findNextItemsInQueue(jobId, numProcessors * 2).filter {
+                        (it.contentJobItem?.cjiUid ?: 0) !in activeJobItemIds
+                    }
 
-                //Check queue and filter out any duplicates that are being actively processed
-                val queueItems = db.contentJobItemDao.findNextItemsInQueue(jobId, numProcessors * 2).filter {
-                    (it.contentJobItem?.cjiUid ?: 0) !in activeJobItemIds
+                    val numJobsToAdd = min(numProcessorsAvailable, queueItems.size)
+
+                    for(i in 0 until numJobsToAdd) {
+                        val contentJobItemUid = queueItems[i].contentJobItem?.cjiUid ?: 0L
+                        activeJobItemIds +=  contentJobItemUid
+                        db.contentJobItemDao.updateItemStatus(contentJobItemUid, JobStatus.RUNNING)
+                        send(queueItems[i])
+                    }
                 }
 
-                val numJobsToAdd = min(numProcessors - activeJobItemIds.size, queueItems.size)
-
-                for(i in 0 until numJobsToAdd) {
-                    val contentJobItemUid = queueItems[i].contentJobItem?.cjiUid ?: 0L
-                    activeJobItemIds +=  contentJobItemUid
-                    db.contentJobItemDao.updateItemStatus(contentJobItemUid, JobStatus.RUNNING)
-                    send(queueItems[i])
-                }
 
                 done = db.contentJobItemDao.isJobDone(jobId)
             }while(!done)
@@ -88,17 +98,25 @@ class ContentJobRunner(
 
         for(item in channel) {
             val processContext = ProcessContext(tmpDir, null, mutableMapOf())
-            println("Proessor #$id processing job #${item.contentJobItem?.cjiUid}")
+            println("Proessor #$id processing job #${item.contentJobItem?.cjiUid} attempt #${item.contentJobItem?.cjiAttemptCount}")
             try {
+                val sourceUri = item.contentJobItem?.sourceUri?.let { DoorUri.parse(it) }
+                    ?: throw IllegalArgumentException("ContentJobItem #${item.contentJobItem?.cjiUid} has no source uri!")
+
+                if(item.contentJobItem?.cjiContentEntryUid == 0L) {
+                    val metadataResult = contentPluginManager.extractMetadata(sourceUri)
+                        ?: throw FatalContentJobException("ContentJobItem #${item.contentJobItem?.cjiUid}: cannot extract metadata")
+                    val contentEntryUid = repo.contentEntryDao.insertAsync(metadataResult.entry)
+                    item.contentJobItem?.cjiContentEntryUid = contentEntryUid
+                    db.contentJobItemDao.updateContentEntryUid(item.contentJobItem?.cjiUid ?: 0,
+                        contentEntryUid)
+                }
+
+
                 val plugin = if(item.contentJobItem?.cjiPluginId != 0) {
                     contentPluginManager.getPluginById(item.contentJobItem?.cjiPluginId ?: 0)
                 }else {
-                    TODO("lookup using URI")
-                }
-
-                //TODO
-                if(item.contentJobItem?.cjiContentEntryUid == 0L) {
-                    //Must extract metadata
+                    TODO("this")
                 }
 
                 plugin.processJob(item, processContext, this@ContentJobRunner)
@@ -109,7 +127,7 @@ class ContentJobRunner(
 
                 //something went wrong
                 val finalStatus = if(e is FatalContentJobException ||
-                        item.contentJobItem?.cjiAttemptCount ?: maxItemAttempts >= maxItemAttempts) {
+                        (item.contentJobItem?.cjiAttemptCount ?: maxItemAttempts) >= maxItemAttempts) {
                     JobStatus.FAILED
                 }else {
                     JobStatus.QUEUED //requeue for another try
@@ -123,7 +141,7 @@ class ContentJobRunner(
             }finally {
                 activeJobItemIds -= (item.contentJobItem?.cjiUid ?: 0)
                 tmpDir.emptyRecursively()
-                println("Processor #$id sending check queue signal #${item.contentJobItem?.cjiUid}")
+                println("Processor #$id sending check queue signal after finishing with #${item.contentJobItem?.cjiUid}")
                 checkQueueSignalChannel.send(true)
             }
         }
