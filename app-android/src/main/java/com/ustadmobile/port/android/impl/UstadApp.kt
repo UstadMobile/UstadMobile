@@ -103,13 +103,17 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<UmAppDatabase>(tag = TAG_DB) with scoped(EndpointScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
-            DatabaseBuilder.databaseBuilder(applicationContext, UmAppDatabase::class, dbName)
+            val db = DatabaseBuilder.databaseBuilder(applicationContext, UmAppDatabase::class, dbName)
                 .addSyncCallback(instance(), true)
                 .build()
                 .also {
                     val networkManager: NetworkManagerBle = di.direct.instance()
                     it.connectivityStatusDao.commitLiveConnectivityStatus(networkManager.connectivityStatus)
                 }
+            GlobalScope.launch {
+                di.on(context).direct.instance<UstadTorrentManager>().start()
+            }
+            db
         }
 
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
@@ -124,9 +128,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
             }).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
                 it.setupAssignmentSyncListener(context, di)
-                GlobalScope.launch {
-                    di.on(context).direct.instance<UstadTorrentManager>().start()
-                }
             }
         }
         bind<File>(tag = DiTag.TAG_TORRENT_DIR) with scoped(EndpointScope.Default).singleton{
