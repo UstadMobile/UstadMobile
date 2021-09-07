@@ -99,8 +99,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<UmAppDatabase>(tag = TAG_DB) with scoped(EndpointScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
+            val nodeIdAndAuth: NodeIdAndAuth = instance()
             DatabaseBuilder.databaseBuilder(applicationContext, UmAppDatabase::class, dbName)
-                .addSyncCallback(instance(), false)
+                .addSyncCallback(nodeIdAndAuth, false)
+                .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                 .build()
                 .also {
                     val networkManager: NetworkManagerBle = di.direct.instance()
