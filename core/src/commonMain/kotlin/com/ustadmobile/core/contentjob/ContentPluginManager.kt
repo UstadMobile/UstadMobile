@@ -2,11 +2,11 @@ package com.ustadmobile.core.contentjob
 
 import com.ustadmobile.door.DoorUri
 
-interface ContentPluginManager {
+interface ContentPluginManager{
 
     fun getPluginById(id: Int): ContentPlugin
 
     //go through plugins to
-    suspend fun extractMetadata(uri: DoorUri) : MetadataResult?
+    suspend fun extractMetadata(uri: DoorUri, processContext: ProcessContext) : MetadataResult?
 
 }

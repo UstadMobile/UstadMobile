@@ -14,7 +14,7 @@ data class ContentJobItem(
     /**
      * Where data is being taken from, this could be
      *  - ContentEntry (leaf)
-     *     e.g. https://servfer.com/endpoint/umapp/index.html#ContentEntryDetail?entityUid=1234
+     *     e.g. https://server.com/endpoint/umapp/index.html#ContentEntryDetail?entityUid=1234
      *  - A plain HTTP file that can be imported
      *     e.g. https://server.com/dir/file.epub
      *  - Web resource that needs scraped

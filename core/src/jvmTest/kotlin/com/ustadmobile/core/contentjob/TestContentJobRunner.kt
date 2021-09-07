@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveDbInstance
+import com.ustadmobile.core.util.onActiveAccount
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
@@ -20,6 +21,7 @@ import org.kodein.di.*
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.junit.Assert
+import org.mockito.kotlin.stub
 
 class TestContentJobRunner {
 
@@ -77,7 +79,7 @@ class TestContentJobRunner {
                         DummyPlugin(di, context)
                     }
 
-                    onBlocking { extractMetadata(any()) }.thenAnswer {
+                    onBlocking { extractMetadata(any(), any()) }.thenAnswer {
                         runBlocking { DummyPlugin(di, context).extractMetadata(
                             it.getArgument(0) as DoorUri, mock {})
                         }
@@ -170,7 +172,18 @@ class TestContentJobRunner {
 
     }
 
+    @Test
     fun givenJobCreated_whenJobItemFailsAndExceedsAllowableAttempts_thenShouldFail() {
+        val pluginManager: ContentPluginManager by di.onActiveAccount().instance()
+        val mockPlugin = mock<ContentPlugin> {
+            onBlocking { processJob(any(), any(), any()) }.thenAnswer {
+                throw RuntimeException("Fail!")
+            }
+        }
+
+        pluginManager.stub {
+            on { getPluginById(any()) }.thenReturn(mockPlugin)
+        }
 
     }
 

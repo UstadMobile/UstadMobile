@@ -104,7 +104,7 @@ class ContentJobRunner(
                     ?: throw IllegalArgumentException("ContentJobItem #${item.contentJobItem?.cjiUid} has no source uri!")
 
                 if(item.contentJobItem?.cjiContentEntryUid == 0L) {
-                    val metadataResult = contentPluginManager.extractMetadata(sourceUri)
+                    val metadataResult = contentPluginManager.extractMetadata(sourceUri, processContext)
                         ?: throw FatalContentJobException("ContentJobItem #${item.contentJobItem?.cjiUid}: cannot extract metadata")
                     val contentEntryUid = repo.contentEntryDao.insertAsync(metadataResult.entry)
                     item.contentJobItem?.cjiContentEntryUid = contentEntryUid
