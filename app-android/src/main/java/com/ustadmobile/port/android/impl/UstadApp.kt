@@ -106,7 +106,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<UmAppDatabase>(tag = TAG_DB) with scoped(EndpointScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
             val nodeIdAndAuth: NodeIdAndAuth = instance()
-            DatabaseBuilder.databaseBuilder(applicationContext, UmAppDatabase::class, dbName)
+            val db = DatabaseBuilder.databaseBuilder(applicationContext, UmAppDatabase::class, dbName)
                 .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                 .addSyncCallback(nodeIdAndAuth, false)
                 .build()
@@ -114,6 +114,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
                     val networkManager: NetworkManagerBle = di.direct.instance()
                     it.connectivityStatusDao.commitLiveConnectivityStatus(networkManager.connectivityStatus)
                 }
+            GlobalScope.launch {
+                di.on(context).direct.instance<UstadTorrentManager>().start()
+            }
+            db
         }
 
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
@@ -189,9 +193,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
             DeletePreparationRequesterAndroidImpl(applicationContext, context)
         }
 
-        bind<ContentJobManager>() with singleton {
-            ContentJobManagerAndroid(applicationContext)
-        }
 
         bind<ContainerDownloadRunner>() with factory { arg: DownloadJobItemRunnerDIArgs ->
             DownloadJobItemRunner(arg.downloadJobItem,

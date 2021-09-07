@@ -167,10 +167,15 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 defaultUrl = "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
             InitialContext().bindDataSourceIfNotExisting(dbHostName, dbProperties)
             val nodeIdAndAuth: NodeIdAndAuth = instance()
-            DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbHostName)
+            val db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbHostName)
                 .addSyncCallback(nodeIdAndAuth, true)
                 .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                 .build()
+            runBlocking {
+                di.on(context).direct.instance<TorrentTracker>().start()
+                di.on(context).direct.instance<UstadTorrentManager>().start()
+            }
+            db
         }
 
         bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {
@@ -197,10 +202,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             repo.ktorInitRepo(trackerAnnounceUrl.toURI().toString())
             runBlocking {
                 repo.initAdminUser(context, di)
-                di.on(context).direct.instance<TorrentTracker>().start()
-                di.on(context).direct.instance<UstadTorrentManager>().start()
             }
-
             repo
         }
 
