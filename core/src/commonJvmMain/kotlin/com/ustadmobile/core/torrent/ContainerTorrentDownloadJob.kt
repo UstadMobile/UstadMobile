@@ -98,11 +98,13 @@ class ContainerTorrentDownloadJob(private val endpoint: Endpoint, override val d
             }
         }
 
-        ustadTorrentManager.addTorrent(containerUid)
+        val startTime = System.currentTimeMillis()
+        ustadTorrentManager.addTorrent(containerUid, containerFilesFolder.path)
 
         val torrentDeferred = CompletableDeferred<Boolean>()
         val torrentListener = object: TorrentDownloadListener{
             override fun onComplete() {
+                println("downloaded torrent in ${System.currentTimeMillis() - startTime} ms")
                 torrentDeferred.complete(true)
             }
         }

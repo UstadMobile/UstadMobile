@@ -4,12 +4,10 @@ import android.content.Context
 import android.media.MediaCodecInfo
 import android.media.MediaExtractor
 import android.media.MediaFormat
-import com.google.gson.Gson
 import io.github.aakira.napier.Napier
 import com.linkedin.android.litr.MediaTransformer
 import com.linkedin.android.litr.TransformationListener
 import com.linkedin.android.litr.analytics.TrackTransformationInfo
-import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.ContentJobProgressListener
@@ -30,7 +28,6 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DI
-import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
@@ -182,7 +179,7 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
                     trackerUrl, containerFolderUri
             )
 
-            ustadTorrentManager.addTorrent(container.containerUid)
+            ustadTorrentManager.addTorrent(container.containerUid, File(containerFolder, container.containerUid.toString()).path)
 
             repo.containerDao.findByUid(container.containerUid) ?: container
         }

@@ -135,7 +135,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                         trackerUrl, containerFolderUri
                 )
 
-                ustadTorrentManager.addTorrent(container.containerUid)
+                ustadTorrentManager.addTorrent(container.containerUid,  File(containerFolder, container.containerUid.toString()).path)
 
                 val containerWithSize = repo.containerDao.findByUid(container.containerUid) ?: container
 
