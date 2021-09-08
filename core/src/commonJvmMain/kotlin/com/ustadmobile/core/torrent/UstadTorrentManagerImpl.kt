@@ -40,17 +40,20 @@ class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : Ust
             file.name.endsWith(".torrent")
         }?.forEach { torrentFile ->
             torrentLock.withLock {
-                addTorrent(torrentFile.nameWithoutExtension.toLong())
+                addTorrent(torrentFile.nameWithoutExtension.toLong(), null)
             }
         }
     }
 
-    override suspend fun addTorrent(containerUid: Long) {
+    override suspend fun addTorrent(containerUid: Long, downloadPath: String?) {
         withContext(Dispatchers.Default){
+
+            val startTime = System.currentTimeMillis()
 
             val torrentFile = File(torrentDir, "$containerUid.torrent")
 
-            val containerFilesDir = File(containerDir, containerUid.toString())
+            val containerFilesDir = if(downloadPath != null) File(downloadPath)
+                                    else File(containerDir, containerUid.toString())
             containerFilesDir.mkdirs()
 
             if(!torrentFile.exists())
@@ -64,6 +67,7 @@ class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : Ust
 
             // add to map for ref
             containerInfoHashMap[containerUid] = metadataProvider.torrentMetadata.hexInfoHash
+            println("prepared to add torrent in ${System.currentTimeMillis() - startTime} ms")
             val manager = communicationManager.addTorrent(metadataProvider, pieceStorage)
             containerManagerMap[containerUid] = manager
 

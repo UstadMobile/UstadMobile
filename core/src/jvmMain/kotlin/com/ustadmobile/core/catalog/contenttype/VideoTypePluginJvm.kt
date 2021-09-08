@@ -1,7 +1,5 @@
 package com.ustadmobile.core.catalog.contenttype
 
-import com.google.gson.Gson
-import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.ContentJobProgressListener
@@ -25,7 +23,6 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
-import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
@@ -96,7 +93,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
                     trackerUrl, containerFolderUri
             )
 
-            ustadTorrentManager.addTorrent(container.containerUid)
+            ustadTorrentManager.addTorrent(container.containerUid, File(containerFolder, container.containerUid.toString()).path)
 
             container
         }

@@ -5,7 +5,8 @@ import kotlin.jvm.Volatile
 
 data class ProcessContext(
         val tempDirUri: DoorUri,
-        @Volatile
-        var localUri: DoorUri? = null,
         val params: MutableMap<String, String>
-)
+){
+        @Volatile
+        var localUri: DoorUri? = null
+}

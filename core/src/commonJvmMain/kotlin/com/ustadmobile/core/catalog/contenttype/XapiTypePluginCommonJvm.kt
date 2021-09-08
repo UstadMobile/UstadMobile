@@ -1,6 +1,5 @@
 package com.ustadmobile.core.catalog.contenttype
 
-import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
@@ -22,7 +21,6 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DI
 import org.kodein.di.instance
-import org.kodein.di.direct
 import org.kodein.di.on
 import org.xmlpull.v1.XmlPullParserFactory
 
@@ -114,7 +112,7 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
                     trackerUrl, containerFolderUri
             )
 
-            ustadTorrentManager.addTorrent(container.containerUid)
+            ustadTorrentManager.addTorrent(container.containerUid,File(containerFolder, container.containerUid.toString()).path )
 
             repo.containerDao.findByUid(container.containerUid)
 

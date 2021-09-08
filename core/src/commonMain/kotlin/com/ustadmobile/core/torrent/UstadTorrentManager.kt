@@ -6,7 +6,7 @@ interface UstadTorrentManager : DIAware {
 
     suspend fun start()
 
-    suspend fun addTorrent(containerUid: Long)
+    suspend fun addTorrent(containerUid: Long, downloadPath: String?)
 
     fun addDownloadListener(containerUid: Long,downloadListener: TorrentDownloadListener)
 

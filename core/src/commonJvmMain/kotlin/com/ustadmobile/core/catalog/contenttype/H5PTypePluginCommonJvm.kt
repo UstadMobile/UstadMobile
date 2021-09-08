@@ -1,14 +1,11 @@
 package com.ustadmobile.core.catalog.contenttype
 
-import com.google.gson.Gson
-import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.getAssetFromResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
-import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
@@ -198,7 +195,7 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
                     trackerUrl, containerFolderUri
             )
 
-            ustadTorrentManager.addTorrent(container.containerUid)
+            ustadTorrentManager.addTorrent(container.containerUid,File(containerFolder, container.containerUid.toString()).path )
 
             repo.containerDao.findByUid(container.containerUid)
 
