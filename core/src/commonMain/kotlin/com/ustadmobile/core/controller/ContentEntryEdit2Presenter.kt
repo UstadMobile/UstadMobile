@@ -31,6 +31,7 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ContentJobItem.Companion.ACCEPT_ANY
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -250,6 +251,7 @@ class ContentEntryEdit2Presenter(context: Any,
                             cjiContentEntryUid = entity.contentEntryUid
                             cjiIsLeaf = entity.leaf
                             cjiParentContentEntryUid = parentEntryUid
+                            cjiConnectivityAcceptable = ACCEPT_ANY
                             cjiUid = db.contentJobItemDao.insertJobItem(this)
                         }
 
@@ -339,7 +341,7 @@ class ContentEntryEdit2Presenter(context: Any,
         var entry: ContentEntryWithLanguage? = null
         try {
 
-            val processContext = ProcessContext(createTemporaryDir(), mutableMapOf())
+            val processContext = ProcessContext(createTemporaryDir("content"), mutableMapOf())
             val metadata = pluginManager.extractMetadata(DoorUri.parse(uri), processContext)
                     ?: throw IllegalArgumentException("no metadata found")
             view.metadataResult = metadata
