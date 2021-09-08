@@ -2,8 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
-import com.ustadmobile.core.contentformats.xapi.endpoints.storeCompletedStatement
-import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
@@ -44,8 +42,6 @@ class ContentEntryDetailOverviewPresenter(context: Any,
             return arguments.toDeepLink(activeEndpoint, ContentEntryDetailView.VIEW_NAME)
         }
 
-
-
     private val isDownloadEnabled: Boolean by di.instance<Boolean>(tag = TAG_DOWNLOAD_ENABLED)
 
     private val containerDownloadManager: ContainerDownloadManager? by di.on(accountManager.activeAccount).instanceOrNull()
@@ -75,7 +71,6 @@ class ContentEntryDetailOverviewPresenter(context: Any,
         super.onCreate(savedState)
         contentEntryUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
-        println(containerDownloadManager)
         containerDownloadManager?.also {
             GlobalScope.launch(doorMainDispatcher()) {
                 downloadJobItemLiveData = it.getDownloadJobItemByContentEntryUid(contentEntryUid).apply {
@@ -100,6 +95,9 @@ class ContentEntryDetailOverviewPresenter(context: Any,
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithMostRecentContainer? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+
+        // TODO get entry with downloaded container
+
         val entity = withTimeoutOrNull(2000) {
             db.contentEntryDao.findEntryWithContainerByEntryId(entityUid)
         } ?: ContentEntryWithMostRecentContainer()
@@ -138,19 +136,21 @@ class ContentEntryDetailOverviewPresenter(context: Any,
     }
 
     fun handleOnClickOpenDownloadButton() {
-        val canOpen = !isDownloadEnabled || downloadJobItemLiveData?.getValue()?.djiStatus == JobStatus.COMPLETE
-        if (canOpen) {
-            val loginFirst = systemImpl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
-                    "false", context)!!.toBoolean()
-            val account = accountManager.activeAccount
-            if (loginFirst && account.personUid == 0L) {
-                systemImpl.go(Login2View.VIEW_NAME, arguments, context)
-            } else {
-                openContentEntry()
+        presenterScope.launch {
+            val canOpen = !isDownloadEnabled || db.containerDao.findContainerWithFilesByContentEntryUid(contentEntryUid) != 0L
+            if (canOpen) {
+                val loginFirst = systemImpl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
+                        "false", context)!!.toBoolean()
+                val account = accountManager.activeAccount
+                if (loginFirst && account.personUid == 0L) {
+                    systemImpl.go(Login2View.VIEW_NAME, arguments, context)
+                } else {
+                    openContentEntry()
+                }
+            } else if (isDownloadEnabled) {
+                view.showDownloadDialog(mapOf(ARG_CONTENT_ENTRY_UID to (entity?.contentEntryUid?.toString()
+                        ?: "0")))
             }
-        } else if (isDownloadEnabled) {
-            view.showDownloadDialog(mapOf(ARG_CONTENT_ENTRY_UID to (entity?.contentEntryUid?.toString()
-                    ?: "0")))
         }
     }
 
@@ -164,7 +164,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
     }
 
     private fun openContentEntry() {
-        GlobalScope.launch(Dispatchers.Main) {
+        presenterScope.launch(Dispatchers.Main) {
             try {
                 entity?.contentEntryUid?.also {
                     contentEntryOpener.openEntry(context, it, isDownloadEnabled, false,
@@ -195,6 +195,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
 
     fun handleOnClickDeleteButton() {
         GlobalScope.launch(doorMainDispatcher()){
+            // TODO handle deleting all containers on this
             val downloadJobItem = db.downloadJobItemDao.findByContentEntryUidAsync(contentEntryUid) ?: return@launch
             val deleteRequester: DeletePreparationRequester by on(accountManager.activeAccount).instance()
             deleteRequester.requestDelete(downloadJobItem.djiUid)

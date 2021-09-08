@@ -4,8 +4,13 @@ import com.google.gson.Gson
 import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
+import com.ustadmobile.core.catalog.contenttype.H5PTypePluginCommonJvm
+import com.ustadmobile.core.catalog.contenttype.VideoTypePluginJvm
+import com.ustadmobile.core.catalog.contenttype.XapiTypePluginCommonJvm
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobManagerJvm
+import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentjob.ContentPluginManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.db.ext.addSyncCallback
@@ -15,6 +20,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.io.UploadSessionManager
+import com.ustadmobile.core.torrent.ContainerTorrentDownloadJob
 import com.ustadmobile.core.torrent.UstadCommunicationManager
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.torrent.UstadTorrentManagerImpl
@@ -181,8 +187,13 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {
             ServerUpdateNotificationManagerImpl()
         }
-        bind<EpubTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton {
-            EpubTypePluginCommonJvm(Any(), context, di)
+        bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
+            ContentPluginManagerImpl(listOf(
+                    EpubTypePluginCommonJvm(Any(), context, di),
+                    H5PTypePluginCommonJvm(Any(), context, di),
+                    XapiTypePluginCommonJvm(Any(), context, di),
+                    VideoTypePluginJvm(Any(), context, di),
+                    ContainerTorrentDownloadJob(context, di)))
         }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {

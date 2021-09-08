@@ -1,6 +1,7 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMStorageDir
@@ -25,6 +26,8 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
     var storageOptions: List<UMStorageDir> ?
 
     var entryMetaData: ImportedContentEntryMetaData?
+
+    var metadataResult: MetadataResult?
 
     var compressionEnabled: Boolean
 

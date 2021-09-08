@@ -64,6 +64,17 @@ abstract class ContainerDao : BaseDao<Container> {
     abstract suspend fun findFilesByContentEntryUid(contentEntryUid: Long): List<Container>
 
 
+    @Query("""
+            SELECT DISTINCT(Container.containerUid) 
+              FROM Container
+             WHERE Container.containerContentEntryUid = :contentEntryUid
+               AND EXISTS (SELECT ContainerEntry.ceUid 
+                             FROM ContainerEntry
+                            WHERE ContainerEntry.ceContainerUid = Container.containerUid)     
+          ORDER BY Container.cntLastModified DESC LIMIT 1
+    """)
+    abstract suspend fun findContainerWithFilesByContentEntryUid(contentEntryUid: Long): Long
+
     @Query("SELECT Container.* FROM Container " +
             "LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = containerContentEntryUid " +
             "WHERE ContentEntry.publik")

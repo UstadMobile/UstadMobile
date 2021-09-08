@@ -17,8 +17,8 @@
             type="com.ustadmobile.lib.db.entities.ContentEntryWithLanguage" />
 
         <variable
-            name="importedMetadata"
-            type="com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData"/>
+            name="metadataResult"
+            type="com.ustadmobile.core.contentjob.MetadataResult" />
 
         <variable
             name="loading"
@@ -395,7 +395,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/dimen_20dp"
                 android:enabled="@{fieldsEnabled}"
-                android:visibility="@{importedMetadata != null ? View.VISIBLE : View.GONE}"
+                android:visibility="@{metadataResult != null ? View.VISIBLE : View.GONE}"
                 android:text="@string/compress"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:checked="@={compressionEnabled}"
