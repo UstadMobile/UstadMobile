@@ -61,7 +61,12 @@ data class ContentJobItem(
     /**
      * The number of attempts made so far
      */
-    var cjiAttemptCount: Int = 0
+    var cjiAttemptCount: Int = 0,
+
+    /**
+     *  The parent of this ContentJobItem in the content job itself.
+     */
+    var cjiParentCjiUid: Long = 0,
 
 ) {
     companion object {

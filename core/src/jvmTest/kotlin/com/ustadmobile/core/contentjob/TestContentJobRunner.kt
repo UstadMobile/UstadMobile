@@ -35,7 +35,9 @@ class TestContentJobRunner {
 
     private lateinit var endpoint: Endpoint
 
-    class DummyPlugin(override val di: DI, endpoint: Endpoint) : ContentPlugin{
+    var numTimesToFail = 0
+
+    inner class DummyPlugin(override val di: DI, endpoint: Endpoint) : ContentPlugin{
         override val pluginId: Int
             get() = TEST_PLUGIN_ID
 
@@ -169,6 +171,11 @@ class TestContentJobRunner {
 
     @Test
     fun givenJobCreated_whenJobItemFails_thenShouldRetry() {
+        val pluginManager: ContentPluginManager by di.onActiveAccount().instance()
+        numTimesToFail = 1
+
+
+
 
     }
 

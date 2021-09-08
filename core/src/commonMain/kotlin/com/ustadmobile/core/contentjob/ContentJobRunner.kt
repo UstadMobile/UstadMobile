@@ -103,8 +103,9 @@ class ContentJobRunner(
                 val sourceUri = item.contentJobItem?.sourceUri?.let { DoorUri.parse(it) }
                     ?: throw IllegalArgumentException("ContentJobItem #${item.contentJobItem?.cjiUid} has no source uri!")
 
+                var metadataResult: MetadataResult? = null
                 if(item.contentJobItem?.cjiContentEntryUid == 0L) {
-                    val metadataResult = contentPluginManager.extractMetadata(sourceUri, processContext)
+                    metadataResult = contentPluginManager.extractMetadata(sourceUri, processContext)
                         ?: throw FatalContentJobException("ContentJobItem #${item.contentJobItem?.cjiUid}: cannot extract metadata")
                     val contentEntryUid = repo.contentEntryDao.insertAsync(metadataResult.entry)
                     item.contentJobItem?.cjiContentEntryUid = contentEntryUid
@@ -112,12 +113,15 @@ class ContentJobRunner(
                         contentEntryUid)
                 }
 
-
-                val plugin = if(item.contentJobItem?.cjiPluginId != 0) {
-                    contentPluginManager.getPluginById(item.contentJobItem?.cjiPluginId ?: 0)
+                val pluginId = if(item.contentJobItem?.cjiPluginId == 0) {
+                    metadataResult?.pluginId ?: contentPluginManager.extractMetadata(sourceUri,
+                        processContext)?.pluginId ?:
+                        throw FatalContentJobException("ContentJobItem #${item.contentJobItem?.cjiUid}: cannot determine pluginId")
                 }else {
-                    TODO("this")
+                    item.contentJobItem?.cjiPluginId ?: 0
                 }
+
+                val plugin = contentPluginManager.getPluginById(pluginId)
 
                 plugin.processJob(item, processContext, this@ContentJobRunner)
                 println("Processor #$id completed job #${item.contentJobItem?.cjiUid}")
