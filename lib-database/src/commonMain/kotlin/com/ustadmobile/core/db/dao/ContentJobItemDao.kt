@@ -65,8 +65,8 @@ abstract class ContentJobItemDao {
 
     @Query("""
         UPDATE ContentJobItem
-           SET cjiProgress = :cjiProgress,
-               cjiTotal = :cjiTotal
+           SET cjiItemProgress = :cjiProgress,
+               cjiItemTotal = :cjiTotal
          WHERE cjiUid = :cjiUid     
     """)
     abstract suspend fun updateItemProgress(cjiUid: Long, cjiProgress: Long, cjiTotal: Long)
