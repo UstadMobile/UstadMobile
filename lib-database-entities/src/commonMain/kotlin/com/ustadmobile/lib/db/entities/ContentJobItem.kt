@@ -44,9 +44,27 @@ data class ContentJobItem(
      */
     var cjiContainerUid: Long = 0,
 
-    var cjiProgress: Long = 0,
+    /**
+     * Represents the progress on this item (itself) not including any child items
+     */
+    var cjiItemProgress: Long = 0,
 
-    var cjiTotal: Long = 0,
+    /**
+     * Represents the total to process on this item (itself) not including any child items
+     */
+    var cjiItemTotal: Long = 0,
+
+    /**
+     * Represents the progress of this item and its child items (inclusive). This should not be set
+     * directly, it is managed by triggers.
+     */
+    var cjiRecursiveProgress: Long = 0,
+
+    /**
+     * Represents the total size of the job and its child items (inclusive). This should not be set
+     * directly, it is managed by triggers.
+     */
+    var cjiRecursiveTotal: Long = 0,
 
     var cjiStatus: Int = 0,
 

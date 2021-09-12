@@ -16,4 +16,4 @@ class ContentJobItemProgressUpdate(
 
 
 fun ContentJobItem.toProgressUpdate() = ContentJobItemProgressUpdate(cjiUid,
-    cjiProgress, cjiTotal)
+    cjiRecursiveProgress, cjiRecursiveTotal)
