@@ -116,7 +116,7 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
                     override fun onProgress(id: String, progress: Float) {
                         Napier.d(tag = VIDEO_ANDROID, message = "progress at value ${progress * 100}")
-                        contentJobItem.cjiProgress = (progress * 100).toLong()
+                        contentJobItem.cjiItemProgress = (progress * 100).toLong()
                         jobProgress.onProgress(contentJobItem)
                     }
 

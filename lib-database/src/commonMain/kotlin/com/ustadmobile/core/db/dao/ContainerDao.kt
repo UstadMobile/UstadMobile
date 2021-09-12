@@ -65,7 +65,7 @@ abstract class ContainerDao : BaseDao<Container> {
 
 
     @Query("""
-            SELECT DISTINCT(Container.containerUid) 
+            SELECT Container.containerUid
               FROM Container
              WHERE Container.containerContentEntryUid = :contentEntryUid
                AND EXISTS (SELECT ContainerEntry.ceUid 
@@ -74,6 +74,18 @@ abstract class ContainerDao : BaseDao<Container> {
           ORDER BY Container.cntLastModified DESC LIMIT 1
     """)
     abstract suspend fun findContainerWithFilesByContentEntryUid(contentEntryUid: Long): Long
+
+
+    @Query("""
+            SELECT Container.containerUid, Container.mimeType
+              FROM Container
+             WHERE Container.containerContentEntryUid = :contentEntryUid
+               AND EXISTS (SELECT ContainerEntry.ceUid 
+                             FROM ContainerEntry
+                            WHERE ContainerEntry.ceContainerUid = Container.containerUid)     
+          ORDER BY Container.cntLastModified DESC LIMIT 1
+    """)
+    abstract suspend fun findContainerWithMimeTypeWithFilesByContentEntryUid(contentEntryUid: Long): ContainerUidAndMimeType?
 
     @Query("SELECT Container.* FROM Container " +
             "LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = containerContentEntryUid " +

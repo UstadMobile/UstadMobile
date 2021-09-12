@@ -6,6 +6,7 @@ import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.KEY_SELECTED_ITEMS
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
@@ -252,6 +253,7 @@ class ContentEntryEdit2Presenter(context: Any,
                             cjiIsLeaf = entity.leaf
                             cjiParentContentEntryUid = parentEntryUid
                             cjiConnectivityAcceptable = ACCEPT_ANY
+                            cjiStatus = JobStatus.QUEUED
                             cjiUid = db.contentJobItemDao.insertJobItem(this)
                         }
 
