@@ -56,13 +56,13 @@ data class ContentJobItem(
 
     /**
      * Represents the progress of this item and its child items (inclusive). This should not be set
-     * directly, it is managed by triggers.
+     * directly, it is managed by triggers and should NOT be updated directly.
      */
     var cjiRecursiveProgress: Long = 0,
 
     /**
      * Represents the total size of the job and its child items (inclusive). This should not be set
-     * directly, it is managed by triggers.
+     * directly, it is managed by triggers and should NOT be updated directly.
      */
     var cjiRecursiveTotal: Long = 0,
 

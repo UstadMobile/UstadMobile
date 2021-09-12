@@ -6,8 +6,8 @@ package com.ustadmobile.lib.db.entities
  */
 class ContentJobItemProgressUpdate(
     val cjiUid: Long,
-    val cjiProgress: Long = 0,
-    val cjiTotal: Long = 0
+    val cjiItemProgress: Long = 0,
+    val cjiItemTotal: Long = 0
 ) {
     override fun equals(other: Any?) = (other as? ContentJobItemProgressUpdate)?.cjiUid == cjiUid
 
@@ -16,4 +16,4 @@ class ContentJobItemProgressUpdate(
 
 
 fun ContentJobItem.toProgressUpdate() = ContentJobItemProgressUpdate(cjiUid,
-    cjiRecursiveProgress, cjiRecursiveTotal)
+    cjiItemProgress, cjiItemTotal)

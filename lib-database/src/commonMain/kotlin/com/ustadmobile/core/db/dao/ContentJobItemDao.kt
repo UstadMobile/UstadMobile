@@ -74,7 +74,7 @@ abstract class ContentJobItemDao {
     @Transaction
     open suspend fun commitProgressUpdates(updates: List<ContentJobItemProgressUpdate>) {
         updates.forEach {
-            updateItemProgress(it.cjiUid, it.cjiProgress, it.cjiTotal)
+            updateItemProgress(it.cjiUid, it.cjiItemProgress, it.cjiItemTotal)
         }
     }
 
