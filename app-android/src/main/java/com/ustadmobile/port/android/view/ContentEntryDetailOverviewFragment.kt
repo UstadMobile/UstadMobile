@@ -81,6 +81,23 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
             mBinding?.markCompleteVisible = value
         }
 
+    override var canDownload: Boolean = false
+        set(value) {
+            field = value
+            mBinding?.canDownload = value
+        }
+    override var canUpdate: Boolean = false
+        set(value) {
+            field =value
+            mBinding?.canUpdate = value
+        }
+
+    override var hasContentToOpenOrDelete: Boolean = false
+        set(value) {
+            field = value
+            mBinding?.canDelete = value
+        }
+
 
     private inner class PresenterViewLifecycleObserver: DefaultLifecycleObserver {
         override fun onStart(owner: LifecycleOwner) {

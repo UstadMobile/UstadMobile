@@ -21,6 +21,12 @@ interface ContentEntryDetailOverviewView: UstadDetailView<ContentEntryWithMostRe
 
     var markCompleteVisible: Boolean
 
+    var canDownload: Boolean
+
+    var canUpdate: Boolean
+
+    var hasContentToOpenOrDelete: Boolean
+
     companion object {
 
         const val VIEW_NAME = "ContentEntryDetailOverviewView"
