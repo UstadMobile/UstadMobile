@@ -327,7 +327,7 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/entry_detail_delete_button"
-                    android:visibility="@{canDelete ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{hasContentToOpenOrDelete ? View.VISIBLE : View.GONE}"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

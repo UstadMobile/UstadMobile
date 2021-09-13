@@ -95,7 +95,7 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
     override var hasContentToOpenOrDelete: Boolean = false
         set(value) {
             field = value
-            mBinding?.canDelete = value
+            mBinding?.hasContentToOpenOrDelete = value
         }
 
 

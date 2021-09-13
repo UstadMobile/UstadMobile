@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import com.ustadmobile.core.db.JobStatus
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.db.entities.ContentJobItem.Companion.ACCEPT_METERED
@@ -62,6 +63,13 @@ abstract class ContentJobItemDao {
                   AND cjiStatus < ${JobStatus.COMPLETE_MIN}) 
     """)
     abstract suspend fun isJobDone(jobUid: Long): Boolean
+
+    @Query("""
+        SELECT * 
+          FROM ContentJobItem
+         WHERE cjiJobUid = :jobUid
+    """)
+    abstract fun findByJobId(jobUid: Long): DoorLiveData<ContentJobItem?>
 
     @Query("""
         UPDATE ContentJobItem

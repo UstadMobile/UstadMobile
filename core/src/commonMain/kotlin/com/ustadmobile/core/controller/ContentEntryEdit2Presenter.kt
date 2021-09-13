@@ -239,11 +239,11 @@ class ContentEntryEdit2Presenter(context: Any,
                     if (fromUri?.startsWith("content://") == true) {
 
                         val job = ContentJob().apply {
-                            cjUid = db.contentJobDao.insertAsync(this)
                             toUri = view.storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString()
                             params = Json.encodeToString(
                                     MapSerializer(String.serializer(), String.serializer()),
                                         conversionParams)
+                            cjUid = db.contentJobDao.insertAsync(this)
                         }
                         ContentJobItem().apply {
                             cjiJobUid = job.cjUid
