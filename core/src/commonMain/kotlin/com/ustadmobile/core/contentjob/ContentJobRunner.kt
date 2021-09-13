@@ -51,7 +51,7 @@ class ContentJobRunner(
 
     private val contentPluginManager: ContentPluginManager by on(endpoint).instance()
 
-    private val eventCollator = EventCollator(1000, this::commitProgressUpdates)
+    private val eventCollator = EventCollator(500, this::commitProgressUpdates)
 
     private val connectivityLiveData: ConnectivityLiveData by on(endpoint).instance()
 
