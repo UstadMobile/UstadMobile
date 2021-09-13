@@ -18,6 +18,8 @@ import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobManagerAndroid
+import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentjob.ContentPluginManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
@@ -213,6 +215,18 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<ContainerUploadManager>() with scoped(EndpointScope.Default).singleton {
             ContainerUploadManagerCommonJvm(di, context)
+        }
+
+        bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
+            ContentPluginManagerImpl(listOf(
+                    EpubTypePluginCommonJvm(applicationContext, context, di),
+                    H5PTypePluginCommonJvm(applicationContext, context, di),
+                    XapiTypePluginCommonJvm(applicationContext, context, di),
+                    VideoTypePluginAndroid(applicationContext, context, di),
+                    ContainerTorrentDownloadJob(context, di)))
+        }
+        bind<ContentJobManager>() with singleton {
+            ContentJobManagerAndroid(applicationContext)
         }
 
         bind<Gson>() with singleton {

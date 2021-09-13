@@ -107,7 +107,7 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
                     this.author = author
                     leaf = true
                 }
-                MetadataResult(entry, EpubTypePluginCommonJvm.PLUGIN_ID)
+                MetadataResult(entry, PLUGIN_ID)
             }
         }
     }

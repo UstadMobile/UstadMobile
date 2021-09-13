@@ -66,7 +66,10 @@ data class ContentJobItem(
      */
     var cjiRecursiveTotal: Long = 0,
 
-    var cjiStatus: Int = 0,
+    /**
+     * Status set to default JobStatus.QUEUED
+     */
+    var cjiStatus: Int = 4,
 
     var cjiConnectivityAcceptable: Int = 0,
 

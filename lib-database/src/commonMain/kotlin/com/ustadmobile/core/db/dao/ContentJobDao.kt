@@ -8,5 +8,5 @@ import com.ustadmobile.lib.db.entities.ContentJob
 abstract class ContentJobDao {
 
     @Insert
-    abstract suspend fun insertAsync(contentJob: ContentJob)
+    abstract suspend fun insertAsync(contentJob: ContentJob): Long
 }

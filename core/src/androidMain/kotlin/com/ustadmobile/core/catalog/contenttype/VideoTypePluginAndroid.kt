@@ -27,6 +27,9 @@ import kotlinx.coroutines.withContext
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -66,7 +69,10 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
             val videoTempDir = makeTempDir(prefix = "tmp")
             val newVideo = File(videoTempDir,
                     localUri.getFileName(context))
-            val compressVideo: Boolean = process.params["compress"]?.toBoolean() ?: false
+            val params: Map<String, String> = Json.decodeFromString(
+                    MapSerializer(String.serializer(), String.serializer()),
+                    jobItem.contentJob?.params ?: "")
+            val compressVideo: Boolean = params["compress"]?.toBoolean() ?: false
 
             Napier.d(tag = VIDEO_ANDROID, message = "conversion Params compress video is $compressVideo")
 
@@ -74,7 +80,7 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
                 Napier.d(tag = VIDEO_ANDROID, message = "start import for new video file $newVideo.name")
 
-                val dimensionsArray = process.params["dimensions"]?.split("x") ?: listOf()
+                val dimensionsArray = params["dimensions"]?.split("x") ?: listOf()
                 val storageDimensions = localUri.extractVideoResolutionMetadata(context as Context)
                 val originalVideoDimensions = if (dimensionsArray.isEmpty()) {
                     storageDimensions
@@ -116,12 +122,14 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
                     override fun onProgress(id: String, progress: Float) {
                         Napier.d(tag = VIDEO_ANDROID, message = "progress at value ${progress * 100}")
-                        contentJobItem.cjiProgress = (progress * 100).toLong()
+                        contentJobItem.cjiItemProgress = (progress * 100).toLong()
                         jobProgress.onProgress(contentJobItem)
                     }
 
                     override fun onCompleted(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
                         Napier.d(tag = VIDEO_ANDROID, message = "completed transform")
+                        contentJobItem.cjiItemProgress = 100L
+                        jobProgress.onProgress(contentJobItem)
                         videoCompleted.complete(true)
                     }
 
