@@ -64,6 +64,60 @@ class ContentJobItemTriggersCallback: DoorDatabaseCallback {
                 END;
                 """
             ))
+        }else {
+            db.execSqlBatch(arrayOf(
+                """
+                CREATE OR REPLACE FUNCTION contentjobiteminsert_fn() RETURNS TRIGGER AS ${'$'}${'$'} 
+                BEGIN
+                UPDATE ContentJobItem 
+                   SET cjiRecursiveProgress = NEW.cjiItemProgress,
+                       cjiRecursiveTotal = NEW.cjiItemTotal
+                 WHERE ContentJobItem.cjiUid = NEW.cjiUid;
+                RETURN NULL; 
+                END ${'$'}${'$'} LANGUAGE plpgsql
+                """,
+                """
+                CREATE TRIGGER contentjobiteminsert_trig 
+                AFTER INSERT ON ContentJobItem
+                FOR EACH ROW EXECUTE PROCEDURE contentjobiteminsert_fn()    
+                """,
+
+                """
+                CREATE OR REPLACE FUNCTION contentjobitem_updaterecursivetotals_fn() RETURNS TRIGGER AS ${'$'}${'$'}
+                BEGIN
+                UPDATE ContentJobItem 
+                   SET cjiRecursiveProgress = (cjiRecursiveProgress + (NEW.cjiItemProgress - OLD.cjiItemProgress)),
+                       cjiRecursiveTotal = (cjiRecursiveTotal + (NEW.cjiItemTotal - OLD.cjiItemTotal))
+                 WHERE (NEW.cjiItemProgress != OLD.cjiItemProgress OR NEW.cjiItemTotal != OLD.cjiItemTotal)
+                   AND ContentJobItem.cjiUid = NEW.cjiUid;
+                RETURN NULL;
+                END ${'$'}${'$'} LANGUAGE plpgsql
+                """,
+                """
+                CREATE TRIGGER contentjobitem_updaterecursivetotals_trig
+                AFTER UPDATE ON ContentJobItem
+                FOR EACH ROW EXECUTE PROCEDURE contentjobitem_updaterecursivetotals_fn();
+                """,
+
+                """
+                CREATE OR REPLACE FUNCTION contentjobitem_updateparents_fn() RETURNS TRIGGER AS ${'$'}${'$'}
+                BEGIN 
+                UPDATE ContentJobItem 
+                   SET cjiRecursiveProgress = (cjiRecursiveProgress + (NEW.cjiRecursiveProgress - OLD.cjiRecursiveProgress)),
+                       cjiRecursiveTotal = (cjiRecursiveTotal + (NEW.cjiRecursiveTotal - OLD.cjiRecursiveTotal))
+                 WHERE (NEW.cjiRecursiveProgress != OLD.cjiRecursiveProgress
+                        OR NEW.cjiRecursiveTotal != OLD.cjiRecursiveTotal)
+                    AND ContentJobItem.cjiUid = NEW.cjiParentCjiUid
+                    AND NEW.cjiParentCjiUid != 0;  
+                RETURN NULL;
+                END ${'$'}${'$'} LANGUAGE plpgsql
+                """,
+                """
+                CREATE TRIGGER contentjobitem_updateparents_trig
+                AFTER UPDATE ON ContentJobItem
+                FOR EACH ROW EXECUTE PROCEDURE contentjobitem_updateparents_fn();    
+                """
+            ))
         }
 
     }
