@@ -1,5 +1,7 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentPluginManager
@@ -9,6 +11,7 @@ import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.KEY_
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
@@ -62,6 +65,8 @@ class ContentEntryEdit2Presenter(context: Any,
 
     private val httpClient: HttpClient by di.instance()
 
+    private val containerStorageManager: ContainerStorageManager by on(accountManager.activeAccount).instance()
+
     enum class LicenceOptions(val optionVal: Int, val messageId: Int) {
         LICENSE_TYPE_CC_BY(ContentEntry.LICENSE_TYPE_CC_BY, MessageID.licence_type_cc_by),
         LICENSE_TYPE_CC_BY_SA(ContentEntry.LICENSE_TYPE_CC_BY_SA, MessageID.licence_type_cc_by_sa),
@@ -112,7 +117,7 @@ class ContentEntryEdit2Presenter(context: Any,
         view.completionCriteriaOptions = CompletionCriteriaOptions.values().map { CompletionCriteriaMessageIdOption(it, context) }
         parentEntryUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0
         GlobalScope.launch(doorMainDispatcher()) {
-            view.storageOptions = systemImpl.getStorageDirsAsync(context)
+            view.storageOptions = containerStorageManager.storageList
         }
     }
 
@@ -239,7 +244,7 @@ class ContentEntryEdit2Presenter(context: Any,
                     if (fromUri?.startsWith("content://") == true) {
 
                         val job = ContentJob().apply {
-                            toUri = view.storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString()
+                            toUri = view.storageOptions?.get(view.selectedStorageIndex)?.dirUri
                             params = Json.encodeToString(
                                     MapSerializer(String.serializer(), String.serializer()),
                                         conversionParams)

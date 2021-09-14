@@ -4,6 +4,7 @@ import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
@@ -23,7 +24,7 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
 
     var fileImportErrorVisible: Boolean
 
-    var storageOptions: List<UMStorageDir> ?
+    var storageOptions: List<ContainerStorageDir> ?
 
     var entryMetaData: ImportedContentEntryMetaData?
 

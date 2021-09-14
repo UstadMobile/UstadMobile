@@ -195,7 +195,9 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
                     trackerUrl, containerFolderUri
             )
 
-            ustadTorrentManager.addTorrent(container.containerUid,File(containerFolder, container.containerUid.toString()).path )
+            val containerUidFolder = File(containerFolder, container.containerUid.toString())
+            containerUidFolder.mkdirs()
+            ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
 
             repo.containerDao.findByUid(container.containerUid)
 

@@ -6,7 +6,7 @@
     <data>
         <import type="android.view.View"/>
         <import type="android.text.InputType" />
-        <import type="com.ustadmobile.core.impl.UMStorageDir" />
+        <import type="com.ustadmobile.core.impl.ContainerStorageDir" />
         <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="com.ustadmobile.core.controller.ContentEntryEdit2Presenter.StorageOptions"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView"/>
@@ -84,7 +84,7 @@
 
         <variable
             name="storageOptions"
-            type="java.util.List&lt;UMStorageDir&gt;"/>
+            type="java.util.List&lt;ContainerStorageDir&gt;"/>
 
         <variable
             name="completionCriteriaListener"

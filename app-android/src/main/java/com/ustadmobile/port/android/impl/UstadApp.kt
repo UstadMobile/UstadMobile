@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.impl
 
 import android.content.Context
+import androidx.core.content.ContextCompat
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import com.google.gson.Gson
@@ -10,8 +11,6 @@ import com.squareup.picasso.Picasso
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.assignment.setupAssignmentSyncListener
 import com.ustadmobile.core.catalog.contenttype.*
-import com.ustadmobile.core.contentformats.ContentImportManager
-import com.ustadmobile.core.contentformats.ContentImportManagerImplAndroid
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
@@ -49,6 +48,7 @@ import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploadManagerCommonJvm
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 import com.ustadmobile.core.db.ext.addSyncCallback
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_ITERATIONS
 import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_KEYLENGTH
@@ -145,10 +145,27 @@ open class UstadApp : BaseUstadApp(), DIAware {
             torrentDir
         }
 
+        bind<ContainerStorageManager> () with scoped(EndpointScope.Default).singleton{
+            val systemImpl: UstadMobileSystemImpl = instance()
+            val storageList = mutableListOf<ContainerStorageDir>()
+            ContextCompat.getExternalFilesDirs(applicationContext, null).mapIndexed { index, it ->
+                val siteDir = it.siteDataSubDir(context)
+                val storageDir = File(siteDir, UstadMobileSystemCommon.SUBDIR_CONTAINER_NAME)
+                storageDir.takeIf { !it.exists() }?.mkdirs()
+                val nameMessageId = if(index == 0) MessageID.phone_memory else MessageID.memory_card
+                storageList.add(
+                        ContainerStorageDir(storageDir.toURI().toString(),
+                                systemImpl.getString(nameMessageId, applicationContext),
+                        it.usableSpace, index == 0))
+            }
+            ContainerStorageManager(storageList.toList())
+        }
+
         bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton{
-            val torrentDir = File(applicationContext.filesDir.siteDataSubDir(context), "container")
-            torrentDir.mkdirs()
-            torrentDir
+            val containerStorage by di.instance<ContainerStorageManager>()
+            val containerFolder = File(containerStorage.storageList.first().dirUri)
+            containerFolder.mkdirs()
+            containerFolder
         }
 
         bind<ConnectivityLiveData>() with scoped(EndpointScope.Default).singleton {

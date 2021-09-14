@@ -347,7 +347,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
         var umDir = File(storageOptions[deviceStorageIndex], contentDirName!!)
         if (!umDir.exists()) umDir.mkdirs()
-        dirList.add(UMStorageDir(umDir.absolutePath,
+        dirList.add(UMStorageDir(umDir.toURI().toString(),
                 getString(MessageID.phone_memory, context), true,
                 isAvailable = true, isWritable = canWriteFileInDir(umDir.absolutePath),
                 usableSpace = umDir.usableSpace))
@@ -356,7 +356,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             val sdCardStorage = storageOptions[sdCardStorageIndex]
             umDir = File(sdCardStorage, contentDirName)
             if (!umDir.exists()) umDir.mkdirs()
-            dirList.add(UMStorageDir(umDir.absolutePath,
+            dirList.add(UMStorageDir(umDir.toURI().toString(),
                     getString(MessageID.memory_card, context), true,
                     isAvailable = true, isWritable = canWriteFileInDir(umDir.absolutePath),
                     usableSpace = umDir.usableSpace))

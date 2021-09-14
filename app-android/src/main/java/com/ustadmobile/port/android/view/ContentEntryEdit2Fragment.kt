@@ -20,11 +20,16 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntryEdit2Binding
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.UMStorageDir
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ContentEntryEdit2View
@@ -34,6 +39,11 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.util.ext.*
 import com.ustadmobile.port.android.view.ContentEntryAddOptionsBottomSheetFragment.Companion.ARG_SHOW_ADD_FOLDER
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.kodein.di.instance
 
 
 interface ContentEntryEdit2FragmentEventHandler {
@@ -189,7 +199,7 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
             field = value
         }
 
-    override var storageOptions: List<UMStorageDir>? = null
+    override var storageOptions: List<ContainerStorageDir>? = null
         set(value) {
             mBinding?.storageOptions = value
             field = value
@@ -256,6 +266,7 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
         mPresenter = ContentEntryEdit2Presenter(requireContext(), arguments.toStringMap(), this,
                 viewLifecycleOwner, di).withViewLifecycle()
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
                 Language::class.java) {
             val language = it.firstOrNull() ?: return@observeResult
