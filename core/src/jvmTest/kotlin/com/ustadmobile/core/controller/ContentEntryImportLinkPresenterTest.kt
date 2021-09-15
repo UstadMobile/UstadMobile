@@ -5,7 +5,9 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.timeout
 import org.mockito.kotlin.verify
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.UstadView
@@ -74,20 +76,18 @@ class ContentEntryImportLinkPresenterTest {
     @Test
     fun givenPresenterCreated_whenUserEntersLinkAndIsValid_thenReturnToPreviousScreen() {
 
-        var importedContentEntryMetaData = ImportedContentEntryMetaData(
-                ContentEntryWithLanguage(), "application/epub+zip",
-                "content://abc.zip", "googleDriveScraper")
+        val metadataResult = MetadataResult(ContentEntryWithLanguage(),EpubTypePluginCommonJvm.PLUGIN_ID)
 
         var response = MockResponse().setResponseCode(200).setHeader("Content-Type", "application/json")
             .setBody(Buffer().write(
-                safeStringify(di, ImportedContentEntryMetaData.serializer(), importedContentEntryMetaData).toByteArray()))
+                safeStringify(di, MetadataResult.serializer(), metadataResult).toByteArray()))
 
         mockWebServer.enqueue(response)
 
         presenter.handleClickDone(mockWebServer.url("/").toString())
 
         verify(mockView, timeout(5000)).showHideProgress(false)
-        verify(mockView, timeout(5000)).finishWithResult(importedContentEntryMetaData)
+        verify(mockView, timeout(5000)).finishWithResult(metadataResult)
     }
 
     @Test

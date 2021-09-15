@@ -18,6 +18,7 @@ import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -112,7 +113,9 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
                     trackerUrl, containerFolderUri
             )
 
-            ustadTorrentManager.addTorrent(container.containerUid,File(containerFolder, container.containerUid.toString()).path )
+            val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
+            containerUidFolder.mkdirs()
+            ustadTorrentManager.addTorrent(container.containerUid,containerUidFolder.path)
 
             repo.containerDao.findByUid(container.containerUid)
 

@@ -70,11 +70,18 @@ ContentEntryOpenerTest {
         container.cntLastModified = System.currentTimeMillis()
         container.containerUid = umAppRepository.containerDao.insert(container)
 
-        var dj = DownloadJobItem()
-        dj.djiContainerUid = container.containerUid
-        dj.djiContentEntryUid = contentEntry.contentEntryUid
-        dj.djiStatus = JobStatus.COMPLETE
-        umAppDatabase.downloadJobItemDao.insert(dj)
+        val containerEntryFile = ContainerEntryFile().apply {
+            this.cefPath = "/home/"
+            this.cefUid = umAppDatabase.containerEntryFileDao.insert(this)
+        }
+
+        ContainerEntry().apply {
+            this.ceContainerUid = container.containerUid
+            this.cePath = "example.mp4"
+            this.ceCefUid = containerEntryFile.cefUid
+            this.ceUid = umAppDatabase.containerEntryDao.insert(this)
+        }
+
     }
 
     @Test

@@ -26,6 +26,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
@@ -187,7 +188,9 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
                     trackerUrl, containerFolderUri
             )
 
-            ustadTorrentManager.addTorrent(container.containerUid, File(containerFolder, container.containerUid.toString()).path)
+            val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
+            containerUidFolder.mkdirs()
+            ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
 
             repo.containerDao.findByUid(container.containerUid) ?: container
         }
