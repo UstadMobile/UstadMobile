@@ -99,6 +99,10 @@ class ContentJobRunner(
         for(item in channel) {
             val processContext = ProcessContext(tmpDir, mutableMapOf())
             println("Proessor #$id processing job #${item.contentJobItem?.cjiUid} attempt #${item.contentJobItem?.cjiAttemptCount}")
+
+            var processResult: ProcessResult? = null
+            var processException: Throwable? = null
+
             try {
                 val sourceUri = item.contentJobItem?.sourceUri?.let { DoorUri.parse(it) }
                     ?: throw IllegalArgumentException("ContentJobItem #${item.contentJobItem?.cjiUid} has no source uri!")
@@ -123,29 +127,34 @@ class ContentJobRunner(
 
                 val plugin = contentPluginManager.getPluginById(pluginId)
 
-                plugin.processJob(item, processContext, this@ContentJobRunner)
+                processResult = plugin.processJob(item, processContext, this@ContentJobRunner)
                 println("Processor #$id completed job #${item.contentJobItem?.cjiUid}")
             }catch(e: Exception) {
-                if(e is CancellationException)
-                    throw e
-
                 //something went wrong
-                val finalStatus = if(e is FatalContentJobException ||
-                        (item.contentJobItem?.cjiAttemptCount ?: maxItemAttempts) >= maxItemAttempts) {
-                    JobStatus.FAILED
-                }else {
-                    JobStatus.QUEUED //requeue for another try
-                }
-
-                db.contentJobItemDao.updateJobItemAttemptCountAndStatus(
-                    item.contentJobItem?.cjiUid ?: 0,
-                    (item.contentJobItem?.cjiAttemptCount ?: 0) + 1, finalStatus)
+                processException = e
 
                 e.printStackTrace()
             }finally {
-                activeJobItemIds -= (item.contentJobItem?.cjiUid ?: 0)
-                tmpDir.emptyRecursively()
-                println("Processor #$id sending check queue signal after finishing with #${item.contentJobItem?.cjiUid}")
+                withContext(NonCancellable) {
+                    val finalStatus = when {
+                        processResult != null -> processResult.status
+                        processException is FatalContentJobException -> JobStatus.FAILED
+                        (item.contentJobItem?.cjiAttemptCount ?: maxItemAttempts) >= maxItemAttempts -> JobStatus.FAILED
+                        else -> JobStatus.QUEUED
+                    }
+
+                    db.contentJobItemDao.updateJobItemAttemptCountAndStatus(
+                        item.contentJobItem?.cjiUid ?: 0,
+                        (item.contentJobItem?.cjiAttemptCount ?: 0) + 1, finalStatus)
+
+                    activeJobItemIds -= (item.contentJobItem?.cjiUid ?: 0)
+                    tmpDir.emptyRecursively()
+                    println("Processor #$id sending check queue signal after finishing with #${item.contentJobItem?.cjiUid}")
+                }
+
+                if(processException is CancellationException)
+                    throw processException
+
                 checkQueueSignalChannel.send(true)
             }
         }
