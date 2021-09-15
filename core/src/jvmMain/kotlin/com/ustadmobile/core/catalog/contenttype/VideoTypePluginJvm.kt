@@ -7,6 +7,7 @@ import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.contentjob.ext.processMetadata
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.io.ext.addTorrentFileFromContainer
@@ -101,7 +102,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
         }
 
 
-        return ProcessResult(200)
+        return ProcessResult(JobStatus.COMPLETE)
     }
 
     suspend fun getEntry(uri: DoorUri, process: ProcessContext): MetadataResult? {

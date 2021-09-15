@@ -144,7 +144,11 @@ class ContentJobRunner(
                 e.printStackTrace()
             }finally {
                 activeJobItemIds -= (item.contentJobItem?.cjiUid ?: 0)
-                tmpDir.emptyRecursively()
+                try{
+                    tmpDir.emptyRecursively()
+                }catch (e: Exception){
+                    e.printStackTrace()
+                }
                 println("Processor #$id sending check queue signal after finishing with #${item.contentJobItem?.cjiUid}")
                 checkQueueSignalChannel.send(true)
             }

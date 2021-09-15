@@ -3,6 +3,7 @@ package com.ustadmobile.core.torrent
 import com.turn.ttorrent.client.FileMetadataProvider
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.*
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.getUnCompressedSize
 import com.ustadmobile.core.io.ext.isGzipped
@@ -160,7 +161,7 @@ class ContainerTorrentDownloadJob(private val endpoint: Endpoint, override val d
         }
 
 
-        return ProcessResult(200)
+        return ProcessResult(JobStatus.COMPLETE)
     }
 
 

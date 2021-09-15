@@ -80,6 +80,7 @@ import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import kotlinx.coroutines.*
 import java.net.InetAddress
+import java.net.URI
 import java.util.concurrent.Executors
 
 /**
@@ -148,7 +149,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<ContainerStorageManager> () with scoped(EndpointScope.Default).singleton{
             val systemImpl: UstadMobileSystemImpl = instance()
             val storageList = mutableListOf<ContainerStorageDir>()
-            ContextCompat.getExternalFilesDirs(applicationContext, null).mapIndexed { index, it ->
+            applicationContext.filesDir.listFiles()?.mapIndexed { index, it ->
                 val siteDir = it.siteDataSubDir(context)
                 val storageDir = File(siteDir, UstadMobileSystemCommon.SUBDIR_CONTAINER_NAME)
                 storageDir.takeIf { !it.exists() }?.mkdirs()
@@ -163,7 +164,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton{
             val containerStorage by di.instance<ContainerStorageManager>()
-            val containerFolder = File(containerStorage.storageList.first().dirUri)
+            val containerFolder = File(URI(containerStorage.storageList.first().dirUri))
             containerFolder.mkdirs()
             containerFolder
         }

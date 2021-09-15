@@ -67,7 +67,7 @@ class TestContentJobRunner {
 
             db.contentJobItemDao.updateItemStatus(jobItem.contentJobItem?.cjiUid ?: 0,
                 JobStatus.COMPLETE)
-            return ProcessResult(200)
+            return ProcessResult(JobStatus.COMPLETE)
         }
     }
 

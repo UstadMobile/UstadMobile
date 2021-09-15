@@ -11,6 +11,7 @@ import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ext.processMetadata
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
@@ -85,7 +86,7 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
 
     override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("mising job item")
-        val uri = contentJobItem.sourceUri ?: return ProcessResult(404)
+        val uri = contentJobItem.sourceUri ?: return ProcessResult(JobStatus.FAILED)
         val container = withContext(Dispatchers.Default) {
 
             val contentEntryUid = processMetadata(jobItem, process,context, endpoint)
@@ -121,7 +122,7 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
 
         }
 
-        return ProcessResult(200)
+        return ProcessResult(JobStatus.COMPLETE)
     }
 
     companion object {
