@@ -7,6 +7,8 @@ import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.impl.ContainerStorageDir
+import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
@@ -71,6 +73,8 @@ class ContentEntryEdit2PresenterTest {
 
     private val metadataResult =  MetadataResult(ContentEntryWithLanguage(), TestPlugin.PLUGIN_ID)
 
+    private val storageDir = ContainerStorageDir(createTemporaryDir("container").uri.toString(), "container", 100, false)
+
 
     @Before
     fun setUp() {
@@ -99,6 +103,9 @@ class ContentEntryEdit2PresenterTest {
             bind<ContentJobManager>() with singleton {
                 contentJobManager
             }
+            bind<ContainerStorageManager>() with scoped(ustadTestRule.endpointScope).singleton {
+                ContainerStorageManager(listOf(storageDir))
+            }
         }
 
         db = di.directActiveDbInstance()
@@ -106,12 +113,6 @@ class ContentEntryEdit2PresenterTest {
 
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
-        runBlocking {
-            whenever(systemImpl.getStorageDirsAsync(any())).thenAnswer {
-                mutableListOf(UMStorageDir("", "", removableMedia = false,
-                        isAvailable = false))
-            }
-        }
 
         whenever(systemImpl.getString(any(), any())).thenReturn(errorMessage)
 
@@ -129,7 +130,7 @@ class ContentEntryEdit2PresenterTest {
             on { compressionEnabled }.thenAnswer{ true }
             on { videoDimensions }.thenAnswer{ Pair(0,0) }
             on { selectedStorageIndex }.thenAnswer { 0 }
-            on { storageOptions }.thenAnswer { runBlocking { systemImpl.getStorageDirsAsync(context) } }
+            on { storageOptions }.thenAnswer { listOf(storageDir) }
             on { metadataResult }.thenAnswer {
                 if (isUriNull) null else
                     metadataResult

@@ -93,7 +93,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
                     trackerUrl, containerFolderUri
             )
 
-            val containerUidFolder = File(containerFolder, container.containerUid.toString())
+            val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
             containerUidFolder.mkdirs()
             ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
 

@@ -16,6 +16,7 @@ import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.core.container.PrefixContainerFileNamer
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ext.processMetadata
@@ -195,7 +196,7 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
                     trackerUrl, containerFolderUri
             )
 
-            val containerUidFolder = File(containerFolder, container.containerUid.toString())
+            val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
             containerUidFolder.mkdirs()
             ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
 
