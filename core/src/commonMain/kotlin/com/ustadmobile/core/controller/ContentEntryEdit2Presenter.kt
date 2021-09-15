@@ -13,6 +13,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.impl.NavigateForResultOptions
+import com.ustadmobile.core.io.ext.getSize
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.createTemporaryDir
@@ -253,6 +254,7 @@ class ContentEntryEdit2Presenter(context: Any,
                         ContentJobItem().apply {
                             cjiJobUid = job.cjUid
                             sourceUri = fromUri
+                            cjiItemTotal = sourceUri?.let { DoorUri.parse(it).getSize(context, di)  } ?: 0L
                             cjiPluginId = metaData.pluginId
                             cjiContentEntryUid = entity.contentEntryUid
                             cjiIsLeaf = entity.leaf

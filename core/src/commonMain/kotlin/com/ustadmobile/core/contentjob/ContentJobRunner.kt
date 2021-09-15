@@ -128,6 +128,7 @@ class ContentJobRunner(
                 val plugin = contentPluginManager.getPluginById(pluginId)
 
                 processResult = plugin.processJob(item, processContext, this@ContentJobRunner)
+                db.contentJobItemDao.updateItemStatus(item.contentJobItem?.cjiUid ?: 0, processResult.status)
                 println("Processor #$id completed job #${item.contentJobItem?.cjiUid}")
             }catch(e: Exception) {
                 //something went wrong
