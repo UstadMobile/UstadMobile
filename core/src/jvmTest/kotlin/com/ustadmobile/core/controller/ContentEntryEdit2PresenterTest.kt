@@ -174,7 +174,7 @@ class ContentEntryEdit2PresenterTest {
 
 
         argumentCaptor<ContentEntryWithLanguage>().apply {
-            verifyBlocking(mockEntryDao, timeout(5000)) {
+            verifyBlocking(mockEntryDao, timeout(5000).atLeastOnce()) {
                 insertAsync(capture())
             }
             assertEquals("Got expected content entry title", contentEntry.title, firstValue.title)
