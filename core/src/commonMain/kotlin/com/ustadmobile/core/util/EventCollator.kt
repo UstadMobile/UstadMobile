@@ -41,6 +41,7 @@ class EventCollator<T>(
             if(runJob == null){
                 runJob = GlobalScope.launch {
                     delay(maxWait)
+                    runJob = null
                     collateAndFire()
                 }
             }
