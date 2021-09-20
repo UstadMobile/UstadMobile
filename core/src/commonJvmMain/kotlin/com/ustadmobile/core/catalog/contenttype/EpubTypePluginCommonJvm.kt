@@ -6,6 +6,7 @@ import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ext.processMetadata
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.torrent.UstadTorrentManager
@@ -107,7 +108,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
 
         override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
             val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
-            val jobUri = contentJobItem.sourceUri ?: return ProcessResult(404)
+            val jobUri = contentJobItem.sourceUri ?: return ProcessResult(JobStatus.FAILED)
             val container = withContext(Dispatchers.Default) {
 
                 val uri = DoorUri.parse(jobUri)
@@ -116,13 +117,17 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                 val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                         ?: throw IllegalArgumentException("missing tracker url")
 
-                val container = Container().apply {
-                    containerContentEntryUid = contentEntryUid
-                    cntLastModified = System.currentTimeMillis()
-                    this.mimeType = supportedMimeTypes.first()
-                    containerUid = repo.containerDao.insert(this)
-                    contentJobItem.cjiContainerUid = containerUid
-                }
+                val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid) ?:
+                    Container().apply {
+                        containerContentEntryUid = contentEntryUid
+                        cntLastModified = System.currentTimeMillis()
+                        mimeType = supportedMimeTypes.first()
+                        containerUid = repo.containerDao.insertAsync(this)
+                        contentJobItem.cjiContainerUid = containerUid
+                    }
+
+                db.contentJobItemDao.updateContainer(contentJobItem.cjiUid, container.containerUid)
+
                 val containerFolder = jobItem.contentJob?.toUri ?: defaultContainerDir.toURI().toString()
                 val containerFolderUri = DoorUri.parse(containerFolder)
 
@@ -144,7 +149,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
 
                 containerWithSize
             }
-            return ProcessResult(200)
+            return ProcessResult(JobStatus.COMPLETE)
         }
 
 

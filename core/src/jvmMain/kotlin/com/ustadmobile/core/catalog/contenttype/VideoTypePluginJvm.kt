@@ -7,6 +7,7 @@ import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.contentjob.ext.processMetadata
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.io.ext.addTorrentFileFromContainer
@@ -71,13 +72,17 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
                 newVideo = videoFile
             }
 
-            val container = Container().apply {
-                containerContentEntryUid = contentEntryUid
-                cntLastModified = System.currentTimeMillis()
-                fileSize = newVideo.length()
-                this.mimeType = supportedMimeTypes.first()
-                containerUid = repo.containerDao.insert(this)
-            }
+            val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid) ?:
+                Container().apply {
+                    containerContentEntryUid = contentEntryUid
+                    cntLastModified = System.currentTimeMillis()
+                    mimeType = supportedMimeTypes.first()
+                    containerUid = repo.containerDao.insertAsync(this)
+                    contentJobItem.cjiContainerUid = containerUid
+                }
+
+            db.contentJobItemDao.updateContainer(contentJobItem.cjiUid, container.containerUid)
+
 
             val containerFolder = jobItem.contentJob?.toUri ?: defaultContainerDir.toURI().toString()
             val containerFolderUri = DoorUri.parse(containerFolder)
@@ -101,7 +106,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
         }
 
 
-        return ProcessResult(200)
+        return ProcessResult(JobStatus.COMPLETE)
     }
 
     suspend fun getEntry(uri: DoorUri, process: ProcessContext): MetadataResult? {

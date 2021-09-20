@@ -158,14 +158,16 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
             }
 
 
-            val container = Container().apply {
-                containerContentEntryUid = contentEntryUid
-                cntLastModified = System.currentTimeMillis()
-                mimeType = supportedMimeTypes.first()
-                containerUid = repo.containerDao.insert(this)
-            }
+            val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid) ?:
+                Container().apply {
+                    containerContentEntryUid = contentEntryUid
+                    cntLastModified = System.currentTimeMillis()
+                    mimeType = supportedMimeTypes.first()
+                    containerUid = repo.containerDao.insertAsync(this)
+                    contentJobItem.cjiContainerUid = containerUid
+                }
 
-            contentJobItem.cjiContainerUid = container.containerUid
+            db.contentJobItemDao.updateContainer(contentJobItem.cjiUid, container.containerUid)
 
             val containerFolder = jobItem.contentJob?.toUri ?: defaultContainerDir.toURI().toString()
             val containerFolderUri = DoorUri.parse(containerFolder)

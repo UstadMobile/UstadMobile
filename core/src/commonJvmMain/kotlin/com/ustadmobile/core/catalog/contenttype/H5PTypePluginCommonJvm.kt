@@ -20,6 +20,7 @@ import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.core.container.PrefixContainerFileNamer
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ext.processMetadata
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
@@ -115,7 +116,7 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
 
     override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
-        val jobUri = contentJobItem.sourceUri ?: return ProcessResult(404)
+        val jobUri = contentJobItem.sourceUri ?: return ProcessResult(JobStatus.FAILED)
         val container = withContext(Dispatchers.Default) {
 
             val doorUri = DoorUri.parse(jobUri)
@@ -124,14 +125,17 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
             val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                     ?: throw IllegalArgumentException("missing tracker url")
 
-            val container = Container().apply {
-                containerContentEntryUid = contentEntryUid
-                cntLastModified = System.currentTimeMillis()
-                mimeType = supportedMimeTypes.first()
-                containerUid = repo.containerDao.insertAsync(this)
-            }
 
-            contentJobItem.cjiContainerUid = container.containerUid
+            val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid) ?:
+                Container().apply {
+                        containerContentEntryUid = contentEntryUid
+                        cntLastModified = System.currentTimeMillis()
+                        mimeType = supportedMimeTypes.first()
+                        containerUid = repo.containerDao.insertAsync(this)
+                        contentJobItem.cjiContainerUid = containerUid
+                }
+
+            db.contentJobItemDao.updateContainer(contentJobItem.cjiUid, container.containerUid)
 
             val containerFolder = jobItem.contentJob?.toUri ?: defaultContainerDir.toURI().toString()
             val containerFolderUri = DoorUri.parse(containerFolder)
@@ -203,7 +207,7 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
             repo.containerDao.findByUid(container.containerUid)
 
         }
-        return ProcessResult(200)
+        return ProcessResult(JobStatus.COMPLETE)
     }
 
     companion object {
