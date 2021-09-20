@@ -108,4 +108,12 @@ abstract class ContentJobItemDao {
     """)
     abstract suspend fun findAll(): List<ContentJobItem>
 
+    @Query("""
+        SELECT ContentJobItem.*
+          FROM ContentJobItem
+         WHERE cjiUid = :cjiUid 
+    """)
+    abstract suspend fun findByUidAsync(cjiUid: Long): ContentJobItem?
+
+
 }
