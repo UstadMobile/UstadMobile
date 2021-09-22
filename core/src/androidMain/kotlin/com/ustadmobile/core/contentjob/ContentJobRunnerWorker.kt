@@ -65,10 +65,9 @@ class ContentJobRunnerWorker(
 
             try {
 
-                val jobItemLiveData = db.contentJobItemDao.findByJobId(jobId)
-               /* val liveData = RateLimitedLiveData(db, listOf("ContentJobItem"), 1000) {
-                    db.contentJobItemDao.findByJobId(jobId) ?: ContentJobItem()
-                }*/
+                val liveData = RateLimitedLiveData<ContentJobItem?>(db, listOf("ContentJobItem"), 1000) {
+                    db.contentJobItemDao.findByJobId(jobId)
+                }
                 val jobObserver = DoorObserver<ContentJobItem?> {
                     notification.setProgress(100, it?.cjiItemProgress?.toInt() ?: 0, false)
                     if(it?.cjiItemProgress?.toInt() == 100){
@@ -77,7 +76,9 @@ class ContentJobRunnerWorker(
                     setForegroundAsync(ForegroundInfo(jobId.toInt(), notification.build()))
                 }
 
-                jobItemLiveData.observeForever(jobObserver)
+                launch(Dispatchers.Main) {
+                    liveData.observeForever(jobObserver)
+                }
             }catch (e: Exception){
                 println(e.message)
             }

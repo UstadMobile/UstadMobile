@@ -7,11 +7,13 @@ import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.contentjob.ext.processMetadata
+import com.ustadmobile.core.contentjob.ext.uploadContentIfNeeded
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.io.ext.addTorrentFileFromContainer
 import com.ustadmobile.core.io.ext.getLocalUri
+import com.ustadmobile.core.io.ext.isRemote
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ShrinkUtils
@@ -29,10 +31,18 @@ import org.kodein.di.on
 import java.io.File
 import java.lang.IllegalArgumentException
 import com.ustadmobile.door.ext.toDoorUri
+import io.ktor.client.*
+import io.ktor.client.features.*
+import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
+import io.ktor.http.*
+import org.kodein.di.direct
 
 class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoint, override val di: DI): VideoTypePlugin() {
 
     private val VIDEO_JVM = "VideoPluginJVM"
+
+    private val httpClient: HttpClient = di.direct.instance()
 
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
@@ -59,6 +69,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
             var newVideo = File(videoFile.parentFile, "new${videoFile.nameWithoutExtension}.mp4")
             val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                     ?: throw IllegalArgumentException("missing tracker url")
+            val contentNeedUpload = !videoUri.isRemote()
 
             val compressVideo: Boolean = process.params["compress"]?.toBoolean() ?: false
 
@@ -101,6 +112,9 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
             val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
             containerUidFolder.mkdirs()
             ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
+
+            val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
+            uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient,  torrentFileBytes, endpoint)
 
             container
         }

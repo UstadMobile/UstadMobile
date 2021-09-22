@@ -15,6 +15,7 @@ import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.contentjob.ext.processMetadata
+import com.ustadmobile.core.contentjob.ext.uploadContentIfNeeded
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.torrent.UstadTorrentManager
@@ -28,10 +29,16 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.*
+import io.ktor.client.*
+import io.ktor.client.features.*
+import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
+import io.ktor.http.*
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
@@ -49,6 +56,8 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
     private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
 
+    private val httpClient: HttpClient = di.direct.instance()
+
     private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
     override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
@@ -56,15 +65,17 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
     }
 
     override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, jobProgress: ContentJobProgressListener): ProcessResult {
-        val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
+        val contentJobItem = jobItem.contentJobItem
+                ?: throw IllegalArgumentException("missing job item")
         withContext(Dispatchers.Default) {
 
             val uri = contentJobItem.sourceUri ?: throw IllegalStateException("missing uri")
             val videoUri = DoorUri.parse(uri)
             val localUri = process.getLocalUri(videoUri, context, di)
-            val contentEntryUid = processMetadata(jobItem, process,context, endpoint)
+            val contentEntryUid = processMetadata(jobItem, process, context, endpoint)
             val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                     ?: throw IllegalArgumentException("missing tracker url")
+            val contentNeedUpload = !videoUri.isRemote()
 
 
             val videoTempDir = makeTempDir(prefix = "tmp")
@@ -158,18 +169,19 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
             }
 
 
-            val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid) ?:
-                Container().apply {
-                    containerContentEntryUid = contentEntryUid
-                    cntLastModified = System.currentTimeMillis()
-                    mimeType = supportedMimeTypes.first()
-                    containerUid = repo.containerDao.insertAsync(this)
-                    contentJobItem.cjiContainerUid = containerUid
-                }
+            val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
+                    ?: Container().apply {
+                        containerContentEntryUid = contentEntryUid
+                        cntLastModified = System.currentTimeMillis()
+                        mimeType = supportedMimeTypes.first()
+                        containerUid = repo.containerDao.insertAsync(this)
+                        contentJobItem.cjiContainerUid = containerUid
+                    }
 
             db.contentJobItemDao.updateContainer(contentJobItem.cjiUid, container.containerUid)
 
-            val containerFolder = jobItem.contentJob?.toUri ?: defaultContainerDir.toURI().toString()
+            val containerFolder = jobItem.contentJob?.toUri
+                    ?: defaultContainerDir.toURI().toString()
             val containerFolderUri = DoorUri.parse(containerFolder)
 
             if (compressVideo) {
@@ -194,6 +206,10 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
             containerUidFolder.mkdirs()
             ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
 
+            val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
+            uploadContentIfNeeded(contentNeedUpload, contentJobItem, jobProgress, httpClient,  torrentFileBytes, endpoint)
+
+
             repo.containerDao.findByUid(container.containerUid) ?: container
         }
         return ProcessResult(200)
@@ -212,17 +228,23 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
             val fileVideoDimensions = localUri.extractVideoResolutionMetadata(context as Context)
 
-            if(fileVideoDimensions.first == 0 || fileVideoDimensions.second == 0){
+            if (fileVideoDimensions.first == 0 || fileVideoDimensions.second == 0) {
                 return@withContext null
             }
 
-            val entry =ContentEntryWithLanguage().apply {
+            val entry = ContentEntryWithLanguage().apply {
                 this.title = fileName
                 this.leaf = true
                 this.contentTypeFlag = ContentEntry.TYPE_VIDEO
             }
             MetadataResult(entry, pluginId)
         }
+    }
+
+    companion object {
+
+        val MEDIA_TYPE_TORRENT = "application/x-bittorrent"
+
     }
 
 }

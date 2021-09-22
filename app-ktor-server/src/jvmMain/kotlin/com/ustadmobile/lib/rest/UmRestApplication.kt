@@ -20,6 +20,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.io.UploadSessionManager
+import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.torrent.ContainerTorrentDownloadJob
 import com.ustadmobile.core.torrent.UstadCommunicationManager
 import com.ustadmobile.core.torrent.UstadTorrentManager
@@ -249,6 +250,11 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             StdSchedulerFactory.getDefaultScheduler().also {
                 it.context.put("di", di)
             }
+        }
+
+        bind<ConnectivityLiveData>() with scoped(EndpointScope.Default).singleton {
+            val db: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_DB)
+            ConnectivityLiveData(db.connectivityStatusDao.statusLive())
         }
 
         bind<UstadMobileSystemImpl>() with singleton {

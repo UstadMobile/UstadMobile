@@ -69,7 +69,7 @@ abstract class ContentJobItemDao {
           FROM ContentJobItem
          WHERE cjiJobUid = :jobUid
     """)
-    abstract fun findByJobId(jobUid: Long): DoorLiveData<ContentJobItem?>
+    abstract fun findByJobId(jobUid: Long): ContentJobItem?
 
     @Query("""
         UPDATE ContentJobItem

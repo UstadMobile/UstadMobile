@@ -6,6 +6,7 @@ import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ext.processMetadata
+import com.ustadmobile.core.contentjob.ext.uploadContentIfNeeded
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.*
@@ -22,10 +23,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.direct
 import org.kodein.di.on
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.util.*
+import io.ktor.client.*
 import java.util.zip.ZipInputStream
 
 class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: Endpoint, override val di: DI) : ContentPlugin {
@@ -41,6 +44,8 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
 
     override val pluginId: Int
         get() = PLUGIN_ID
+
+    private val httpClient: HttpClient = di.direct.instance()
 
     private val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
@@ -116,6 +121,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                 val contentEntryUid = processMetadata(jobItem, process, context,endpoint)
                 val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                         ?: throw IllegalArgumentException("missing tracker url")
+                val contentNeedUpload = !uri.isRemote()
 
                 val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid) ?:
                     Container().apply {
@@ -144,6 +150,10 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                 val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
                 containerUidFolder.mkdirs()
                 ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
+
+                val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
+                uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient,  torrentFileBytes, endpoint)
+
 
                 val containerWithSize = repo.containerDao.findByUid(container.containerUid) ?: container
 
