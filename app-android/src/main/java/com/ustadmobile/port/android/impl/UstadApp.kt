@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.impl
 
 import android.content.Context
+import androidx.core.content.ContextCompat
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import com.google.gson.Gson
@@ -10,12 +11,14 @@ import com.squareup.picasso.Picasso
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.assignment.setupAssignmentSyncListener
 import com.ustadmobile.core.catalog.contenttype.*
-import com.ustadmobile.core.contentformats.ContentImportManager
-import com.ustadmobile.core.contentformats.ContentImportManagerImplAndroid
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
+import com.ustadmobile.core.contentjob.ContentJobManager
+import com.ustadmobile.core.contentjob.ContentJobManagerAndroid
+import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentjob.ContentPluginManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
@@ -43,9 +46,9 @@ import com.ustadmobile.sharedse.network.*
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploadManagerCommonJvm
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
+import com.ustadmobile.core.db.ext.addSyncCallback
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_ITERATIONS
 import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_KEYLENGTH
@@ -67,10 +70,17 @@ import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import com.ustadmobile.core.impl.di.commonJvmDiModule
+import com.ustadmobile.core.torrent.ContainerTorrentDownloadJob
+import com.ustadmobile.core.torrent.UstadCommunicationManager
+import com.ustadmobile.core.torrent.UstadTorrentManager
+import com.ustadmobile.core.torrent.UstadTorrentManagerImpl
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.lib.db.entities.ContainerImportJob
-import kotlinx.coroutines.asCoroutineDispatcher
+import com.ustadmobile.door.ext.DoorTag
+import kotlinx.coroutines.*
+import java.net.InetAddress
+import java.net.URI
 import java.util.concurrent.Executors
 
 /**
@@ -98,12 +108,19 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<UmAppDatabase>(tag = TAG_DB) with scoped(EndpointScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
-            UmAppDatabase.getInstance(context = applicationContext, dbName = dbName,
-                nodeIdAndAuth = instance()
-            ).also {
-                val networkManager: NetworkManagerBle = di.direct.instance()
-                it.connectivityStatusDao.commitLiveConnectivityStatus(networkManager.connectivityStatus)
+            val nodeIdAndAuth: NodeIdAndAuth = instance()
+            val db = DatabaseBuilder.databaseBuilder(applicationContext, UmAppDatabase::class, dbName)
+                .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
+                .addSyncCallback(nodeIdAndAuth, false)
+                .build()
+                .also {
+                    val networkManager: NetworkManagerBle = di.direct.instance()
+                    it.connectivityStatusDao.commitLiveConnectivityStatus(networkManager.connectivityStatus)
+                }
+            GlobalScope.launch {
+                di.on(context).direct.instance<UstadTorrentManager>().start()
             }
+            db
         }
 
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
@@ -118,7 +135,43 @@ open class UstadApp : BaseUstadApp(), DIAware {
             }).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
                 it.setupAssignmentSyncListener(context, di)
+                GlobalScope.launch {
+                    di.on(context).direct.instance<UstadTorrentManager>().start()
+                }
             }
+        }
+        bind<File>(tag = DiTag.TAG_TORRENT_DIR) with scoped(EndpointScope.Default).singleton{
+            val torrentDir = File(applicationContext.filesDir.siteDataSubDir(context), "torrent")
+            torrentDir.mkdirs()
+            torrentDir
+        }
+
+        bind<ContainerStorageManager> () with scoped(EndpointScope.Default).singleton{
+            val systemImpl: UstadMobileSystemImpl = instance()
+            val storageList = mutableListOf<ContainerStorageDir>()
+            applicationContext.filesDir.listFiles()?.mapIndexed { index, it ->
+                val siteDir = it.siteDataSubDir(context)
+                val storageDir = File(siteDir, UstadMobileSystemCommon.SUBDIR_CONTAINER_NAME)
+                storageDir.takeIf { !it.exists() }?.mkdirs()
+                val nameMessageId = if(index == 0) MessageID.phone_memory else MessageID.memory_card
+                storageList.add(
+                        ContainerStorageDir(storageDir.toURI().toString(),
+                                systemImpl.getString(nameMessageId, applicationContext),
+                        it.usableSpace, index == 0))
+            }
+            ContainerStorageManager(storageList.toList())
+        }
+
+        bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton{
+            val containerStorage by di.instance<ContainerStorageManager>()
+            val containerFolder = File(URI(containerStorage.storageList.first().dirUri))
+            containerFolder.mkdirs()
+            containerFolder
+        }
+
+        bind<ConnectivityLiveData>() with scoped(EndpointScope.Default).singleton {
+            val db: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_DB)
+            ConnectivityLiveData(db.connectivityStatusDao.statusLive())
         }
 
         bind<EmbeddedHTTPD>() with singleton {
@@ -182,13 +235,17 @@ open class UstadApp : BaseUstadApp(), DIAware {
             ContainerUploadManagerCommonJvm(di, context)
         }
 
-        bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
-            ContentImportManagerImplAndroid(listOf(EpubTypePluginCommonJvm(),
-                    XapiTypePluginCommonJvm(), VideoTypePluginAndroid(),
-                    H5PTypePluginCommonJvm()), applicationContext,
-                    context, di)
+        bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
+            ContentPluginManagerImpl(listOf(
+                    EpubTypePluginCommonJvm(applicationContext, context, di),
+                    H5PTypePluginCommonJvm(applicationContext, context, di),
+                    XapiTypePluginCommonJvm(applicationContext, context, di),
+                    VideoTypePluginAndroid(applicationContext, context, di),
+                    ContainerTorrentDownloadJob(context, di)))
         }
-
+        bind<ContentJobManager>() with singleton {
+            ContentJobManagerAndroid(applicationContext)
+        }
 
         bind<Gson>() with singleton {
             val builder = GsonBuilder()
@@ -231,6 +288,18 @@ open class UstadApp : BaseUstadApp(), DIAware {
             ViewNameToDestMap()
         }
 
+        bind<UstadTorrentManager>() with scoped(EndpointScope.Default).singleton {
+            UstadTorrentManagerImpl(endpoint = context, di = di)
+        }
+
+        bind<UstadCommunicationManager>() with singleton {
+            UstadCommunicationManager()
+        }
+
+        bind<ContainerTorrentDownloadJob>() with scoped(EndpointScope.Default).singleton {
+            ContainerTorrentDownloadJob(endpoint = context, di = di)
+        }
+
         bind<Pbkdf2Params>() with singleton {
             val systemImpl: UstadMobileSystemImpl = instance()
             val numIterations = systemImpl.getAppConfigInt(KEY_PBKDF2_ITERATIONS,
@@ -253,6 +322,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<BleGattServer>()
             instance<NetworkManagerBle>()
             instance<EmbeddedHTTPD>()
+            instance<UstadCommunicationManager>().start(InetAddress.getByName("0.0.0.0"))
 
             Picasso.setSingletonInstance(Picasso.Builder(applicationContext)
                     .downloader(OkHttp3Downloader(instance<OkHttpClient>()))

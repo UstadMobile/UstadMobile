@@ -19,7 +19,7 @@ import java.nio.file.Files
 
 
 
-class KhanLiteVideoScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : YoutubeScraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
+class KhanLiteVideoScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, override val di: DI) : YoutubeScraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
 
     override fun scrapeUrl(sourceUrl: String) {
@@ -80,7 +80,7 @@ class KhanLiteVideoScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntr
             val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolder.toDoorUri())
             runBlocking {
                 repo.addFileToContainer(container.containerUid, tempFile.toDoorUri(),
-                        tempFile.name, containerAddOptions)
+                        tempFile.name, Any(), di, containerAddOptions)
             }
             if (!headRequestValues.mimeType.isNullOrEmpty()) {
                 val etagContainer = ContainerETag(container.containerUid, headRequestValues.etag)

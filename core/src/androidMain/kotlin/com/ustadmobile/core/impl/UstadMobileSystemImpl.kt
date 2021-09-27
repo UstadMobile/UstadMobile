@@ -53,6 +53,7 @@ import androidx.navigation.*
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.nav.toNavOptions
+import com.ustadmobile.core.io.ext.isGzipped
 import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
@@ -346,7 +347,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
         var umDir = File(storageOptions[deviceStorageIndex], contentDirName!!)
         if (!umDir.exists()) umDir.mkdirs()
-        dirList.add(UMStorageDir(umDir.absolutePath,
+        dirList.add(UMStorageDir(umDir.toURI().toString(),
                 getString(MessageID.phone_memory, context), true,
                 isAvailable = true, isWritable = canWriteFileInDir(umDir.absolutePath),
                 usableSpace = umDir.usableSpace))
@@ -355,7 +356,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             val sdCardStorage = storageOptions[sdCardStorageIndex]
             umDir = File(sdCardStorage, contentDirName)
             if (!umDir.exists()) umDir.mkdirs()
-            dirList.add(UMStorageDir(umDir.absolutePath,
+            dirList.add(UMStorageDir(umDir.toURI().toString(),
                     getString(MessageID.memory_card, context), true,
                     isAvailable = true, isWritable = canWriteFileInDir(umDir.absolutePath),
                     usableSpace = umDir.usableSpace))
@@ -506,7 +507,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
         var file = File(path)
 
-        if (isFileGzipped(file)) {
+        if (file.isGzipped()) {
 
             var gzipIn: GZIPInputStream? = null
             var destOut: FileOutputStream? = null
@@ -532,14 +533,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ctx.startActivity(intent)
         } else {
             throw NoAppFoundException("No activity found for mimetype: $mMimeType", mMimeType)
-        }
-    }
-
-    private fun isFileGzipped(file: File): Boolean {
-        file.inputStream().use {
-            val signature = ByteArray(2)
-            val nread = it.read(signature)
-            return nread == 2 && signature[0] == GZIPInputStream.GZIP_MAGIC.toByte() && signature[1] == (GZIPInputStream.GZIP_MAGIC shr 8).toByte()
         }
     }
 

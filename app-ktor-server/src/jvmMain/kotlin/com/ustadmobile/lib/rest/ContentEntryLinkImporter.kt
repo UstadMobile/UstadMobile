@@ -16,6 +16,7 @@ import io.ktor.routing.post
 import io.ktor.routing.route
 import kotlinx.coroutines.withTimeout
 import org.kodein.di.instance
+import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
 import org.kodein.di.on
 
@@ -28,7 +29,7 @@ fun Route.ContentEntryLinkImporter() {
 
         post("validateLink") {
             val url = call.request.queryParameters["url"]?: ""
-            val scraperManager: ScraperManager by di().on(call).instance()
+            val scraperManager: ScraperManager by closestDI().on(call).instance()
             var metadata: ImportedContentEntryMetaData? = null
             try{
                 metadata = withTimeout(IMPORT_LINK_TIMEOUT_DEFAULT) {
@@ -55,14 +56,14 @@ fun Route.ContentEntryLinkImporter() {
                 val scraperType = call.request.queryParameters["scraperType"] ?: ""
                 val conversionParams = call.request.queryParameters["conversionParams"]
 
-                val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
-                val repo: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_REPO)
+                val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
+                val repo: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_REPO)
                 val entryFromDb = db.contentEntryDao.findByUid(contentEntry.contentEntryUid)
                 if (entryFromDb == null) {
                     repo.contentEntryDao.insertWithReplace(contentEntry)
                 }
 
-                val scraperManager: ScraperManager by di().on(call).instance()
+                val scraperManager: ScraperManager by closestDI().on(call).instance()
                 scraperManager.start(url, scraperType, parentUid, contentEntry.contentEntryUid,
                         true, conversionParams)
                 call.respond(HttpStatusCode.OK)

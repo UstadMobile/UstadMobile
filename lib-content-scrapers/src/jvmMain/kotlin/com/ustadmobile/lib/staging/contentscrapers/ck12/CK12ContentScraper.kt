@@ -172,7 +172,9 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
 
 
     override fun run() {
-        val db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
+        //This needs to use DI instead
+        lateinit var db: UmAppDatabase
+        //val db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
         val repository = db// db.getRepository("https://localhost", "")
         val containerDao = repository.containerDao
         val queueDao = db.scrapeQueueItemDao

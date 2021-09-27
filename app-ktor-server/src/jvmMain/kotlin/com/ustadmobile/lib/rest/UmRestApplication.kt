@@ -1,62 +1,67 @@
 package com.ustadmobile.lib.rest
 
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
 import com.google.gson.Gson
+import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.*
-import com.ustadmobile.core.catalog.contenttype.*
-import com.ustadmobile.core.contentformats.ContentImportManager
-import com.ustadmobile.core.contentformats.ContentImportManagerImpl
+import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
+import com.ustadmobile.core.catalog.contenttype.H5PTypePluginCommonJvm
+import com.ustadmobile.core.catalog.contenttype.VideoTypePluginJvm
+import com.ustadmobile.core.catalog.contenttype.XapiTypePluginCommonJvm
+import com.ustadmobile.core.contentjob.ContentJobManager
+import com.ustadmobile.core.contentjob.ContentJobManagerJvm
+import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentjob.ContentPluginManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.io.UploadSessionManager
+import com.ustadmobile.core.torrent.ContainerTorrentDownloadJob
+import com.ustadmobile.core.torrent.UstadCommunicationManager
+import com.ustadmobile.core.torrent.UstadTorrentManager
+import com.ustadmobile.core.torrent.UstadTorrentManagerImpl
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
+import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
-import com.ustadmobile.lib.rest.ext.*
+import com.ustadmobile.lib.db.entities.PersonAuth2
+import com.ustadmobile.lib.rest.ext.databasePropertiesFromSection
+import com.ustadmobile.lib.rest.ext.initAdminUser
+import com.ustadmobile.lib.rest.ext.ktorInitRepo
+import com.ustadmobile.lib.rest.ext.toProperties
 import com.ustadmobile.lib.rest.messaging.MailProperties
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import io.ktor.application.Application
-import io.ktor.application.ApplicationCall
-import io.ktor.application.install
-import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.features.CORS
-import io.ktor.features.CallLogging
-import io.ktor.features.ContentNegotiation
-import io.ktor.gson.GsonConverter
-import io.ktor.gson.gson
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
-import io.ktor.request.header
-import io.ktor.routing.Routing
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
+import io.ktor.application.*
+import io.ktor.features.*
+import io.ktor.gson.*
+import io.ktor.http.*
+import io.ktor.http.content.*
+import io.ktor.request.*
+import io.ktor.routing.*
+import jakarta.mail.Authenticator
+import jakarta.mail.PasswordAuthentication
+import kotlinx.coroutines.runBlocking
 import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
-import java.io.File
-import java.nio.file.Files
-import java.util.*
-import javax.naming.InitialContext
-import io.ktor.http.content.*
-import jakarta.mail.Authenticator
-import jakarta.mail.PasswordAuthentication
 import org.xmlpull.v1.XmlPullParserFactory
-import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
-import com.ustadmobile.lib.db.entities.PersonAuth2
-import kotlinx.coroutines.runBlocking
+import java.io.File
+import java.net.InetAddress
+import java.net.URL
+import java.nio.file.Files
+import javax.naming.InitialContext
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -108,6 +113,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
     val dbMode = dbModeOverride ?:
         appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
+    val trackerAnnounceUrlConfig: String = appConfig.propertyOrNull("ktor.ustad.trackerAnnounceUrl")?.getString() ?: ""
+    val trackerAnnounceUrl = URL(trackerAnnounceUrlConfig)
     val dataDirPath = File(environment.config.propertyOrNull("ktor.ustad.datadir")?.getString() ?: "data")
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
 
@@ -148,6 +155,11 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             containerDir.takeIf { !it.exists() }?.mkdirs()
             containerDir
         }
+        bind<File>(tag = DiTag.TAG_TORRENT_DIR) with scoped(EndpointScope.Default).singleton {
+            val torrentDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), "torrent")
+            torrentDir.takeIf { !it.exists() }?.mkdirs()
+            torrentDir
+        }
 
         bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {
             apiKey
@@ -160,11 +172,28 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             val dbProperties = appConfig.databasePropertiesFromSection("ktor.database",
                 defaultUrl = "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
             InitialContext().bindDataSourceIfNotExisting(dbHostName, dbProperties)
-            UmAppDatabase.getInstance(Any(), dbHostName, instance<NodeIdAndAuth>(), primary = true)
+            val nodeIdAndAuth: NodeIdAndAuth = instance()
+            val db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbHostName)
+                .addSyncCallback(nodeIdAndAuth, true)
+                .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
+                .build()
+            runBlocking {
+                di.on(context).direct.instance<TorrentTracker>().start()
+                di.on(context).direct.instance<UstadTorrentManager>().start()
+            }
+            db
         }
 
         bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {
             ServerUpdateNotificationManagerImpl()
+        }
+        bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
+            ContentPluginManagerImpl(listOf(
+                    EpubTypePluginCommonJvm(Any(), context, di),
+                    H5PTypePluginCommonJvm(Any(), context, di),
+                    XapiTypePluginCommonJvm(Any(), context, di),
+                    VideoTypePluginJvm(Any(), context, di),
+                    ContainerTorrentDownloadJob(context, di)))
         }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
@@ -181,9 +210,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             //Add listener that will end sessions when authentication has been updated
             repo.addSyncListener(PersonAuth2::class, EndSessionPersonAuth2SyncListener(repo))
             repo.preload()
-            repo.ktorInitRepo()
-            runBlocking { repo.initAdminUser(context, di) }
-
+            repo.ktorInitRepo(trackerAnnounceUrl.toURI().toString())
+            runBlocking {
+                repo.initAdminUser(context, di)
+            }
             repo
         }
 
@@ -191,15 +221,22 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             ScraperManager(endpoint = context, di = di)
         }
 
-        bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
-            ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm(),
-                    XapiTypePluginCommonJvm(), VideoTypePluginJvm(),
-                    H5PTypePluginCommonJvm()), Any(),
-                    context, di)
-        }
-
         bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {
             UploadSessionManager(context, di)
+        }
+
+        bind<Tracker>() with singleton {
+            Tracker(trackerAnnounceUrl.port, trackerAnnounceUrl.toString())
+        }
+
+        bind<TorrentTracker>() with scoped(EndpointScope.Default).singleton {
+            TorrentTracker(endpoint = context, di)
+        }
+        bind<UstadCommunicationManager>() with singleton {
+            UstadCommunicationManager()
+        }
+        bind<UstadTorrentManager>() with scoped(EndpointScope.Default).singleton {
+            UstadTorrentManagerImpl(endpoint = context, di)
         }
 
         bind<Scheduler>() with singleton {
@@ -238,6 +275,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
         bind<AuthManager>() with scoped(EndpointScope.Default).singleton {
             AuthManager(context, di)
+        }
+
+        bind<ContentJobManager>() with singleton {
+            ContentJobManagerJvm(di)
         }
 
         try {
@@ -280,6 +321,11 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             }
 
             instance<Scheduler>().start()
+            val tracker = instance<Tracker>()
+            //needed to announce urls
+            tracker.setAcceptForeignTorrents(true)
+            tracker.start(true)
+            instance<UstadCommunicationManager>().start(InetAddress.getByName(trackerAnnounceUrl.host))
         }
     }
 
@@ -291,6 +337,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         UmAppDatabase_KtorRoute(true)
         SiteRoute()
         ContentEntryLinkImporter()
+        TorrentFileRoute()
+        StartFile()
         /*
           This is a temporary redirect approach for users who open an app link but don't
           have the app installed. Because the uri scheme of views is #ViewName?args, this

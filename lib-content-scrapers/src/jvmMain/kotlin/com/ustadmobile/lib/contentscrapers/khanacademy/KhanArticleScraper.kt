@@ -33,7 +33,7 @@ import java.io.File
 import java.net.URL
 
 
-class KhanArticleScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid : Long, endpoint: Endpoint, di: DI) : HarScraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
+class KhanArticleScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid : Long, endpoint: Endpoint, override val di: DI) : HarScraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
 
     override fun scrapeUrl(sourceUrl: String) {
@@ -180,7 +180,7 @@ class KhanArticleScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
             contentInputStream.writeToFile(harExtraFile)
             val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolder.toDoorUri())
             repo.addFileToContainer(scraperResult.containerUid, harExtraFile.toDoorUri(),
-                    harExtraFile.name, containerAddOptions)
+                    harExtraFile.name, Any(), di, containerAddOptions)
             harExtraFile.delete()
         }
 

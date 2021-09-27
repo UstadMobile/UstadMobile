@@ -10,30 +10,31 @@ import com.linkedin.android.litr.TransformationListener
 import com.linkedin.android.litr.analytics.TrackTransformationInfo
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
+import com.ustadmobile.core.contentjob.ContentJobProgressListener
+import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
+import com.ustadmobile.core.contentjob.ext.processMetadata
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.ext.addContainerFromUri
-import com.ustadmobile.core.io.ext.addFileToContainer
-import com.ustadmobile.core.io.ext.extractVideoResolutionMetadata
-import com.ustadmobile.core.io.ext.guessMimeType
+import com.ustadmobile.core.io.ext.*
+import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.door.ext.toFile
+import com.ustadmobile.lib.db.entities.*
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
-import java.nio.file.Files
 
 
 class VideoTypePluginAndroid(private var context: Any, private val endpoint: Endpoint, override val di: DI) : VideoTypePlugin() {
@@ -44,25 +45,35 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+    private val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
+    private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
 
-    override suspend fun canProcess(doorUri: DoorUri, process: ProcessContext): Boolean {
-        return getEntry(doorUri, process) != null
-    }
+    private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): ContentEntryWithLanguage? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
         return getEntry(uri, process)
     }
 
-    override suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, jobProgress: ContentJobProgressListener): ProcessResult {
+        val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
         withContext(Dispatchers.Default) {
 
-            val uri = jobItem.fromUri ?: throw IllegalStateException("missing uri")
+            val uri = contentJobItem.sourceUri ?: throw IllegalStateException("missing uri")
             val videoUri = DoorUri.parse(uri)
-            val newVideo = File(Files.createTempDirectory("tmp").toFile(),
-                    videoUri.getFileName(context))
-            val compressVideo: Boolean = process.params["compress"]?.toBoolean() ?: false
+            val localUri = process.getLocalUri(videoUri, context, di)
+            val contentEntryUid = processMetadata(jobItem, process,context, endpoint)
+            val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
+                    ?: throw IllegalArgumentException("missing tracker url")
+
+
+            val videoTempDir = makeTempDir(prefix = "tmp")
+            val newVideo = File(videoTempDir,
+                    localUri.getFileName(context))
+            val params: Map<String, String> = Json.decodeFromString(
+                    MapSerializer(String.serializer(), String.serializer()),
+                    jobItem.contentJob?.params ?: "")
+            val compressVideo: Boolean = params["compress"]?.toBoolean() ?: false
 
             Napier.d(tag = VIDEO_ANDROID, message = "conversion Params compress video is $compressVideo")
 
@@ -70,8 +81,8 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
                 Napier.d(tag = VIDEO_ANDROID, message = "start import for new video file $newVideo.name")
 
-                val dimensionsArray = process.params["dimensions"]?.split("x") ?: listOf()
-                val storageDimensions = videoUri.extractVideoResolutionMetadata(context as Context)
+                val dimensionsArray = params["dimensions"]?.split("x") ?: listOf()
+                val storageDimensions = localUri.extractVideoResolutionMetadata(context as Context)
                 val originalVideoDimensions = if (dimensionsArray.isEmpty()) {
                     storageDimensions
                 } else {
@@ -91,7 +102,7 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
                 }
 
                 val audioCodecInfo = MediaExtractor().useThenRelease {
-                    it.setDataSource(context as Context, videoUri.uri, null)
+                    it.setDataSource(context as Context, localUri.uri, null)
                     it.getFirstAudioCodecInfo()
                 }
 
@@ -104,7 +115,7 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
                 val mediaTransformer = MediaTransformer(context as Context)
 
-                mediaTransformer.transform(jobItem.cjiContentEntryUid.toString(), videoUri.uri, newVideo.path,
+                mediaTransformer.transform(contentJobItem.cjiContentEntryUid.toString(), localUri.uri, newVideo.path,
                         videoTarget, audioTarget, object : TransformationListener {
                     override fun onStarted(id: String) {
                         Napier.d(tag = VIDEO_ANDROID, message = "started transform")
@@ -112,11 +123,14 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
                     override fun onProgress(id: String, progress: Float) {
                         Napier.d(tag = VIDEO_ANDROID, message = "progress at value ${progress * 100}")
-                        jobItem.cjiProgress = (progress * 100).toLong()
+                        contentJobItem.cjiItemProgress = (progress * 100).toLong()
+                        jobProgress.onProgress(contentJobItem)
                     }
 
                     override fun onCompleted(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
                         Napier.d(tag = VIDEO_ANDROID, message = "completed transform")
+                        contentJobItem.cjiItemProgress = 100L
+                        jobProgress.onProgress(contentJobItem)
                         videoCompleted.complete(true)
                     }
 
@@ -144,53 +158,70 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
             }
 
 
-            val container = Container().apply {
-                containerContentEntryUid = jobItem.cjiContentEntryUid
-                cntLastModified = System.currentTimeMillis()
-                mimeType = supportedMimeTypes.first()
-                containerUid = repo.containerDao.insert(this)
-            }
+            val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid) ?:
+                Container().apply {
+                    containerContentEntryUid = contentEntryUid
+                    cntLastModified = System.currentTimeMillis()
+                    mimeType = supportedMimeTypes.first()
+                    containerUid = repo.containerDao.insertAsync(this)
+                    contentJobItem.cjiContainerUid = containerUid
+                }
 
-            jobItem.cjiContainerUid = container.containerUid
+            db.contentJobItemDao.updateContainer(contentJobItem.cjiUid, container.containerUid)
 
-            val containerFolder = jobItem.toUri ?: defaultContainerDir.toURI().toString()
+            val containerFolder = jobItem.contentJob?.toUri ?: defaultContainerDir.toURI().toString()
             val containerFolderUri = DoorUri.parse(containerFolder)
 
             if (compressVideo) {
                 repo.addFileToContainer(container.containerUid, newVideo.toDoorUri(), newVideo.name,
+                        context,
+                        di,
                         ContainerAddOptions(containerFolderUri))
             } else {
-                repo.addContainerFromUri(container.containerUid, videoUri, context,
-                        videoUri.getFileName(context),
+                repo.addContainerFromUri(container.containerUid, localUri, context, di,
+                        localUri.getFileName(context),
                         ContainerAddOptions(containerFolderUri))
             }
-            newVideo.delete()
+            videoTempDir.delete()
+
+            repo.addTorrentFileFromContainer(
+                    container.containerUid,
+                    DoorUri.parse(torrentDir.toURI().toString()),
+                    trackerUrl, containerFolderUri
+            )
+
+            val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
+            containerUidFolder.mkdirs()
+            ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
 
             repo.containerDao.findByUid(container.containerUid) ?: container
         }
         return ProcessResult(200)
     }
 
-    suspend fun getEntry(doorUri: DoorUri, process: ProcessContext): ContentEntryWithLanguage? {
+    suspend fun getEntry(doorUri: DoorUri, process: ProcessContext): MetadataResult? {
         return withContext(Dispatchers.Default) {
 
-            val fileName = doorUri.getFileName(context)
+            val localUri = process.getLocalUri(doorUri, context, di)
+
+            val fileName = localUri.getFileName(context)
 
             if (!supportedFileExtensions.any { fileName.endsWith(it, true) }) {
                 return@withContext null
             }
 
-            val fileVideoDimensions = doorUri.extractVideoResolutionMetadata(context as Context)
+            val fileVideoDimensions = localUri.extractVideoResolutionMetadata(context as Context)
 
             if(fileVideoDimensions.first == 0 || fileVideoDimensions.second == 0){
                 return@withContext null
             }
 
-            ContentEntryWithLanguage().apply {
+            val entry =ContentEntryWithLanguage().apply {
                 this.title = fileName
                 this.leaf = true
                 this.contentTypeFlag = ContentEntry.TYPE_VIDEO
             }
+            MetadataResult(entry, pluginId)
         }
     }
 

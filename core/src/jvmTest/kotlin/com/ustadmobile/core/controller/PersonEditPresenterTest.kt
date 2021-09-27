@@ -239,11 +239,8 @@ class PersonEditPresenterTest  {
 
         presenter.handleClickSave(person)
 
-        argumentCaptor<Person>().apply {
-            verifyBlocking(mockDao, timeout(timeoutInMill)){
-                insertAsync(capture())
-                assertEquals("Person saved in the db", person, firstValue)
-            }
+        verifyBlocking(mockDao, timeout(timeoutInMill)) {
+            insertAsync(argWhere { it.username ==  "dummyUsername"})
         }
     }
 

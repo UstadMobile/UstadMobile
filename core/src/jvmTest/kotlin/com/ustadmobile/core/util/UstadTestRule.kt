@@ -1,6 +1,7 @@
 package com.ustadmobile.core.util
 
 import com.google.gson.Gson
+import com.turn.ttorrent.tracker.Tracker
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
@@ -10,17 +11,24 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
+import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.torrent.UstadCommunicationManager
+import com.ustadmobile.core.torrent.UstadTorrentManager
+import com.ustadmobile.core.torrent.UstadTorrentManagerImpl
 import com.ustadmobile.core.view.ContainerMounter
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.rest.TorrentTracker
 import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
@@ -30,16 +38,15 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExecutorCoroutineDispatcher
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
+import java.net.InetAddress
+import java.net.URL
 import java.nio.file.Files
 import java.util.concurrent.Executors
 import javax.naming.InitialContext
@@ -82,8 +89,6 @@ class UstadTestRule: TestWatcher() {
 
     lateinit var tempFolder: File
 
-    lateinit var nodeIdAndAuth: NodeIdAndAuth
-
     private val xppFactory = XmlPullParserFactory.newInstance().also {
         it.isNamespaceAware = true
     }
@@ -91,8 +96,6 @@ class UstadTestRule: TestWatcher() {
 
     override fun starting(description: Description?) {
         tempFolder = Files.createTempDirectory("ustadtestrule").toFile()
-
-        nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
 
         endpointScope = EndpointScope()
         systemImplSpy = spy(UstadMobileSystemImpl(xppFactory, tempFolder))
@@ -109,27 +112,43 @@ class UstadTestRule: TestWatcher() {
             }
         }
 
+
+        val trackerUrl = URL("http://127.0.0.1:6677/announce")
+
         diModule = DI.Module("UstadTestRule") {
             bind<UstadMobileSystemImpl>() with singleton { systemImplSpy }
             bind<UstadAccountManager>() with singleton {
                 UstadAccountManager(instance(), Any(), di)
             }
+
+            bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
+                NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
+            }
+
             bind<UmAppDatabase>(tag = TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName, nodeIdAndAuth).also {
-                    it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, isPrimary = false)
-                })
+                val nodeIdAndAuth: NodeIdAndAuth = instance()
+                spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
+                    .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
+                    .addSyncCallback(nodeIdAndAuth, primary = false)
+                    .build()
+                    .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, isPrimary = false))
             }
 
             bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope).singleton {
+                val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(
                     Any(), context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
-                    instance(), instance()))
+                    instance(), instance()
+                ) {
+                    attachmentsDir = File(tempFolder, "attachments").absolutePath
+                })
                 ).also {
                     it.siteDao.insert(Site().apply {
                         siteName = "Test"
                         authSalt = randomString(16)
+                        torrentAnnounceUrl = trackerUrl.toURI().toString()
                     })
                 }
             }
@@ -157,7 +176,16 @@ class UstadTestRule: TestWatcher() {
             bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
                 xppFactory
             }
-
+            bind<File>(tag = DiTag.TAG_TORRENT_DIR) with scoped(endpointScope).singleton {
+                val torrentFolder = File(tempFolder, "torrentDir")
+                torrentFolder.mkdirs()
+                torrentFolder
+            }
+            bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(endpointScope).singleton {
+                val containerFolder = File(tempFolder, "containerDir")
+                containerFolder.mkdirs()
+                containerFolder
+            }
             bind<XmlPullParserFactory>(tag = DiTag.XPP_FACTORY_NSUNAWARE) with singleton {
                 XmlPullParserFactory.newInstance()
             }

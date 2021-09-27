@@ -1,24 +1,39 @@
 package com.ustadmobile.core.contentjob
 
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.lib.db.entities.ContentJobItem
-import com.ustadmobile.lib.db.entities.DownloadJobItem
+import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DIAware
 
 interface ContentPlugin : DIAware {
 
-    val jobType: Int
+    /**
+     * This must be a unique integer. It can be used by components to remember what plugin to use
+     * e.g. when extractMetadata is called, the plugin id that successfully extracted the metadata
+     * will be saved to the ContentJobItem such that processJob will not have to guess which plugin
+     * to use.
+     */
+    val pluginId: Int
 
     val supportedMimeTypes: List<String>
 
     val supportedFileExtensions: List<String>
 
-    suspend fun canProcess(doorUri: DoorUri, process: ProcessContext): Boolean
+    /**
+     * The plugin should extract metadata from the given uri (if possible) and return a
+     * MetadataResult if Metadata is retrieved, or null otherwise.
+     */
+    suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult?
 
-    suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): ContentEntryWithLanguage?
-
-    suspend fun processJob(jobItem: ContentJobItem, process: ProcessContext): ProcessResult
+    /**
+     * The plugin should actually process the given ContentJobItem (e.g. import, download, etc).
+     *
+     * If a FatalContentJobException is thrown, no retry attempt will be made. If any other exception
+     * is thrown, processJob may be retried by ContentJobRunner
+     */
+    suspend fun processJob(
+            jobItem: ContentJobItemAndContentJob,
+            process: ProcessContext,
+            progress: ContentJobProgressListener
+    ) : ProcessResult
 
 }

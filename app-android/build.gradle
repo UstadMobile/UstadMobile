@@ -296,6 +296,8 @@ dependencies {
     implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy_support"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
+    implementation "commons-io:commons-io:$version_commons_io"
+    implementation "com.github.SamihMustafa:ttorrent:$version_ttorrent"
 
     //ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
@@ -396,6 +398,7 @@ dependencies {
 
     //Persian-Date-Picker
     implementation 'com.github.varunasingh:Persian-Date-Picker-Dialog-Strings:primary-SNAPSHOT'
+
 
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"

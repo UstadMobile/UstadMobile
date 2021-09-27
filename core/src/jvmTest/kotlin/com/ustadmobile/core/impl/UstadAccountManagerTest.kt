@@ -7,9 +7,11 @@ import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIV
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION
 import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.waitUntil
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.userAtServer
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.asRepository
@@ -101,9 +103,10 @@ class UstadAccountManagerTest {
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName, nodeIdAndAuth).also {
-                    it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, isPrimary = false)
-                })
+                DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
+                    .addSyncCallback(nodeIdAndAuth, primary = false)
+                    .build()
+                    .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, isPrimary = false)
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {

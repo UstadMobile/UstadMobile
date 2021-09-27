@@ -22,7 +22,9 @@ class GdlContentScraper(var scrapeUrl: URL, var destLocation: File, var containe
     private var isContentUpdated: Boolean = true
 
     override fun run() {
-        val db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
+        //replace with DI
+        lateinit var db: UmAppDatabase
+        //val db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
         val repository = db// db.getRepository("https://localhost", "")
         val containerDao = repository.containerDao
         val queueDao = db.scrapeQueueItemDao

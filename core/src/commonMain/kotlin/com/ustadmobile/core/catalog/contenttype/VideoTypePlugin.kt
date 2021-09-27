@@ -23,8 +23,8 @@ abstract class VideoTypePlugin : ContentPlugin {
     override val supportedFileExtensions: List<String>
         get() = VIDEO_EXT_LIST.map { it.removePrefix(".") }
 
-    override val jobType: Int
-        get() = TODO("Not yet implemented")
+    override val pluginId: Int
+        get() = PLUGIN_ID
 
     companion object {
 
@@ -39,6 +39,8 @@ abstract class VideoTypePlugin : ContentPlugin {
         const val AUDIO_CHANNEL_COUNT = 2
 
         const val AUDIO_BIT_RATE = 64000
+
+        const val PLUGIN_ID = 12
 
     }
 

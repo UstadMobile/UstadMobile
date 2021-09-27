@@ -63,6 +63,65 @@ abstract class ContainerDao : BaseDao<Container> {
     @JsName("findFilesByContentEntryUid")
     abstract suspend fun findFilesByContentEntryUid(contentEntryUid: Long): List<Container>
 
+    @Query("""
+          SELECT EXISTS(SELECT 1
+                          FROM Container 
+                         WHERE Container.containerContentEntryUid = :contentEntryUid
+                           AND NOT EXISTS (SELECT ContainerEntry.ceUid 
+                                         FROM ContainerEntry
+                                        WHERE ContainerEntry.ceContainerUid = Container.containerUid)   
+                      ORDER BY cntLastModified DESC LIMIT 1)
+    """)
+    abstract fun hasContainerWithFilesToDownload(contentEntryUid: Long): DoorLiveData<Boolean>
+
+    @Query("""
+          SELECT EXISTS(SELECT 1
+                          FROM Container 
+                         WHERE Container.containerContentEntryUid = :contentEntryUid
+                           AND EXISTS (SELECT ContainerEntry.ceUid 
+                                         FROM ContainerEntry
+                                        WHERE ContainerEntry.ceContainerUid = Container.containerUid)   
+                      ORDER BY cntLastModified DESC LIMIT 1)
+    """)
+    abstract fun hasContainerWithFilesToDelete(contentEntryUid: Long): DoorLiveData<Boolean>
+
+    @Query("""
+         SELECT (SELECT MAX(cntLastModified) 
+                   FROM Container 
+                  WHERE containerContentEntryUid = :contentEntryUid) > (COALESCE((
+                  
+                        SELECT cntLastModified 
+                          FROM Container 
+                         WHERE Container.containerContentEntryUid = :contentEntryUid
+                           AND EXISTS (SELECT ContainerEntry.ceUid 
+                                         FROM ContainerEntry
+                                        WHERE ContainerEntry.ceContainerUid = Container.containerUid) 
+                      ORDER BY cntLastModified DESC), 9223372036854775807))
+    """)
+    abstract fun hasContainerWithFilesToUpdate(contentEntryUid: Long): DoorLiveData<Boolean>
+
+    @Query("""
+            SELECT Container.containerUid
+              FROM Container
+             WHERE Container.containerContentEntryUid = :contentEntryUid
+               AND EXISTS (SELECT ContainerEntry.ceUid 
+                             FROM ContainerEntry
+                            WHERE ContainerEntry.ceContainerUid = Container.containerUid)     
+          ORDER BY Container.cntLastModified DESC LIMIT 1
+    """)
+    abstract suspend fun findContainerWithFilesByContentEntryUid(contentEntryUid: Long): Long
+
+
+    @Query("""
+            SELECT Container.containerUid, Container.mimeType
+              FROM Container
+             WHERE Container.containerContentEntryUid = :contentEntryUid
+               AND EXISTS (SELECT ContainerEntry.ceUid 
+                             FROM ContainerEntry
+                            WHERE ContainerEntry.ceContainerUid = Container.containerUid)     
+          ORDER BY Container.cntLastModified DESC LIMIT 1
+    """)
+    abstract suspend fun findContainerWithMimeTypeWithFilesByContentEntryUid(contentEntryUid: Long): ContainerUidAndMimeType?
 
     @Query("SELECT Container.* FROM Container " +
             "LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = containerContentEntryUid " +

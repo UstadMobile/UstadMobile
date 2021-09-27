@@ -1,6 +1,11 @@
 package com.ustadmobile.core.io.ext
 
+import java.io.File
+import java.io.FileOutputStream
 import java.io.InputStream
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
 
 /**
  * As per the InputStream spec it is possible that an InputStream might only read up to and
@@ -28,6 +33,25 @@ fun InputStream.readFully(buf: ByteArray, offset: Int = 0, len: Int = buf.size):
 
     return totalBytesRead
 }
+
+suspend fun InputStream.writeToFileAsync(destination: File){
+    withContext(Dispatchers.IO){
+        use { inStream ->
+            FileOutputStream(destination).use { outStream ->
+                var bytesCopied: Long = 0
+                val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                var bytes = inStream.read(buffer)
+                while (bytes >= 0 && isActive) {
+                    outStream.write(buffer, 0, bytes)
+                    bytesCopied += bytes
+                    bytes = inStream.read(buffer)
+                }
+                outStream.flush()
+            }
+        }
+    }
+}
+
 
 fun InputStream.readString(): String{
     return this.bufferedReader().use { it.readText() }

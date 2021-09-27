@@ -5,25 +5,28 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.networkmanager.ContainerUploadManager
+import com.ustadmobile.core.torrent.UstadCommunicationManager
+import com.ustadmobile.core.torrent.UstadTorrentManager
+import com.ustadmobile.core.torrent.UstadTorrentManagerImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorUri
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploadManagerCommonJvm
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import okio.Buffer
-import okio.buffer
-import okio.source
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
-import java.io.File
+import java.net.InetAddress
+import java.net.URL
 
 class EpubFileTypePluginTest {
 
@@ -42,12 +45,29 @@ class EpubFileTypePluginTest {
 
     @Before
     fun setup(){
+
+
         endpointScope = EndpointScope()
         di = DI {
             import(ustadTestRule.diModule)
+            val trackerUrl = URL("http://127.0.0.1:6677/announce")
+            bind<UstadTorrentManager>() with scoped(endpointScope).singleton {
+                UstadTorrentManagerImpl(endpoint = context, di = di)
+            }
+            bind<UstadCommunicationManager>() with singleton {
+                UstadCommunicationManager()
+            }
+            onReady {
+                instance<UstadCommunicationManager>().start(InetAddress.getByName(trackerUrl.host))
+                GlobalScope.launch {
+                    val ustadTorrentManager: UstadTorrentManager = di.on(Endpoint("localhost")).direct.instance()
+                    ustadTorrentManager.start()
+                }
+            }
         }
 
         mockWebServer = MockWebServer()
+        mockWebServer.dispatcher = ContentDispatcher()
         mockWebServer.start()
 
     }
@@ -65,10 +85,10 @@ class EpubFileTypePluginTest {
 
         val epubPlugin = EpubTypePluginCommonJvm(Any(), Endpoint("http://localhost/dummy"), di)
         runBlocking {
-            val contentEntry = epubPlugin.extractMetadata(DoorUri.parse(tempEpubFile.toURI().toString()), ProcessContext(tempUri, params = mutableMapOf<String,String>()))
+            val metadata = epubPlugin.extractMetadata(DoorUri.parse(tempEpubFile.toURI().toString()), ProcessContext(tempUri, params = mutableMapOf<String,String>()))
             Assert.assertEquals("Got ContentEntry with expected title",
                     "A Textbook of Sources for Teachers and Teacher-Training Classes",
-                    contentEntry?.title)
+                    metadata!!.entry.title)
         }
 
     }
@@ -76,53 +96,41 @@ class EpubFileTypePluginTest {
     @Test
     fun givenValidEpubLink_whenExtractMetadataAndProcessJobComplete_thenDataShouldBeDownloaded(){
 
-        val newStream = javaClass.getResourceAsStream("/com/ustadmobile/core/contenttype/childrens-literature.epub")
-        val source = newStream.source().buffer()
-        val buffer = Buffer()
-        source.readAll(buffer)
-
-        val response = MockResponse().setResponseCode(200).setHeader("Content-Type", "application/epub+zip")
-        response.setBody(buffer)
-
-        mockWebServer.enqueue(response)
-        mockWebServer.enqueue(response)
-
         val containerTmpDir = tmpFolder.newFolder("containerTmpDir")
         val tempFolder = tmpFolder.newFolder("newFolder")
         val tempUri = DoorUri.parse(tempFolder.toURI().toString())
         val accountManager: UstadAccountManager by di.instance()
         val repo: UmAppDatabase = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
 
+
         val epubPlugin = EpubTypePluginCommonJvm(Any(), accountManager.activeEndpoint, di)
         runBlocking{
 
-            val doorUri = DoorUri.parse(mockWebServer.url("children.epub").toString())
+            val doorUri = DoorUri.parse(mockWebServer.url("/com/ustadmobile/core/contenttype/childrens-literature.epub").toString())
             val processContext = ProcessContext(tempUri, params = mutableMapOf<String,String>())
-            val isValid = epubPlugin.canProcess(doorUri, processContext)
 
-            Assert.assertTrue("valid epub", isValid)
+            val uid = repo.contentEntryDao.insert(ContentEntry().apply{
+                title = "hello"
+            })
+            
+            val jobItem = ContentJobItem(sourceUri = doorUri.uri.toString(),
+                                    cjiParentContentEntryUid = uid)
+            val job = ContentJob(toUri = containerTmpDir.toURI().toString())
+            val jobAndItem = ContentJobItemAndContentJob().apply{
+                this.contentJob = job
+                this.contentJobItem = jobItem
+            }
 
-            val entry = epubPlugin.extractMetadata(doorUri, processContext)!!
+            epubPlugin.processJob(jobAndItem, processContext) {
 
-            Assert.assertEquals("Got ContentEntry with expected title",
-                    "A Textbook of Sources for Teachers and Teacher-Training Classes",
-                    entry.title)
+            }
 
-            val uid = repo.contentEntryDao.insert(entry)
-
-            val job = ContentJobItem(fromUri = doorUri.uri.toString(),
-                                    toUri = containerTmpDir.toURI().toString(),
-                                    cjiContentEntryUid = uid)
-
-            epubPlugin.processJob(job, processContext)
-
-            val container = repo.containerDao.findByUid(job.cjiContainerUid)!!
+            val container = repo.containerDao.findByUid(jobItem.cjiContainerUid)!!
 
             Assert.assertNotNull(container)
 
 
         }
-
 
     }
 

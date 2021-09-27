@@ -1,7 +1,12 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity
 data class ContentJob(
 
+        @PrimaryKey(autoGenerate = true)
         var cjUid: Long = 0,
 
         //Where data should be saved (null = default device storage)

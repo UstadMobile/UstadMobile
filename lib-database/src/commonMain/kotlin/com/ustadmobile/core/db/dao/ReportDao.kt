@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorQuery
@@ -32,7 +32,7 @@ abstract class ReportDao : BaseDao<Report> {
             """)
     abstract fun findAllActiveReport(searchBit: String, personUid: Long, sortOrder: Int,
                                      isTemplate: Boolean)
-            : DataSource.Factory<Int, Report>
+            : DoorDataSourceFactory<Int, Report>
 
     @Query("SELECT * FROM Report WHERE reportUid = :entityUid")
     abstract suspend fun findByUid(entityUid: Long): Report?

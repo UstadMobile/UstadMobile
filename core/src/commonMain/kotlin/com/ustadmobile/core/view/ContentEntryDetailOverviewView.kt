@@ -1,12 +1,12 @@
 package com.ustadmobile.core.view
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 
 
 interface ContentEntryDetailOverviewView: UstadDetailView<ContentEntryWithMostRecentContainer> {
 
-    var availableTranslationsList: DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage>?
+    var availableTranslationsList: DoorDataSourceFactory<Int, ContentEntryRelatedEntryJoinWithLanguage>?
 
     /**
      * Show the download dialog. The platform should request permission before if required.
@@ -20,6 +20,12 @@ interface ContentEntryDetailOverviewView: UstadDetailView<ContentEntryWithMostRe
     var locallyAvailable: Boolean
 
     var markCompleteVisible: Boolean
+
+    var canDownload: Boolean
+
+    var canUpdate: Boolean
+
+    var hasContentToOpenOrDelete: Boolean
 
     companion object {
 

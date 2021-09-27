@@ -80,7 +80,9 @@ class EdraakK12ContentScraper : Runnable {
 
     public override fun run() {
         System.gc()
-        val db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
+        //This needs to be replaced with DI
+        lateinit var db: UmAppDatabase
+        //val db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
         val repository = db // db.getRepository("https://localhost", "");
         val containerDao = repository.containerDao
         val queueDao = db.scrapeQueueItemDao

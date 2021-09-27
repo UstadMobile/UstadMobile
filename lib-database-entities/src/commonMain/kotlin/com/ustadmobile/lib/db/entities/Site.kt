@@ -36,4 +36,11 @@ open class Site {
 
     var authSalt: String? = null
 
+    /**
+     *
+     *  e.g. endpoint = https://sitename.server.com/endpoint with torrentTracker = http://sitename.otherserver.com:6970/
+     *     trackerUrl = http://sitename.otherserver.com:6970/announce
+     */
+    var torrentAnnounceUrl: String? = null
+
 }

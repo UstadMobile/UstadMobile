@@ -72,7 +72,9 @@ class AsbScraper {
 
         val africanBooksUrl = generateURL()
 
-        val db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
+        //Replace this with DI
+        lateinit var db: UmAppDatabase
+        //val db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
         val repository = db //db.getRepository("https://localhost", "");
         val contentEntryDao = repository.contentEntryDao
         val contentParentChildJoinDao = repository.contentEntryParentChildJoinDao

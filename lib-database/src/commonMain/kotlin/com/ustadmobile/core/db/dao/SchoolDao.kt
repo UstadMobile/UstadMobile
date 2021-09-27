@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
@@ -69,7 +69,7 @@ abstract class SchoolDao : BaseDao<School> {
         END DESC""")
     abstract fun findAllActiveSchoolWithMemberCountAndLocationName(searchBit: String,
                     personUid: Long, permission: Long, sortOrder: Int)
-            : DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
+            : DoorDataSourceFactory<Int, SchoolWithMemberCountAndLocation>
 
 
     @Update

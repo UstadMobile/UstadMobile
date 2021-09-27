@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
@@ -11,6 +11,7 @@ import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_LAST_ACTIVE_DESC
 import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_LAST_NAME_ASC
 import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_LAST_NAME_DESC
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 
@@ -155,9 +156,11 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                 ELSE ''
             END DESC
     """)
+    @QueryLiveTables(["ClazzAssignment", "ScopedGrant", "ClazzAssignmentRollUp",
+        "PersonGroupMember", "ClazzEnrolment"])
     abstract fun getAllAssignments(clazzUid: Long, timestamp: Long, accountPersonUid: Long,
                                    sortOrder: Int, searchText: String, permission: Long)
-            : DataSource.Factory<Int, ClazzAssignmentWithMetrics>
+            : DoorDataSourceFactory<Int, ClazzAssignmentWithMetrics>
 
 
     @Query("""
@@ -297,7 +300,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
     abstract fun getAttemptSummaryForStudentsInAssignment(assignmentUid: Long, clazzUid: Long,
                                                           accountPersonUid: Long,
                                                           searchText: String, sortOrder: Int):
-            DataSource.Factory<Int, PersonWithAttemptsSummary>
+            DoorDataSourceFactory<Int, PersonWithAttemptsSummary>
 
     @Query("""
         WITH CtePermissionCheck (hasPermission) 
