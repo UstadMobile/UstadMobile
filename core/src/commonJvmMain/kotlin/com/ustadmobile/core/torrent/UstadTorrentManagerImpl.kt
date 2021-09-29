@@ -2,6 +2,8 @@ package com.ustadmobile.core.torrent
 
 import com.turn.ttorrent.client.*
 import com.turn.ttorrent.client.storage.FairPieceStorageFactory
+import com.turn.ttorrent.tracker.TrackedTorrent
+import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.io.ext.UstadFileCollectionStorage.createFileCollectionStorage
 import com.ustadmobile.core.util.DiTag
@@ -40,7 +42,7 @@ class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : Ust
             file.name.endsWith(".torrent")
         }?.forEach { torrentFile ->
             torrentLock.withLock {
-                addTorrent(torrentFile.nameWithoutExtension.toLong(), null)
+                    addTorrent(torrentFile.nameWithoutExtension.toLong(), null)
             }
         }
     }
@@ -70,7 +72,6 @@ class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : Ust
             println("prepared to add torrent in ${System.currentTimeMillis() - startTime} ms")
             val manager = communicationManager.addTorrent(metadataProvider, pieceStorage)
             containerManagerMap[containerUid] = manager
-
         }
     }
 

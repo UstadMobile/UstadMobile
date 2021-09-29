@@ -135,6 +135,7 @@ class ContentEntryEdit2Presenter(context: Any,
             if (metaData != null) {
                 val metadataResult = safeParse(di, MetadataResult.serializer(), metaData)
                 view.metadataResult = metadataResult
+                fromUri = metadataResult.entry.sourceUrl
                 return metadataResult.entry
             }
         }
@@ -179,6 +180,7 @@ class ContentEntryEdit2Presenter(context: Any,
             view.loading = true
             // back from navigate import
             view.metadataResult = metadata
+            fromUri = metadata.entry.sourceUrl
             arguments[ARG_ENTITY_UID]?.let { uid ->
                 val entry = metadata.entry
                 entry.contentEntryUid = uid.toLong()
@@ -281,8 +283,8 @@ class ContentEntryEdit2Presenter(context: Any,
                                 url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
                                         "/import/downloadLink"))
                                 parameter("parentUid", parentEntryUid)
-                                parameter("scraperType", view.entryMetaData?.scraperType)
-                                parameter("url", view.entryMetaData?.uri)
+                                parameter("pluginId", view.metadataResult?.pluginId)
+                                parameter("url", fromUri)
                                 parameter("conversionParams",
                                         Json.encodeToString(MapSerializer(String.serializer(),
                                                 String.serializer()),

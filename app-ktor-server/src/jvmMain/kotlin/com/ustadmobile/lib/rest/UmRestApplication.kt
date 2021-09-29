@@ -33,6 +33,7 @@ import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
+import com.ustadmobile.lib.contentscrapers.apache.ApacheIndexerPlugin
 import com.ustadmobile.lib.db.entities.PersonAuth2
 import com.ustadmobile.lib.rest.ext.databasePropertiesFromSection
 import com.ustadmobile.lib.rest.ext.initAdminUser
@@ -194,7 +195,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                     H5PTypePluginCommonJvm(Any(), context, di),
                     XapiTypePluginCommonJvm(Any(), context, di),
                     VideoTypePluginJvm(Any(), context, di),
-                    ContainerTorrentDownloadJob(context, di)))
+                    ContainerTorrentDownloadJob(context, di),
+                    ApacheIndexerPlugin(Any(), context, di)))
         }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {

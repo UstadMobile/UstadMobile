@@ -67,9 +67,17 @@ data class ContentJobItem(
     var cjiRecursiveTotal: Long = 0,
 
     /**
+     * Represents the status to the process of this job item and not including any child items.
      * Status set to default JobStatus.QUEUED
      */
     var cjiStatus: Int = 4,
+
+    /**
+     * Represents the status of the job and its child items(inclusive). This is managed by
+     * triggers and should NOT be updated directly. Status set to default JobStatus.QUEUED
+     */
+    var cjiRecursiveStatus:Int = 4,
+
 
     var cjiConnectivityAcceptable: Int = 0,
 
@@ -88,6 +96,9 @@ data class ContentJobItem(
      *  The parent of this ContentJobItem in the content job itself.
      */
     var cjiParentCjiUid: Long = 0,
+
+
+    var cjiServerJobId: Long = 0
 
 ) {
     companion object {

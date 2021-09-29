@@ -84,6 +84,7 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
                     description = activity.desc
                     leaf = true
                     entryId = activity.id
+                    sourceUrl = uri.uri.toString()
                 }
                 MetadataResult(entry, PLUGIN_ID)
             }

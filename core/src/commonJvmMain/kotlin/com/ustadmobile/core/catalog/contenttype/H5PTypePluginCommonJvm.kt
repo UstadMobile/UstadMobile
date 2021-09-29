@@ -110,6 +110,7 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
                     contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
                     licenseType = licenseMap[json.jsonObject["license"] ?: ""]
                             ?: ContentEntry.LICENSE_TYPE_OTHER
+                    sourceUrl = uri.uri.toString()
                     title = if(json.jsonObject["title"]?.jsonPrimitive?.content.isNullOrEmpty())
                         uri.getFileName(context) else json.jsonObject["title"]?.jsonPrimitive?.content
                     this.author = author
@@ -131,7 +132,6 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
             val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                     ?: throw IllegalArgumentException("missing tracker url")
             val contentNeedUpload = !doorUri.isRemote()
-
 
             val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid) ?:
                 Container().apply {

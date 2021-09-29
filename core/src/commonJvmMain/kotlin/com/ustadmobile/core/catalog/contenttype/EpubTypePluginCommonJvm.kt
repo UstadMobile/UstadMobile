@@ -95,6 +95,7 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                             author = opfDocument.getCreator(0)?.creator
                             description = opfDocument.description
                             leaf = true
+                            sourceUrl = uri.uri.toString()
                             entryId = opfDocument.id.alternative(UUID.randomUUID().toString())
                             val languageCode = opfDocument.getLanguage(0)
                             if (languageCode != null) {

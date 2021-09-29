@@ -83,6 +83,7 @@ class ContentEntryEdit2PresenterTest {
         contentEntry = createMockEntryWithLanguage()
         mockLifecycleOwner = mock { }
         contentJobManager = mock { }
+        contentPluginManager = mock { }
         systemImpl = mock {
 
             onBlocking { getStorageDirsAsync(any()) }.thenAnswer {
@@ -97,12 +98,6 @@ class ContentEntryEdit2PresenterTest {
         di = DI {
             import(ustadTestRule.diModule)
             bind<UstadMobileSystemImpl>(overrides = true) with singleton { systemImpl }
-            bind<ContentPluginManager>() with scoped(ustadTestRule.endpointScope).singleton {
-                ContentPluginManagerImpl(listOf(TestPlugin(di, metadataResult)))
-            }
-            bind<ContentJobManager>() with singleton {
-                contentJobManager
-            }
             bind<ContainerStorageManager>() with scoped(ustadTestRule.endpointScope).singleton {
                 ContainerStorageManager(listOf(storageDir))
             }
@@ -220,7 +215,6 @@ class ContentEntryEdit2PresenterTest {
         val presenter = ContentEntryEdit2Presenter(context,
                 mapOf(ARG_ENTITY_UID to contentEntry.contentEntryUid.toString(),
                         UstadView.ARG_PARENT_ENTRY_UID to parentUid.toString()), mockView, mockLifecycleOwner, di)
-
         presenter.onCreate(null)
         val entrySetOnView = mockView.captureLastEntityValue()
         runBlocking{

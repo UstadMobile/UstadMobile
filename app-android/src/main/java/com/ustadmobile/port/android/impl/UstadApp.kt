@@ -328,6 +328,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
     }
 
+    lateinit var connectionManager: ConnectionManager
+
     override val di: DI by DI.lazy {
         import(diModule)
     }
@@ -337,6 +339,13 @@ open class UstadApp : BaseUstadApp(), DIAware {
         val systemImpl: UstadMobileSystemImpl = di.direct.instance()
         systemImpl.messageIdMap = MessageIDMap.ID_MAP
         Napier.base(DebugAntilog())
+        connectionManager = ConnectionManager(this, di)
+        connectionManager.startNetworkCallback()
+    }
+
+    override fun onTerminate() {
+        super.onTerminate()
+        connectionManager.stopNetworkCallback()
     }
 
     override fun attachBaseContext(base: Context) {

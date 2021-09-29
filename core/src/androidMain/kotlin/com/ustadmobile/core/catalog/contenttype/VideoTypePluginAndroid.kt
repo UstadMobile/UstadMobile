@@ -235,6 +235,7 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
             val entry = ContentEntryWithLanguage().apply {
                 this.title = fileName
                 this.leaf = true
+                this.sourceUrl = doorUri.uri.toString()
                 this.contentTypeFlag = ContentEntry.TYPE_VIDEO
             }
             MetadataResult(entry, pluginId)

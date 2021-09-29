@@ -140,6 +140,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
             val entry = ContentEntryWithLanguage().apply {
                 this.title = file.nameWithoutExtension
                 this.leaf = true
+                sourceUrl = uri.uri.toString()
                 this.contentTypeFlag = ContentEntry.TYPE_VIDEO
             }
             MetadataResult(entry, PLUGIN_ID)
