@@ -140,7 +140,7 @@ class H5PTypePluginTest {
             })
 
             val jobItem = ContentJobItem(sourceUri = doorUri.uri.toString(),
-                    cjiParentContentEntryUid = uid)
+                    cjiParentContentEntryUid = uid, cjiContentEntryUid = 42)
             val job = ContentJob(toUri = containerTmpDir.toURI().toString())
             val jobAndItem = ContentJobItemAndContentJob().apply{
                 this.contentJob = job
@@ -150,22 +150,9 @@ class H5PTypePluginTest {
             h5pPlugin.processJob(jobAndItem, processContext) {
 
             }
-            println("entry uid = ${jobItem.cjiContentEntryUid}")
-           val contentEntry = repo.contentEntryDao.findByUid(jobItem.cjiContentEntryUid)!!
-
-            Assert.assertNotNull(contentEntry)
-
-            Assert.assertEquals("Got ContentEntry with expected title",
-                    "Dialog Cards",
-                    contentEntry.title)
-            Assert.assertEquals("Got ContentEntry with expected title",
-                    "Samih",
-                    contentEntry.author)
-            Assert.assertEquals("Got Entry with expected license",
-                    ContentEntry.LICENSE_TYPE_OTHER, contentEntry.licenseType)
 
 
-            val container = repo.containerDao.findByUid(jobItem.cjiContainerUid)!!
+            val container = repo.containerDao.findFilesByContentEntryUid(42).first()
 
             Assert.assertNotNull(container)
 

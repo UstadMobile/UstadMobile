@@ -103,7 +103,7 @@ class TestApacheIndexer {
                 sourceUri = URL(mockWebServer.url("/json/com/ustadmobile/core/contenttype/folder.txt").toString()).toURI().toString()
                 cjiItemTotal = sourceUri?.let { DoorUri.parse(it).getSize(Any(), di)  } ?: 0L
                 cjiPluginId = ApacheIndexerPlugin.PLUGIN_ID
-                cjiContentEntryUid = 0
+                cjiContentEntryUid = 42
                 cjiIsLeaf = false
                 cjiParentContentEntryUid = 0
                 cjiConnectivityAcceptable = ContentJobItem.ACCEPT_ANY
@@ -116,15 +116,12 @@ class TestApacheIndexer {
             apacheIndexer.processJob(jobAndItem, ProcessContext(tmpDir.toDoorUri(), mutableMapOf())){
 
             }
+
+
+            val contentJobItems = db.contentJobItemDao.findAll().filter { it.cjiJobUid == job.cjUid }
+            Assert.assertTrue("created more jobs",contentJobItems.size > 1)
+
         }
-
-        val apacheFolderEntry = db.contentEntryDao.findBySourceUrl("http://localhost:${mockWebServer.port}/json/com/ustadmobile/core/contenttype/folder.txt")
-        Assert.assertEquals("English content exists", "UstadMobile-app-branded-maktab-tajikistan", apacheFolderEntry!!.title)
-    }
-
-    companion object{
-
-        const val TEST_ENDPOINT = "http://test.localhost.com/"
     }
 
 }
