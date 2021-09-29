@@ -1,4 +1,4 @@
-package com.ustadmobile.lib.contentscrapers.apache
+package com.ustadmobile.core.catalog.contenttype
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.*
@@ -11,13 +11,11 @@ import com.ustadmobile.core.io.ext.guessMimeType
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.db.entities.*
 import io.github.aakira.napier.Napier
+import com.ustadmobile.door.ext.openInputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import com.ustadmobile.door.ext.openInputStream
-import org.apache.commons.lang3.exception.ExceptionUtils
 import org.jsoup.Jsoup
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -27,13 +25,12 @@ import java.net.URL
 
 class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoint, override val di: DI): ContentPlugin {
 
-    private val logPrefix = "[ApacheIndexer] "
 
     override val pluginId: Int
         get() = PLUGIN_ID
 
     override val supportedMimeTypes: List<String>
-        get() = listOf("text/html")
+        get() = listOf("text/html", "text/plain")
 
     override val supportedFileExtensions: List<String>
         get() = listOf()
@@ -64,10 +61,9 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                 return@withContext null
             }
 
-            val urlWithEndingSlash = uri.uri.toString().requirePostfix("/")
             val entry = ContentEntryWithLanguage()
             entry.title = document.title().substringAfterLast("/")
-            entry.sourceUrl = urlWithEndingSlash
+            entry.sourceUrl =  uri.uri.toString()
             entry.leaf = false
             entry.contentTypeFlag = ContentEntry.TYPE_COLLECTION
 
@@ -81,8 +77,6 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
         withContext(Dispatchers.Default) {
             val uri = DoorUri.parse(jobUri)
             val localUri = process.getLocalUri(uri, context, di)
-            val contentEntryUid = processMetadata(jobItem, process, context,endpoint)
-
             val data: InputStream? = localUri.openInputStream(context)
             val document = Jsoup.parse(data, "UTF-8", uri.uri.toURL().toString())
 
@@ -92,10 +86,12 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                 try {
                     val element = it.select("td a")
                     val href = element.attr("href")
-                    val title = element.text()
+                    if(href.isEmpty()){
+                        return@forEachIndexed
+                    }
                     val hrefUrl = URL(uri.uri.toURL(), href)
 
-                    if(alt == "[PARENTDIR]" || alt == "[ICO]"){
+                    if(alt == "[PARENTDIR]" || alt == "[ICO]" || alt == ""){
                         return@forEachIndexed
                     }
 
@@ -108,24 +104,21 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                             cjiPluginId = PLUGIN_ID
                             cjiContentEntryUid = 0
                             cjiIsLeaf = false
-                            cjiParentContentEntryUid = contentEntryUid
+                            cjiParentContentEntryUid = contentJobItem.cjiContentEntryUid
                             cjiConnectivityAcceptable = ContentJobItem.ACCEPT_ANY
                             cjiStatus = JobStatus.QUEUED
                             cjiUid = db.contentJobItemDao.insertJobItem(this)
                         }
 
-                        Napier.i("$logPrefix found new directory with title $title for parent folder ${document.title()}", tag = ScraperConstants.SCRAPER_TAG)
-
                     } else {
-
 
                         ContentJobItem().apply {
                             cjiJobUid = contentJobItem.cjiJobUid
                             sourceUri = hrefUrl.toURI().toString()
                             cjiItemTotal = sourceUri?.let { DoorUri.parse(it).getSize(context, di)  } ?: 0L
                             cjiContentEntryUid = 0
-                            cjiIsLeaf = false
-                            cjiParentContentEntryUid = contentEntryUid
+                            cjiIsLeaf = true
+                            cjiParentContentEntryUid = contentJobItem.cjiContentEntryUid
                             cjiConnectivityAcceptable = ContentJobItem.ACCEPT_ANY
                             cjiStatus = JobStatus.QUEUED
                             cjiUid = db.contentJobItemDao.insertJobItem(this)
@@ -133,8 +126,7 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
 
                     }
                 } catch (e: Exception) {
-                    Napier.e("$logPrefix Error during directory search on $jobUri", tag = ScraperConstants.SCRAPER_TAG)
-                    Napier.e("$logPrefix ${ExceptionUtils.getStackTrace(e)}", tag = ScraperConstants.SCRAPER_TAG)
+                    e.printStackTrace()
                 }
             }
         }

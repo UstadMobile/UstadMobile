@@ -115,6 +115,14 @@ class ContentJobRunner(
                     item.contentJobItem?.cjiContentEntryUid = contentEntryUid
                     db.contentJobItemDao.updateContentEntryUid(item.contentJobItem?.cjiUid ?: 0,
                         contentEntryUid)
+
+                    if(item.contentJobItem?.cjiParentContentEntryUid != 0L){
+                        ContentEntryParentChildJoin().apply {
+                            cepcjParentContentEntryUid = item.contentJobItem?.cjiParentContentEntryUid ?: 0L
+                            cepcjChildContentEntryUid = item.contentJobItem?.cjiContentEntryUid ?: 0L
+                            cepcjUid = repo.contentEntryParentChildJoinDao.insert(this)
+                        }
+                    }
                 }
 
                 val pluginId = if(item.contentJobItem?.cjiPluginId == 0) {

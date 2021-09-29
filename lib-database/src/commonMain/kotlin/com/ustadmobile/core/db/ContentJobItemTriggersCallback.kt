@@ -49,7 +49,7 @@ class ContentJobItemTriggersCallback: DoorDatabaseCallback {
                  WHERE ContentJobItem.cjiUid = NEW.cjiUid;
                 END;
                 """,
-                """
+              /*  """
                 CREATE TRIGGER ContentJobItem_UpdateRecursiveStatus
                 AFTER UPDATE ON ContentJobItem
                 FOR EACH ROW WHEN (NEW.cjiStatus != OLD.cjiStatus)
@@ -58,7 +58,7 @@ class ContentJobItemTriggersCallback: DoorDatabaseCallback {
                     SET cjiRecursiveStatus = $STATUS_CHECK
                     WHERE contentJobItem.cjiUid = NEW.cjiUid;
                 END;    
-                """,    
+                """,    */
                 """
                 CREATE TRIGGER ContentJobItem_UpdateParents
                 AFTER UPDATE ON ContentJobItem
@@ -72,7 +72,7 @@ class ContentJobItemTriggersCallback: DoorDatabaseCallback {
                        cjiRecursiveTotal = (cjiRecursiveTotal + (NEW.cjiRecursiveTotal - OLD.cjiRecursiveTotal))
                  WHERE ContentJobItem.cjiUid = NEW.cjiParentCjiUid;
                 END;
-                """,
+                """/*,
                 """
                 CREATE TRIGGER ContentJobItem_UpdateStatusParent
                 AFTER UPDATE ON ContentJobItem
@@ -80,11 +80,11 @@ class ContentJobItemTriggersCallback: DoorDatabaseCallback {
                          NEW.cjiParentCjiUid != 0
                     AND (New.cjiRecursiveStatus != OLD.cjiRecursiveStatus))
                 BEGIN
-                UPDATE ContentJobItem 
+                UPDATE ContentJobItem
                    SET cjiRecursiveStatus = $STATUS_CHECK
                  WHERE ContentJobItem.cjiUid = NEW.cjiParentCjiUid;
                  END;
-                """
+                """*/
 
             ))
         }else {

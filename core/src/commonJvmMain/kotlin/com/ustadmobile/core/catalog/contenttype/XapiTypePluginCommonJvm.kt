@@ -97,7 +97,6 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
         val container = withContext(Dispatchers.Default) {
 
             val doorUri = DoorUri.parse(uri)
-            val contentEntryUid = processMetadata(jobItem, process,context, endpoint)
             val localUri = process.getLocalUri(doorUri, context, di)
             val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                     ?: throw IllegalArgumentException("missing tracker url")
@@ -105,7 +104,7 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
 
             val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid) ?:
                 Container().apply {
-                    containerContentEntryUid = contentEntryUid
+                    containerContentEntryUid = contentJobItem.cjiContentEntryUid
                     cntLastModified = System.currentTimeMillis()
                     mimeType = supportedMimeTypes.first()
                     containerUid = repo.containerDao.insertAsync(this)

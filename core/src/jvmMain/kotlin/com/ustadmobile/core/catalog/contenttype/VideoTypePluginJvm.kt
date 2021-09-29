@@ -65,7 +65,6 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
             val uri = contentJobItem.sourceUri ?: throw IllegalStateException("missing uri")
             val videoUri = DoorUri.parse(uri)
             val videoFile = process.getLocalUri(videoUri, context, di).toFile()
-            val contentEntryUid = processMetadata(jobItem, process, context, endpoint)
             var newVideo = File(videoFile.parentFile, "new${videoFile.nameWithoutExtension}.mp4")
             val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                     ?: throw IllegalArgumentException("missing tracker url")
@@ -85,7 +84,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
 
             val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid) ?:
                 Container().apply {
-                    containerContentEntryUid = contentEntryUid
+                    containerContentEntryUid = contentJobItem.cjiContentEntryUid
                     cntLastModified = System.currentTimeMillis()
                     mimeType = supportedMimeTypes.first()
                     containerUid = repo.containerDao.insertAsync(this)
@@ -125,11 +124,16 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
 
     suspend fun getEntry(uri: DoorUri, process: ProcessContext): MetadataResult? {
         return withContext(Dispatchers.Default){
-            val file = uri.toFile()
 
-            if(!supportedFileExtensions.any { file.name.endsWith(it, true) }) {
+            val localUri = process.getLocalUri(uri, context, di)
+
+            val fileName = localUri.getFileName(context)
+
+            if(!supportedFileExtensions.any { fileName.endsWith(it, true) }) {
                 return@withContext null
             }
+
+            val file = localUri.toFile()
 
             val fileVideoDimensions = ShrinkUtils.getVideoResolutionMetadata(file)
 

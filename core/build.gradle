@@ -129,6 +129,7 @@ kotlin {
             resources.srcDirs += ["locale/main", "src/main/assets"]
 
             dependencies {
+                implementation "org.jsoup:jsoup:$version_jsoup"
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"

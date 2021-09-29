@@ -119,14 +119,13 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
 
                 val uri = DoorUri.parse(jobUri)
                 val localUri = process.getLocalUri(uri, context, di)
-                val contentEntryUid = processMetadata(jobItem, process, context,endpoint)
                 val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                         ?: throw IllegalArgumentException("missing tracker url")
                 val contentNeedUpload = !uri.isRemote()
 
                 val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid) ?:
                     Container().apply {
-                        containerContentEntryUid = contentEntryUid
+                        containerContentEntryUid = contentJobItem.cjiContentEntryUid
                         cntLastModified = System.currentTimeMillis()
                         mimeType = supportedMimeTypes.first()
                         containerUid = repo.containerDao.insertAsync(this)
