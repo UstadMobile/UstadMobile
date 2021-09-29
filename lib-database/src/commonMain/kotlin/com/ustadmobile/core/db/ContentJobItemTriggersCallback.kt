@@ -50,6 +50,16 @@ class ContentJobItemTriggersCallback: DoorDatabaseCallback {
                 END;
                 """,
                 """
+                CREATE TRIGGER ContentJobItem_UpdateRecursiveStatus
+                AFTER UPDATE ON ContentJobItem
+                FOR EACH ROW WHEN (NEW.cjiStatus != OLD.cjiStatus)
+                BEGIN 
+                UPDATE ContentJobItem
+                    SET cjiRecursiveStatus = $STATUS_CHECK
+                    WHERE contentJobItem.cjiUid = NEW.cjiUid;
+                END;    
+                """,    
+                """
                 CREATE TRIGGER ContentJobItem_UpdateParents
                 AFTER UPDATE ON ContentJobItem
                 FOR EACH ROW WHEN (
@@ -62,7 +72,20 @@ class ContentJobItemTriggersCallback: DoorDatabaseCallback {
                        cjiRecursiveTotal = (cjiRecursiveTotal + (NEW.cjiRecursiveTotal - OLD.cjiRecursiveTotal))
                  WHERE ContentJobItem.cjiUid = NEW.cjiParentCjiUid;
                 END;
+                """,
                 """
+                CREATE TRIGGER ContentJobItem_UpdateStatusParent
+                AFTER UPDATE ON ContentJobItem
+                FOR EACH ROW WHEN (
+                         NEW.cjiParentCjiUid != 0
+                    AND (New.cjiRecursiveStatus != OLD.cjiRecursiveStatus))
+                BEGIN
+                UPDATE ContentJobItem 
+                   SET cjiRecursiveStatus = $STATUS_CHECK
+                 WHERE ContentJobItem.cjiUid = NEW.cjiParentCjiUid;
+                 END;
+                """
+
             ))
         }else {
             db.execSqlBatch(arrayOf(
@@ -123,6 +146,49 @@ class ContentJobItemTriggersCallback: DoorDatabaseCallback {
     }
 
     override fun onOpen(db: DoorSqlDatabase) {
+
+    }
+
+    companion object {
+
+        const val STATUS_CHECK = """
+            (CASE cjiStatus 
+              WHEN (cjiStatus = ${JobStatus.COMPLETE} 
+                        AND (SELECT Count(*) FROM ContentJobItem ContentJobItemInternal
+                             WHERE ContentJobItemInternal.cjiStatus = ${JobStatus.COMPLETE}
+                               AND ((cjiParentCjiUid = ContentJobItemInternal.cjiUid) 
+                                OR cjiUid = ContentJobItemInternal.cjiUid)) == 
+                                    (SELECT COUNT(*) FROM ContentJobItem ContentJobItemInternal
+                                      WHERE ((cjiParentCjiUid = ContentJobItemInternal.cjiUid) 
+                                OR cjiUid = ContentJobItemInternal.cjiUid)))
+             THEN ${JobStatus.COMPLETE}
+             WHEN (cjiStatus > ${JobStatus.COMPLETE_MIN}
+                       AND EXISTS (SELECT * FROM ContentJobItem ContentJobItemInternal
+                           WHERE cjiStatus = ${JobStatus.FAILED}
+                           AND ((cjiParentCjiUid = ContentJobItemInternal.cjiUid) 
+                               OR cjiUid = ContentJobItemInternal.cjiUid))
+                       AND EXISTS  (SELECT * FROM ContentJobItem ContentJobItemInternal
+                           WHERE cjiStatus = ${JobStatus.COMPLETE}
+                           AND ((cjiParentCjiUid = ContentJobItemInternal.cjiUid) 
+                               OR cjiUid = ContentJobItemInternal.cjiUid)))             
+             THEN ${JobStatus.PARTIAL_FAILED}
+             WHEN EXISTS (SELECT * FROM ContentJobItem ContentJobItemInternal
+                           WHERE cjiStatus = ${JobStatus.RUNNING} 
+                           AND ((cjiParentCjiUid = ContentJobItemInternal.cjiUid) 
+                                OR cjiUid = ContentJobItemInternal.cjiUid))
+             THEN ${JobStatus.RUNNING}
+             WHEN EXISTS (SELECT * FROM ContentJobItem ContentJobItemInternal
+                           WHERE cjiStatus = ${JobStatus.WAITING_FOR_CONNECTION}
+                           AND ((cjiParentCjiUid = ContentJobItemInternal.cjiUid) 
+                               OR cjiUid = ContentJobItemInternal.cjiUid))
+             THEN ${JobStatus.WAITING_FOR_CONNECTION}
+              WHEN EXISTS (SELECT * FROM ContentJobItem ContentJobItemInternal
+                           WHERE cjiStatus = ${JobStatus.FAILED}
+                           AND ((cjiParentCjiUid = ContentJobItemInternal.cjiUid) 
+                               OR cjiUid = ContentJobItemInternal.cjiUid))
+             THEN ${JobStatus.FAILED}
+             ELSE ${JobStatus.QUEUED} END)
+        """
 
     }
 
