@@ -189,14 +189,36 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {
             ServerUpdateNotificationManagerImpl()
         }
+
+        bind<EpubTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
+            EpubTypePluginCommonJvm(Any(), context, di)
+        }
+
+        bind<XapiTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
+            XapiTypePluginCommonJvm(Any(), context, di)
+        }
+
+        bind<H5PTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
+            H5PTypePluginCommonJvm(Any(), context, di)
+        }
+        bind<VideoTypePluginJvm>() with scoped(EndpointScope.Default).singleton{
+            VideoTypePluginJvm(Any(), context, di)
+        }
+        bind<ContainerTorrentDownloadJob>() with scoped(EndpointScope.Default).singleton{
+            ContainerTorrentDownloadJob(context, di)
+        }
+        bind<ApacheIndexerPlugin>() with scoped(EndpointScope.Default).singleton{
+            ApacheIndexerPlugin(Any(), context, di)
+        }
+
         bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
             ContentPluginManagerImpl(listOf(
-                    EpubTypePluginCommonJvm(Any(), context, di),
-                    H5PTypePluginCommonJvm(Any(), context, di),
-                    XapiTypePluginCommonJvm(Any(), context, di),
-                    VideoTypePluginJvm(Any(), context, di),
-                    ContainerTorrentDownloadJob(context, di),
-                    ApacheIndexerPlugin(Any(), context, di)))
+                    di.on(context).direct.instance<EpubTypePluginCommonJvm>(),
+                    di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
+                    di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
+                    di.on(context).direct.instance<VideoTypePluginJvm>(),
+                    di.on(context).direct.instance<ContainerTorrentDownloadJob>(),
+                    di.on(context).direct.instance<ApacheIndexerPlugin>()))
         }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {

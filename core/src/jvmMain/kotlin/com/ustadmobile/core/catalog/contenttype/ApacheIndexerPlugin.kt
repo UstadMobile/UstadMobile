@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.InputStream
@@ -37,7 +38,11 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    private val pluginManager: ContentPluginManager by di.on(endpoint).instance()
+    val pluginManager = ContentPluginManagerImpl(listOf(
+            di.on(endpoint).direct.instance<EpubTypePluginCommonJvm>(),
+            di.on(endpoint).direct.instance<XapiTypePluginCommonJvm>(),
+            di.on(endpoint).direct.instance<H5PTypePluginCommonJvm>(),
+            di.on(endpoint).direct.instance<VideoTypePluginJvm>()))
 
     override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
         val mimeType = uri.guessMimeType(context, di)?.substringBefore(";")
@@ -108,6 +113,7 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                             cjiContentEntryUid = 0
                             cjiIsLeaf = false
                             cjiParentContentEntryUid = contentJobItem.cjiContentEntryUid
+                            cjiParentCjiUid = contentJobItem.cjiUid
                             cjiConnectivityAcceptable = ContentJobItem.ACCEPT_ANY
                             cjiStatus = JobStatus.QUEUED
                             cjiUid = db.contentJobItemDao.insertJobItem(this)
@@ -127,6 +133,7 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                                 cjiContentEntryUid = 0
                                 cjiIsLeaf = true
                                 cjiPluginId = metadataResult.pluginId
+                                cjiParentCjiUid = contentJobItem.cjiUid
                                 cjiParentContentEntryUid = contentJobItem.cjiContentEntryUid
                                 cjiConnectivityAcceptable = ContentJobItem.ACCEPT_ANY
                                 cjiStatus = JobStatus.QUEUED
