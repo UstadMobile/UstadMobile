@@ -22,6 +22,7 @@ import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -317,6 +318,14 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         navController.navigate(SelectFileView.VIEW_NAME, args)
     }
 
+    override fun onClickAddFolder() {
+        val args = mutableMapOf(
+                ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
+                ARG_LEAF to true.toString())
+        args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
+
+        navController.navigate(SelectFolderView.VIEW_NAME, args)
+    }
 
     fun handleMoveWithSelectedEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
 

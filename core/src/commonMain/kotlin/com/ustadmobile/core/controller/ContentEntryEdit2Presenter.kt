@@ -209,6 +209,7 @@ class ContentEntryEdit2Presenter(context: Any,
         view.titleErrorEnabled = false
         view.fileImportErrorVisible = false
         GlobalScope.launch(doorMainDispatcher()) {
+
             val canCreate = isImportValid(entity)
 
             if (canCreate) {
@@ -361,7 +362,7 @@ class ContentEntryEdit2Presenter(context: Any,
             arguments[ARG_ENTITY_UID]?.let { entry.contentEntryUid = it.toLong() }
             view.fileImportErrorVisible = false
             fromUri = uri
-            if (plugin.supportedMimeTypes.first().startsWith("video/") &&
+            if (plugin.supportedMimeTypes.firstOrNull()?.startsWith("video/") == true &&
                     !uri.lowercase().startsWith("https://drive.google.com")) {
                         view.videoUri = uri
             }
@@ -416,6 +417,18 @@ class ContentEntryEdit2Presenter(context: Any,
         navigateForResult(
                 NavigateForResultOptions(this,
                         null, SelectFileView.VIEW_NAME, String::class,
+                        String.serializer(), SAVED_STATE_KEY_URI,
+                        arguments = args)
+        )
+    }
+
+    override fun onClickAddFolder() {
+        val args = mutableMapOf(ARG_LEAF to true.toString())
+        args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
+
+        navigateForResult(
+                NavigateForResultOptions(this,
+                        null, SelectFolderView.VIEW_NAME, String::class,
                         String.serializer(), SAVED_STATE_KEY_URI,
                         arguments = args)
         )

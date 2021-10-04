@@ -241,7 +241,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
                     H5PTypePluginCommonJvm(applicationContext, context, di),
                     XapiTypePluginCommonJvm(applicationContext, context, di),
                     VideoTypePluginAndroid(applicationContext, context, di),
-                    ContainerTorrentDownloadJob(context, di)))
+                    ContainerTorrentDownloadJob(context, di),
+                    FolderIndexerPlugin(applicationContext, context, di)
+                )
+            )
         }
         bind<ContentJobManager>() with singleton {
             ContentJobManagerAndroid(applicationContext)

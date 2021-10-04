@@ -8,7 +8,7 @@ interface SelectFileView : UstadView {
 
         const val VIEW_NAME = "SelectFileView"
 
-        const val ARG_SELECTION_MODE = "selectMode"
+        const val ARG_SELECTION_MODE = "selectMimeTypeMode"
 
         const val SELECTION_MODE_GALLERY = "video/*;audio/*"
 
