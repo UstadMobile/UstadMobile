@@ -5,7 +5,11 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.catalog.contenttype.ApacheIndexerPlugin
+import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
+import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentjob.ContentPluginManagerImpl
 import com.ustadmobile.core.contentjob.ProcessContext
+import com.ustadmobile.core.contentjob.TestContentJobRunner
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
@@ -35,6 +39,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import java.io.File
 import java.net.URL
 import java.nio.file.Files
@@ -71,6 +77,12 @@ class TestApacheIndexer {
 
         di = DI {
             import(ustadTestRule.diModule)
+            bind<ContentPluginManager>() with scoped(ustadTestRule.endpointScope).singleton {
+                ContentPluginManagerImpl(listOf(
+                        EpubTypePluginCommonJvm(Any(), context, di)
+                    )
+                )
+            }
         }
 
         mockWebServer = MockWebServer()
