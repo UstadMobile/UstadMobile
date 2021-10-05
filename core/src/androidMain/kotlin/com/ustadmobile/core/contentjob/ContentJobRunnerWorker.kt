@@ -61,32 +61,33 @@ class ContentJobRunnerWorker(
 
         val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-        GlobalScope.launch(Dispatchers.Main) {
+        var jobObserver: DoorObserver<ContentJobItem?>? = null
+        var liveData: RateLimitedLiveData<ContentJobItem?>? = null
 
-            try {
+         try {
+             liveData = RateLimitedLiveData(db, listOf("ContentJobItem"), 1000) {
+                 db.contentJobItemDao.findByJobId(jobId)
+             }
+             GlobalScope.launch(Dispatchers.Main) {
+                 jobObserver?.let { liveData.observeForever(it) }
+             }
+             jobObserver = DoorObserver {
+                 notification.setProgress(100, it?.cjiItemProgress?.toInt() ?: 0, false)
+                 if (it?.cjiItemProgress?.toInt() == 100) {
+                     notification.setContentTitle("Download Complete")
+                 }
+                 setForegroundAsync(ForegroundInfo(jobId.toInt(), notification.build()))
+             }
 
-                val liveData = RateLimitedLiveData<ContentJobItem?>(db, listOf("ContentJobItem"), 1000) {
-                    db.contentJobItemDao.findByJobId(jobId)
-                }
-                val jobObserver = DoorObserver<ContentJobItem?> {
-                    notification.setProgress(100, it?.cjiItemProgress?.toInt() ?: 0, false)
-                    if(it?.cjiItemProgress?.toInt() == 100){
-                        notification.setContentTitle("Download Complete")
-                    }
-                    setForegroundAsync(ForegroundInfo(jobId.toInt(), notification.build()))
-                }
-
-                launch(Dispatchers.Main) {
-                    liveData.observeForever(jobObserver)
-                }
-            }catch (e: Exception){
-                println(e.message)
-            }
-        }
+         } catch (e: Exception) {
+             println(e.message)
+         }
 
         setForeground(ForegroundInfo(jobId.toInt(), notification.build()))
 
-        val jobResult =  ContentJobRunner(jobId, endpoint, di).runJob().toWorkerResult()
+        val jobResult = ContentJobRunner(jobId, endpoint, di).runJob().toWorkerResult()
+
+        jobObserver?.let { liveData?.removeObserver(it) }
 
         return jobResult
     }
