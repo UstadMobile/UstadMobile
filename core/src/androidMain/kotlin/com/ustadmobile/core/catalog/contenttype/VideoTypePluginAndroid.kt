@@ -7,6 +7,7 @@ import android.media.MediaFormat
 import io.github.aakira.napier.Napier
 import com.linkedin.android.litr.MediaTransformer
 import com.linkedin.android.litr.TransformationListener
+import com.linkedin.android.litr.TransformationOptions
 import com.linkedin.android.litr.analytics.TrackTransformationInfo
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
@@ -123,7 +124,6 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
                 val videoCompleted = CompletableDeferred<Boolean>()
 
                 val mediaTransformer = MediaTransformer(context as Context)
-
                 mediaTransformer.transform(contentJobItem.cjiContentEntryUid.toString(), localUri.uri, newVideo.path,
                         videoTarget, audioTarget, object : TransformationListener {
                     override fun onStarted(id: String) {
@@ -153,7 +153,11 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
                                 ?: RuntimeException("error on video id: $id"))
                     }
 
-                }, MediaTransformer.GRANULARITY_DEFAULT, null)
+                }, TransformationOptions.Builder()
+                        .setGranularity(MediaTransformer.GRANULARITY_DEFAULT)
+                        .setVideoFilters(null)
+                        .build()
+                )
 
 
                 try {

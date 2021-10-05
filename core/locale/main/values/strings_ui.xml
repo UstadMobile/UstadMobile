@@ -1239,8 +1239,8 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="add_video_or_audio_from_the_device_gallery">Add video or audio from the device gallery</string>
 
     <string name="add_file">Add file</string>
-    <string name="add_folder">Add folder</string>
-    <string name="add_folder_description">Add a folder of content from your device</string>
+    <string name="add_folder">Add all from folder</string>
+    <string name="add_folder_description">Add all supported education content from a folder</string>
 
     <string name="add_educational_content_using_supported_formats_eg_pdf_xapi_h5p">Add educational content using supported formats e.g. PDF, xAPI, H5P</string>
 

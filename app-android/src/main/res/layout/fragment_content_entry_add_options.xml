@@ -115,44 +115,6 @@
                 android:textAppearance="@style/UmTheme.TextAppearance.Body2" />
         </RelativeLayout>
 
-
-        <RelativeLayout
-            android:id="@+id/content_add_folder"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_listitem"
-            android:clickable="true"
-            android:focusable="true"
-            android:padding="@dimen/dimen_16dp">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/add_folder_icon"
-                android:layout_width="@dimen/dimen_22dp"
-                android:layout_height="@dimen/dimen_22dp"
-                android:layout_alignTop="@id/add_folder_title"
-                android:tint="?colorOnIconTint"
-                app:srcCompat="@drawable/ic_create_new_folder_white_24dp"
-                app:tint="?colorOnIconTint" />
-
-            <TextView
-                android:id="@+id/add_folder_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/dimen_16dp"
-                android:layout_toEndOf="@+id/add_folder_icon"
-                android:text="@string/add_folder"
-                android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/add_folder_title"
-                android:layout_marginStart="@dimen/dimen_16dp"
-                android:layout_toEndOf="@+id/add_folder_icon"
-                android:text="@string/add_folder_description"
-                android:textAppearance="@style/UmTheme.TextAppearance.Body2" />
-        </RelativeLayout>
-
         <RelativeLayout
             android:id="@+id/content_add_file"
             android:layout_width="match_parent"
@@ -168,7 +130,7 @@
                 android:layout_height="@dimen/dimen_22dp"
                 android:layout_alignTop="@id/add_file_title"
                 android:tint="?colorOnIconTint"
-                app:srcCompat="@drawable/ic_insert_drive_file_black_24dp"
+                app:srcCompat="@drawable/ic_round_upload_file_24"
                 app:tint="?colorOnIconTint" />
 
             <TextView
@@ -187,6 +149,43 @@
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_toEndOf="@+id/add_file_icon"
                 android:text="@string/add_file_description"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body2" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/content_add_folder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_listitem"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="@dimen/dimen_16dp">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/add_folder_icon"
+                android:layout_width="@dimen/dimen_22dp"
+                android:layout_height="@dimen/dimen_22dp"
+                android:layout_alignTop="@id/add_folder_title"
+                android:tint="?colorOnIconTint"
+                app:srcCompat="@drawable/ic_round_drive_folder_upload_24"
+                app:tint="?colorOnIconTint" />
+
+            <TextView
+                android:id="@+id/add_folder_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_toEndOf="@+id/add_folder_icon"
+                android:text="@string/add_folder"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/add_folder_title"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_toEndOf="@+id/add_folder_icon"
+                android:text="@string/add_folder_description"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body2" />
         </RelativeLayout>
 
