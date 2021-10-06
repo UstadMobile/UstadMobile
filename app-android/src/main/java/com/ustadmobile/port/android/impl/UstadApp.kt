@@ -75,11 +75,14 @@ import com.ustadmobile.core.torrent.UstadCommunicationManager
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.torrent.UstadTorrentManagerImpl
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
+import com.ustadmobile.core.util.getLocalIpAddress
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import kotlinx.coroutines.*
+import java.net.Inet4Address
 import java.net.InetAddress
+import java.net.NetworkInterface
 import java.net.URI
 import java.util.concurrent.Executors
 
@@ -135,9 +138,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
             }).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
                 it.setupAssignmentSyncListener(context, di)
-                GlobalScope.launch {
-                    di.on(context).direct.instance<UstadTorrentManager>().start()
-                }
             }
         }
         bind<File>(tag = DiTag.TAG_TORRENT_DIR) with scoped(EndpointScope.Default).singleton{
@@ -150,7 +150,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
             val systemImpl: UstadMobileSystemImpl = instance()
             val storageList = mutableListOf<ContainerStorageDir>()
             applicationContext.filesDir.listFiles()?.mapIndexed { index, it ->
-                val siteDir = it.siteDataSubDir(context)
+                val siteDir = it.parentFile.siteDataSubDir(context)
                 val storageDir = File(siteDir, UstadMobileSystemCommon.SUBDIR_CONTAINER_NAME)
                 storageDir.takeIf { !it.exists() }?.mkdirs()
                 val nameMessageId = if(index == 0) MessageID.phone_memory else MessageID.memory_card
@@ -241,7 +241,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
                     H5PTypePluginCommonJvm(applicationContext, context, di),
                     XapiTypePluginCommonJvm(applicationContext, context, di),
                     VideoTypePluginAndroid(applicationContext, context, di),
-                    ContainerTorrentDownloadJob(context, di)))
+                    ContainerTorrentDownloadJob(context, di),
+                    FolderIndexerPlugin(applicationContext, context, di)
+                )
+            )
         }
         bind<ContentJobManager>() with singleton {
             ContentJobManagerAndroid(applicationContext)
@@ -296,10 +299,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
             UstadCommunicationManager()
         }
 
-        bind<ContainerTorrentDownloadJob>() with scoped(EndpointScope.Default).singleton {
-            ContainerTorrentDownloadJob(endpoint = context, di = di)
-        }
-
         bind<Pbkdf2Params>() with singleton {
             val systemImpl: UstadMobileSystemImpl = instance()
             val numIterations = systemImpl.getAppConfigInt(KEY_PBKDF2_ITERATIONS,
@@ -322,13 +321,17 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<BleGattServer>()
             instance<NetworkManagerBle>()
             instance<EmbeddedHTTPD>()
-            instance<UstadCommunicationManager>().start(InetAddress.getByName("0.0.0.0"))
+
+            val address: InetAddress? = getLocalIpAddress()
+            instance<UstadCommunicationManager>().start(address)
 
             Picasso.setSingletonInstance(Picasso.Builder(applicationContext)
                     .downloader(OkHttp3Downloader(instance<OkHttpClient>()))
                     .build())
         }
     }
+
+    lateinit var connectionManager: ConnectionManager
 
     override val di: DI by DI.lazy {
         import(diModule)
@@ -339,6 +342,13 @@ open class UstadApp : BaseUstadApp(), DIAware {
         val systemImpl: UstadMobileSystemImpl = di.direct.instance()
         systemImpl.messageIdMap = MessageIDMap.ID_MAP
         Napier.base(DebugAntilog())
+        connectionManager = ConnectionManager(this, di)
+        connectionManager.startNetworkCallback()
+    }
+
+    override fun onTerminate() {
+        super.onTerminate()
+        connectionManager.stopNetworkCallback()
     }
 
     override fun attachBaseContext(base: Context) {

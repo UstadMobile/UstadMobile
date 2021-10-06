@@ -20,6 +20,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.io.UploadSessionManager
+import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.torrent.ContainerTorrentDownloadJob
 import com.ustadmobile.core.torrent.UstadCommunicationManager
 import com.ustadmobile.core.torrent.UstadTorrentManager
@@ -32,6 +33,7 @@ import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
+import com.ustadmobile.core.catalog.contenttype.ApacheIndexerPlugin
 import com.ustadmobile.lib.db.entities.PersonAuth2
 import com.ustadmobile.lib.rest.ext.databasePropertiesFromSection
 import com.ustadmobile.lib.rest.ext.initAdminUser
@@ -187,13 +189,36 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {
             ServerUpdateNotificationManagerImpl()
         }
+
+        bind<EpubTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
+            EpubTypePluginCommonJvm(Any(), context, di)
+        }
+
+        bind<XapiTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
+            XapiTypePluginCommonJvm(Any(), context, di)
+        }
+
+        bind<H5PTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
+            H5PTypePluginCommonJvm(Any(), context, di)
+        }
+        bind<VideoTypePluginJvm>() with scoped(EndpointScope.Default).singleton{
+            VideoTypePluginJvm(Any(), context, di)
+        }
+        bind<ContainerTorrentDownloadJob>() with scoped(EndpointScope.Default).singleton{
+            ContainerTorrentDownloadJob(context, di)
+        }
+        bind<ApacheIndexerPlugin>() with scoped(EndpointScope.Default).singleton{
+            ApacheIndexerPlugin(Any(), context, di)
+        }
+
         bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
             ContentPluginManagerImpl(listOf(
-                    EpubTypePluginCommonJvm(Any(), context, di),
-                    H5PTypePluginCommonJvm(Any(), context, di),
-                    XapiTypePluginCommonJvm(Any(), context, di),
-                    VideoTypePluginJvm(Any(), context, di),
-                    ContainerTorrentDownloadJob(context, di)))
+                    di.on(context).direct.instance<EpubTypePluginCommonJvm>(),
+                    di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
+                    di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
+                    di.on(context).direct.instance<VideoTypePluginJvm>(),
+                    di.on(context).direct.instance<ContainerTorrentDownloadJob>(),
+                    di.on(context).direct.instance<ApacheIndexerPlugin>()))
         }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
@@ -249,6 +274,11 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             StdSchedulerFactory.getDefaultScheduler().also {
                 it.context.put("di", di)
             }
+        }
+
+        bind<ConnectivityLiveData>() with scoped(EndpointScope.Default).singleton {
+            val db: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_DB)
+            ConnectivityLiveData(db.connectivityStatusDao.statusLive())
         }
 
         bind<UstadMobileSystemImpl>() with singleton {

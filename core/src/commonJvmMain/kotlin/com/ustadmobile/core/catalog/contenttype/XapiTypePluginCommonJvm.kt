@@ -10,7 +10,7 @@ import java.io.IOException
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.*
-import com.ustadmobile.core.contentjob.ext.processMetadata
+import com.ustadmobile.core.contentjob.ext.uploadContentIfNeeded
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.torrent.UstadTorrentManager
@@ -23,7 +23,9 @@ import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.direct
 import org.kodein.di.on
+import io.ktor.client.*
 import org.xmlpull.v1.XmlPullParserFactory
 
 
@@ -41,6 +43,9 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
 
     override val pluginId: Int
         get() = PLUGIN_ID
+
+
+    private val httpClient: HttpClient = di.direct.instance()
 
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
@@ -78,6 +83,7 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
                     description = activity.desc
                     leaf = true
                     entryId = activity.id
+                    sourceUrl = uri.uri.toString()
                 }
                 MetadataResult(entry, PLUGIN_ID)
             }
@@ -89,14 +95,15 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
         val uri = contentJobItem.sourceUri ?: return ProcessResult(JobStatus.FAILED)
         val container = withContext(Dispatchers.Default) {
 
-            val contentEntryUid = processMetadata(jobItem, process,context, endpoint)
-            val localUri = process.getLocalUri(DoorUri.parse(uri), context, di)
+            val doorUri = DoorUri.parse(uri)
+            val localUri = process.getLocalUri(doorUri, context, di)
             val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                     ?: throw IllegalArgumentException("missing tracker url")
+            val contentNeedUpload = !doorUri.isRemote()
 
             val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid) ?:
                 Container().apply {
-                    containerContentEntryUid = contentEntryUid
+                    containerContentEntryUid = contentJobItem.cjiContentEntryUid
                     cntLastModified = System.currentTimeMillis()
                     mimeType = supportedMimeTypes.first()
                     containerUid = repo.containerDao.insertAsync(this)
@@ -117,12 +124,15 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
             repo.addTorrentFileFromContainer(
                     container.containerUid,
                     DoorUri.parse(torrentDir.toURI().toString()),
-                    trackerUrl, containerFolderUri
-            )
+                    trackerUrl, containerFolderUri)
 
             val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
             containerUidFolder.mkdirs()
             ustadTorrentManager.addTorrent(container.containerUid,containerUidFolder.path)
+
+            val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
+            uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient,  torrentFileBytes, endpoint)
+
 
             repo.containerDao.findByUid(container.containerUid)
 

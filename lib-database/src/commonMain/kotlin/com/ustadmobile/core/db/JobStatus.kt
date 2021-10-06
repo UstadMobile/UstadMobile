@@ -68,6 +68,8 @@ object JobStatus {
 
     const val COMPLETE_MAX = 30
 
+    const val PARTIAL_FAILED = 23
+
     const val COMPLETE = 24
 
     const val FAILED = 25

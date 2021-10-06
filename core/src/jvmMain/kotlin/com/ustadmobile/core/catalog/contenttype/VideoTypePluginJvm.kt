@@ -6,12 +6,13 @@ import com.ustadmobile.core.contentjob.ContentJobProgressListener
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
-import com.ustadmobile.core.contentjob.ext.processMetadata
+import com.ustadmobile.core.contentjob.ext.uploadContentIfNeeded
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.io.ext.addTorrentFileFromContainer
 import com.ustadmobile.core.io.ext.getLocalUri
+import com.ustadmobile.core.io.ext.isRemote
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ShrinkUtils
@@ -29,10 +30,18 @@ import org.kodein.di.on
 import java.io.File
 import java.lang.IllegalArgumentException
 import com.ustadmobile.door.ext.toDoorUri
+import io.ktor.client.*
+import io.ktor.client.features.*
+import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
+import io.ktor.http.*
+import org.kodein.di.direct
 
 class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoint, override val di: DI): VideoTypePlugin() {
 
     private val VIDEO_JVM = "VideoPluginJVM"
+
+    private val httpClient: HttpClient = di.direct.instance()
 
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
@@ -55,10 +64,10 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
             val uri = contentJobItem.sourceUri ?: throw IllegalStateException("missing uri")
             val videoUri = DoorUri.parse(uri)
             val videoFile = process.getLocalUri(videoUri, context, di).toFile()
-            val contentEntryUid = processMetadata(jobItem, process, context, endpoint)
             var newVideo = File(videoFile.parentFile, "new${videoFile.nameWithoutExtension}.mp4")
             val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                     ?: throw IllegalArgumentException("missing tracker url")
+            val contentNeedUpload = !videoUri.isRemote()
 
             val compressVideo: Boolean = process.params["compress"]?.toBoolean() ?: false
 
@@ -74,7 +83,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
 
             val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid) ?:
                 Container().apply {
-                    containerContentEntryUid = contentEntryUid
+                    containerContentEntryUid = contentJobItem.cjiContentEntryUid
                     cntLastModified = System.currentTimeMillis()
                     mimeType = supportedMimeTypes.first()
                     containerUid = repo.containerDao.insertAsync(this)
@@ -102,6 +111,9 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
             containerUidFolder.mkdirs()
             ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
 
+            val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
+            uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient,  torrentFileBytes, endpoint)
+
             container
         }
 
@@ -111,11 +123,16 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
 
     suspend fun getEntry(uri: DoorUri, process: ProcessContext): MetadataResult? {
         return withContext(Dispatchers.Default){
-            val file = uri.toFile()
 
-            if(!supportedFileExtensions.any { file.name.endsWith(it, true) }) {
+            val localUri = process.getLocalUri(uri, context, di)
+
+            val fileName = localUri.getFileName(context)
+
+            if(!supportedFileExtensions.any { fileName.endsWith(it, true) }) {
                 return@withContext null
             }
+
+            val file = localUri.toFile()
 
             val fileVideoDimensions = ShrinkUtils.getVideoResolutionMetadata(file)
 
@@ -126,6 +143,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
             val entry = ContentEntryWithLanguage().apply {
                 this.title = file.nameWithoutExtension
                 this.leaf = true
+                sourceUrl = uri.uri.toString()
                 this.contentTypeFlag = ContentEntry.TYPE_VIDEO
             }
             MetadataResult(entry, PLUGIN_ID)

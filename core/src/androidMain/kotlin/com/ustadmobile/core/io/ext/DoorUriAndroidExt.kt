@@ -65,7 +65,11 @@ actual suspend fun DoorUri.getSize(context: Any, di: DI): Long {
             }
         }
     } else{
-        (context as Context).contentResolver.openAssetFileDescriptor(uri, "r")?.length ?: -1
+        try {
+                (context as Context).contentResolver.openAssetFileDescriptor(uri, "r")?.length ?: -1
+        }catch (e: Exception){
+            return -1
+        }
     }
 }
 

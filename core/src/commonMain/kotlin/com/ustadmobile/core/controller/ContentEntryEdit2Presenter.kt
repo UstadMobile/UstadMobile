@@ -135,6 +135,7 @@ class ContentEntryEdit2Presenter(context: Any,
             if (metaData != null) {
                 val metadataResult = safeParse(di, MetadataResult.serializer(), metaData)
                 view.metadataResult = metadataResult
+                fromUri = metadataResult.entry.sourceUrl
                 return metadataResult.entry
             }
         }
@@ -179,6 +180,7 @@ class ContentEntryEdit2Presenter(context: Any,
             view.loading = true
             // back from navigate import
             view.metadataResult = metadata
+            fromUri = metadata.entry.sourceUrl
             arguments[ARG_ENTITY_UID]?.let { uid ->
                 val entry = metadata.entry
                 entry.contentEntryUid = uid.toLong()
@@ -207,6 +209,7 @@ class ContentEntryEdit2Presenter(context: Any,
         view.titleErrorEnabled = false
         view.fileImportErrorVisible = false
         GlobalScope.launch(doorMainDispatcher()) {
+
             val canCreate = isImportValid(entity)
 
             if (canCreate) {
@@ -281,8 +284,8 @@ class ContentEntryEdit2Presenter(context: Any,
                                 url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
                                         "/import/downloadLink"))
                                 parameter("parentUid", parentEntryUid)
-                                parameter("scraperType", view.entryMetaData?.scraperType)
-                                parameter("url", view.entryMetaData?.uri)
+                                parameter("pluginId", view.metadataResult?.pluginId)
+                                parameter("url", fromUri)
                                 parameter("conversionParams",
                                         Json.encodeToString(MapSerializer(String.serializer(),
                                                 String.serializer()),
@@ -359,7 +362,7 @@ class ContentEntryEdit2Presenter(context: Any,
             arguments[ARG_ENTITY_UID]?.let { entry.contentEntryUid = it.toLong() }
             view.fileImportErrorVisible = false
             fromUri = uri
-            if (plugin.supportedMimeTypes.first().startsWith("video/") &&
+            if (plugin.supportedMimeTypes.firstOrNull()?.startsWith("video/") == true &&
                     !uri.lowercase().startsWith("https://drive.google.com")) {
                         view.videoUri = uri
             }
@@ -414,6 +417,18 @@ class ContentEntryEdit2Presenter(context: Any,
         navigateForResult(
                 NavigateForResultOptions(this,
                         null, SelectFileView.VIEW_NAME, String::class,
+                        String.serializer(), SAVED_STATE_KEY_URI,
+                        arguments = args)
+        )
+    }
+
+    override fun onClickAddFolder() {
+        val args = mutableMapOf(ARG_LEAF to true.toString())
+        args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
+
+        navigateForResult(
+                NavigateForResultOptions(this,
+                        null, SelectFolderView.VIEW_NAME, String::class,
                         String.serializer(), SAVED_STATE_KEY_URI,
                         arguments = args)
         )

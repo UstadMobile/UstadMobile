@@ -276,6 +276,10 @@
         android:name="com.ustadmobile.port.android.view.SelectFileFragment"
         />
 
+    <fragment
+        android:id="@+id/select_folder_view"
+        android:name="com.ustadmobile.port.android.view.SelectFolderFragment"/>
+
 
     <fragment
         android:id="@+id/webchunk_view"

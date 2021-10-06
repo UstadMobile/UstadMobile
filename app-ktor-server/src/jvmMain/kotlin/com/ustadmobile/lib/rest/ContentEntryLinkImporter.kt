@@ -1,24 +1,43 @@
 package com.ustadmobile.lib.rest
 
+import com.ustadmobile.core.account.Endpoint
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.contentjob.ContentJobManager
+import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentjob.MetadataResult
+import com.ustadmobile.core.contentjob.ProcessContext
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.io.ext.getSize
+import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.lib.db.entities.ContentJob
+import com.ustadmobile.lib.db.entities.ContentJobItem
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
-import io.ktor.request.receive
+import io.ktor.request.*
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.post
 import io.ktor.routing.route
 import kotlinx.coroutines.withTimeout
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
 import org.kodein.di.on
+import java.io.File
+import java.net.URI
+import java.net.URL
 
 
 private val IMPORT_LINK_TIMEOUT_DEFAULT = (30 * 1000).toLong()
@@ -29,11 +48,12 @@ fun Route.ContentEntryLinkImporter() {
 
         post("validateLink") {
             val url = call.request.queryParameters["url"]?: ""
-            val scraperManager: ScraperManager by closestDI().on(call).instance()
-            var metadata: ImportedContentEntryMetaData? = null
+            val pluginManager: ContentPluginManager by closestDI().on(call).instance()
+            var metadata: MetadataResult? = null
             try{
+                val processContext = ProcessContext(createTemporaryDir("content"), mutableMapOf())
                 metadata = withTimeout(IMPORT_LINK_TIMEOUT_DEFAULT) {
-                    scraperManager.extractMetadata(url)
+                    pluginManager.extractMetadata(DoorUri.parse(url), processContext)
                 }
             }catch (e: Exception){
                 Napier.e("Exception extracting metadata to validateLink: $url", e)
@@ -48,24 +68,45 @@ fun Route.ContentEntryLinkImporter() {
 
         post("downloadLink") {
             try {
-                val parentUid = call.request.queryParameters["parentUid"]?.toLong() ?: UstadView.MASTER_SERVER_ROOT_ENTRY_UID
+                val parentUid = call.request.queryParameters["parentUid"]?.toLong()
                 val url = call.request.queryParameters["url"]?: ""
                 Napier.i("Downloadlink: $url")
 
                 val contentEntry = call.receive<ContentEntryWithLanguage>()
-                val scraperType = call.request.queryParameters["scraperType"] ?: ""
+                val pluginId = call.request.queryParameters["pluginId"]?.toInt() ?: 0
                 val conversionParams = call.request.queryParameters["conversionParams"]
+                Napier.i("contentEntry from client: ${contentEntry.contentEntryUid}")
 
                 val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
                 val repo: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_REPO)
+                val containerFolder: File by closestDI().on(call).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
                 val entryFromDb = db.contentEntryDao.findByUid(contentEntry.contentEntryUid)
+                val endpoint = Endpoint(call.request.header("Host") ?: "localhost")
                 if (entryFromDb == null) {
+                    Napier.i("not synced so using contentEntry from db")
                     repo.contentEntryDao.insertWithReplace(contentEntry)
                 }
 
-                val scraperManager: ScraperManager by closestDI().on(call).instance()
-                scraperManager.start(url, scraperType, parentUid, contentEntry.contentEntryUid,
-                        true, conversionParams)
+                val contentJobManager: ContentJobManager by closestDI().on(call).instance()
+                val job = ContentJob().apply {
+                    toUri = containerFolder.toURI().toString()
+                    params = conversionParams
+                    cjUid = db.contentJobDao.insertAsync(this)
+                }
+                ContentJobItem().apply {
+                    cjiJobUid = job.cjUid
+                    sourceUri = URL(url).toURI().toString()
+                    cjiItemTotal = sourceUri?.let { DoorUri.parse(it).getSize(context, closestDI())  } ?: 0L
+                    cjiPluginId = pluginId
+                    cjiContentEntryUid = contentEntry.contentEntryUid
+                    cjiIsLeaf = entryFromDb?.leaf ?: false
+                    cjiParentContentEntryUid = parentUid ?: 0
+                    cjiConnectivityAcceptable = ContentJobItem.ACCEPT_ANY
+                    cjiStatus = JobStatus.QUEUED
+                    cjiUid = db.contentJobItemDao.insertJobItem(this)
+                }
+
+                contentJobManager.enqueueContentJob(endpoint, job.cjUid)
                 call.respond(HttpStatusCode.OK)
             } catch (e: Exception) {
                 Napier.e("Exception attempting to start scrape", e)

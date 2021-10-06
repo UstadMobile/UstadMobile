@@ -28,6 +28,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
 import java.io.InputStream
+import java.net.URI
 
 class ContainerTorrentDownloadJob(private val endpoint: Endpoint, override val di: DI) : ContentPlugin {
 
@@ -76,7 +77,7 @@ class ContainerTorrentDownloadJob(private val endpoint: Endpoint, override val d
             torrentFile.writeBytes(torrentFileStream.readBytes())
         }
 
-        val downloadFolderPath = jobItem.contentJob?.toUri ?: containerDir.path
+        val downloadFolderPath = jobItem.contentJob?.toUri?.let { URI(it).path } ?: containerDir.path
 
         val containerFilesFolder = File(downloadFolderPath, containerUid.toString())
         containerFilesFolder.mkdirs()
@@ -169,8 +170,6 @@ class ContainerTorrentDownloadJob(private val endpoint: Endpoint, override val d
     companion object {
 
         internal const val MANIFEST_FILE_NAME = "USTAD-MANIFEST.json"
-
-
 
         const val PLUGIN_ID = 10
     }

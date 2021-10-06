@@ -11,7 +11,11 @@ class ContentPluginManagerImpl(val pluginList: List<ContentPlugin>) : ContentPlu
 
     override suspend fun extractMetadata(uri: DoorUri, processContext: ProcessContext): MetadataResult? {
         pluginList.forEach {
-            return it.extractMetadata(uri, processContext) ?: return@forEach
+            try {
+                return it.extractMetadata(uri, processContext) ?: return@forEach
+            }catch (e: Exception){
+                e.printStackTrace()
+            }
         }
         return null
     }
