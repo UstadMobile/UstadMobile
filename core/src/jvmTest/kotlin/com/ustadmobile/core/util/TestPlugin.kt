@@ -1,6 +1,7 @@
 package com.ustadmobile.core.util
 
 import com.ustadmobile.core.contentjob.*
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import org.kodein.di.DI
@@ -19,7 +20,7 @@ class TestPlugin(override val di: DI, val metadata: MetadataResult) : ContentPlu
     }
 
     override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
-        return ProcessResult(200)
+        return ProcessResult(JobStatus.COMPLETE)
     }
 
     companion object{

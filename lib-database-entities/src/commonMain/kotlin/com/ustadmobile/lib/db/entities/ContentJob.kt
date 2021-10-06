@@ -16,5 +16,7 @@ data class ContentJob(
 
         var cjTotal: Long = 0,
 
+        var cjNotificationTitle: String? = null,
+
         var params: String? = null
 )

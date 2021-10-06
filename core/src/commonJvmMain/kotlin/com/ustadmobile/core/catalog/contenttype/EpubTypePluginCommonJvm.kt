@@ -153,6 +153,9 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                 containerUidFolder.mkdirs()
                 ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
 
+                contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
+                progress.onProgress(contentJobItem)
+
                 val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
                 uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient,  torrentFileBytes, endpoint)
 

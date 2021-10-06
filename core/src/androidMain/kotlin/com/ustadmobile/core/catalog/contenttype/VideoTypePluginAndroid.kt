@@ -16,6 +16,7 @@ import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.contentjob.ext.uploadContentIfNeeded
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.torrent.UstadTorrentManager
@@ -86,7 +87,6 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
                     jobItem.contentJob?.params ?: "")
             val compressVideo: Boolean = params["compress"]?.toBoolean() ?: false
 
-
             Napier.d(tag = VIDEO_ANDROID, message = "conversion Params compress video is $compressVideo")
 
             if (compressVideo) {
@@ -134,13 +134,13 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
                     override fun onProgress(id: String, progress: Float) {
                         Napier.d(tag = VIDEO_ANDROID, message = "progress at value ${progress * 100}")
-                        contentJobItem.cjiItemProgress = (progress * 100).toLong() / progressSize
+                        contentJobItem.cjiItemProgress = ((progress * contentJobItem.cjiItemTotal) / progressSize).toLong()
                         jobProgress.onProgress(contentJobItem)
                     }
 
                     override fun onCompleted(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
                         Napier.d(tag = VIDEO_ANDROID, message = "completed transform")
-                        contentJobItem.cjiItemProgress = 100L / progressSize
+                        contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
                         jobProgress.onProgress(contentJobItem)
                         videoCompleted.complete(true)
                     }
@@ -197,6 +197,9 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
                 repo.addContainerFromUri(container.containerUid, localUri, context, di,
                         localUri.getFileName(context),
                         ContainerAddOptions(containerFolderUri))
+
+                contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
+                jobProgress.onProgress(contentJobItem)
             }
             videoTempDir.delete()
 
@@ -215,7 +218,7 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
             repo.containerDao.findByUid(container.containerUid) ?: container
         }
-        return ProcessResult(200)
+        return ProcessResult(JobStatus.COMPLETE)
     }
 
     suspend fun getEntry(doorUri: DoorUri, process: ProcessContext): MetadataResult? {

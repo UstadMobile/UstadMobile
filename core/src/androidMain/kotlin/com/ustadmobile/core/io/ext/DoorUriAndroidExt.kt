@@ -1,11 +1,16 @@
 package com.ustadmobile.core.io.ext
 
-import android.R.attr
 import android.content.ContentResolver
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.webkit.MimeTypeMap
 import com.ustadmobile.door.DoorUri
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.features.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -49,19 +54,14 @@ actual suspend fun DoorUri.guessMimeType(context: Any, di: DI): String? {
 actual suspend fun DoorUri.getSize(context: Any, di: DI): Long {
     return if(isRemote()){
         withContext(Dispatchers.IO){
-            var response: Response? = null
             try {
-                val okHttpClient: OkHttpClient = di.direct.instance()
-                val okRequest = Request.Builder().url(uri.toString()).head().build()
-                response = okHttpClient.newCall(okRequest).execute()
-                val length = response.header("Content-Length")
-                length?.toLong() ?: -1
+                val okHttpClient: HttpClient = di.direct.instance()
+                val response: HttpResponse = okHttpClient.head<HttpResponse>(uri.toString()).receive()
+                return@withContext response.contentLength() ?: -1L
             }catch (io: IOException){
                 throw io
             }catch (e: Exception) {
                 return@withContext -1
-            }finally {
-                response?.closeQuietly()
             }
         }
     } else{

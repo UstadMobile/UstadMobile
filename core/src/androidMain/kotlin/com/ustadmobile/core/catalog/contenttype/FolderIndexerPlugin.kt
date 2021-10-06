@@ -147,13 +147,13 @@ class FolderIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                     }
                 }
 
-                contentJobItem.cjiItemProgress = ((index.toFloat()/uriList.size) * 100).toLong()
+                contentJobItem.cjiItemProgress = index.toLong()
                 progress.onProgress(contentJobItem)
             }
-        }
 
-        contentJobItem.cjiItemProgress = 100
-        progress.onProgress(contentJobItem)
+            contentJobItem.cjiItemProgress = uriList.size.toLong()
+            progress.onProgress(contentJobItem)
+        }
 
         return ProcessResult(JobStatus.COMPLETE)
     }

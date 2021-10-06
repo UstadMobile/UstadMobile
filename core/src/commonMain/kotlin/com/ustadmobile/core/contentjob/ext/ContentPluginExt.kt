@@ -42,7 +42,7 @@ suspend fun ContentPlugin.uploadContentIfNeeded(contentNeedUpload: Boolean,
                         })
             })
             onUpload { bytesSentTotal, contentLength ->
-                contentJobItem.cjiItemProgress = 50 + (((bytesSentTotal / contentLength) * 100) / 2)
+                contentJobItem.cjiItemProgress = (contentJobItem.cjiItemTotal / 2) + (((bytesSentTotal / contentLength) * contentJobItem.cjiItemTotal) / 2)
                 progress.onProgress(contentJobItem)
             }
         }
