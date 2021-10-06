@@ -24,6 +24,7 @@ import com.ustadmobile.lib.db.entities.ContentJobItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import org.kodein.di.direct
@@ -68,9 +69,10 @@ class ContentJobRunnerWorker(
              liveData = RateLimitedLiveData(db, listOf("ContentJobItem"), 1000) {
                  db.contentJobItemDao.findByJobId(jobId)
              }
-             GlobalScope.launch(Dispatchers.Main) {
+             withContext(Dispatchers.Main) {
                  jobObserver?.let { liveData.observeForever(it) }
              }
+             
              jobObserver = DoorObserver {
                  notification.setProgress(100, it?.cjiItemProgress?.toInt() ?: 0, false)
                  if (it?.cjiItemProgress?.toInt() == 100) {
@@ -87,7 +89,7 @@ class ContentJobRunnerWorker(
 
         val jobResult = ContentJobRunner(jobId, endpoint, di).runJob().toWorkerResult()
 
-        GlobalScope.launch(Dispatchers.Main) {
+        withContext(Dispatchers.Main) {
             jobObserver?.let { liveData?.removeObserver(it) }
         }
 
