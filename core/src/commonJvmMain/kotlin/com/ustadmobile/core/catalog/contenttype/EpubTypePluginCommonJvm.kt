@@ -117,10 +117,13 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
             val container = withContext(Dispatchers.Default) {
 
                 val uri = DoorUri.parse(jobUri)
+
+                val contentNeedUpload = !uri.isRemote()
+                val progressSize = if(contentNeedUpload) 2 else 1
+
                 val localUri = process.getLocalUri(uri, context, di)
                 val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                         ?: throw IllegalArgumentException("missing tracker url")
-                val contentNeedUpload = !uri.isRemote()
 
                 val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid) ?:
                     Container().apply {
@@ -152,7 +155,6 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
 
                 val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
                 uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient,  torrentFileBytes, endpoint)
-
 
                 val containerWithSize = repo.containerDao.findByUid(container.containerUid) ?: container
 
