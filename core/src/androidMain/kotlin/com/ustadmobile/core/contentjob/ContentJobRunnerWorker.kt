@@ -87,7 +87,10 @@ class ContentJobRunnerWorker(
 
         val jobResult = ContentJobRunner(jobId, endpoint, di).runJob().toWorkerResult()
 
-        jobObserver?.let { liveData?.removeObserver(it) }
+        GlobalScope.launch(Dispatchers.Main) {
+            jobObserver?.let { liveData?.removeObserver(it) }
+        }
+
 
         return jobResult
     }

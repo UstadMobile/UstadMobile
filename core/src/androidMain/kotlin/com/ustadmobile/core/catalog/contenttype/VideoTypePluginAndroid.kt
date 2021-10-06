@@ -71,11 +71,12 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
             val uri = contentJobItem.sourceUri ?: throw IllegalStateException("missing uri")
             val videoUri = DoorUri.parse(uri)
+            val contentNeedUpload = !videoUri.isRemote()
             val localUri = process.getLocalUri(videoUri, context, di)
             val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                     ?: throw IllegalArgumentException("missing tracker url")
-            val contentNeedUpload = !videoUri.isRemote()
 
+            val progressSize = if(contentNeedUpload) 2 else 1
 
             val videoTempDir = makeTempDir(prefix = "tmp")
             val newVideo = File(videoTempDir,
@@ -84,6 +85,7 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
                     MapSerializer(String.serializer(), String.serializer()),
                     jobItem.contentJob?.params ?: "")
             val compressVideo: Boolean = params["compress"]?.toBoolean() ?: false
+
 
             Napier.d(tag = VIDEO_ANDROID, message = "conversion Params compress video is $compressVideo")
 
@@ -132,13 +134,13 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
                     override fun onProgress(id: String, progress: Float) {
                         Napier.d(tag = VIDEO_ANDROID, message = "progress at value ${progress * 100}")
-                        contentJobItem.cjiItemProgress = (progress * 100).toLong()
+                        contentJobItem.cjiItemProgress = (progress * 100).toLong() / progressSize
                         jobProgress.onProgress(contentJobItem)
                     }
 
                     override fun onCompleted(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
                         Napier.d(tag = VIDEO_ANDROID, message = "completed transform")
-                        contentJobItem.cjiItemProgress = 100L
+                        contentJobItem.cjiItemProgress = 100L / progressSize
                         jobProgress.onProgress(contentJobItem)
                         videoCompleted.complete(true)
                     }
@@ -210,7 +212,6 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
 
             val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
             uploadContentIfNeeded(contentNeedUpload, contentJobItem, jobProgress, httpClient,  torrentFileBytes, endpoint)
-
 
             repo.containerDao.findByUid(container.containerUid) ?: container
         }

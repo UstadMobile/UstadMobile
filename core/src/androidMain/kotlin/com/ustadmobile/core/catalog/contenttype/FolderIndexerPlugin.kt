@@ -86,7 +86,7 @@ class FolderIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                 // let's query the files
                 cursor = (context as Context).contentResolver.query(startingUri, arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID),
                         null, null, null)
-                if (cursor != null && cursor.moveToFirst()) {
+                if (cursor?.moveToFirst() == true) {
                     do {
                         // build the uri for the file
                         val uriFile: Uri = DocumentsContract.buildDocumentUriUsingTree(startingUri, cursor.getString(0))
@@ -95,12 +95,15 @@ class FolderIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                     } while (cursor.moveToNext())
                 }
             } catch (e: Exception) {
-                // TODO: handle error
+                e.printStackTrace()
             } finally {
                 cursor?.close()
             }
 
-            uriList.forEach { fileUri ->
+            contentJobItem.cjiItemTotal = uriList.size.toLong()
+            progress.onProgress(contentJobItem)
+
+            uriList.forEachIndexed { index, fileUri ->
 
                 val fileDocument = DocumentFile.fromSingleUri(context as Context, fileUri)
 
@@ -129,7 +132,7 @@ class FolderIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                         ContentJobItem().apply {
                             cjiJobUid = contentJobItem.cjiJobUid
                             sourceUri = fileDocument?.uri.toString()
-                            cjiItemTotal = sourceUri?.let { source -> DoorUri.parse(source).getSize(context, di)  } ?: 0L
+                            cjiItemTotal = fileDocument?.length() ?: -1L
                             cjiContentEntryUid = 0
                             cjiIsLeaf = true
                             cjiPluginId = metadataResult.pluginId
@@ -143,8 +146,15 @@ class FolderIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                         println("no metadata found for file ${fileDocument?.name}")
                     }
                 }
+
+                contentJobItem.cjiItemProgress = ((index.toFloat()/uriList.size) * 100).toLong()
+                progress.onProgress(contentJobItem)
             }
         }
+
+        contentJobItem.cjiItemProgress = 100
+        progress.onProgress(contentJobItem)
+
         return ProcessResult(JobStatus.COMPLETE)
     }
 

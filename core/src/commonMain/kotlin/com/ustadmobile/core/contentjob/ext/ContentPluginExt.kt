@@ -16,7 +16,9 @@ import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
@@ -40,7 +42,7 @@ suspend fun ContentPlugin.uploadContentIfNeeded(contentNeedUpload: Boolean,
                         })
             })
             onUpload { bytesSentTotal, contentLength ->
-                contentJobItem.cjiItemProgress = (bytesSentTotal / contentLength) * 100
+                contentJobItem.cjiItemProgress = 50 + (((bytesSentTotal / contentLength) * 100) / 2)
                 progress.onProgress(contentJobItem)
             }
         }
