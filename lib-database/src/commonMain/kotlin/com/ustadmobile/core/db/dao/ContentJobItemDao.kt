@@ -6,13 +6,10 @@ import androidx.room.Query
 import androidx.room.Transaction
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.ConnectivityStatus
-import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ContentJobItem.Companion.ACCEPT_METERED
 import com.ustadmobile.lib.db.entities.ContentJobItem.Companion.ACCEPT_NONE
 import com.ustadmobile.lib.db.entities.ContentJobItem.Companion.ACCEPT_UNMETERED
-import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
-import com.ustadmobile.lib.db.entities.ContentJobItemProgressUpdate
 
 @Dao
 abstract class ContentJobItemDao {
@@ -72,12 +69,41 @@ abstract class ContentJobItemDao {
     abstract fun findByJobId(jobUid: Long): ContentJobItem?
 
     @Query("""
+        SELECT ContentJobItem.*
+          FROM ContentJobItem
+         WHERE cjiContentEntryUid = :contentEntryUid
+         LIMIT 1
+    """)
+    abstract fun findLiveDataByContentEntryUid(contentEntryUid: Long): DoorLiveData<ContentJobItem?>
+
+    @Query("""
         UPDATE ContentJobItem
            SET cjiItemProgress = :cjiProgress,
                cjiItemTotal = :cjiTotal
          WHERE cjiUid = :cjiUid     
     """)
     abstract suspend fun updateItemProgress(cjiUid: Long, cjiProgress: Long, cjiTotal: Long)
+
+
+    @Query("""
+        UPDATE ContentJobItem
+           SET cjiConnectivityAcceptable = :connectivityStatus
+         WHERE cjiJobUid = :contentJobId     
+    """)
+    abstract suspend fun updateConnectivityStatus(contentJobId: Long, connectivityStatus: Int)
+
+
+
+    @Query("""SELECT (SELECT COUNT(*) 
+                              FROM ContentJobItem 
+                             WHERE cjiJobUid = :contentJobId) AS numEntries, 
+                           (SELECT cjiRecursiveTotal 
+                              FROM ContentJobItem 
+                             WHERE cjiJobUid = :contentJobId 
+                               AND cjiParentCjiUid = 0) AS totalSize""")
+    abstract suspend fun getDownloadSizeInfo(contentJobId: Long): DownloadJobSizeInfo?
+
+
 
     @Transaction
     open suspend fun commitProgressUpdates(updates: List<ContentJobItemProgressUpdate>) {

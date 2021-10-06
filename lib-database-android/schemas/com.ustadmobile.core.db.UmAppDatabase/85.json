@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 85,
-    "identityHash": "6ff3a1072fc39de703b592d1f9050aba",
+    "identityHash": "ad60b0c3760fee4d5bfcf6e69350aa4c",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -6107,7 +6107,7 @@
       },
       {
         "tableName": "ContentJob",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `toUri` TEXT, `cjProgress` INTEGER NOT NULL, `cjTotal` INTEGER NOT NULL, `params` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `toUri` TEXT, `cjProgress` INTEGER NOT NULL, `cjTotal` INTEGER NOT NULL, `cjNotificationTitle` TEXT, `params` TEXT)",
         "fields": [
           {
             "fieldPath": "cjUid",
@@ -6132,6 +6132,12 @@
             "columnName": "cjTotal",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "cjNotificationTitle",
+            "columnName": "cjNotificationTitle",
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "params",
@@ -10701,7 +10707,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6ff3a1072fc39de703b592d1f9050aba')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ad60b0c3760fee4d5bfcf6e69350aa4c')"
     ]
   }
 }

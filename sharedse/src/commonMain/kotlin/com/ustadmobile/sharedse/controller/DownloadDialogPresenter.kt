@@ -2,6 +2,7 @@ package com.ustadmobile.sharedse.controller
 
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
@@ -10,23 +11,15 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
+import com.ustadmobile.core.io.ext.getSize
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.ext.isStatusCompletedSuccessfully
-import com.ustadmobile.core.util.ext.isStatusPaused
-import com.ustadmobile.core.util.ext.isStatusPausedOrQueuedOrDownloading
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorObserver
-import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.DownloadJob
-import com.ustadmobile.lib.db.entities.DownloadJobItem
-import com.ustadmobile.lib.db.entities.DownloadJobSizeInfo
-import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.core.networkmanager.DeletePreparationRequester
-import com.ustadmobile.sharedse.network.DownloadPreparationRequester
+import com.ustadmobile.core.util.ext.isStatusCompletedSuccessfully
+import com.ustadmobile.core.util.ext.isStatusPausedOrQueuedOrDownloading
+import com.ustadmobile.door.*
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlin.jvm.Volatile
@@ -41,7 +34,7 @@ class DownloadDialogPresenter(
     view: DownloadDialogView,
     di: DI,
     private val lifecycleOwner: DoorLifecycleOwner
-) : UstadBaseController<DownloadDialogView>(context, arguments, view, di), DoorObserver<DownloadJob?> {
+) : UstadBaseController<DownloadDialogView>(context, arguments, view, di), DoorObserver<ContentJobItem?> {
 
     private var deleteFileOptions = false
 
@@ -51,7 +44,7 @@ class DownloadDialogPresenter(
      * Testing purpose
      */
     @Volatile
-    var currentJobId: Int = -1
+    var currentJobId: Long = -1
         private set
 
     private var statusMessage: String? = null
@@ -62,15 +55,13 @@ class DownloadDialogPresenter(
 
     private val wifiOnlyChecked = atomic(0)
 
-    private lateinit var downloadJobItemLiveData : DoorLiveData<DownloadJobItem?>
+    private lateinit var contentJobItemLiveData : DoorLiveData<ContentJobItem?>
 
     //Used to avoid issues with handleStorageOptionSelection being called before the
     // downloadJobItemLiveData is ready.
-    private val downloadJobCompletable = CompletableDeferred<Boolean>()
+    private val contentJobCompletable = CompletableDeferred<Boolean>()
 
-    private var currentDownloadJobItem: DownloadJobItem? = null
-
-    private var downloadJobLiveData: DoorLiveData<DownloadJob?>? = null
+    private var currentContentJobItem: ContentJobItem? = null
 
     private var selectedStorageDir: UMStorageDir? = null
 
@@ -78,7 +69,7 @@ class DownloadDialogPresenter(
 
     private val impl: UstadMobileSystemImpl by instance()
 
-    private val containerDownloadManager: ContainerDownloadManager by on(accountManager.activeAccount).instance()
+    private val contentJobManager: ContentJobManager by di.instance()
 
     private val appDatabase: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
 
@@ -87,21 +78,19 @@ class DownloadDialogPresenter(
     /**
      * If this is private, Kotlinx serialization will refuse to compile compileKotlinMetadata
      */
-    val downloadJobItemObserver = object: DoorObserver<DownloadJobItem?> {
-        override fun onChanged(t: DownloadJobItem?) {
-            currentDownloadJobItem = t
-            val newDownloadJobIdVal = t?.djiDjUid ?: 0
-            if(newDownloadJobIdVal != currentJobId) {
-                currentJobId = newDownloadJobIdVal
-                GlobalScope.launch(doorMainDispatcher()) {
-                    val downloadJobLiveDataVal = containerDownloadManager.getDownloadJob(newDownloadJobIdVal)
-                    downloadJobLiveData = downloadJobLiveDataVal
-                    downloadJobLiveDataVal.observe(lifecycleOwner,
-                            this@DownloadDialogPresenter)
-                }
-            }
+/*    val downloadJobItemObserver = DoorObserver<ContentJobItem?> { t ->
+        currentContentJobItem = t
+        val newDownloadJobIdVal = t?.cjiJobUid ?: 0
+        if(newDownloadJobIdVal != currentJobId) {
+            currentJobId = newDownloadJobIdVal
+           *//* GlobalScope.launch(doorMainDispatcher()) {
+                val downloadJobLiveDataVal = appDatabase.contentJobDao.findLiveDataByUid(newDownloadJobIdVal)
+                contentJobLiveData = downloadJobLiveDataVal
+                downloadJobLiveDataVal.observe(lifecycleOwner,
+                        this@DownloadDialogPresenter)
+            }*//*
         }
-    }
+    }*/
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -109,22 +98,31 @@ class DownloadDialogPresenter(
         contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0L
         Napier.i("Starting download presenter for $contentEntryUid")
         view.setWifiOnlyOptionVisible(false)
-        presenterScope.launch {
-            downloadJobItemLiveData = containerDownloadManager.getDownloadJobItemByContentEntryUid(
+        GlobalScope.launch {
+            contentJobItemLiveData = appDatabase.contentJobItemDao.findLiveDataByContentEntryUid(
                     contentEntryUid)
-            downloadJobCompletable.complete(true)
-            val wifiOnly: Boolean = !appDatabase.downloadJobDao.getMeteredNetworkAllowed(currentJobId)
-            view.setDownloadOverWifiOnly(wifiOnly)
-            val checkedVal = if(wifiOnly) 1 else 0
+            contentJobCompletable.complete(true)
+            // TODO check downloadJobItem if status = wifiOnly
+          //  val wifiOnly: Boolean = !appDatabase.downloadJobDao.getMeteredNetworkAllowed(currentJobId)
+            view.setDownloadOverWifiOnly(true)
+            val checkedVal = if(true) 1 else 0
             wifiOnlyChecked.value = checkedVal
 
-            downloadJobItemLiveData.observe(lifecycleOwner, downloadJobItemObserver)
+            withContext(Dispatchers.Main){
+                contentJobItemLiveData.observe(lifecycleOwner, this@DownloadDialogPresenter)
+            }
 
-            updateWarningMessage(downloadJobItemLiveData.getValue())
+            updateWarningMessage(contentJobItemLiveData.getValue())
         }
     }
 
-    override fun onChanged(t: DownloadJob?) {
+    override fun onChanged(t: ContentJobItem?) {
+        currentContentJobItem = t
+        val newDownloadJobIdVal = t?.cjiJobUid ?: 0
+        if(newDownloadJobIdVal != currentJobId) {
+            currentJobId = newDownloadJobIdVal
+        }
+
         when {
             t.isStatusCompletedSuccessfully() -> {
                 deleteFileOptions = true
@@ -169,12 +167,12 @@ class DownloadDialogPresenter(
 
         val currentJobSizeTotals = jobSizeTotals.value
         if(!t.isStatusPausedOrQueuedOrDownloading() && currentJobSizeTotals == null
-                && !jobSizeLoading.compareAndSet(true, true)) {
+                && !jobSizeLoading.compareAndSet(expect = true, update = true)) {
             view.setBottomPositiveButtonEnabled(false)
-            presenterScope.launch {
+            GlobalScope.launch {
                 try {
                     val sizeTotals = if(t != null) {
-                        appDatabase.downloadJobDao.getDownloadSizeInfo(t.djUid)
+                        appDatabase.contentJobItemDao.getDownloadSizeInfo(t.cjiJobUid)
                     }else {
                         appDatabaseRepo.contentEntryDao.getRecursiveDownloadTotals(contentEntryUid)
                     }
@@ -202,7 +200,7 @@ class DownloadDialogPresenter(
         val currentStatuMessage = statusMessage
         if(downloadTotals != null && currentStatuMessage != null){
             view.runOnUiThread(Runnable {
-                updateWarningMessage(downloadJobItemLiveData.getValue())
+                updateWarningMessage(contentJobItemLiveData.getValue())
                 view.setCalculatingViewVisible(false)
                 view.setStatusText(currentStatuMessage,
                     downloadTotals.numEntries, UMFileUtil.formatFileSize(downloadTotals.totalSize))
@@ -210,10 +208,10 @@ class DownloadDialogPresenter(
         }
     }
 
-    private fun updateWarningMessage(currentDownloadJobItem: DownloadJobItem?) {
+    private fun updateWarningMessage(currentDownloadJobItem: ContentJobItem?) {
         val jobSizeTotalsVal = jobSizeTotals.value
         val selectedStorageDirVal = selectedStorageDir
-        val currentStatus = currentDownloadJobItem?.djiStatus ?: 0
+        val currentStatus = currentDownloadJobItem?.cjiStatus ?: 0
         if(currentStatus <= JobStatus.PAUSED && jobSizeTotalsVal != null
                 && selectedStorageDirVal != null) {
             if(jobSizeTotalsVal.totalSize > selectedStorageDirVal.usableSpace) {
@@ -230,16 +228,45 @@ class DownloadDialogPresenter(
     }
 
     private suspend fun createDownloadJobAndRequestPreparation() : Boolean{
-        val newDownloadJob = DownloadJob(contentEntryUid, getSystemTimeInMillis())
+
+        val entry = appDatabase.contentEntryDao.findByUid(contentEntryUid)
+        val container = appDatabase.containerDao
+                .getMostRecentDownloadedContainerForContentEntryAsync(contentEntryUid)
+        val isWifiOnlyChecked = wifiOnlyChecked.value
+        val job = ContentJob().apply {
+            toUri = selectedStorageDir?.dirURI
+            cjNotificationTitle = impl.getString(MessageID.downloading, context)
+                    .replace("%1\$s",entry?.title ?: "")
+            cjUid = appDatabase.contentJobDao.insertAsync(this)
+        }
+        currentJobId = job.cjUid
+        ContentJobItem().apply {
+            cjiJobUid = job.cjUid
+            sourceUri = "" // TODO entry ?
+            cjiItemTotal = container?.fileSize ?: 0
+            cjiPluginId = 10 // TODO containerTorrentDownload plugin ref in core commonMain
+            cjiContentEntryUid = contentEntryUid
+            cjiContainerUid = container?.containerUid ?: 0
+            cjiIsLeaf = entry?.leaf ?: false
+            cjiConnectivityAcceptable = if(isWifiOnlyChecked == 0) ContentJobItem.ACCEPT_METERED else ContentJobItem.ACCEPT_ANY
+            cjiStatus = JobStatus.QUEUED
+            cjiUid = appDatabase.contentJobItemDao.insertJobItem(this)
+        }
+
+        contentJobManager.enqueueContentJob(accountManager.activeEndpoint, job.cjUid)
+
+        return currentJobId != 0L
+
+        /*val newDownloadJob = DownloadJob(contentEntryUid, getSystemTimeInMillis())
         newDownloadJob.djDestinationDir = selectedStorageDir?.dirURI
         newDownloadJob.djStatus = JobStatus.NEEDS_PREPARED
-        val isWifiOnlyChecked = wifiOnlyChecked.value
+
         newDownloadJob.meteredNetworkAllowed = isWifiOnlyChecked == 0
         containerDownloadManager.createDownloadJob(newDownloadJob)
         currentJobId = newDownloadJob.djUid
         val downloadPrepRequester: DownloadPreparationRequester by on(accountManager.activeAccount).instance()
         downloadPrepRequester.requestPreparation(currentJobId)
-        return currentJobId != 0
+        return currentJobId != 0*/
     }
 
 
@@ -247,13 +274,14 @@ class DownloadDialogPresenter(
      * The positive button can be either the download button or the download button
      */
     fun handleClickPositive() {
-        val currentDownloadJobItemVal = currentDownloadJobItem
+        val currentDownloadJobItemVal = currentContentJobItem
         when {
-            currentDownloadJobItem.isStatusCompletedSuccessfully() && currentDownloadJobItemVal != null ->
-                createDeleteJobAndRequestPreparation(currentDownloadJobItemVal.djiUid)
+            currentContentJobItem?.cjiStatus == JobStatus.COMPLETE && currentDownloadJobItemVal != null ->
+                createDeleteJobAndRequestPreparation(currentDownloadJobItemVal.cjiUid)
 
-            currentDownloadJobItem.isStatusPaused() && currentDownloadJobItemVal != null -> GlobalScope.launch {
-                containerDownloadManager.enqueue(currentDownloadJobItemVal.djiDjUid)
+            currentContentJobItem?.cjiStatus == JobStatus.PAUSED && currentDownloadJobItemVal != null -> GlobalScope.launch {
+                // TODO queue it
+                //containerDownloadManager.enqueue(currentDownloadJobItemVal.cjiJobUid)
             }
 
             else -> GlobalScope.launch {
@@ -262,9 +290,10 @@ class DownloadDialogPresenter(
         }
     }
 
-    private fun createDeleteJobAndRequestPreparation(downloadJobItemUid: Int) {
-        val deleteRequester: DeletePreparationRequester by on(accountManager.activeAccount).instance()
-        deleteRequester.requestDelete(downloadJobItemUid)
+    private fun createDeleteJobAndRequestPreparation(downloadJobItemUid: Long) {
+        // TODO create delete job
+     /*   val deleteRequester: DeletePreparationRequester by on(accountManager.activeAccount).instance()
+        deleteRequester.requestDelete(downloadJobItemUid)*/
     }
 
     /**
@@ -280,20 +309,23 @@ class DownloadDialogPresenter(
 
 
     fun handleClickStackedButton(idClicked: Int) {
-        val currentDownloadJobItemVal = currentDownloadJobItem
+        val currentDownloadJobItemVal = currentContentJobItem
         if(currentDownloadJobItemVal != null) {
             when (idClicked) {
                 STACKED_BUTTON_PAUSE -> GlobalScope.launch {
-                    containerDownloadManager.pause(currentDownloadJobItemVal.djiDjUid)
+                    // TODO pause download
+                    //containerDownloadManager.pause(currentDownloadJobItemVal.djiDjUid)
                 }
 
                 //If the download is already running, this will have no effect
                 STACKED_BUTTON_CONTINUE -> GlobalScope.launch {
-                    containerDownloadManager.enqueue(currentDownloadJobItemVal.djiDjUid)
+                    // TODO back to running download
+                    //containerDownloadManager.enqueue(currentDownloadJobItemVal.djiDjUid)
                 }
 
                 STACKED_BUTTON_CANCEL -> GlobalScope.launch {
-                    containerDownloadManager.cancel(currentDownloadJobItemVal.djiDjUid)
+                    // TODO cancel download
+                    //containerDownloadManager.cancel(currentDownloadJobItemVal.djiDjUid)
                 }
             }
 
@@ -308,9 +340,11 @@ class DownloadDialogPresenter(
     fun handleClickWiFiOnlyOption(wifiOnly: Boolean) {
         val wifiOnlyCheckedVal = if(wifiOnly) 1 else 0
         wifiOnlyChecked.value = wifiOnlyCheckedVal
-        if(currentJobId != 0) {
+        if(currentJobId != 0L) {
             GlobalScope.launch {
-                containerDownloadManager.setMeteredDataAllowed(currentJobId, !wifiOnly)
+                // TODO handle wifi status change
+                appDatabase.contentJobItemDao.updateConnectivityStatus(currentJobId, 0)
+                //containerDownloadManager.setMeteredDataAllowed(currentJobId, !wifiOnly)
             }
         }
     }
@@ -318,17 +352,19 @@ class DownloadDialogPresenter(
     fun handleStorageOptionSelection(selectedDir: UMStorageDir) {
         selectedStorageDir = selectedDir
         GlobalScope.launch(doorMainDispatcher()) {
-            downloadJobCompletable.await()
-            updateWarningMessage(downloadJobItemLiveData.getValue())
-            val downloadJob = containerDownloadManager.getDownloadJob(currentJobId).getValue()
-            if(downloadJob != null){
-                containerDownloadManager.handleDownloadJobUpdated(downloadJob.also {
+            contentJobCompletable.await()
+            updateWarningMessage(contentJobItemLiveData.getValue())
+            val contentJob = appDatabase.contentJobDao.findByUid(currentJobId)
+            if(contentJob != null){
+                // TODO handle job updated save location
+                /*containerDownloadManager.handleDownloadJobUpdated(downloadJob.also {
                     it.djDestinationDir = selectedDir.dirURI
-                })
+                })*/
             }
 
+            /*
             appDatabase.downloadJobDao.updateDestinationDirectoryAsync(currentJobId,
-                    selectedDir.dirURI)
+                    selectedDir.dirURI)*/
         }
     }
 
