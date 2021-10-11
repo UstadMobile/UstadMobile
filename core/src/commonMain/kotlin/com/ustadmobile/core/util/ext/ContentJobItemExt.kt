@@ -13,12 +13,12 @@ private fun Int.isStatusCompleted() = this >= JobStatus.COMPLETE_MIN
 
 private fun Int.isStatusPausedOrQueuedOrDownloading() = this >= JobStatus.PAUSED && this < JobStatus.COMPLETE_MIN
 
-fun ContentJobItem?.isStatusQueuedOrDownloading() = this?.cjiStatus?.isStatusQueuedOrDownloading() ?: false
+fun ContentJobItem?.isStatusQueuedOrDownloading() = this?.cjiRecursiveStatus?.isStatusQueuedOrDownloading() ?: false
 
-fun ContentJobItem?.isStatusPaused() = this?.cjiStatus?.isStatusPaused() ?: false
+fun ContentJobItem?.isStatusPaused() = this?.cjiRecursiveStatus?.isStatusPaused() ?: false
 
-fun ContentJobItem?.isStatusCompletedSuccessfully() = this?.cjiStatus?.isStatusCompletedSuccessfully() ?: false
+fun ContentJobItem?.isStatusCompletedSuccessfully() = this?.cjiRecursiveStatus?.isStatusCompletedSuccessfully() ?: false
 
-fun ContentJobItem?.isStatusCompleted() = this?.cjiStatus?.isStatusCompleted() ?: false
+fun ContentJobItem?.isStatusCompleted() = this?.cjiRecursiveStatus?.isStatusCompleted() ?: false
 
-fun ContentJobItem?.isStatusPausedOrQueuedOrDownloading() = this?.cjiStatus?.isStatusPausedOrQueuedOrDownloading() ?: false
+fun ContentJobItem?.isStatusPausedOrQueuedOrDownloading() = this?.cjiRecursiveStatus?.isStatusPausedOrQueuedOrDownloading() ?: false

@@ -109,9 +109,9 @@ class DownloadDialogPresenter(
             val wifiCheckValue = job?.cjiConnectivityAcceptable ?: ContentJobItem.ACCEPT_METERED
             wifiOnlyChecked.value = wifiCheckValue
 
-            withContext(Dispatchers.Main){
-                contentJobItemLiveData.observe(lifecycleOwner, this@DownloadDialogPresenter)
-            }
+            view.runOnUiThread(Runnable {
+                    contentJobItemLiveData.observe(lifecycleOwner, this@DownloadDialogPresenter)
+            })
 
             updateWarningMessage(job)
         }
@@ -257,17 +257,6 @@ class DownloadDialogPresenter(
         contentJobManager.enqueueContentJob(accountManager.activeEndpoint, job.cjUid)
 
         return currentJobId != 0L
-
-        /*val newDownloadJob = DownloadJob(contentEntryUid, getSystemTimeInMillis())
-        newDownloadJob.djDestinationDir = selectedStorageDir?.dirURI
-        newDownloadJob.djStatus = JobStatus.NEEDS_PREPARED
-
-        newDownloadJob.meteredNetworkAllowed = isWifiOnlyChecked == 0
-        containerDownloadManager.createDownloadJob(newDownloadJob)
-        currentJobId = newDownloadJob.djUid
-        val downloadPrepRequester: DownloadPreparationRequester by on(accountManager.activeAccount).instance()
-        downloadPrepRequester.requestPreparation(currentJobId)
-        return currentJobId != 0*/
     }
 
 

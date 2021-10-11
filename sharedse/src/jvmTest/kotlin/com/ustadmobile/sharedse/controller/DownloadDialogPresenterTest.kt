@@ -1,4 +1,3 @@
-/*
 package com.ustadmobile.sharedse.controller
 
 
@@ -112,17 +111,15 @@ class DownloadDialogPresenterTest {
                     .getRecursiveDownloadTotals(eq(contentEntrySet.rootEntry.contentEntryUid))
         }
 
-
         whenever(repo.contentEntryDao).thenReturn(contentEntrySpy)
 
         runBlocking {
-          */
-/*  val downloadJobItemLiveData = DoorMutableLiveData<ContentJobItem?>(null)
-            val downloadJobLiveData = DoorMutableLiveData<ContentJob?>(null)
-            whenever(contentJobManager.getDownloadJobItemByContentEntryUid(any()))
-                    .thenReturn(downloadJobItemLiveData)
-            whenever(contentJobManager.getDownloadJob(any())).thenReturn(downloadJobLiveData)*//*
+            val contentJobLiveData = DoorMutableLiveData<ContentJobItem?>(null)
+            val downloadJobDaoSpy = spy(db.contentJobItemDao) {
+                onBlocking { findLiveDataByContentEntryUid(any()) }.doReturn(contentJobLiveData)
+            }
 
+            whenever(db.contentJobItemDao).thenReturn(downloadJobDaoSpy)
 
             presenter = DownloadDialogPresenter(context,
                     mapOf(ARG_CONTENT_ENTRY_UID to contentEntrySet.rootEntry.contentEntryUid.toString()),
@@ -138,9 +135,9 @@ class DownloadDialogPresenterTest {
                     eq(2), eq(UMFileUtil.formatFileSize(1000)))
             verify(mockedDialogView, timeout(5000).atLeastOnce()).setWarningTextVisible(false)
 
-            assertNull("No download job should be created if the user does not select to download",
-                    db.contentJobItemDao.findLiveDataByContentEntryUid(
-                            contentEntrySet.rootEntry.contentEntryUid))
+            val contentJobItem = db.contentJobItemDao.findLiveDataByContentEntryUid(
+            contentEntrySet.rootEntry.contentEntryUid).getValue()
+            assertNull("No download job should be created if the user does not select to download", contentJobItem)
         }
 
 
@@ -159,12 +156,19 @@ class DownloadDialogPresenterTest {
         whenever(repo.contentEntryDao).thenReturn(contentEntrySpy)
 
         runBlocking {
-           */
-/* val downloadJobItemLiveData = DoorMutableLiveData<DownloadJobItem?>(null)
+
+            val contentJobLiveData = DoorMutableLiveData<ContentJobItem?>(null)
+            val downloadJobDaoSpy = spy(db.contentJobItemDao) {
+                onBlocking { findLiveDataByContentEntryUid(any()) }.doReturn(contentJobLiveData)
+            }
+
+            whenever(db.contentJobItemDao).thenReturn(downloadJobDaoSpy)
+
+            /*val downloadJobItemLiveData = DoorMutableLiveData<DownloadJobItem?>(null)
             val downloadJobLiveData = DoorMutableLiveData<DownloadJob?>(null)
             whenever(contentJobManager.getDownloadJobItemByContentEntryUid(any()))
                     .thenReturn(downloadJobItemLiveData)
-            whenever(contentJobManager.getDownloadJob(any())).thenReturn(downloadJobLiveData)*//*
+            whenever(contentJobManager.getDownloadJob(any())).thenReturn(downloadJobLiveData)*/
 
 
             storageDirs = listOf(UMStorageDir("/", name="Phone", isAvailable = true,
@@ -199,7 +203,7 @@ class DownloadDialogPresenterTest {
                 cjiItemTotal = 1000L
                 cjiContentEntryUid = 1L
                 cjiContainerUid = 1L
-                cjiStatus = djStatus
+                cjiRecursiveStatus = djStatus
             }
 
             val contentJobLiveData = DoorMutableLiveData<ContentJobItem?>(contentJobItem)
@@ -282,13 +286,12 @@ class DownloadDialogPresenterTest {
         val viewReadyLatch = CountDownLatch(1)
 
         runBlocking {
-          */
-/*  whenever(contentJobManager.getDownloadJobItemByContentEntryUid(any()))
+          /*  whenever(contentJobManager.getDownloadJobItemByContentEntryUid(any()))
                     .thenReturn(DoorMutableLiveData(null))
             whenever(contentJobManager.getDownloadJobItemByJobItemUid(any()))
                     .thenReturn(DoorMutableLiveData(null))
             whenever(contentJobManager.getDownloadJob(any()))
-                    .thenReturn(DoorMutableLiveData(null))*//*
+                    .thenReturn(DoorMutableLiveData(null))*/
 
         }
 
@@ -315,7 +318,7 @@ class DownloadDialogPresenterTest {
             }
             val contentJob = db.contentJobItemDao.findByJobId(this.firstValue)!!
             assertEquals("Download Job created with status = NEEDS_PREPARED",
-                    JobStatus.QUEUED, contentJob.cjiStatus)
+                    JobStatus.QUEUED, contentJob.cjiRecursiveStatus)
             assertEquals("Download job root content entry uid is the same as presenter arg",
                     contentEntrySet.rootEntry.contentEntryUid, contentJob.cjiContentEntryUid)
             if(meteredNetworkAllowed){
@@ -344,22 +347,19 @@ class DownloadDialogPresenterTest {
     @Test
     fun givenDownloadRunning_whenCreated_shouldShowStackedOptions() {
         runBlocking{
-            val existingDownloadJob = DownloadJob(1L, System.currentTimeMillis()).also {
-                it.djStatus = JobStatus.RUNNING
-            }
-            val existingDownloadJobLiveData = DoorMutableLiveData<DownloadJob?>(existingDownloadJob)
-            val existingDownloadJobItem = DownloadJobItem(existingDownloadJob, 1L, 1L,
-                    1000L).also {
-                it.djiStatus = JobStatus.RUNNING
-            }
-            val existingDownloadJobItemLiveData = DoorMutableLiveData<DownloadJobItem?>(existingDownloadJobItem)
 
-          */
-/*  whenever(contentJobManager.getDownloadJob(existingDownloadJob.djUid))
-                    .thenReturn(existingDownloadJobLiveData)
-            whenever(contentJobManager.getDownloadJobItemByContentEntryUid(existingDownloadJobItem.djiContentEntryUid))
-                    .thenReturn(existingDownloadJobItemLiveData)*//*
+            val contentJob = ContentJob(cjUid = 1)
+            val contentJobItem = ContentJobItem().apply {
+                cjiRecursiveStatus = JobStatus.RUNNING
+                cjiJobUid = 1
+                cjiContentEntryUid = 1
+            }
 
+            val existingDownloadJobLiveData = DoorMutableLiveData<ContentJobItem?>(contentJobItem)
+            val downloadJobDaoSpy = spy(db.contentJobItemDao) {
+                onBlocking { findLiveDataByContentEntryUid(any()) }.doReturn(existingDownloadJobLiveData)
+            }
+            whenever(db.contentJobItemDao).thenReturn(downloadJobDaoSpy)
 
             val args = mapOf(ARG_CONTENT_ENTRY_UID to "1")
             presenter = DownloadDialogPresenter(context, args, mockedDialogView, di, mockLifecycle)
@@ -379,21 +379,18 @@ class DownloadDialogPresenterTest {
     @Throws(InterruptedException::class)
     fun givenDownloadRunning_whenClickPause_shouldCallPause() {
         runBlocking {
-            val existingDownloadJob = DownloadJob(1L, System.currentTimeMillis()).also {
-                it.djStatus = JobStatus.RUNNING
+            val contentJob = ContentJob(cjUid = 1)
+            val contentJobItem = ContentJobItem().apply {
+                cjiRecursiveStatus = JobStatus.RUNNING
+                cjiJobUid = 1
+                cjiContentEntryUid = 1
             }
-            val existingDownloadJobLiveData = DoorMutableLiveData<DownloadJob?>(existingDownloadJob)
-            val existingDownloadJobItem = DownloadJobItem(existingDownloadJob, 1L, 1L,
-                    1000L).also {
-                it.djiStatus = JobStatus.RUNNING
-            }
-            val existingDownloadJobItemLiveData = DoorMutableLiveData<DownloadJobItem?>(existingDownloadJobItem)
 
-         */
-/*   whenever(contentJobManager.getDownloadJob(existingDownloadJob.djUid))
-                    .thenReturn(existingDownloadJobLiveData)
-            whenever(contentJobManager.getDownloadJobItemByContentEntryUid(existingDownloadJobItem.djiContentEntryUid))
-                    .thenReturn(existingDownloadJobItemLiveData)*//*
+            val existingDownloadJobLiveData = DoorMutableLiveData<ContentJobItem?>(contentJobItem)
+            val downloadJobDaoSpy = spy(db.contentJobItemDao) {
+                onBlocking { findLiveDataByContentEntryUid(any()) }.doReturn(existingDownloadJobLiveData)
+            }
+            whenever(db.contentJobItemDao).thenReturn(downloadJobDaoSpy)
 
 
             presenter = DownloadDialogPresenter(context, mapOf(ARG_CONTENT_ENTRY_UID to "1"),
@@ -404,9 +401,7 @@ class DownloadDialogPresenterTest {
             verify(mockedDialogView, timeout(5000)).setStackOptionsVisible(true)
 
             presenter.handleClickStackedButton(DownloadDialogPresenter.STACKED_BUTTON_PAUSE)
-*/
-/*
-            verify(contentJobManager, timeout(5000)).pause(existingDownloadJob.djUid)*//*
+            //verify(contentJobManager, timeout(5000)).pause(existingDownloadJob.djUid)
 
         }
     }
@@ -414,22 +409,18 @@ class DownloadDialogPresenterTest {
     @Test
     fun givenDownloadRunning_whenClickCancel_shouldSetStatusToCancelling() {
         runBlocking {
-            val existingDownloadJob = DownloadJob(1L, System.currentTimeMillis()).also {
-                it.djStatus = JobStatus.RUNNING
+            val contentJob = ContentJob(cjUid = 1)
+            val contentJobItem = ContentJobItem().apply {
+                cjiRecursiveStatus = JobStatus.RUNNING
+                cjiJobUid = 1
+                cjiContentEntryUid = 1
             }
-            val existingDownloadJobLiveData = DoorMutableLiveData<DownloadJob?>(existingDownloadJob)
-            val existingDownloadJobItem = DownloadJobItem(existingDownloadJob, 1L, 1L,
-                    1000L).also {
-                it.djiStatus = JobStatus.RUNNING
+
+            val existingDownloadJobLiveData = DoorMutableLiveData<ContentJobItem?>(contentJobItem)
+            val downloadJobDaoSpy = spy(db.contentJobItemDao) {
+                onBlocking { findLiveDataByContentEntryUid(any()) }.doReturn(existingDownloadJobLiveData)
             }
-            val existingDownloadJobItemLiveData = DoorMutableLiveData<DownloadJobItem?>(existingDownloadJobItem)
-
-         */
-/*   whenever(contentJobManager.getDownloadJob(existingDownloadJob.djUid))
-                    .thenReturn(existingDownloadJobLiveData)
-            whenever(contentJobManager.getDownloadJobItemByContentEntryUid(existingDownloadJobItem.djiContentEntryUid))
-                    .thenReturn(existingDownloadJobItemLiveData)*//*
-
+            whenever(db.contentJobItemDao).thenReturn(downloadJobDaoSpy)
 
             presenter = DownloadDialogPresenter(context, mapOf(ARG_CONTENT_ENTRY_UID to "1"), mockedDialogView,
                     di, mockLifecycle)
@@ -439,10 +430,8 @@ class DownloadDialogPresenterTest {
             verify(mockedDialogView, timeout(5000)).setStackOptionsVisible(true)
 
             presenter.handleClickStackedButton(STACKED_BUTTON_CANCEL)
-*/
-/*
-            verify(contentJobManager, timeout(5000)).cancel(existingDownloadJob.djUid)*//*
+            //verify(contentJobManager, timeout(5000)).cancel(existingDownloadJob.djUid)
 
         }
     }
-}*/
+}
