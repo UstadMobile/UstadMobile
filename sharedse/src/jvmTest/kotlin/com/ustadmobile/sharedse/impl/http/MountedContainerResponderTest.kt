@@ -1,5 +1,6 @@
 package com.ustadmobile.sharedse.impl.http
 
+import com.ustadmobile.core.account.Endpoint
 import org.mockito.kotlin.mock
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
@@ -24,6 +25,8 @@ import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder.Compani
 import com.ustadmobile.sharedse.network.ContainerDownloadManagerImpl
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.sharedse.util.UstadTestRule
+import com.ustadmobile.sharedse.util.directActiveDbInstance
+import com.ustadmobile.sharedse.util.directActiveRepoInstance
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.HttpClient
@@ -36,10 +39,7 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.junit.*
 import org.junit.rules.TemporaryFolder
-import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.scoped
-import org.kodein.di.singleton
+import org.kodein.di.*
 import java.io.File
 import java.io.IOException
 import kotlin.random.Random
@@ -54,17 +54,9 @@ class MountedContainerResponderTest {
 
     private lateinit var db: UmAppDatabase
 
-    private lateinit var nodeIdAndAuth: NodeIdAndAuth
-
     private lateinit var repo: UmAppDatabase
 
     private lateinit var container: Container
-
-//    private lateinit var containerManager: ContainerManager
-
-    private lateinit var httpClient: HttpClient
-
-    private lateinit var okHttpClient: OkHttpClient
 
     @JvmField
     @Rule
@@ -74,29 +66,13 @@ class MountedContainerResponderTest {
     @Throws(IOException::class)
     fun setup() {
         containerTmpDir = temporaryFolder.newFolder("TestMountedContainerResponder-containerTmp")
-        nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
-            randomUuid().toString())
 
         val clientDi = DI {
             import(ustadTestRule.diModule)
         }
 
-        db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
-            .addSyncCallback(nodeIdAndAuth, false)
-            .build()
-            .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, false)
-        okHttpClient = OkHttpClient()
-        httpClient = HttpClient(OkHttp) {
-            install(JsonFeature)
-            install(HttpTimeout)
-            engine {
-                preconfigured = okHttpClient
-            }
-        }
-
-        repo = db.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
-            nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))
-        db.clearAllTables()
+        db = clientDi.directActiveDbInstance()
+        repo = clientDi.directActiveRepoInstance()
 
         container = Container()
         container.containerUid = repo.containerDao.insert(container)
@@ -117,12 +93,7 @@ class MountedContainerResponderTest {
         }
     }
 
-    @After
-    fun tearDown() {
-        httpClient.close()
-    }
-
-    //Test handling of file names when url encoding is required
+    //Test handling of file names when url encoding is requiredDownloadDi
     @Test
     fun givenFileNameWithSpaces_whenGetCalled_thenContentsShouldMatch() {
         val routerHttpd = RouterNanoHTTPD(0)
