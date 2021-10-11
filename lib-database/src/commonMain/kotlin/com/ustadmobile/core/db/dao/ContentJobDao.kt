@@ -23,9 +23,23 @@ abstract class ContentJobDao {
     @Query("""
         SELECT ContentJob.*
           FROM ContentJob
+         WHERE cjUid = :cjUid 
+    """)
+    abstract suspend fun findByUidAsync(cjUid: Long): ContentJob?
+
+    @Query("""
+        SELECT ContentJob.*
+          FROM ContentJob
          WHERE cjUid = :cjUid
     """)
     abstract fun findLiveDataByUid(cjUid: Long): DoorLiveData<ContentJob?>
+
+    @Query("""
+        UPDATE ContentJob
+           SET toUri = :toUri
+         WHERE cjUid = :cjUid
+    """)
+    abstract suspend fun updateDestinationDir(cjUid: Long, toUri: String)
 
 
 }

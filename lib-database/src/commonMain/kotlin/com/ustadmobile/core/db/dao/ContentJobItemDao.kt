@@ -93,6 +93,16 @@ abstract class ContentJobItemDao {
     abstract suspend fun updateConnectivityStatus(contentJobId: Long, connectivityStatus: Int)
 
 
+    @Query("""
+        SELECT COALESCE((SELECT CASE 
+                                WHEN cjiConnectivityAcceptable = $ACCEPT_METERED
+                                THEN 1 ELSE 0 END
+                          FROM ContentJobItem 
+                         WHERE cjiJobUid = :contentJobId 
+                         LIMIT 1)
+               , 1)
+    """)
+    abstract suspend fun isConnectionMetered(contentJobId: Long): Boolean
 
     @Query("""SELECT (SELECT COUNT(*) 
                               FROM ContentJobItem 
@@ -102,7 +112,6 @@ abstract class ContentJobItemDao {
                              WHERE cjiJobUid = :contentJobId 
                                AND cjiParentCjiUid = 0) AS totalSize""")
     abstract suspend fun getDownloadSizeInfo(contentJobId: Long): DownloadJobSizeInfo?
-
 
 
     @Transaction

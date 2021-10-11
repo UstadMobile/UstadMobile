@@ -103,16 +103,17 @@ class DownloadDialogPresenter(
                     contentEntryUid)
             contentJobCompletable.complete(true)
             // TODO check downloadJobItem if status = wifiOnly
-          //  val wifiOnly: Boolean = !appDatabase.downloadJobDao.getMeteredNetworkAllowed(currentJobId)
-            view.setDownloadOverWifiOnly(true)
-            val checkedVal = if(true) 1 else 0
-            wifiOnlyChecked.value = checkedVal
+            val job =  contentJobItemLiveData.getValue()
+            val wifiOnly: Boolean = job == null || job.cjiConnectivityAcceptable == ContentJobItem.ACCEPT_METERED
+            view.setDownloadOverWifiOnly(wifiOnly)
+            val wifiCheckValue = job?.cjiConnectivityAcceptable ?: ContentJobItem.ACCEPT_METERED
+            wifiOnlyChecked.value = wifiCheckValue
 
             withContext(Dispatchers.Main){
                 contentJobItemLiveData.observe(lifecycleOwner, this@DownloadDialogPresenter)
             }
 
-            updateWarningMessage(contentJobItemLiveData.getValue())
+            updateWarningMessage(job)
         }
     }
 
@@ -229,8 +230,8 @@ class DownloadDialogPresenter(
 
     private suspend fun createDownloadJobAndRequestPreparation() : Boolean{
 
-        val entry = appDatabase.contentEntryDao.findByUid(contentEntryUid)
-        val container = appDatabase.containerDao
+        val entry = appDatabaseRepo.contentEntryDao.findByUid(contentEntryUid)
+        val container = appDatabaseRepo.containerDao
                 .getMostRecentDownloadedContainerForContentEntryAsync(contentEntryUid)
         val isWifiOnlyChecked = wifiOnlyChecked.value
         val job = ContentJob().apply {
@@ -248,7 +249,7 @@ class DownloadDialogPresenter(
             cjiContentEntryUid = contentEntryUid
             cjiContainerUid = container?.containerUid ?: 0
             cjiIsLeaf = entry?.leaf ?: false
-            cjiConnectivityAcceptable = if(isWifiOnlyChecked == 0) ContentJobItem.ACCEPT_METERED else ContentJobItem.ACCEPT_ANY
+            cjiConnectivityAcceptable = isWifiOnlyChecked
             cjiStatus = JobStatus.QUEUED
             cjiUid = appDatabase.contentJobItemDao.insertJobItem(this)
         }
@@ -338,13 +339,12 @@ class DownloadDialogPresenter(
     }
 
     fun handleClickWiFiOnlyOption(wifiOnly: Boolean) {
-        val wifiOnlyCheckedVal = if(wifiOnly) 1 else 0
+        val wifiOnlyCheckedVal = if(wifiOnly) ContentJobItem.ACCEPT_METERED else ContentJobItem.ACCEPT_UNMETERED
         wifiOnlyChecked.value = wifiOnlyCheckedVal
         if(currentJobId != 0L) {
             GlobalScope.launch {
                 // TODO handle wifi status change
-                appDatabase.contentJobItemDao.updateConnectivityStatus(currentJobId, 0)
-                //containerDownloadManager.setMeteredDataAllowed(currentJobId, !wifiOnly)
+                appDatabase.contentJobItemDao.updateConnectivityStatus(currentJobId, wifiOnlyCheckedVal)
             }
         }
     }
@@ -354,14 +354,14 @@ class DownloadDialogPresenter(
         GlobalScope.launch(doorMainDispatcher()) {
             contentJobCompletable.await()
             updateWarningMessage(contentJobItemLiveData.getValue())
-            val contentJob = appDatabase.contentJobDao.findByUid(currentJobId)
+            val contentJob = appDatabase.contentJobDao.findByUidAsync(currentJobId)
             if(contentJob != null){
+                appDatabase.contentJobDao.updateDestinationDir(currentJobId, selectedDir.dirURI)
                 // TODO handle job updated save location
                 /*containerDownloadManager.handleDownloadJobUpdated(downloadJob.also {
                     it.djDestinationDir = selectedDir.dirURI
                 })*/
             }
-
             /*
             appDatabase.downloadJobDao.updateDestinationDirectoryAsync(currentJobId,
                     selectedDir.dirURI)*/

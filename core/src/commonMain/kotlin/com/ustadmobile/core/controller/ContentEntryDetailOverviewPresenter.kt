@@ -139,7 +139,8 @@ class ContentEntryDetailOverviewPresenter(context: Any,
 
     fun handleOnClickOpenDownloadButton() {
         presenterScope.launch {
-            val canOpen = !isDownloadEnabled || db.containerDao.findContainerWithFilesByContentEntryUid(contentEntryUid) != 0L
+            val containerWithFiles = db.containerDao.findContainerWithFilesByContentEntryUid(contentEntryUid)
+            val canOpen = !isDownloadEnabled || (containerWithFiles != null && containerWithFiles.containerUid != 0L)
             if (canOpen) {
                 val loginFirst = systemImpl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
                         "false", context)!!.toBoolean()

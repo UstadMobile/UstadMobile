@@ -101,7 +101,7 @@ abstract class ContainerDao : BaseDao<Container> {
     abstract fun hasContainerWithFilesToUpdate(contentEntryUid: Long): DoorLiveData<Boolean>
 
     @Query("""
-            SELECT Container.containerUid
+            SELECT Container.*
               FROM Container
              WHERE Container.containerContentEntryUid = :contentEntryUid
                AND EXISTS (SELECT ContainerEntry.ceUid 
@@ -109,7 +109,7 @@ abstract class ContainerDao : BaseDao<Container> {
                             WHERE ContainerEntry.ceContainerUid = Container.containerUid)     
           ORDER BY Container.cntLastModified DESC LIMIT 1
     """)
-    abstract suspend fun findContainerWithFilesByContentEntryUid(contentEntryUid: Long): Long
+    abstract suspend fun findContainerWithFilesByContentEntryUid(contentEntryUid: Long): Container?
 
 
     @Query("""

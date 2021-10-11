@@ -54,6 +54,8 @@ actual suspend fun UmAppDatabase.addFileToContainer(containerUid: Long, fileUri:
     val db = repo.db as UmAppDatabase
     db.addFileToContainerInternal(containerUid, fileUri.toFile(), false,
             addOptions, "", pathInContainer, context,  di)
+
+    containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
 }
 
 actual suspend fun UmAppDatabase.addTorrentFileFromContainer(

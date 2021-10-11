@@ -114,7 +114,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
             val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
             uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient,  torrentFileBytes, endpoint)
 
-            container
+            repo.containerDao.findByUid(container.containerUid) ?: container
         }
 
 
