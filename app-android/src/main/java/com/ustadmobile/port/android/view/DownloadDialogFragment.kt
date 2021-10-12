@@ -201,7 +201,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
     }
 
     override fun setBottomPositiveButtonEnabled(enabled: Boolean) {
-        mDialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = enabled
+        mDialog.getButton(AlertDialog.BUTTON_POSITIVE)?.isEnabled = enabled
     }
 
     override fun setWarningText(text: String) {
