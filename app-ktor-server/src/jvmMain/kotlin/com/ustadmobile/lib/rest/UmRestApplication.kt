@@ -207,7 +207,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             VideoTypePluginJvm(Any(), context, di)
         }
         bind<ContainerTorrentDownloadJob>() with scoped(EndpointScope.Default).singleton{
-            ContainerTorrentDownloadJob(context, di)
+            ContainerTorrentDownloadJob(Any(), context, di)
         }
         bind<ApacheIndexerPlugin>() with scoped(EndpointScope.Default).singleton{
             ApacheIndexerPlugin(Any(), context, di)

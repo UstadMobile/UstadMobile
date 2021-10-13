@@ -6,6 +6,8 @@ import com.turn.ttorrent.client.TorrentListener
 
 class DownloadListenerAdapter(val destListener: TorrentDownloadListener) : TorrentListener {
 
+    var totalDownloaded: Int = 0
+
     override fun peerConnected(peerInformation: PeerInformation?) {
 
     }
@@ -15,7 +17,8 @@ class DownloadListenerAdapter(val destListener: TorrentDownloadListener) : Torre
     }
 
     override fun pieceDownloaded(pieceInformation: PieceInformation?, peerInformation: PeerInformation?) {
-
+        totalDownloaded += pieceInformation?.size ?: 0
+        destListener.onProgress(totalDownloaded)
     }
 
     override fun downloadComplete() {

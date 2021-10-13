@@ -1,27 +1,18 @@
-package com.ustadmobile.core.contentjob.ext
+package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.ContentJobProgressListener
 import com.ustadmobile.core.contentjob.ContentPlugin
-import com.ustadmobile.core.contentjob.ProcessContext
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.ext.getLocalUri
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.ContentJobItem
-import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
 
+
+expect suspend fun ContentPlugin.withWifiLock(context: Any, block: suspend () -> Unit)
 
 suspend fun ContentPlugin.uploadContentIfNeeded(contentNeedUpload: Boolean,
                                                 contentJobItem: ContentJobItem,

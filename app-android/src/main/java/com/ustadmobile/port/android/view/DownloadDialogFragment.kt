@@ -14,6 +14,8 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.ContainerStorageDir
+import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -27,6 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.instance
+import org.kodein.di.on
 import java.util.*
 
 //It would be nice to move this to proguard-rules.pro and allow obfuscation of the contents of the class
@@ -55,7 +58,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
     private var savedInstanceState : Bundle? = null
 
-    private lateinit var storageDirs: List<UMStorageDir>
+    private lateinit var storageDirs: List<ContainerStorageDir>
 
     //internal var viewIdMap = HashMap<Int, Int>()
 
@@ -91,7 +94,6 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
         mPresenter = DownloadDialogPresenter(context as Context, bundleToMap(arguments),
                 this@DownloadDialogFragment, di, this).also {
             it.onCreate(null)
-
             GlobalScope.launch(Dispatchers.Main) {
                 showStorageOptions()
             }
@@ -103,8 +105,8 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
     private suspend fun showStorageOptions() {
         val impl: UstadMobileSystemImpl by di.instance()
         val accountManager: UstadAccountManager by di.instance()
-        val storageOptions = impl.getStorageDirsAsync(requireContext(),
-                Endpoint(accountManager.activeAccount.endpointUrl))
+        val containerStorageManager: ContainerStorageManager by on(accountManager.activeAccount).instance()
+        val storageOptions = containerStorageManager.storageList
         this.storageDirs = storageOptions
         val optionLabels = storageOptions.map { umStorageDir ->
             String.format(impl.getString(

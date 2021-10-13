@@ -243,8 +243,9 @@ open class UstadApp : BaseUstadApp(), DIAware {
                     H5PTypePluginCommonJvm(applicationContext, context, di),
                     XapiTypePluginCommonJvm(applicationContext, context, di),
                     VideoTypePluginAndroid(applicationContext, context, di),
-                    ContainerTorrentDownloadJob(context, di),
-                    FolderIndexerPlugin(applicationContext, context, di)
+                    ContainerTorrentDownloadJob(applicationContext, context, di),
+                    FolderIndexerPlugin(applicationContext, context, di),
+                    DeleteContainerPlugin(applicationContext, context, di)
                 )
             )
         }

@@ -10,7 +10,7 @@ import java.io.IOException
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.*
-import com.ustadmobile.core.contentjob.ext.uploadContentIfNeeded
+import com.ustadmobile.core.util.ext.uploadContentIfNeeded
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.torrent.UstadTorrentManager

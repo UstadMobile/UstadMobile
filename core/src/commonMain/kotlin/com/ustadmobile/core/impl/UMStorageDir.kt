@@ -39,6 +39,7 @@ import kotlin.jvm.JvmOverloads
  *
  * @author mike
  */
+@Deprecated("Please use ContainerStorageDir via ContainerStorageManager")
 class UMStorageDir
 /**
  * Constructor

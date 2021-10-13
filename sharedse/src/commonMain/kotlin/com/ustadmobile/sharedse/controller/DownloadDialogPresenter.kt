@@ -9,13 +9,11 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UMStorageDir
+import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.io.ext.getSize
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
-import com.ustadmobile.core.networkmanager.DeletePreparationRequester
 import com.ustadmobile.core.util.ext.isStatusCompletedSuccessfully
 import com.ustadmobile.core.util.ext.isStatusPausedOrQueuedOrDownloading
 import com.ustadmobile.door.*
@@ -63,7 +61,7 @@ class DownloadDialogPresenter(
 
     private var currentContentJobItem: ContentJobItem? = null
 
-    private var selectedStorageDir: UMStorageDir? = null
+    private var selectedStorageDir: ContainerStorageDir? = null
 
     private val accountManager: UstadAccountManager by instance()
 
@@ -110,7 +108,7 @@ class DownloadDialogPresenter(
             wifiOnlyChecked.value = wifiCheckValue
 
             view.runOnUiThread(Runnable {
-                    contentJobItemLiveData.observe(lifecycleOwner, this@DownloadDialogPresenter)
+                contentJobItemLiveData.observe(lifecycleOwner, this@DownloadDialogPresenter)
             })
 
             updateWarningMessage(job)
@@ -228,15 +226,15 @@ class DownloadDialogPresenter(
         }
     }
 
-    private suspend fun createDownloadJobAndRequestPreparation() : Boolean{
+    private suspend fun createDownloadJob() : Boolean{
 
         val entry = appDatabaseRepo.contentEntryDao.findByUid(contentEntryUid)
         val container = appDatabaseRepo.containerDao
                 .getMostRecentDownloadedContainerForContentEntryAsync(contentEntryUid)
         val isWifiOnlyChecked = wifiOnlyChecked.value
         val job = ContentJob().apply {
-            toUri = selectedStorageDir?.dirURI
-            cjNotificationTitle = impl.getString(MessageID.downloading, context)
+            toUri = selectedStorageDir?.dirUri
+            cjNotificationTitle = impl.getString(MessageID.downloading_content, context)
                     .replace("%1\$s",entry?.title ?: "")
             cjUid = appDatabase.contentJobDao.insertAsync(this)
         }
@@ -266,24 +264,40 @@ class DownloadDialogPresenter(
     fun handleClickPositive() {
         val currentDownloadJobItemVal = currentContentJobItem
         when {
-            currentContentJobItem?.cjiStatus == JobStatus.COMPLETE && currentDownloadJobItemVal != null ->
-                createDeleteJobAndRequestPreparation(currentDownloadJobItemVal.cjiUid)
-
+            currentContentJobItem?.cjiStatus == JobStatus.COMPLETE && currentDownloadJobItemVal != null -> GlobalScope.launch {
+                createDeleteJob()
+            }
             currentContentJobItem?.cjiStatus == JobStatus.PAUSED && currentDownloadJobItemVal != null -> GlobalScope.launch {
                 // TODO queue it
                 //containerDownloadManager.enqueue(currentDownloadJobItemVal.cjiJobUid)
             }
 
             else -> GlobalScope.launch {
-                createDownloadJobAndRequestPreparation()
+                createDownloadJob()
             }
         }
     }
 
-    private fun createDeleteJobAndRequestPreparation(downloadJobItemUid: Long) {
-        // TODO create delete job
-     /*   val deleteRequester: DeletePreparationRequester by on(accountManager.activeAccount).instance()
-        deleteRequester.requestDelete(downloadJobItemUid)*/
+    private suspend fun createDeleteJob() {
+        val entry = appDatabaseRepo.contentEntryDao.findByUid(contentEntryUid)
+        val job = ContentJob().apply {
+            cjNotificationTitle = impl.getString(MessageID.deleting_content, context)
+                    .replace("%1\$s",entry?.title ?: "")
+            cjUid = appDatabase.contentJobDao.insertAsync(this)
+        }
+        ContentJobItem().apply {
+            cjiJobUid = job.cjUid
+            sourceUri = "" // TODO entry
+            cjiPluginId = 14 // points to deleteContainerPlugin
+            cjiContentEntryUid = entry?.contentEntryUid ?: 0
+            cjiIsLeaf = true
+            cjiParentContentEntryUid = 0
+            cjiConnectivityAcceptable = ContentJobItem.ACCEPT_ANY
+            cjiStatus = JobStatus.QUEUED
+            cjiUid = appDatabase.contentJobItemDao.insertJobItem(this)
+        }
+
+        contentJobManager.enqueueContentJob(accountManager.activeEndpoint, job.cjUid)
     }
 
     /**
@@ -338,14 +352,14 @@ class DownloadDialogPresenter(
         }
     }
 
-    fun handleStorageOptionSelection(selectedDir: UMStorageDir) {
+    fun handleStorageOptionSelection(selectedDir: ContainerStorageDir) {
         selectedStorageDir = selectedDir
         GlobalScope.launch(doorMainDispatcher()) {
             contentJobCompletable.await()
             updateWarningMessage(contentJobItemLiveData.getValue())
             val contentJob = appDatabase.contentJobDao.findByUidAsync(currentJobId)
             if(contentJob != null){
-                appDatabase.contentJobDao.updateDestinationDir(currentJobId, selectedDir.dirURI)
+                appDatabase.contentJobDao.updateDestinationDir(currentJobId, selectedDir.dirUri)
                 // TODO handle job updated save location
                 /*containerDownloadManager.handleDownloadJobUpdated(downloadJob.also {
                     it.djDestinationDir = selectedDir.dirURI

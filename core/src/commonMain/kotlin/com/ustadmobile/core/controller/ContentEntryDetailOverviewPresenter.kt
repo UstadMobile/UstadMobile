@@ -3,11 +3,13 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.storeCompletedStatement
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
+import com.ustadmobile.core.io.ext.getSize
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.DeletePreparationRequester
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
@@ -23,9 +25,13 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.kodein.di.*
 
 
@@ -193,12 +199,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
     }
 
     fun handleOnClickDeleteButton() {
-        GlobalScope.launch(doorMainDispatcher()){
-            // TODO handle deleting all containers on this
-            val downloadJobItem = db.downloadJobItemDao.findByContentEntryUidAsync(contentEntryUid) ?: return@launch
-            val deleteRequester: DeletePreparationRequester by on(accountManager.activeAccount).instance()
-            deleteRequester.requestDelete(downloadJobItem.djiUid)
-        }
+        handleOnClickManageDownload()
     }
 
     fun handleOnClickGroupActivityButton() {

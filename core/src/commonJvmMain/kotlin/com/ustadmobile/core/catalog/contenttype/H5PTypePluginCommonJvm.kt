@@ -20,7 +20,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.core.container.PrefixContainerFileNamer
 import com.ustadmobile.core.contentjob.*
-import com.ustadmobile.core.contentjob.ext.uploadContentIfNeeded
+import com.ustadmobile.core.util.ext.uploadContentIfNeeded
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.torrent.UstadTorrentManager
