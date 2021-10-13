@@ -90,7 +90,7 @@ class DeleteContainerPlugin(private var context: Any, private val endpoint: Endp
         }
 
         return if(numFailures == 0){
-            ProcessResult(JobStatus.COMPLETE)
+            ProcessResult(JobStatus.DELETED)
         }else{
             ProcessResult(JobStatus.FAILED)
         }
