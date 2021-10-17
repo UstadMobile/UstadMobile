@@ -99,7 +99,7 @@ fun Route.ContentEntryLinkImporter() {
                     cjiItemTotal = sourceUri?.let { DoorUri.parse(it).getSize(context, closestDI())  } ?: 0L
                     cjiPluginId = pluginId
                     cjiContentEntryUid = contentEntry.contentEntryUid
-                    cjiIsLeaf = entryFromDb?.leaf ?: false
+                    cjiIsLeaf = contentEntry.leaf
                     cjiParentContentEntryUid = parentUid ?: 0
                     cjiConnectivityAcceptable = ContentJobItem.ACCEPT_ANY
                     cjiStatus = JobStatus.QUEUED

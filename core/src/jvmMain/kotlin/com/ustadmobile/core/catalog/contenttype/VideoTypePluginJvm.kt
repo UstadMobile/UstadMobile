@@ -6,7 +6,7 @@ import com.ustadmobile.core.contentjob.ContentJobProgressListener
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
-import com.ustadmobile.core.contentjob.ext.uploadContentIfNeeded
+import com.ustadmobile.core.util.ext.uploadContentIfNeeded
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
@@ -114,7 +114,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
             val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
             uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient,  torrentFileBytes, endpoint)
 
-            container
+            repo.containerDao.findByUid(container.containerUid) ?: container
         }
 
 

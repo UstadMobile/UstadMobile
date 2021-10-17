@@ -19,6 +19,7 @@ import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobManagerAndroid
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.contentjob.ContentPluginManagerImpl
+import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
@@ -115,6 +116,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
             val db = DatabaseBuilder.databaseBuilder(applicationContext, UmAppDatabase::class, dbName)
                 .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                 .addSyncCallback(nodeIdAndAuth, false)
+                    .addCallback(ContentJobItemTriggersCallback())
                 .build()
                 .also {
                     val networkManager: NetworkManagerBle = di.direct.instance()
@@ -241,8 +243,9 @@ open class UstadApp : BaseUstadApp(), DIAware {
                     H5PTypePluginCommonJvm(applicationContext, context, di),
                     XapiTypePluginCommonJvm(applicationContext, context, di),
                     VideoTypePluginAndroid(applicationContext, context, di),
-                    ContainerTorrentDownloadJob(context, di),
-                    FolderIndexerPlugin(applicationContext, context, di)
+                    ContainerTorrentDownloadJob(applicationContext, context, di),
+                    FolderIndexerPlugin(applicationContext, context, di),
+                    DeleteContainerPlugin(applicationContext, context, di)
                 )
             )
         }

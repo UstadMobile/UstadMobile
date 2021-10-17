@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.createSymLink
 import com.ustadmobile.core.util.ext.base64EncodedToHexString
 import com.ustadmobile.core.util.ext.maxQueryParamListSize
+import com.ustadmobile.core.util.ext.withWifiLock
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
@@ -30,7 +31,7 @@ import java.io.File
 import java.io.InputStream
 import java.net.URI
 
-class ContainerTorrentDownloadJob(private val endpoint: Endpoint, override val di: DI) : ContentPlugin {
+class ContainerTorrentDownloadJob(private var context: Any, private val endpoint: Endpoint, override val di: DI) : ContentPlugin {
 
     private val httpClient: HttpClient = di.direct.instance()
 
@@ -93,35 +94,51 @@ class ContainerTorrentDownloadJob(private val endpoint: Endpoint, override val d
 
         //link them to the new container path
         existingFiles.forEach {
-            val oldPath = it.cefPath ?: return@forEach
-            val target = File(containerFilesFolder, File(oldPath).name)
+            val existingPath = it.cefPath ?: return@forEach
+            val existingFile = File(existingPath)
+            if(existingFile.name == MANIFEST_FILE_NAME){
+                return@forEach
+            }
+            val target = File(containerFilesFolder, existingFile.name)
             if(!target.exists()){
-                createSymLink(oldPath, target.path)
+                createSymLink(existingPath, target.path)
             }
         }
 
-        val startTime = System.currentTimeMillis()
-        ustadTorrentManager.addTorrent(containerUid, containerFilesFolder.path)
+        withWifiLock(context){
 
-        val torrentDeferred = CompletableDeferred<Boolean>()
-        val torrentListener = object: TorrentDownloadListener{
-            override fun onComplete() {
-                println("downloaded torrent in ${System.currentTimeMillis() - startTime} ms")
-                torrentDeferred.complete(true)
-            }
-        }
-        GlobalScope.launch(Dispatchers.Default){
-            while(true){
-                delay(100)
-                if(!isActive){
-                    torrentDeferred.completeExceptionally(CancellationException())
+            val startTime = System.currentTimeMillis()
+            ustadTorrentManager.addTorrent(containerUid, containerFilesFolder.path)
+
+            val torrentDeferred = CompletableDeferred<Boolean>()
+            val torrentListener = object: TorrentDownloadListener{
+                override fun onComplete() {
+                    contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal
+                    progress.onProgress(contentJobItem)
+                    println("downloaded torrent in ${System.currentTimeMillis() - startTime} ms")
+                    torrentDeferred.complete(true)
+                }
+
+                override fun onProgress(progressSize: Int) {
+                    contentJobItem.cjiItemProgress = progressSize.toLong()
+                    progress.onProgress(contentJobItem)
                 }
             }
+            GlobalScope.launch(Dispatchers.Default){
+                while(true){
+                    delay(100)
+                    if(!isActive){
+                        torrentDeferred.completeExceptionally(CancellationException())
+                    }
+                }
+            }
+
+            ustadTorrentManager.addDownloadListener(containerUid, torrentListener)
+            torrentDeferred.await()
+            ustadTorrentManager.removeDownloadListener(containerUid, torrentListener)
+
         }
 
-        ustadTorrentManager.addDownloadListener(containerUid, torrentListener)
-        torrentDeferred.await()
-        ustadTorrentManager.removeDownloadListener(containerUid, torrentListener)
 
         val existingMd5s = existingFiles.mapNotNull { it.cefMd5 }.toSet()
         val entriesThatGotDownloaded = fileNameList

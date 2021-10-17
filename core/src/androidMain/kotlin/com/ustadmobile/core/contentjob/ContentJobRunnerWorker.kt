@@ -7,8 +7,6 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat.getSystemService
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.work.*
 import com.ustadmobile.core.R
 import com.ustadmobile.core.account.Endpoint
@@ -22,11 +20,9 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
-import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.lang.IllegalStateException
@@ -57,49 +53,42 @@ class ContentJobRunnerWorker(
 
         val jobId = inputData.getLong(ContentJobManager.KEY_CONTENTJOB_UID, 0)
 
-        val notification = createNotification()
-
         val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-        var jobObserver: DoorObserver<ContentJobItem?>? = null
-        var liveData: RateLimitedLiveData<ContentJobItem?>? = null
+        val job = db.contentJobDao.findByUid(jobId) ?: throw IllegalStateException("No job found")
 
-         try {
-             liveData = RateLimitedLiveData(db, listOf("ContentJobItem"), 1000) {
+        val notification = createNotification(job)
+
+        val liveData = RateLimitedLiveData(db, listOf("ContentJobItem"), 1000) {
                  db.contentJobItemDao.findByJobId(jobId)
-             }
-             GlobalScope.launch(Dispatchers.Main) {
-                 jobObserver?.let { liveData.observeForever(it) }
-             }
-             jobObserver = DoorObserver {
-                 notification.setProgress(100, it?.cjiItemProgress?.toInt() ?: 0, false)
-                 if (it?.cjiItemProgress?.toInt() == 100) {
-                     notification.setContentTitle("Download Complete")
-                 }
-                 setForegroundAsync(ForegroundInfo(jobId.toInt(), notification.build()))
-             }
-
-         } catch (e: Exception) {
-             println(e.message)
-         }
-
-        setForeground(ForegroundInfo(jobId.toInt(), notification.build()))
-
-        val jobResult = ContentJobRunner(jobId, endpoint, di).runJob().toWorkerResult()
-
-        GlobalScope.launch(Dispatchers.Main) {
-            jobObserver?.let { liveData?.removeObserver(it) }
         }
 
+        val jobObserver = DoorObserver<ContentJobItem?> {
+            notification.setProgress(it?.cjiRecursiveTotal?.toInt() ?: 100, it?.cjiRecursiveProgress?.toInt() ?: 0, false)
+            setForegroundAsync(ForegroundInfo(jobId.toInt(), notification.build()))
+        }
 
-        return jobResult
+        try {
+
+            withContext(Dispatchers.Main) {
+                liveData.observeForever(jobObserver)
+            }
+
+            setForeground(ForegroundInfo(jobId.toInt(), notification.build()))
+
+            return ContentJobRunner(jobId, endpoint, di).runJob().toWorkerResult()
+        } finally {
+            withContext(Dispatchers.Main) {
+                liveData.removeObserver(jobObserver)
+            }
+        }
     }
 
     override fun isRunInForeground(): Boolean {
         return true
     }
 
-    private fun createNotification(): NotificationCompat.Builder {
+    private fun createNotification(job: ContentJob): NotificationCompat.Builder {
 
         val intent = WorkManager.getInstance(applicationContext)
                 .createCancelPendingIntent(id)
@@ -109,7 +98,7 @@ class ContentJobRunnerWorker(
         }
 
         return NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
-                .setContentTitle("Downloading")
+                .setContentTitle(job.cjNotificationTitle)
                 .setOngoing(true)
                 .setAutoCancel(true)
                 .setSmallIcon(R.drawable.ic_file_download_white_24dp)

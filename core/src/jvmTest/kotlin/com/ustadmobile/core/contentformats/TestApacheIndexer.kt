@@ -4,8 +4,7 @@ import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.catalog.contenttype.ApacheIndexerPlugin
-import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
+import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.contentjob.ContentPluginManagerImpl
 import com.ustadmobile.core.contentjob.ProcessContext
@@ -77,6 +76,18 @@ class TestApacheIndexer {
 
         di = DI {
             import(ustadTestRule.diModule)
+            bind<EpubTypePluginCommonJvm>() with scoped(ustadTestRule.endpointScope).singleton {
+                EpubTypePluginCommonJvm(Any(), context, di)
+            }
+            bind<XapiTypePluginCommonJvm>() with scoped(ustadTestRule.endpointScope).singleton {
+                XapiTypePluginCommonJvm(Any(), context, di)
+            }
+            bind<H5PTypePluginCommonJvm>() with scoped(ustadTestRule.endpointScope).singleton {
+                H5PTypePluginCommonJvm(Any(), context, di)
+            }
+            bind<VideoTypePluginJvm>() with scoped(ustadTestRule.endpointScope).singleton {
+                VideoTypePluginJvm(Any(), context, di)
+            }
             bind<ContentPluginManager>() with scoped(ustadTestRule.endpointScope).singleton {
                 ContentPluginManagerImpl(listOf(
                         EpubTypePluginCommonJvm(Any(), context, di)

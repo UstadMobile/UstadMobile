@@ -7,11 +7,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemContentEntryListBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ContentEntryListItemListener
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -34,13 +36,13 @@ class ContentEntryListRecyclerAdapter(var itemListener: ContentEntryListItemList
 
     private val accountManager: UstadAccountManager by di.instance()
 
-    private val containerDownloadManager: ContainerDownloadManager by di.on(accountManager.activeAccount).instance()
+    private val appDatabase: UmAppDatabase by di.on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
 
     private val boundViewHolders = mutableSetOf<ContentEntryListViewHolder>()
 
     inner class ContentEntryListViewHolder(val itemBinding: ItemContentEntryListBinding): RecyclerView.ViewHolder(itemBinding.root),
-        DoorObserver<DownloadJobItem?>{
-        var downloadJobItemLiveData: DoorLiveData<DownloadJobItem?>? = null
+        DoorObserver<ContentJobItem?>{
+        var downloadJobItemLiveData: DoorLiveData<ContentJobItem?>? = null
             set(value) {
                 field?.removeObserver(this)
                 field = value
@@ -50,7 +52,7 @@ class ContentEntryListRecyclerAdapter(var itemListener: ContentEntryListItemList
             }
 
 
-        override fun onChanged(t: DownloadJobItem?) {
+        override fun onChanged(t: ContentJobItem?) {
             itemBinding.downloadStatusButton.downloadJobItem = t
         }
     }
@@ -79,8 +81,7 @@ class ContentEntryListRecyclerAdapter(var itemListener: ContentEntryListItemList
         holder.itemView.setSelectedIfInList(item, selectedItems, ContentEntryList2Fragment.DIFF_CALLBACK)
         if(item != null) {
             GlobalScope.launch(Dispatchers.Main.immediate) {
-                holder.downloadJobItemLiveData = containerDownloadManager
-                        .getDownloadJobItemByContentEntryUid(item.contentEntryUid )
+                holder.downloadJobItemLiveData = appDatabase.contentJobItemDao.findLiveDataByContentEntryUid(item.contentEntryUid )
             }
         }
     }

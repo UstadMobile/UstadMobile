@@ -5,7 +5,7 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentjob.*
-import com.ustadmobile.core.contentjob.ext.uploadContentIfNeeded
+import com.ustadmobile.core.util.ext.uploadContentIfNeeded
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.*
@@ -152,6 +152,9 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
                 val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
                 containerUidFolder.mkdirs()
                 ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
+
+                contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
+                progress.onProgress(contentJobItem)
 
                 val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
                 uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient,  torrentFileBytes, endpoint)

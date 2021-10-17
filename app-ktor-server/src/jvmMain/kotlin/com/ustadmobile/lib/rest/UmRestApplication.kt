@@ -34,6 +34,7 @@ import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
 import com.ustadmobile.core.catalog.contenttype.ApacheIndexerPlugin
+import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.lib.db.entities.PersonAuth2
 import com.ustadmobile.lib.rest.ext.databasePropertiesFromSection
 import com.ustadmobile.lib.rest.ext.initAdminUser
@@ -177,7 +178,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             val nodeIdAndAuth: NodeIdAndAuth = instance()
             val db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbHostName)
                 .addSyncCallback(nodeIdAndAuth, true)
-                .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
+                    .addCallback(ContentJobItemTriggersCallback())
+                    .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                 .build()
             runBlocking {
                 di.on(context).direct.instance<TorrentTracker>().start()
@@ -205,7 +207,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             VideoTypePluginJvm(Any(), context, di)
         }
         bind<ContainerTorrentDownloadJob>() with scoped(EndpointScope.Default).singleton{
-            ContainerTorrentDownloadJob(context, di)
+            ContainerTorrentDownloadJob(Any(), context, di)
         }
         bind<ApacheIndexerPlugin>() with scoped(EndpointScope.Default).singleton{
             ApacheIndexerPlugin(Any(), context, di)

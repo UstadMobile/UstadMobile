@@ -1240,6 +1240,21 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="add_file">Add file</string>
     <string name="add_folder">Add all from folder</string>
+
+    <!-- Used to show a notification when user is importing a file or folder
+         %1$s will be replaced with the title of the file/folder -->
+    <string name="importing">Importing %1$s</string>
+
+    <!-- Used to show a notification when user is downloading a file or folder
+       %1$s will be replaced with the title of the file/folder -->
+    <string name="downloading_content">Downloading %1$s</string>
+
+    <!-- Used to show a notification when user is deleting a file or folder
+      %1$s will be replaced with the title of the file/folder -->
+    <string name="deleting_content">Deleting %1$s</string>
+
+
+
     <string name="add_folder_description">Add all supported education content from a folder</string>
 
     <string name="add_educational_content_using_supported_formats_eg_pdf_xapi_h5p">Add educational content using supported formats e.g. PDF, xAPI, H5P</string>

@@ -252,6 +252,8 @@ class ContentEntryEdit2Presenter(context: Any,
                             params = Json.encodeToString(
                                     MapSerializer(String.serializer(), String.serializer()),
                                         conversionParams)
+                            cjNotificationTitle = systemImpl.getString(MessageID.importing, context)
+                                    .replace("%1\$s",entity.title ?: "")
                             cjUid = db.contentJobDao.insertAsync(this)
                         }
                         ContentJobItem().apply {

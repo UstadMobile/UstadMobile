@@ -195,40 +195,6 @@ class ContentJobItemTriggersCallback: DoorDatabaseCallback {
 						  ELSE ${JobStatus.QUEUED} END)  
             """
         }
-
-        const val STATUS_CHECK = """
-            (CASE WHEN 
-							(SELECT Count(*) FROM ChildContentJobItemStatuses) = 
-							(SELECT Count(*) 
-							   FROM ChildContentJobItemStatuses 
-							  WHERE Status =  ${JobStatus.COMPLETE}) 
-					      THEN  ${JobStatus.COMPLETE} 
-                          TODO check total failed
-						  WHEN EXISTS (Select Status 
-							   FROM ChildContentJobItemStatuses 
-							  WHERE Status > ${JobStatus.COMPLETE_MIN} 
-								AND EXISTS (SELECT Status 
-									         FROM ChildContentJobItemStatuses 
-											 WHERE Status = ${JobStatus.FAILED})
-								AND EXISTS (SELECT Status 
-									         FROM ChildContentJobItemStatuses 
-											 WHERE Status = ${JobStatus.COMPLETE}))
-						  THEN ${JobStatus.PARTIAL_FAILED}
-						  WHEN EXISTS (SELECT Status 
-										 FROM ChildContentJobItemStatuses		
-										WHERE Status = ${JobStatus.RUNNING})
-						  THEN ${JobStatus.RUNNING}
-						  WHEN EXISTS (SELECT Status
-										FROM ChildContentJobItemStatuses
-									    WHERE Status = ${JobStatus.WAITING_FOR_CONNECTION})
-						  THEN ${JobStatus.WAITING_FOR_CONNECTION} 
-						  WHEN EXISTS  (SELECT Status
-										FROM ChildContentJobItemStatuses
-									    WHERE Status = ${JobStatus.FAILED})
-						  THEN ${JobStatus.FAILED}				
-						  ELSE ${JobStatus.QUEUED} END)     
-        """
-
     }
 
 }

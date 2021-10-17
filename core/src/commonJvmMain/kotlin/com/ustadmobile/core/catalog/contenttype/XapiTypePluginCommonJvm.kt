@@ -10,7 +10,7 @@ import java.io.IOException
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.*
-import com.ustadmobile.core.contentjob.ext.uploadContentIfNeeded
+import com.ustadmobile.core.util.ext.uploadContentIfNeeded
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.torrent.UstadTorrentManager
@@ -100,6 +100,7 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
             val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                     ?: throw IllegalArgumentException("missing tracker url")
             val contentNeedUpload = !doorUri.isRemote()
+            val progressSize = if(contentNeedUpload) 2 else 1
 
             val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid) ?:
                 Container().apply {
@@ -129,6 +130,9 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
             val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
             containerUidFolder.mkdirs()
             ustadTorrentManager.addTorrent(container.containerUid,containerUidFolder.path)
+
+            contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
+            progress.onProgress(contentJobItem)
 
             val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
             uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient,  torrentFileBytes, endpoint)

@@ -7,13 +7,11 @@ import android.view.ViewDebug
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.util.ext.isStatusCompleted
 import com.ustadmobile.core.util.ext.isStatusCompletedSuccessfully
 import com.ustadmobile.core.util.ext.isStatusPaused
-import com.ustadmobile.core.util.ext.isStatusQueuedOrDownloading
-import com.ustadmobile.lib.db.entities.DownloadJobItem
+import com.ustadmobile.lib.db.entities.ContentJobItem
 
 /**
  * A button that shows the download status of an item. It consists of an icon (a download icon or
@@ -26,11 +24,11 @@ class DownloadStatusButton : RelativeLayout {
 
     private var currentDownloadStatus: Int = -1
 
-    var downloadJobItem: DownloadJobItem? = null
+    var downloadJobItem: ContentJobItem? = null
         set(value) {
             field = value
 
-            val statusChanged = currentDownloadStatus != value?.djiStatus ?: -1
+            val statusChanged = currentDownloadStatus != value?.cjiStatus ?: -1
 
             when {
                 statusChanged && value.isStatusPaused() -> {
@@ -55,8 +53,8 @@ class DownloadStatusButton : RelativeLayout {
                 View.INVISIBLE
             }
 
-            val downloadLength = value?.downloadLength ?: 0
-            val downloadedSoFar = value?.downloadedSoFar ?: 0
+            val downloadLength = value?.cjiItemTotal ?: 0
+            val downloadedSoFar = value?.cjiItemProgress ?: 0
             progress = if(downloadLength > 0) {
                 (downloadedSoFar * 100 / downloadLength).toInt()
             }else {
