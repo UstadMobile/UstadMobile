@@ -45,7 +45,7 @@ import styled.styledDiv
 
 class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount>(mProps), PersonEditView {
 
-    private lateinit var mPresenter: PersonEditPresenter
+    private var mPresenter: PersonEditPresenter? = null
 
     override val mEditPresenter: UstadEditPresenter<*, PersonWithAccount>?
         get() = mPresenter
@@ -237,7 +237,7 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
             setEditTitle(MessageID.add_a_new_person, MessageID.edit_person)
         }
         mPresenter = PersonEditPresenter(this, arguments,this, di, this)
-        mPresenter.onCreate(mapOf())
+        mPresenter?.onCreate(mapOf())
     }
 
     override fun RBuilder.render() {
@@ -494,5 +494,11 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
 
             }
         }
+    }
+
+    override fun componentWillUnmount() {
+        super.componentWillUnmount()
+        mPresenter?.onDestroy()
+        mPresenter = null
     }
 }
