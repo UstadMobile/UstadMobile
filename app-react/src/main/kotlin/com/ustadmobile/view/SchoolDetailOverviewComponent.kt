@@ -1,14 +1,12 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import com.ccfraser.muirwik.components.*
 import com.ustadmobile.core.controller.SchoolDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.SchoolDetailOverviewView
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
-import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.util.StyleManager
@@ -21,8 +19,6 @@ import com.ustadmobile.util.StyleManager.umItemWithIconAndText
 import com.ustadmobile.util.Util
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.css.display
 import kotlinx.css.paddingBottom
 import kotlinx.css.paddingTop
@@ -57,7 +53,7 @@ class SchoolDetailOverviewComponent(mProps: RProps): UstadDetailComponent<School
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)
             liveData?.removeObserver(observer)
-            liveData?.observe(lifecycleOwner, observer)
+            liveData?.observe(this, observer)
         }
 
     override var schoolCodeVisible: Boolean = false

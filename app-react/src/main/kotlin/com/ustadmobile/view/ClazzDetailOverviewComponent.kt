@@ -1,28 +1,31 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ccfraser.muirwik.components.*
+import com.ccfraser.muirwik.components.MGridSize
+import com.ccfraser.muirwik.components.MTypographyColor
+import com.ccfraser.muirwik.components.MTypographyVariant
+import com.ccfraser.muirwik.components.mTypography
 import com.ustadmobile.core.controller.ClazzDetailOverviewPresenter
 import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.core.view.EditButtonMode
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.lib.db.entities.Schedule
-import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.Util.copyToClipboard
-import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.formattedInHoursAndMinutes
-import com.ustadmobile.view.ext.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import com.ustadmobile.util.ext.standardFormat
+import com.ustadmobile.view.ext.createInformation
+import com.ustadmobile.view.ext.createListSectionTitle
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
 import kotlinx.css.display
 import react.RBuilder
 import react.RProps
@@ -56,7 +59,7 @@ class ClazzDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ClazzWi
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)
             liveData?.removeObserver(observer)
-            liveData?.observe(lifecycleOwner, observer)
+            liveData?.observe(this, observer)
         }
 
     override var clazzCodeVisible: Boolean = false

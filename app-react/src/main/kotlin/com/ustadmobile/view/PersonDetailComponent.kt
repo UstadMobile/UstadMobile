@@ -57,7 +57,7 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)
             liveData?.removeObserver(observer)
-            liveData?.observe(lifecycleOwner, observer)
+            liveData?.observe(this, observer)
         }
 
     override var changePasswordVisible: Boolean = false

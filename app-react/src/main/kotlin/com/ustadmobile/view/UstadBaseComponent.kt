@@ -23,10 +23,10 @@ import com.ustadmobile.util.*
 import kotlinx.atomicfu.atomic
 import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import org.w3c.dom.HashChangeEvent
@@ -35,7 +35,6 @@ import react.RBuilder
 import react.RComponent
 import react.RProps
 import react.RState
-import kotlin.reflect.KClass
 
 abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(props),
     UstadView, DIAware, DoorLifecycleOwner {
@@ -55,8 +54,6 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
     var searchManager: SearchManager? = null
 
     var fabManager: FabManager? = null
-
-    lateinit var lifecycleOwner: DoorLifecycleOwner
 
     protected lateinit var arguments: Map<String, String>
 
@@ -101,7 +98,6 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         lifecycleStatus.value = DoorLifecycleObserver.STARTED
         val umController: UstadNavController by instance()
         navController = umController as NavControllerJs
-        lifecycleOwner = this
     }
 
     override fun componentWillMount() {

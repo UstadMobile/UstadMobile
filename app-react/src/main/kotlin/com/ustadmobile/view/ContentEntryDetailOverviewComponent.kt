@@ -62,7 +62,7 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)
             liveData?.removeObserver(observer)
-            liveData?.observe(lifecycleOwner, observer)
+            liveData?.observe(this, observer)
         }
 
     override var downloadJobItem: DownloadJobItem? = null

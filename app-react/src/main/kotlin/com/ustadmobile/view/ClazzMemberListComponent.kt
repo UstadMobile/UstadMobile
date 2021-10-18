@@ -47,7 +47,7 @@ class ClazzMemberListComponent(mProps: RProps):UstadListComponent<PersonWithClaz
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)
             liveData?.removeObserver(studentListObserver)
-            liveData?.observe(lifecycleOwner, studentListObserver)
+            liveData?.observe(this, studentListObserver)
         }
 
     private lateinit var pendingStudents: List<PersonWithClazzEnrolmentDetails>
@@ -63,7 +63,7 @@ class ClazzMemberListComponent(mProps: RProps):UstadListComponent<PersonWithClaz
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)
             liveData?.removeObserver(pendingStudentObserver)
-            liveData?.observe(lifecycleOwner, pendingStudentObserver)
+            liveData?.observe(this, pendingStudentObserver)
         }
 
     override var addTeacherVisible: Boolean = false

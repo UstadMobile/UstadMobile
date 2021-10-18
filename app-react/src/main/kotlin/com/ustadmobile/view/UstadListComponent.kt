@@ -118,7 +118,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)
             liveData?.removeObserver(dataObserver)
-            liveData?.observe(lifecycleOwner, dataObserver)
+            liveData?.observe(this, dataObserver)
         }
 
 
