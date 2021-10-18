@@ -71,7 +71,7 @@ subprojects {
 
 
 //Major.minor.database version
-version = "0.3.40"
+version = "0.3.42"
 group = "com.ustadmobile.app"
 
 /**
@@ -81,7 +81,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 217
+    ustadVersionCode = 219
 
     version_kotlin_react = "17.0.2-pre.204-kotlin-1.5.0"
     version_kotlin_react_router_dom = "5.2.0-pre.204-kotlin-1.5.0"

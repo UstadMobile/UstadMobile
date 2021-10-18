@@ -164,9 +164,11 @@
     <string name="onboarding_get_started_label">Get Started</string>
     <string name="lets_get_started_label">Let\'s get started</string>
     <string name="onboarding_no_internet_headline">No Internet? No problem.</string>
-    <string name="onboarding_no_internet_subheadline">Download educational videos, articles and interactive exercises for later use. </string>
+    <string name="onboarding_no_internet_subheadline">Everything works offline</string>
     <string name="onboarding_offline_sharing">Share offline</string>
-    <string name="onboarding_offline_sharing_subheading">Share content at high speed with any other user nearby.</string>
+    <string name="onboarding_offline_sharing_subheading">Save time and data with superfast offline sharing</string>
+    <string name="onboarding_stay_organized_headline">Stay organized</string>
+    <string name="onboarding_stay_organized_subheading">Education content, assignments, classes, and attendance all in one place</string>
     <string name="location_permission_title">Location permission required</string>
     <string name="location_permission_message">This app requires the location permission to enable high-speed offline sharing with nearby users.</string>
     <string name="location_permission_details">This app uses Bluetooth and WiFi scanning to find other users nearby. The app can then connect to
