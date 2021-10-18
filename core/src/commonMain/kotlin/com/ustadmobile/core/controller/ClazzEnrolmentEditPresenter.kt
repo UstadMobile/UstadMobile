@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.MessageIdOption
@@ -17,11 +18,13 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import org.kodein.di.DI
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.view.LeavingReasonListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.serialization.builtins.ListSerializer
 
 
 class ClazzEnrolmentEditPresenter(context: Any,
@@ -86,6 +89,20 @@ class ClazzEnrolmentEditPresenter(context: Any,
         setupRoleListOptions()
 
         return clazzEnrolment
+    }
+
+    override fun onLoadDataComplete() {
+        super.onLoadDataComplete()
+
+        observeSavedStateResult(SAVEDSTATE_KEY_LEAVING_REASON, ListSerializer(LeavingReason.serializer()),
+            LeavingReason::class) {
+            val reason = it.firstOrNull() ?: return@observeSavedStateResult
+            entity?.leavingReason = reason
+            entity?.clazzEnrolmentLeavingReasonUid = reason.leavingReasonUid
+            view.entity = entity
+            requireSavedStateHandle()[SAVEDSTATE_KEY_LEAVING_REASON] = null
+        }
+
     }
 
     private suspend fun setupRoleListOptions(){
@@ -184,5 +201,17 @@ class ClazzEnrolmentEditPresenter(context: Any,
         }
     }
 
+    fun handleReasonLeavingClicked(){
+        navigateForResult(
+            NavigateForResultOptions(this, null,
+                LeavingReasonListView.VIEW_NAME,
+                LeavingReason::class,
+                LeavingReason.serializer())
+        )
+    }
+
+    companion object {
+        val SAVEDSTATE_KEY_LEAVING_REASON = "LeavingReason"
+    }
 
 }

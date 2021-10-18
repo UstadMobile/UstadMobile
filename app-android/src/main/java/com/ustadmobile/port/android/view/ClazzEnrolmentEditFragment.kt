@@ -22,12 +22,9 @@ import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import java.util.*
 
 
-interface ClazzEnrolmentFragmentEventHandler {
-    fun handleReasonLeavingClicked()
-}
 
 class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingReason>(),
-        ClazzEnrolmentEditView, ClazzEnrolmentFragmentEventHandler,
+        ClazzEnrolmentEditView,
         DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption>  {
 
     private var mBinding: FragmentClazzEnrolmentBinding? = null
@@ -41,7 +38,7 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
         val rootView: View
         mBinding = FragmentClazzEnrolmentBinding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.activityEventHandler = this
+            it.presenter = mPresenter
             it.statusSelectorListener = this
         }
 
@@ -66,11 +63,6 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
             entity?.leavingReason = reason
             mBinding?.clazzEnrolment = entity
         }
-    }
-
-    override fun handleReasonLeavingClicked() {
-        onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(LeavingReason::class.java, R.id.leaving_reason_list)
     }
 
     override fun onDestroyView() {

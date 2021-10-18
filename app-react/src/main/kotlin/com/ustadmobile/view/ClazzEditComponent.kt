@@ -24,6 +24,8 @@ import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.formattedInHoursAndMinutes
 import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.view.ext.*
+import kotlinx.css.LinearDimension
+import kotlinx.css.marginTop
 import react.RBuilder
 import react.RProps
 import react.setState
@@ -178,7 +180,7 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
                     umGridContainer(MGridSpacing.spacing4) {
                         umItem(MGridSize.cells12, MGridSize.cells6 ) {
                             mTextField(label = "${startDateLabel.text}",
-                                value = Date(entity?.clazzStartTime ?: 0).standardFormat(),
+                                value = Date(entity?.clazzStartTime ?: Date.now()).standardFormat(),
                                 error = startDateLabel.error,
                                 disabled = !fieldsEnabled,
                                 helperText = startDateLabel.errorText,
@@ -196,7 +198,7 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
 
                         umItem(MGridSize.cells12, MGridSize.cells6 ) {
                             mTextField(label = "${endDateLabel.text}",
-                                value = Date(entity?.clazzEndTime ?: 0).standardFormat(),
+                                value = Date(entity?.clazzEndTime ?: Date.now()).standardFormat(),
                                 error = endDateLabel.error,
                                 disabled = !fieldsEnabled,
                                 helperText = endDateLabel.errorText,
@@ -226,6 +228,8 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
                             }
                         }
                     }
+
+                    mSpacer()
 
                     mTextField(label = "${schoolNameLabel.text}",
                         helperText = schoolNameLabel.errorText,

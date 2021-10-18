@@ -426,3 +426,28 @@ fun RBuilder.permissionListText(systemImpl: UstadMobileSystemImpl,tableId: Int, 
         ?.filter { it.enabled }
         ?.joinToString { systemImpl.getString(it.messageId, this) }
 }
+
+fun RBuilder.mSpacer(
+    left: LinearDimension? = null, right: LinearDimension? = null,
+    top: LinearDimension? = 1.spacingUnits,
+    bottom: LinearDimension? = 1.spacingUnits){
+    styledDiv {
+        css {
+            if(left != null){
+                marginLeft = left
+            }
+
+            if(right != null){
+                marginRight = right
+            }
+
+            if(top != null){
+                marginTop = top
+            }
+
+            if(bottom != null){
+                marginBottom = bottom
+            }
+        }
+    }
+}

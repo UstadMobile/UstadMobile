@@ -30,13 +30,6 @@ class ClazzLogListAttendanceComponent(mProps: RProps) : UstadBaseComponent<RProp
             umGridContainer(MGridSpacing.spacing4) {
 
                 umItem(MGridSize.cells12, MGridSize.cells7){
-                    mDatePicker("MM/DD/YYYY"){
-                        attrs.render = { value,open ->
-                            mTextField("Date", value.toString()){
-                                attrs.asDynamic().onClick = { open.invoke()}
-                            }
-                        }
-                    }
 
                     mChart(arrayOf(
                         arrayOf("Year", "Sales", "Expenses"),

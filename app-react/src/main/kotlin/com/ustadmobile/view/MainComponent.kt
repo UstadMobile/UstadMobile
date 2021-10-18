@@ -126,128 +126,130 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
 
 
     override fun RBuilder.render() {
-        errorBoundary(errorFallBack(getString(MessageID.error))){
-            mCssBaseline()
-            themeContext.Consumer { theme ->
+        themeContext.Consumer { theme ->
+
+            styledDiv {
+                css (mainComponentWrapperContainer)
+
+                //Loading indicator
+                mLinearProgress {
+                    css(mainComponentProgressIndicator)
+                    attrs.asDynamic().id = "um-progress"
+                    attrs.color = if(isDarkModeActive()) MLinearProgressColor.secondary
+                    else MLinearProgressColor.primary
+                }
 
                 styledDiv {
-                    css (mainComponentWrapperContainer)
+                    css(mainComponentContainer)
 
-                    //Loading indicator
-                    mLinearProgress {
-                        css(mainComponentProgressIndicator)
-                        attrs.asDynamic().id = "um-progress"
-                        attrs.color = if(isDarkModeActive()) MLinearProgressColor.secondary
-                        else MLinearProgressColor.primary
-                    }
+                    mAppBar(position = MAppBarPosition.fixed) {
+                        css (if(currentDestination.showNavigation) mainComponentAppBar
+                        else mainComponentAppBarWithNoNav)
 
-                    styledDiv {
-                        css(mainComponentContainer)
+                        mToolbar {
+                            attrs.asDynamic().id = "um-toolbar"
+                            css(mainComponentToolbarMargins)
 
-                        mAppBar(position = MAppBarPosition.fixed) {
-                            css (if(currentDestination.showNavigation) mainComponentAppBar
-                            else mainComponentAppBarWithNoNav)
+                            umGridContainer {
 
-                            mToolbar {
-                                attrs.asDynamic().id = "um-toolbar"
-                                css(mainComponentToolbarMargins)
-
-                                umGridContainer {
-
-                                    mHidden(xsDown = true) {
-                                        umItem(MGridSize.cells1, MGridSize.cells5){
-                                            css{marginTop = 4.px}
-                                            mToolbarTitle(appState.appToolbar.title ?: "")
-                                        }
+                                mHidden(xsDown = true) {
+                                    umItem(MGridSize.cells1, MGridSize.cells5){
+                                        css{marginTop = 4.px}
+                                        mToolbarTitle(appState.appToolbar.title ?: "")
                                     }
+                                }
 
-                                    umItem(MGridSize.cells10,MGridSize.cells6){
+                                umItem(MGridSize.cells10,MGridSize.cells6){
+
+                                    styledDiv {
+
+                                        css{
+                                            +mainComponentSearch
+                                            display = displayProperty(currentDestination.showSearch)
+                                        }
 
                                         styledDiv {
+                                            css(mainComponentSearchIcon)
+                                            mIcon("search")
+                                        }
 
-                                            css{
-                                                +mainComponentSearch
-                                                display = displayProperty(currentDestination.showSearch)
-                                            }
+                                        val inputProps = object: RProps {
+                                            val className = "${StyleManager.name}-mainComponentInputSearchClass"
+                                            val id = "um-search"
+                                        }
 
-                                            styledDiv {
-                                                css(mainComponentSearchIcon)
-                                                mIcon("search")
-                                            }
-
-                                            val inputProps = object: RProps {
-                                                val className = "${StyleManager.name}-mainComponentInputSearchClass"
-                                                val id = "um-search"
-                                            }
-
-                                            mInput(placeholder = "${getString(MessageID.search)}...",
-                                                disableUnderline = true) {
-                                                attrs.inputProps = inputProps
-                                            }
+                                        mInput(placeholder = "${getString(MessageID.search)}...",
+                                            disableUnderline = true) {
+                                            attrs.inputProps = inputProps
                                         }
                                     }
+                                }
 
-                                    umItem(MGridSize.cells2, MGridSize.cells1){
-                                        mAvatar {
-                                            css {
-                                                display = displayProperty(currentDestination.showNavigation)
-                                                +mainComponentProfileOuterAvatar
+                                umItem(MGridSize.cells2, MGridSize.cells1){
+                                    mAvatar {
+                                        css {
+                                            display = displayProperty(currentDestination.showNavigation)
+                                            +mainComponentProfileOuterAvatar
+                                        }
+
+                                        attrs {
+                                            onClick = {
+                                                systemImpl.go(AccountListView.VIEW_NAME, mapOf(), this)
                                             }
+                                        }
 
-                                            attrs {
-                                                onClick = {
-                                                    systemImpl.go(AccountListView.VIEW_NAME, mapOf(), this)
-                                                }
-                                            }
-
-                                            mAvatar{
-                                                css (mainComponentProfileInnerAvatar)
-                                                mTypography("${activeAccount?.firstName?.first()}",
-                                                    align = MTypographyAlign.center,
-                                                    variant = MTypographyVariant.h5){
-                                                    css{
-                                                        marginTop = (1.5).px
-                                                    }
+                                        mAvatar{
+                                            css (mainComponentProfileInnerAvatar)
+                                            mTypography("${activeAccount?.firstName?.first()}",
+                                                align = MTypographyAlign.center,
+                                                variant = MTypographyVariant.h5){
+                                                css{
+                                                    marginTop = (1.5).px
                                                 }
                                             }
                                         }
                                     }
                                 }
-
                             }
-                        }
 
-                        if(currentDestination.showNavigation){
-                            renderSideNavigation()
-                        }
-
-
-                        // Main content area, this div holds the contents
-                        styledDiv {
-                            css(mainComponentContentContainer)
-                            appBarSpacer()
-                            styledDiv {
-                                attrs.id = "main-content"
-                                renderRoutes()
-                            }
-                        }
-
-                        if(currentDestination.showNavigation){
-                            renderBottomNavigation()
-                        }
-
-                        mFab("","",
-                            color = MColor.secondary) {
-                            attrs.id = "um-fab"
-                            css{
-                                display = Display.none
-                                +mainComponentFab
-                            }
                         }
                     }
-                    renderSnackBar()
+
+                    if(currentDestination.showNavigation){
+                        renderSideNavigation()
+                    }
+
+
+                    // Main content area, this div holds the contents
+                    styledDiv {
+                        css(mainComponentContentContainer)
+                        appBarSpacer()
+                        styledDiv {
+                            attrs.id = "main-content"
+                            renderRoutes()
+                        }
+                    }
+
+                    if(currentDestination.showNavigation){
+                        renderBottomNavigation()
+                    }
+
+                    mFab("","",
+                        color = MColor.secondary) {
+                        attrs.id = "um-fab"
+                        css{
+                            display = Display.none
+                            +mainComponentFab
+                        }
+                    }
                 }
+                renderSnackBar()
             }
+        }
+
+        errorBoundary(errorFallBack(getString(MessageID.error))){
+            mCssBaseline()
+
         }
     }
 

@@ -121,7 +121,7 @@ class ClazzLogListComponent (mProps: RProps) : UstadListComponent<ClazzLog, Claz
     }
 
     override fun RBuilder.renderHeaderView() {
-        +"Hello filters"
+        //Handle header view as per android
     }
 
     override fun RBuilder.renderListItem(item: ClazzLog) {
