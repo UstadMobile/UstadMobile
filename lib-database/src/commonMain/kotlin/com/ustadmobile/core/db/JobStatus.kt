@@ -78,6 +78,7 @@ object JobStatus {
 
     const val CANCELED = 28
 
+    @Deprecated("Status should be completed after deleting job")
     const val DELETED = 29
 
     fun statusToString(status: Int): String {

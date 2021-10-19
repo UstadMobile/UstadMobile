@@ -7,10 +7,9 @@
 
         <import type="android.view.View" />
 
-        <import type="com.ustadmobile.core.util.ext.DownloadJobExtKt" />
-
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
 
+        <import  type="com.ustadmobile.lib.db.entities.ContentJobItem" />
         <variable
             name="contentEntry"
             type="com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer" />
@@ -44,8 +43,8 @@
             type="com.ustadmobile.port.android.view.ContentEntryDetailFragmentEventHandler" />
 
         <variable
-            name="downloadJobItem"
-            type="com.ustadmobile.lib.db.entities.DownloadJobItem" />
+            name="contentJobItemStatus"
+            type="Integer" />
 
         <variable
             name="locallyAvailable"
@@ -351,7 +350,7 @@
                     android:layout_weight="1"
                     android:maxWidth="128dp"
                     android:onClick="@{()-> fragmentEventHandler.handleOnClickManageDownloadButton()}"
-                    android:visibility="@{DownloadJobExtKt.isStatusQueuedOrDownloading(downloadJobItem) ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{contentJobItemStatus == ContentJobItem.STATUS_RUNNING ? View.VISIBLE : View.GONE}"
                     android:text="@string/manage_download"/>
 
             </androidx.appcompat.widget.LinearLayoutCompat>

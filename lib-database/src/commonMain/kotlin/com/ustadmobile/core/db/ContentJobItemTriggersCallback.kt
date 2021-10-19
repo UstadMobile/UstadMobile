@@ -183,7 +183,7 @@ class ContentJobItemTriggersCallback: DoorDatabaseCallback {
                          WHEN EXISTS (SELECT status
 										FROM (${getStatus(id)}) 
 									    WHERE status = ${JobStatus.FAILED})
-						  THEN ${JobStatus.PARTIAL_FAILED}			
+						  THEN ${JobStatus.PARTIAL_FAILED}
 						  WHEN EXISTS (SELECT status 
 										FROM (${getStatus(id)}) 	
 										WHERE status = ${JobStatus.RUNNING})

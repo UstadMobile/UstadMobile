@@ -22,36 +22,6 @@ private val statusToMessageIdMap = mapOf(
         JobStatus.FAILED to MessageID.failed,
         JobStatus.DELETED to MessageID.deleted)
 
-private fun Int.isStatusQueuedOrDownloading() = this >= JobStatus.WAITING_MIN && this < JobStatus.COMPLETE_MIN
-
-private fun Int.isStatusPaused() = this == JobStatus.PAUSED
-
-private fun Int.isStatusCompletedSuccessfully() = this == JobStatus.COMPLETE
-
-private fun Int.isStatusCompleted() = this >= JobStatus.COMPLETE_MIN
-
-private fun Int.isStatusPausedOrQueuedOrDownloading() = this >= JobStatus.PAUSED && this < JobStatus.COMPLETE_MIN
-
-fun DownloadJobItem?.isStatusQueuedOrDownloading() = this?.djiStatus?.isStatusQueuedOrDownloading() ?: false
-
-fun DownloadJobItem?.isStatusPaused() = this?.djiStatus?.isStatusPaused() ?: false
-
-fun DownloadJobItem?.isStatusCompletedSuccessfully() = this?.djiStatus?.isStatusCompletedSuccessfully() ?: false
-
-fun DownloadJobItem?.isStatusCompleted() = this?.djiStatus?.isStatusCompleted() ?: false
-
-fun DownloadJobItem?.isStatusPausedOrQueuedOrDownloading() = this?.djiStatus?.isStatusPausedOrQueuedOrDownloading() ?: false
-
-fun DownloadJob?.isStatusQueuedOrDownloading() = this?.djStatus?.isStatusQueuedOrDownloading() ?: false
-
-fun DownloadJob?.isStatusPaused() = this?.djStatus?.isStatusPaused() ?: false
-
-fun DownloadJob?.isStatusCompletedSuccessfully() = this?.djStatus?.isStatusCompletedSuccessfully() ?: false
-
-fun DownloadJob?.isStatusCompleted() = this?.djStatus?.isStatusCompleted() ?: false
-
-fun DownloadJob?.isStatusPausedOrQueuedOrDownloading() = this?.djStatus?.isStatusPausedOrQueuedOrDownloading() ?: false
-
 private fun Int.downloadJobStatusStr(systemImpl: UstadMobileSystemImpl, context: Any): String {
     val messageId = statusToMessageIdMap[this]
     return if(messageId != null) {

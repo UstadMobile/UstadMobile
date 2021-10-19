@@ -1,9 +1,11 @@
 package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity
+@Entity(indices = [Index(value = ["cjiContentEntryUid", "cjiFinishTime"],
+        unique = true)])
 data class ContentJobItem(
 
     @PrimaryKey(autoGenerate = true)
@@ -98,10 +100,28 @@ data class ContentJobItem(
     var cjiParentCjiUid: Long = 0,
 
 
-    var cjiServerJobId: Long = 0
+    var cjiServerJobId: Long = 0,
+
+    /**
+     * time when the job runner started the job item
+     */
+    var cjiStartTime: Long = 0,
+
+    /**
+     * time when the job runner finished the job item
+     */
+    var cjiFinishTime: Long = 0
 
 ) {
     companion object {
+
+        const val STATUS_DOWNLOAD = 0
+
+        const val STATUS_RUNNING = 5
+
+        const val STATUS_COMPLETE = 10
+
+
 
         const val ACCEPT_NONE = 1
 

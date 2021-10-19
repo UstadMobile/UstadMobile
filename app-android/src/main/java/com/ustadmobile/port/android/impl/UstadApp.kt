@@ -58,7 +58,6 @@ import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.networkmanager.*
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.port.android.network.downloadmanager.ContainerDownloadNotificationListener
 import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
@@ -200,26 +199,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<ClazzLogCreatorManager>() with singleton { ClazzLogCreatorManagerAndroidImpl(applicationContext) }
 
         constant(TAG_DOWNLOAD_ENABLED) with true
-
-        bind<ContainerDownloadManager>() with scoped(EndpointScope.Default).singleton {
-            ContainerDownloadManagerImpl(endpoint = context, di = di).also {
-                it.addContainerDownloadListener(ContainerDownloadNotificationListener(applicationContext, context))
-            }
-        }
-
-        bind<DownloadPreparationRequester>() with scoped(EndpointScope.Default).singleton {
-            DownloadPreparationRequesterAndroidImpl(applicationContext, context)
-        }
-
-        bind<DeletePreparationRequester>() with scoped(EndpointScope.Default).singleton {
-            DeletePreparationRequesterAndroidImpl(applicationContext, context)
-        }
-
-
-        bind<ContainerDownloadRunner>() with factory { arg: DownloadJobItemRunnerDIArgs ->
-            DownloadJobItemRunner(arg.downloadJobItem,
-                    arg.endpoint.url, di = di)
-        }
 
         bind<CoroutineDispatcher>(tag = TAG_MAIN_COROUTINE_CONTEXT) with singleton { Dispatchers.Main }
 
