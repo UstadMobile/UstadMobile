@@ -3,7 +3,9 @@ package com.ustadmobile.view.ext
 import com.ccfraser.muirwik.components.*
 import com.ccfraser.muirwik.components.button.MIconButtonSize
 import com.ccfraser.muirwik.components.button.mIconButton
+import com.ccfraser.muirwik.components.form.MFormControlVariant
 import com.ccfraser.muirwik.components.list.mListItemIcon
+import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.ScopedGrantEditPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -20,6 +22,7 @@ import com.ustadmobile.util.StyleManager.mainComponentErrorPaper
 import com.ustadmobile.util.StyleManager.personListItemAvatar
 import com.ustadmobile.util.Util.ASSET_ACCOUNT
 import com.ustadmobile.util.ext.format
+import com.ustadmobile.util.ext.standardFormat
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
 import org.w3c.dom.events.Event
@@ -34,6 +37,7 @@ import styled.css
 import styled.styledDiv
 import styled.styledSpan
 import kotlin.Float
+import kotlin.js.Date
 
 fun RBuilder.appBarSpacer() {
     themeContext.Consumer { theme ->
@@ -430,24 +434,44 @@ fun RBuilder.permissionListText(systemImpl: UstadMobileSystemImpl,tableId: Int, 
 fun RBuilder.mSpacer(
     left: LinearDimension? = null, right: LinearDimension? = null,
     top: LinearDimension? = 1.spacingUnits,
-    bottom: LinearDimension? = 1.spacingUnits){
+    bottom: LinearDimension? = 1.spacingUnits) {
     styledDiv {
         css {
-            if(left != null){
+            if (left != null) {
                 marginLeft = left
             }
 
-            if(right != null){
+            if (right != null) {
                 marginRight = right
             }
 
-            if(top != null){
+            if (top != null) {
                 marginTop = top
             }
 
-            if(bottom != null){
+            if (bottom != null) {
                 marginBottom = bottom
             }
+        }
+    }
+}
+fun RBuilder.mDateField(label: FieldLabel, disabled: Boolean,
+                       initialValue: Date, type: String = "date",
+                       onChange: (newDateMsUtc: Long) -> Unit) {
+    mTextField(label = "${label.text}",
+        value = initialValue.standardFormat(),
+        error = label.error,
+        disabled = disabled,
+        helperText = label.errorText,
+        variant = MFormControlVariant.outlined) {
+        css(StyleManager.defaultFullWidth)
+        attrs.type = type
+        attrs.inputLabelProps = object : RProps {
+            val shrink = true
+        }
+        attrs.onChange = { event ->
+            event.persist()
+            onChange(Date(event.targetInputValue).getTime().toLong())
         }
     }
 }

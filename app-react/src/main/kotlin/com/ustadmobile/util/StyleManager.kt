@@ -62,7 +62,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     }
 
     val defaultPaddingTop by css{
-        paddingTop = 2.spacingUnits
+        paddingTop = 3.spacingUnits
     }
 
     val defaultDoubleMarginTop  by css{
@@ -314,9 +314,22 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         +defaultFullWidth
     }
 
+    val fieldsOnlyFormScreen by css {
+        paddingLeft = 4.spacingUnits
+        paddingRight = 4.spacingUnits
+        paddingTop = 4.spacingUnits
+        height = LinearDimension("100vh")
+        overflow = Overflow.scroll
+        paddingBottom = 16.spacingUnits
+        width = LinearDimension("96.5%")
+        media(theme.breakpoints.up(tabletAndHighEnd)){
+            width = LinearDimension("99.5%")
+        }
+    }
+
     val contentContainer by css {
-        marginLeft = 2.spacingUnits
-        marginRight = 2.spacingUnits
+        marginLeft = 3.spacingUnits
+        marginRight = 3.spacingUnits
         height = LinearDimension("100vh")
         overflow = Overflow.scroll
         paddingBottom = 16.spacingUnits

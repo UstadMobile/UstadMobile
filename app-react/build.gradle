@@ -59,6 +59,7 @@ dependencies {
     implementation "org.jetbrains.kotlin-wrappers:kotlin-redux:$version_kotlin_redux"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-react-redux:$version_kotlin_react_redux"
     implementation "com.ccfraser.muirwik:muirwik-components:$version_muirwik_components"
+    implementation project(":lib-database-mpp")
     implementation project(":core")
     implementation project(":lib-util")
     implementation project(":lib-database")

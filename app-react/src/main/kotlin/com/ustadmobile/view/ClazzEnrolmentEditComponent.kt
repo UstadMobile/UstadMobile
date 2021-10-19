@@ -13,6 +13,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.util.StyleManager
@@ -120,11 +121,11 @@ class ClazzEnrolmentEditComponent (mProps: RProps): UstadEditComponent<ClazzEnro
 
         styledDiv {
             css {
-                +StyleManager.contentContainer
-                +StyleManager.defaultPaddingTop
+                +StyleManager.fieldsOnlyFormScreen
             }
 
             umGridContainer(MGridSpacing.spacing4) {
+
                 umItem(MGridSize.cells12){
 
                     umGridContainer(MGridSpacing.spacing4) {
@@ -218,7 +219,7 @@ class ClazzEnrolmentEditComponent (mProps: RProps): UstadEditComponent<ClazzEnro
 
                         umItem(MGridSize.cells12, MGridSize.cells6 ) {
                             mTextField(label = "${endDateLabel.text}",
-                                value = Date(entity?.clazzEnrolmentDateLeft ?: Date.now()).standardFormat(),
+                                value = Date(entity?.clazzEnrolmentDateLeft ?: systemTimeInMillis()).standardFormat(),
                                 error = endDateLabel.error,
                                 disabled = !fieldsEnabled,
                                 helperText = endDateLabel.errorText,
