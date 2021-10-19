@@ -109,15 +109,6 @@ abstract class ContentJobItemDao {
     abstract fun findByJobId(jobUid: Long): ContentJobItem?
 
     @Query("""
-        SELECT ContentJobItem.*
-          FROM ContentJobItem
-         WHERE cjiContentEntryUid = :contentEntryUid
-      ORDER BY ContentJobItem.cjiUid DESC
-         LIMIT 1
-    """)
-    abstract fun findLiveDataByContentEntryUid(contentEntryUid: Long): DoorLiveData<ContentJobItem?>
-
-    @Query("""
         UPDATE ContentJobItem
            SET cjiItemProgress = :cjiProgress,
                cjiItemTotal = :cjiTotal
@@ -144,15 +135,6 @@ abstract class ContentJobItemDao {
                , 1)
     """)
     abstract suspend fun isConnectionMetered(contentJobId: Long): Boolean
-
-    @Query("""SELECT (SELECT COUNT(*) 
-                              FROM ContentJobItem 
-                             WHERE cjiJobUid = :contentJobId) AS numEntries, 
-                           (SELECT cjiRecursiveTotal 
-                              FROM ContentJobItem 
-                             WHERE cjiJobUid = :contentJobId 
-                               AND cjiParentCjiUid = 0) AS totalSize""")
-    abstract suspend fun getDownloadSizeInfo(contentJobId: Long): DownloadJobSizeInfo?
 
 
     @Transaction
