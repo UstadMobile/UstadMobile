@@ -12,7 +12,9 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -104,6 +106,9 @@ class ContentJobRunner(
             var processException: Throwable? = null
 
             try {
+
+                item.contentJobItem?.cjiUid?.let { db.contentJobItemDao.updateStartTimeForJob(it, getSystemTimeInMillis()) }
+
                 val sourceUri = item.contentJobItem?.sourceUri?.let { DoorUri.parse(it) }
                     ?: throw IllegalArgumentException("ContentJobItem #${item.contentJobItem?.cjiUid} has no source uri!")
 
@@ -137,6 +142,7 @@ class ContentJobRunner(
 
                 processResult = plugin.processJob(item, processContext, this@ContentJobRunner)
                 db.contentJobItemDao.updateItemStatus(item.contentJobItem?.cjiUid ?: 0, processResult.status)
+                db.contentJobItemDao.updateFinishTimeForJob(item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
                 println("Processor #$id completed job #${item.contentJobItem?.cjiUid}")
             }catch(e: Exception) {
                 //something went wrong
@@ -155,6 +161,7 @@ class ContentJobRunner(
                     db.contentJobItemDao.updateJobItemAttemptCountAndStatus(
                         item.contentJobItem?.cjiUid ?: 0,
                         (item.contentJobItem?.cjiAttemptCount ?: 0) + 1, finalStatus)
+                    db.contentJobItemDao.updateFinishTimeForJob(item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
 
                     activeJobItemIds -= (item.contentJobItem?.cjiUid ?: 0)
                     try{

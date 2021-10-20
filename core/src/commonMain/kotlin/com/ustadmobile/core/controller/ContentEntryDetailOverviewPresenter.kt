@@ -14,6 +14,7 @@ import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.DeletePreparationRequester
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.util.ContentEntryOpener
+import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.toDeepLink
 import com.ustadmobile.core.view.*
@@ -23,10 +24,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
-import com.ustadmobile.door.DoorDatabaseRepository
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.*
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.MapSerializer
@@ -40,7 +38,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
                                           di: DI, lifecycleOwner: DoorLifecycleOwner)
 
     : UstadDetailPresenter<ContentEntryDetailOverviewView, ContentEntryWithMostRecentContainer>(context,
-        arguments, view, di, lifecycleOwner) {
+        arguments, view, di, lifecycleOwner){
 
     val deepLink: String
         get() {
@@ -62,6 +60,8 @@ class ContentEntryDetailOverviewPresenter(context: Any,
     private val availabilityRequestDeferred = CompletableDeferred<AvailabilityMonitorRequest>()
 
     val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
+
+    private var contentJobItemStatusLiveData: DoorLiveData<Int>? = null
 
     private var contentEntryUid = 0L
 
@@ -118,6 +118,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
             }
         }else{
 
+
             db.containerDao.hasContainerWithFilesToDelete(entityUid)
                     .observeWithLifecycleOwner(lifecycleOwner) {
                         view.hasContentToOpenOrDelete = it ?: false
@@ -132,6 +133,27 @@ class ContentEntryDetailOverviewPresenter(context: Any,
                     .observeWithLifecycleOwner(lifecycleOwner){
                         view.canUpdate = it ?: false
                     }
+
+            contentJobItemStatusLiveData = RateLimitedLiveData(db, listOf("ContentJobItem"), 1000) {
+                db.contentJobItemDao.findStatusForActiveContentJobItem(contentEntryUid)
+            }
+
+            val contentJobItemProgressLiveData = RateLimitedLiveData(db, listOf("ContentJobItem") , 1000){
+                db.contentJobItemDao.findProgressForActiveContentJobItem(contentEntryUid)
+            }
+
+            withContext(Dispatchers.Main){
+                contentJobItemStatusLiveData?.observeWithLifecycleOwner(lifecycleOwner){
+                    val status = it ?: return@observeWithLifecycleOwner
+                    view.contentJobItemStatus = status
+                }
+                contentJobItemProgressLiveData.observeWithLifecycleOwner(lifecycleOwner){
+                    val progress = it ?: return@observeWithLifecycleOwner
+                    view.contentJobItemProgress = progress
+                }
+
+            }
+
         }
 
         return entity

@@ -38,6 +38,46 @@ abstract class ContentJobItemDao {
     """)
     abstract suspend fun findNextItemsInQueue(contentJobUid: Long, limit: Int) : List<ContentJobItemAndContentJob>
 
+
+    @Query("""
+            SELECT COALESCE((
+                 SELECT CASE 
+                 WHEN 
+                       (SELECT cjiFinishTime 
+                          FROM ContentJobItem 
+                         WHERE cjiPluginId != 14 
+                           AND cjiRecursiveStatus = ${JobStatus.COMPLETE}
+                           AND cjiContentEntryUid = :contentEntryUid
+					  ORDER BY cjiFinishTime DESC LIMIT 1) > 
+						COALESCE((SELECT cjiFinishTime 
+					       FROM ContentJobItem 
+						  WHERE cjiPluginId = 14 
+							AND cjiContentEntryUid = :contentEntryUid
+					   ORDER BY cjiFinishTime DESC LIMIT 1),0)
+                 THEN ${ContentJobItem.STATUS_COMPLETE}
+                 WHEN EXISTS (SELECT 1 FROM ContentJobItem 
+								  WHERE cjiContentEntryUid = :contentEntryUid
+								  AND cjiRecursiveStatus >= ${JobStatus.RUNNING_MIN}
+                                  AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX})
+			     THEN ${ContentJobItem.STATUS_RUNNING} 				
+		         ELSE ${ContentJobItem.STATUS_DOWNLOAD}  
+	             END
+		    FROM ContentJobItem
+            WHERE cjiContentEntryUid = :contentEntryUid),${ContentJobItem.STATUS_DOWNLOAD}) as status
+    """)
+    abstract suspend fun findStatusForActiveContentJobItem(contentEntryUid: Long): Int
+
+
+    @Query("""
+        SELECT cjiRecursiveProgress AS progress, cjiRecursiveTotal AS total
+          FROM ContentJobItem 
+         WHERE cjiContentEntryUid = :contentEntryUid
+           AND cjiRecursiveStatus >= ${JobStatus.RUNNING_MIN}
+           AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX}
+      ORDER BY cjiStartTime DESC LIMIT 1 
+    """)
+    abstract suspend fun findProgressForActiveContentJobItem(contentEntryUid: Long): ContentJobItemProgress?
+
     @Insert
     abstract suspend fun insertJobItem(jobItem: ContentJobItem) : Long
 
@@ -69,14 +109,6 @@ abstract class ContentJobItemDao {
     abstract fun findByJobId(jobUid: Long): ContentJobItem?
 
     @Query("""
-        SELECT ContentJobItem.*
-          FROM ContentJobItem
-         WHERE cjiContentEntryUid = :contentEntryUid
-         LIMIT 1
-    """)
-    abstract fun findLiveDataByContentEntryUid(contentEntryUid: Long): DoorLiveData<ContentJobItem?>
-
-    @Query("""
         UPDATE ContentJobItem
            SET cjiItemProgress = :cjiProgress,
                cjiItemTotal = :cjiTotal
@@ -104,15 +136,6 @@ abstract class ContentJobItemDao {
     """)
     abstract suspend fun isConnectionMetered(contentJobId: Long): Boolean
 
-    @Query("""SELECT (SELECT COUNT(*) 
-                              FROM ContentJobItem 
-                             WHERE cjiJobUid = :contentJobId) AS numEntries, 
-                           (SELECT cjiRecursiveTotal 
-                              FROM ContentJobItem 
-                             WHERE cjiJobUid = :contentJobId 
-                               AND cjiParentCjiUid = 0) AS totalSize""")
-    abstract suspend fun getDownloadSizeInfo(contentJobId: Long): DownloadJobSizeInfo?
-
 
     @Transaction
     open suspend fun commitProgressUpdates(updates: List<ContentJobItemProgressUpdate>) {
@@ -129,6 +152,21 @@ abstract class ContentJobItemDao {
          WHERE cjiUid = :cjiUid      
     """)
     abstract suspend fun updateJobItemAttemptCountAndStatus(cjiUid: Long, attemptCount: Int, status: Int)
+
+
+    @Query("""
+        UPDATE ContentJobItem
+           SET cjiStartTime = :startTime
+         WHERE cjiUid = :cjiUid      
+    """)
+    abstract suspend fun updateStartTimeForJob(cjiUid: Long, startTime: Long)
+
+    @Query("""
+        UPDATE ContentJobItem
+           SET cjiFinishTime = :finishTime
+         WHERE cjiUid = :cjiUid      
+    """)
+    abstract suspend fun updateFinishTimeForJob(cjiUid: Long, finishTime: Long)
 
     @Query("""
         UPDATE ContentJobITem

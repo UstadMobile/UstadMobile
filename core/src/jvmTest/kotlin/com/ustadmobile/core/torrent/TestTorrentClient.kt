@@ -29,7 +29,7 @@ class TestTorrentClient {
         localDi = DI {
             import(ustadTestRule.diModule)
             bind<ContainerTorrentDownloadJob>() with scoped(ustadTestRule.endpointScope).singleton {
-                ContainerTorrentDownloadJob(endpoint = context, di = di)
+                ContainerTorrentDownloadJob(Any(), endpoint = context, di = di)
             }
             val trackerUrl = URL("http://127.0.0.1:6677/announce")
             bind<UstadTorrentManager>() with scoped(ustadTestRule.endpointScope).singleton {

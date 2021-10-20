@@ -156,21 +156,37 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
         systemImpl.go("DownloadDialog", args, requireContext())
     }
 
-    override var downloadJobItem: DownloadJobItem? = null
+    override var contentJobItemProgress: ContentJobItemProgress? = null
+        set(value){
+            field = value
+            if(value != null) {
+                /* mBinding?.entryDetailProgress?.statusText = value.toStatusString(
+                     di.direct.instance(), requireContext())*/
+                mBinding?.entryDetailProgress?.progress = if (value.total > 0) {
+                    (value.progress.toFloat()) / (value.total.toFloat()) * 100
+                } else {
+                    0f
+                }
+            }else{
+                mBinding?.entryDetailProgress?.progress = 0f
+            }
+        }
+
+    override var contentJobItemStatus: Int = 0
         set(value) {
-            Napier.d("ContentEntryDetail: Download Status = ${downloadJobItem?.djiStatus} currentDownloadJobItemStatus = $currentDownloadJobItemStatus")
-            if(field.isStatusCompleted() != value.isStatusCompleted())
+            //Napier.d("ContentEntryDetail: Download Status = ${downloadJobItem?.djiStatus} currentDownloadJobItemStatus = $currentDownloadJobItemStatus")
+            if((field == ContentJobItem.STATUS_COMPLETE) != (value == ContentJobItem.STATUS_COMPLETE))
                 activity?.invalidateOptionsMenu()
 
-            mBinding?.downloadJobItem = value
-            if(currentDownloadJobItemStatus != value?.djiStatus) {
+            mBinding?.contentJobItemStatus = value
+            if(currentDownloadJobItemStatus != value) {
                 when {
-                    value.isStatusCompletedSuccessfully() -> {
+                    value == ContentJobItem.STATUS_COMPLETE -> {
                         mBinding?.entryDownloadOpenBtn?.visibility = View.VISIBLE
                         mBinding?.entryDetailProgress?.visibility = View.GONE
                     }
 
-                    value.isStatusQueuedOrDownloading() -> {
+                    value == ContentJobItem.STATUS_RUNNING -> {
                         mBinding?.entryDownloadOpenBtn?.visibility = View.GONE
                         mBinding?.entryDetailProgress?.visibility = View.VISIBLE
                     }
@@ -181,18 +197,7 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
                     }
                 }
 
-                currentDownloadJobItemStatus = value?.djiStatus ?: 0
-            }
-
-
-            if(value != null && value.isStatusQueuedOrDownloading()) {
-                mBinding?.entryDetailProgress?.statusText = value.toStatusString(
-                        di.direct.instance(), requireContext())
-                mBinding?.entryDetailProgress?.progress = if(value.downloadLength > 0) {
-                    (value.downloadedSoFar.toFloat()) / (value.downloadLength.toFloat())
-                }else {
-                    0f
-                }
+                currentDownloadJobItemStatus = value
             }
             field = value
         }
@@ -259,7 +264,7 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_content_entry, menu)
-        menu.findItem(R.id.content_entry_group_activity).isVisible = downloadJobItem.isStatusCompleted()
+        menu.findItem(R.id.content_entry_group_activity).isVisible = currentDownloadJobItemStatus == ContentJobItem.STATUS_COMPLETE
         super.onCreateOptionsMenu(menu, inflater)
     }
 
@@ -287,7 +292,6 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
         mBinding = null
         mPresenter = null
         currentLiveData = null
-        downloadJobItem = null
         mBinding?.availableTranslationView?.adapter = null
         availableTranslationAdapter = null
         availableTranslationsList = null

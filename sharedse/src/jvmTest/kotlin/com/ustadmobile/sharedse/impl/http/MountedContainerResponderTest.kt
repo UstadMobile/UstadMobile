@@ -22,8 +22,6 @@ import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder
 import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder.Companion.PARAM_CONTAINERUID_INDEX
 import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder.Companion.PARAM_DB_INDEX
 import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder.Companion.PARAM_FILTERS_INDEX
-import com.ustadmobile.sharedse.network.ContainerDownloadManagerImpl
-import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.sharedse.util.UstadTestRule
 import com.ustadmobile.sharedse.util.directActiveDbInstance
 import com.ustadmobile.sharedse.util.directActiveRepoInstance
