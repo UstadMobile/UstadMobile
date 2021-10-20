@@ -173,7 +173,7 @@ class TestUstadTorrentManager {
                     TorrentTracker(endpoint = context, di)
                 }
                  bind<ContainerTorrentDownloadJob>() with scoped(endpointScope).singleton {
-                     ContainerTorrentDownloadJob(context, di)
+                     ContainerTorrentDownloadJob(Any(),context, di)
                  }
 
                  bind<ContentJobManager>() with singleton {
