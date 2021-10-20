@@ -251,6 +251,7 @@ class DownloadDialogPresenter(
             cjiPluginId = 14 // points to deleteContainerPlugin
             cjiContentEntryUid = entry?.contentEntryUid ?: 0
             cjiIsLeaf = true
+            cjiItemTotal = 100
             cjiParentContentEntryUid = 0
             cjiConnectivityAcceptable = ContentJobItem.ACCEPT_ANY
             cjiStatus = JobStatus.QUEUED

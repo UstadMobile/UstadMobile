@@ -113,14 +113,14 @@ class ContainerTorrentDownloadJob(private var context: Any, private val endpoint
             val torrentDeferred = CompletableDeferred<Boolean>()
             val torrentListener = object: TorrentDownloadListener{
                 override fun onComplete() {
-                    contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal
+                    contentJobItem.cjiItemProgress = (contentJobItem.cjiItemTotal * 0.75).toLong()
                     progress.onProgress(contentJobItem)
                     println("downloaded torrent in ${System.currentTimeMillis() - startTime} ms")
                     torrentDeferred.complete(true)
                 }
 
                 override fun onProgress(progressSize: Int) {
-                    contentJobItem.cjiItemProgress = progressSize.toLong()
+                    contentJobItem.cjiItemProgress = (progressSize * 0.75).toLong()
                     progress.onProgress(contentJobItem)
                 }
             }
@@ -144,18 +144,19 @@ class ContainerTorrentDownloadJob(private var context: Any, private val endpoint
         val entriesThatGotDownloaded = fileNameList
                 .filter { it !in existingMd5s || it.equals(MANIFEST_FILE_NAME) }
 
-
+        val newContainerEntryFiles = mutableListOf<ContainerEntryFile>()
         entriesThatGotDownloaded.forEach {
-            ContainerEntryFile().apply {
+            val entryFile = ContainerEntryFile().apply {
                 cefMd5 = it
                 val cefFile = File(containerFilesFolder, it)
                 cefPath = cefFile.path
                 ceTotalSize = cefFile.getUnCompressedSize()
                 ceCompressedSize = cefFile.length()
                 compression = if(cefFile.isGzipped()) COMPRESSION_GZIP else COMPRESSION_NONE
-                cefUid = db.containerEntryFileDao.insert(this)
             }
+            newContainerEntryFiles.add(entryFile)
         }
+        db.containerEntryFileDao.insertList(newContainerEntryFiles)
 
         val manifestFile = File(containerFilesFolder, MANIFEST_FILE_NAME)
         if(!manifestFile.exists()) throw IllegalArgumentException("no manifest file found")
@@ -163,20 +164,26 @@ class ContainerTorrentDownloadJob(private var context: Any, private val endpoint
         val manifestJson = manifestFile.readText()
         val manifest: ContainerManifest = Json.decodeFromString(
                 ContainerManifest.serializer(), manifestJson)
+        val newContainerEntry = mutableListOf<ContainerEntry>()
         manifest.entryMap?.entries?.forEach { entry ->
             if(entry.key == MANIFEST_FILE_NAME){
                 return@forEach
             }
             entry.value.forEach {  path ->
-                ContainerEntry().apply {
+                val cefUid = db.containerEntryFileDao.findEntryByMd5Sum(entry.key.base64EncodedToHexString())?.cefUid
+                        ?: throw IllegalArgumentException("missed a file during download ${entry.key} with path $path")
+                val containerEntry = ContainerEntry().apply {
                     ceContainerUid = containerUid
                     cePath = path
-                    ceCefUid = db.containerEntryFileDao.findEntryByMd5Sum(entry.key.base64EncodedToHexString())?.cefUid
-                            ?: throw IllegalArgumentException("missed a file during download ${entry.key} with path $path")
-                    ceUid = db.containerEntryDao.insert(this)
+                    ceCefUid = cefUid
                 }
+                newContainerEntry.add(containerEntry)
             }
         }
+        db.containerEntryDao.insertListAsync(newContainerEntry)
+
+        contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal
+        progress.onProgress(contentJobItem)
 
 
         return ProcessResult(JobStatus.COMPLETE)

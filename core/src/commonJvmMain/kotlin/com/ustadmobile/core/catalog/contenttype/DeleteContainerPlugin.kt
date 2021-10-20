@@ -64,6 +64,9 @@ class DeleteContainerPlugin(private var context: Any, private val endpoint: Endp
         // delete all containerEntries for this contentEntry
         db.containerEntryDao.deleteByContentEntryUid(contentJobItem.cjiContentEntryUid)
 
+        contentJobItem.cjiItemProgress = 25
+        progress.onProgress(contentJobItem)
+
         var numFailures = 0
         db.runInTransaction {
             var zombieEntryFilesList: List<ContainerEntryFile>
@@ -80,6 +83,9 @@ class DeleteContainerPlugin(private var context: Any, private val endpoint: Endp
             } while (zombieEntryFilesList.isNotEmpty())
         }
 
+        contentJobItem.cjiItemProgress = 75
+        progress.onProgress(contentJobItem)
+
         val containers = db.containerDao.findFilesByContentEntryUid(contentJobItem.cjiContentEntryUid)
 
         containers.forEach {
@@ -88,6 +94,9 @@ class DeleteContainerPlugin(private var context: Any, private val endpoint: Endp
                 torrentFile.delete()
             }
         }
+
+        contentJobItem.cjiItemProgress = 100
+        progress.onProgress(contentJobItem)
 
         return if(numFailures == 0){
             ProcessResult(JobStatus.COMPLETE)

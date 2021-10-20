@@ -163,7 +163,7 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
                 /* mBinding?.entryDetailProgress?.statusText = value.toStatusString(
                      di.direct.instance(), requireContext())*/
                 mBinding?.entryDetailProgress?.progress = if (value.total > 0) {
-                    (value.progress.toFloat()) / (value.total.toFloat()) * 100
+                    (value.progress.toFloat()) / (value.total.toFloat())
                 } else {
                     0f
                 }
