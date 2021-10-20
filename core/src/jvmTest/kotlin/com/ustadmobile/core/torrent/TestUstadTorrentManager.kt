@@ -240,7 +240,7 @@ class TestUstadTorrentManager {
         clientDi = DI {
             import(ustadTestRule.diModule)
             bind<ContainerTorrentDownloadJob>() with scoped(ustadTestRule.endpointScope).singleton {
-                ContainerTorrentDownloadJob(endpoint = context, di = di)
+                ContainerTorrentDownloadJob(Any(), endpoint = context, di = di)
             }
             bind<EpubTypePluginCommonJvm>() with scoped(ustadTestRule.endpointScope).singleton {
                 EpubTypePluginCommonJvm(Any(), endpoint = context, di = di)
