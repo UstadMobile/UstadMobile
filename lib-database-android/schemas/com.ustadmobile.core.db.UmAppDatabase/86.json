@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 86,
-    "identityHash": "9e31ee79979918577999d4de10b1d8b5",
+    "identityHash": "afe933de0c49445e6696fae1d4e3da76",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -6289,12 +6289,12 @@
         "indices": [
           {
             "name": "index_ContentJobItem_cjiContentEntryUid_cjiFinishTime",
-            "unique": true,
+            "unique": false,
             "columnNames": [
               "cjiContentEntryUid",
               "cjiFinishTime"
             ],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ContentJobItem_cjiContentEntryUid_cjiFinishTime` ON `${TABLE_NAME}` (`cjiContentEntryUid`, `cjiFinishTime`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentJobItem_cjiContentEntryUid_cjiFinishTime` ON `${TABLE_NAME}` (`cjiContentEntryUid`, `cjiFinishTime`)"
           }
         ],
         "foreignKeys": []
@@ -10729,7 +10729,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9e31ee79979918577999d4de10b1d8b5')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'afe933de0c49445e6696fae1d4e3da76')"
     ]
   }
 }

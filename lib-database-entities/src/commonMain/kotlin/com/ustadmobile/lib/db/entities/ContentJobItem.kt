@@ -5,7 +5,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(indices = [Index(value = ["cjiContentEntryUid", "cjiFinishTime"],
-        unique = true)])
+        unique = false)])
 data class ContentJobItem(
 
     @PrimaryKey(autoGenerate = true)
