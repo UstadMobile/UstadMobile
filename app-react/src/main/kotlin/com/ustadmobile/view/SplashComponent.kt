@@ -8,29 +8,19 @@ import com.ustadmobile.util.StyleManager.splashComponentPreloadContainer
 import com.ustadmobile.util.StyleManager.splashComponentPreloadProgressBar
 import com.ustadmobile.util.ThemeManager.isDarkModeActive
 import kotlinx.browser.document
-import react.RBuilder
-import react.RProps
-import react.RState
-import react.setState
+import kotlinx.coroutines.Runnable
+import react.*
 import styled.css
 import styled.styledDiv
 import styled.styledImg
 
-
-class SplashComponent (props: RProps): UstadBaseComponent<RProps, RState>(props), SplashView {
+class SplashComponent (props: RProps): RComponent<RProps, RState>(props), SplashView {
 
     private var mPresenter: SplashPresenter? = null
 
-    private var showMainComponent: Boolean = false
-
-    override val viewName: String
-        get() = SplashView.VIEW_NAME
-
-    override fun onCreate() {
-        super.onCreate()
+    override fun componentWillMount() {
         mPresenter = SplashPresenter(this)
         mPresenter?.onCreate()
-        mPresenter?.handleResourceLoading()
     }
 
     override var appName: String? = null
@@ -39,11 +29,17 @@ class SplashComponent (props: RProps): UstadBaseComponent<RProps, RState>(props)
             document.title = value.toString()
         }
 
-    override fun showMainComponent() {
-        setState {
-            showMainComponent = true
+    override var loading: Boolean = true
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
         }
-    }
+
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {}
+
+    override fun runOnUiThread(r: Runnable?) {}
 
     override fun RBuilder.render() {
         mCssBaseline()
@@ -51,7 +47,8 @@ class SplashComponent (props: RProps): UstadBaseComponent<RProps, RState>(props)
 
             styledDiv {
                 css (splashComponentContainer)
-                if (showMainComponent) {
+                if (!loading) {
+                    console.log("shw main")
                     mainComponent()
                 } else {
                     styledDiv {

@@ -37,7 +37,7 @@ import kotlin.js.Date
 class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
         ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>(props), ContentEntryList2View{
 
-    private lateinit var mPresenter: ContentEntryList2Presenter
+    private var mPresenter: ContentEntryList2Presenter? = null
 
     private var showingEditOptions = false
 
@@ -66,7 +66,7 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
         super.onCreate()
         fabManager?.text = getString(MessageID.content)
         mPresenter = ContentEntryList2Presenter(this, arguments, this,di,this)
-        mPresenter.onCreate(mapOf())
+        mPresenter?.onCreate(mapOf())
     }
 
     override fun RBuilder.renderListItem(item: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
@@ -124,7 +124,7 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
                                 color = MColor.primary,
                                 onClick = {
                                     it.stopPropagation()
-                                    mPresenter.onClickSelectContentEntry(item)
+                                    mPresenter?.onClickSelectContentEntry(item)
                                 }){
                                 css {
                                     display = displayProperty(showSelectBtn)
@@ -138,7 +138,7 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
     }
 
     override fun handleClickEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
-        mPresenter.onClickContentEntry(entry)
+        mPresenter?.onClickContentEntry(entry)
     }
 
     override fun onFabClicked() {
@@ -159,19 +159,19 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
             val options = mutableListOf(
                 PopUpOptionItem("create_new_folder",
                     MessageID.content_editor_create_new_category) {
-                    mPresenter.onClickNewFolder()
+                    mPresenter?.onClickNewFolder()
                 },
                 PopUpOptionItem("link",MessageID.add_using_link,
                     MessageID.add_link_description) {
-                    mPresenter.onClickImportLink()
+                    mPresenter?.onClickImportLink()
                 },
                 PopUpOptionItem("collections",MessageID.add_from_gallery,
                     MessageID.add_gallery_description) {
-                    mPresenter.onClickImportGallery()
+                    mPresenter?.onClickImportGallery()
                 },
                 PopUpOptionItem("note_add",MessageID.add_file,
                     MessageID.add_file_description) {
-                    mPresenter.onClickImportFile()
+                    mPresenter?.onClickImportFile()
                 }
             )
 
@@ -205,10 +205,10 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
             mMenu(showingEditOptions, anchorElement = anchorElement,
                 onClose = { _, _ -> setState { showingEditOptions = false; anchorElement = null}}) {
                 mMenuItem(getString(MessageID.edit), onClick = {
-                    mPresenter.handleClickEditFolder()
+                    mPresenter?.handleClickEditFolder()
                 })
                 mMenuItem(getString(MessageID.show_hidden_items), onClick = {
-                    mPresenter.handleClickShowHiddenItems()
+                    mPresenter?.handleClickShowHiddenItems()
                 })
             }
         }
@@ -217,7 +217,8 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
 
     override fun componentWillUnmount() {
         super.componentWillUnmount()
-        mPresenter.onDestroy()
+        mPresenter?.onDestroy()
+        mPresenter = null
     }
 
     companion object {

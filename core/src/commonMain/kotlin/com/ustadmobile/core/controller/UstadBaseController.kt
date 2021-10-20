@@ -348,7 +348,8 @@ abstract class UstadBaseController<V : UstadView>(
             }
 
             numAccountsRemaining == 0 && !canSelectServer -> {
-                impl.go(Login2View.VIEW_NAME, mapOf(), context, goOptions)
+                //change later
+                impl.go(ContentEntryListTabsView.VIEW_NAME, mapOf(), context, goOptions)
             }
 
             numAccountsRemaining > 0 -> {

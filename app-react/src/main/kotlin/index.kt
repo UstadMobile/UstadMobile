@@ -12,9 +12,7 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.defaultJsonSerializer
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.mocks.container.ContainerMounterJs
-import com.ustadmobile.mocks.db.DatabaseJs
 import com.ustadmobile.navigation.NavControllerJs
 import com.ustadmobile.redux.ReduxAppStateManager.createStore
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
@@ -22,7 +20,6 @@ import com.ustadmobile.redux.ReduxDiState
 import com.ustadmobile.redux.ReduxThemeState
 import com.ustadmobile.util.BrowserTabTracker
 import com.ustadmobile.util.ThemeManager.createAppTheme
-import com.ustadmobile.util.TimeZonesUtil
 import com.ustadmobile.view.splashComponent
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.XmlSerializer
@@ -33,7 +30,9 @@ import io.ktor.client.features.json.*
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import org.kodein.di.*
 import react.dom.render
 import react.redux.provider
@@ -42,6 +41,7 @@ fun main() {
     defaultJsonSerializer()
     BrowserTabTracker.init()
     window.onload = {
+        console.log("App loaded")
         render(document.getElementById("root")) {
             val diState = ReduxDiState(
                 DI.lazy {
@@ -69,8 +69,10 @@ private val diModule = DI.Module("UstadApp-React"){
     }
 
     bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(EndpointScope.Default).singleton {
-        val dbName = sanitizeDbNameFromUrl(context.url)
-        DatabaseJs.getInstance(this, dbName)
+        getCurrentState().db.instance ?: throw IllegalArgumentException("Database was not built, make sure it is built before proceeding")
+    }
+    bind<CoroutineScope>(DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with provider {
+        GlobalScope
     }
 
     bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(EndpointScope.Default).singleton {

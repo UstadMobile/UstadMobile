@@ -6,8 +6,6 @@ interface SplashView: SplashScreenView {
 
     var appName: String?
 
-    fun showMainComponent()
-
     companion object {
 
         const val VIEW_NAME = "SplashView"

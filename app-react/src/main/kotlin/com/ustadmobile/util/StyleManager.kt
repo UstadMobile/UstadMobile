@@ -524,6 +524,6 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     }
 
     override val di: DI
-        get() = ReduxAppStateManager.getCurrentState().appDi.di
+        get() = ReduxAppStateManager.getCurrentState().di.instance
 
 }

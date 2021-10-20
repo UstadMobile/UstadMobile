@@ -1,6 +1,7 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
@@ -147,13 +148,8 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         r?.run()
     }
 
-    override val di: DI by DI.lazy {
-        extend(getCurrentState().appDi.di)
-
-        bind<CoroutineScope>(DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with provider {
-            GlobalScope
-        }
-    }
+    override val di: DI
+        get() = getCurrentState().di.instance
 
     override fun addObserver(observer: DoorLifecycleObserver) {
         lifecycleObservers.add(observer)

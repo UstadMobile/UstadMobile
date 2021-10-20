@@ -4,4 +4,4 @@ import com.ustadmobile.core.db.UmAppDatabase
 import org.kodein.di.DI
 import redux.RAction
 
-data class ReduxDiState(var instance: DI = DI.lazy {  }): RAction
+data class ReduxDbState(var instance: UmAppDatabase? = null): RAction
