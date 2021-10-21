@@ -15,8 +15,8 @@ abstract class UstadEditComponent<T: Any>(mProps: RProps): UstadBaseComponent<RP
 
     abstract protected val mEditPresenter : UstadEditPresenter<*, T>?
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         val textId = if(mEditPresenter?.persistenceMode == UstadSingleEntityPresenter.PersistenceMode.DB) {
             getString(MessageID.save)
         }else {
@@ -37,7 +37,7 @@ abstract class UstadEditComponent<T: Any>(mProps: RProps): UstadBaseComponent<RP
     }
 
     override fun finishWithResult(result: List<T>) {
-        saveResultToBackStackSavedStateHandle(result)
+        TODO("Not used anymore, handle it MPP way")
     }
 
     protected fun setEditTitle(newTitleId: Int, editStringId: Int) {

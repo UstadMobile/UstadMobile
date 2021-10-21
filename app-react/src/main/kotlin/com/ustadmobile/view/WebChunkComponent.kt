@@ -27,8 +27,8 @@ class WebChunkComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(mPro
             field = value
         }
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         mPresenter = WebChunkPresenter(this,arguments, this, di)
         mPresenter?.onCreate(mapOf())
     }
@@ -39,6 +39,14 @@ class WebChunkComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(mPro
 
     override fun showNoAppFoundError(message: String, actionMessageId: Int, mimeType: String) {
         showSnackBar(message, {}, actionMessageId)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
+        entry = null
+        viewName = null
     }
 
 }

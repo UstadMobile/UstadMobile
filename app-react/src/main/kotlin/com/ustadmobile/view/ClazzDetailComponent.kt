@@ -56,8 +56,8 @@ class ClazzDetailComponent(mProps: RProps): UstadDetailComponent<Clazz>(mProps),
             }
         }
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         mPresenter = ClazzDetailPresenter(this, arguments, this,di,this)
         mPresenter?.onCreate(mapOf())
     }
@@ -86,6 +86,14 @@ class ClazzDetailComponent(mProps: RProps): UstadDetailComponent<Clazz>(mProps),
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter = null
+        entity = null
+        tabsToRender = null
+        tabs = null
     }
 
     companion object {

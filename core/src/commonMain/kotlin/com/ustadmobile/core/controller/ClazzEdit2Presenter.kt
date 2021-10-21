@@ -182,7 +182,7 @@ class ClazzEdit2Presenter(context: Any,
     }
 
     fun handleClickTimezone() {
-        navigateForResult(NavigateForResultOptions<String>(
+        navigateForResult(NavigateForResultOptions(
             this,
             currentEntityValue = entity?.clazzTimeZone,
             destinationViewName = TimeZoneListView.VIEW_NAME,

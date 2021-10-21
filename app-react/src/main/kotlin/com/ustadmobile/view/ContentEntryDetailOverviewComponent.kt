@@ -27,9 +27,6 @@ import com.ustadmobile.util.ext.joinString
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.css.*
 import react.RBuilder
 import react.RProps
@@ -40,14 +37,14 @@ import styled.styledDiv
 class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ContentEntryWithMostRecentContainer>(mProps),
     ContentEntryDetailOverviewView {
 
-    private lateinit var mPresenter: ContentEntryDetailOverviewPresenter
+    private var mPresenter: ContentEntryDetailOverviewPresenter? = null
 
     private var translations: List<ContentEntryRelatedEntryJoinWithLanguage>? = null
 
     override val viewName: String
         get() = ContentEntryDetailOverviewView.VIEW_NAME
 
-    override val detailPresenter: UstadDetailPresenter<*, *>
+    override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
     private val observer = ObserverFnWrapper<List<ContentEntryRelatedEntryJoinWithLanguage>>{
@@ -91,10 +88,10 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
             field = value
         }
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         mPresenter = ContentEntryDetailOverviewPresenter(this,arguments, this,di,this)
-        mPresenter.onCreate(mapOf())
+        mPresenter?.onCreate(mapOf())
     }
 
     override fun RBuilder.render() {
@@ -113,10 +110,12 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
                         if(entity?.leaf == true) ASSET_BOOK else ASSET_FOLDER,
                         showIcon = false)
 
-                    mButton(getString(MessageID.open), size = MButtonSize.large
-                        ,color = MColor.secondary,variant = MButtonVariant.contained,
+                    mButton(getString(MessageID.open),
+                        size = MButtonSize.large,
+                        color = MColor.secondary,
+                        variant = MButtonVariant.contained,
                         onClick = {
-                            mPresenter.handleOnClickOpenDownloadButton()
+                            mPresenter?.handleOnClickOpenDownloadButton()
                         }){
                         css (contentEntryDetailOverviewComponentOpenBtn)
                     }
@@ -128,7 +127,8 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
                             +contentEntryDetailOverviewExtraInfo
                         }
 
-                        mTypography(entity?.title, variant = MTypographyVariant.h4,
+                        mTypography(entity?.title,
+                            variant = MTypographyVariant.h4,
                             gutterBottom = true){
                             css(alignTextToStart)
                         }
@@ -137,7 +137,8 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
                             entity?.author?.let { author ->
                                 getString(MessageID.entry_details_author).joinString(author)
                             },
-                            variant = MTypographyVariant.h6, gutterBottom = true){
+                            variant = MTypographyVariant.h6,
+                            gutterBottom = true){
                             css(alignTextToStart)
                         }
 
@@ -149,7 +150,8 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
                                         entity?.publisher?.let {
                                             getString(MessageID.entry_details_publisher).joinString(":",it)
                                         },
-                                        variant = MTypographyVariant.subtitle1, gutterBottom = true){
+                                        variant = MTypographyVariant.subtitle1,
+                                        gutterBottom = true){
                                         css(alignTextToStart)
                                     }
                                 }
@@ -159,7 +161,8 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
                                         entity?.licenseName?.let { license ->
                                             getString(MessageID.entry_details_license).joinString(license)
                                         },
-                                        variant = MTypographyVariant.subtitle1, gutterBottom = true){
+                                        variant = MTypographyVariant.subtitle1,
+                                        gutterBottom = true){
                                         css(alignTextToStart)
                                     }
                                 }
@@ -167,7 +170,8 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
                         }
 
                         mTypography(getString(MessageID.description),
-                            variant = MTypographyVariant.caption, paragraph = true){
+                            variant = MTypographyVariant.caption,
+                            paragraph = true){
                             css(alignTextToStart)
                         }
 
@@ -176,7 +180,8 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
                         }
 
                         mTypography(getString(MessageID.also_available_in),
-                            variant = MTypographyVariant.caption, paragraph = true){
+                            variant = MTypographyVariant.caption,
+                            paragraph = true){
                             css(alignTextToStart)
                         }
                         styledDiv {
@@ -187,7 +192,7 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
                             translations?.forEach { translation ->
                                 mChip("${translation.language?.name}",
                                     onClick = {
-                                        mPresenter.handleOnTranslationClicked(translation.language?.langUid ?: 0)
+                                        mPresenter?.handleOnTranslationClicked(translation.language?.langUid ?: 0)
                                     }) {
                                     css {
                                         margin(1.spacingUnits)
@@ -203,10 +208,17 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
 
     override fun onFabClicked() {
         super.onFabClicked()
-        mPresenter.handleClickEdit()
+        mPresenter?.handleClickEdit()
     }
 
     override fun showDownloadDialog(args: Map<String, String>) {
         TODO("Not yet implemented")
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
+        entity = null
     }
 }

@@ -6,6 +6,7 @@ import com.ccfraser.muirwik.components.list.MListItemAlignItems
 import com.ccfraser.muirwik.components.list.alignItems
 import com.ccfraser.muirwik.components.list.mList
 import com.ccfraser.muirwik.components.list.mListItem
+import com.ustadmobile.EmptyList
 import com.ustadmobile.core.controller.OnSortOptionSelected
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
@@ -19,6 +20,9 @@ import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.centerContainer
+import com.ustadmobile.util.StyleManager.centerItem
 import com.ustadmobile.util.StyleManager.chipSetFilter
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.displayProperty
@@ -169,8 +173,8 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
             }
         }
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
         window.setTimeout({
             searchManager?.searchListener = listPresenter
@@ -191,10 +195,14 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
 
             renderHeaderView()
 
-            if(listTypeSingleColumn)
-                renderSingleColumnList()
-            else
-                renderMultiColumnList()
+            if(listItems.isNotEmpty()){
+                if(listTypeSingleColumn)
+                    renderSingleColumnList()
+                else
+                    renderMultiColumnList()
+            }else {
+                renderEmptyList()
+            }
 
             renderFooterView()
         }
@@ -202,6 +210,30 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
         //Render dialog UI to be shown when fab is clicked
         renderAddEntryOptionsDialog()
     }
+
+
+    private fun RBuilder.renderEmptyList(){
+        umGridContainer {
+            css (centerContainer)
+            styledDiv {
+                css{
+                    +centerItem
+                    width = LinearDimension("200px")
+                }
+                mIcon(emptyList.icon ?: "crop_free", className = "${StyleManager.name}-emptyListIcon")
+                mTypography(emptyList.text ?: getString(MessageID.nothing_here),
+                    variant = MTypographyVariant.h6,
+                    align = MTypographyAlign.center,
+                    color = MTypographyColor.textPrimary){
+                    css {
+                        marginTop = LinearDimension("20px")
+                    }
+                }
+            }
+        }
+    }
+
+
 
 
     private fun RBuilder.renderMultiColumnList(){
@@ -395,6 +427,8 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
 
     open fun RBuilder.renderAddEntryOptionsDialog(){}
 
+    open val emptyList: EmptyList = EmptyList()
+
     open fun RBuilder.renderEditOptionMenu(){}
 
     open fun RBuilder.renderHeaderView(){}
@@ -417,7 +451,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
     }
 
     override fun finishWithResult(result: List<RT>) {
-        saveResultToBackStackSavedStateHandle(result)
+        TODO("Not used anymore")
     }
 
     override fun onFabClicked() {
@@ -425,8 +459,10 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
         handleClickCreateNewEntry()
     }
 
-    override fun componentWillUnmount() {
-        super.componentWillUnmount()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        dbRepo = null
+        listPresenter?.onDestroy()
         selectedEntries.clear()
     }
 

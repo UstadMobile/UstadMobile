@@ -8,7 +8,6 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.HolidayEditView
 import com.ustadmobile.lib.db.entities.Holiday
-import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
@@ -55,14 +54,12 @@ class HolidayEditComponent(mProps: RProps): UstadEditComponent<Holiday>(mProps),
 
     override var loading: Boolean = false
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         setEditTitle(MessageID.add_a_holiday, MessageID.edit_holiday)
         mPresenter = HolidayEditPresenter(this, arguments, this, di, this)
         mPresenter?.onCreate(mapOf())
     }
-
-
 
     override fun RBuilder.render() {
         styledDiv {
@@ -127,5 +124,12 @@ class HolidayEditComponent(mProps: RProps): UstadEditComponent<Holiday>(mProps),
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
+        entity = null
     }
 }

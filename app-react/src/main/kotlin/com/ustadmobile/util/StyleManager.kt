@@ -314,6 +314,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         +defaultFullWidth
     }
 
+
     val fieldsOnlyFormScreen by css {
         paddingLeft = 4.spacingUnits
         paddingRight = 4.spacingUnits
@@ -337,6 +338,20 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         media(theme.breakpoints.up(tabletAndHighEnd)){
             width = LinearDimension("96.5%")
         }
+    }
+
+
+    val centerContainer by css {
+        display = Display.flex
+        justifyContent = JustifyContent.center
+        height = LinearDimension("100%")
+        width = LinearDimension("100wh")
+        alignItems = Align.center
+    }
+
+    val centerItem by css {
+        alignItems = Align.center
+        flexShrink = 0.0
     }
 
 
@@ -422,6 +437,12 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
     val entityImageIconClass by css {
         fontSize = LinearDimension("3em")
+    }
+
+    val emptyListIcon by css {
+        display = Display.table
+        margin = "0 auto"
+        fontSize = LinearDimension("7em")
     }
 
     val entryItemImageContainer by css {

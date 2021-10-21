@@ -64,8 +64,8 @@ class ClazzLogListComponent (mProps: RProps) : UstadListComponent<ClazzLog, Claz
         }
 
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         fabManager?.text = getString(MessageID.record_attendance)
         fabManager?.icon = "assignment_turned_in"
         mPresenter = ClazzLogListAttendancePresenter(this, arguments, this, di, this)
@@ -171,6 +171,12 @@ class ClazzLogListComponent (mProps: RProps) : UstadListComponent<ClazzLog, Claz
 
     override fun handleClickEntry(entry: ClazzLog) {
 
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
     }
 }
 

@@ -25,8 +25,8 @@ class TimeZoneListComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(
     override val viewName: String
         get() = TimeZoneListView.VIEW_NAME
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         mPresenter = TimeZoneListPresenter(this, arguments,
             this, di)
         mPresenter?.onCreate(mapOf())
@@ -37,10 +37,6 @@ class TimeZoneListComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(
             mPresenter?.handleClickTimeZone(timezone.id)
         }
 
-    }
-
-    override fun finishWithResult(timeZoneId: String) {
-        saveResultToBackStackSavedStateHandle(timeZoneId)
     }
 
     override fun onSearchSubmitted(text: String?) {
@@ -60,6 +56,12 @@ class TimeZoneListComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(
                }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
     }
 }
 

@@ -13,7 +13,6 @@ import com.ustadmobile.core.util.ext.determineListMode
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_SELECT_FOLDER_VISIBLE
 import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.UstadView.Companion.ARG_WEB_PLATFORM
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.util.StyleManager
@@ -62,8 +61,8 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
         }
 
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         fabManager?.text = getString(MessageID.content)
         mPresenter = ContentEntryList2Presenter(this, arguments, this,di,this)
         mPresenter?.onCreate(mapOf())
@@ -83,7 +82,8 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
 
             umItem(MGridSize.cells8, MGridSize.cells9){
                 umItem(MGridSize.cells12){
-                    mTypography(item.title,variant = MTypographyVariant.h6,
+                    mTypography(item.title,
+                        variant = MTypographyVariant.h6,
                         color = MTypographyColor.textPrimary){
                         css {
                             +alignTextToStart
@@ -93,8 +93,10 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
                 }
 
                 umItem(MGridSize.cells12){
-                    mTypography(item.description, variant = MTypographyVariant.body1,
-                        paragraph = true, color = MTypographyColor.textPrimary){
+                    mTypography(item.description,
+                        variant = MTypographyVariant.body1,
+                        paragraph = true,
+                        color = MTypographyColor.textPrimary){
                         css(alignTextToStart)
                     }
                 }
@@ -115,7 +117,9 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
                         }
 
                         umItem(MGridSize.cells8, MGridSize.cells9) {
-                            mTypography(getString(messageId), variant = MTypographyVariant.body2, gutterBottom = true)
+                            mTypography(getString(messageId),
+                                variant = MTypographyVariant.body2,
+                                gutterBottom = true)
                         }
 
                         umItem(MGridSize.cells2){
@@ -193,30 +197,40 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
             css{
                 display = displayProperty(editOptionVisible)
             }
-            mIconButton("more_vert", color = MColor.default, onClick = {
-                val target =  it.currentTarget
-                setState {
-                    showingEditOptions = true; anchorElement = target.asDynamic()
-                }
+            mIconButton("more_vert",
+                color = MColor.default,
+                onClick = {
+                    val target =  it.currentTarget
+                    setState {
+                        showingEditOptions = true; anchorElement = target.asDynamic()
+                    }
             })
         }
 
         styledDiv{
-            mMenu(showingEditOptions, anchorElement = anchorElement,
-                onClose = { _, _ -> setState { showingEditOptions = false; anchorElement = null}}) {
-                mMenuItem(getString(MessageID.edit), onClick = {
-                    mPresenter?.handleClickEditFolder()
-                })
-                mMenuItem(getString(MessageID.show_hidden_items), onClick = {
-                    mPresenter?.handleClickShowHiddenItems()
-                })
+            mMenu(showingEditOptions,
+                anchorElement = anchorElement,
+                onClose = { _, _ -> setState {
+                    showingEditOptions = false; anchorElement = null
+                }}) {
+
+                mMenuItem(getString(MessageID.edit),
+                    onClick = {
+                        mPresenter?.handleClickEditFolder()
+                    }
+                )
+                mMenuItem(getString(MessageID.show_hidden_items),
+                    onClick = {
+                        mPresenter?.handleClickShowHiddenItems()
+                    }
+                )
             }
         }
     }
 
 
-    override fun componentWillUnmount() {
-        super.componentWillUnmount()
+    override fun onDestroyView() {
+        super.onDestroyView()
         mPresenter?.onDestroy()
         mPresenter = null
     }

@@ -45,8 +45,8 @@ class SchoolDetailComponent(mProps:RProps): UstadDetailComponent<School>(mProps)
 
     private var tabsToRender: List<UstadTab>? = null
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         fabManager?.visible = false
         mPresenter = SchoolDetailPresenter(this, arguments, this, di, this)
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
@@ -105,5 +105,13 @@ class SchoolDetailComponent(mProps:RProps): UstadDetailComponent<School>(mProps)
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
+        entity = null
+        tabsToRender = null
     }
 }

@@ -30,7 +30,7 @@ import styled.css
 
 class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), Login2View {
 
-    private lateinit var mPresenter: Login2Presenter
+    private var mPresenter: Login2Presenter? = null
 
     private var username: String = ""
 
@@ -116,11 +116,11 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
         }
 
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         title = getString(MessageID.login)
         mPresenter = Login2Presenter(this, arguments,this, di)
-        mPresenter.onCreate(mapOf())
+        mPresenter?.onCreate(mapOf())
     }
 
     override fun RBuilder.render() {
@@ -158,9 +158,11 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
                     umItem(MGridSize.cells12, gridSizeOnCenterOnMdDown, gridSizeOnCenterLgUp) {
                         mTextField(label = "${usernameLabel.text}",
                             helperText = usernameLabel.errorText,
-                            value = username, error = usernameLabel.error,
+                            value = username,
+                            error = usernameLabel.error,
                             disabled = inProgress,
-                            variant = MFormControlVariant.outlined, onChange = {
+                            variant = MFormControlVariant.outlined,
+                            onChange = {
                                 it.persist()
                                 setState {
                                     username = it.targetInputValue
@@ -185,7 +187,10 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
                                 error = passwordLabel.error,
                                 variant = MFormControlVariant.outlined,
                                 htmlFor = "password-input")
-                            mOutlinedInput(labelWidth = passwordLabel.width,id = "password-input",value = password, disabled = inProgress,
+                            mOutlinedInput(labelWidth = passwordLabel.width,
+                                id = "password-input",
+                                value = password,
+                                disabled = inProgress,
                                 error = passwordLabel.error,
                                 type =  if(showPassword) InputType.text else InputType.password,
                                 onChange = {
@@ -237,7 +242,7 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
                             ,color = MColor.secondary,
                             variant = MButtonVariant.contained,
                             onClick = {
-                                mPresenter.handleLogin(username, password)
+                                mPresenter?.handleLogin(username, password)
                             }){
                             css {
                                 +defaultFullWidth
@@ -253,8 +258,13 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
                     mHidden(xsDown = true) { umItem(MGridSize.cells12, gridSizeOnLeft,gridSizeOnCenterLgUp) {} }
                     umItem(MGridSize.cells12, gridSizeOnCenterOnMdDown,gridSizeOnCenterLgUp) {
                         mButton(getString(MessageID.create_account),
-                            variant = MButtonVariant.text, color = MColor.primary, disabled = inProgress,
-                            size = MButtonSize.large, onClick = {mPresenter.handleCreateAccount()}){
+                            variant = MButtonVariant.text,
+                            color = MColor.primary,
+                            disabled = inProgress,
+                            size = MButtonSize.large,
+                            onClick = {
+                                mPresenter?.handleCreateAccount()
+                            }){
                             css(defaultFullWidth)
                         }
                     }
@@ -269,8 +279,12 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
                     }
                     umItem(MGridSize.cells12, gridSizeOnCenterOnMdDown,gridSizeOnCenterLgUp) {
                         mButton(getString(MessageID.connect_as_guest),
-                            variant = MButtonVariant.text, color = MColor.primary,disabled = inProgress,
-                            size = MButtonSize.large, onClick = { mPresenter.handleConnectAsGuest() }){
+                            variant = MButtonVariant.text,
+                            color = MColor.primary,
+                            disabled = inProgress,
+                            size = MButtonSize.large,
+                            onClick = {
+                                mPresenter?.handleConnectAsGuest() }){
                             css(defaultFullWidth)
                         }
                     }
@@ -286,8 +300,9 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
         }
     }
 
-    override fun componentWillUnmount() {
-        super.componentWillUnmount()
-        mPresenter.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
     }
 }

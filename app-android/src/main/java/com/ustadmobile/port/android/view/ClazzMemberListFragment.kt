@@ -18,6 +18,7 @@ import com.ustadmobile.core.controller.ClazzMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toListFilterOptions
+import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.ClazzMemberListView.Companion.ARG_HIDE_CLAZZES
@@ -220,8 +221,7 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
             }
         }
 
-        navigateToPickEntityFromList(ClazzEnrolment::class.java, R.id.personlist_dest,
-                bundle, overwriteDestination = true)
+        mPresenter?.handlePickNewMemberClicked(bundle.toStringMap())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

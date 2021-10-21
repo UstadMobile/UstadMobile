@@ -36,7 +36,7 @@ import styled.styledDiv
 class PersonAccountEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount>(mProps),
     PersonAccountEditView {
 
-    private lateinit var mPresenter: PersonAccountEditPresenter
+    private var mPresenter: PersonAccountEditPresenter? = null
 
     private var showCurrentPassword = false
 
@@ -57,7 +57,7 @@ class PersonAccountEditComponent(mProps: RProps) : UstadEditComponent<PersonWith
 
     override var fieldsEnabled: Boolean = true
 
-    override val mEditPresenter: UstadEditPresenter<*, PersonWithAccount>
+    override val mEditPresenter: UstadEditPresenter<*, PersonWithAccount>?
         get() = mPresenter
 
     override var currentPasswordError: String? = null
@@ -128,10 +128,10 @@ class PersonAccountEditComponent(mProps: RProps) : UstadEditComponent<PersonWith
 
     val spacing = MGridSpacing.spacing6
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         mPresenter = PersonAccountEditPresenter(this, arguments,this, di, this)
-        mPresenter.onCreate(mapOf())
+        mPresenter?.onCreate(mapOf())
     }
 
     override fun RBuilder.render() {
@@ -324,5 +324,10 @@ class PersonAccountEditComponent(mProps: RProps) : UstadEditComponent<PersonWith
         }
     }
 
-
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
+        entity = null
+    }
 }

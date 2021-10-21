@@ -48,7 +48,6 @@ class SplashComponent (props: RProps): RComponent<RProps, RState>(props), Splash
             styledDiv {
                 css (splashComponentContainer)
                 if (!loading) {
-                    console.log("shw main")
                     mainComponent()
                 } else {
                     styledDiv {
@@ -73,6 +72,7 @@ class SplashComponent (props: RProps): RComponent<RProps, RState>(props), Splash
 
     override fun componentWillUnmount() {
         mPresenter?.onDestroy()
+        mPresenter = null
     }
 }
 fun RBuilder.splashComponent() = child(SplashComponent::class) {}

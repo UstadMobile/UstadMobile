@@ -21,7 +21,6 @@ import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
@@ -226,8 +225,8 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
             }
         }
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         loading = false
         if(registrationMode.hasFlag(PersonEditView.REGISTER_MODE_ENABLED)) {
             setState {
@@ -496,9 +495,10 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
         }
     }
 
-    override fun componentWillUnmount() {
-        super.componentWillUnmount()
+    override fun onDestroyView() {
+        super.onDestroyView()
         mPresenter?.onDestroy()
         mPresenter = null
+        entity = null
     }
 }

@@ -49,6 +49,8 @@ object RouteManager {
         UstadDestination(view = SchoolDetailOverviewView.VIEW_NAME, component = SchoolDetailOverviewComponent::class),
         UstadDestination(view = SchoolMemberListView.VIEW_NAME, component = SchoolMemberListComponent::class, showSearch = true),
         UstadDestination(view = ClazzEnrolmentEditView.VIEW_NAME, component = ClazzEnrolmentEditComponent::class),
+        UstadDestination(view = ScheduleEditView.VIEW_NAME, component = ScheduleEditComponent::class),
+        UstadDestination(view = JoinWithCodeView.VIEW_NAME, component = JoinWithCodeComponent::class),
         UstadDestination(labelId= MessageID.accounts, view = AccountListView.VIEW_NAME, component = PlaceHolderComponent::class)
     )
 

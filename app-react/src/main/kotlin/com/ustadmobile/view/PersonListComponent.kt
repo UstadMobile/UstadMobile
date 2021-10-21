@@ -23,7 +23,7 @@ import styled.css
 class PersonListComponent(mProps: RProps): UstadListComponent<Person, PersonWithDisplayDetails>(mProps),
     PersonListView{
 
-    private lateinit var mPresenter: PersonListPresenter
+    private var mPresenter: PersonListPresenter? = null
 
     override val displayTypeRepo: Any?
         get() = dbRepo?.personDao
@@ -32,19 +32,19 @@ class PersonListComponent(mProps: RProps): UstadListComponent<Person, PersonWith
         get() = PersonListView.VIEW_NAME
 
 
-    override val listPresenter: UstadListPresenter<*, in PersonWithDisplayDetails>
+    override val listPresenter: UstadListPresenter<*, in PersonWithDisplayDetails>?
         get() = mPresenter
 
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         fabManager?.text = getString(MessageID.person)
         if(arguments.containsKey(UstadView.ARG_CODE_TABLE)){
             //handle invite with link
         }
         title = getString(MessageID.people)
         mPresenter = PersonListPresenter(this, arguments, this,di,this)
-        mPresenter.onCreate(mapOf())
+        mPresenter?.onCreate(mapOf())
     }
 
     override fun RBuilder.renderListItem(item: PersonWithDisplayDetails) {
@@ -79,7 +79,13 @@ class PersonListComponent(mProps: RProps): UstadListComponent<Person, PersonWith
     }
 
     override fun handleClickEntry(entry: PersonWithDisplayDetails) {
-        mPresenter.handleClickEntry(entry)
+        mPresenter?.handleClickEntry(entry)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
     }
 
 }

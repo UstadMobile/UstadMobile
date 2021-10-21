@@ -7,7 +7,6 @@ import com.ustadmobile.core.controller.HolidayCalendarEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.HolidayCalendarEditView
-import com.ustadmobile.core.view.HolidayEditView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.Holiday
@@ -15,7 +14,6 @@ import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
-import com.ustadmobile.util.ext.observeResult
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.css.padding
@@ -29,8 +27,6 @@ class HolidayCalendarEditComponent(mProps: RProps): UstadEditComponent<HolidayCa
     HolidayCalendarEditView{
 
     private var mPresenter: HolidayCalendarEditPresenter? = null
-
-    private val serializer = Holiday.serializer()
 
     override val mEditPresenter: UstadEditPresenter<*, HolidayCalendar>?
         get() = mPresenter
@@ -73,19 +69,13 @@ class HolidayCalendarEditComponent(mProps: RProps): UstadEditComponent<HolidayCa
             console.log(value)
         }
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
 
         mPresenter = HolidayCalendarEditPresenter(this, arguments, this, this,di)
         mPresenter?.onCreate(mapOf())
 
         setEditTitle(MessageID.add_a_holiday, MessageID.edit_holiday)
-
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-            serializer) {
-            val holiday = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleAddOrEditHoliday(holiday)
-        }
     }
 
     override fun RBuilder.render() {
@@ -117,21 +107,22 @@ class HolidayCalendarEditComponent(mProps: RProps): UstadEditComponent<HolidayCa
             }
 
             val newItem = CreateNewItem(true,MessageID.add_a_holiday){
-                onClickEditHoliday(null)
+                mPresenter?.holidayToManyJoinListener?.onClickEdit(Holiday())
             }
 
             holidays?.let { holidays ->
                 renderHolidays(holidays, newItem){ holiday ->
-                    onClickEditHoliday(holiday)
+                    mPresenter?.holidayToManyJoinListener?.onClickEdit(holiday)
                 }
             }
         }
     }
 
-    private fun onClickEditHoliday(holiday: Holiday?) {
-        onSaveStateToBackStackStateHandle()
-        navigateToEditEntity(holiday, HolidayEditView.VIEW_NAME,
-            navOptions = DEFAULT_NAV_OPTION(serializer))
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
+        entity = null
     }
 }
 

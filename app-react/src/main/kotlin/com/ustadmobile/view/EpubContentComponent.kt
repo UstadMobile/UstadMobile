@@ -73,17 +73,27 @@ class EpubContentComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(m
             }
         }
 
-    private lateinit var mPresenter: EpubContentPresenter
+    private var mPresenter: EpubContentPresenter? = null
 
     override fun scrollToSpinePosition(spinePosition: Int, hashAnchor: String?) {}
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         mPresenter = EpubContentPresenter(this,arguments,this, di)
-        mPresenter.onCreate(mapOf())
+        mPresenter?.onCreate(mapOf())
     }
 
     override fun RBuilder.render() {
         renderIframe(spineUrls)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
+        tableOfContents = null
+        spineUrls = null
+        windowTitle = null
+        containerTitle = null
     }
 }

@@ -21,8 +21,8 @@ class ContentEntryListTabsComponent(mProps: RProps) :UstadBaseComponent<RProps, 
 
     private var tabsToRender: List<UstadTab>? = null
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         val parentUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: MASTER_SERVER_ROOT_ENTRY_UID
 
         val defArgs = "?${ARG_PARENT_ENTRY_UID}=" +
@@ -44,5 +44,10 @@ class ContentEntryListTabsComponent(mProps: RProps) :UstadBaseComponent<RProps, 
         tabsToRender?.let {
             renderTabs(it, false)
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        tabsToRender = null
     }
 }

@@ -1,21 +1,13 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.util.ext.putResultDestInfo
-import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.navigation.NavControllerJs
-import com.ustadmobile.navigation.RouteManager.lookupDestinationName
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.redux.ReduxSnackBarState
@@ -23,13 +15,10 @@ import com.ustadmobile.redux.ReduxToolbarState
 import com.ustadmobile.util.*
 import kotlinx.atomicfu.atomic
 import kotlinx.browser.window
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
-import org.kodein.di.*
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.instance
 import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.events.Event
 import react.RBuilder
@@ -65,7 +54,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
     private var hashChangeListener:(Event) -> Unit = { (it as HashChangeEvent)
         if(viewName == getViewNameFromUrl(it.newURL)){
             arguments = urlSearchParamsToMap()
-            onCreate()
+            onCreateView()
         }
     }
 
@@ -86,7 +75,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
     override val currentState: Int
         get() = lifecycleStatus.value
 
-    open fun onCreate(){
+    open fun onCreateView(){
         for(observer in lifecycleObservers){
             observer.onStart(this)
         }
@@ -100,6 +89,8 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         val umController: UstadNavController by instance()
         navController = umController as NavControllerJs
     }
+
+    open fun onDestroyView(){}
 
     override fun componentWillMount() {
         window.addEventListener("hashchange",hashChangeListener)
@@ -120,7 +111,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
                 props.asDynamic().arguments as Map<String, String>
             else -> urlSearchParamsToMap()
         }
-        onCreate()
+        onCreateView()
     }
 
     override fun componentDidUpdate(prevProps: P, prevState: S, snapshot: Any) {
@@ -132,7 +123,7 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         //This will check and make sure the component has changed by checking if the props has changed
         if(propsDidChange){
             arguments = props.asDynamic().arguments as Map<String, String>
-            onCreate()
+            onCreateView()
         }
     }
 
@@ -163,99 +154,6 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         return if(messageId == 0) "" else systemImpl.getString(messageId, this)
     }
 
-    /**
-     * Save the result of a component (e.g. a selection from a list or newly created entity) to the
-     * BackStack SavedStateHandle as specified by ARG_RESULT_DEST_ID and ARG_RESULT_DEST_KEY
-     */
-
-    @Suppress("UNUSED_PARAMETER") //result used in js code
-    fun  <T> saveResultToBackStackSavedStateHandle(result: List<T>) {
-        val serializer = getCurrentState().serialization.serializer
-        if(serializer != null){
-            saveResultToBackStackSavedStateHandle(
-                Json.encodeToString(ListSerializer(serializer),
-                    js("result")))
-        }else{
-            throw IllegalStateException("Serializer not provided")
-        }
-    }
-
-
-    fun saveResultToBackStackSavedStateHandle(result: String) {
-        var saveToDestination = arguments[UstadView.ARG_RESULT_DEST_ID]
-        val saveToDestinationViewName = arguments[UstadView.ARG_RESULT_DEST_VIEWNAME]
-
-        if(saveToDestination == null && saveToDestinationViewName != null) {
-            saveToDestination = lookupDestinationName(saveToDestinationViewName)?.view
-        }
-
-        val saveToKey = arguments[UstadView.ARG_RESULT_DEST_KEY]
-
-        if(saveToDestination != null && saveToKey != null) {
-            val destStackEntry = navController.getBackStackEntry(saveToDestination)
-            destStackEntry?.savedStateHandle?.set(saveToKey, result)
-            navController.popBackStack(saveToDestination, false)
-        }else{
-            navController.navigateUp()
-        }
-    }
-
-
-    /**
-     * Navigate to a list view in picker mode for the given entity type and destination view as
-     * equivalent to android implementation
-     */
-    fun navigateToPickEntityFromList(destinationView: String,
-                                     args: MutableMap<String, String> = mutableMapOf(),
-                                     overwriteDestination: Boolean? = null,
-                                     navOptions: UstadMobileSystemCommon.UstadGoOptions){
-        val destinationResultKey = navOptions.serializer?.descriptor?.serialName
-        val currentBackStateEntryVal = navController.currentBackStackEntry
-        if(currentBackStateEntryVal != null && destinationResultKey != null)
-            args.putResultDestInfo(currentBackStateEntryVal, destinationResultKey,
-                overwriteDest = overwriteDestination ?: (this is UstadEditComponent<*>))
-
-        args[UstadView.ARG_LISTMODE] = ListViewMode.PICKER.toString()
-        navController.navigate(destinationView, args, navOptions)
-    }
-
-
-    /**
-     * Navigate to an edit view and instruct the destination to save the result to the back stack as
-     * equivalent to android implementation
-     */
-    fun <T> navigateToEditEntity(entity: T?,
-                                 destinationView: String,
-                                 overwriteDestination: Boolean? = null,
-                                 args:MutableMap<String,String> = mutableMapOf(),
-                                 navOptions: UstadMobileSystemCommon.UstadGoOptions) {
-        val backStateEntryVal = navController.currentBackStackEntry
-
-        if(backStateEntryVal != null) {
-            //Provide compatibility with multiplatform results
-            val currentDestViewName = backStateEntryVal.arguments[UstadView.ARG_RESULT_DEST_VIEWNAME]
-            val currentDestKey = backStateEntryVal.arguments[UstadView.ARG_RESULT_DEST_KEY]
-
-            val overwriteDestVal = (this is UstadEditComponent<*>)
-
-            if(!overwriteDestVal && currentDestViewName != null && currentDestKey != null){
-                args[UstadView.ARG_RESULT_DEST_VIEWNAME] = currentDestViewName
-                args[UstadView.ARG_RESULT_DEST_KEY] = currentDestKey
-                val viewName = lookupDestinationName(currentDestViewName)?.view ?: ""
-                args[UstadView.ARG_RESULT_DEST_ID] = viewName
-            }else {
-                navOptions.serializer?.descriptor?.serialName?.let {key ->
-                    args.putResultDestInfo(backStateEntryVal, key,
-                        overwriteDest = overwriteDestination ?: (this is UstadEditComponent<*>))
-                }
-            }
-        }
-
-        if(entity != null)
-            args.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON, null, entity)
-
-        navController.navigate(destinationView, args, navOptions)
-    }
 
 
     override fun componentWillUnmount() {
@@ -269,13 +167,10 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         searchManager = null
         fabManager?.onDestroy()
         fabManager = null
+        onDestroyView()
     }
 
     companion object {
-
-        val DEFAULT_NAV_OPTION: (serializer: KSerializer<*>) -> UstadMobileSystemCommon.UstadGoOptions = {
-            UstadMobileSystemCommon.UstadGoOptions(serializer = it)
-        }
 
         const val STATE_CHANGE_DELAY = 100
     }

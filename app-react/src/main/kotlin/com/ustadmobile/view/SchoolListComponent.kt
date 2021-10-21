@@ -46,8 +46,8 @@ class SchoolListComponent(mProps: RProps) : UstadListComponent<School, SchoolWit
             }
         }
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         listTypeSingleColumn = false
         fabManager?.text = getString(MessageID.school)
         mPresenter = SchoolListPresenter(this, arguments,
@@ -160,5 +160,11 @@ class SchoolListComponent(mProps: RProps) : UstadListComponent<School, SchoolWit
 
     override fun handleClickEntry(entry: SchoolWithMemberCountAndLocation) {
         mPresenter?.handleClickEntry(entry)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
     }
 }

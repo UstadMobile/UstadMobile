@@ -13,9 +13,9 @@ import react.RProps
 
 class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentEntry>(mProps), ContentEntryDetailView {
 
-    private lateinit var mPresenter: ContentEntryDetailPresenter
+    private var mPresenter: ContentEntryDetailPresenter? = null
 
-    override val detailPresenter: UstadDetailPresenter<*, *>
+    override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
     override val viewName: String
@@ -45,10 +45,10 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
         }
 
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         mPresenter = ContentEntryDetailPresenter(this, arguments, this, di, this)
-        mPresenter.onCreate(mapOf())
+        mPresenter?.onCreate(mapOf())
     }
 
     override fun RBuilder.render() {
@@ -57,9 +57,10 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
         }
     }
 
-    override fun componentWillUnmount() {
-        super.componentWillUnmount()
-        mPresenter.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
     }
 
     companion object{

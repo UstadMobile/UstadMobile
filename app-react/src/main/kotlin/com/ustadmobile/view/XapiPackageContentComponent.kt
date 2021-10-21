@@ -28,15 +28,22 @@ class XapiPackageContentComponent(mProps: RProps): UstadBaseComponent<RProps, RS
             }
         }
 
-    private lateinit var mPresenter: XapiPackageContentPresenter
+    private var mPresenter: XapiPackageContentPresenter? = null
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         mPresenter = XapiPackageContentPresenter(this,arguments,this,di)
-        mPresenter.onCreate(mapOf())
+        mPresenter?.onCreate(mapOf())
     }
 
     override fun RBuilder.render() {
         renderIframe(listOf(url), 1)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
+        viewName = null
     }
 }

@@ -82,8 +82,8 @@ class ClazzMemberListComponent(mProps: RProps):UstadListComponent<PersonWithClaz
 
     private var filterByClazzUid: Long = 0
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         createNewTextId = MessageID.add_a_teacher
         filterByClazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
         mPresenter = ClazzMemberListPresenter(this, arguments, this, di, this)
@@ -96,7 +96,8 @@ class ClazzMemberListComponent(mProps: RProps):UstadListComponent<PersonWithClaz
 
     override fun RBuilder.renderListItem(item: PersonWithClazzEnrolmentDetails) {
         createListItemWithPersonAttendanceAndPendingRequests(item.personUid, item.fullName(), attendance = item.attendance,
-            attendanceLabel = getString(MessageID.x_percent_attended), student = false)
+            attendanceLabel = getString(MessageID.x_percent_attended),
+            student = false)
     }
 
     override fun RBuilder.renderFooterView() {
@@ -158,11 +159,13 @@ class ClazzMemberListComponent(mProps: RProps):UstadListComponent<PersonWithClaz
             }
         }
 
-        navigateToPickEntityFromList(
-            PersonListView.VIEW_NAME, args,
-            overwriteDestination = true,
-            navOptions = DEFAULT_NAV_OPTION(ClazzEnrolment.serializer())
-        )
+        mPresenter?.handlePickNewMemberClicked(args)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
     }
 }
 

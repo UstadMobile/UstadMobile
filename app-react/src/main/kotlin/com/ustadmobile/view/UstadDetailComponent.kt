@@ -22,8 +22,8 @@ abstract class UstadDetailComponent<T: Any>(mProps: RProps) : UstadBaseComponent
             }, STATE_CHANGE_DELAY)
         }
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         fabManager?.icon = "edit"
         fabManager?.text = getString(MessageID.edit)
     }

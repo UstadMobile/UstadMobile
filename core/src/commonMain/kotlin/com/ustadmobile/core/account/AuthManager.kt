@@ -67,10 +67,10 @@ class AuthManager(
         if(authorizedPerson == null && fallbackToOldPersonAuth) {
             val person = db.personDao.findUidAndPasswordHashAsync(username)
             if(person != null
-                && ((person.passwordHash.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX)
-                        && person.passwordHash.substring(2) == password)
-                        ||(person.passwordHash.startsWith(PersonAuthDao.ENCRYPTED_PASS_PREFIX) &&
-                        authenticateEncryptedPassword(password, person.passwordHash.substring(2))))) {
+                && ((person.passwordHash?.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX) == true
+                        && person.passwordHash?.substring(2) == password)
+                        ||(person.passwordHash?.startsWith(PersonAuthDao.ENCRYPTED_PASS_PREFIX) == true &&
+                        authenticateEncryptedPassword(password, person.passwordHash?.substring(2) ?: "")))) {
                 authorizedPerson = db.personDao.findByUid(person.personUid)
 
                 //Create the auth object

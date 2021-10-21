@@ -75,8 +75,8 @@ class AccountListComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(m
             field = value
         }
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         mPresenter = AccountListPresenter(this,arguments,this, di,
             this)
         mPresenter?.onCreate(mapOf())
@@ -111,6 +111,12 @@ class AccountListComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(m
                     .format(getString(MessageID.account)))
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter = null
+        mActiveAccount = null
     }
 
     private fun RBuilder.renderList(accounts: List<UserSessionWithPersonAndEndpoint>, active: Boolean = false){

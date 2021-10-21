@@ -45,8 +45,8 @@ class VideoContentComponent(mProps:RProps):UstadBaseComponent<RProps, RState>(mP
 
     private var containerUid: Long = 0
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         db = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
         containerUid = arguments[ARG_CONTAINER_UID]?.toLong() ?: 0L
         mPresenter = VideoContentPresenter(this, arguments, this, di)
@@ -61,5 +61,15 @@ class VideoContentComponent(mProps:RProps):UstadBaseComponent<RProps, RState>(mP
             attrs.autoBuffer = true
             attrs.controls = true
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
+        entry = null
+        viewName = null
+        videoParams = null
+        db = null
     }
 }

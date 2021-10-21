@@ -2,15 +2,19 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
+import com.ustadmobile.core.util.OneToManyJoinEditHelperMp
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.HolidayCalendarEditView
+import com.ustadmobile.core.view.HolidayEditView
+import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
+import com.ustadmobile.lib.db.entities.Schedule
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -27,19 +31,17 @@ class HolidayCalendarEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
+    private val holidayOneToManyJoinEditHelper
+            = OneToManyJoinEditHelperMp(Holiday::holUid,
+        ARG_SAVED_STATE_HOLIDAY,
+        ListSerializer(Holiday.serializer()),
+        ListSerializer(Holiday.serializer()),
+        this,
+        requireSavedStateHandle(),
+        Holiday::class) {holUid = it}
 
-    val holidayOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<Holiday>(Holiday::holUid,
-            "state_Holiday_list",
-            ListSerializer(Holiday.serializer()),
-            ListSerializer(Holiday.serializer()), this, Holiday::class) { holUid = it }
-
-    fun handleAddOrEditHoliday(holiday: Holiday) {
-        holidayOneToManyJoinEditHelper.onEditResult(holiday)
-    }
-
-    fun handleRemoveHoliday(holiday: Holiday) {
-        holidayOneToManyJoinEditHelper.onDeactivateEntity(holiday)
-    }
+    val holidayToManyJoinListener = holidayOneToManyJoinEditHelper.createNavigateForResultListener(
+        HolidayEditView.VIEW_NAME, Holiday.serializer())
 
 
     override fun onCreate(savedState: Map<String, String>?) {
@@ -103,7 +105,7 @@ class HolidayCalendarEditPresenter(context: Any,
     companion object {
 
         //TODO: Add constants for keys that would be used for any One To Many Join helpers
-
+        const val ARG_SAVED_STATE_HOLIDAY = "holiday"
     }
 
 }

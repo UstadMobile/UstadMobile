@@ -35,9 +35,9 @@ import kotlin.js.Date
 class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPersonParentJoin>(mProps),
     PersonDetailView {
 
-    private lateinit var mPresenter: PersonDetailPresenter
+    private var mPresenter: PersonDetailPresenter? = null
 
-    override val detailPresenter: UstadDetailPresenter<*, *>
+    override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
     override val viewName: String
@@ -85,10 +85,10 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
             }
         }
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         mPresenter = PersonDetailPresenter(this,arguments,this,di,this)
-        mPresenter.onCreate(mapOf())
+        mPresenter?.onCreate(mapOf())
     }
 
     override fun RBuilder.render() {
@@ -114,11 +114,11 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
                         }
                         createAction("vpn_key",MessageID.change_password, MGridSize.cells6, MGridSize.cells3,
                             changePasswordVisible){
-                            mPresenter.handleChangePassword()
+                            mPresenter?.handleChangePassword()
                         }
                         createAction("person_add",MessageID.create_account, MGridSize.cells6, MGridSize.cells3,
                             showCreateAccountVisible){
-                            mPresenter.handleCreateAccount()
+                            mPresenter?.handleCreateAccount()
                         }
                     }
                 }
@@ -188,7 +188,7 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
                                             child(ClazzEnrolmentWithClazzSimpleListComponent::class){
                                                 attrs.entries = clazzes
                                                 attrs.onEntryClicked = { clazz ->
-                                                    mPresenter.handleClickClazz(clazz)
+                                                    mPresenter?.handleClickClazz(clazz)
                                                 }
                                             }
                                         }
@@ -201,6 +201,7 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
             }
         }
     }
+
 
     private fun RBuilder.createAction(icon: String, messageId: Int, xs: MGridSize,
                                       sm: MGridSize? = null, visible: Boolean = false,
@@ -226,6 +227,12 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
     }
 
     class ClazzEnrolmentWithClazzSimpleListComponent(mProps: ListProps<ClazzEnrolmentWithClazzAndAttendance>):

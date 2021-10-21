@@ -39,6 +39,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.lib.db.entities.Person
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -348,7 +349,7 @@ abstract class UstadBaseController<V : UstadView>(
             }
 
             numAccountsRemaining == 0 && !canSelectServer -> {
-                //change later
+                //change later to login
                 impl.go(ContentEntryListTabsView.VIEW_NAME, mapOf(), context, goOptions)
             }
 

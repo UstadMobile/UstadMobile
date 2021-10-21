@@ -53,7 +53,6 @@ class ClazzDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ClazzWi
         }
     }
 
-
     override var scheduleList: DoorDataSourceFactory<Int, Schedule>? = null
         set(value) {
             field = value
@@ -78,8 +77,8 @@ class ClazzDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ClazzWi
             }
         }
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         editButtonMode = EditButtonMode.FAB
         mPresenter = ClazzDetailOverviewPresenter(this, arguments, this,
             di, this)
@@ -142,6 +141,13 @@ class ClazzDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ClazzWi
 
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
+        entity = null
     }
 
 

@@ -102,7 +102,7 @@ abstract class DownloadJobItemDao {
     abstract fun countDownloadJobItems(djiDjUid: Long): DoorLiveData<Int>
 
     @Query("SELECT destinationFile FROM DownloadJobItem WHERE djiUid != 0 AND djiDsiUid IN(:djiDsiUids)")
-    abstract fun getDestinationFiles(djiDsiUids: List<Long>): List<String>
+    abstract fun getDestinationFiles(djiDsiUids: List<Long>): List<String?>
 
     @Query("""SELECT DownloadJobItem.* FROM DownloadJobItem 
             LEFT JOIN DownloadJob ON DownloadJobItem.djiDjUid = DownloadJob.djUid 

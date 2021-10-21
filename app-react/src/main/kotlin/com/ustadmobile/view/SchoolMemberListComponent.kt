@@ -12,8 +12,6 @@ import com.ustadmobile.lib.db.entities.SchoolMember
 import com.ustadmobile.lib.db.entities.SchoolMemberWithPerson
 import com.ustadmobile.view.ext.createListSectionTitle
 import com.ustadmobile.view.ext.createListItemWithPersonAttendanceAndPendingRequests
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import react.RBuilder
 import react.RProps
 import react.setState
@@ -44,7 +42,7 @@ class SchoolMemberListComponent(mProps: RProps): UstadListComponent<SchoolMember
         get() = SchoolMemberListView.VIEW_NAME
 
     override fun addMember() {
-        TODO("Not yet implemented")
+        TODO("addMember: Not yet implemented")
     }
 
     private var pendingStudents: List<SchoolMemberWithPerson>? = null
@@ -63,8 +61,8 @@ class SchoolMemberListComponent(mProps: RProps): UstadListComponent<SchoolMember
             liveData?.observe(this, observer)
         }
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
 
         val filterByRole = arguments[UstadView.ARG_FILTER_BY_ROLE]?.toInt() ?: 0
         roleStudent = filterByRole != Role.ROLE_SCHOOL_STAFF_UID
@@ -101,6 +99,13 @@ class SchoolMemberListComponent(mProps: RProps): UstadListComponent<SchoolMember
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
+        pendingStudents = null
     }
 
     class MembersListComponent(mProps: ListProps<SchoolMemberWithPerson>):

@@ -4,8 +4,6 @@ import com.ustadmobile.core.controller.HolidayCalendarListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.HolidayCalendarListView
-import com.ustadmobile.core.view.HolidayEditView
-import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 import com.ustadmobile.util.ext.format
@@ -25,8 +23,8 @@ class HolidayCalendarListComponent(mProps: RProps): UstadListComponent<HolidayCa
         get() = mPresenter
 
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         showCreateNewItem = true
         createNewTextId = MessageID.add_a_new_holiday_calendar
         mPresenter = HolidayCalendarListPresenter(this, arguments, this, di, this)
@@ -38,11 +36,6 @@ class HolidayCalendarListComponent(mProps: RProps): UstadListComponent<HolidayCa
             getString(MessageID.num_items_with_name)
                 .format(item.numEntries, getString(MessageID.holidays))
         )
-    }
-
-    override fun handleClickCreateNewEntry() {
-        navigateToEditEntity(null,HolidayEditView.VIEW_NAME,
-            navOptions = DEFAULT_NAV_OPTION(HolidayCalendar.serializer()))
     }
 
     override val viewName: String

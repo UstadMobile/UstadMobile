@@ -22,8 +22,8 @@ class ReportListComponent(mProps: RProps):  UstadListComponent<Report, Report>(m
     override val viewName: String
         get() = ReportListView.VIEW_NAME
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         createNewTextId = MessageID.create_a_new_report
         fabManager?.text = getString(MessageID.report)
         mPresenter = ReportListPresenter(this, arguments, this, di, this)
@@ -31,10 +31,16 @@ class ReportListComponent(mProps: RProps):  UstadListComponent<Report, Report>(m
     }
 
     override fun RBuilder.renderListItem(item: Report) {
-        +"Hello"
+        +"Report screen"
     }
 
     override fun handleClickEntry(entry: Report) {
         TODO("Not yet implemented")
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
     }
 }

@@ -104,12 +104,6 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
         val navController = findNavController()
 
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
-
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                Holiday::class.java) {
-            val holiday = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleAddOrEditHoliday(holiday)
-        }
     }
 
     override fun onDestroyView() {
@@ -128,8 +122,7 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
     }
 
     override fun onClickEditHoliday(holiday: Holiday?) {
-        onSaveStateToBackStackStateHandle()
-        navigateToEditEntity(holiday, R.id.holiday_edit_dest, Holiday::class.java)
+        mPresenter?.holidayToManyJoinListener?.onClickEdit(holiday ?: Holiday())
     }
 
     override fun onClickNewHoliday() = onClickEditHoliday(null)

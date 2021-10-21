@@ -110,8 +110,8 @@ class ClazzEnrolmentEditComponent (mProps: RProps): UstadEditComponent<ClazzEnro
         }
 
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         mPresenter = ClazzEnrolmentEditPresenter(this, arguments, this, this,
             di)
         mPresenter?.onCreate(mapOf())
@@ -258,6 +258,13 @@ class ClazzEnrolmentEditComponent (mProps: RProps): UstadEditComponent<ClazzEnro
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
+        entity = null
     }
 
 }

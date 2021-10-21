@@ -24,8 +24,6 @@ import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.formattedInHoursAndMinutes
 import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.view.ext.*
-import kotlinx.css.LinearDimension
-import kotlinx.css.marginTop
 import react.RBuilder
 import react.RProps
 import react.setState
@@ -125,8 +123,8 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
             }
         }
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         title = getString(MessageID.add_a_new_class).format(getString(MessageID.edit_clazz))
         mPresenter = ClazzEdit2Presenter(this, arguments, this,
             di, this)
@@ -150,7 +148,8 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
 
                     mTextField(label = "${clazzNameLabel.text}",
                         helperText = clazzNameLabel.errorText,
-                        value = entity?.clazzName, error = clazzNameLabel.error,
+                        value = entity?.clazzName,
+                        error = clazzNameLabel.error,
                         disabled = !fieldsEnabled,
                         variant = MFormControlVariant.outlined,
                         onChange = {
@@ -165,7 +164,8 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
 
                     mTextField(label = "${clazzDescLabel.text}",
                         value = entity?.clazzDesc,
-                        error = clazzDescLabel.error, disabled = !fieldsEnabled,
+                        error = clazzDescLabel.error,
+                        disabled = !fieldsEnabled,
                         helperText = clazzDescLabel.errorText,
                         variant = MFormControlVariant.outlined,
                         onChange = {
@@ -180,7 +180,7 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
                     umGridContainer(MGridSpacing.spacing4) {
                         umItem(MGridSize.cells12, MGridSize.cells6 ) {
                             mTextField(label = "${startDateLabel.text}",
-                                value = Date(entity?.clazzStartTime ?: 0).standardFormat(),
+                                value = (if(entity?.clazzStartTime == null) Date() else Date(entity?.clazzStartTime!!)).standardFormat(),
                                 error = startDateLabel.error,
                                 disabled = !fieldsEnabled,
                                 helperText = startDateLabel.errorText,
@@ -198,7 +198,7 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
 
                         umItem(MGridSize.cells12, MGridSize.cells6 ) {
                             mTextField(label = "${endDateLabel.text}",
-                                value = Date(entity?.clazzEndTime ?: Date().getTime()).standardFormat(),
+                                value = (if(entity?.clazzEndTime == null) Date() else Date(entity?.clazzEndTime!!)).standardFormat(),
                                 error = endDateLabel.error,
                                 disabled = !fieldsEnabled,
                                 helperText = endDateLabel.errorText,
@@ -330,6 +330,13 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
 
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
+        entity = null
     }
 
 }

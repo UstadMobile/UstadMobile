@@ -9,22 +9,24 @@ import react.RState
 
 class RedirectComponent (props: RProps): UstadBaseComponent<RProps, RState>(props), RedirectView {
 
-    private lateinit var mPresenter: RedirectPresenter
+    private var mPresenter: RedirectPresenter? = null
 
     override val viewName: String
         get() = RedirectView.VIEW_NAME
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         val args = arguments.toMutableMap()
         args[ARG_WEB_PLATFORM] = true.toString()
         mPresenter = RedirectPresenter(this, args, this, di)
-        mPresenter.onCreate(mapOf())
+        mPresenter?.onCreate(mapOf())
     }
 
     override fun RBuilder.render() {}
 
-    override fun componentWillUnmount() {
-        mPresenter.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
     }
 }

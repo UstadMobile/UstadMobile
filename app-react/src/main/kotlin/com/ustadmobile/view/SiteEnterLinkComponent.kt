@@ -75,8 +75,8 @@ class SiteEnterLinkComponent(mProps: RProps): UstadBaseComponent<RProps, RState>
         }
     }
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         mPresenter = SiteEnterLinkPresenter(this, arguments, this, di)
         mPresenter?.onCreate(mapOf())
     }
@@ -173,6 +173,13 @@ class SiteEnterLinkComponent(mProps: RProps): UstadBaseComponent<RProps, RState>
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
+        siteLink = null
     }
 
 

@@ -46,8 +46,8 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
     override val listPresenter: UstadListPresenter<*, in ClazzWithListDisplayDetails>?
         get() = mPresenter
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         val accountManager: UstadAccountManager by instance()
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
         fabManager?.text = getString(MessageID.clazz)
@@ -175,4 +175,10 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
                 field = value
             }
         }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
+    }
 }

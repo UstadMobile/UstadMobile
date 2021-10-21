@@ -28,7 +28,7 @@ abstract class PersonDao : BaseDao<Person> {
     abstract suspend fun insertListAsync(entityList: List<Person>)
 
     class PersonUidAndPasswordHash {
-        var passwordHash: String = ""
+        var passwordHash: String? = null
 
         var personUid: Long = 0
 

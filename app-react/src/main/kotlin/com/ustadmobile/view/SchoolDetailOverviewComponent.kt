@@ -72,8 +72,8 @@ class SchoolDetailOverviewComponent(mProps: RProps): UstadDetailComponent<School
             }
         }
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateView() {
+        super.onCreateView()
         mPresenter = SchoolDetailOverviewPresenter(this, arguments, this, di, this)
         mPresenter?.onCreate(mapOf())
     }
@@ -142,6 +142,15 @@ class SchoolDetailOverviewComponent(mProps: RProps): UstadDetailComponent<School
 
             }
         }
+    }
+
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mPresenter = null
+        schoolClazzList = null
+        entity = null
     }
 
     class SchoolClazzesComponent(mProps: ListProps<ClazzWithListDisplayDetails>):
