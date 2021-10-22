@@ -65,10 +65,11 @@ dependencies {
     implementation project(":lib-database")
     implementation project(":lib-database-entities")
     implementation npm("moment","$version_npm_moment")
+    implementation npm("@date-io/moment","$version_npm_mement_io")
+    implementation npm("@material-ui/pickers","$version_npm_picker_ui")
     implementation "com.ustadmobile.door:room-annotations:$version_door"
     implementation "org.kodein.di:kodein-di:$version_kodein_di"
     implementation npm("react-google-charts","$version_npm_google_charts")
-    implementation npm("react-multi-date-picker","^3.0.0")
     implementation "com.ustadmobile.door:door-runtime:$version_door"
     implementation npm("browser-session-tabs-tracker","$version_npm_tabtracker")
     implementation "io.ktor:ktor-client-js:$version_ktor"
