@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_EXCLUDE_PERSONUIDS_LIST
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
@@ -15,6 +16,7 @@ import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class PersonListPresenter(context: Any, arguments: Map<String, String>, view: PersonListView,
@@ -80,7 +82,7 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
                         systemImpl.go(goToViewOnComplete, args, context)
                     }
                     else -> {
-                        view.finishWithResult(listOf(entry))
+                        finishWithResult(safeStringify(di, ListSerializer(Person.serializer()),listOf(entry)))
                     }
                 }
             }

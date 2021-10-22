@@ -11,9 +11,6 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.defaultJsonSerializer
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.view.ContainerMounter
-import com.ustadmobile.door.DoorDatabaseSyncRepository
-import com.ustadmobile.door.RepositoryConfig
-import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
@@ -58,6 +55,9 @@ fun main() {
                 mThemeProvider(theme) {
                     splashComponent()
                 }
+
+
+
             }
         }
     }

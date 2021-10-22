@@ -134,7 +134,8 @@ class JoinWithCodeComponent (mProps: RProps): UstadBaseComponent<RProps, RState>
                                 onChange = {
                                     it.persist()
                                     setState {
-                                       code = it.targetInputValue
+                                        code = it.targetInputValue
+                                        errorText = null
                                     }
                                 }){
                                 css(StyleManager.defaultFullWidth)

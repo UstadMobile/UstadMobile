@@ -15,6 +15,7 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
@@ -23,6 +24,8 @@ import com.ustadmobile.util.Util.ASSET_ENTRY
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.formattedInHoursAndMinutes
 import com.ustadmobile.util.ext.standardFormat
+import com.ustadmobile.view.components.MDateTimePickerType
+import com.ustadmobile.view.components.mDateTimePicker
 import com.ustadmobile.view.ext.*
 import react.RBuilder
 import react.RProps
@@ -125,7 +128,7 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
 
     override fun onCreateView() {
         super.onCreateView()
-        title = getString(MessageID.add_a_new_class).format(getString(MessageID.edit_clazz))
+        setEditTitle(MessageID.add_a_new_class, MessageID.edit_clazz)
         mPresenter = ClazzEdit2Presenter(this, arguments, this,
             di, this)
         mPresenter?.onCreate(mapOf())
@@ -178,40 +181,40 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
                     }
 
                     umGridContainer(MGridSpacing.spacing4) {
+
                         umItem(MGridSize.cells12, MGridSize.cells6 ) {
-                            mTextField(label = "${startDateLabel.text}",
-                                value = (if(entity?.clazzStartTime == null) Date() else Date(entity?.clazzStartTime!!)).standardFormat(),
+                            mDateTimePicker(
+                                label = "${startDateLabel.text}",
+                                ruleSet = defaultFullWidth,
                                 error = startDateLabel.error,
-                                disabled = !fieldsEnabled,
                                 helperText = startDateLabel.errorText,
-                                variant = MFormControlVariant.outlined,
-                                onChange = {
-                                    it.persist()
+                                value = Date(if(entity?.clazzStartTime != null &&  entity?.clazzStartTime != 0L) entity?.clazzStartTime!! else Date.now()),
+                                inputVariant = MFormControlVariant.outlined,
+                                pickerType = MDateTimePickerType.date,
+                                onChange = { mills, _ ->
                                     setState {
-                                        entity?.clazzStartTime = it.targetInputValue.toLong()
+                                        entity?.clazzStartTime = mills
                                         clazzStartDateError = null
                                     }
-                                }){
-                                css(defaultFullWidth)
-                            }
+                                })
                         }
 
                         umItem(MGridSize.cells12, MGridSize.cells6 ) {
-                            mTextField(label = "${endDateLabel.text}",
-                                value = (if(entity?.clazzEndTime == null) Date() else Date(entity?.clazzEndTime!!)).standardFormat(),
+
+                            mDateTimePicker(
+                                label = "${endDateLabel.text}",
+                                ruleSet = defaultFullWidth,
                                 error = endDateLabel.error,
-                                disabled = !fieldsEnabled,
                                 helperText = endDateLabel.errorText,
-                                variant = MFormControlVariant.outlined,
-                                onChange = {
-                                    it.persist()
+                                value = Date(entity?.clazzEndTime ?: Date.now().toLong()),
+                                inputVariant = MFormControlVariant.outlined,
+                                pickerType = MDateTimePickerType.date,
+                                onChange = { mills, utc ->
                                     setState {
-                                        entity?.clazzEndTime = it.targetInputValue.toLong()
+                                        entity?.clazzEndTime = mills
                                         clazzEndDateError = null
                                     }
-                                }){
-                                css(defaultFullWidth)
-                            }
+                                })
                         }
                     }
 
@@ -281,12 +284,11 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
                                 onChange = {
                                     it.persist()
                                     setState {
-                                        //entity?.holidayCalendar. = it.targetInputValue
                                         clazzEndDateError = null
                                     }
                                 }){
                                 attrs.asDynamic().onClick = {
-                                    mPresenter?.handleClickHolidayCalendar()
+                                    mPresenter?.handleHolidayCalendarClicked()
                                 }
                                 css(defaultFullWidth)
                             }
@@ -361,7 +363,7 @@ class ScopeGrantListComponent(mProps: ListProps<ScopedGrantAndName>): UstadSimpl
 
 }
 
-fun RBuilder.renderScopedGrants(presenter: ClazzEdit2Presenter,
+fun RBuilder.renderScopedGrants(presenter: UstadEditPresenter<*,*>,
                              scopes: List<ScopedGrantAndName>,
                              createNewItem: CreateNewItem = CreateNewItem(),
                              onEntryClicked: ((ScopedGrantAndName) -> Unit)? = null) = child(ScopeGrantListComponent::class) {
@@ -405,7 +407,7 @@ class ScheduleListComponent(mProps: ListProps<Schedule>): UstadSimpleList<ListPr
 
 }
 
-fun RBuilder.renderSchedules(presenter: ClazzEdit2Presenter,
+fun RBuilder.renderSchedules(presenter: UstadEditPresenter<*,*>,
                              schedules: List<Schedule>,
                              createNewItem: CreateNewItem = CreateNewItem(),
                              onEntryClicked: ((Schedule) -> Unit)? = null) = child(ScheduleListComponent::class) {

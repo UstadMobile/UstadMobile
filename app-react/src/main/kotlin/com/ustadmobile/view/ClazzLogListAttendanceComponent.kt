@@ -1,13 +1,12 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.button.mButton
+import com.ccfraser.muirwik.components.MGridSize
+import com.ccfraser.muirwik.components.MGridSpacing
+import com.ccfraser.muirwik.components.spacingUnits
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.util.StyleManager.attendance
 import com.ustadmobile.view.components.MChartType
 import com.ustadmobile.view.components.mChart
-import com.ustadmobile.view.components.mDatePicker
-import com.ustadmobile.view.components.mTimePicker
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.css.margin
@@ -16,7 +15,6 @@ import react.RProps
 import react.RState
 import styled.css
 import styled.styledDiv
-import kotlin.js.Date
 
 class ClazzLogListAttendanceComponent(mProps: RProps) : UstadBaseComponent<RProps, RState>(mProps){
 

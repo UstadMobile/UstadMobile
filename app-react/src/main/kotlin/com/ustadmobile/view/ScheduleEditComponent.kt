@@ -17,6 +17,8 @@ import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.ext.standardFormat
+import com.ustadmobile.view.components.MDateTimePickerType
+import com.ustadmobile.view.components.mDateTimePicker
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import react.RBuilder
@@ -133,39 +135,40 @@ class ScheduleEditComponent (mProps: RProps): UstadEditComponent<Schedule>(mProp
                 umItem(MGridSize.cells12){
                     umGridContainer(MGridSpacing.spacing4) {
                         umItem(MGridSize.cells12, MGridSize.cells6 ) {
-                            mTextField(label = "${fromTimeLabel.text}",
-                                value = Date(entity?.sceduleStartTime ?: 0).standardFormat(),
+
+                            mDateTimePicker(
+                                label = "${fromTimeLabel.text}",
+                                ruleSet = defaultFullWidth,
                                 error = fromTimeLabel.error,
-                                disabled = !fieldsEnabled,
                                 helperText = fromTimeLabel.errorText,
-                                variant = MFormControlVariant.outlined,
-                                onChange = {
-                                    it.persist()
+                                value = Date(entity?.sceduleStartTime ?: Date.now().toLong()),
+                                inputVariant = MFormControlVariant.outlined,
+                                pickerType = MDateTimePickerType.time,
+                                onChange = { mills, _ ->
                                     setState {
-                                        entity?.sceduleStartTime = it.targetInputValue.toLong()
+                                        entity?.sceduleStartTime = mills
                                         fromTimeError = null
                                     }
-                                }){
-                                css(defaultFullWidth)
-                            }
+                                })
                         }
 
                         umItem(MGridSize.cells12, MGridSize.cells6 ) {
-                            mTextField(label = "${toTimeLabel.text}",
-                                value = Date(entity?.scheduleEndTime ?: 0).standardFormat(),
+
+
+                            mDateTimePicker(
+                                label = "${toTimeLabel.text}",
+                                ruleSet = defaultFullWidth,
                                 error = toTimeLabel.error,
-                                disabled = !fieldsEnabled,
                                 helperText = toTimeLabel.errorText,
-                                variant = MFormControlVariant.outlined,
-                                onChange = {
-                                    it.persist()
+                                value = Date(entity?.scheduleEndTime ?: Date.now().toLong()),
+                                inputVariant = MFormControlVariant.outlined,
+                                pickerType = MDateTimePickerType.time,
+                                onChange = { mills, _ ->
                                     setState {
-                                        entity?.scheduleEndTime = it.targetInputValue.toLong()
+                                        entity?.scheduleEndTime = mills
                                         toTimeError = null
                                     }
-                                }){
-                                css(defaultFullWidth)
-                            }
+                                })
                         }
                     }
                 }

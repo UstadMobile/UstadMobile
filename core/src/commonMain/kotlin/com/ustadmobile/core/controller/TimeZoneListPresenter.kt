@@ -1,6 +1,10 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.TimeZoneListView
+import com.ustadmobile.lib.db.entities.Person
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
 
 /**
@@ -13,13 +17,8 @@ class TimeZoneListPresenter(context: Any, args: Map<String, String>, view: TimeZ
     : UstadBaseController<TimeZoneListView>(context, args, view, di) {
 
 
-    override fun onCreate(savedState: Map<String, String>?) {
-        super.onCreate(savedState)
-    }
-
-
     fun handleClickTimeZone(timeZoneId: String) {
-        finishWithResult(timeZoneId)
+        finishWithResult(safeStringify(di, ListSerializer(String.serializer()),listOf(timeZoneId)))
     }
 
     companion object {

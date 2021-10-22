@@ -87,6 +87,16 @@ class ClazzEdit2Presenter(context: Any,
             requireSavedStateHandle()[SAVEDSTATE_KEY_HOLIDAYCALENDAR] = null
         }
 
+        observeSavedStateResult(
+            RESULT_TIMEZONE_KEY,
+            ListSerializer(String.serializer()), String::class) {
+            val timeZone = it.firstOrNull() ?: return@observeSavedStateResult
+            entity?.clazzTimeZone = timeZone
+            view.entity = entity
+
+            requireSavedStateHandle()[RESULT_TIMEZONE_KEY] = null
+        }
+
         observeSavedStateResult(SAVEDSTATE_KEY_FEATURES,
             ListSerializer(LongWrapper.serializer()), LongWrapper::class) {
             val wrapper = it.firstOrNull() ?: return@observeSavedStateResult
@@ -184,18 +194,21 @@ class ClazzEdit2Presenter(context: Any,
     fun handleClickTimezone() {
         navigateForResult(NavigateForResultOptions(
             this,
-            currentEntityValue = entity?.clazzTimeZone,
-            destinationViewName = TimeZoneListView.VIEW_NAME,
-            entityClass = String::class,
-            serializationStrategy = String.serializer(),
-            destinationResultKey = RESULT_TIMEZONE_KEY))
+            entity?.clazzTimeZone,
+            TimeZoneListView.VIEW_NAME,
+            String::class,
+            String.serializer(),
+            RESULT_TIMEZONE_KEY))
     }
 
-    fun handleClickHolidayCalendar() {
+    fun handleHolidayCalendarClicked() {
         navigateForResult(
             NavigateForResultOptions(this,
-            null, HolidayCalendarListView.VIEW_NAME, HolidayCalendar::class,
-            HolidayCalendar.serializer(), SAVEDSTATE_KEY_HOLIDAYCALENDAR)
+            null,
+                HolidayCalendarListView.VIEW_NAME,
+                HolidayCalendar::class,
+            HolidayCalendar.serializer(),
+                SAVEDSTATE_KEY_HOLIDAYCALENDAR)
         )
     }
 
@@ -286,7 +299,7 @@ class ClazzEdit2Presenter(context: Any,
 
         const val SAVEDSTATE_KEY_SCHOOL = "School"
 
-        const val SAVEDSTATE_KEY_HOLIDAYCALENDAR = "HolidayCalendar"
+        const val SAVEDSTATE_KEY_HOLIDAYCALENDAR = "ClazzHolidayCalendar"
 
         const val SAVEDSTATE_KEY_FEATURES = "ClazzFeatures"
 
