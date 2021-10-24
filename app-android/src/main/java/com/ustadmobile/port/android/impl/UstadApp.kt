@@ -305,7 +305,9 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<EmbeddedHTTPD>()
 
             val address: InetAddress? = getLocalIpAddress()
-            instance<UstadCommunicationManager>().start(address)
+            if(address != null){
+                instance<UstadCommunicationManager>().start(address)
+            }
 
             Picasso.setSingletonInstance(Picasso.Builder(applicationContext)
                     .downloader(OkHttp3Downloader(instance<OkHttpClient>()))
