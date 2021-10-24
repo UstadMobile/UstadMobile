@@ -160,8 +160,9 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
         set(value){
             field = value
             if(value != null) {
-                /* mBinding?.entryDetailProgress?.statusText = value.toStatusString(
-                     di.direct.instance(), requireContext())*/
+                if(value.progressTitle != null){
+                    mBinding?.entryDetailProgress?.statusText = value.progressTitle.toString()
+                }
                 mBinding?.entryDetailProgress?.progress = if (value.total > 0) {
                     (value.progress.toFloat()) / (value.total.toFloat())
                 } else {

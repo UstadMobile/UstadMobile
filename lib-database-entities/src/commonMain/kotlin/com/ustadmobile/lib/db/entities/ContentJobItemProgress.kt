@@ -6,4 +6,6 @@ class ContentJobItemProgress {
 
     var total: Int = 0
 
+    var progressTitle: String? = null
+
 }

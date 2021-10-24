@@ -69,8 +69,10 @@ abstract class ContentJobItemDao {
 
 
     @Query("""
-        SELECT cjiRecursiveProgress AS progress, cjiRecursiveTotal AS total
-          FROM ContentJobItem 
+        SELECT cjiRecursiveProgress AS progress, cjiRecursiveTotal AS total, cjNotificationTitle as progressTitle
+          FROM ContentJobItem
+          JOIN ContentJob
+            ON ContentJob.cjUid = ContentJobItem.cjiJobUid
          WHERE cjiContentEntryUid = :contentEntryUid
            AND cjiRecursiveStatus >= ${JobStatus.RUNNING_MIN}
            AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX}
