@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view.binding
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.graphics.Color
 import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
@@ -10,20 +9,28 @@ import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
+import androidx.fragment.app.findFragment
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.min
-import ir.hamsaa.persiandatepicker.PersianDatePickerDialog
-import ir.hamsaa.persiandatepicker.api.PersianPickerDate
-import ir.hamsaa.persiandatepicker.api.PersianPickerListener
-import ir.hamsaa.persiandatepicker.date.PersianDateImpl
-import org.jetbrains.annotations.NotNull
 import org.kodein.di.DIAware
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import com.aminography.primecalendar.common.CalendarFactory
+import com.aminography.primecalendar.common.CalendarType
+import com.aminography.primedatepicker.common.PickType
+import com.aminography.primedatepicker.picker.PrimeDatePicker
+import com.aminography.primedatepicker.picker.callback.SingleDayPickCallback
+import com.aminography.primecalendar.PrimeCalendar
+import com.aminography.primecalendar.persian.PersianCalendar
+import com.aminography.primedatepicker.picker.theme.DarkThemeFactory
+import com.aminography.primedatepicker.picker.theme.LightThemeFactory
+import com.aminography.primedatepicker.picker.theme.base.ThemeFactory
+import com.ustadmobile.port.android.view.UstadBaseFragment
+import com.aminography.primecalendar.common.toPersian
 
 
 const val MODE_START_OF_DAY = 1
@@ -89,11 +96,24 @@ fun TextView.setDateTime2(timeInMillis: Long, timeZoneId: String?, dateTimeInMil
     text = when {
         !adapterCalendar.timeInMillis.isSet2 -> ""
         (localeString.startsWith("fa") || localeString.startsWith("ps")) -> {
-            val persianDate = PersianDateImpl()
-            persianDate.setDate(adapterCalendar.timeInMillis)
-            persianDate.persianYear.toString() + "/" +
-                    persianDate.persianMonth + "/" +
-                    persianDate.persianDay
+
+            val calendarType = CalendarType.PERSIAN
+            val locale = Locale(localeString)
+            val pickType = PickType.SINGLE
+            val minDateCalendar = null
+            val maxDateCalendar = null
+            val today = CalendarFactory.newInstance(calendarType, locale)
+            val timeZone =adapterDateFormat.timeZone
+
+
+            var persianCalendar = PersianCalendar(timeZone, locale).also{
+                it.timeInMillis = adapterCalendar.timeInMillis}
+
+            persianCalendar.get(Calendar.YEAR).toString() + "/" +
+                    persianCalendar.get(Calendar.MONTH).toString() + "/" +
+                    persianCalendar.get(Calendar.DAY_OF_MONTH).toString()
+
+
         }
         else -> adapterDateFormat.format(Date(adapterCalendar.timeInMillis))
     }
@@ -103,6 +123,13 @@ fun TextView.setDateTime2(timeInMillis: Long, timeZoneId: String?, dateTimeInMil
 fun TextView.getDateTimeInMillis(): Long {
     return adapterCalendar.timeInMillis
 }
+
+private val singleDayPickCallback = SingleDayPickCallback { singleDay ->
+    println("hey")
+}
+
+const val PICKER_TAG = "PrimeDatePickerBottomSheet"
+
 @BindingAdapter("dateTimeInMillisAttrChanged")
 fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingListener) {
     setOnClickListener {
@@ -117,40 +144,37 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
 
         if(localeString.startsWith("ps") || localeString.startsWith("fa")){
 
-            val picker: PersianDatePickerDialog = PersianDatePickerDialog(context)
-                .setPositiveButtonString(context.getString(R.string.ok))
-                .setNegativeButton(context.getString(R.string.cancel))
-                .setTodayButton(context.getString(R.string.today))
-                .setTodayButtonVisible(true)
-                .setMinYear(1200)
-                .setMaxYear(1600)
-                .apply {
-                    if(cal.timeInMillis.isSet2)
-                        setInitDate(cal.timeInMillis)
-                }
-                .setActionTextColor(Color.BLACK)
-                .setTypeFace(typeface)
-                .setTitleType(PersianDatePickerDialog.NO_TITLE)
-                .setShowInBottomSheet(true)
-                .setListener(object : PersianPickerListener {
-                    override fun onDateSelected(@NotNull persianPickerDate: PersianPickerDate) {
+            val calendarType = CalendarType.PERSIAN
+            val locale = Locale(localeString)
+            val pickType = PickType.SINGLE
+            val minDateCalendar = null
+            val maxDateCalendar = null
 
-                        adapterCalendar.timeInMillis = persianPickerDate.timestamp
+            val today = CalendarFactory.newInstance(calendarType, locale)
 
-                        val persianDate = PersianDateImpl()
-                        persianDate.setDate(adapterCalendar.timeInMillis)
+            var datePicker: PrimeDatePicker? = null
 
-                        text = persianPickerDate.getPersianYear().toString() + "/" +
-                                persianPickerDate.getPersianMonth() + "/" +
-                                persianPickerDate.getPersianDay()
-
-                        inverseBindingListener.onChange()
+            datePicker = PrimeDatePicker.dialogWith(today).let {
+                when (pickType) {
+                    PickType.SINGLE -> {
+                        it.pickSingleDay(singleDayPickCallback)
                     }
 
-                    override fun onDismissed() {}
-                })
+                    else -> null
+                }
+            }?.let {
+                minDateCalendar?.let { minDate -> it.minPossibleDate(minDate) }
+                maxDateCalendar?.let { maxDate -> it.maxPossibleDate(maxDate) }
+                //it.applyTheme(theme)
+                it.build()
+            }
 
-            picker.show()
+
+            datePicker?.show(
+                findFragment<UstadBaseFragment>().childFragmentManager, PICKER_TAG
+            )
+
+            datePicker?.setOnDismissListener { datePicker = null }
 
         }else {
 
@@ -202,20 +226,33 @@ fun TextView.setTextFromToDateTimeMillis(textFromDateLong: Long, textToDateLong:
 
     text = if(localeString.startsWith("ps") || localeString.startsWith("fa")){
 
-        val persianDateTo = PersianDateImpl()
-        persianDateTo.setDate(textToDateLong)
 
-        val persianDateFrom = PersianDateImpl()
-        persianDateFrom.setDate(textFromDateLong)
-        val persianFromText = persianDateFrom.persianYear.toString() + "/" +
-                persianDateFrom.persianMonth + "/" +
-                persianDateFrom.persianDay
-        val persianToText = persianDateTo.persianYear.toString() + "/" +
-                persianDateTo.persianMonth + "/" +
-                persianDateTo.persianDay
+        val calendarType = CalendarType.PERSIAN
+        val locale = Locale(localeString)
+        val pickType = PickType.SINGLE
+        val minDateCalendar = null
+        val maxDateCalendar = null
+        val today = CalendarFactory.newInstance(calendarType, locale)
+        val timeZone =adapterDateFormat.timeZone
+
+
+        var persianFromCalendar = PersianCalendar(timeZone, locale).also{
+            it.timeInMillis = textFromDateLong}
+
+        var persianToCalendar = PersianCalendar(timeZone, locale).also{
+            it.timeInMillis = textToDateLong}
+
+        val persianFromText = persianFromCalendar.get(Calendar.YEAR).toString() + "/" +
+                persianFromCalendar.get(Calendar.MONTH).toString() + "/" +
+                persianFromCalendar.get(Calendar.DAY_OF_MONTH).toString()
+
+        val persianToText = persianToCalendar.get(Calendar.YEAR).toString() + "/" +
+                persianToCalendar.get(Calendar.MONTH).toString() + "/" +
+                persianToCalendar.get(Calendar.DAY_OF_MONTH).toString()
 
         "${if (textFromDateLong > 0) persianFromText else ""} -" +
-                " ${if (textToDateLong > 0 && textToDateLong != Long.MAX_VALUE) persianToText else ""}"
+                " ${if (textToDateLong > 0 && textToDateLong != Long.MAX_VALUE) 
+                    persianToText else ""}"
 
     }else{
         "${if (textFromDateLong > 0) dateFormat.format(textFromDateLong) else ""} -" +

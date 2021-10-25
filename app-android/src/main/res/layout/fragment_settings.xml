@@ -46,7 +46,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:visibility="@{holidayCalendarVisible ? View.VISIBLE : View.GONE}"
-                android:background="?android:selectableItemBackground"
                 android:onClick="@{() -> presenter.goToHolidayCalendarList()}">
 
                 <androidx.appcompat.widget.AppCompatImageView
@@ -242,6 +241,76 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_lang_list_iv"
                     app:layout_constraintTop_toBottomOf="@+id/activity_settings2_lang_list_title" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/activity_settings2_app_lang_cl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:visibility="@{langListVisible ? View.VISIBLE : View.GONE}"
+                android:background="?android:selectableItemBackground"
+                android:onClick="@{() -> presenter.handleClickLangList()}">
+
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/activity_settings2_app_lang_cl_iv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+                    android:tint="?colorOnIconTint"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0"
+                    app:srcCompat="@drawable/ic_language_blue_grey_600_24dp" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    android:id="@+id/activity_settings2_app_lang_cl_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:text="@string/app_language"
+                    app:layout_constraintStart_toEndOf="@+id/activity_settings2_app_lang_cl_iv"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                    android:id="@+id/activity_settings2_app_lang_cl_desc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+                    android:text="@string/select_app_language"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/activity_settings2_app_lang_cl_iv"
+                    app:layout_constraintTop_toBottomOf="@+id/activity_settings2_app_lang_cl_title" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/language_option"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/language"
+                    android:saveEnabled="false"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/activity_settings2_app_lang_cl_desc"
+                    app:layout_constraintTop_toBottomOf="@+id/activity_settings2_app_lang_cl_desc">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/fragment_settings_language_options_autocomplete_textview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:saveEnabled="false" />
+
+                </com.google.android.material.textfield.TextInputLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

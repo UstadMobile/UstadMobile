@@ -1445,5 +1445,7 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="parent">Parent</string>
 
+    <string name="app_language">App language</string>
+    <string name="select_app_language">Select the application language</string>
 
 </resources>
