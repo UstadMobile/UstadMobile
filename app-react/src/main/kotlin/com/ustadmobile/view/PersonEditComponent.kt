@@ -28,6 +28,7 @@ import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.errorTextClass
+import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
@@ -236,7 +237,7 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
             setEditTitle(MessageID.add_a_new_person, MessageID.edit_person)
         }
         mPresenter = PersonEditPresenter(this, arguments,this, di, this)
-        mPresenter?.onCreate(mapOf())
+        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
     }
 
     override fun RBuilder.render() {

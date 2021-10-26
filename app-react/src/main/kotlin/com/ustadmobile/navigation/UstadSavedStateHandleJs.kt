@@ -6,19 +6,19 @@ import com.ustadmobile.door.ext.concurrentSafeMapOf
 
 class UstadSavedStateHandleJs: UstadSavedStateHandle {
 
-    internal val mLiveDatas: MutableMap<String, DoorMutableLiveData<*>> = concurrentSafeMapOf()
+    internal val mLiveData: MutableMap<String, DoorMutableLiveData<*>> = concurrentSafeMapOf()
 
     override fun <T> set(key: String, value: T?) {
-        mLiveDatas[key] = DoorMutableLiveData(value as Any)
+        mLiveData[key] = DoorMutableLiveData(value)
     }
 
     override fun <T> get(key: String): T? {
-        return mLiveDatas[key]?.getValue() as T?
+        return mLiveData[key]?.getValue().unsafeCast<T>()
     }
 
     override fun <T> getLiveData(key: String): DoorMutableLiveData<T> {
-        return mLiveDatas.getOrPut(key) {
+        return mLiveData.getOrPut(key) {
             DoorMutableLiveData(null)
-        } as DoorMutableLiveData<T>
+        }.unsafeCast<DoorMutableLiveData<T>>()
     }
 }

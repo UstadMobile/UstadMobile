@@ -58,7 +58,6 @@ class SplashPresenter(private val view: SplashView): DIAware {
         rootElement?.setAttribute("dir",directionAttributeValue)
         subscribe(dbBuildListener)
         setUpResources()
-
     }
 
     /**

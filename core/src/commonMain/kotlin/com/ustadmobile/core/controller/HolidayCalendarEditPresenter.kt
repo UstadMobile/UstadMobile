@@ -1,20 +1,18 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.OneToManyJoinEditHelperMp
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.HolidayCalendarEditView
 import com.ustadmobile.core.view.HolidayEditView
-import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
-import com.ustadmobile.lib.db.entities.Schedule
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -53,7 +51,7 @@ class HolidayCalendarEditPresenter(context: Any,
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): HolidayCalendar? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         val holidayCalendar = withTimeoutOrNull(2000) {
-            db.holidayCalendarDao.findByUid(entityUid)
+            db.holidayCalendarDao.findByUidAsync(entityUid)
         } ?: HolidayCalendar()
 
         val holidayList = withTimeoutOrNull(2000) {
@@ -97,7 +95,7 @@ class HolidayCalendarEditPresenter(context: Any,
                 it.holHolidayCalendarUid = entity.umCalendarUid
             }
 
-            view.finishWithResult(listOf(entity))
+            finishWithResult(safeStringify(di, ListSerializer(HolidayCalendar.serializer()), listOf(entity)))
         }
     }
 

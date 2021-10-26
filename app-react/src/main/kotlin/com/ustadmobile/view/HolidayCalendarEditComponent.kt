@@ -14,6 +14,9 @@ import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
+import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.util.ext.standardFormat
+import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.css.padding
@@ -22,6 +25,7 @@ import react.RProps
 import react.setState
 import styled.css
 import styled.styledDiv
+import kotlin.js.Date
 
 class HolidayCalendarEditComponent(mProps: RProps): UstadEditComponent<HolidayCalendar>(mProps),
     HolidayCalendarEditView{
@@ -66,14 +70,13 @@ class HolidayCalendarEditComponent(mProps: RProps): UstadEditComponent<HolidayCa
             setState{
                 field = value
             }
-            console.log(value)
         }
 
     override fun onCreateView() {
         super.onCreateView()
 
         mPresenter = HolidayCalendarEditPresenter(this, arguments, this, this,di)
-        mPresenter?.onCreate(mapOf())
+        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 
         setEditTitle(MessageID.add_a_holiday, MessageID.edit_holiday)
     }
@@ -129,9 +132,8 @@ class HolidayCalendarEditComponent(mProps: RProps): UstadEditComponent<HolidayCa
 
 class HolidayListComponent(mProps: ListProps<Holiday>): UstadSimpleList<ListProps<Holiday>>(mProps){
     override fun RBuilder.renderListItem(item: Holiday) {
-
+        createItemWithIconTitleAndDescription("date_range",item.holName, "${Date(item.holStartTime).standardFormat()} - ${Date(item.holEndTime).standardFormat()}")
     }
-
 }
 
 fun RBuilder.renderHolidays(holidays: List<Holiday>,

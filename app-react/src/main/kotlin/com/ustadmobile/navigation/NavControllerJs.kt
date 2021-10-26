@@ -26,6 +26,8 @@ class NavControllerJs: UstadNavController {
         if(inclusive)
             splitIndex--
 
+        if(splitIndex < 0) return
+
         navStack.removeAll(navStack.subList(splitIndex, navStack.size))
         dispatch(ReduxNavStackState(navStack))
 

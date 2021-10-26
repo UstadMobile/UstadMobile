@@ -21,9 +21,7 @@ import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.Util.ASSET_ENTRY
-import com.ustadmobile.util.ext.format
-import com.ustadmobile.util.ext.formattedInHoursAndMinutes
-import com.ustadmobile.util.ext.standardFormat
+import com.ustadmobile.util.ext.*
 import com.ustadmobile.view.components.MDateTimePickerType
 import com.ustadmobile.view.components.mDateTimePicker
 import com.ustadmobile.view.ext.*
@@ -131,7 +129,7 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
         setEditTitle(MessageID.add_a_new_class, MessageID.edit_clazz)
         mPresenter = ClazzEdit2Presenter(this, arguments, this,
             di, this)
-        mPresenter?.onCreate(mapOf())
+        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
     }
 
     override fun RBuilder.render() {
@@ -188,7 +186,7 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
                                 ruleSet = defaultFullWidth,
                                 error = startDateLabel.error,
                                 helperText = startDateLabel.errorText,
-                                value = Date(if(entity?.clazzStartTime != null &&  entity?.clazzStartTime != 0L) entity?.clazzStartTime!! else Date.now()),
+                                value = entity?.clazzStartTime.toDate(),
                                 inputVariant = MFormControlVariant.outlined,
                                 pickerType = MDateTimePickerType.date,
                                 onChange = { mills, _ ->
@@ -206,7 +204,7 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
                                 ruleSet = defaultFullWidth,
                                 error = endDateLabel.error,
                                 helperText = endDateLabel.errorText,
-                                value = Date(entity?.clazzEndTime ?: Date.now().toLong()),
+                                value = entity?.clazzEndTime.toDate(),
                                 inputVariant = MFormControlVariant.outlined,
                                 pickerType = MDateTimePickerType.date,
                                 onChange = { mills, utc ->

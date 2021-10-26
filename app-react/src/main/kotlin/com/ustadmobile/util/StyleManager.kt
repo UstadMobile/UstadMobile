@@ -344,7 +344,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     val centerContainer by css {
         display = Display.flex
         justifyContent = JustifyContent.center
-        height = LinearDimension("100%")
+        height = LinearDimension("70vh")
         width = LinearDimension("100wh")
         alignItems = Align.center
     }
@@ -392,6 +392,10 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     val horizontalList by css {
         width = LinearDimension("100%")
         backgroundColor = Color(theme.palette.background.paper)
+    }
+
+    val horizontalListEmpty by css {
+        width = LinearDimension("100%")
     }
 
     val listItemCreateNewDiv by css {

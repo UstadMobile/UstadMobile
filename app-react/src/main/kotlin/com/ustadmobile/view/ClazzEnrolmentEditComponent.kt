@@ -19,6 +19,7 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.defaultFullWidth
+import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
@@ -112,9 +113,9 @@ class ClazzEnrolmentEditComponent (mProps: RProps): UstadEditComponent<ClazzEnro
 
     override fun onCreateView() {
         super.onCreateView()
-        mPresenter = ClazzEnrolmentEditPresenter(this, arguments, this, this,
-            di)
-        mPresenter?.onCreate(mapOf())
+        mPresenter = ClazzEnrolmentEditPresenter(this, arguments, this,
+            this, di)
+        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
     }
 
     override fun RBuilder.render() {

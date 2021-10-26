@@ -14,6 +14,7 @@ import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.Util.ASSET_ENTRY
+import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.*
 import kotlinx.html.InputType
@@ -88,7 +89,7 @@ class SchoolEditComponent (mProps: RProps): UstadEditComponent<SchoolWithHoliday
         setEditTitle(MessageID.add_a_new_school, MessageID.edit_school)
         mPresenter = SchoolEditPresenter(this, arguments, this,
             di, this)
-        mPresenter?.onCreate(mapOf())
+        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
     }
 
     override fun RBuilder.render() {

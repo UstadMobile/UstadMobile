@@ -27,6 +27,7 @@ import com.ustadmobile.util.StyleManager.chipSetFilter
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.horizontalList
+import com.ustadmobile.util.StyleManager.horizontalListEmpty
 import com.ustadmobile.util.StyleManager.listComponentContainer
 import com.ustadmobile.util.StyleManager.listCreateNewContainer
 import com.ustadmobile.util.StyleManager.selectionContainer
@@ -194,15 +195,10 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
             renderMenuOptions()
 
             renderHeaderView()
-
-            if(listItems.isNotEmpty()){
-                if(listTypeSingleColumn)
-                    renderSingleColumnList()
-                else
-                    renderMultiColumnList()
-            }else {
-                renderEmptyList()
-            }
+            if(listTypeSingleColumn)
+                renderSingleColumnList()
+            else
+                renderMultiColumnList()
 
             renderFooterView()
         }
@@ -233,56 +229,21 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
         }
     }
 
-
-
-
-    private fun RBuilder.renderMultiColumnList(){
-        umGridContainer {
-            if(showCreateNewItem){
+    private fun RBuilder.renderNewItem(multiColumn: Boolean = false){
+        if(showCreateNewItem){
+            if(multiColumn){
                 umItem(MGridSize.cells12) {
-                    css(listCreateNewContainer)
+                    css{
+                        +listCreateNewContainer
+                        +horizontalList
+                    }
                     attrs.alignItems = MGridAlignItems.flexStart
                     attrs.asDynamic().onClick = {
                         handleClickCreateNewEntry()
                     }
                     createCreateNewItem(getString(createNewTextId))
                 }
-            }
-
-            umItem(MGridSize.cells12){
-                umGridContainer(MGridSpacing.spacing4) {
-                    listItems.forEach {entry->
-                        umItem(MGridSize.cells12, multiColumnItemSize){
-                            css{
-                                cursor = Cursor.pointer
-                                backgroundColor = Color(if(selectedEntries.indexOf(entry) != -1)
-                                    theme.palette.action.selected
-                                else theme.palette.background.default)
-                            }
-                            mPaper(elevation = 4) {
-                                styledDiv {
-                                    renderListItem(entry)
-                                }
-
-                                attrs.onMouseDown = {
-                                    handleListItemPress(entry)
-                                }
-                                attrs.onMouseUp = {
-                                    handleListItemRelease(entry)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-        }
-    }
-
-    private fun RBuilder.renderSingleColumnList(){
-        mList {
-            css{ +(styleList() ?: horizontalList) }
-            if(showCreateNewItem){
+            }else {
                 mListItem {
                     css(listCreateNewContainer)
                     attrs.alignItems = MListItemAlignItems.flexStart
@@ -294,25 +255,76 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                     createCreateNewItem(getString(createNewTextId))
                 }
             }
+        }
+    }
 
-            listItems.forEach {entry->
-                mListItem {
-                    css{
-                        backgroundColor = Color(if(selectedEntries.indexOf(entry) != -1)
-                            theme.palette.action.selected
-                        else theme.palette.background.paper)
-                        width = LinearDimension("100%")
+
+    private fun RBuilder.renderMultiColumnList(){
+        umGridContainer {
+
+            renderNewItem()
+
+            if(listItems.isEmpty()){
+                renderEmptyList()
+            }else {
+                umItem(MGridSize.cells12){
+                    umGridContainer(MGridSpacing.spacing4) {
+                        listItems.forEach {entry->
+                            umItem(MGridSize.cells12, multiColumnItemSize){
+                                css{
+                                    cursor = Cursor.pointer
+                                    backgroundColor = Color(if(selectedEntries.indexOf(entry) != -1)
+                                        theme.palette.action.selected
+                                    else theme.palette.background.default)
+                                }
+                                mPaper(elevation = 4) {
+                                    styledDiv {
+                                        renderListItem(entry)
+                                    }
+
+                                    attrs.onMouseDown = {
+                                        handleListItemPress(entry)
+                                    }
+                                    attrs.onMouseUp = {
+                                        handleListItemRelease(entry)
+                                    }
+                                }
+                            }
+                        }
                     }
-                    attrs.alignItems = MListItemAlignItems.flexStart
-                    attrs.button = true
-                    attrs.divider = true
-                    attrs.onMouseDown = {
-                        handleListItemPress(entry)
+                }
+            }
+        }
+    }
+
+    private fun RBuilder.renderSingleColumnList(){
+        mList {
+            css{ +(styleList() ?: if(listItems.isNotEmpty()) horizontalList else horizontalListEmpty) }
+
+            renderNewItem(false)
+
+            if(listItems.isEmpty()){
+                renderEmptyList()
+            }else {
+                listItems.forEach {entry->
+                    mListItem {
+                        css{
+                            backgroundColor = Color(if(selectedEntries.indexOf(entry) != -1)
+                                theme.palette.action.selected
+                            else theme.palette.background.paper)
+                            width = LinearDimension("100%")
+                        }
+                        attrs.alignItems = MListItemAlignItems.flexStart
+                        attrs.button = true
+                        attrs.divider = true
+                        attrs.onMouseDown = {
+                            handleListItemPress(entry)
+                        }
+                        attrs.onMouseUp = {
+                            handleListItemRelease(entry)
+                        }
+                        renderListItem(entry)
                     }
-                    attrs.onMouseUp = {
-                        handleListItemRelease(entry)
-                    }
-                    renderListItem(entry)
                 }
             }
         }

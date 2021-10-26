@@ -282,7 +282,7 @@ fun RBuilder.mDateTimePicker(
     mUiTimePickerProvider(className = className) {
 
         if(pickerType == MDateTimePickerType.datetime)
-            uiDateTimePicker(value, { onChange(it.valueOf(), it.isUTC()) },
+            uiDateTimePicker(value, { onChange("${it.valueOf()}".toLong(), it.isUTC()) },
                 autoOk,disabled,emptyLabel, format, disableToolbar,initialFocusedDate,
                 inputVariant,orientation, views,variant,
                 {renderTextField(it, label, error, helperText,ruleSet)}, allowKeyboardControl,
@@ -293,14 +293,14 @@ fun RBuilder.mDateTimePicker(
 
         if(pickerType == MDateTimePickerType.time)
             uiTimePicker(
-                value, { onChange(it.valueOf(), it.isUTC()) },autoOk,disabled,emptyLabel,
+                value, { onChange("${it.valueOf()}".toLong(), it.isUTC()) },autoOk,disabled,emptyLabel,
                 format, disableToolbar,initialFocusedDate,inputVariant,orientation,
                 views,variant, {renderTextField(it, label, error,helperText, ruleSet)},ampm, openTo, className){
 
             }
 
         if(pickerType == MDateTimePickerType.date)
-            uiDatePicker(value, { onChange(it.valueOf(), it.isUTC()) },autoOk,disabled,emptyLabel,
+            uiDatePicker(value, { onChange("${it.valueOf()}".toLong(), it.isUTC()) },autoOk,disabled,emptyLabel,
                 format, disableToolbar,initialFocusedDate,inputVariant,orientation,
                 views,variant,{renderTextField(it, label, error,helperText, ruleSet)}, allowKeyboardControl,animateYearScrolling,
                 openTo, disableFuture,disablePast,minDate, maxDate,className){

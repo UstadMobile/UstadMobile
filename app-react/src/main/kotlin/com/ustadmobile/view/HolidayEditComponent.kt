@@ -11,6 +11,9 @@ import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
+import com.ustadmobile.util.ext.toDate
+import com.ustadmobile.view.components.MDateTimePickerType
+import com.ustadmobile.view.components.mDateTimePicker
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.css.padding
@@ -91,35 +94,37 @@ class HolidayEditComponent(mProps: RProps): UstadEditComponent<Holiday>(mProps),
                 umGridContainer(MGridSpacing.spacing4) {
 
                     umItem(MGridSize.cells6) {
-                        mTextField(label = "${holidayStart.text}",
+
+                        mDateTimePicker(
+                            label = "${holidayStart.text}",
+                            ruleSet = defaultFullWidth,
+                            error = holidayStart.error,
                             helperText = holidayStart.errorText,
-                            value = entity?.holStartTime.toString(), error = holidayStart.error,
-                            disabled = !fieldsEnabled,
-                            variant = MFormControlVariant.outlined,
-                            onChange = {
-                                it.persist()
+                            value = entity?.holStartTime.toDate(),
+                            inputVariant = MFormControlVariant.outlined,
+                            pickerType = MDateTimePickerType.date,
+                            onChange = { mills, _ ->
                                 setState {
-                                    //entity?.holStartTime = it.targetInputValue
+                                    entity?.holStartTime = mills
                                 }
-                            }) {
-                            css(defaultFullWidth)
-                        }
+                            })
                     }
 
                     umItem(MGridSize.cells6) {
-                        mTextField(label = "${holidayEnd.text}",
+
+                        mDateTimePicker(
+                            label = "${holidayEnd.text}",
+                            ruleSet = defaultFullWidth,
+                            error = holidayEnd.error,
                             helperText = holidayEnd.errorText,
-                            value = entity?.holStartTime.toString(), error = holidayEnd.error,
-                            disabled = !fieldsEnabled,
-                            variant = MFormControlVariant.outlined,
-                            onChange = {
-                                it.persist()
+                            value = entity?.holStartTime.toDate(),
+                            inputVariant = MFormControlVariant.outlined,
+                            pickerType = MDateTimePickerType.date,
+                            onChange = { mills, _ ->
                                 setState {
-                                    //entity?.holStartTime = it.targetInputValue
+                                    entity?.holEndTime = mills
                                 }
-                            }) {
-                            css(defaultFullWidth)
-                        }
+                            })
                     }
                 }
             }

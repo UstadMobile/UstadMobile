@@ -72,23 +72,8 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
             layoutManager = LinearLayoutManager(requireContext())
         }
 
-
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                HolidayCalendar::class.java) {
-            val holidayCalendar = it.firstOrNull() ?: return@observeResult
-            entity?.holidayCalendar = holidayCalendar
-            entity?.schoolHolidayCalendarUid = holidayCalendar.umCalendarUid
-            mBinding?.school = entity
-        }
-
-
-        navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>(RESULT_TIMEZONE_KEY)
-                ?.observe(viewLifecycleOwner) {
-                    entity?.schoolTimeZone = it
-                    mBinding?.school = entity
-                }
     }
 
     override fun onDestroyView() {

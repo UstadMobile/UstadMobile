@@ -11,10 +11,6 @@
             name="mPresenter"
             type="com.ustadmobile.core.controller.HolidayCalendarEditPresenter" />
 
-        <variable
-            name="mActivity"
-            type="com.ustadmobile.port.android.view.HolidayCalendarEditActivityEventHandler" />
-
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -73,8 +69,8 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_more_vert_black_24dp"
             android:contentDescription="@string/edit"
-            app:onClickEditPopupMenu="@{() -> mActivity.onClickEditHoliday(holiday)}"
-            app:onClickDeletePopupMenu="@{() -> mPresenter.handleRemoveHoliday(holiday)}"
+            app:onClickEditPopupMenu="@{() -> mPresenter.holidayToManyJoinListener.onClickEdit(holiday)}"
+            app:onClickDeletePopupMenu="@{() -> mPresenter.holidayToManyJoinListener.onClickDelete(holiday)}"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

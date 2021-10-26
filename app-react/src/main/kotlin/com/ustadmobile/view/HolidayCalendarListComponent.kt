@@ -14,6 +14,9 @@ import react.RProps
 class HolidayCalendarListComponent(mProps: RProps): UstadListComponent<HolidayCalendar, HolidayCalendarWithNumEntries>(mProps),
     HolidayCalendarListView {
 
+    override val viewName: String
+        get() = HolidayCalendarListView.VIEW_NAME
+
     private var mPresenter: HolidayCalendarListPresenter? = null
 
     override val displayTypeRepo: Any?
@@ -33,13 +36,9 @@ class HolidayCalendarListComponent(mProps: RProps): UstadListComponent<HolidayCa
 
     override fun RBuilder.renderListItem(item: HolidayCalendarWithNumEntries) {
         createItemWithIconTitleAndDescription("calendar_today", item.umCalendarName,
-            getString(MessageID.num_items_with_name)
-                .format(item.numEntries, getString(MessageID.holidays))
-        )
+            getString(MessageID.num_items_with_name).format(item.numEntries,
+                getString(MessageID.holidays)))
     }
-
-    override val viewName: String
-        get() = HolidayCalendarListView.VIEW_NAME
 
     override fun handleClickEntry(entry: HolidayCalendarWithNumEntries) {
         mPresenter?.handleClickEntry(entry as HolidayCalendar)

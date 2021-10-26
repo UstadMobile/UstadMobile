@@ -28,7 +28,7 @@ fun <T> UstadSavedStateHandle.observeResult(lifecycleOwner: DoorLifecycleOwner,
 
 fun UstadSavedStateHandleJs.toStringMap() : Map<String, String> {
     return mutableMapOf<String, String>().also {
-        this.mLiveDatas.keys.forEach {key ->
+        this.mLiveData.keys.forEach {key ->
             val strVal = get<String>(key)
             if(strVal != null)
                 it[key] = strVal

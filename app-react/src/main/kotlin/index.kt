@@ -6,6 +6,8 @@ import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager
+import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJs
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.defaultJsonSerializer
@@ -55,9 +57,6 @@ fun main() {
                 mThemeProvider(theme) {
                     splashComponent()
                 }
-
-
-
             }
         }
     }
@@ -156,4 +155,6 @@ private val diModule = DI.Module("UstadApp-React"){
 
         Pbkdf2Params(numIterations, keyLength)
     }
+
+    bind<ClazzLogCreatorManager>() with singleton { ClazzLogCreatorManagerJs() }
 }

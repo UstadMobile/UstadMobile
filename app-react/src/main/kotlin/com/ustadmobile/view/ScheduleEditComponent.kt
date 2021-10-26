@@ -16,7 +16,9 @@ import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.defaultFullWidth
+import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.standardFormat
+import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.components.MDateTimePickerType
 import com.ustadmobile.view.components.mDateTimePicker
 import com.ustadmobile.view.ext.umGridContainer
@@ -88,7 +90,7 @@ class ScheduleEditComponent (mProps: RProps): UstadEditComponent<Schedule>(mProp
         mPresenter = ScheduleEditPresenter(this, arguments, this,
             di, this)
         setEditTitle(MessageID.add_a_schedule, MessageID.edit_schedule)
-        mPresenter?.onCreate(mapOf())
+        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
     }
 
     override fun RBuilder.render() {
@@ -141,7 +143,7 @@ class ScheduleEditComponent (mProps: RProps): UstadEditComponent<Schedule>(mProp
                                 ruleSet = defaultFullWidth,
                                 error = fromTimeLabel.error,
                                 helperText = fromTimeLabel.errorText,
-                                value = Date(entity?.sceduleStartTime ?: Date.now().toLong()),
+                                value = entity?.sceduleStartTime.toDate(),
                                 inputVariant = MFormControlVariant.outlined,
                                 pickerType = MDateTimePickerType.time,
                                 onChange = { mills, _ ->
@@ -160,7 +162,7 @@ class ScheduleEditComponent (mProps: RProps): UstadEditComponent<Schedule>(mProp
                                 ruleSet = defaultFullWidth,
                                 error = toTimeLabel.error,
                                 helperText = toTimeLabel.errorText,
-                                value = Date(entity?.scheduleEndTime ?: Date.now().toLong()),
+                                value = entity?.scheduleEndTime.toDate(),
                                 inputVariant = MFormControlVariant.outlined,
                                 pickerType = MDateTimePickerType.time,
                                 onChange = { mills, _ ->

@@ -1,6 +1,7 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.view.UstadView
@@ -153,8 +154,6 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
     open fun getString(messageId: Int): String {
         return if(messageId == 0) "" else systemImpl.getString(messageId, this)
     }
-
-
 
     override fun componentWillUnmount() {
         for(observer in lifecycleObservers){
