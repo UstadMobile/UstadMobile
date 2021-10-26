@@ -104,6 +104,10 @@ class ContentJobRunner(
 
             var processResult: ProcessResult? = null
             var processException: Throwable? = null
+            var mediatorObserver: DoorObserver<Pair<Int, Boolean>>?= null
+            val mediatorLiveData = JobConnectivityLiveData(connectivityLiveData,
+                    db.contentJobDao.findMeteredAllowedLiveData(
+                            item.contentJob?.cjUid ?: 0))
 
             try {
 
@@ -140,8 +144,28 @@ class ContentJobRunner(
 
                 val plugin = contentPluginManager.getPluginById(pluginId)
 
-                processResult = plugin.processJob(item, processContext, this@ContentJobRunner)
-                db.contentJobItemDao.updateItemStatus(item.contentJobItem?.cjiUid ?: 0, processResult.status)
+                val job = async {
+                    processResult = plugin.processJob(item, processContext, this@ContentJobRunner)
+                }
+
+                mediatorObserver = DoorObserver {
+                    val state = it.first
+                    val isMeteredAllowed = it.second
+
+                    if(item.contentJobItem?.cjiConnectivityNeeded == true
+                            && (!isMeteredAllowed && state == ConnectivityStatus.STATE_METERED)){
+                        job.cancel()
+                    }
+
+                }
+
+                withContext(Dispatchers.Main){
+                    mediatorLiveData.observeForever(mediatorObserver)
+                }
+
+                job.await()
+
+                db.contentJobItemDao.updateItemStatus(item.contentJobItem?.cjiUid ?: 0, processResult?.status ?: 0)
                 db.contentJobItemDao.updateFinishTimeForJob(item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
                 println("Processor #$id completed job #${item.contentJobItem?.cjiUid}")
             }catch(e: Exception) {
@@ -152,7 +176,7 @@ class ContentJobRunner(
             }finally {
                 withContext(NonCancellable) {
                     val finalStatus = when {
-                        processResult != null -> processResult.status
+                        processResult != null -> processResult?.status ?: JobStatus.FAILED
                         processException is FatalContentJobException -> JobStatus.FAILED
                         (item.contentJobItem?.cjiAttemptCount ?: maxItemAttempts) >= maxItemAttempts -> JobStatus.FAILED
                         else -> JobStatus.QUEUED
@@ -171,6 +195,11 @@ class ContentJobRunner(
                     }
                     println("Processor #$id sending check queue signal after finishing with #${item.contentJobItem?.cjiUid}")
                 }
+
+                withContext(NonCancellable + doorMainDispatcher()) {
+                    mediatorObserver?.let { mediatorLiveData.removeObserver(it) }
+                }
+
 
                 if(processException is CancellationException)
                     throw processException

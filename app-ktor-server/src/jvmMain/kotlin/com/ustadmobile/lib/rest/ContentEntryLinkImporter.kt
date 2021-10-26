@@ -2,7 +2,6 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.account.Endpoint
 import io.github.aakira.napier.Napier
-import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.contentjob.MetadataResult
@@ -12,11 +11,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.getSize
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.createTemporaryDir
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
@@ -28,15 +24,10 @@ import io.ktor.routing.Route
 import io.ktor.routing.post
 import io.ktor.routing.route
 import kotlinx.coroutines.withTimeout
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.Json
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
-import org.kodein.di.ktor.di
 import org.kodein.di.on
 import java.io.File
-import java.net.URI
 import java.net.URL
 
 
@@ -91,6 +82,7 @@ fun Route.ContentEntryLinkImporter() {
                 val job = ContentJob().apply {
                     toUri = containerFolder.toURI().toString()
                     params = conversionParams
+                    cjIsMeteredAllowed = true
                     cjUid = db.contentJobDao.insertAsync(this)
                 }
                 ContentJobItem().apply {
@@ -101,7 +93,7 @@ fun Route.ContentEntryLinkImporter() {
                     cjiContentEntryUid = contentEntry.contentEntryUid
                     cjiIsLeaf = contentEntry.leaf
                     cjiParentContentEntryUid = parentUid ?: 0
-                    cjiConnectivityAcceptable = ContentJobItem.ACCEPT_ANY
+                    cjiConnectivityNeeded = false
                     cjiStatus = JobStatus.QUEUED
                     cjiUid = db.contentJobItemDao.insertJobItem(this)
                 }

@@ -25,6 +25,7 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.checkConnectivityToDoJob
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.lib.db.entities.*
 import io.ktor.client.*
@@ -123,7 +124,7 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
     override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
         val jobUri = contentJobItem.sourceUri ?: return ProcessResult(JobStatus.FAILED)
-        val container = withContext(Dispatchers.Default) {
+        return withContext(Dispatchers.Default) {
 
             val doorUri = DoorUri.parse(jobUri)
             val localUri = process.getLocalUri(doorUri, context, di)
@@ -213,13 +214,22 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
             contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
             progress.onProgress(contentJobItem)
 
+            contentJobItem.cjiConnectivityNeeded = true
+            db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
+
+            val haveConnectivityToContinueJob = checkConnectivityToDoJob(db, jobItem)
+            if(!haveConnectivityToContinueJob){
+                return@withContext ProcessResult(JobStatus.QUEUED)
+            }
+
+
             val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
             uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient,  torrentFileBytes, endpoint)
 
             repo.containerDao.findByUid(container.containerUid)
 
+            return@withContext ProcessResult(JobStatus.COMPLETE)
         }
-        return ProcessResult(JobStatus.COMPLETE)
     }
 
     companion object {

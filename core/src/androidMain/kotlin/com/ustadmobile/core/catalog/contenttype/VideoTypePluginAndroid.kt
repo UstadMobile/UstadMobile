@@ -68,7 +68,7 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
     override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, jobProgress: ContentJobProgressListener): ProcessResult {
         val contentJobItem = jobItem.contentJobItem
                 ?: throw IllegalArgumentException("missing job item")
-        withContext(Dispatchers.Default) {
+        return withContext(Dispatchers.Default) {
 
             val uri = contentJobItem.sourceUri ?: throw IllegalStateException("missing uri")
             val videoUri = DoorUri.parse(uri)
@@ -213,12 +213,21 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
             containerUidFolder.mkdirs()
             ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
 
+            contentJobItem.cjiConnectivityNeeded = true
+            db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
+
+            val haveConnectivityToContinueJob = checkConnectivityToDoJob(db, jobItem)
+            if(!haveConnectivityToContinueJob){
+                return@withContext ProcessResult(JobStatus.QUEUED)
+            }
+
             val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
             uploadContentIfNeeded(contentNeedUpload, contentJobItem, jobProgress, httpClient,  torrentFileBytes, endpoint)
 
-            repo.containerDao.findByUid(container.containerUid) ?: container
+            repo.containerDao.findByUid(container.containerUid)
+
+            return@withContext ProcessResult(JobStatus.COMPLETE)
         }
-        return ProcessResult(JobStatus.COMPLETE)
     }
 
     suspend fun getEntry(doorUri: DoorUri, process: ProcessContext): MetadataResult? {

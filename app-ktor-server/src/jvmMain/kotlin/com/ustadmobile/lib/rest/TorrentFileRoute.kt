@@ -2,12 +2,9 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.ContentJobManager
-import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.ext.getSize
 import com.ustadmobile.core.torrent.ContainerTorrentDownloadJob
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import io.ktor.application.*
@@ -18,17 +15,11 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.Json
-import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
-import org.kodein.di.ktor.di
 import org.kodein.di.on
 import java.io.File
 import java.lang.Exception
-import java.util.*
 
 fun Route.TorrentFileRoute(){
 
@@ -75,6 +66,7 @@ fun Route.TorrentFileRoute(){
 
             val job = ContentJob().apply {
                 toUri = containerFolder.toURI().toString()
+                cjIsMeteredAllowed = true
                 cjUid = db.contentJobDao.insertAsync(this)
             }
 
@@ -85,7 +77,7 @@ fun Route.TorrentFileRoute(){
                 cjiContentEntryUid = contentEntryUid
                 cjiPluginId = ContainerTorrentDownloadJob.PLUGIN_ID
                 cjiIsLeaf = true
-                cjiConnectivityAcceptable = ContentJobItem.ACCEPT_ANY
+                cjiConnectivityNeeded = false
                 cjiUid = db.contentJobItemDao.insertJobItem(this)
             }
 

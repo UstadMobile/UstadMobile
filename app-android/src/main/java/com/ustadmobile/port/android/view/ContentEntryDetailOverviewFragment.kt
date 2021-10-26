@@ -175,7 +175,6 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
 
     override var contentJobItemStatus: Int = 0
         set(value) {
-            //Napier.d("ContentEntryDetail: Download Status = ${downloadJobItem?.djiStatus} currentDownloadJobItemStatus = $currentDownloadJobItemStatus")
             if((field == ContentJobItem.STATUS_COMPLETE) != (value == ContentJobItem.STATUS_COMPLETE))
                 activity?.invalidateOptionsMenu()
 
