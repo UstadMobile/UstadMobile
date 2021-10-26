@@ -140,7 +140,7 @@ class TestContentJobRunner {
             db.contentJobDao.insertAsync(ContentJob(cjUid = 2))
             db.contentJobItemDao.insertJobItem(ContentJobItem().apply {
                 this.cjiJobUid = 2
-                cjiConnectivityNeeded = false
+                cjiConnectivityNeeded = true
                 cjiStatus = JobStatus.QUEUED
                 cjiPluginId = TEST_PLUGIN_ID
                 sourceUri = "dummy:///test"
