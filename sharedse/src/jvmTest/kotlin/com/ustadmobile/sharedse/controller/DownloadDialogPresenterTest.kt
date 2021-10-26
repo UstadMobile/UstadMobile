@@ -290,7 +290,7 @@ class DownloadDialogPresenterTest {
         presenter.onStart()
         viewReadyLatch.await(5, TimeUnit.SECONDS)
 
-        presenter.handleClickWiFiOnlyOption(meteredNetworkAllowed)
+        presenter.handleClickWiFiOnlyOption(!meteredNetworkAllowed)
 
         presenter.handleClickPositive()
 
