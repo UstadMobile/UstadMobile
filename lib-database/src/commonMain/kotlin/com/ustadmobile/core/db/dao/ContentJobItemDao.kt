@@ -7,9 +7,6 @@ import androidx.room.Transaction
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ContentJobItem.Companion.ACCEPT_METERED
-import com.ustadmobile.lib.db.entities.ContentJobItem.Companion.ACCEPT_NONE
-import com.ustadmobile.lib.db.entities.ContentJobItem.Companion.ACCEPT_UNMETERED
 
 @Dao
 abstract class ContentJobItemDao {
@@ -28,11 +25,10 @@ abstract class ContentJobItemDao {
          WHERE ContentJobItem.cjiJobUid = :contentJobUid
            AND ContentJobItem.cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.COMPLETE_MIN}
            AND (
-                ((cjiConnectivityAcceptable & $ACCEPT_NONE) = $ACCEPT_NONE)
-                OR (((cjiConnectivityAcceptable & $ACCEPT_UNMETERED) = $ACCEPT_UNMETERED) 
-                     AND (SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_UNMETERED})
-                OR (((cjiConnectivityAcceptable & $ACCEPT_METERED) = $ACCEPT_METERED) 
-                     AND (SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_METERED})
+                NOT cjiConnectivityNeeded 
+                OR ((SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_UNMETERED}) 
+                OR (cjIsMeteredAllowed 
+                    AND (SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_METERED})
                 )
          LIMIT :limit
     """)
@@ -42,6 +38,14 @@ abstract class ContentJobItemDao {
     @Query("""
             SELECT COALESCE((
                  SELECT CASE 
+                 WHEN (EXISTS(SELECT 1
+                          FROM Container 
+                         WHERE Container.containerContentEntryUid = :contentEntryUid
+                           AND EXISTS (SELECT ContainerEntry.ceUid 
+                                         FROM ContainerEntry
+                                        WHERE ContainerEntry.ceContainerUid = Container.containerUid)   
+                      ORDER BY cntLastModified DESC LIMIT 1))
+                 THEN ${ContentJobItem.STATUS_COMPLETE}
                  WHEN 
                        (SELECT cjiFinishTime 
                           FROM ContentJobItem 
@@ -121,22 +125,10 @@ abstract class ContentJobItemDao {
 
     @Query("""
         UPDATE ContentJobItem
-           SET cjiConnectivityAcceptable = :connectivityStatus
-         WHERE cjiJobUid = :contentJobId     
+           SET cjiConnectivityNeeded = :connectivityNeeded
+         WHERE cjiUid = :contentJobItemId     
     """)
-    abstract suspend fun updateConnectivityStatus(contentJobId: Long, connectivityStatus: Int)
-
-
-    @Query("""
-        SELECT COALESCE((SELECT CASE 
-                                WHEN cjiConnectivityAcceptable = $ACCEPT_METERED
-                                THEN 1 ELSE 0 END
-                          FROM ContentJobItem 
-                         WHERE cjiJobUid = :contentJobId 
-                         LIMIT 1)
-               , 1)
-    """)
-    abstract suspend fun isConnectionMetered(contentJobId: Long): Boolean
+    abstract suspend fun updateConnectivityNeeded(contentJobItemId: Long, connectivityNeeded: Boolean)
 
 
     @Transaction

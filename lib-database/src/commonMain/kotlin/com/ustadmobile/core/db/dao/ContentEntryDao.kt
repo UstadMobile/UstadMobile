@@ -162,15 +162,17 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract fun findByTitle(title: String): DoorLiveData<ContentEntry?>
 
     @Query("""
-       SELECT COALESCE((SELECT cjiConnectivityAcceptable 
+       SELECT COALESCE((SELECT cjIsMeteredAllowed 
                 FROM ContentJobItem 
+                JOIN ContentJob
+                    ON ContentJobItem.cjiJobUid = ContentJob.cjUid
                WHERE cjiContentEntryUid = :contentEntryUid
                 AND cjiRecursiveStatus >= ${JobStatus.RUNNING_MIN}
                 AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX}),0) AS Status
         FROM ContentEntry
        WHERE contentEntryUid = :contentEntryUid
     """)
-    abstract fun getConnectivityAcceptableForEntry(contentEntryUid: Long): Int
+    abstract fun isMeteredAllowedForEntry(contentEntryUid: Long): Boolean
 
 
     @Query("SELECT ContentEntry.* FROM ContentEntry " +

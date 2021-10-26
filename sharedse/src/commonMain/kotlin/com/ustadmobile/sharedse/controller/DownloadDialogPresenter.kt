@@ -36,13 +36,15 @@ class DownloadDialogPresenter(
 
     private var contentEntryUid = 0L
 
+    private var currentJobId: Long = 0L
+
     private var statusMessage: String? = null
 
     private val jobSizeLoading = atomic(false)
 
     private val jobSizeTotals = atomic(null as DownloadJobSizeInfo?)
 
-    private val wifiOnlyChecked = atomic(0)
+    private val wifiOnlyChecked = atomic(true)
 
     private lateinit var contentJobItemStatusLiveData: RateLimitedLiveData<Int>
 
@@ -76,11 +78,10 @@ class DownloadDialogPresenter(
             }
             contentJobCompletable.complete(true)
             val status = contentJobItemStatusLiveData.getValue() ?: 0
-            val connectivityAcceptable = appDatabase.contentEntryDao.getConnectivityAcceptableForEntry(contentEntryUid)
-            val wifiOnly: Boolean = connectivityAcceptable == 0 || connectivityAcceptable == ContentJobItem.ACCEPT_METERED
-            view.setDownloadOverWifiOnly(wifiOnly)
-            val wifiCheckValue = if(connectivityAcceptable == 0) ContentJobItem.ACCEPT_METERED else connectivityAcceptable
-            wifiOnlyChecked.value = wifiCheckValue
+            val isMeteredAllowed = appDatabase.contentEntryDao.isMeteredAllowedForEntry(contentEntryUid)
+            view.setDownloadOverWifiOnly(!isMeteredAllowed)
+            // TODO needs to happen
+            //wifiOnlyChecked.value = !isMeteredAllowed
 
             view.runOnUiThread(Runnable {
                 contentJobItemStatusLiveData.observe(lifecycleOwner, this@DownloadDialogPresenter)
@@ -198,10 +199,13 @@ class DownloadDialogPresenter(
         val isWifiOnlyChecked = wifiOnlyChecked.value
         val job = ContentJob().apply {
             toUri = selectedStorageDir?.dirUri
+            cjIsMeteredAllowed = !isWifiOnlyChecked
             cjNotificationTitle = impl.getString(MessageID.downloading_content, context)
                     .replace("%1\$s",entry?.title ?: "")
             cjUid = appDatabase.contentJobDao.insertAsync(this)
         }
+        currentJobId = job.cjUid
+
         ContentJobItem().apply {
             cjiJobUid = job.cjUid
             sourceUri = "" // TODO entry ?
@@ -210,7 +214,7 @@ class DownloadDialogPresenter(
             cjiContentEntryUid = contentEntryUid
             cjiContainerUid = container?.containerUid ?: 0
             cjiIsLeaf = entry?.leaf ?: false
-            cjiConnectivityAcceptable = isWifiOnlyChecked
+            cjiConnectivityNeeded = true
             cjiStatus = JobStatus.QUEUED
             cjiUid = appDatabase.contentJobItemDao.insertJobItem(this)
         }
@@ -253,7 +257,7 @@ class DownloadDialogPresenter(
             cjiIsLeaf = true
             cjiItemTotal = 100
             cjiParentContentEntryUid = 0
-            cjiConnectivityAcceptable = ContentJobItem.ACCEPT_ANY
+            cjiConnectivityNeeded = false
             cjiStatus = JobStatus.QUEUED
             cjiUid = appDatabase.contentJobItemDao.insertJobItem(this)
         }
@@ -299,13 +303,10 @@ class DownloadDialogPresenter(
     }
 
     fun handleClickWiFiOnlyOption(wifiOnly: Boolean) {
-        val wifiOnlyCheckedVal = if(wifiOnly) ContentJobItem.ACCEPT_METERED else ContentJobItem.ACCEPT_UNMETERED
-        wifiOnlyChecked.value = wifiOnlyCheckedVal
-      /*  if(currentJobId != 0L) {
-            GlobalScope.launch {
-                appDatabase.contentJobItemDao.updateConnectivityStatus(currentJobId, wifiOnlyCheckedVal)
-            }
-        }*/
+        wifiOnlyChecked.value = wifiOnly
+        GlobalScope.launch(doorMainDispatcher()){
+            appDatabase.contentJobDao.updateMeteredAllowedForEntry(contentEntryUid, !wifiOnly)
+        }
     }
 
     fun handleStorageOptionSelection(selectedDir: ContainerStorageDir) {
@@ -325,8 +326,10 @@ class DownloadDialogPresenter(
         const val STACKED_BUTTON_CONTINUE = 2
 
         //Previously internal: This does not compile since Kotlin 1.3.61
-        val STACKED_OPTIONS = intArrayOf(STACKED_BUTTON_PAUSE, STACKED_BUTTON_CANCEL,
-                STACKED_BUTTON_CONTINUE)
+       /* val STACKED_OPTIONS = intArrayOf(STACKED_BUTTON_PAUSE, STACKED_BUTTON_CANCEL,
+                STACKED_BUTTON_CONTINUE)*/
+
+        val STACKED_OPTIONS = intArrayOf(STACKED_BUTTON_CANCEL)
 
         //Previously internal: This does not compile since Kotlin 1.3.61
         val STACKED_TEXT_MESSAGE_IDS = listOf(MessageID.pause_download,

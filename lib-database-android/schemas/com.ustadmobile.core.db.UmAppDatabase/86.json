@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 86,
-    "identityHash": "afe933de0c49445e6696fae1d4e3da76",
+    "identityHash": "f099c4dd4540261ac00eacae7b449afd",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -6107,7 +6107,7 @@
       },
       {
         "tableName": "ContentJob",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `toUri` TEXT, `cjProgress` INTEGER NOT NULL, `cjTotal` INTEGER NOT NULL, `cjNotificationTitle` TEXT, `params` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `toUri` TEXT, `cjProgress` INTEGER NOT NULL, `cjTotal` INTEGER NOT NULL, `cjNotificationTitle` TEXT, `cjIsMeteredAllowed` INTEGER NOT NULL, `params` TEXT)",
         "fields": [
           {
             "fieldPath": "cjUid",
@@ -6140,6 +6140,12 @@
             "notNull": false
           },
           {
+            "fieldPath": "cjIsMeteredAllowed",
+            "columnName": "cjIsMeteredAllowed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "params",
             "columnName": "params",
             "affinity": "TEXT",
@@ -6157,7 +6163,7 @@
       },
       {
         "tableName": "ContentJobItem",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cjiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cjiJobUid` INTEGER NOT NULL, `sourceUri` TEXT, `cjiIsLeaf` INTEGER NOT NULL, `cjiContentEntryUid` INTEGER NOT NULL, `cjiParentContentEntryUid` INTEGER NOT NULL, `cjiContainerUid` INTEGER NOT NULL, `cjiItemProgress` INTEGER NOT NULL, `cjiItemTotal` INTEGER NOT NULL, `cjiRecursiveProgress` INTEGER NOT NULL, `cjiRecursiveTotal` INTEGER NOT NULL, `cjiStatus` INTEGER NOT NULL, `cjiRecursiveStatus` INTEGER NOT NULL, `cjiConnectivityAcceptable` INTEGER NOT NULL, `cjiPluginId` INTEGER NOT NULL, `cjiAttemptCount` INTEGER NOT NULL, `cjiParentCjiUid` INTEGER NOT NULL, `cjiServerJobId` INTEGER NOT NULL, `cjiStartTime` INTEGER NOT NULL, `cjiFinishTime` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cjiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cjiJobUid` INTEGER NOT NULL, `sourceUri` TEXT, `cjiIsLeaf` INTEGER NOT NULL, `cjiContentEntryUid` INTEGER NOT NULL, `cjiParentContentEntryUid` INTEGER NOT NULL, `cjiContainerUid` INTEGER NOT NULL, `cjiItemProgress` INTEGER NOT NULL, `cjiItemTotal` INTEGER NOT NULL, `cjiRecursiveProgress` INTEGER NOT NULL, `cjiRecursiveTotal` INTEGER NOT NULL, `cjiStatus` INTEGER NOT NULL, `cjiRecursiveStatus` INTEGER NOT NULL, `cjiConnectivityNeeded` INTEGER NOT NULL, `cjiPluginId` INTEGER NOT NULL, `cjiAttemptCount` INTEGER NOT NULL, `cjiParentCjiUid` INTEGER NOT NULL, `cjiServerJobId` INTEGER NOT NULL, `cjiStartTime` INTEGER NOT NULL, `cjiFinishTime` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "cjiUid",
@@ -6238,8 +6244,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "cjiConnectivityAcceptable",
-            "columnName": "cjiConnectivityAcceptable",
+            "fieldPath": "cjiConnectivityNeeded",
+            "columnName": "cjiConnectivityNeeded",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -10729,7 +10735,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'afe933de0c49445e6696fae1d4e3da76')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f099c4dd4540261ac00eacae7b449afd')"
     ]
   }
 }

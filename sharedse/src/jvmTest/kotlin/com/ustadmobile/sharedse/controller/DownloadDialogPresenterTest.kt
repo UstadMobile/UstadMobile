@@ -15,7 +15,6 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.STACKED_BUTTON_CANCEL
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
@@ -299,19 +298,14 @@ class DownloadDialogPresenterTest {
             verifyBlocking(contentJobManager, timeout(5000)) {
                 enqueueContentJob(any(), capture())
             }
-            val contentJob = db.contentJobItemDao.findByJobId(this.firstValue)!!
+            val contentJobItem = db.contentJobItemDao.findByJobId(this.firstValue)!!
             assertEquals("Download Job created with status = NEEDS_PREPARED",
-                    JobStatus.QUEUED, contentJob.cjiRecursiveStatus)
+                    JobStatus.QUEUED, contentJobItem.cjiRecursiveStatus)
             assertEquals("Download job root content entry uid is the same as presenter arg",
-                    contentEntrySet.rootEntry.contentEntryUid, contentJob.cjiContentEntryUid)
-            if(meteredNetworkAllowed){
-                assertEquals("Metered data allowed is Metered", ContentJobItem.ACCEPT_METERED,
-                        contentJob.cjiConnectivityAcceptable)
-            }else{
-                assertEquals("Metered data allowed is Metered", ContentJobItem.ACCEPT_UNMETERED,
-                        contentJob.cjiConnectivityAcceptable)
-            }
-
+                    contentEntrySet.rootEntry.contentEntryUid, contentJobItem.cjiContentEntryUid)
+            val contentJob = db.contentJobDao.findByUid(this.firstValue)!!
+            assertEquals("Metered data allowed set correctly", meteredNetworkAllowed,
+                        contentJob.cjIsMeteredAllowed)
         }
 
         Unit

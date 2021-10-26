@@ -16,6 +16,7 @@ import com.ustadmobile.core.io.ext.isRemote
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ShrinkUtils
+import com.ustadmobile.core.util.ext.checkConnectivityToDoJob
 import com.ustadmobile.core.util.ext.fitWithin
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
@@ -59,7 +60,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
 
     override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
-        withContext(Dispatchers.Default) {
+        return withContext(Dispatchers.Default) {
 
             val uri = contentJobItem.sourceUri ?: throw IllegalStateException("missing uri")
             val videoUri = DoorUri.parse(uri)
@@ -111,14 +112,22 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
             containerUidFolder.mkdirs()
             ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
 
+
+            contentJobItem.cjiConnectivityNeeded = true
+            db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
+
+            val haveConnectivityToContinueJob = checkConnectivityToDoJob(db, jobItem)
+            if(!haveConnectivityToContinueJob){
+                return@withContext ProcessResult(JobStatus.QUEUED)
+            }
+
             val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
             uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient,  torrentFileBytes, endpoint)
 
-            repo.containerDao.findByUid(container.containerUid) ?: container
+            repo.containerDao.findByUid(container.containerUid)
+
+            return@withContext ProcessResult(JobStatus.COMPLETE)
         }
-
-
-        return ProcessResult(JobStatus.COMPLETE)
     }
 
     suspend fun getEntry(uri: DoorUri, process: ProcessContext): MetadataResult? {
