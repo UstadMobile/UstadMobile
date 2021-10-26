@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
+import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import io.ktor.client.*
@@ -15,9 +16,12 @@ import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
+import java.io.File
 
 
 expect suspend fun ContentPlugin.withWifiLock(context: Any, block: suspend () -> Unit)
+
+expect suspend fun deleteFilesForContentEntry(db: UmAppDatabase, contentEntryUid: Long, torrentDir: File): Int
 
 suspend fun ContentPlugin.uploadContentIfNeeded(contentNeedUpload: Boolean,
                                                 contentJobItem: ContentJobItem,

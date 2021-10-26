@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
@@ -20,18 +21,11 @@ import java.io.File
 
 class DeleteContainerPlugin(private var context: Any, private val endpoint: Endpoint, override val di: DI): ContentPlugin {
 
-    private val httpClient: HttpClient = di.direct.instance()
-
     val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
     val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    private val containerDir = di.direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
-
     private val torrentDir = di.direct.instance<File>(tag = DiTag.TAG_TORRENT_DIR)
-
-    private val ustadTorrentManager: UstadTorrentManager = di.direct.instance<UstadTorrentManager>()
-
 
     override val pluginId: Int
         get() = PLUGIN_ID
@@ -61,39 +55,12 @@ class DeleteContainerPlugin(private var context: Any, private val endpoint: Endp
 
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
 
-        // delete all containerEntries for this contentEntry
-        db.containerEntryDao.deleteByContentEntryUid(contentJobItem.cjiContentEntryUid)
 
         contentJobItem.cjiItemProgress = 25
         progress.onProgress(contentJobItem)
 
-        var numFailures = 0
-        db.runInTransaction {
-            var zombieEntryFilesList: List<ContainerEntryFile>
-            do {
-                zombieEntryFilesList = db.containerEntryFileDao.findZombieEntries()
-                zombieEntryFilesList.forEach {
-                    val filePath = it.cefPath
-                    if (filePath == null || !File(filePath).delete()) {
-                        numFailures++
-                    }
-                }
-
-                db.containerEntryFileDao.deleteListOfEntryFiles(zombieEntryFilesList)
-            } while (zombieEntryFilesList.isNotEmpty())
-        }
-
-        contentJobItem.cjiItemProgress = 75
-        progress.onProgress(contentJobItem)
-
-        val containers = db.containerDao.findFilesByContentEntryUid(contentJobItem.cjiContentEntryUid)
-
-        containers.forEach {
-            val torrentFile = File(torrentDir, "${it.containerUid}.torrent")
-            if(torrentFile.exists()){
-                torrentFile.delete()
-            }
-        }
+        // delete all containerEntries, containerEntryFiles and torrentFile for this contentEntry
+        val numFailures = deleteFilesForContentEntry(db, contentJobItem.cjiContentEntryUid, torrentDir)
 
         contentJobItem.cjiItemProgress = 100
         progress.onProgress(contentJobItem)

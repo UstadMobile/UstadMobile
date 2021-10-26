@@ -157,7 +157,7 @@ class H5PTypePluginTest {
             }
 
 
-            val container = repo.containerDao.findFilesByContentEntryUid(42).first()
+            val container = repo.containerDao.findContainersForContentEntryUid(42).first()
 
             Assert.assertNotNull(container)
 

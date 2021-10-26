@@ -11,6 +11,7 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.createSymLink
 import com.ustadmobile.core.util.ext.base64EncodedToHexString
+import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.core.util.ext.maxQueryParamListSize
 import com.ustadmobile.core.util.ext.withWifiLock
 import com.ustadmobile.door.DoorUri
@@ -30,6 +31,7 @@ import org.kodein.di.on
 import java.io.File
 import java.io.InputStream
 import java.net.URI
+import kotlin.coroutines.cancellation.CancellationException
 
 class ContainerTorrentDownloadJob(private var context: Any, private val endpoint: Endpoint, override val di: DI) : ContentPlugin {
 
@@ -72,118 +74,132 @@ class ContainerTorrentDownloadJob(private var context: Any, private val endpoint
 
         // check if torrent file already exists
         val torrentFile = File(torrentDir, "$containerUid.torrent")
-        if(!torrentFile.exists()){
-            val path = UMFileUtil.joinPaths(endpoint.url, "containers/$containerUid")
-            val torrentFileStream = httpClient.get<InputStream>(path)
-            torrentFile.writeBytes(torrentFileStream.readBytes())
-        }
 
-        val downloadFolderPath = jobItem.contentJob?.toUri?.let { URI(it).path } ?: containerDir.path
+        try {
 
-        val containerFilesFolder = File(downloadFolderPath, containerUid.toString())
-        containerFilesFolder.mkdirs()
-
-        val metadataProvider = FileMetadataProvider(torrentFile.absolutePath)
-        val fileNameList = metadataProvider
-                            .torrentMetadata
-                            .files
-                            .map { File(it.relativePathAsString).name }
-
-        val existingFiles = db.containerEntryFileDao.findEntriesByMd5SumsSafeAsync(fileNameList,
-                db.maxQueryParamListSize)
-
-        //link them to the new container path
-        existingFiles.forEach {
-            val existingPath = it.cefPath ?: return@forEach
-            val existingFile = File(existingPath)
-            if(existingFile.name == MANIFEST_FILE_NAME){
-                return@forEach
+            if (!torrentFile.exists()) {
+                val path = UMFileUtil.joinPaths(endpoint.url, "containers/$containerUid")
+                val torrentFileStream = httpClient.get<InputStream>(path)
+                torrentFile.writeBytes(torrentFileStream.readBytes())
             }
-            val target = File(containerFilesFolder, existingFile.name)
-            if(!target.exists()){
-                createSymLink(existingPath, target.path)
-            }
-        }
 
-        withWifiLock(context){
+            val downloadFolderPath = jobItem.contentJob?.toUri?.let { URI(it).path }
+                    ?: containerDir.path
 
-            val startTime = System.currentTimeMillis()
-            ustadTorrentManager.addTorrent(containerUid, containerFilesFolder.path)
+            val containerFilesFolder = File(downloadFolderPath, containerUid.toString())
+            containerFilesFolder.mkdirs()
 
-            val torrentDeferred = CompletableDeferred<Boolean>()
-            val torrentListener = object: TorrentDownloadListener{
-                override fun onComplete() {
-                    contentJobItem.cjiItemProgress = (contentJobItem.cjiItemTotal * 0.75).toLong()
-                    progress.onProgress(contentJobItem)
-                    println("downloaded torrent in ${System.currentTimeMillis() - startTime} ms")
-                    torrentDeferred.complete(true)
+            val metadataProvider = FileMetadataProvider(torrentFile.absolutePath)
+            val fileNameList = metadataProvider
+                    .torrentMetadata
+                    .files
+                    .map { File(it.relativePathAsString).name }
+
+            val existingFiles = db.containerEntryFileDao.findEntriesByMd5SumsSafeAsync(fileNameList,
+                    db.maxQueryParamListSize)
+
+            //link them to the new container path
+            existingFiles.forEach {
+                val existingPath = it.cefPath ?: return@forEach
+                val existingFile = File(existingPath)
+                if (existingFile.name == MANIFEST_FILE_NAME) {
+                    return@forEach
                 }
-
-                override fun onProgress(progressSize: Int) {
-                    contentJobItem.cjiItemProgress = (progressSize * 0.75).toLong()
-                    progress.onProgress(contentJobItem)
+                val target = File(containerFilesFolder, existingFile.name)
+                if (!target.exists()) {
+                    createSymLink(existingPath, target.path)
                 }
             }
-            GlobalScope.launch(Dispatchers.Default){
-                while(true){
-                    delay(100)
-                    if(!isActive){
-                        torrentDeferred.completeExceptionally(CancellationException())
+
+            withWifiLock(context) {
+
+                val startTime = System.currentTimeMillis()
+                ustadTorrentManager.addTorrent(containerUid, containerFilesFolder.path)
+
+                val torrentDeferred = CompletableDeferred<Boolean>()
+                val torrentListener = object : TorrentDownloadListener {
+                    override fun onComplete() {
+                        contentJobItem.cjiItemProgress = (contentJobItem.cjiItemTotal * 0.75).toLong()
+                        progress.onProgress(contentJobItem)
+                        println("downloaded torrent in ${System.currentTimeMillis() - startTime} ms")
+                        torrentDeferred.complete(true)
+                    }
+
+                    override fun onProgress(progressSize: Int) {
+                        contentJobItem.cjiItemProgress = (progressSize * 0.75).toLong()
+                        progress.onProgress(contentJobItem)
                     }
                 }
-            }
-
-            ustadTorrentManager.addDownloadListener(containerUid, torrentListener)
-            torrentDeferred.await()
-            ustadTorrentManager.removeDownloadListener(containerUid, torrentListener)
-
-        }
-
-
-        val existingMd5s = existingFiles.mapNotNull { it.cefMd5 }.toSet()
-        val entriesThatGotDownloaded = fileNameList
-                .filter { it !in existingMd5s || it.equals(MANIFEST_FILE_NAME) }
-
-        val newContainerEntryFiles = mutableListOf<ContainerEntryFile>()
-        entriesThatGotDownloaded.forEach {
-            val entryFile = ContainerEntryFile().apply {
-                cefMd5 = it
-                val cefFile = File(containerFilesFolder, it)
-                cefPath = cefFile.path
-                ceTotalSize = cefFile.getUnCompressedSize()
-                ceCompressedSize = cefFile.length()
-                compression = if(cefFile.isGzipped()) COMPRESSION_GZIP else COMPRESSION_NONE
-            }
-            newContainerEntryFiles.add(entryFile)
-        }
-        db.containerEntryFileDao.insertList(newContainerEntryFiles)
-
-        val manifestFile = File(containerFilesFolder, MANIFEST_FILE_NAME)
-        if(!manifestFile.exists()) throw IllegalArgumentException("no manifest file found")
-
-        val manifestJson = manifestFile.readText()
-        val manifest: ContainerManifest = Json.decodeFromString(
-                ContainerManifest.serializer(), manifestJson)
-        val newContainerEntry = mutableListOf<ContainerEntry>()
-        manifest.entryMap?.entries?.forEach { entry ->
-            if(entry.key == MANIFEST_FILE_NAME){
-                return@forEach
-            }
-            entry.value.forEach {  path ->
-                val cefUid = db.containerEntryFileDao.findEntryByMd5Sum(entry.key.base64EncodedToHexString())?.cefUid
-                        ?: throw IllegalArgumentException("missed a file during download ${entry.key} with path $path")
-                val containerEntry = ContainerEntry().apply {
-                    ceContainerUid = containerUid
-                    cePath = path
-                    ceCefUid = cefUid
+                GlobalScope.launch(Dispatchers.Default) {
+                    while (true) {
+                        delay(100)
+                        if (!isActive) {
+                            torrentDeferred.completeExceptionally(CancellationException())
+                        }
+                    }
                 }
-                newContainerEntry.add(containerEntry)
-            }
-        }
-        db.containerEntryDao.insertListAsync(newContainerEntry)
 
-        contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal
-        progress.onProgress(contentJobItem)
+                ustadTorrentManager.addDownloadListener(containerUid, torrentListener)
+                torrentDeferred.await()
+                ustadTorrentManager.removeDownloadListener(containerUid, torrentListener)
+
+            }
+
+
+            val existingMd5s = existingFiles.mapNotNull { it.cefMd5 }.toSet()
+            val entriesThatGotDownloaded = fileNameList
+                    .filter { it !in existingMd5s || it.equals(MANIFEST_FILE_NAME) }
+
+            val newContainerEntryFiles = mutableListOf<ContainerEntryFile>()
+            entriesThatGotDownloaded.forEach {
+                val entryFile = ContainerEntryFile().apply {
+                    cefMd5 = it
+                    val cefFile = File(containerFilesFolder, it)
+                    cefPath = cefFile.path
+                    ceTotalSize = cefFile.getUnCompressedSize()
+                    ceCompressedSize = cefFile.length()
+                    compression = if (cefFile.isGzipped()) COMPRESSION_GZIP else COMPRESSION_NONE
+                }
+                newContainerEntryFiles.add(entryFile)
+            }
+            db.containerEntryFileDao.insertList(newContainerEntryFiles)
+
+            val manifestFile = File(containerFilesFolder, MANIFEST_FILE_NAME)
+            if (!manifestFile.exists()) throw IllegalArgumentException("no manifest file found")
+
+            val manifestJson = manifestFile.readText()
+            val manifest: ContainerManifest = Json.decodeFromString(
+                    ContainerManifest.serializer(), manifestJson)
+            val newContainerEntry = mutableListOf<ContainerEntry>()
+            manifest.entryMap?.entries?.forEach { entry ->
+                if (entry.key == MANIFEST_FILE_NAME) {
+                    return@forEach
+                }
+                entry.value.forEach { path ->
+                    val cefUid = db.containerEntryFileDao.findEntryByMd5Sum(entry.key.base64EncodedToHexString())?.cefUid
+                            ?: throw IllegalArgumentException("missed a file during download ${entry.key} with path $path")
+                    val containerEntry = ContainerEntry().apply {
+                        ceContainerUid = containerUid
+                        cePath = path
+                        ceCefUid = cefUid
+                    }
+                    newContainerEntry.add(containerEntry)
+                }
+            }
+            db.containerEntryDao.insertListAsync(newContainerEntry)
+
+            contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal
+            progress.onProgress(contentJobItem)
+
+        }catch (c: CancellationException){
+
+            withContext(NonCancellable){
+                deleteFilesForContentEntry(db, contentJobItem.cjiContentEntryUid, torrentDir)
+                torrentFile.delete()
+            }
+
+            throw c
+        }
 
 
         return ProcessResult(JobStatus.COMPLETE)
