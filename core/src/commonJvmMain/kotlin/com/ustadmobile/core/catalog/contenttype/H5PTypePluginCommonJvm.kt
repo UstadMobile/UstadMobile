@@ -235,7 +235,7 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
             }catch (c: CancellationException){
 
                 withContext(NonCancellable){
-                    deleteFilesForContentEntry(db, contentJobItem.cjiContentEntryUid, torrentDir)
+                    deleteFilesForContentEntry(db, contentJobItem.cjiContentEntryUid, torrentDir, ustadTorrentManager)
                 }
                 throw c
             }

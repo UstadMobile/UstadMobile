@@ -138,7 +138,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
 
                 withContext(NonCancellable){
 
-                    deleteFilesForContentEntry(db, contentJobItem.cjiContentEntryUid, torrentDir)
+                    deleteFilesForContentEntry(db, contentJobItem.cjiContentEntryUid, torrentDir, ustadTorrentManager)
                     videoFile.delete()
                     newVideo.delete()
 

@@ -27,6 +27,8 @@ class DeleteContainerPlugin(private var context: Any, private val endpoint: Endp
 
     private val torrentDir = di.direct.instance<File>(tag = DiTag.TAG_TORRENT_DIR)
 
+    private val ustadTorrentManager: UstadTorrentManager = di.direct.instance<UstadTorrentManager>()
+
     override val pluginId: Int
         get() = PLUGIN_ID
     override val supportedMimeTypes: List<String>
@@ -60,7 +62,9 @@ class DeleteContainerPlugin(private var context: Any, private val endpoint: Endp
         progress.onProgress(contentJobItem)
 
         // delete all containerEntries, containerEntryFiles and torrentFile for this contentEntry
-        val numFailures = deleteFilesForContentEntry(db, contentJobItem.cjiContentEntryUid, torrentDir)
+        val numFailures = deleteFilesForContentEntry(db,
+                contentJobItem.cjiContentEntryUid,
+                torrentDir, ustadTorrentManager)
 
         contentJobItem.cjiItemProgress = 100
         progress.onProgress(contentJobItem)

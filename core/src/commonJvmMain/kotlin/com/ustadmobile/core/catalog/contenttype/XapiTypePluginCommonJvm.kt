@@ -156,7 +156,7 @@ class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: En
             }catch (c: CancellationException){
 
                 withContext(NonCancellable){
-                    deleteFilesForContentEntry(db, contentJobItem.cjiContentEntryUid, torrentDir)
+                    deleteFilesForContentEntry(db, contentJobItem.cjiContentEntryUid, torrentDir, ustadTorrentManager)
                 }
                 throw c
 

@@ -6,6 +6,7 @@ import com.ustadmobile.core.contentjob.ContentPlugin
 import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
@@ -21,7 +22,7 @@ import java.io.File
 
 expect suspend fun ContentPlugin.withWifiLock(context: Any, block: suspend () -> Unit)
 
-expect suspend fun deleteFilesForContentEntry(db: UmAppDatabase, contentEntryUid: Long, torrentDir: File): Int
+expect suspend fun deleteFilesForContentEntry(db: UmAppDatabase, contentEntryUid: Long, torrentDir: File, ustadTorrentManager: UstadTorrentManager): Int
 
 suspend fun ContentPlugin.uploadContentIfNeeded(contentNeedUpload: Boolean,
                                                 contentJobItem: ContentJobItem,
