@@ -284,17 +284,17 @@ class DownloadDialogPresenter(
 
     fun handleClickStackedButton(idClicked: Int) {
             when (idClicked) {
-                STACKED_BUTTON_PAUSE -> GlobalScope.launch {
+              /*  STACKED_BUTTON_PAUSE -> GlobalScope.launch {
                     // TODO pause download
                     //containerDownloadManager.pause(currentDownloadJobItemVal.djiDjUid)
-                }
+                }*/
 
                 //If the download is already running, this will have no effect
-                STACKED_BUTTON_CONTINUE -> GlobalScope.launch {
+              /*  STACKED_BUTTON_CONTINUE -> GlobalScope.launch {
                     // TODO back to running download
                     //containerDownloadManager.enqueue(currentDownloadJobItemVal.djiDjUid)
                 }
-
+*/
                 STACKED_BUTTON_CANCEL -> GlobalScope.launch {
                     // TODO cancel download
                     createCancelJob()
