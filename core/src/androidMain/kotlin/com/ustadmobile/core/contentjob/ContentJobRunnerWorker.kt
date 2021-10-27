@@ -19,8 +19,7 @@ import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import org.kodein.di.instance
@@ -77,7 +76,9 @@ class ContentJobRunnerWorker(
             setForeground(ForegroundInfo(jobId.toInt(), notification.build()))
 
             return ContentJobRunner(jobId, endpoint, di).runJob().toWorkerResult()
-        } finally {
+        } catch(c: CancellationException) {
+            return Result.failure()
+        }finally {
             withContext(Dispatchers.Main) {
                 liveData.removeObserver(jobObserver)
             }
@@ -106,6 +107,8 @@ class ContentJobRunnerWorker(
                         systemImpl.getString(MessageID.cancel, applicationContext),
                         intent)
     }
+
+
 
 
     @RequiresApi(Build.VERSION_CODES.O)

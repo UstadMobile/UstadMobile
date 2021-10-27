@@ -190,4 +190,12 @@ abstract class ContentJobItemDao {
     abstract suspend fun findByUidAsync(cjiUid: Long): ContentJobItem?
 
 
+    @Query("""
+        SELECT ContentJobItem.*
+          FROM ContentJobItem
+         WHERE cjiFinishTime = 0
+      ORDER BY cjiStartTime DESC LIMIT 1
+        """)
+    abstract suspend fun getActiveContentJobItem(): ContentJobItem?
+
 }

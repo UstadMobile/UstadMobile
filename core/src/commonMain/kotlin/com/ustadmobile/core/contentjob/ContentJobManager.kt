@@ -10,6 +10,8 @@ interface ContentJobManager  {
 
     fun enqueueContentJob(endpoint: Endpoint, contentJobUid: Long)
 
+    fun cancelContentJob(endpoint: Endpoint, contentJobUid: Long)
+
     companion object {
 
         const val KEY_ENDPOINT = "endpoint"

@@ -72,16 +72,16 @@ class DownloadDialogPresenter(
         contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0L
         Napier.i("Starting download presenter for $contentEntryUid")
         view.setWifiOnlyOptionVisible(false)
-        GlobalScope.launch {
+        GlobalScope.launch(doorMainDispatcher()) {
             contentJobItemStatusLiveData = RateLimitedLiveData(appDatabase, listOf("ContentJobItem"), 1000) {
                 appDatabase.contentJobItemDao.findStatusForActiveContentJobItem(contentEntryUid)
             }
+            val activeJobItem = appDatabase.contentJobItemDao.getActiveContentJobItem()
+            currentJobId = activeJobItem?.cjiJobUid ?: 0
             contentJobCompletable.complete(true)
+
             val status = contentJobItemStatusLiveData.getValue() ?: 0
-            val isMeteredAllowed = appDatabase.contentEntryDao.isMeteredAllowedForEntry(contentEntryUid)
-            view.setDownloadOverWifiOnly(!isMeteredAllowed)
-            // TODO needs to happen
-            //wifiOnlyChecked.value = !isMeteredAllowed
+            //wifiOnlyChecked.value = wifiOnly
 
             view.runOnUiThread(Runnable {
                 contentJobItemStatusLiveData.observe(lifecycleOwner, this@DownloadDialogPresenter)
@@ -89,6 +89,10 @@ class DownloadDialogPresenter(
 
             updateWarningMessage(status)
         }
+        val wifiOnly = !appDatabase.contentEntryDao.isMeteredAllowedForEntry(contentEntryUid)
+        view.setDownloadOverWifiOnly(wifiOnly)
+        wifiOnlyChecked.value = wifiOnly
+
     }
 
     override fun onChanged(t: Int?) {
@@ -249,6 +253,7 @@ class DownloadDialogPresenter(
                     .replace("%1\$s",entry?.title ?: "")
             cjUid = appDatabase.contentJobDao.insertAsync(this)
         }
+        currentJobId = job.cjUid
         ContentJobItem().apply {
             cjiJobUid = job.cjUid
             sourceUri = "" // TODO entry
@@ -292,10 +297,14 @@ class DownloadDialogPresenter(
 
                 STACKED_BUTTON_CANCEL -> GlobalScope.launch {
                     // TODO cancel download
-                    //containerDownloadManager.cancel(currentDownloadJobItemVal.djiDjUid)
+                    createCancelJob()
                 }
             }
             dismissDialog()
+    }
+
+    private suspend fun createCancelJob(){
+        contentJobManager.cancelContentJob(accountManager.activeEndpoint, currentJobId)
     }
 
     private fun dismissDialog() {
@@ -319,11 +328,11 @@ class DownloadDialogPresenter(
 
     companion object {
 
-        const val STACKED_BUTTON_PAUSE = 0
+        const val STACKED_BUTTON_CANCEL = 0
+/*
+        const val STACKED_BUTTON_PAUSE = 1
 
-        const val STACKED_BUTTON_CANCEL = 1
-
-        const val STACKED_BUTTON_CONTINUE = 2
+        const val STACKED_BUTTON_CONTINUE = 2*/
 
         //Previously internal: This does not compile since Kotlin 1.3.61
        /* val STACKED_OPTIONS = intArrayOf(STACKED_BUTTON_PAUSE, STACKED_BUTTON_CANCEL,
