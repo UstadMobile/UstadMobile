@@ -230,7 +230,7 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
             }catch(c: CancellationException){
 
                 withContext(NonCancellable){
-                    deleteFilesForContentEntry(db, contentJobItem.cjiContentEntryUid, torrentDir, ustadTorrentManager)
+                    deleteFilesForContentEntry(db, contentJobItem.cjiContentEntryUid, torrentDir.toDoorUri(), ustadTorrentManager)
                     newVideo.delete()
                     videoTempDir.delete()
                     localUri.toFile().delete()

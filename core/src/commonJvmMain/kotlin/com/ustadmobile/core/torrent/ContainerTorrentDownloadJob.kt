@@ -16,6 +16,7 @@ import com.ustadmobile.core.util.ext.maxQueryParamListSize
 import com.ustadmobile.core.util.ext.withWifiLock
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_NONE
@@ -196,7 +197,7 @@ class ContainerTorrentDownloadJob(private var context: Any, private val endpoint
             } catch (c: CancellationException) {
 
                 withContext(NonCancellable) {
-                    deleteFilesForContentEntry(db, contentJobItem.cjiContentEntryUid, torrentDir, ustadTorrentManager)
+                    deleteFilesForContentEntry(db, contentJobItem.cjiContentEntryUid, torrentDir.toDoorUri(), ustadTorrentManager)
                     torrentFile.delete()
                 }
 

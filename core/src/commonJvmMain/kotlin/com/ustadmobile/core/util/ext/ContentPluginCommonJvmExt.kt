@@ -3,13 +3,17 @@ package com.ustadmobile.core.util.ext
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
+import com.ustadmobile.door.ext.toFile
+import com.ustadmobile.door.DoorUri
 import java.io.File
 
 actual suspend fun deleteFilesForContentEntry(
         db: UmAppDatabase,
         contentEntryUid: Long,
-        torrentDir: File,
+        torrentDir: DoorUri,
         ustadTorrentManager: UstadTorrentManager): Int{
+
+    val torrentDirFile: File = torrentDir.toFile()
 
     var numberOfFailedDeletion = 0
     db.runInTransaction{
@@ -34,7 +38,7 @@ actual suspend fun deleteFilesForContentEntry(
     val containers = db.containerDao.findContainersForContentEntryUid(contentEntryUid)
 
     containers.forEach {
-        val torrentFile = File(torrentDir, "${it.containerUid}.torrent")
+        val torrentFile = File(torrentDirFile, "${it.containerUid}.torrent")
         if(torrentFile.exists()){
             torrentFile.delete()
         }

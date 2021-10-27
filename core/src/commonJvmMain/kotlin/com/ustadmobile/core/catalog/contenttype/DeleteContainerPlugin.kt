@@ -9,6 +9,7 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
@@ -64,7 +65,7 @@ class DeleteContainerPlugin(private var context: Any, private val endpoint: Endp
         // delete all containerEntries, containerEntryFiles and torrentFile for this contentEntry
         val numFailures = deleteFilesForContentEntry(db,
                 contentJobItem.cjiContentEntryUid,
-                torrentDir, ustadTorrentManager)
+                torrentDir.toDoorUri(), ustadTorrentManager)
 
         contentJobItem.cjiItemProgress = 100
         progress.onProgress(contentJobItem)
