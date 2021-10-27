@@ -370,7 +370,7 @@ class DownloadDialogPresenterTest {
 
             verify(mockedDialogView, timeout(5000)).setStackOptionsVisible(true)
 
-            presenter.handleClickStackedButton(DownloadDialogPresenter.STACKED_BUTTON_PAUSE)
+            //presenter.handleClickStackedButton(DownloadDialogPresenter.STACKED_BUTTON_PAUSE)
             //verify(contentJobManager, timeout(5000)).pause(existingDownloadJob.djUid)
 
         }
