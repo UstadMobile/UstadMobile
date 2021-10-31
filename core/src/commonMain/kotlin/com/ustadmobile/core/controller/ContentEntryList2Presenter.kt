@@ -9,7 +9,6 @@ import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_CLAZZ
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_OPTION
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_DOWNLOADED
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_PARENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_SHOW_ONLY_FOLDER_FILTER
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
@@ -100,10 +99,6 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
             ARG_DISPLAY_CONTENT_BY_PARENT -> {
                 repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByName(
                         parentEntryUid, 0, 0, loggedPersonUid, showHiddenEntries, onlyFolderFilter,
-                        selectedSortOption?.flag ?: ContentEntryDao.SORT_TITLE_ASC)
-            }
-            ARG_DISPLAY_CONTENT_BY_DOWNLOADED -> {
-                db.contentEntryDao.downloadedRootItems(loggedPersonUid,
                         selectedSortOption?.flag ?: ContentEntryDao.SORT_TITLE_ASC)
             }
             ARG_DISPLAY_CONTENT_BY_CLAZZ -> {

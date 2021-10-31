@@ -32,7 +32,6 @@ import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
 import com.ustadmobile.core.catalog.contenttype.ApacheIndexerPlugin
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.lib.db.entities.PersonAuth2
@@ -242,10 +241,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 repo.initAdminUser(context, di)
             }
             repo
-        }
-
-        bind<ScraperManager>() with scoped(EndpointScope.Default).singleton {
-            ScraperManager(endpoint = context, di = di)
         }
 
         bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {

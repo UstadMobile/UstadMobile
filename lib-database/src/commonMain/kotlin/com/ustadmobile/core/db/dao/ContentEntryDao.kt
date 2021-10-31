@@ -16,58 +16,6 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Insert
     abstract suspend fun insertListAsync(entityList: List<ContentEntry>)
 
-    @Query("""
-        SELECT DISTINCT ContentEntry.*, Container.*, 
-               0 AS cepcjUid, 0 as cepcjChildContentEntryUid, 0 AS cepcjParentContentEntryUid, 
-               0 as childIndex, 0 AS cepcjLocalChangeSeqNum, 0 AS cepcjMasterChangeSeqNum, 
-               0 AS cepcjLastChangedBy, 0 as cepcjLct, 
-               COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
-               COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
-               COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
-               COALESCE(StatementEntity.extensionProgress,0) AS progress,  
-               COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
-               COALESCE(StatementEntity.resultSuccess, 0) AS success,
-               COALESCE((CASE WHEN StatementEntity.resultCompletion 
-                THEN 1 ELSE 0 END),0) AS totalCompletedContent,
-                
-                1 as totalContent, 
-               
-               
-               0 as penalty
-          FROM DownloadJob 
-                    LEFT JOIN ContentEntry 
-                    ON DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid 
-                    
-                    LEFT JOIN StatementEntity
-							ON StatementEntity.statementUid = 
-                                (SELECT statementUid 
-							       FROM StatementEntity 
-                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
-							        AND StatementEntity.statementPersonUid = :personUid
-							        AND contentEntryRoot 
-                               ORDER BY resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC LIMIT 1)
-                    
-                    LEFT JOIN ContentEntryStatus 
-                    ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid 
-                    
-                    LEFT JOIN Container 
-                    ON Container.containerUid = 
-                        (SELECT containerUid 
-                           FROM Container 
-                          WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
-                       ORDER BY cntLastModified DESC LIMIT 1) 
-        WHERE DownloadJob.djStatus < ${JobStatus.CANCELED} 
-     ORDER BY CASE(:sortOrder)
-                        WHEN $SORT_TITLE_ASC THEN ContentEntry.title
-                        ELSE ''
-                        END ASC,
-                        CASE(:sortOrder)
-                        WHEN $SORT_TITLE_DESC THEN ContentEntry.title
-                        ELSE ''
-                        END DESC""")
-    @JsName("downloadedRootItemsAsc")
-    abstract fun downloadedRootItems(personUid: Long, sortOrder: Int): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
-
     @Query("SELECT ContentEntry.*, Language.* FROM ContentEntry LEFT JOIN Language ON Language.langUid = ContentEntry.primaryLanguageUid " +
             "WHERE ContentEntry.contentEntryUid=:entryUuid"
     )
@@ -244,7 +192,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
 
     @Query("""
-               SELECT ContentEntry.*,ContentEntryStatus.*, ContentEntryParentChildJoin.*, 
+               SELECT ContentEntry.*, ContentEntryParentChildJoin.*, 
                            Container.*,      
                       COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
                       COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
@@ -273,9 +221,6 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 							        AND StatementEntity.statementPersonUid = :personUid
 							        AND contentEntryRoot 
                                ORDER BY resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC LIMIT 1)
-                          
-                          LEFT JOIN ContentEntryStatus 
-                          ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid
                           
                           LEFT JOIN Container 
                           ON Container.containerUid = (SELECT containerUid 

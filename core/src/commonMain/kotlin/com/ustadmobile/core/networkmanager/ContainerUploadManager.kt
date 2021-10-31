@@ -16,6 +16,7 @@ data class ContainerUploaderRequest2(val uploadUuid: String,
                                      val siteUrl: String)
 
 
+@Deprecated("use contentJobPlugin")
 abstract class ContainerUploadManager() {
 
     abstract suspend fun enqueue(request: ContainerUploaderRequest2): Deferred<Int>
