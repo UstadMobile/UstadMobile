@@ -5211,6 +5211,29 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_85_86 = DoorMigrationStatementList(85, 86){ database ->
+                    if(database.dbType() == DoorDbType.SQLITE){
+                        listOf("ALTER TABLE ContentJobItem ADD COLUMN cjiStartTime INTEGER NOT NULL DEFAULT 0",
+                                "ALTER TABLE ContentJobItem ADD COLUMN cjiFinishTime INTEGER NOT NULL DEFAULT 0",
+                                "ALTER TABLE ContentJobItem ADD COLUMN cjiConnectivityNeeded INTEGER NOT NULL DEFAULT 1",
+                                "ALTER TABLE ContentJobItem RENAME to ContentJobItem_OLD",
+                                "CREATE TABLE IF NOT EXISTS ContentJobItem (`cjiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cjiJobUid` INTEGER NOT NULL, `sourceUri` TEXT, `cjiIsLeaf` INTEGER NOT NULL, `cjiContentEntryUid` INTEGER NOT NULL, `cjiParentContentEntryUid` INTEGER NOT NULL, `cjiContainerUid` INTEGER NOT NULL, `cjiItemProgress` INTEGER NOT NULL, `cjiItemTotal` INTEGER NOT NULL, `cjiRecursiveProgress` INTEGER NOT NULL, `cjiRecursiveTotal` INTEGER NOT NULL, `cjiStatus` INTEGER NOT NULL, `cjiRecursiveStatus` INTEGER NOT NULL, `cjiConnectivityNeeded` INTEGER NOT NULL, `cjiPluginId` INTEGER NOT NULL, `cjiAttemptCount` INTEGER NOT NULL, `cjiParentCjiUid` INTEGER NOT NULL, `cjiServerJobId` INTEGER NOT NULL, `cjiStartTime` INTEGER NOT NULL, `cjiFinishTime` INTEGER NOT NULL)",
+                                "INSERT INTO ContentJobItem (cjiUid, cjiJobUid, sourceUri, cjiIsLeaf, cjiContentEntryUid, cjiParentContentEntryUid, cjiContainerUid, cjiItemProgress, cjiItemTotal, cjiRecursiveProgress, cjiRecursiveTotal, cjiStatus, cjiRecursiveStatus, cjiConnectivityNeeded, cjiPluginId, cjiAttemptCount, cjiParentCjiUid, cjiServerJobId, cjiStartTime, cjiFinishTime) SELECT cjiUid, cjiJobUid, sourceUri, cjiIsLeaf, cjiContentEntryUid, cjiParentContentEntryUid, cjiContainerUid, cjiItemProgress, cjiItemTotal, cjiRecursiveProgress, cjiRecursiveTotal, cjiStatus, cjiRecursiveStatus, cjiConnectivityNeeded, cjiPluginId, cjiAttemptCount, cjiParentCjiUid, cjiServerJobId, cjiStartTime, cjiFinishTime FROM ContentJobItem_OLD",
+                                "DROP TABLE ContentJobItem_OLD",
+                                "ALTER TABLE ContentJob ADD COLUMN cjIsMeteredAllowed INTEGER NOT NULL DEFAULT 0",
+                                "CREATE INDEX IF NOT EXISTS `index_ContentJobItem_cjiContentEntryUid_cjiFinishTime` ON ContentJobItem (`cjiContentEntryUid`, `cjiFinishTime`)"
+                        )
+                    }else{
+                        listOf("ALTER TABLE ContentJobItem ADD COLUMN cjiStartTime BIGINT NOT NULL DEFAULT 0",
+                                "ALTER TABLE ContentJobItem ADD COLUMN cjiFinishTime INTEGER NOT NULL DEFAULT 0",
+                                "ALTER TABLE ContentJob ADD COLUMN cjIsMeteredAllowed BOOL NOT NULL DEFAULT 0",
+                                "ALTER TABLE ContentJobItem ADD COLUMN cjiConnectivityNeeded BOOL NOT NULL DEFAULT 1",
+                                "ALTER TABLE ContentJobItem DROP COLUMN cjiConnectivityAcceptable",
+                                "CREATE INDEX index_ContentJobItem_cjiContentEntryUid_cjiFinishTime ON ContentJobItem (cjiContentEntryUid, cjiFinishTime)"
+                        )
+                    }
+        }
+
 
         fun migrationList(nodeId: Int) = listOf<DoorMigration>(
             MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
