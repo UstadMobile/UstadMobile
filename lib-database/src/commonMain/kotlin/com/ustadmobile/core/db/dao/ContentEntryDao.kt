@@ -120,7 +120,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
         FROM ContentEntry
        WHERE contentEntryUid = :contentEntryUid
     """)
-    abstract fun isMeteredAllowedForEntry(contentEntryUid: Long): Boolean
+    abstract suspend fun isMeteredAllowedForEntry(contentEntryUid: Long): Boolean
 
 
     @Query("SELECT ContentEntry.* FROM ContentEntry " +

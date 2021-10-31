@@ -77,22 +77,24 @@ class DownloadDialogPresenter(
                 appDatabase.contentJobItemDao.findStatusForActiveContentJobItem(contentEntryUid)
             }
             val activeJobItem = appDatabase.contentJobItemDao.getActiveContentJobItem()
+
             currentJobId = activeJobItem?.cjiJobUid ?: 0
             contentJobCompletable.complete(true)
 
             val status = contentJobItemStatusLiveData.getValue() ?: 0
             //wifiOnlyChecked.value = wifiOnly
 
+            val wifiOnly = !appDatabase.contentEntryDao.isMeteredAllowedForEntry(contentEntryUid)
+            view.setDownloadOverWifiOnly(wifiOnly)
+
             view.runOnUiThread(Runnable {
+                // atomic doesn't like globalScope
+                wifiOnlyChecked.value = wifiOnly
                 contentJobItemStatusLiveData.observe(lifecycleOwner, this@DownloadDialogPresenter)
             })
 
             updateWarningMessage(status)
         }
-        val wifiOnly = !appDatabase.contentEntryDao.isMeteredAllowedForEntry(contentEntryUid)
-        view.setDownloadOverWifiOnly(wifiOnly)
-        wifiOnlyChecked.value = wifiOnly
-
     }
 
     override fun onChanged(t: Int?) {
