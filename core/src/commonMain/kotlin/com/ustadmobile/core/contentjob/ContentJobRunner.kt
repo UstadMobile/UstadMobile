@@ -159,7 +159,7 @@ class ContentJobRunner(
 
                 }
 
-                withContext(Dispatchers.Main){
+                withContext(doorMainDispatcher()){
                     mediatorLiveData.observeForever(mediatorObserver)
                 }
 
