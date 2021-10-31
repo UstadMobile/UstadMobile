@@ -48,7 +48,7 @@ class ContentEntryListTabsFragment : UstadBaseFragment(), ContentEntryListTabsVi
                 "${arguments?.get(ARG_PARENT_ENTRY_UID).toString()}&$ARG_DISPLAY_CONTENT_BY_OPTION="
 
         mPager.adapter = ContentEntryTabsPagerAdapter(childFragmentManager,
-                lifecycle, listOf("$defArgs$ARG_DISPLAY_CONTENT_BY_PARENT", "$defArgs$ARG_DISPLAY_CONTENT_BY_DOWNLOADED"))
+                lifecycle, listOf("$defArgs$ARG_DISPLAY_CONTENT_BY_PARENT"))
         val titleList = listOf(getString(R.string.libraries), getString(R.string.downloaded))
 
         mediator = TabLayoutMediator(mTabLayout, mPager) { tab, position ->
