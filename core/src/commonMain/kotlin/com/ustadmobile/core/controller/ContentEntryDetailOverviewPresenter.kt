@@ -60,8 +60,6 @@ class ContentEntryDetailOverviewPresenter(context: Any,
 
     val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
 
-    private var contentJobItemStatusLiveData: DoorLiveData<Int>? = null
-
     private var contentEntryUid = 0L
 
     private var clazzUid = 0L
@@ -133,7 +131,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
                         view.canUpdate = it ?: false
                     }
 
-            contentJobItemStatusLiveData = RateLimitedLiveData(db, listOf("ContentJobItem"), 1000) {
+            val contentJobItemStatusLiveData = RateLimitedLiveData(db, listOf("ContentJobItem"), 1000) {
                 db.contentJobItemDao.findStatusForActiveContentJobItem(contentEntryUid)
             }
 
@@ -142,7 +140,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
             }
 
             withContext(Dispatchers.Main){
-                contentJobItemStatusLiveData?.observeWithLifecycleOwner(lifecycleOwner){
+                contentJobItemStatusLiveData.observeWithLifecycleOwner(lifecycleOwner){
                     val status = it ?: return@observeWithLifecycleOwner
                     view.contentJobItemStatus = status
                 }
