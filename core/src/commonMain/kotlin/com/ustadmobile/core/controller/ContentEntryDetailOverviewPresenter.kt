@@ -139,7 +139,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
                 db.contentJobItemDao.findProgressForActiveContentJobItem(contentEntryUid)
             }
 
-            withContext(Dispatchers.Main){
+            withContext(doorMainDispatcher()){
                 contentJobItemStatusLiveData.observeWithLifecycleOwner(lifecycleOwner){
                     val status = it ?: return@observeWithLifecycleOwner
                     view.contentJobItemStatus = status
@@ -188,7 +188,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
     }
 
     private fun openContentEntry() {
-        presenterScope.launch(Dispatchers.Main) {
+        presenterScope.launch(doorMainDispatcher()) {
             try {
                 entity?.contentEntryUid?.also {
                     contentEntryOpener.openEntry(context, it, isDownloadEnabled, false,
