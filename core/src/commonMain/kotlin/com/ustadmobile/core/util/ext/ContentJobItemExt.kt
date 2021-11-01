@@ -33,7 +33,7 @@ fun ContentJobItem?.isStatusPausedOrQueuedOrDownloading() = this?.cjiRecursiveSt
 private val statusToMessageIdMap = mapOf(
         JobStatus.PAUSED to MessageID.download_entry_state_paused,
         JobStatus.QUEUED to MessageID.queued,
-        JobStatus.RUNNING to MessageID.downloading,
+        JobStatus.RUNNING to MessageID.in_progress,
         JobStatus.CANCELLING to MessageID.canceled,
         JobStatus.CANCELED to MessageID.canceled,
         JobStatus.COMPLETE to MessageID.completed,
