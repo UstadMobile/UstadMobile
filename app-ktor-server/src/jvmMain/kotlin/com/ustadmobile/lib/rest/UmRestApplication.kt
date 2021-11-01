@@ -34,6 +34,7 @@ import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.core.catalog.contenttype.ApacheIndexerPlugin
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
+import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.PersonAuth2
 import com.ustadmobile.lib.rest.ext.databasePropertiesFromSection
 import com.ustadmobile.lib.rest.ext.initAdminUser
@@ -181,6 +182,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                     .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                 .build()
             runBlocking {
+                db.connectivityStatusDao.insertAsync(ConnectivityStatus().apply {
+                    connectivityState = ConnectivityStatus.STATE_UNMETERED
+                    connectedOrConnecting = true
+                })
                 di.on(context).direct.instance<TorrentTracker>().start()
                 di.on(context).direct.instance<UstadTorrentManager>().start()
             }
