@@ -22,7 +22,7 @@ import io.ktor.http.*
 
 expect suspend fun ContentPlugin.withWifiLock(context: Any, block: suspend () -> Unit)
 
-expect suspend fun deleteFilesForContentEntry(db: UmAppDatabase, contentEntryUid: Long, torrentDir: DoorUri, ustadTorrentManager: UstadTorrentManager): Int
+expect suspend fun deleteFilesForContentEntry(db: UmAppDatabase, contentEntryUid: Long, ustadTorrentManager: UstadTorrentManager): Int
 
 suspend fun ContentPlugin.uploadContentIfNeeded(contentNeedUpload: Boolean,
                                                 contentJobItem: ContentJobItem,

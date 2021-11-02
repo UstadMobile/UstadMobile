@@ -33,6 +33,7 @@ import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -230,7 +231,6 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
             }catch(c: CancellationException){
 
                 withContext(NonCancellable){
-                    deleteFilesForContentEntry(db, contentJobItem.cjiContentEntryUid, torrentDir.toDoorUri(), ustadTorrentManager)
                     newVideo.delete()
                     videoTempDir.delete()
                     localUri.toFile().delete()

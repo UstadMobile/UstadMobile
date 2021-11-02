@@ -31,6 +31,7 @@ import java.util.*
 import io.ktor.client.*
 import java.util.zip.ZipInputStream
 import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
 
 class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: Endpoint, override val di: DI) : ContentPlugin {
 
@@ -177,10 +178,6 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
 
                     return@withContext ProcessResult(JobStatus.COMPLETE)
                 }catch (c: CancellationException){
-
-                    withContext(NonCancellable){
-                        deleteFilesForContentEntry(db, contentJobItem.cjiContentEntryUid, torrentDir.toDoorUri(), ustadTorrentManager)
-                    }
                     throw c
                 }
             }

@@ -195,12 +195,6 @@ class ContainerTorrentDownloadJob(private var context: Any, private val endpoint
                 progress.onProgress(contentJobItem)
 
             } catch (c: CancellationException) {
-
-                withContext(NonCancellable) {
-                    deleteFilesForContentEntry(db, contentJobItem.cjiContentEntryUid, torrentDir.toDoorUri(), ustadTorrentManager)
-                    torrentFile.delete()
-                }
-
                 throw c
             }
 

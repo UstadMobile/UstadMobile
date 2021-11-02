@@ -228,7 +228,8 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                                                         WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
                                                      ORDER BY cntLastModified DESC LIMIT 1)
                  WHERE ccjClazzUid = :clazzUid 
-                   AND ccjActive                                      
+                   AND ccjActive
+                   AND (NOT ContentEntry.ceInactive OR ContentEntry.ceInactive = :showHidden)
               ORDER BY CASE(:sortOrder)
                         WHEN $SORT_TITLE_ASC THEN ContentEntry.title
                         ELSE ''
@@ -238,7 +239,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                         ELSE ''
                         END DESC
     """)
-    abstract fun getClazzContent(clazzUid: Long,  personUid: Long, sortOrder: Int): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+    abstract fun getClazzContent(clazzUid: Long,  personUid: Long, showHidden: Boolean, sortOrder: Int): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
     @Update

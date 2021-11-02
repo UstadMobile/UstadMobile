@@ -64,8 +64,7 @@ class DeleteContainerPlugin(private var context: Any, private val endpoint: Endp
 
         // delete all containerEntries, containerEntryFiles and torrentFile for this contentEntry
         val numFailures = deleteFilesForContentEntry(db,
-                contentJobItem.cjiContentEntryUid,
-                torrentDir.toDoorUri(), ustadTorrentManager)
+                contentJobItem.cjiContentEntryUid, ustadTorrentManager)
 
         contentJobItem.cjiItemProgress = 100
         progress.onProgress(contentJobItem)

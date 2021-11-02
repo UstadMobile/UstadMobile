@@ -18,7 +18,7 @@ import java.io.File
 
 class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : UstadTorrentManager {
 
-    private val torrentDir = di.direct.instance<File>(tag = DiTag.TAG_TORRENT_DIR)
+    private val torrentDir: File = di.direct.instance<File>(tag = DiTag.TAG_TORRENT_DIR)
 
     private val containerDir = di.direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
@@ -90,6 +90,10 @@ class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : Ust
 
     override suspend fun removeTorrent(containerUid: Long) {
         val hexInfoHash = containerInfoHashMap.remove(containerUid) ?: return
+        val torrentFile = File(torrentDir, "${containerUid}.torrent")
+        if(torrentFile.exists()){
+            torrentFile.delete()
+        }
         communicationManager.removeTorrent(hexInfoHash)
     }
 

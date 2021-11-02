@@ -3,15 +3,20 @@ package com.ustadmobile.core.contentjob
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.ConnectivityException
 import com.ustadmobile.core.util.EventCollator
 import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.core.io.ext.emptyRecursively
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
+import com.ustadmobile.core.torrent.UstadTorrentManager
+import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import com.ustadmobile.door.getFirstValue
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -23,6 +28,7 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
+import java.io.File
 import kotlin.jvm.Volatile
 import kotlin.math.min
 
@@ -56,6 +62,10 @@ class ContentJobRunner(
     private val eventCollator = EventCollator(500, this::commitProgressUpdates)
 
     private val connectivityLiveData: ConnectivityLiveData by on(endpoint).instance()
+
+    private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
+
+    private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
     @ExperimentalCoroutinesApi
     private fun CoroutineScope.produceJobs() = produce<ContentJobItemAndContentJob> {
@@ -153,8 +163,9 @@ class ContentJobRunner(
                     val isMeteredAllowed = it.second
 
                     if(item.contentJobItem?.cjiConnectivityNeeded == true
-                            && (!isMeteredAllowed && state == ConnectivityStatus.STATE_METERED)){
-                        job.cancel()
+                            && (state == ConnectivityStatus.STATE_DISCONNECTED ||
+                                    !isMeteredAllowed && state == ConnectivityStatus.STATE_METERED)){
+                        job.cancel(ConnectivityException("connectivity not acceptable"))
                     }
 
                 }
@@ -175,9 +186,16 @@ class ContentJobRunner(
                 e.printStackTrace()
             }finally {
                 withContext(NonCancellable) {
-                    val finalStatus = when {
+                    val finalStatus: Int = when {
                         processResult != null -> processResult?.status ?: JobStatus.FAILED
                         processException is FatalContentJobException -> JobStatus.FAILED
+                        processException is ConnectivityException -> JobStatus.QUEUED
+                        processException is CancellationException && processException !is ConnectivityException -> {
+                            deleteFilesForContentEntry(db,
+                                            item.contentJobItem?.cjiContentEntryUid ?: 0,
+                                            ustadTorrentManager)
+                            JobStatus.CANCELED
+                        }
                         (item.contentJobItem?.cjiAttemptCount ?: maxItemAttempts) >= maxItemAttempts -> JobStatus.FAILED
                         else -> JobStatus.QUEUED
                     }

@@ -24,11 +24,14 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import kotlinx.coroutines.NonCancellable
 import com.ustadmobile.core.contentformats.har.HarEntry
+import com.ustadmobile.core.impl.ConnectivityException
 import com.ustadmobile.core.torrent.ContainerTorrentDownloadJob.Companion.MANIFEST_FILE_NAME
 import com.ustadmobile.core.util.createSymLink
 import com.ustadmobile.lib.db.entities.ContainerManifest
 import java.util.Base64
+import kotlin.coroutines.cancellation.CancellationException
 
 actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: DoorUri,
                                                    recursive: Boolean, context:Any, di: DI,
@@ -331,38 +334,50 @@ suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
 
     val (db, repo) = requireDbAndRepo()
     withContext(Dispatchers.IO) {
+
         val containerEntriesForExistingFiles = mutableListOf<ContainerEntry>()
         val containerEntryFilesToAdd = mutableMapOf<ContainerEntryFile, MutableList<ContainerEntry>>()
-        zipInputStream.use { zipIn ->
-            var zipEntry: ZipEntry? = null
-            while(zipIn.nextEntry?.also { zipEntry = it } != null) {
-                val zipEntryVal = zipEntry ?: throw IllegalStateException("ZipEntry is not null in loop")
-                val nameInZip = zipEntryVal.name
-                val containerFile = db.insertOrLookupContainerEntryFile(zipIn, zipEntryVal.size,
-                        containerUid, nameInZip, addOptions)
+        try {
+            zipInputStream.use { zipIn ->
+                var zipEntry: ZipEntry? = null
+                while (zipIn.nextEntry?.also { zipEntry = it } != null) {
+                    val zipEntryVal = zipEntry
+                            ?: throw IllegalStateException("ZipEntry is not null in loop")
+                    val nameInZip = zipEntryVal.name
+                    val containerFile = db.insertOrLookupContainerEntryFile(zipIn, zipEntryVal.size,
+                            containerUid, nameInZip, addOptions)
 
-                val entryPath = addOptions.fileNamer.nameContainerFile(nameInZip, nameInZip)
+                    val entryPath = addOptions.fileNamer.nameContainerFile(nameInZip, nameInZip)
 
-                if(containerFile.cefUid == 0L){
-                    val containerEntryList = containerEntryFilesToAdd[containerFile] ?: mutableListOf()
-                    containerEntryList.add(ContainerEntry().apply {
-                        this.cePath = entryPath
-                        this.ceContainerUid = containerUid
-                    })
-                    containerEntryFilesToAdd[containerFile] = containerEntryList
-                }else{
-                    containerEntriesForExistingFiles.add(ContainerEntry().apply {
-                        this.cePath = entryPath
-                        this.ceContainerUid = containerUid
-                        this.ceCefUid = containerFile.cefUid
-                    })
+                    if (containerFile.cefUid == 0L) {
+                        val containerEntryList = containerEntryFilesToAdd[containerFile]
+                                ?: mutableListOf()
+                        containerEntryList.add(ContainerEntry().apply {
+                            this.cePath = entryPath
+                            this.ceContainerUid = containerUid
+                        })
+                        containerEntryFilesToAdd[containerFile] = containerEntryList
+                    } else {
+                        containerEntriesForExistingFiles.add(ContainerEntry().apply {
+                            this.cePath = entryPath
+                            this.ceContainerUid = containerUid
+                            this.ceCefUid = containerFile.cefUid
+                        })
+                    }
+                }
+                withContext(NonCancellable) {
+                    AddFilesResult(containerEntriesForExistingFiles, containerEntryFilesToAdd).addFiles(db)
+                    repo.containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
                 }
             }
+        } catch (e: CancellationException) {
+            if(e !is ConnectivityException){
+                val storageFolder = addOptions.storageDirUri.toFile()
+                val containerFolder = File(storageFolder, containerUid.toString())
+                containerFolder.delete()
+            }
+            throw e
         }
-
-        AddFilesResult(containerEntriesForExistingFiles, containerEntryFilesToAdd).addFiles(db)
-
-        repo.containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
     }
 }
 

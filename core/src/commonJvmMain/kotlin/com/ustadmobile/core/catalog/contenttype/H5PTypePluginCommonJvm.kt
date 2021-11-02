@@ -31,6 +31,7 @@ import io.ktor.client.*
 import kotlinx.serialization.json.*
 import java.util.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
 
 
 val licenseMap = mapOf(
@@ -233,10 +234,6 @@ class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,ov
                 return@withContext ProcessResult(JobStatus.COMPLETE)
 
             }catch (c: CancellationException){
-
-                withContext(NonCancellable){
-                    deleteFilesForContentEntry(db, contentJobItem.cjiContentEntryUid, torrentDir.toDoorUri(), ustadTorrentManager)
-                }
                 throw c
             }
         }

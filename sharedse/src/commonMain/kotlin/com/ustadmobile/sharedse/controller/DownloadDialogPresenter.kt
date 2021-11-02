@@ -82,7 +82,6 @@ class DownloadDialogPresenter(
             contentJobCompletable.complete(true)
 
             val status = contentJobItemStatusLiveData.getValue() ?: 0
-            //wifiOnlyChecked.value = wifiOnly
 
             val wifiOnly = !appDatabase.contentEntryDao.isMeteredAllowedForEntry(contentEntryUid)
             view.setDownloadOverWifiOnly(wifiOnly)

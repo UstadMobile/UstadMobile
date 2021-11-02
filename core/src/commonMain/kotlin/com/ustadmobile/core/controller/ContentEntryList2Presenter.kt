@@ -102,7 +102,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                         selectedSortOption?.flag ?: ContentEntryDao.SORT_TITLE_ASC)
             }
             ARG_DISPLAY_CONTENT_BY_CLAZZ -> {
-                repo.contentEntryDao.getClazzContent(selectedClazzUid, loggedPersonUid,
+                repo.contentEntryDao.getClazzContent(selectedClazzUid, loggedPersonUid, showHiddenEntries,
                         selectedSortOption?.flag ?: ContentEntryDao.SORT_TITLE_ASC)
             }
             else -> null
