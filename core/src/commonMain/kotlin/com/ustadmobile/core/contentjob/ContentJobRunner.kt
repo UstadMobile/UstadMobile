@@ -9,7 +9,6 @@ import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.core.io.ext.emptyRecursively
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.torrent.UstadTorrentManager
-import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.DoorUri
@@ -28,7 +27,6 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
-import java.io.File
 import kotlin.jvm.Volatile
 import kotlin.math.min
 
@@ -62,8 +60,6 @@ class ContentJobRunner(
     private val eventCollator = EventCollator(500, this::commitProgressUpdates)
 
     private val connectivityLiveData: ConnectivityLiveData by on(endpoint).instance()
-
-    private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
 
     private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
