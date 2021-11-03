@@ -131,8 +131,6 @@ android {
 
         multiDexEnabled true //required for all variants to use java library desugaring
         vectorDrawables.useSupportLibrary = true
-        versionCode rootProject.ext.ustadVersionCode
-        versionName rootProject.version
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments clearPackageData: 'true'
         buildConfigField "String", "TEST_HOST", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver"] + "\""

@@ -3,7 +3,7 @@ plugins {
     id 'application'
     id 'org.jetbrains.kotlin.multiplatform'
     id 'maven-publish'
-    id 'com.github.johnrengelman.shadow'
+    id 'com.github.johnrengelman.shadow' version "$version_shadow"
     id 'kotlinx-serialization'
     id 'com.github.psxpaul.execfork' version '0.1.13'
 }
