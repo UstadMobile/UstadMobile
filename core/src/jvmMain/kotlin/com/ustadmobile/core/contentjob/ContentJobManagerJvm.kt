@@ -32,4 +32,11 @@ class ContentJobManagerJvm(override val di: DI): ContentJobManager, DIAware {
         scheduler.scheduleJob(job, jobTrigger)
 
     }
+
+    override fun cancelContentJob(endpoint: Endpoint, contentJobUid: Long) {
+        val scheduler: Scheduler = di.direct.instance()
+        val triggerKey = TriggerKey("contentjob-${endpoint.url}-$contentJobUid")
+        scheduler.unscheduleJob(triggerKey)
+    }
+
 }

@@ -103,7 +103,7 @@ class TestContentJobRunner {
         val jobItems = (0 .. 100).map {
             ContentJobItem().apply {
                 cjiJobUid = 2
-                cjiConnectivityAcceptable = ContentJobItem.ACCEPT_ANY
+                cjiConnectivityNeeded = false
                 cjiStatus = JobStatus.QUEUED
                 cjiPluginId = TEST_PLUGIN_ID
                 sourceUri = "dummy:///test_$it"
@@ -140,7 +140,7 @@ class TestContentJobRunner {
             db.contentJobDao.insertAsync(ContentJob(cjUid = 2))
             db.contentJobItemDao.insertJobItem(ContentJobItem().apply {
                 this.cjiJobUid = 2
-                cjiConnectivityAcceptable = ContentJobItem.ACCEPT_UNMETERED
+                cjiConnectivityNeeded = true
                 cjiStatus = JobStatus.QUEUED
                 cjiPluginId = TEST_PLUGIN_ID
                 sourceUri = "dummy:///test"

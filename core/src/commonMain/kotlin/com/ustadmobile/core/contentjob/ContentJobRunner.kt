@@ -3,15 +3,19 @@ package com.ustadmobile.core.contentjob
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.ConnectivityException
 import com.ustadmobile.core.util.EventCollator
 import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.core.io.ext.emptyRecursively
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
+import com.ustadmobile.core.torrent.UstadTorrentManager
+import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import com.ustadmobile.door.getFirstValue
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -56,6 +60,8 @@ class ContentJobRunner(
     private val eventCollator = EventCollator(500, this::commitProgressUpdates)
 
     private val connectivityLiveData: ConnectivityLiveData by on(endpoint).instance()
+
+    private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
     @ExperimentalCoroutinesApi
     private fun CoroutineScope.produceJobs() = produce<ContentJobItemAndContentJob> {
@@ -104,6 +110,10 @@ class ContentJobRunner(
 
             var processResult: ProcessResult? = null
             var processException: Throwable? = null
+            var mediatorObserver: DoorObserver<Pair<Int, Boolean>>?= null
+            val mediatorLiveData = JobConnectivityLiveData(connectivityLiveData,
+                    db.contentJobDao.findMeteredAllowedLiveData(
+                            item.contentJob?.cjUid ?: 0))
 
             try {
 
@@ -140,8 +150,29 @@ class ContentJobRunner(
 
                 val plugin = contentPluginManager.getPluginById(pluginId)
 
-                processResult = plugin.processJob(item, processContext, this@ContentJobRunner)
-                db.contentJobItemDao.updateItemStatus(item.contentJobItem?.cjiUid ?: 0, processResult.status)
+                val job = async {
+                    processResult = plugin.processJob(item, processContext, this@ContentJobRunner)
+                }
+
+                mediatorObserver = DoorObserver {
+                    val state = it.first
+                    val isMeteredAllowed = it.second
+
+                    if(item.contentJobItem?.cjiConnectivityNeeded == true
+                            && (state == ConnectivityStatus.STATE_DISCONNECTED ||
+                                    !isMeteredAllowed && state == ConnectivityStatus.STATE_METERED)){
+                        job.cancel(ConnectivityException("connectivity not acceptable"))
+                    }
+
+                }
+
+                withContext(doorMainDispatcher()){
+                    mediatorLiveData.observeForever(mediatorObserver)
+                }
+
+                job.await()
+
+                db.contentJobItemDao.updateItemStatus(item.contentJobItem?.cjiUid ?: 0, processResult?.status ?: 0)
                 db.contentJobItemDao.updateFinishTimeForJob(item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
                 println("Processor #$id completed job #${item.contentJobItem?.cjiUid}")
             }catch(e: Exception) {
@@ -151,9 +182,16 @@ class ContentJobRunner(
                 e.printStackTrace()
             }finally {
                 withContext(NonCancellable) {
-                    val finalStatus = when {
-                        processResult != null -> processResult.status
+                    val finalStatus: Int = when {
+                        processResult != null -> processResult?.status ?: JobStatus.FAILED
                         processException is FatalContentJobException -> JobStatus.FAILED
+                        processException is ConnectivityException -> JobStatus.QUEUED
+                        processException is CancellationException && processException !is ConnectivityException -> {
+                            deleteFilesForContentEntry(db,
+                                            item.contentJobItem?.cjiContentEntryUid ?: 0,
+                                            ustadTorrentManager)
+                            JobStatus.CANCELED
+                        }
                         (item.contentJobItem?.cjiAttemptCount ?: maxItemAttempts) >= maxItemAttempts -> JobStatus.FAILED
                         else -> JobStatus.QUEUED
                     }
@@ -171,6 +209,11 @@ class ContentJobRunner(
                     }
                     println("Processor #$id sending check queue signal after finishing with #${item.contentJobItem?.cjiUid}")
                 }
+
+                withContext(NonCancellable + doorMainDispatcher()) {
+                    mediatorObserver?.let { mediatorLiveData.removeObserver(it) }
+                }
+
 
                 if(processException is CancellationException)
                     throw processException

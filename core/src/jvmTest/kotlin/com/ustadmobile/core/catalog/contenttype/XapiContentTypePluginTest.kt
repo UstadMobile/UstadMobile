@@ -10,10 +10,8 @@ import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.torrent.UstadTorrentManagerImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentJob
-import com.ustadmobile.lib.db.entities.ContentJobItem
-import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -65,6 +63,11 @@ class XapiContentTypePluginTest {
                 }
             }
         }
+
+        val accountManager: UstadAccountManager by di.instance()
+        val umAppDatabase: UmAppDatabase = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
+        val connectivityStatus = ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED, true, "NetworkSSID")
+        umAppDatabase.connectivityStatusDao.insert(connectivityStatus)
 
         mockWebServer = MockWebServer()
         mockWebServer.dispatcher = ContentDispatcher()

@@ -3,6 +3,7 @@ package com.ustadmobile.core.contentjob
 import android.content.Context
 import androidx.work.*
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.door.getFirstValue
 
 class ContentJobManagerAndroid(val appContext: Context): ContentJobManager {
 
@@ -19,6 +20,12 @@ class ContentJobManagerAndroid(val appContext: Context): ContentJobManager {
         WorkManager.getInstance(appContext)
             .enqueueUniqueWork("contentjob-${endpoint.url}-$contentJobUid",
                 ExistingWorkPolicy.REPLACE, request)
+
+    }
+
+    override fun cancelContentJob(endpoint: Endpoint, contentJobUid: Long) {
+        WorkManager.getInstance(appContext).cancelUniqueWork(
+                "contentjob-${endpoint.url}-$contentJobUid")
     }
 
 }

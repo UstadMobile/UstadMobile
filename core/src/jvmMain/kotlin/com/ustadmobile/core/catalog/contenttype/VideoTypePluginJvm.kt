@@ -16,6 +16,8 @@ import com.ustadmobile.core.io.ext.isRemote
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ShrinkUtils
+import com.ustadmobile.core.util.ext.checkConnectivityToDoJob
+import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.core.util.ext.fitWithin
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
@@ -35,6 +37,8 @@ import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
 import org.kodein.di.direct
 
 class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoint, override val di: DI): VideoTypePlugin() {
@@ -59,66 +63,89 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
 
     override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
-        withContext(Dispatchers.Default) {
+        return withContext(Dispatchers.Default) {
 
             val uri = contentJobItem.sourceUri ?: throw IllegalStateException("missing uri")
             val videoUri = DoorUri.parse(uri)
             val videoFile = process.getLocalUri(videoUri, context, di).toFile()
             var newVideo = File(videoFile.parentFile, "new${videoFile.nameWithoutExtension}.mp4")
-            val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
-                    ?: throw IllegalArgumentException("missing tracker url")
-            val contentNeedUpload = !videoUri.isRemote()
 
-            val compressVideo: Boolean = process.params["compress"]?.toBoolean() ?: false
+            try {
 
-            Napier.d(tag = VIDEO_JVM, message = "conversion Params compress video is $compressVideo")
+                val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
+                        ?: throw IllegalArgumentException("missing tracker url")
+                val contentNeedUpload = !videoUri.isRemote()
 
-            if(compressVideo) {
-                val fileVideoDimensionsAndAspectRatio = ShrinkUtils.getVideoResolutionMetadata(videoFile)
-                val newVideoDimensions = Pair(fileVideoDimensionsAndAspectRatio.first, fileVideoDimensionsAndAspectRatio.second).fitWithin()
-                ShrinkUtils.optimiseVideo(videoFile, newVideo, newVideoDimensions, fileVideoDimensionsAndAspectRatio.third)
-            }else{
-                newVideo = videoFile
-            }
+                val compressVideo: Boolean = process.params["compress"]?.toBoolean() ?: false
 
-            val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid) ?:
-                Container().apply {
-                    containerContentEntryUid = contentJobItem.cjiContentEntryUid
-                    cntLastModified = System.currentTimeMillis()
-                    mimeType = supportedMimeTypes.first()
-                    containerUid = repo.containerDao.insertAsync(this)
-                    contentJobItem.cjiContainerUid = containerUid
+                Napier.d(tag = VIDEO_JVM, message = "conversion Params compress video is $compressVideo")
+
+                if (compressVideo) {
+                    val fileVideoDimensionsAndAspectRatio = ShrinkUtils.getVideoResolutionMetadata(videoFile)
+                    val newVideoDimensions = Pair(fileVideoDimensionsAndAspectRatio.first, fileVideoDimensionsAndAspectRatio.second).fitWithin()
+                    ShrinkUtils.optimiseVideo(videoFile, newVideo, newVideoDimensions, fileVideoDimensionsAndAspectRatio.third)
+                } else {
+                    newVideo = videoFile
                 }
 
-            db.contentJobItemDao.updateContainer(contentJobItem.cjiUid, container.containerUid)
+                val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
+                        ?: Container().apply {
+                            containerContentEntryUid = contentJobItem.cjiContentEntryUid
+                            cntLastModified = System.currentTimeMillis()
+                            mimeType = supportedMimeTypes.first()
+                            containerUid = repo.containerDao.insertAsync(this)
+                            contentJobItem.cjiContainerUid = containerUid
+                        }
+
+                db.contentJobItemDao.updateContainer(contentJobItem.cjiUid, container.containerUid)
 
 
-            val containerFolder = jobItem.contentJob?.toUri ?: defaultContainerDir.toURI().toString()
-            val containerFolderUri = DoorUri.parse(containerFolder)
+                val containerFolder = jobItem.contentJob?.toUri
+                        ?: defaultContainerDir.toURI().toString()
+                val containerFolderUri = DoorUri.parse(containerFolder)
 
-            repo.addFileToContainer(container.containerUid, newVideo.toDoorUri(), newVideo.name,
-                    context,
-                    di,
-                    ContainerAddOptions(containerFolderUri))
+                repo.addFileToContainer(container.containerUid, newVideo.toDoorUri(), newVideo.name,
+                        context,
+                        di,
+                        ContainerAddOptions(containerFolderUri))
 
-            repo.addTorrentFileFromContainer(
-                    container.containerUid,
-                    DoorUri.parse(torrentDir.toURI().toString()),
-                    trackerUrl, containerFolderUri
-            )
+                repo.addTorrentFileFromContainer(
+                        container.containerUid,
+                        DoorUri.parse(torrentDir.toURI().toString()),
+                        trackerUrl, containerFolderUri
+                )
 
-            val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
-            containerUidFolder.mkdirs()
-            ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
+                val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
+                containerUidFolder.mkdirs()
+                ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
 
-            val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
-            uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient,  torrentFileBytes, endpoint)
 
-            repo.containerDao.findByUid(container.containerUid) ?: container
+                contentJobItem.cjiConnectivityNeeded = true
+                db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
+
+                val haveConnectivityToContinueJob = checkConnectivityToDoJob(db, jobItem)
+                if (!haveConnectivityToContinueJob) {
+                    return@withContext ProcessResult(JobStatus.QUEUED)
+                }
+
+                val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
+                uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient, torrentFileBytes, endpoint)
+
+                repo.containerDao.findByUid(container.containerUid)
+
+                return@withContext ProcessResult(JobStatus.COMPLETE)
+            }catch (c: CancellationException){
+
+                withContext(NonCancellable){
+                    videoFile.delete()
+                    newVideo.delete()
+
+                }
+
+                throw c
+
+            }
         }
-
-
-        return ProcessResult(JobStatus.COMPLETE)
     }
 
     suspend fun getEntry(uri: DoorUri, process: ProcessContext): MetadataResult? {

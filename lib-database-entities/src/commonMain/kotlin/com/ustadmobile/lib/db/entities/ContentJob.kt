@@ -18,5 +18,7 @@ data class ContentJob(
 
         var cjNotificationTitle: String? = null,
 
+        var cjIsMeteredAllowed: Boolean = false,
+
         var params: String? = null
 )

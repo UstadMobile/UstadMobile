@@ -1,8 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.contentjob.MetadataResult
@@ -36,7 +33,6 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ContentJobItem.Companion.ACCEPT_ANY
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -49,7 +45,6 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
-import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 
 
@@ -252,6 +247,7 @@ class ContentEntryEdit2Presenter(context: Any,
                             params = Json.encodeToString(
                                     MapSerializer(String.serializer(), String.serializer()),
                                         conversionParams)
+                            cjIsMeteredAllowed = false
                             cjNotificationTitle = systemImpl.getString(MessageID.importing, context)
                                     .replace("%1\$s",entity.title ?: "")
                             cjUid = db.contentJobDao.insertAsync(this)
@@ -264,7 +260,7 @@ class ContentEntryEdit2Presenter(context: Any,
                             cjiContentEntryUid = entity.contentEntryUid
                             cjiIsLeaf = entity.leaf
                             cjiParentContentEntryUid = parentEntryUid
-                            cjiConnectivityAcceptable = ACCEPT_ANY
+                            cjiConnectivityNeeded = false
                             cjiStatus = JobStatus.QUEUED
                             cjiUid = db.contentJobItemDao.insertJobItem(this)
                         }

@@ -8,7 +8,6 @@ import com.ustadmobile.core.io.ext.getLocalUri
 import com.ustadmobile.core.io.ext.getSize
 import com.ustadmobile.core.io.ext.guessMimeType
 import com.ustadmobile.core.util.createTemporaryDir
-import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
@@ -114,7 +113,7 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                             cjiIsLeaf = false
                             cjiParentContentEntryUid = contentJobItem.cjiContentEntryUid
                             cjiParentCjiUid = contentJobItem.cjiUid
-                            cjiConnectivityAcceptable = ContentJobItem.ACCEPT_ANY
+                            cjiConnectivityNeeded = false
                             cjiStatus = JobStatus.QUEUED
                             cjiUid = db.contentJobItemDao.insertJobItem(this)
                         }
@@ -135,7 +134,7 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                                 cjiPluginId = metadataResult.pluginId
                                 cjiParentCjiUid = contentJobItem.cjiUid
                                 cjiParentContentEntryUid = contentJobItem.cjiContentEntryUid
-                                cjiConnectivityAcceptable = ContentJobItem.ACCEPT_ANY
+                                cjiConnectivityNeeded = false
                                 cjiStatus = JobStatus.QUEUED
                                 cjiUid = db.contentJobItemDao.insertJobItem(this)
                             }

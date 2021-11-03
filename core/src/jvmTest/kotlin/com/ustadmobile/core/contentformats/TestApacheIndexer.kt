@@ -1,6 +1,5 @@
 package com.ustadmobile.core.contentformats
 
-import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
@@ -8,29 +7,14 @@ import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.contentjob.ContentPluginManagerImpl
 import com.ustadmobile.core.contentjob.ProcessContext
-import com.ustadmobile.core.contentjob.TestContentJobRunner
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.io.ext.getSize
-import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.RepositoryConfig
-import com.ustadmobile.door.asRepository
-import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.clearAllTablesAndResetSync
 import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.util.randomString
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
 import kotlinx.coroutines.runBlocking
-import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
 import org.junit.Before
@@ -38,13 +22,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import java.io.File
 import java.net.URL
 import java.nio.file.Files
-import javax.naming.InitialContext
-import kotlin.random.Random
 
 
 class TestApacheIndexer {
@@ -129,7 +108,7 @@ class TestApacheIndexer {
                 cjiContentEntryUid = 42
                 cjiIsLeaf = false
                 cjiParentContentEntryUid = 0
-                cjiConnectivityAcceptable = ContentJobItem.ACCEPT_ANY
+                cjiConnectivityNeeded = false
                 cjiStatus = JobStatus.QUEUED
                 cjiUid = db.contentJobItemDao.insertJobItem(this)
             }

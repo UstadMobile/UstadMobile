@@ -37,7 +37,14 @@ class ConnectionManager(val context: Context,
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
 
         override fun onAvailable(network: Network) {
-            communicationManager.start(getLocalIpAddress())
+            if(!communicationManager.isRunning){
+                communicationManager.start(getLocalIpAddress())
+            }
+        }
+
+        override fun onLost(network: Network) {
+            super.onLost(network)
+            communicationManager.stop()
         }
 
         override fun onUnavailable() {

@@ -1,22 +1,17 @@
 package com.ustadmobile.core.catalog.contenttype
 
-import android.content.ContentResolver
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
-import android.os.Build
 import android.provider.DocumentsContract
-import android.provider.DocumentsProvider
 import androidx.documentfile.provider.DocumentFile
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.ext.getSize
 import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJobItem
@@ -26,7 +21,6 @@ import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
-import java.io.File
 import java.lang.Exception
 
 class FolderIndexerPlugin(private var context: Any, private val endpoint: Endpoint, override val di: DI): ContentPlugin {
@@ -117,7 +111,7 @@ class FolderIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                         cjiContentEntryUid = 0
                         cjiIsLeaf = false
                         cjiParentContentEntryUid = contentJobItem.cjiContentEntryUid
-                        cjiConnectivityAcceptable = ContentJobItem.ACCEPT_ANY
+                        cjiConnectivityNeeded = false
                         cjiStatus = JobStatus.QUEUED
                         cjiUid = db.contentJobItemDao.insertJobItem(this)
                     }
@@ -137,7 +131,7 @@ class FolderIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                             cjiIsLeaf = true
                             cjiPluginId = metadataResult.pluginId
                             cjiParentContentEntryUid = contentJobItem.cjiContentEntryUid
-                            cjiConnectivityAcceptable = ContentJobItem.ACCEPT_ANY
+                            cjiConnectivityNeeded = false
                             cjiStatus = JobStatus.QUEUED
                             cjiUid = db.contentJobItemDao.insertJobItem(this)
                         }

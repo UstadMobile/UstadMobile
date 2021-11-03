@@ -17,14 +17,11 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
-import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.STACKED_BUTTON_CANCEL
-import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.STACKED_BUTTON_CONTINUE
-import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.STACKED_BUTTON_PAUSE
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -60,7 +57,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
     private lateinit var storageDirs: List<ContainerStorageDir>
 
-    //internal var viewIdMap = HashMap<Int, Int>()
+    internal var viewIdMap = HashMap<Int, Int>()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val inflater = requireContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -87,7 +84,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
         //mapping presenter constants to view ids
 //        viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_PAUSE] = R.id.action_btn_pause_download
-//        viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CANCEL] = R.id.action_btn_cancel_download
+        viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CANCEL] = R.id.action_btn_cancel_download
 //        viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CONTINUE] = R.id.action_btn_continue_download
 
 
@@ -243,9 +240,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
     companion object {
         val STACKED_BUTTON_ANDROID_ID_TO_PRESENTER_ID_MAP = mapOf(
-            R.id.action_btn_pause_download to STACKED_BUTTON_PAUSE,
-            R.id.action_btn_cancel_download to STACKED_BUTTON_CANCEL,
-            R.id.action_btn_continue_download to STACKED_BUTTON_CONTINUE
+            R.id.action_btn_cancel_download to STACKED_BUTTON_CANCEL
         )
     }
 }

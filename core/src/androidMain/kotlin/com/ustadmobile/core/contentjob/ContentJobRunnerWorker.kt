@@ -15,12 +15,13 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.RateLimitedLiveData
+import com.ustadmobile.core.util.ext.toStatusString
 import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import org.kodein.di.instance
@@ -65,20 +66,23 @@ class ContentJobRunnerWorker(
 
         val jobObserver = DoorObserver<ContentJobItem?> {
             notification.setProgress(it?.cjiRecursiveTotal?.toInt() ?: 100, it?.cjiRecursiveProgress?.toInt() ?: 0, false)
+            notification.setContentText(it.toStatusString(systemImpl, applicationContext))
             setForegroundAsync(ForegroundInfo(jobId.toInt(), notification.build()))
         }
 
         try {
 
-            withContext(Dispatchers.Main) {
+            withContext(doorMainDispatcher()) {
                 liveData.observeForever(jobObserver)
             }
 
             setForeground(ForegroundInfo(jobId.toInt(), notification.build()))
 
             return ContentJobRunner(jobId, endpoint, di).runJob().toWorkerResult()
-        } finally {
-            withContext(Dispatchers.Main) {
+        } catch(c: CancellationException) {
+            return Result.failure()
+        }finally {
+            withContext(doorMainDispatcher()) {
                 liveData.removeObserver(jobObserver)
             }
         }
@@ -106,6 +110,8 @@ class ContentJobRunnerWorker(
                         systemImpl.getString(MessageID.cancel, applicationContext),
                         intent)
     }
+
+
 
 
     @RequiresApi(Build.VERSION_CODES.O)

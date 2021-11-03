@@ -87,15 +87,14 @@ class LearnerGroupEndToEndTest : TestCase() {
             dbRule.repo.addEntriesToContainerFromZipResource(container.containerUid, this::class.java,
                     "/com/ustadmobile/port/android/view/tincan-group.zip",
                     ContainerAddOptions(temporaryFolder.newFolder().toDoorUri()))
-        }
 
-        DownloadJobItem().apply {
-            djiContentEntryUid = 1
-            djiContainerUid = container.containerUid
-            djiStatus = JobStatus.COMPLETE
-            djiUid = dbRule.db.downloadJobItemDao.insert(this).toInt()
+            ContentJobItem().apply {
+                cjiContentEntryUid = 1
+                cjiContainerUid = container.containerUid
+                cjiRecursiveStatus = JobStatus.COMPLETE
+                cjiUid = dbRule.db.contentJobItemDao.insertJobItem(this)
+            }
         }
-
     }
 
     @AdbScreenRecord("given Downloaded Entry when GroupActivity Clicked then Learner Group Created And Content Viewed As Group")

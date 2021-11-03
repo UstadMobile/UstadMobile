@@ -12,14 +12,15 @@ import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.alternative
+import com.ustadmobile.core.util.ext.checkConnectivityToDoJob
+import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.direct
@@ -29,6 +30,8 @@ import java.io.File
 import java.util.*
 import io.ktor.client.*
 import java.util.zip.ZipInputStream
+import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
 
 class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: Endpoint, override val di: DI) : ContentPlugin {
 
@@ -114,56 +117,70 @@ class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: En
         override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
             val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
             val jobUri = contentJobItem.sourceUri ?: return ProcessResult(JobStatus.FAILED)
-            val container = withContext(Dispatchers.Default) {
+            return withContext(Dispatchers.Default) {
 
-                val uri = DoorUri.parse(jobUri)
+                try {
 
-                val contentNeedUpload = !uri.isRemote()
-                val progressSize = if(contentNeedUpload) 2 else 1
+                    val uri = DoorUri.parse(jobUri)
 
-                val localUri = process.getLocalUri(uri, context, di)
-                val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
-                        ?: throw IllegalArgumentException("missing tracker url")
+                    val contentNeedUpload = !uri.isRemote()
+                    val progressSize = if (contentNeedUpload) 2 else 1
 
-                val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid) ?:
-                    Container().apply {
-                        containerContentEntryUid = contentJobItem.cjiContentEntryUid
-                        cntLastModified = System.currentTimeMillis()
-                        mimeType = supportedMimeTypes.first()
-                        containerUid = repo.containerDao.insertAsync(this)
-                        contentJobItem.cjiContainerUid = containerUid
+                    val localUri = process.getLocalUri(uri, context, di)
+                    val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
+                            ?: throw IllegalArgumentException("missing tracker url")
+
+                    val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
+                            ?: Container().apply {
+                                containerContentEntryUid = contentJobItem.cjiContentEntryUid
+                                cntLastModified = System.currentTimeMillis()
+                                mimeType = supportedMimeTypes.first()
+                                containerUid = repo.containerDao.insertAsync(this)
+                                contentJobItem.cjiContainerUid = containerUid
+                            }
+
+                    db.contentJobItemDao.updateContainer(contentJobItem.cjiUid, container.containerUid)
+
+                    val containerFolder = jobItem.contentJob?.toUri
+                            ?: defaultContainerDir.toURI().toString()
+                    val containerFolderUri = DoorUri.parse(containerFolder)
+
+                    repo.addEntriesToContainerFromZip(container.containerUid,
+                            localUri,
+                            ContainerAddOptions(storageDirUri = containerFolderUri), context)
+
+                    repo.addTorrentFileFromContainer(
+                            container.containerUid,
+                            DoorUri.parse(torrentDir.toURI().toString()),
+                            trackerUrl, containerFolderUri
+                    )
+
+                    val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
+                    containerUidFolder.mkdirs()
+                    ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
+
+                    contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
+                    progress.onProgress(contentJobItem)
+
+                    contentJobItem.cjiConnectivityNeeded = true
+                    db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
+
+                    val haveConnectivityToContinueJob = checkConnectivityToDoJob(db, jobItem)
+                    if (!haveConnectivityToContinueJob) {
+                        return@withContext ProcessResult(JobStatus.QUEUED)
                     }
 
-                db.contentJobItemDao.updateContainer(contentJobItem.cjiUid, container.containerUid)
 
-                val containerFolder = jobItem.contentJob?.toUri ?: defaultContainerDir.toURI().toString()
-                val containerFolderUri = DoorUri.parse(containerFolder)
+                    val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
+                    uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient, torrentFileBytes, endpoint)
 
-                repo.addEntriesToContainerFromZip(container.containerUid,
-                        localUri,
-                        ContainerAddOptions(storageDirUri = containerFolderUri), context)
+                    repo.containerDao.findByUid(container.containerUid)
 
-                repo.addTorrentFileFromContainer(
-                        container.containerUid,
-                        DoorUri.parse(torrentDir.toURI().toString()),
-                        trackerUrl, containerFolderUri
-                )
-
-                val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
-                containerUidFolder.mkdirs()
-                ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
-
-                contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
-                progress.onProgress(contentJobItem)
-
-                val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
-                uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient,  torrentFileBytes, endpoint)
-
-                val containerWithSize = repo.containerDao.findByUid(container.containerUid) ?: container
-
-                containerWithSize
+                    return@withContext ProcessResult(JobStatus.COMPLETE)
+                }catch (c: CancellationException){
+                    throw c
+                }
             }
-            return ProcessResult(JobStatus.COMPLETE)
         }
 
 

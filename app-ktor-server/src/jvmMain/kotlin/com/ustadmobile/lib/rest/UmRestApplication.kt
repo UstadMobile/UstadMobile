@@ -32,9 +32,9 @@ import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
 import com.ustadmobile.core.catalog.contenttype.ApacheIndexerPlugin
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
+import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.PersonAuth2
 import com.ustadmobile.lib.rest.ext.databasePropertiesFromSection
 import com.ustadmobile.lib.rest.ext.initAdminUser
@@ -182,6 +182,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                     .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                 .build()
             runBlocking {
+                db.connectivityStatusDao.insertAsync(ConnectivityStatus().apply {
+                    connectivityState = ConnectivityStatus.STATE_UNMETERED
+                    connectedOrConnecting = true
+                })
                 di.on(context).direct.instance<TorrentTracker>().start()
                 di.on(context).direct.instance<UstadTorrentManager>().start()
             }
@@ -242,10 +246,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 repo.initAdminUser(context, di)
             }
             repo
-        }
-
-        bind<ScraperManager>() with scoped(EndpointScope.Default).singleton {
-            ScraperManager(endpoint = context, di = di)
         }
 
         bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {

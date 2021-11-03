@@ -23,9 +23,6 @@ import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.ext.toDoorUri
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toFile
@@ -35,6 +32,8 @@ import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -68,7 +67,7 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
     override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, jobProgress: ContentJobProgressListener): ProcessResult {
         val contentJobItem = jobItem.contentJobItem
                 ?: throw IllegalArgumentException("missing job item")
-        withContext(Dispatchers.Default) {
+        return withContext(Dispatchers.Default) {
 
             val uri = contentJobItem.sourceUri ?: throw IllegalStateException("missing uri")
             val videoUri = DoorUri.parse(uri)
@@ -87,138 +86,159 @@ class VideoTypePluginAndroid(private var context: Any, private val endpoint: End
                     jobItem.contentJob?.params ?: "")
             val compressVideo: Boolean = params["compress"]?.toBoolean() ?: false
 
-            Napier.d(tag = VIDEO_ANDROID, message = "conversion Params compress video is $compressVideo")
+            try {
 
-            if (compressVideo) {
+                Napier.d(tag = VIDEO_ANDROID, message = "conversion Params compress video is $compressVideo")
 
-                Napier.d(tag = VIDEO_ANDROID, message = "start import for new video file $newVideo.name")
+                if (compressVideo) {
 
-                val dimensionsArray = params["dimensions"]?.split("x") ?: listOf()
-                val storageDimensions = localUri.extractVideoResolutionMetadata(context as Context)
-                val originalVideoDimensions = if (dimensionsArray.isEmpty()) {
-                    storageDimensions
+                    Napier.d(tag = VIDEO_ANDROID, message = "start import for new video file $newVideo.name")
+
+                    val dimensionsArray = params["dimensions"]?.split("x") ?: listOf()
+                    val storageDimensions = localUri.extractVideoResolutionMetadata(context as Context)
+                    val originalVideoDimensions = if (dimensionsArray.isEmpty()) {
+                        storageDimensions
+                    } else {
+                        val aspectRatio = dimensionsArray[0].toFloat() / dimensionsArray[1].toFloat()
+                        Pair(storageDimensions.first, (storageDimensions.first / aspectRatio).toInt())
+                    }
+                    val newVideoDimensions = originalVideoDimensions.fitWithin()
+
+                    Napier.d(tag = VIDEO_ANDROID, message = "width of old video is ${originalVideoDimensions.first}, height of old video is ${originalVideoDimensions.second}")
+                    Napier.d(tag = VIDEO_ANDROID, message = "width of new video is ${newVideoDimensions.first}, height of new video is ${newVideoDimensions.second}")
+
+                    val videoTarget = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, newVideoDimensions.first, newVideoDimensions.second).apply {
+                        setInteger(MediaFormat.KEY_BIT_RATE, VIDEO_BIT_RATE)
+                        setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, VIDEO_FRAME_INTERVAL)
+                        setInteger(MediaFormat.KEY_FRAME_RATE, VIDEO_FRAME_RATE)
+                        setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
+                    }
+
+                    val audioCodecInfo = MediaExtractor().useThenRelease {
+                        it.setDataSource(context as Context, localUri.uri, null)
+                        it.getFirstAudioCodecInfo()
+                    }
+
+                    val audioTarget = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC,
+                            audioCodecInfo.sampleRate, audioCodecInfo.channelCount).apply {
+                        setInteger(MediaFormat.KEY_BIT_RATE, AUDIO_BIT_RATE)
+                    }
+
+                    val videoCompleted = CompletableDeferred<Boolean>()
+
+                    val mediaTransformer = MediaTransformer(context as Context)
+                    mediaTransformer.transform(contentJobItem.cjiContentEntryUid.toString(), localUri.uri, newVideo.path,
+                            videoTarget, audioTarget, object : TransformationListener {
+                        override fun onStarted(id: String) {
+                            Napier.d(tag = VIDEO_ANDROID, message = "started transform")
+                        }
+
+                        override fun onProgress(id: String, progress: Float) {
+                            Napier.d(tag = VIDEO_ANDROID, message = "progress at value ${progress * 100}")
+                            contentJobItem.cjiItemProgress = ((progress * contentJobItem.cjiItemTotal) / progressSize).toLong()
+                            jobProgress.onProgress(contentJobItem)
+                        }
+
+                        override fun onCompleted(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
+                            Napier.d(tag = VIDEO_ANDROID, message = "completed transform")
+                            contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
+                            jobProgress.onProgress(contentJobItem)
+                            videoCompleted.complete(true)
+                        }
+
+                        override fun onCancelled(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
+                            Napier.d(tag = VIDEO_ANDROID, message = "cancelled transform")
+                            videoCompleted.complete(false)
+                        }
+
+                        override fun onError(id: String, cause: Throwable?, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
+                            videoCompleted.completeExceptionally(cause
+                                    ?: RuntimeException("error on video id: $id"))
+                        }
+
+                    }, TransformationOptions.Builder()
+                            .setGranularity(MediaTransformer.GRANULARITY_DEFAULT)
+                            .setVideoFilters(null)
+                            .build()
+                    )
+
+
+                    try {
+                        videoCompleted.await()
+                    } catch (e: Exception) {
+                        Napier.e(tag = VIDEO_ANDROID, throwable = e, message = e.message ?: "")
+                    } finally {
+                        mediaTransformer.release()
+                    }
+
+                }
+
+
+                val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
+                        ?: Container().apply {
+                            containerContentEntryUid = contentJobItem.cjiContentEntryUid
+                            cntLastModified = System.currentTimeMillis()
+                            mimeType = supportedMimeTypes.first()
+                            containerUid = repo.containerDao.insertAsync(this)
+                            contentJobItem.cjiContainerUid = containerUid
+                        }
+
+                db.contentJobItemDao.updateContainer(contentJobItem.cjiUid, container.containerUid)
+
+                val containerFolder = jobItem.contentJob?.toUri
+                        ?: defaultContainerDir.toURI().toString()
+                val containerFolderUri = DoorUri.parse(containerFolder)
+
+                if (compressVideo) {
+                    repo.addFileToContainer(container.containerUid, newVideo.toDoorUri(), newVideo.name,
+                            context,
+                            di,
+                            ContainerAddOptions(containerFolderUri))
                 } else {
-                    val aspectRatio = dimensionsArray[0].toFloat() / dimensionsArray[1].toFloat()
-                    Pair(storageDimensions.first, (storageDimensions.first / aspectRatio).toInt())
+                    repo.addContainerFromUri(container.containerUid, localUri, context, di,
+                            localUri.getFileName(context),
+                            ContainerAddOptions(containerFolderUri))
+
+                    contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
+                    jobProgress.onProgress(contentJobItem)
                 }
-                val newVideoDimensions = originalVideoDimensions.fitWithin()
+                videoTempDir.delete()
 
-                Napier.d(tag = VIDEO_ANDROID, message = "width of old video is ${originalVideoDimensions.first}, height of old video is ${originalVideoDimensions.second}")
-                Napier.d(tag = VIDEO_ANDROID, message = "width of new video is ${newVideoDimensions.first}, height of new video is ${newVideoDimensions.second}")
-
-                val videoTarget = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, newVideoDimensions.first, newVideoDimensions.second).apply {
-                    setInteger(MediaFormat.KEY_BIT_RATE, VIDEO_BIT_RATE)
-                    setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, VIDEO_FRAME_INTERVAL)
-                    setInteger(MediaFormat.KEY_FRAME_RATE, VIDEO_FRAME_RATE)
-                    setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
-                }
-
-                val audioCodecInfo = MediaExtractor().useThenRelease {
-                    it.setDataSource(context as Context, localUri.uri, null)
-                    it.getFirstAudioCodecInfo()
-                }
-
-                val audioTarget = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC,
-                        audioCodecInfo.sampleRate, audioCodecInfo.channelCount).apply {
-                    setInteger(MediaFormat.KEY_BIT_RATE, AUDIO_BIT_RATE)
-                }
-
-                val videoCompleted = CompletableDeferred<Boolean>()
-
-                val mediaTransformer = MediaTransformer(context as Context)
-                mediaTransformer.transform(contentJobItem.cjiContentEntryUid.toString(), localUri.uri, newVideo.path,
-                        videoTarget, audioTarget, object : TransformationListener {
-                    override fun onStarted(id: String) {
-                        Napier.d(tag = VIDEO_ANDROID, message = "started transform")
-                    }
-
-                    override fun onProgress(id: String, progress: Float) {
-                        Napier.d(tag = VIDEO_ANDROID, message = "progress at value ${progress * 100}")
-                        contentJobItem.cjiItemProgress = ((progress * contentJobItem.cjiItemTotal) / progressSize).toLong()
-                        jobProgress.onProgress(contentJobItem)
-                    }
-
-                    override fun onCompleted(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
-                        Napier.d(tag = VIDEO_ANDROID, message = "completed transform")
-                        contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
-                        jobProgress.onProgress(contentJobItem)
-                        videoCompleted.complete(true)
-                    }
-
-                    override fun onCancelled(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
-                        Napier.d(tag = VIDEO_ANDROID, message = "cancelled transform")
-                        videoCompleted.complete(false)
-                    }
-
-                    override fun onError(id: String, cause: Throwable?, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
-                        videoCompleted.completeExceptionally(cause
-                                ?: RuntimeException("error on video id: $id"))
-                    }
-
-                }, TransformationOptions.Builder()
-                        .setGranularity(MediaTransformer.GRANULARITY_DEFAULT)
-                        .setVideoFilters(null)
-                        .build()
+                repo.addTorrentFileFromContainer(
+                        container.containerUid,
+                        DoorUri.parse(torrentDir.toURI().toString()),
+                        trackerUrl, containerFolderUri
                 )
 
+                val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
+                containerUidFolder.mkdirs()
+                ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
 
-                try {
-                    videoCompleted.await()
-                } catch (e: Exception) {
-                    Napier.e(tag = VIDEO_ANDROID, throwable = e, message = e.message ?: "")
-                } finally {
-                    mediaTransformer.release()
+                contentJobItem.cjiConnectivityNeeded = true
+                db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
+
+                val haveConnectivityToContinueJob = checkConnectivityToDoJob(db, jobItem)
+                if (!haveConnectivityToContinueJob) {
+                    return@withContext ProcessResult(JobStatus.QUEUED)
                 }
 
+                val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
+                uploadContentIfNeeded(contentNeedUpload, contentJobItem, jobProgress, httpClient, torrentFileBytes, endpoint)
+
+                repo.containerDao.findByUid(container.containerUid)
+
+                return@withContext ProcessResult(JobStatus.COMPLETE)
+            }catch(c: CancellationException){
+
+                withContext(NonCancellable){
+                    newVideo.delete()
+                    videoTempDir.delete()
+                    localUri.toFile().delete()
+                }
+
+                throw c
             }
-
-
-            val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
-                    ?: Container().apply {
-                        containerContentEntryUid = contentJobItem.cjiContentEntryUid
-                        cntLastModified = System.currentTimeMillis()
-                        mimeType = supportedMimeTypes.first()
-                        containerUid = repo.containerDao.insertAsync(this)
-                        contentJobItem.cjiContainerUid = containerUid
-                    }
-
-            db.contentJobItemDao.updateContainer(contentJobItem.cjiUid, container.containerUid)
-
-            val containerFolder = jobItem.contentJob?.toUri
-                    ?: defaultContainerDir.toURI().toString()
-            val containerFolderUri = DoorUri.parse(containerFolder)
-
-            if (compressVideo) {
-                repo.addFileToContainer(container.containerUid, newVideo.toDoorUri(), newVideo.name,
-                        context,
-                        di,
-                        ContainerAddOptions(containerFolderUri))
-            } else {
-                repo.addContainerFromUri(container.containerUid, localUri, context, di,
-                        localUri.getFileName(context),
-                        ContainerAddOptions(containerFolderUri))
-
-                contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
-                jobProgress.onProgress(contentJobItem)
-            }
-            videoTempDir.delete()
-
-            repo.addTorrentFileFromContainer(
-                    container.containerUid,
-                    DoorUri.parse(torrentDir.toURI().toString()),
-                    trackerUrl, containerFolderUri
-            )
-
-            val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
-            containerUidFolder.mkdirs()
-            ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
-
-            val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
-            uploadContentIfNeeded(contentNeedUpload, contentJobItem, jobProgress, httpClient,  torrentFileBytes, endpoint)
-
-            repo.containerDao.findByUid(container.containerUid) ?: container
         }
-        return ProcessResult(JobStatus.COMPLETE)
     }
 
     suspend fun getEntry(doorUri: DoorUri, process: ProcessContext): MetadataResult? {

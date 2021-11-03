@@ -160,10 +160,11 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
         set(value){
             field = value
             if(value != null) {
-                /* mBinding?.entryDetailProgress?.statusText = value.toStatusString(
-                     di.direct.instance(), requireContext())*/
+                if(value.progressTitle != null){
+                    mBinding?.entryDetailProgress?.statusText = value.progressTitle.toString()
+                }
                 mBinding?.entryDetailProgress?.progress = if (value.total > 0) {
-                    (value.progress.toFloat()) / (value.total.toFloat()) * 100
+                    (value.progress.toFloat()) / (value.total.toFloat())
                 } else {
                     0f
                 }
@@ -174,7 +175,6 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
 
     override var contentJobItemStatus: Int = 0
         set(value) {
-            //Napier.d("ContentEntryDetail: Download Status = ${downloadJobItem?.djiStatus} currentDownloadJobItemStatus = $currentDownloadJobItemStatus")
             if((field == ContentJobItem.STATUS_COMPLETE) != (value == ContentJobItem.STATUS_COMPLETE))
                 activity?.invalidateOptionsMenu()
 

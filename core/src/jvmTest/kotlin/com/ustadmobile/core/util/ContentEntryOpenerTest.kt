@@ -107,11 +107,11 @@ ContentEntryOpenerTest {
             container.cntLastModified = System.currentTimeMillis()
             container.containerUid = umAppRepository.containerDao.insert(container)
 
-            var dj = DownloadJobItem()
-            dj.djiContainerUid = container.containerUid
-            dj.djiContentEntryUid = contentEntry.contentEntryUid
-            dj.djiStatus = JobStatus.STARTING
-            umAppDatabase.downloadJobItemDao.insert(dj)
+            var dj = ContentJobItem()
+            dj.cjiContainerUid = container.containerUid
+            dj.cjiContentEntryUid = contentEntry.contentEntryUid
+            dj.cjiRecursiveStatus = JobStatus.QUEUED
+            umAppDatabase.contentJobItemDao.insertJobItem(dj)
 
             ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                 true, true, false)
@@ -162,11 +162,11 @@ ContentEntryOpenerTest {
             containerEntry.ceCefUid = containerEntryFile.cefUid
             containerEntry.ceUid = umAppDatabase.containerEntryDao.insert(containerEntry)
 
-            var dj = DownloadJobItem()
-            dj.djiContainerUid = container.containerUid
-            dj.djiContentEntryUid = contentEntry.contentEntryUid
-            dj.djiStatus = JobStatus.COMPLETE
-            umAppDatabase.downloadJobItemDao.insert(dj)
+            var dj = ContentJobItem()
+            dj.cjiContainerUid = container.containerUid
+            dj.cjiContentEntryUid = contentEntry.contentEntryUid
+            dj.cjiRecursiveStatus = JobStatus.COMPLETE
+            umAppDatabase.contentJobItemDao.insertJobItem(dj)
 
             ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                     false, true, false)

@@ -57,11 +57,11 @@ abstract class ContainerDao : BaseDao<Container> {
     @JsName("findRecentContainerToBeMonitoredWithEntriesUid")
     abstract suspend fun findRecentContainerToBeMonitoredWithEntriesUid(contentEntries: List<Long>): List<Container>
 
-    @Query("Select Container.* FROM Container " +
-            "WHERE Container.containerContentEntryUid = :contentEntryUid " +
-            "ORDER BY Container.cntLastModified DESC")
+    @Query("""Select Container.* FROM Container 
+                    WHERE Container.containerContentEntryUid = :contentEntryUid
+                    ORDER BY Container.cntLastModified DESC""")
     @JsName("findFilesByContentEntryUid")
-    abstract suspend fun findFilesByContentEntryUid(contentEntryUid: Long): List<Container>
+    abstract suspend fun findContainersForContentEntryUid(contentEntryUid: Long): List<Container>
 
     @Query("""
           SELECT EXISTS(SELECT 1

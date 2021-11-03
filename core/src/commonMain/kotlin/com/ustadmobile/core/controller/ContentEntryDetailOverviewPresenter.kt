@@ -11,7 +11,6 @@ import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.io.ext.getSize
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
-import com.ustadmobile.core.networkmanager.DeletePreparationRequester
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.RateLimitedLiveData
@@ -60,8 +59,6 @@ class ContentEntryDetailOverviewPresenter(context: Any,
     private val availabilityRequestDeferred = CompletableDeferred<AvailabilityMonitorRequest>()
 
     val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
-
-    private var contentJobItemStatusLiveData: DoorLiveData<Int>? = null
 
     private var contentEntryUid = 0L
 
@@ -134,7 +131,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
                         view.canUpdate = it ?: false
                     }
 
-            contentJobItemStatusLiveData = RateLimitedLiveData(db, listOf("ContentJobItem"), 1000) {
+            val contentJobItemStatusLiveData = RateLimitedLiveData(db, listOf("ContentJobItem"), 1000) {
                 db.contentJobItemDao.findStatusForActiveContentJobItem(contentEntryUid)
             }
 
@@ -142,8 +139,8 @@ class ContentEntryDetailOverviewPresenter(context: Any,
                 db.contentJobItemDao.findProgressForActiveContentJobItem(contentEntryUid)
             }
 
-            withContext(Dispatchers.Main){
-                contentJobItemStatusLiveData?.observeWithLifecycleOwner(lifecycleOwner){
+            withContext(doorMainDispatcher()){
+                contentJobItemStatusLiveData.observeWithLifecycleOwner(lifecycleOwner){
                     val status = it ?: return@observeWithLifecycleOwner
                     view.contentJobItemStatus = status
                 }
@@ -191,7 +188,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
     }
 
     private fun openContentEntry() {
-        presenterScope.launch(Dispatchers.Main) {
+        presenterScope.launch(doorMainDispatcher()) {
             try {
                 entity?.contentEntryUid?.also {
                     contentEntryOpener.openEntry(context, it, isDownloadEnabled, false,

@@ -18,19 +18,19 @@ import com.ustadmobile.lib.util.randomString
 import kotlin.js.JsName
 import kotlin.jvm.JvmField
 
-@Database(entities = [NetworkNode::class, DownloadJobItemHistory::class,
+@Database(entities = [NetworkNode::class,
     ClazzLog::class, ClazzLogAttendanceRecord::class,
     Schedule::class, DateRange::class, HolidayCalendar::class, Holiday::class,
     ScheduledCheck::class,
     AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
-    Person::class, DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class,
+    Person::class,
     Clazz::class, ClazzEnrolment::class, LeavingReason::class, PersonCustomFieldValue::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
     ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
     Language::class, LanguageVariant::class, AccessToken::class, PersonAuth::class, Role::class,
     EntityRole::class, PersonGroup::class, PersonGroupMember::class,
     PersonPicture::class,
-    ScrapeQueueItem::class, ScrapeRun::class, ContentEntryStatus::class, ConnectivityStatus::class,
+    ScrapeQueueItem::class, ScrapeRun::class, ConnectivityStatus::class,
     Container::class, ContainerEntry::class, ContainerEntryFile::class,
     VerbEntity::class, XObjectEntity::class, StatementEntity::class,
     ContextXObjectStatementJoin::class, AgentEntity::class,
@@ -63,7 +63,7 @@ import kotlin.jvm.JvmField
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 86)
+], version = 87)
 @MinSyncVersion(60)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -103,18 +103,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("networkNodeDao")
     abstract val networkNodeDao: NetworkNodeDao
-
-    @JsName("downloadJobDao")
-    abstract val downloadJobDao: DownloadJobDao
-
-    @JsName("downloadJobItemDao")
-    abstract val downloadJobItemDao: DownloadJobItemDao
-
-    @JsName("downloadJobItemParentChildJoinDao")
-    abstract val downloadJobItemParentChildJoinDao: DownloadJobItemParentChildJoinDao
-
-    @JsName("downloadJobItemHistoryDao")
-    abstract val downloadJobItemHistoryDao: DownloadJobItemHistoryDao
 
     @JsName("personDao")
     abstract val personDao: PersonDao
@@ -184,9 +172,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("scrapeRunDao")
     abstract val scrapeRunDao: ScrapeRunDao
-
-    @JsName("contentEntryStatusDao")
-    abstract val contentEntryStatusDao: ContentEntryStatusDao
 
     @JsName("connectivityStatusDao")
     abstract val connectivityStatusDao: ConnectivityStatusDao
@@ -5211,6 +5196,37 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_85_86 = DoorMigrationStatementList(85, 86){ database ->
+                    if(database.dbType() == DoorDbType.SQLITE){
+                        listOf("ALTER TABLE ContentJobItem ADD COLUMN cjiStartTime INTEGER NOT NULL DEFAULT 0",
+                                "ALTER TABLE ContentJobItem ADD COLUMN cjiFinishTime INTEGER NOT NULL DEFAULT 0",
+                                "ALTER TABLE ContentJobItem ADD COLUMN cjiConnectivityNeeded INTEGER NOT NULL DEFAULT 1",
+                                "ALTER TABLE ContentJobItem RENAME to ContentJobItem_OLD",
+                                "CREATE TABLE IF NOT EXISTS ContentJobItem (`cjiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cjiJobUid` INTEGER NOT NULL, `sourceUri` TEXT, `cjiIsLeaf` INTEGER NOT NULL, `cjiContentEntryUid` INTEGER NOT NULL, `cjiParentContentEntryUid` INTEGER NOT NULL, `cjiContainerUid` INTEGER NOT NULL, `cjiItemProgress` INTEGER NOT NULL, `cjiItemTotal` INTEGER NOT NULL, `cjiRecursiveProgress` INTEGER NOT NULL, `cjiRecursiveTotal` INTEGER NOT NULL, `cjiStatus` INTEGER NOT NULL, `cjiRecursiveStatus` INTEGER NOT NULL, `cjiConnectivityNeeded` INTEGER NOT NULL, `cjiPluginId` INTEGER NOT NULL, `cjiAttemptCount` INTEGER NOT NULL, `cjiParentCjiUid` INTEGER NOT NULL, `cjiServerJobId` INTEGER NOT NULL, `cjiStartTime` INTEGER NOT NULL, `cjiFinishTime` INTEGER NOT NULL)",
+                                "INSERT INTO ContentJobItem (cjiUid, cjiJobUid, sourceUri, cjiIsLeaf, cjiContentEntryUid, cjiParentContentEntryUid, cjiContainerUid, cjiItemProgress, cjiItemTotal, cjiRecursiveProgress, cjiRecursiveTotal, cjiStatus, cjiRecursiveStatus, cjiConnectivityNeeded, cjiPluginId, cjiAttemptCount, cjiParentCjiUid, cjiServerJobId, cjiStartTime, cjiFinishTime) SELECT cjiUid, cjiJobUid, sourceUri, cjiIsLeaf, cjiContentEntryUid, cjiParentContentEntryUid, cjiContainerUid, cjiItemProgress, cjiItemTotal, cjiRecursiveProgress, cjiRecursiveTotal, cjiStatus, cjiRecursiveStatus, cjiConnectivityNeeded, cjiPluginId, cjiAttemptCount, cjiParentCjiUid, cjiServerJobId, cjiStartTime, cjiFinishTime FROM ContentJobItem_OLD",
+                                "DROP TABLE ContentJobItem_OLD",
+                                "ALTER TABLE ContentJob ADD COLUMN cjIsMeteredAllowed INTEGER NOT NULL DEFAULT 0",
+                                "CREATE INDEX IF NOT EXISTS `index_ContentJobItem_cjiContentEntryUid_cjiFinishTime` ON ContentJobItem (`cjiContentEntryUid`, `cjiFinishTime`)"
+                        )
+                    }else{
+                        listOf("ALTER TABLE ContentJobItem ADD COLUMN cjiStartTime BIGINT NOT NULL DEFAULT 0",
+                                "ALTER TABLE ContentJobItem ADD COLUMN cjiFinishTime INTEGER NOT NULL DEFAULT 0",
+                                "ALTER TABLE ContentJob ADD COLUMN cjIsMeteredAllowed BOOL NOT NULL DEFAULT 0",
+                                "ALTER TABLE ContentJobItem ADD COLUMN cjiConnectivityNeeded BOOL NOT NULL DEFAULT 1",
+                                "ALTER TABLE ContentJobItem DROP COLUMN cjiConnectivityAcceptable",
+                                "CREATE INDEX index_ContentJobItem_cjiContentEntryUid_cjiFinishTime ON ContentJobItem (cjiContentEntryUid, cjiFinishTime)"
+                        )
+                    }
+        }
+
+        val MIGRATION_86_87 = DoorMigrationStatementList(86, 87) { database ->
+            listOf("DROP TABLE IF EXISTS DownloadJob",
+                    "DROP TABLE IF EXISTS DownloadJobItem",
+                    "DROP TABLE IF EXISTS DownloadJobItemHistory",
+                    "DROP TABLE IF EXISTS DownloadJobItemParentChildJoin",
+                    "DROP TABLE IF EXISTS ContentEntryStatus")
+        }
+
 
         fun migrationList(nodeId: Int) = listOf<DoorMigration>(
             MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
@@ -5226,7 +5242,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             MIGRATION_72_73, MIGRATION_73_74, MIGRATION_74_75, MIGRATION_75_76,
             MIGRATION_76_77, MIGRATION_77_78, MIGRATION_78_79, MIGRATION_78_79,
             MIGRATION_79_80, MIGRATION_80_81, MIGRATION_81_82, MIGRATION_82_83,
-                MIGRATION_84_85
+                MIGRATION_84_85, MIGRATION_85_86, MIGRATION_86_87
         )
 
         internal fun migrate67to68(nodeId: Int)= DoorMigrationSync(67, 68) { database ->
