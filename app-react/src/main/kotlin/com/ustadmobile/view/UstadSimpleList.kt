@@ -5,6 +5,7 @@ import com.ccfraser.muirwik.components.list.alignItems
 import com.ccfraser.muirwik.components.list.mList
 import com.ccfraser.muirwik.components.list.mListItem
 import com.ustadmobile.core.controller.UstadBaseController
+import com.ustadmobile.core.util.OneToManyJoinEditListener
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.horizontalList
 import com.ustadmobile.util.StyleManager.listComponentContainer
@@ -35,6 +36,8 @@ interface ListProps<T>: RProps {
     var mainList: Boolean
 
     var presenter: UstadBaseController<*>
+
+    var listener: OneToManyJoinEditListener<T>
 }
 
 data class CreateNewItem(var visible: Boolean = false, var labelId: Int = 0, var onClickCreateNew: (() -> Unit)? = null)
