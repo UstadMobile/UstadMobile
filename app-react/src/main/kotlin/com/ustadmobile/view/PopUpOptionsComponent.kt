@@ -12,10 +12,10 @@ import com.ccfraser.muirwik.components.list.mListItemAvatar
 import com.ccfraser.muirwik.components.list.mListItemText
 import com.ccfraser.muirwik.components.mAvatar
 import com.ccfraser.muirwik.components.mIcon
+import com.ccfraser.muirwik.components.styles.Breakpoint
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import kotlinx.css.LinearDimension
-import kotlinx.css.pc
 import kotlinx.css.width
 import react.*
 import styled.css
@@ -41,13 +41,13 @@ class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, RSta
     override fun RBuilder.render() {
         mDialog(showDialog, onClose = { _, _ ->
             handleDialogClosed()
-        }) {
+        },fullWidth = true, maxWidth = Breakpoint.sm) {
             if(props.title != null){
                 mDialogTitle("${props.title}")
             }
             mDialogContent {
                 css {
-                    width = 25.pc
+                    width = LinearDimension("100%")
                 }
                 styledDiv {
                     css {

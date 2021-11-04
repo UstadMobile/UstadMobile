@@ -24,7 +24,7 @@ class ReportListComponent(mProps: RProps):  UstadListComponent<Report, Report>(m
 
     override fun onCreateView() {
         super.onCreateView()
-        createNewTextId = MessageID.create_a_new_report
+        createNewText = getString(MessageID.create_a_new_report)
         fabManager?.text = getString(MessageID.report)
         mPresenter = ReportListPresenter(this, arguments, this, di, this)
         mPresenter?.onCreate(mapOf())

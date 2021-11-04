@@ -12,6 +12,6 @@ class PlaceHolderComponent(props: RProps): RComponent<RProps,RState>(props) {
         styledDiv {
             +"${getViewNameFromUrl()}"
         }
-        console.log("hello")
+
     }
 }

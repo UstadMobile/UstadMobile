@@ -21,6 +21,7 @@ import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.personDetailComponentActionIcon
 import com.ustadmobile.util.StyleManager.personDetailComponentActions
 import com.ustadmobile.util.ext.standardFormat
+import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.*
 import kotlinx.css.display
 import kotlinx.css.marginTop
@@ -153,12 +154,15 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
                                 }
 
                                 umItem(MGridSize.cells12){
+                                    if(entity?.dateOfBirth ?: 0 > 0)
                                     createInformation("event",
-                                        Date(entity?.dateOfBirth ?: 0).standardFormat(),
+                                        entity?.dateOfBirth.toDate().standardFormat(),
                                         getString(MessageID.birthday))
+
                                     createInformation(null,
                                         getString(GENDER_MESSAGE_ID_MAP[entity?.gender] ?: 0),
                                         getString(MessageID.field_person_gender))
+
                                     if(!entity?.personOrgId.isNullOrBlank()){
                                         createInformation("badge", entity?.personOrgId, getString(MessageID.organization_id))
                                     }
@@ -179,11 +183,11 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
                                 }
 
 
-                                if(classList != null){
+                                if(classList != null && classList?.isNotEmpty() == true){
 
                                     umItem(MGridSize.cells12){
-
                                         createListSectionTitle(getString(MessageID.classes))
+
                                         classList?.let { clazzes ->
                                             child(ClazzEnrolmentWithClazzSimpleListComponent::class){
                                                 attrs.entries = clazzes

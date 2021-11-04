@@ -29,6 +29,9 @@ import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.errorTextClass
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.util.ext.toDate
+import com.ustadmobile.view.components.MDateTimePickerType
+import com.ustadmobile.view.components.mDateTimePicker
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
@@ -290,21 +293,22 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
 
                     umGridContainer(MGridSpacing.spacing4) {
                         umItem(MGridSize.cells12,MGridSize.cells6 ) {
-                            mTextField(label = "${dobLabel.text}",
-                                value = entity?.lastName,
+
+                            mDateTimePicker(
+                                label = "${dobLabel.text}",
+                                ruleSet = defaultFullWidth,
                                 error = dobLabel.error,
-                                disabled = !fieldsEnabled,
                                 helperText = dobLabel.errorText,
-                                variant = MFormControlVariant.outlined,
-                                onChange = {
-                                    it.persist()
+                                value = entity?.dateOfBirth.toDate(),
+                                inputVariant = MFormControlVariant.outlined,
+                                pickerType = MDateTimePickerType.date,
+                                onChange = { mills, utc ->
                                     setState {
-                                        entity?.lastName = it.targetInputValue
+                                        entity?.dateOfBirth = mills
                                         dateOfBirthError = null
                                     }
-                                }){
-                                css(defaultFullWidth)
-                            }
+                                })
+
                         }
 
                         umItem(MGridSize.cells12,MGridSize.cells6 ) {

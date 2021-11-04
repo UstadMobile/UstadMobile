@@ -84,7 +84,7 @@ class ClazzMemberListComponent(mProps: RProps):UstadListComponent<PersonWithClaz
 
     override fun onCreateView() {
         super.onCreateView()
-        createNewTextId = MessageID.add_a_teacher
+        createNewText = getString(MessageID.add_a_teacher)
         filterByClazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
         mPresenter = ClazzMemberListPresenter(this, arguments, this, di, this)
         mPresenter?.onCreate(mapOf())

@@ -1,27 +1,24 @@
 package com.ustadmobile.view
 
 import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.button.MIconButtonSize
-import com.ccfraser.muirwik.components.button.mIconButton
 import com.ccfraser.muirwik.components.form.MFormControlVariant
 import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
-import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ObserverFnWrapper
-import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.alignTextToStart
+import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
+import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.lib.db.entities.ScopedGrantAndName
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.Util.ASSET_ENTRY
-import com.ustadmobile.util.ext.*
+import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.components.MDateTimePickerType
 import com.ustadmobile.view.components.mDateTimePicker
 import com.ustadmobile.view.ext.*
@@ -30,7 +27,6 @@ import react.RProps
 import react.setState
 import styled.css
 import styled.styledDiv
-import kotlin.js.Date
 
 class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCalendarAndSchool>(mProps),
     ClazzEdit2View {
@@ -224,7 +220,7 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
 
                     mPresenter?.let { presenter ->
                         scheduleList?.let { schedules ->
-                            renderSchedules(presenter, schedules, createNewItem){
+                            renderSchedules(presenter.scheduleOneToManyJoinListener, schedules, createNewItem){
                                 mPresenter?.scheduleOneToManyJoinListener?.onClickEdit(it)
                             }
                         }
@@ -240,9 +236,7 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
                         variant = MFormControlVariant.outlined,
                         onChange = {
                             it.persist()
-                            setState {
-                                //entity?.clazzFeatures = it.targetInputValue.toLong()
-                            }
+                            setState {}
                         }){
                         attrs.asDynamic().onClick = {
                             mPresenter?.handleClickSchool()
@@ -320,7 +314,8 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
                                 mPresenter?.scopedGrantOneToManyHelper?.onClickNew()
                             }
 
-                            renderScopedGrants(presenter, scopeList, newItem){ scope ->
+                            renderScopedGrants(presenter.scopedGrantOneToManyHelper, scopeList,
+                                newItem){ scope ->
                                 mPresenter?.scopedGrantOneToManyHelper?.onClickEdit(scope)
                             }
                         }
@@ -339,78 +334,4 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
         entity = null
     }
 
-}
-
-class ScopeGrantListComponent(mProps: ListProps<ScopedGrantAndName>): UstadSimpleList<ListProps<ScopedGrantAndName>>(mProps){
-
-    override fun RBuilder.renderListItem(item: ScopedGrantAndName) {
-        val showDeleteIcon = item.scopedGrant?.sgFlags?.hasFlag(ScopedGrant.FLAG_NO_DELETE) == true
-        val permissionList = permissionListText(systemImpl,Clazz.TABLE_ID,
-            item.scopedGrant?.sgPermissions ?: 0)
-        val listener = (props.presenter as ClazzEdit2Presenter).scopedGrantOneToManyHelper
-        if(showDeleteIcon){
-            createItemWithIconTitleDescriptionAndIconBtn("admin_panel_settings",
-                "delete",item.name, permissionList){
-                listener.onClickDelete(item)
-            }
-        }else{
-            createItemWithIconTitleAndDescription("admin_panel_settings",
-                item.name, permissionList)
-        }
-    }
-
-}
-
-fun RBuilder.renderScopedGrants(presenter: UstadEditPresenter<*,*>,
-                             scopes: List<ScopedGrantAndName>,
-                             createNewItem: CreateNewItem = CreateNewItem(),
-                             onEntryClicked: ((ScopedGrantAndName) -> Unit)? = null) = child(ScopeGrantListComponent::class) {
-    attrs.entries = scopes
-    attrs.onEntryClicked = onEntryClicked
-    attrs.createNewItem = createNewItem
-    attrs.presenter = presenter
-}
-
-class ScheduleListComponent(mProps: ListProps<Schedule>): UstadSimpleList<ListProps<Schedule>>(mProps){
-
-    override fun RBuilder.renderListItem(item: Schedule) {
-        umGridContainer {
-            val frequencyMessageId = ScheduleEditPresenter.FrequencyOption.values()
-                .firstOrNull { it.optionVal == item.scheduleFrequency }?.messageId ?: MessageID.None
-            val dayMessageId = ScheduleEditPresenter.DayOptions.values()
-                .firstOrNull { it.optionVal == item.scheduleDay }?.messageId ?: MessageID.None
-
-            val scheduleDays = "${systemImpl.getString(frequencyMessageId, this)} - ${systemImpl.getString(dayMessageId, this)}"
-
-            val startEndTime = "${Date(item.sceduleStartTime).formattedInHoursAndMinutes()} " +
-                    "- ${Date(item.scheduleEndTime).formattedInHoursAndMinutes()}"
-
-            umItem(MGridSize.cells10, MGridSize.cells11){
-                mTypography("$scheduleDays $startEndTime",
-                    variant = MTypographyVariant.body2,
-                    color = MTypographyColor.textPrimary,
-                    gutterBottom = true){
-                    css(alignTextToStart)
-                }
-            }
-
-            umItem(MGridSize.cells2, MGridSize.cells1){
-                mIconButton("delete", size = MIconButtonSize.small, onClick = {
-                    val joinEditListener = (props.presenter as ClazzEdit2Presenter).scheduleOneToManyJoinListener
-                    joinEditListener.onClickDelete(item)
-                })
-            }
-        }
-    }
-
-}
-
-fun RBuilder.renderSchedules(presenter: UstadEditPresenter<*,*>,
-                             schedules: List<Schedule>,
-                             createNewItem: CreateNewItem = CreateNewItem(),
-                             onEntryClicked: ((Schedule) -> Unit)? = null) = child(ScheduleListComponent::class) {
-    attrs.entries = schedules
-    attrs.onEntryClicked = onEntryClicked
-    attrs.createNewItem = createNewItem
-    attrs.presenter = presenter
 }

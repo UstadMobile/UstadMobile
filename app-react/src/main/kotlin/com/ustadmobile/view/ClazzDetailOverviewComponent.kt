@@ -17,7 +17,6 @@ import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
-import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.Util.copyToClipboard
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.formattedInHoursAndMinutes
@@ -26,7 +25,6 @@ import com.ustadmobile.view.ext.createInformation
 import com.ustadmobile.view.ext.createListSectionTitle
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
-import kotlinx.css.display
 import react.RBuilder
 import react.RProps
 import react.setState
@@ -125,17 +123,15 @@ class ClazzDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ClazzWi
                 createInformation("event", entity?.clazzHolidayCalendar?.umCalendarName)
 
 
-                umItem(MGridSize.cells12){
-                    css{
-                        display = displayProperty(!schedules.isNullOrEmpty())
+                if(!schedules.isNullOrEmpty()){
+                    umItem(MGridSize.cells12){
+                        createListSectionTitle(getString(MessageID.schedule))
                     }
-                    createListSectionTitle(getString(MessageID.schedule))
 
-                }
-
-                schedules?.let { schedules ->
-                    child(SchedulesComponent::class) {
-                        attrs.entries = schedules
+                    schedules?.let { schedules ->
+                        child(SchedulesComponent::class) {
+                            attrs.entries = schedules
+                        }
                     }
                 }
 
