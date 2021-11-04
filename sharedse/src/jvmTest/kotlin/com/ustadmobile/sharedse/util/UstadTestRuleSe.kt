@@ -18,9 +18,9 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -45,6 +45,7 @@ import java.io.File
 import java.nio.file.Files
 import javax.naming.InitialContext
 import kotlin.random.Random
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 
 fun DI.onActiveAccount(): DI {
     val accountManager: UstadAccountManager by instance()
@@ -101,7 +102,7 @@ class UstadTestRule: TestWatcher() {
                 UstadAccountManager(instance(), Any(), di)
             }
             bind<NodeIdAndAuth>() with scoped(endpointScope!!).singleton {
-                NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
+                NodeIdAndAuth(Random.nextLong(), randomUuid().toString())
             }
 
             bind<UmAppDatabase>(tag = TAG_DB) with scoped(endpointScope!!).singleton {
@@ -111,7 +112,7 @@ class UstadTestRule: TestWatcher() {
                 spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
                     .addSyncCallback(nodeIdAndAuth)
                     .build()
-                    .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId)
+                    .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
                     .also { it.preload() })
             }
 

@@ -6,10 +6,10 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.util.randomString
@@ -17,10 +17,11 @@ import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import org.kodein.di.*
 import javax.naming.InitialContext
 import kotlin.random.Random
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 
 fun DI.Builder.bindDbAndRepoWithEndpoint(endpointScope: EndpointScope, clientMode: Boolean = true) {
     bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
-        NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
+        NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
     }
 
     bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
@@ -30,7 +31,7 @@ fun DI.Builder.bindDbAndRepoWithEndpoint(endpointScope: EndpointScope, clientMod
         spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
             .addSyncCallback(nodeIdAndAuth)
             .build()
-            .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId)
+            .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
             .also { it.preload() })
     }
 
