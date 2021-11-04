@@ -52,7 +52,7 @@ class SchoolListComponent(mProps: RProps) : UstadListComponent<School, SchoolWit
         fabManager?.text = getString(MessageID.school)
         mPresenter = SchoolListPresenter(this, arguments,
             this, di, this)
-        createNewTextId = MessageID.add_a_new_school
+        createNewText = getString(MessageID.add_a_new_school)
         showCreateNewItem = true
         mPresenter?.onCreate(mapOf())
     }

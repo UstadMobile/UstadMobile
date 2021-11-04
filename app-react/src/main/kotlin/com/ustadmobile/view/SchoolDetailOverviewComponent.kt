@@ -9,7 +9,6 @@ import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
-import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.contentAfterIconMarginLeft
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -19,7 +18,6 @@ import com.ustadmobile.util.StyleManager.umItemWithIconAndText
 import com.ustadmobile.util.Util
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.*
-import kotlinx.css.display
 import kotlinx.css.paddingBottom
 import kotlinx.css.paddingTop
 import kotlinx.css.px
@@ -120,22 +118,17 @@ class SchoolDetailOverviewComponent(mProps: RProps): UstadDetailComponent<School
                 createInformation("language", entity?.schoolTimeZone,
                     getString(MessageID.timezone))
 
-                umItem(MGridSize.cells12){
-                    css{
-                        display = StyleManager.displayProperty(!schoolClazzList.isNullOrEmpty())
+                if(!schoolClazzList.isNullOrEmpty()){
+                    umItem(MGridSize.cells12){
+                        createListSectionTitle(getString(MessageID.classes))
                     }
-                    createListSectionTitle(getString(MessageID.classes))
 
-                }
-
-                schoolClazzList?.let { classes ->
-                    child(SchoolClazzesComponent::class) {
-                        attrs.entries = classes
-                        mPresenter?.let { presenter ->
-                            attrs.presenter = presenter
-                        }
-                        attrs.onEntryClicked = { clazz->
-                            mPresenter?.handleClickClazz(clazz)
+                    schoolClazzList?.let { classes ->
+                        child(SchoolClazzesComponent::class) {
+                            attrs.entries = classes
+                            attrs.onEntryClicked = { clazz->
+                                mPresenter?.handleClickClazz(clazz)
+                            }
                         }
                     }
                 }

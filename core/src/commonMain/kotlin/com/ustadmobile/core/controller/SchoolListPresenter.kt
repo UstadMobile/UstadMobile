@@ -4,11 +4,13 @@ import com.ustadmobile.core.db.dao.SchoolDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: SchoolListView,
@@ -49,7 +51,8 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
 
     override fun handleClickEntry(entry: School) {
         when(mListMode) {
-            ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
+            ListViewMode.PICKER -> finishWithResult(safeStringify(di,
+                ListSerializer(School.serializer()), listOf(entry)))
             ListViewMode.BROWSER -> systemImpl.go(SchoolDetailView.VIEW_NAME,
                     mapOf(UstadView.ARG_ENTITY_UID to entry.schoolUid.toString()), context)
         }

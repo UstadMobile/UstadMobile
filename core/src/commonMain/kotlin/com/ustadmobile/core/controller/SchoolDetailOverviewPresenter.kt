@@ -7,6 +7,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -64,6 +65,7 @@ class SchoolDetailOverviewPresenter(context: Any, arguments: Map<String, String>
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
+        Napier.d(account?.personUid.toString())
         return db.schoolDao.personHasPermissionWithSchool(account?.personUid ?: 0L,
                 arguments[ARG_ENTITY_UID]?.toLong() ?: 0L, Role.PERMISSION_SCHOOL_UPDATE)
     }

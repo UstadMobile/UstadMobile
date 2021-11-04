@@ -19,6 +19,7 @@ import com.ustadmobile.core.controller.SchoolMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.observeResult
+import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.core.view.SchoolMemberListView
 import com.ustadmobile.core.view.UstadView
@@ -58,17 +59,15 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
             PendingSchoolMemberListRecyclerAdapter? = null
 
 
-    private val pendingStudentsObserver = object
-        : Observer<PagedList<SchoolMemberWithPerson>> {
-        override fun onChanged(t: PagedList<SchoolMemberWithPerson>?) {
-            mPendingStudentListRecyclerViewAdapter?.submitList(t)
-            mPendingStudentsHeaderRecyclerViewAdapter?.headerLayoutId = if (t != null && !t.isEmpty()) {
+    private val pendingStudentsObserver =
+        Observer<PagedList<SchoolMemberWithPerson>> {
+            mPendingStudentListRecyclerViewAdapter?.submitList(it)
+            mPendingStudentsHeaderRecyclerViewAdapter?.headerLayoutId = if (it != null && !it.isEmpty()) {
                 R.layout.item_simple_list_header
             } else {
                 0
             }
         }
-    }
 
     class PendingSchoolMemberListViewHolder(val itemBinding: ItemSchoolmemberPendingListItemBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
@@ -245,9 +244,7 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
             bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL to filterBySchoolUid.toString(),
                     UstadView.ARG_CODE_TABLE to School.TABLE_ID.toString())
         }
-
-        navigateToPickEntityFromList(Person::class.java, R.id.person_list_dest,
-                bundle, addPersonKeyName, true)
+        mPresenter?.handleAddMemberClicked(bundle.toStringMap(), addPersonKeyName)
     }
 
     override var pendingStudentList: DataSource.Factory<Int, SchoolMemberWithPerson>? = null

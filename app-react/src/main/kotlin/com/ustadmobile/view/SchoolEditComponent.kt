@@ -9,13 +9,13 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.SchoolEditView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.ObserverFnWrapper
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
+import com.ustadmobile.lib.db.entities.ScopedGrantAndName
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.Util.ASSET_ENTRY
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.*
 import kotlinx.html.InputType
 import react.RBuilder
@@ -35,9 +35,9 @@ class SchoolEditComponent (mProps: RProps): UstadEditComponent<SchoolWithHoliday
     override val viewName: String
         get() = SchoolEditView.VIEW_NAME
 
-    private var nameLabel = FieldLabel(text = getString(MessageID.class_name))
+    private var nameLabel = FieldLabel(text = getString(MessageID.name))
 
-    private var descLabel = FieldLabel(text = getString(MessageID.class_description))
+    private var descLabel = FieldLabel(text = getString(MessageID.description))
 
     private var timeZoneLabel = FieldLabel(text = getString(MessageID.timezone))
 
@@ -232,12 +232,11 @@ class SchoolEditComponent (mProps: RProps): UstadEditComponent<SchoolWithHoliday
 
                     mPresenter?.let { presenter ->
                         scopeList?.let { scopeList ->
-
                             val newItem = CreateNewItem(true, MessageID.add_person_or_group){
                                 mPresenter?.scopedGrantOneToManyHelper?.onClickNew()
                             }
 
-                            renderScopedGrants(presenter, scopeList, newItem){ scope ->
+                            renderScopedGrants(presenter.scopedGrantOneToManyHelper, scopeList, newItem){ scope ->
                                 mPresenter?.scopedGrantOneToManyHelper?.onClickEdit(scope)
                             }
                         }
