@@ -2,6 +2,7 @@ package com.ustadmobile.core.account
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.safeParse
@@ -209,6 +210,9 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
         val endpointRepo: UmAppDatabase = di.on(endpoint).direct
             .instance(tag = DoorTag.TAG_REPO)
 
+        val clientId: ClientId = di.on(endpoint).direct
+            .instance(tag = UstadMobileSystemCommon.TAG_CLIENT_ID)
+
         if(endpoint !in endpointsWithActiveSessions) {
             addActiveEndpoint(endpoint, commit = false)
             commitActiveEndpointsToPref()
@@ -222,7 +226,7 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
 
 
         val userSession = UserSession().apply {
-            usClientNodeId = (endpointRepo as DoorDatabaseSyncRepository).clientId
+            usClientNodeId = clientId.id
             usPersonUid = person.personUid
             usStartTime = systemTimeInMillis()
             usSessionType = UserSession.TYPE_STANDARD
@@ -240,8 +244,8 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
             commitActiveEndpointsToPref()
 
         withContext(doorMainDispatcher()) {
-            val repo: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
-            (repo as DoorDatabaseRepository).addSyncListener(UserSession::class,
+            val repo: DoorDatabaseRepository = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
+            repo.addSyncListener(UserSession::class,
                 this@UstadAccountManager)
             userSessionLiveDataMediator.addEndpoint(endpoint)
         }
@@ -253,8 +257,8 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
             commitActiveEndpointsToPref()
 
         withContext(doorMainDispatcher()) {
-            val repo: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
-            (repo as DoorDatabaseRepository).removeSyncListener(UserSession::class,
+            val repo: DoorDatabaseRepository = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
+            repo.removeSyncListener(UserSession::class,
                 this@UstadAccountManager)
             userSessionLiveDataMediator.removeEndpoint(endpoint)
         }
@@ -304,15 +308,15 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
     suspend fun login(username: String, password: String, endpointUrl: String,
         maxDateOfBirth: Long = 0L): UmAccount = withContext(Dispatchers.Default){
         val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_REPO)
-        val nodeId = (repo as? DoorDatabaseSyncRepository)?.clientId
-                ?: throw IllegalStateException("Could not open repo for endpoint $endpointUrl")
+        val clientId: ClientId = di.on(Endpoint(endpointUrl)).direct
+            .instance(tag = UstadMobileSystemCommon.TAG_CLIENT_ID)
 
         val loginResponse = httpClient.post<HttpResponse> {
             url("${endpointUrl.removeSuffix("/")}/auth/login")
             parameter("username", username)
             parameter("password", password)
             parameter("maxDateOfBirth", maxDateOfBirth)
-            header("X-nid", nodeId)
+            header("X-nid", clientId.id)
             expectSuccess = false
         }
 

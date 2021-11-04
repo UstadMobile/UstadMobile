@@ -160,7 +160,7 @@ actual open class UstadMobileSystemImpl(private val xppFactory: XmlPullParserFac
 
 
     actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return listOf()
     }
 
     /**

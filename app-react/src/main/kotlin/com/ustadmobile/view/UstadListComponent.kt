@@ -76,7 +76,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
             }
         }
 
-    var createNewTextId: Int = MessageID.add_new_content
+    var createNewText: String = getString(MessageID.add_new_content)
         get() = field
         set(value) {
             field = value
@@ -148,8 +148,8 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
         set(value) {
             setState {
                 field = value
+                showCreateNewItem = value == ListViewAddMode.FIRST_ITEM
             }
-            showCreateNewItem = value == ListViewAddMode.FIRST_ITEM
             window.setTimeout({
                 fabManager?.visible = value == ListViewAddMode.FAB
             }, STATE_CHANGE_DELAY)
@@ -241,7 +241,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                     attrs.asDynamic().onClick = {
                         handleClickCreateNewEntry()
                     }
-                    createCreateNewItem(getString(createNewTextId))
+                    createCreateNewItem(createNewText)
                 }
             }else {
                 mListItem {
@@ -252,7 +252,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                     attrs.onClick = {
                         handleClickCreateNewEntry()
                     }
-                    createCreateNewItem(getString(createNewTextId))
+                    createCreateNewItem(createNewText)
                 }
             }
         }
