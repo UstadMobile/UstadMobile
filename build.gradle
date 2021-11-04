@@ -99,7 +99,7 @@ ext {
     version_npm_pbkdf2 = "^3.1.2"
     version_npm_google_charts = "^3.0.15"
 
-    version_door = "0.0.32j"
+    version_door = "0.0.32n"
     version_xmlpullparserkmp = '0.0.19'
 
     version_gradle_buildconfig_plugin = "1.1.7"
@@ -143,7 +143,7 @@ ext {
     version_postgres_jdbc = "42.2.20"
     version_log4j = "2.8.2"
     version_exo_player = "2.14.0"
-    version_napier = "1.5.0"
+    version_napier = "2.1.0"
     version_browser_proxy = "2.1.5"
     version_logback = "1.0.13"
     version_kodein_di = "7.6.0"
