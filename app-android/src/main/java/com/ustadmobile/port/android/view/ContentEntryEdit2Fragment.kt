@@ -9,9 +9,6 @@ import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.AdapterView
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.ActivityResultRegistry
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.fragment.findNavController
@@ -30,17 +27,11 @@ import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ContentEntryEdit2View
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.util.ext.*
 import com.ustadmobile.port.android.view.ContentEntryAddOptionsBottomSheetFragment.Companion.ARG_SHOW_ADD_FOLDER
-import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 
 interface ContentEntryEdit2FragmentEventHandler {
@@ -213,8 +204,7 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
     }
 
     override fun handleClickLanguage() {
-        onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(Language::class.java, R.id.language_list_dest)
+        mPresenter?.handleClickLanguage()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -257,13 +247,6 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
         mPresenter = ContentEntryEdit2Presenter(requireContext(), arguments.toStringMap(), this,
                 viewLifecycleOwner, di).withViewLifecycle()
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
-                Language::class.java) {
-            val language = it.firstOrNull() ?: return@observeResult
-            entity?.language = language
-            entity?.primaryLanguageUid = language.langUid
-        }
-
         viewLifecycleOwner.lifecycle.addObserver(viewLifecycleObserver)
 
     }

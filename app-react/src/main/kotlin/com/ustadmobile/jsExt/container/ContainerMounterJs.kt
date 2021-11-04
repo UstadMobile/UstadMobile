@@ -1,4 +1,4 @@
-package com.ustadmobile.mocks.container
+package com.ustadmobile.jsExt.container
 
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContainerMounter

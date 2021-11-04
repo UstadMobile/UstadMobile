@@ -26,6 +26,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
+import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -175,6 +176,16 @@ class ContentEntryEdit2Presenter(context: Any,
             requireSavedStateHandle()[SAVED_STATE_KEY_METADATA] = null
         }
 
+        observeSavedStateResult(
+            SAVEDSTATE_KEY_LANGUAGE, ListSerializer(Language.serializer()),
+            Language::class) {
+            val language = it.firstOrNull() ?: return@observeSavedStateResult
+            entity?.language = language
+            entity?.primaryLanguageUid = language.langUid
+            view.entity = entity
+            requireSavedStateHandle()[SAVEDSTATE_KEY_LANGUAGE] = null
+        }
+
 
     }
 
@@ -212,6 +223,7 @@ class ContentEntryEdit2Presenter(context: Any,
                 } else {
                     repo.contentEntryDao.updateAsync(entity)
                 }
+                Napier.d("Hit here")
 
                 val language = entity.language
                 if (language != null && language.langUid == 0L) {
@@ -392,9 +404,21 @@ class ContentEntryEdit2Presenter(context: Any,
         )
     }
 
+    fun handleClickLanguage(){
+        navigateForResult(
+            NavigateForResultOptions(this,
+                null,
+                LanguageListView.VIEW_NAME, Language::class,
+                Language.serializer(),
+                SAVEDSTATE_KEY_LANGUAGE)
+        )
+    }
+
     companion object {
 
         const val SAVED_STATE_KEY_URI = "URI"
+
+        const val SAVEDSTATE_KEY_LANGUAGE = "Language"
 
         const val SAVED_STATE_KEY_METADATA = "importedMetadata"
 

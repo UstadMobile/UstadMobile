@@ -4,30 +4,47 @@ import android.os.Bundle
 import android.view.*
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentEntryImportLinkBinding
-import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter
+import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryImportLinkView
-import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
 
-class ContentEntryImportLinkFragment : UstadBaseFragment(), ContentEntryImportLinkView {
+
+class ContentEntryImportLinkFragment() : UstadEditFragment<String>(), ContentEntryImportLinkView {
 
     private var mBinding: FragmentEntryImportLinkBinding? = null
 
     private var mPresenter: ContentEntryImportLinkPresenter? = null
 
+    override val mEditPresenter: UstadEditPresenter<*, String>?
+        get() = mPresenter
+
     private var menuDoneItem: MenuItem? = null
 
-    override fun showHideProgress(show: Boolean) {
-        mBinding?.entryImportLinkTextInput?.isEnabled = show
-        menuDoneItem?.isEnabled = show
-    }
+    override var showHideProgress: Boolean = false
+        set(value) {
+            field = value
+            mBinding?.entryImportLinkTextInput?.isEnabled = value
+            menuDoneItem?.isEnabled = value
+        }
 
     override var validLink: Boolean = false
         set(value) {
             mBinding?.entryImportLinkTextInput?.isErrorEnabled = value
             mBinding?.entryImportLinkTextInput?.error = if(value) null else getString(R.string.invalid_link)
+            field = value
+        }
+    override var entity: String? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.importLink = value
+        }
+
+    override var fieldsEnabled: Boolean = false
+        get() = field
+        set(value) {
             field = value
         }
 
@@ -45,7 +62,7 @@ class ContentEntryImportLinkFragment : UstadBaseFragment(), ContentEntryImportLi
         setHasOptionsMenu(true)
 
         mPresenter = ContentEntryImportLinkPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di).withViewLifecycle()
+                this, viewLifecycleOwner, di).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toStringMap())
 
     }
@@ -53,20 +70,6 @@ class ContentEntryImportLinkFragment : UstadBaseFragment(), ContentEntryImportLi
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_done, menu)
         menuDoneItem = menu.findItem(R.id.menu_done)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.menu_done -> {
-                mPresenter?.handleClickDone(mBinding?.entryImportLinkEditText?.text.toString())
-                return super.onOptionsItemSelected(item)
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
-    override fun finishWithResult(result: ImportedContentEntryMetaData) {
-        saveResultToBackStackSavedStateHandle(listOf(result))
     }
 
 

@@ -12,6 +12,7 @@ import com.ustadmobile.util.ext.toArgumentsMap
 import react.RBuilder
 import react.RProps
 import react.RState
+import react.setState
 
 class ContentEntryListTabsComponent(mProps: RProps) :UstadBaseComponent<RProps, RState>(mProps),
     ContentEntryListTabsView {
@@ -28,21 +29,23 @@ class ContentEntryListTabsComponent(mProps: RProps) :UstadBaseComponent<RProps, 
         val defArgs = "?${ARG_PARENT_ENTRY_UID}=" +
                 "$parentUid&${ARG_DISPLAY_CONTENT_BY_OPTION}="
 
-        tabsToRender = listOf(
-            UstadTab(ContentEntryList2View.VIEW_NAME,
-                "$defArgs${ARG_DISPLAY_CONTENT_BY_PARENT}".toArgumentsMap(),
-                getString(MessageID.libraries)),
-            UstadTab(ContentEntryList2View.VIEW_NAME,
-                "$defArgs${ARG_DISPLAY_CONTENT_BY_DOWNLOADED}".toArgumentsMap(),
-                getString(MessageID.downloaded))
-        )
+        setState {
+            tabsToRender = listOf(
+                UstadTab(ContentEntryList2View.VIEW_NAME,
+                    "$defArgs${ARG_DISPLAY_CONTENT_BY_PARENT}".toArgumentsMap(),
+                    getString(MessageID.libraries)),
+                UstadTab(ContentEntryList2View.VIEW_NAME,
+                    "$defArgs${ARG_DISPLAY_CONTENT_BY_DOWNLOADED}".toArgumentsMap(),
+                    getString(MessageID.downloaded))
+            )
+        }
 
     }
 
 
     override fun RBuilder.render() {
         tabsToRender?.let {
-            renderTabs(it, false)
+            renderTabs(it, true)
         }
     }
 

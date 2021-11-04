@@ -7,7 +7,6 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.redux.ReduxAppStateManager
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxNavStackState
-import com.ustadmobile.redux.ReduxSerializationState
 import kotlinx.browser.window
 
 class NavControllerJs: UstadNavController {
@@ -39,7 +38,6 @@ class NavControllerJs: UstadNavController {
     override fun navigate(viewName: String,
                           args: Map<String, String>,
                           goOptions: UstadMobileSystemCommon.UstadGoOptions) {
-        dispatch(ReduxSerializationState(goOptions.serializer))
         navStack.add(UstadBackStackEntryJs(viewName, args))
         dispatch(ReduxNavStackState(navStack))
 

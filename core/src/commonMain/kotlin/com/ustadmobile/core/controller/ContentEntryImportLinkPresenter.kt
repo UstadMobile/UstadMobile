@@ -1,20 +1,21 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
-import com.ustadmobile.core.view.ContentEntryEdit2View
-import com.ustadmobile.core.view.ContentEntryImportLinkView
+import com.ustadmobile.core.util.safeStringify
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_IMPORTED_METADATA
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
+import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.lib.db.entities.*
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.features.*
@@ -22,64 +23,67 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 
+
 class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, String>, view: ContentEntryImportLinkView,
+                                      lifecycleOwner: DoorLifecycleOwner,
                                       di: DI) :
-        UstadBaseController<ContentEntryImportLinkView>(context, arguments, view, di) {
+    UstadEditPresenter<ContentEntryImportLinkView, String>(context, arguments, view, di, lifecycleOwner){
 
-    val accountManager: UstadAccountManager by instance()
-
-    val systemImpl: UstadMobileSystemImpl by instance()
 
     private val currentHttpClient: HttpClient by instance()
 
-    fun handleClickDone(link: String) {
+    override val persistenceMode: PersistenceMode
+        get() = PersistenceMode.JSON
+
+    override fun handleClickSave(entity: String) {
         GlobalScope.launch(doorMainDispatcher()) {
 
-            view.showHideProgress(false)
+            view.showHideProgress = false
             try {
                 currentHttpClient.post<HttpStatement>() {
                     url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
-                            "/import/validateLink"))
-                    parameter("url", link)
+                        "/import/validateLink"))
+                    parameter("url", entity)
                     expectSuccess = false
                 }.execute() {
 
                     val status = it.status
                     if (status.value != 200) {
                         view.validLink = false
-                        view.showHideProgress(true)
+                        view.showHideProgress = true
                         return@execute
                     }
 
                     val data = it.receive<ImportedContentEntryMetaData>()
-                    view.showHideProgress(true)
+                    view.showHideProgress = true
 
                     if (arguments.containsKey(ARG_RESULT_DEST_KEY)) {
-                        view.finishWithResult(data)
+                        finishWithResult(safeStringify(di, ListSerializer(ImportedContentEntryMetaData.serializer()), listOf(data)))
                     } else {
                         val args = mutableMapOf<String, String>()
-                        args.putEntityAsJson(ContentEntryEdit2View.ARG_IMPORTED_METADATA,
-                                ImportedContentEntryMetaData.serializer(), data)
+                        args.putEntityAsJson(
+                            ARG_IMPORTED_METADATA,
+                            ImportedContentEntryMetaData.serializer(), data)
                         args[ARG_POPUPTO_ON_FINISH] = ContentEntryImportLinkView.VIEW_NAME
                         args.putFromOtherMapIfPresent(arguments, ARG_LEAF)
                         args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
                         systemImpl.go(ContentEntryEdit2View.VIEW_NAME,
-                                args, context)
+                            args, context)
                     }
 
 
                 }
 
             } catch (e: Exception) {
-                view.showHideProgress(true)
+                view.showHideProgress = true
                 view.showSnackBar(systemImpl.getString(MessageID.import_link_error, context))
                 dumpException(e)
             }
         }
-
     }
 
 }
