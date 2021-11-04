@@ -69,6 +69,9 @@ class ClazzEnrolmentEditPresenterTest {
             clazzUid = repo.clazzDao.insert(this)
         }
 
+        val existingClazz = repo.clazzDao.findByUid(testClazz.clazzUid)
+        println(existingClazz)
+
         activePerson = Person().apply {
             firstNames = "Test"
             lastName = "User"
@@ -92,14 +95,14 @@ class ClazzEnrolmentEditPresenterTest {
                 presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
 
-        val initialEntity = mockView.captureLastEntityValue()!!
+        val initialEntity = mockView.captureLastEntityValue(timeoutMillis = 5000)!!
 
         initialEntity.clazzEnrolmentRole = ClazzEnrolment.ROLE_STUDENT
 
         presenter.handleClickSave(initialEntity)
 
         runBlocking {
-            repo.waitUntil(5000, listOf("ClazzEnrolmentWithClazz")) {
+            repo.waitUntil(5000, listOf("ClazzEnrolment")) {
                 runBlocking {
                     repo.clazzEnrolmentDao.findAllClazzesByPersonWithClazzAsListAsync(
                             activePerson.personUid).isNotEmpty()
@@ -148,9 +151,9 @@ class ClazzEnrolmentEditPresenterTest {
         presenter.handleClickSave(initialEntity)
 
         runBlocking {
-            repo.waitUntil(5000, listOf("ClazzEnrolment")) {
+            repo.waitUntil(120000, listOf("ClazzEnrolment")) {
                 runBlocking {
-                    repo.clazzEnrolmentDao.findByUid(testEntity.clazzEnrolmentUid)?.clazzEnrolmentDateLeft != Long.MAX_VALUE
+                    repo.clazzEnrolmentDao.findByUid(testEntity.clazzEnrolmentUid)?.clazzEnrolmentLeavingReasonUid == LeavingReason.FAMILY_PROBLEM_UID
                 }
             }
         }

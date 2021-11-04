@@ -31,7 +31,6 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import okio.Buffer
-import okio.Okio
 import okio.buffer
 import okio.source
 import org.apache.commons.io.IOUtils
@@ -77,7 +76,7 @@ class TestPrathamContentScraper {
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
-                    .addSyncCallback(nodeIdAndAuth, true)
+                    .addSyncCallback(nodeIdAndAuth)
                     .build()
                     .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true))
             }

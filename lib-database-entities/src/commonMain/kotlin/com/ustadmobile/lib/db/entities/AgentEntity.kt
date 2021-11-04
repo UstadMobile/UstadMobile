@@ -8,6 +8,20 @@ import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSON_TO_USER
 import kotlinx.serialization.Serializable
 
 @Entity
+@ReplicateEntity(tableId = AgentEntity.TABLE_ID, tracker = AgentEntityTrkr::class)
+/*
+@Triggers(arrayOf(
+    Trigger(name = "agententity_remote_insert",
+        order = Trigger.Order.INSTEAD_OF,
+        events = [Trigger.Event.INSERT],
+        sqlStatements = [
+            """
+            REPLACE INTO AgentEntity(agentUid, agentMbox,
+            """
+        ])))
+
+ */
+/*
 @SyncableEntity(tableId = AgentEntity.TABLE_ID,
     notifyOnUpdate = [
         """
@@ -39,6 +53,7 @@ import kotlinx.serialization.Serializable
            AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
         """
 )
+ */
 
 @Serializable
 class AgentEntity {
@@ -67,6 +82,7 @@ class AgentEntity {
     @LastChangedBy
     var statementLastChangedBy: Int = 0
 
+    @ReplicationVersionId
     @LastChangedTime
     var agentLct: Long = 0
 

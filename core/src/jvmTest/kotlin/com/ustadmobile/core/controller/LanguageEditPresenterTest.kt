@@ -91,7 +91,7 @@ class LanguageEditPresenterTest {
     }
 
     @Test
-    fun givenExistingLeavingReason_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
+    fun givenExistingLanguage_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
         val repo: UmAppDatabase by di.activeRepoInstance()
         val testEntity = Language().apply {
             name = "German"
@@ -111,6 +111,10 @@ class LanguageEditPresenterTest {
         presenter.handleClickSave(initialEntity)
 
         runBlocking {
+            repo.waitUntil(5000, listOf("Language")) {
+                repo.languageDao.findByUid(testEntity.langUid)?.name == "Russian"
+            }
+
             val reason = repo.languageDao.findByUidAsync(testEntity.langUid)
             Assert.assertEquals("Name was saved and updated",
                     "Russian", reason!!.name)

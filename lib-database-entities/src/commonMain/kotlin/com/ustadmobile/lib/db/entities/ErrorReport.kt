@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 
 @Entity
-@SyncableEntity(tableId = 419)
+//@SyncableEntity(tableId = 419)
 class ErrorReport {
 
     @PrimaryKey(autoGenerate = true)

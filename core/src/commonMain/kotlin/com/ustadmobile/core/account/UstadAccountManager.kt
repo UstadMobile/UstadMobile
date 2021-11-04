@@ -222,7 +222,7 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
 
 
         val userSession = UserSession().apply {
-            usClientNodeId = (endpointRepo as DoorDatabaseSyncRepository).clientId
+            usClientNodeId = (endpointRepo as DoorDatabaseRepository).config.nodeId
             usPersonUid = person.personUid
             usStartTime = systemTimeInMillis()
             usSessionType = UserSession.TYPE_STANDARD
@@ -304,7 +304,7 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
     suspend fun login(username: String, password: String, endpointUrl: String,
         maxDateOfBirth: Long = 0L): UmAccount = withContext(Dispatchers.Default){
         val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_REPO)
-        val nodeId = (repo as? DoorDatabaseSyncRepository)?.clientId
+        val nodeId = (repo as? DoorDatabaseRepository)?.config?.nodeId
                 ?: throw IllegalStateException("Could not open repo for endpoint $endpointUrl")
 
         val loginResponse = httpClient.post<HttpResponse> {

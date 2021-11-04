@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-@SyncableEntity(tableId = TABLE_ID)
+//@SyncableEntity(tableId = TABLE_ID)
 open class PersonParentJoin {
 
     @PrimaryKey(autoGenerate = true)

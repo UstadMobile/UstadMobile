@@ -6,7 +6,7 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = Comments.TABLE_ID)
+//@SyncableEntity(tableId = Comments.TABLE_ID)
 @Serializable
 open class Comments() {
 

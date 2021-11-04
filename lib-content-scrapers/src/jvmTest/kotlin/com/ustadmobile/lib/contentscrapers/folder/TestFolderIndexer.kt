@@ -58,7 +58,7 @@ class TestFolderIndexer {
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 spy(
                     DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
-                    .addSyncCallback(nodeIdAndAuth, true)
+                    .addSyncCallback(nodeIdAndAuth)
                     .build()
                     .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true))
             }

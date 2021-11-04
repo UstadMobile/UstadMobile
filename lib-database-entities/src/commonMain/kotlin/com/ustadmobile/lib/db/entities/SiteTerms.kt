@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-@SyncableEntity(tableId = SiteTerms.TABLE_ID)
+//@SyncableEntity(tableId = SiteTerms.TABLE_ID)
 open class SiteTerms {
 
     @PrimaryKey(autoGenerate = true)

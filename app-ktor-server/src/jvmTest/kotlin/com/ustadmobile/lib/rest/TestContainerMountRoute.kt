@@ -80,7 +80,7 @@ class TestContainerMountRoute {
             randomUuid().toString())
 
         db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
-            .addSyncCallback(nodeIdAndAuth, true)
+            .addSyncCallback(nodeIdAndAuth)
             .build()
             .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
 

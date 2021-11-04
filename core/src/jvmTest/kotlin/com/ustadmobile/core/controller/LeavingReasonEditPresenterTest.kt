@@ -77,7 +77,7 @@ class LeavingReasonEditPresenterTest {
         presenter.handleClickSave(initialEntity)
 
         runBlocking {
-            repo.waitUntil(5000, listOf("Report")) {
+            repo.waitUntil(5000, listOf("LeavingReason")) {
                 repo.leavingReasonDao.findAllReasonsLive().size == 1
             }
         }
@@ -110,6 +110,12 @@ class LeavingReasonEditPresenterTest {
         presenter.handleClickSave(initialEntity)
 
         runBlocking {
+            runBlocking {
+                repo.waitUntil(5000, listOf("LeavingReason")) {
+                    repo.leavingReasonDao.findAllReasonsLive().size == 1
+                }
+            }
+
             val reason = repo.leavingReasonDao.findByUidAsync(testEntity.leavingReasonUid)
             Assert.assertEquals("Name was saved and updated",
                     "Moved Aboard", reason!!.leavingReasonTitle)

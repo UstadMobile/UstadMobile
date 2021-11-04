@@ -7,7 +7,7 @@ import com.ustadmobile.lib.db.entities.StateContentEntity.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID)
+//@SyncableEntity(tableId = TABLE_ID)
 @Serializable
 //TODO
 class StateContentEntity {

@@ -11,12 +11,14 @@ import kotlinx.serialization.Serializable
  * Represents a schema (list) of categories.
  */
 @Entity
+/*
 @SyncableEntity(tableId = TABLE_ID,
         notifyOnUpdate = ["""
         SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
                ${TABLE_ID} AS tableId 
           FROM UserSession
     """])
+ */
 @Serializable
 class ContentCategorySchema() {
 

@@ -7,6 +7,7 @@ import com.ustadmobile.lib.db.entities.ClazzAssignmentContentJoin.Companion.TABL
 import kotlinx.serialization.Serializable
 
 @Entity
+/*
 @SyncableEntity(tableId = TABLE_ID,
         notifyOnUpdate =  [
         """
@@ -41,6 +42,8 @@ import kotlinx.serialization.Serializable
           WHERE UserSession.usClientNodeId = :clientId
                AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
         """)
+
+ */
 @Serializable
 class ClazzAssignmentContentJoin {
 

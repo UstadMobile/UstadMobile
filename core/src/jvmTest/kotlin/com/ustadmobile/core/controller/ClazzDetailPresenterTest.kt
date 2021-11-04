@@ -87,7 +87,7 @@ class ClazzDetailPresenterTest {
 
         presenter.onCreate(null)
 
-        verify(mockView, timeout(5000)).tabs = argWhere {
+        verify(mockView, timeout(5000).atLeastOnce()).tabs = argWhere {
             it.any { it.startsWith(ClazzLogListAttendanceView.VIEW_NAME) }
         }
     }
@@ -113,7 +113,7 @@ class ClazzDetailPresenterTest {
 
         presenter.onCreate(null)
 
-        verify(mockView, timeout(5000)).tabs = argWhere {
+        verify(mockView, timeout(5000).atLeastOnce()).tabs = argWhere {
             !it.any { it.startsWith(ClazzLogListAttendanceView.VIEW_NAME) }
         }
 

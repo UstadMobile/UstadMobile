@@ -13,7 +13,6 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import okio.Buffer
-import okio.Okio
 import okio.buffer
 import okio.source
 import org.junit.Assert
@@ -250,7 +249,7 @@ class TestPhetContentScraper {
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
             randomUuid().toString())
         val db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
-            .addSyncCallback(nodeIdAndAuth, true)
+            .addSyncCallback(nodeIdAndAuth)
             .build()
             .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
         val repo = db //db.getRepository("https://localhost", "")
@@ -309,7 +308,7 @@ class TestPhetContentScraper {
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
             randomUuid().toString())
         val db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
-            .addSyncCallback(nodeIdAndAuth, true)
+            .addSyncCallback(nodeIdAndAuth)
             .build()
             .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
         val repo = db//db.getRepository("https://localhost", "")

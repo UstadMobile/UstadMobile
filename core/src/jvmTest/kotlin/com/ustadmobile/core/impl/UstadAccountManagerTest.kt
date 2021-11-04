@@ -12,13 +12,13 @@ import com.ustadmobile.core.db.waitUntil
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.userAtServer
 import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.door.DoorDatabaseSyncRepository
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.RepositoryConfig
-import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
-import com.ustadmobile.door.ext.clearAllTablesAndResetSync
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -42,6 +42,7 @@ import org.kodein.di.*
 import java.io.ByteArrayOutputStream
 import javax.naming.InitialContext
 import kotlin.random.Random
+
 
 class UstadAccountManagerTest {
 
@@ -88,7 +89,7 @@ class UstadAccountManagerTest {
 
         json = Json { encodeDefaults = true }
 
-        val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
+        val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE),
             randomUuid().toString())
 
         di = DI {
@@ -104,9 +105,9 @@ class UstadAccountManagerTest {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
-                    .addSyncCallback(nodeIdAndAuth, primary = false)
+                    .addSyncCallback(nodeIdAndAuth)
                     .build()
-                    .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, isPrimary = false)
+                    .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
@@ -142,7 +143,7 @@ class UstadAccountManagerTest {
     }
 
     private fun Person.createTestUserSession(repo: UmAppDatabase): UserSession {
-        val nodeClientId = (repo as DoorDatabaseSyncRepository).clientId
+        val nodeClientId = (repo as DoorDatabaseRepository).config.nodeId
         return UserSession().apply {
             usStartTime = systemTimeInMillis()
             usClientNodeId = nodeClientId

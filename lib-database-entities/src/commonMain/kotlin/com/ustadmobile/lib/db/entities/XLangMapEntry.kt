@@ -8,11 +8,11 @@ import com.ustadmobile.lib.db.entities.XLangMapEntry.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-               ${XLangMapEntry.TABLE_ID} AS tableId 
-          FROM UserSession"""])
+//@SyncableEntity(tableId = TABLE_ID,
+//    notifyOnUpdate = ["""
+//        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
+//               ${XLangMapEntry.TABLE_ID} AS tableId
+//          FROM UserSession"""])
 @Serializable
 data class XLangMapEntry(
         @ColumnInfo(index = true)

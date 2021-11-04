@@ -3,28 +3,27 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.ClientSyncManager.Companion.TABLEID_SYNC_ALL_TABLES
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity(indices = [
     Index(value = ["usPersonUid", "usStatus", "usClientNodeId"], name = "person_status_node_idx"),
     Index(value = ["usClientNodeId", "usStatus", "usPersonUid"], name = "node_status_person_idx")])
-@SyncableEntity(tableId = UserSession.TABLE_ID,
-    syncFindAllQuery = """
-        SELECT UserSession.*
-          FROM UserSession
-         WHERE usClientNodeId =  :clientId
-    """,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
-               $TABLEID_SYNC_ALL_TABLES AS tableId
-          FROM ChangeLog
-               JOIN UserSession 
-                    ON ChangeLog.chTableId = ${UserSession.TABLE_ID}
-                       AND ChangeLog.chEntityPk = UserSession.usUid
-                        
-    """])
+//@SyncableEntity(tableId = UserSession.TABLE_ID,
+//    syncFindAllQuery = """
+//        SELECT UserSession.*
+//          FROM UserSession
+//         WHERE usClientNodeId =  :clientId
+//    """,
+//    notifyOnUpdate = ["""
+//        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
+//               $TABLEID_SYNC_ALL_TABLES AS tableId
+//          FROM ChangeLog
+//               JOIN UserSession
+//                    ON ChangeLog.chTableId = ${UserSession.TABLE_ID}
+//                       AND ChangeLog.chEntityPk = UserSession.usUid
+//
+//    """])
 @Serializable
 class UserSession {
 
@@ -45,7 +44,7 @@ class UserSession {
 
     var usPersonUid: Long = 0
 
-    var usClientNodeId: Int = 0
+    var usClientNodeId: Long = 0
 
     var usStartTime: Long = 0
 

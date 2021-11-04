@@ -7,7 +7,7 @@ import com.ustadmobile.lib.db.entities.ContextXObjectStatementJoin.Companion.TAB
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID)
+//@SyncableEntity(tableId = TABLE_ID)
 @Serializable
 //TODO: check this
 class ContextXObjectStatementJoin {

@@ -60,11 +60,13 @@ class ClazzEnrolmentEditPresenter(context: Any,
     val loggedInPersonUid = accountManager.activeAccount.personUid
 
     override fun onCreate(savedState: Map<String, String>?) {
-        super.onCreate(savedState)
-        view.statusList = OutcomeOptions.values().map { OutcomeMessageIdOption(it, context) }
         selectedPerson = arguments[ARG_PERSON_UID]?.toLong() ?: 0L
         selectedClazz = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
         selectedRole = arguments[ARG_FILTER_BY_ENROLMENT_ROLE]?.toInt() ?: 0
+
+        super.onCreate(savedState)
+
+        view.statusList = OutcomeOptions.values().map { OutcomeMessageIdOption(it, context) }
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzEnrolmentWithLeavingReason? {

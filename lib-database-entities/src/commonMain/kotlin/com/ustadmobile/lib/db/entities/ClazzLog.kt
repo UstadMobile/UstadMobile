@@ -10,6 +10,7 @@ import kotlinx.serialization.Serializable
  * could also be related to behavior logs etc. in the future.
  */
 
+/*
 @SyncableEntity(tableId = ClazzLog.TABLE_ID,
     notifyOnUpdate = [
         """
@@ -41,6 +42,8 @@ import kotlinx.serialization.Serializable
                AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
         """
 )
+
+ */
 @Entity
 @Serializable
 open class ClazzLog()  {

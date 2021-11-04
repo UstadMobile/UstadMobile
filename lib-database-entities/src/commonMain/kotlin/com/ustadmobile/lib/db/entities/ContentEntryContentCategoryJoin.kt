@@ -12,11 +12,13 @@ import kotlinx.serialization.Serializable
  * Join entity to link ContentEntry many:many with ContentCategory
  */
 @Entity
+/*
 @SyncableEntity(tableId = TABLE_ID,
         notifyOnUpdate = ["""
         SELECT DISTINCT UserSession.usClientNodeId AS deviceId, $TABLE_ID AS tableId
         FROM UserSession
     """])
+ */
 @Serializable
 class ContentEntryContentCategoryJoin() {
 

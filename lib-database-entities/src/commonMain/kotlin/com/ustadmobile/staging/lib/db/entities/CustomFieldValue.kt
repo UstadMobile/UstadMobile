@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
-@SyncableEntity(tableId = 57)
+//@SyncableEntity(tableId = 57)
 @Entity
 @Serializable
 data class CustomFieldValue(

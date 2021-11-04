@@ -9,7 +9,6 @@ import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.door.ext.clearAllTablesAndResetSync
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Site
@@ -29,7 +28,7 @@ fun DI.Builder.bindDbAndRepoWithEndpoint(endpointScope: EndpointScope, clientMod
         val nodeIdAndAuth: NodeIdAndAuth = instance()
         InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
         spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
-            .addSyncCallback(nodeIdAndAuth, false)
+            .addSyncCallback(nodeIdAndAuth)
             .build()
             .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId)
             .also { it.preload() })

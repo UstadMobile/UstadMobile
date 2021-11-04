@@ -14,12 +14,12 @@ import kotlinx.serialization.Serializable
  */
 //shortcode cerej
 @Entity
-@SyncableEntity(tableId = TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-               $TABLE_ID AS tableId 
-          FROM UserSession 
-    """])
+//@SyncableEntity(tableId = TABLE_ID,
+//    notifyOnUpdate = ["""
+//        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
+//               $TABLE_ID AS tableId
+//          FROM UserSession
+//    """])
 @Serializable
 open class ContentEntryRelatedEntryJoin() {
 

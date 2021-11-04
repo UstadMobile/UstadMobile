@@ -6,10 +6,10 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = XObjectEntity.TABLE_ID, notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-               ${XObjectEntity.TABLE_ID} AS tableId 
-        FROM UserSession"""])
+//@SyncableEntity(tableId = XObjectEntity.TABLE_ID, notifyOnUpdate = ["""
+//        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
+//               ${XObjectEntity.TABLE_ID} AS tableId
+//        FROM UserSession"""])
 @Serializable
 class XObjectEntity {
 

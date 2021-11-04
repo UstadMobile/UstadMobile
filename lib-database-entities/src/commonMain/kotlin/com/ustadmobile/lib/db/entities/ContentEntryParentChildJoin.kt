@@ -14,12 +14,13 @@ import kotlinx.serialization.Serializable
  */
 //short code = cepcj
 @Entity(indices = [Index(name = "parent_child", value = ["cepcjChildContentEntryUid", "cepcjParentContentEntryUid"])])
-@SyncableEntity(tableId = TABLE_ID,
-        notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-               $TABLE_ID AS tableId 
-          FROM UserSession 
-    """])
+
+//@SyncableEntity(tableId = TABLE_ID,
+//        notifyOnUpdate = ["""
+//        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
+//               $TABLE_ID AS tableId
+//          FROM UserSession
+//    """])
 @Serializable
 class ContentEntryParentChildJoin(
     @ColumnInfo(index = true)

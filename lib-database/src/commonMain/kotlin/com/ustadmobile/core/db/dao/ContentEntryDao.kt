@@ -4,6 +4,7 @@ import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.RepoHttpAccessible
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
@@ -65,6 +66,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract suspend fun findAllLanguageRelatedEntriesAsync(entryUuid: Long): List<ContentEntry>
 
     @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
+    @RepoHttpAccessible
     @Query("SELECT DISTINCT ContentCategory.contentCategoryUid, ContentCategory.name AS categoryName, " +
             "ContentCategorySchema.contentCategorySchemaUid, ContentCategorySchema.schemaName FROM ContentEntry " +
             "LEFT JOIN ContentEntryContentCategoryJoin ON ContentEntryContentCategoryJoin.ceccjContentEntryUid = ContentEntry.contentEntryUid " +
@@ -81,6 +83,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid ORDER BY Language.name")
     @JsName("findUniqueLanguagesInListAsync")
+    @RepoHttpAccessible
     abstract suspend fun findUniqueLanguagesInListAsync(parentUid: Long): List<Language>
 
     @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
@@ -89,6 +92,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
         LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
         WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid ORDER BY Language.name""")
     @JsName("findUniqueLanguageWithParentUid")
+    @RepoHttpAccessible
     abstract suspend fun findUniqueLanguageWithParentUid(parentUid: Long): List<LangUidAndName>
 
     @Update
@@ -280,6 +284,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     ContentEntry_recursive
     WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = ContentEntry_recursive.contentEntryUid)
     SELECT COUNT(*) AS numEntries, SUM(containerSize) AS totalSize FROM ContentEntry_recursive""")
+    @RepoHttpAccessible
     abstract suspend fun getRecursiveDownloadTotals(contentEntryUid: Long): DownloadJobSizeInfo?
 
     @Query(ALL_ENTRIES_RECURSIVE_SQL)

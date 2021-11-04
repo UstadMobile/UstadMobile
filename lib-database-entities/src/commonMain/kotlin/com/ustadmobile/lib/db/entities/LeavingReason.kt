@@ -6,7 +6,7 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = LeavingReason.TABLE_ID)
+//@SyncableEntity(tableId = LeavingReason.TABLE_ID)
 @Serializable
 class LeavingReason() {
 

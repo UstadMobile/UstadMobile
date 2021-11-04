@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
-@SyncableEntity(tableId = PersonCustomFieldValue.TABLE_ID)
+//@SyncableEntity(tableId = PersonCustomFieldValue.TABLE_ID)
 @Entity
 @Serializable
 class PersonCustomFieldValue() {

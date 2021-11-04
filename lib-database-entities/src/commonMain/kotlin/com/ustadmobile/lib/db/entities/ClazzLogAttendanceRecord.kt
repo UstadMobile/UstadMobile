@@ -7,6 +7,7 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.FROM_C
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.FROM_SCOPEDGRANT_TO_CLAZZLOGATTENDANCERECORD_JOIN_ON_CLAUSE
 import kotlinx.serialization.Serializable
 
+/*
 @SyncableEntity(tableId = ClazzLogAttendanceRecord.TABLE_ID,
     notifyOnUpdate = [
         """
@@ -39,6 +40,8 @@ import kotlinx.serialization.Serializable
              WHERE UserSession.usClientNodeId = :clientId
                    AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
         """)
+
+ */
 @Entity
 @Serializable
 open class ClazzLogAttendanceRecord {

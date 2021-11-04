@@ -24,6 +24,7 @@ import kotlinx.serialization.Serializable
     //Index for streamlining ClazzList where the number of users is counted by role
     Index(value = ["clazzEnrolmentClazzUid", "clazzEnrolmentRole"])
 ])
+/*
 @SyncableEntity(tableId = ClazzEnrolment.TABLE_ID,
     /* If someone is newly added to a class this might mean that existing members of the class (e.g.
      * students and teachers) now have access to information in other tables that was not previously
@@ -213,6 +214,8 @@ import kotlinx.serialization.Serializable
              WHERE UserSession.usClientNodeId = :clientId
                    AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE} 
     """)
+
+ */
 @Serializable
 open class ClazzEnrolment()  {
 

@@ -3,7 +3,9 @@ plugins {
     id 'application'
     id 'org.jetbrains.kotlin.multiplatform'
     id 'maven-publish'
-    id 'com.github.johnrengelman.shadow' version "$version_shadow"
+
+    // 4/Nov/2021: This causes any multiplatform component consuming it to fail to resolve dependencies
+    //id 'com.github.johnrengelman.shadow' version "$version_shadow"
     id 'kotlinx-serialization'
     id 'com.github.psxpaul.execfork' version '0.1.13'
 }
@@ -128,17 +130,17 @@ kotlin {
 mainClassName = 'com.ustadmobile.lib.rest.ServerAppMain'
 
 // This task will generate your fat JAR and put it in the ./build/libs/ directory
-shadowJar {
-    manifest {
-        attributes 'Main-Class': mainClassName
-    }
-    archiveBaseName = "ustad-server"
-
-    def target = kotlin.targets.jvm
-    from target.compilations.main.output
-    def runtimeClasspath = target.compilations.main.runtimeDependencyFiles
-    configurations = [runtimeClasspath]
-}
+//shadowJar {
+//    manifest {
+//        attributes 'Main-Class': mainClassName
+//    }
+//    archiveBaseName = "ustad-server"
+//
+//    def target = kotlin.targets.jvm
+//    from target.compilations.main.output
+//    def runtimeClasspath = target.compilations.main.runtimeDependencyFiles
+//    configurations = [runtimeClasspath]
+//}
 
 
 sourceCompatibility = "8"

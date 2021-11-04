@@ -14,12 +14,12 @@ import kotlin.random.Random
  */
 fun UstadMobileSystemImpl.getOrGenerateNodeIdAndAuth(contextPrefix: String, context: Any): NodeIdAndAuth {
     val nodeId: String = getOrPutAppPref("${contextPrefix}_nodeId", context) {
-        Random.nextInt(0, Int.MAX_VALUE).toString()
+        Random.nextLong(0, Long.MAX_VALUE).toString()
     }
 
     val nodeAuth: String = getOrPutAppPref("${contextPrefix}_nodeAuth", context) {
         randomUuid().toString()
     }
 
-    return NodeIdAndAuth(nodeId.toInt(), nodeAuth)
+    return NodeIdAndAuth(nodeId.toLong(), nodeAuth)
 }

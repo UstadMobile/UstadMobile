@@ -37,8 +37,6 @@ import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.PersonAuth2
 import com.ustadmobile.lib.rest.ext.databasePropertiesFromSection
-import com.ustadmobile.lib.rest.ext.initAdminUser
-import com.ustadmobile.lib.rest.ext.ktorInitRepo
 import com.ustadmobile.lib.rest.ext.toProperties
 import com.ustadmobile.lib.rest.messaging.MailProperties
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
@@ -65,6 +63,9 @@ import java.net.InetAddress
 import java.net.URL
 import java.nio.file.Files
 import javax.naming.InitialContext
+import com.ustadmobile.door.ext.asRepository
+import com.ustadmobile.lib.rest.ext.initAdminUser
+import com.ustadmobile.lib.rest.ext.ktorInitRepo
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -177,7 +178,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             InitialContext().bindDataSourceIfNotExisting(dbHostName, dbProperties)
             val nodeIdAndAuth: NodeIdAndAuth = instance()
             val db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbHostName)
-                .addSyncCallback(nodeIdAndAuth, true)
+                .addSyncCallback(nodeIdAndAuth)
                     .addCallback(ContentJobItemTriggersCallback())
                     .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                 .build()
@@ -230,16 +231,16 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
             val doorNode = instance<NodeIdAndAuth>()
-            val repo = db.asRepository(repositoryConfig(Any(), "http://localhost/",
+            val repo: UmAppDatabase = db.asRepository(repositoryConfig(Any(), "http://localhost/",
                 doorNode.nodeId, doorNode.auth, instance(), instance()) {
                 attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT),
                     UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME).absolutePath
                 updateNotificationManager = instance()
             })
-            ServerChangeLogMonitor(db, repo as DoorDatabaseRepository)
+            //ServerChangeLogMonitor(db, repo as DoorDatabaseRepository)
 
             //Add listener that will end sessions when authentication has been updated
-            repo.addSyncListener(PersonAuth2::class, EndSessionPersonAuth2SyncListener(repo))
+            //repo.addSyncListener(PersonAuth2::class, EndSessionPersonAuth2SyncListener(repo))
             repo.preload()
             repo.ktorInitRepo(trackerAnnounceUrl.toURI().toString())
             runBlocking {

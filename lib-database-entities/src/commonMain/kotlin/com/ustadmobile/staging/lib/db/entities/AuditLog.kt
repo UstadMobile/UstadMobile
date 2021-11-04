@@ -8,7 +8,7 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 
-@SyncableEntity(tableId = 53)
+//@SyncableEntity(tableId = 53)
 @Entity
 @Serializable
 open class AuditLog() {

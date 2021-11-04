@@ -92,7 +92,8 @@ suspend fun UmAppDatabase.processEnrolmentIntoClass(
 ) : ClazzEnrolment {
 
     val clazzWithSchoolVal = clazzWithSchool ?: clazzDao.getClazzWithSchool(
-        enrolment.clazzEnrolmentClazzUid) ?: throw IllegalArgumentException("Class does not exist")
+        enrolment.clazzEnrolmentClazzUid)
+        ?: throw IllegalArgumentException("processEnrolmentIntoClass: Class does not exist")
     val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
 
     enrolment.clazzEnrolmentDateJoined = DateTime(enrolment.clazzEnrolmentDateJoined)

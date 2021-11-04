@@ -85,7 +85,7 @@ class TestEtekScraper {
             Random.nextInt(0, Int.MAX_VALUE),
             randomUuid().toString())
         val db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
-            .addSyncCallback(nodeIdAndAuth, true)
+            .addSyncCallback(nodeIdAndAuth)
             .build()
             .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
         checkIfPathsToDriversExist()

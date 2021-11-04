@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.LearnerGroupMemberDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.view.LearnerGroupMemberListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
@@ -144,7 +145,10 @@ class LearnerGroupMemberListPresenterTest {
         presenter.handleNewMemberToGroup(person)
 
         runBlocking {
-            verify(repoLearnerGroupMemberDaoSpy, timeout(5000)).insertAsync(any())
+            repo.waitUntil(5000, listOf("LearnerGroupMember")) {
+                repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntryList(
+                    1, 1).size == 2
+            }
         }
 
         val list = repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntryList(1, 1)

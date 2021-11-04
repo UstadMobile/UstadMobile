@@ -1,7 +1,6 @@
 package com.ustadmobile.core.util
 
 import com.google.gson.Gson
-import com.turn.ttorrent.tracker.Tracker
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
@@ -14,21 +13,15 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.core.torrent.UstadCommunicationManager
-import com.ustadmobile.core.torrent.UstadTorrentManager
-import com.ustadmobile.core.torrent.UstadTorrentManagerImpl
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
-import com.ustadmobile.door.ext.clearAllTablesAndResetSync
-import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.lib.rest.TorrentTracker
 import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
@@ -45,12 +38,11 @@ import org.junit.runner.Description
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
-import java.net.InetAddress
 import java.net.URL
 import java.nio.file.Files
-import java.util.concurrent.Executors
 import javax.naming.InitialContext
 import kotlin.random.Random
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 
 fun DI.onActiveAccount(): DI {
     val accountManager: UstadAccountManager by instance()
@@ -122,7 +114,7 @@ class UstadTestRule: TestWatcher() {
             }
 
             bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
-                NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
+                NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
             }
 
             bind<UmAppDatabase>(tag = TAG_DB) with scoped(endpointScope).singleton {
@@ -131,9 +123,9 @@ class UstadTestRule: TestWatcher() {
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
                     .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
-                    .addSyncCallback(nodeIdAndAuth, primary = false)
+                    .addSyncCallback(nodeIdAndAuth)
                     .build()
-                    .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, isPrimary = false))
+                    .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId))
             }
 
             bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope).singleton {

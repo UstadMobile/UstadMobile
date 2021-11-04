@@ -14,7 +14,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
-import com.ustadmobile.door.DoorDatabaseSyncRepository
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -82,7 +82,7 @@ class Login2PresenterTest {
         mockPersonDao = mock {}
         mockWebServer = MockWebServer()
         mockWebServer.start()
-        mockRepo = mock(extraInterfaces = arrayOf(DoorDatabaseSyncRepository::class)) {}
+        mockRepo = mock(extraInterfaces = arrayOf(DoorDatabaseRepository::class)) {}
 
         val endpointScope = EndpointScope()
         di = DI {

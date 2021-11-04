@@ -7,12 +7,12 @@ import com.ustadmobile.lib.db.entities.Holiday.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-               $TABLE_ID AS tableId
-          FROM UserSession
-    """])
+//@SyncableEntity(tableId = TABLE_ID,
+//    notifyOnUpdate = ["""
+//        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
+//               $TABLE_ID AS tableId
+//          FROM UserSession
+//    """])
 @Serializable
 class Holiday() {
 

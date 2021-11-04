@@ -3,8 +3,8 @@ package com.ustadmobile.core.db
 import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.*
+import com.ustadmobile.door.annotation.MinReplicationVersion
 import com.ustadmobile.door.migration.*
-import com.ustadmobile.door.annotation.MinSyncVersion
 import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
@@ -36,7 +36,7 @@ import kotlin.jvm.JvmField
     ContextXObjectStatementJoin::class, AgentEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
     SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
-    SyncResult::class, School::class,
+    School::class,
     SchoolMember::class, Comments::class,
     Report::class,
     Site::class, ContainerImportJob::class,
@@ -55,7 +55,6 @@ import kotlin.jvm.JvmField
     //Door Helper entities
     SqliteChangeSeqNums::class,
     UpdateNotification::class,
-    TableSyncStatus::class,
     ChangeLog::class,
     ZombieAttachmentData::class,
     DoorNode::class
@@ -63,9 +62,9 @@ import kotlin.jvm.JvmField
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 87)
-@MinSyncVersion(60)
-abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
+], version = 88)
+@MinReplicationVersion(60)
+abstract class UmAppDatabase : DoorDatabase() {
 
     /*
         Changes from 38-39:
@@ -85,10 +84,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         Added School and Assignment based entities
         Updated Clazz : added clazzFeatures and removed individual feature bits
      */
-
-
-    override val master: Boolean
-        get() = false
 
 
     /**
@@ -223,8 +218,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("groupLearningSessionDao")
     abstract val groupLearningSessionDao: GroupLearningSessionDao
-
-    abstract val syncresultDao: SyncResultDao
 
     abstract val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
     abstract val clazzLogDao: ClazzLogDao
@@ -5228,7 +5221,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
 
-        fun migrationList(nodeId: Int) = listOf<DoorMigration>(
+        fun migrationList(nodeId: Long) = listOf<DoorMigration>(
             MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
             MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
             MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
@@ -5245,7 +5238,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 MIGRATION_84_85, MIGRATION_85_86, MIGRATION_86_87
         )
 
-        internal fun migrate67to68(nodeId: Int)= DoorMigrationSync(67, 68) { database ->
+        internal fun migrate67to68(nodeId: Long)= DoorMigrationSync(67, 68) { database ->
             if (database.dbType() == DoorDbType.SQLITE) {
                 database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
             } else {

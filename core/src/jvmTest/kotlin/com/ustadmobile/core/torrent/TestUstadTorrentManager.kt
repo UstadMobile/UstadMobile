@@ -5,7 +5,6 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
-import com.ustadmobile.core.catalog.contenttype.H5PTypePluginCommonJvm
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ProcessContext
@@ -20,9 +19,9 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.*
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.ext.asRepository
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentJobItem
@@ -120,11 +119,11 @@ class TestUstadTorrentManager {
 
         val serverFolder = temporaryFolder.newFolder("serverFolder")
 
-        val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
+        val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(), randomUuid().toString())
         serverDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
-                .addSyncCallback(nodeIdAndAuth, true)
+                .addSyncCallback(nodeIdAndAuth)
                 .build()
-                .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
+                .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
         serverRepo = serverDb.asRepository(RepositoryConfig.repositoryConfig(Any(), "http://localhost/",
                 nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))
         val endpointScope = EndpointScope()

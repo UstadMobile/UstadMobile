@@ -40,7 +40,7 @@ class TestRateLimitedLiveData {
                 repeat(5) {
                     delay(100)
                     changeListeners.forEach {
-                        it.onChange(listOf("Test"))
+                        it.onInvalidated.onTablesInvalidated(listOf("Test"))
                     }
                 }
             }
