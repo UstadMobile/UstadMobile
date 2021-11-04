@@ -6,7 +6,6 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadDestination
 import com.ustadmobile.core.view.*
-import com.ustadmobile.lib.db.entities.ClazzAssignment
 
 @Keep
 class ViewNameToDestMap: DestinationProvider {
@@ -16,6 +15,7 @@ class ViewNameToDestMap: DestinationProvider {
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             ClazzList2View.VIEW_NAME to UstadDestination(R.id.home_clazzlist_dest),
             ClazzDetailView.VIEW_NAME to UstadDestination(R.id.clazz_detail_dest),
+            HolidayEditView.VIEW_NAME to UstadDestination(R.id.holiday_edit_dest),
             HolidayCalendarListView.VIEW_NAME to UstadDestination(R.id.holidaycalendar_list_dest),
             HolidayCalendarEditView.VIEW_NAME to UstadDestination(R.id.holidaycalendar_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),

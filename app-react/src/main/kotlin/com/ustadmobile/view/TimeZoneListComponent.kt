@@ -69,7 +69,7 @@ class ZonesListComponent(mProps: ListProps<TimeZone>):
     UstadSimpleList<ListProps<TimeZone>>(mProps){
 
     override fun RBuilder.renderListItem(item: TimeZone) {
-        createItemWithIconTitleAndDescription("language",item.name, item.timeName)
+        createItemWithIconTitleAndDescription("query_builder",item.name, item.timeName)
     }
 }
 
