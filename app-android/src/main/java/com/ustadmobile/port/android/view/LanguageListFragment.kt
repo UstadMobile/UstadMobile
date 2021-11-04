@@ -11,7 +11,6 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.LanguageListView
 import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -82,7 +81,7 @@ class LanguageListFragment(): UstadListViewFragment<Language, Language>(),
      */
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.language_edit_dest, Language::class.java)
+            mPresenter?.handleClickCreateNewFab()
         else
             super.onClick(view)
     }

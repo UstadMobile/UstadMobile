@@ -22,10 +22,6 @@
             name="langNameError"
             type="String" />
 
-        <variable
-            name="activityEventHandler"
-            type="com.ustadmobile.port.android.view.LanguageEditFragmentEventHandler" />
-
     </data>
 
 

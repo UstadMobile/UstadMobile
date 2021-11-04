@@ -28,7 +28,7 @@ interface LanguageProps: RProps {
 }
 
 
-class  LanguageComponent(mProps: LanguageProps): RComponent<LanguageProps,RState>(mProps){
+class  LanguageOptionComponent(mProps: LanguageProps): RComponent<LanguageProps,RState>(mProps){
 
     private lateinit var languageOptions: List<Pair<String, String>>
 
@@ -77,7 +77,7 @@ class  LanguageComponent(mProps: LanguageProps): RComponent<LanguageProps,RState
 }
 
 fun RBuilder.renderLanguages(systemImpl: UstadMobileSystemImpl, width: LinearDimension = 200.px,
-                             label : String? = null, caption: String? = null) = child(LanguageComponent::class) {
+                             label : String? = null, caption: String? = null) = child(LanguageOptionComponent::class) {
     attrs.systemImpl = systemImpl
     attrs.width = width
     attrs.label = label
