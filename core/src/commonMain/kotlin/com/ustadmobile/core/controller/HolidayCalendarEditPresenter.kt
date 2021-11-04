@@ -103,7 +103,7 @@ class HolidayCalendarEditPresenter(context: Any,
     companion object {
 
         //TODO: Add constants for keys that would be used for any One To Many Join helpers
-        const val ARG_SAVED_STATE_HOLIDAY = "holiday"
+        const val ARG_SAVED_STATE_HOLIDAY = "Holiday"
     }
 
 }

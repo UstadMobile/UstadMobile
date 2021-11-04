@@ -1,10 +1,10 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.serialization.builtins.ListSerializer
@@ -38,10 +38,24 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>,
     }
 
     override fun handleClickCreateNewFab() {
-        systemImpl.go(HolidayCalendarEditView.VIEW_NAME, mapOf(), context)
+        navigateForResult(
+            NavigateForResultOptions(
+                this, null,
+                HolidayCalendarEditView.VIEW_NAME,
+                HolidayCalendar::class,
+                HolidayCalendar.serializer(),
+                RESULT_DEST_KEY
+            )
+        )
     }
+
+
 
     override fun handleClickSortOrder(sortOption: IdOption) {
         //no sort options here
+    }
+
+    companion object {
+        const val RESULT_DEST_KEY = "SchoolHolidayCalendar"
     }
 }

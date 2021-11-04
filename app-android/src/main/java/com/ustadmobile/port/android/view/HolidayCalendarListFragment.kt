@@ -14,7 +14,6 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.HolidayCalendarListView
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -73,7 +72,7 @@ class HolidayCalendarListFragment()
     }
 
     override fun onClick(view: View?) {
-        navigateToEditEntity(null, R.id.holidaycalendar_edit_dest, HolidayCalendar::class.java)
+        mPresenter?.handleClickCreateNewFab()
     }
 
     override fun onDestroyView() {

@@ -29,7 +29,7 @@ class HolidayCalendarListComponent(mProps: RProps): UstadListComponent<HolidayCa
     override fun onCreateView() {
         super.onCreateView()
         showCreateNewItem = true
-        createNewTextId = MessageID.add_a_new_holiday_calendar
+        createNewText = getString(MessageID.add_a_new_holiday_calendar)
         mPresenter = HolidayCalendarListPresenter(this, arguments, this, di, this)
         mPresenter?.onCreate(mapOf())
     }

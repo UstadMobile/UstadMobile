@@ -68,7 +68,6 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
         val rootView: View
         mBinding = FragmentHolidaycalendarEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
-
         }
 
         holidayRecyclerView = rootView.findViewById(R.id.activity_holidaycalendar_holiday_recyclerview)
@@ -78,9 +77,8 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
 
         mPresenter = HolidayCalendarEditPresenter(requireContext(), arguments.toStringMap(), this,
                 this, di).withViewLifecycle()
-        mBinding?.mPresenter = mPresenter
+        mBinding?.presenter = mPresenter
         holidayRecyclerAdapter?.presenter = mPresenter
-
 
         return rootView
     }

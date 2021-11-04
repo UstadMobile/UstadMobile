@@ -21,7 +21,7 @@
             type="boolean" />
 
         <variable
-            name="mPresenter"
+            name="presenter"
             type="com.ustadmobile.core.controller.HolidayCalendarEditPresenter" />
 
     </data>
@@ -63,7 +63,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:createNewText="@{@string/add_a_holiday}"
-                app:onClickNew="@{() ->  mPresenter.holidayToManyJoinListener.onClickNew()}"
+                app:onClickNew="@{() ->  presenter.holidayToManyJoinListener.onClickNew()}"
                 app:layout_constraintTop_toBottomOf="@+id/activity_holiday_calendar_name_text"
                 app:layout_constraintStart_toStartOf="parent"
                 />

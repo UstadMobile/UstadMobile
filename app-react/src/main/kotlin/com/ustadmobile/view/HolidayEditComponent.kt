@@ -117,7 +117,7 @@ class HolidayEditComponent(mProps: RProps): UstadEditComponent<Holiday>(mProps),
                             ruleSet = defaultFullWidth,
                             error = holidayEnd.error,
                             helperText = holidayEnd.errorText,
-                            value = entity?.holStartTime.toDate(),
+                            value = entity?.holEndTime.toDate(),
                             inputVariant = MFormControlVariant.outlined,
                             pickerType = MDateTimePickerType.date,
                             onChange = { mills, _ ->
