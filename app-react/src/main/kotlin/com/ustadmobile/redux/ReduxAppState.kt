@@ -7,6 +7,5 @@ data class ReduxAppState(var appTheme: ReduxThemeState? = ReduxThemeState(),
                          var db: ReduxDbState = ReduxDbState(),
                          var appToolbar: ReduxToolbarState = ReduxToolbarState(),
                          var navStack: ReduxNavStackState = BrowserTabTracker.navStackState,
-                         var appSnackBar: ReduxSnackBarState = ReduxSnackBarState(),
-                         var serialization: ReduxSerializationState = ReduxSerializationState()
+                         var appSnackBar: ReduxSnackBarState = ReduxSnackBarState()
 )

@@ -89,6 +89,7 @@ fun RBuilder.umEntityAvatar (src: String? = null,
                              showIcon: Boolean = true,
                              listItem: Boolean = false,
                              className: String? = "${StyleManager.name}-entityImageClass",
+                             iconClassName: String? = "${StyleManager.name}-entityImageIconClass",
                              clickEvent:((Event) -> Unit)? = null){
 
     styledDiv {
@@ -111,7 +112,7 @@ fun RBuilder.umEntityAvatar (src: String? = null,
                 }
 
                 if(showIcon){
-                    mIcon(iconName, className = "${StyleManager.name}-entityImageIconClass")
+                    mIcon(iconName, className = iconClassName)
                 }
             }
         }
@@ -228,6 +229,9 @@ fun RBuilder.createItemWithIconTitleAndDescription(iconName: String, title: Stri
         }
 
         umItem(MGridSize.cells10, if(scaleOnLargeSmall) MGridSize.cells9 else MGridSize.cells11){
+            css{
+                marginTop = LinearDimension("5px")
+            }
             if(title != null){
                 umItem(MGridSize.cells11){
                     mTypography(title,

@@ -52,6 +52,12 @@ object RouteManager {
         UstadDestination(view = ScheduleEditView.VIEW_NAME, component = ScheduleEditComponent::class),
         UstadDestination(view = JoinWithCodeView.VIEW_NAME, component = JoinWithCodeComponent::class),
         UstadDestination(view = SchoolEditView.VIEW_NAME, component = SchoolEditComponent::class),
+        UstadDestination(view = ScopedGrantEditView.VIEW_NAME, component = ScopedGrantEditComponent::class),
+        UstadDestination(view = BitmaskEditView.VIEW_NAME, component = BitmaskEditComponent::class),
+        UstadDestination(view = ContentEntryEdit2View.VIEW_NAME, component = ContentEntryEditComponent::class),
+        UstadDestination(view = LanguageListView.VIEW_NAME, component = LanguageListComponent::class, showSearch = true),
+        UstadDestination(view = LanguageEditView.VIEW_NAME, component = LanguageEditComponent::class),
+        UstadDestination(view = ContentEntryImportLinkView.VIEW_NAME, component = ContentEntryImportLinkComponent::class),
         UstadDestination(labelId= MessageID.accounts, view = AccountListView.VIEW_NAME, component = PlaceHolderComponent::class)
     )
 

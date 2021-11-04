@@ -17,10 +17,10 @@ fun UstadSavedStateHandle.setAllFromMap(stringMap: Map<String, String>) {
 
 fun <T> UstadSavedStateHandle.observeResult(lifecycleOwner: DoorLifecycleOwner,
                                             serializer: KSerializer<T>,
-                                            resultKey: String = serializer.descriptor.serialName,
+                                            resultKey: String,
                                             block: (List<T>) -> Unit) {
     getLiveData<String>(resultKey).observe(lifecycleOwner) {
-        val entity = Json.decodeFromString(ListSerializer(serializer), it)
+        val entity = if(it.isNullOrBlank()) listOf() else Json.decodeFromString(ListSerializer(serializer), it)
         block(entity)
         set(resultKey, null)
     }

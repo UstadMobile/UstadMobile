@@ -37,7 +37,6 @@ object ReduxAppStateManager {
 
             }
             is ReduxSnackBarState -> state.copy(appSnackBar = action)
-            is ReduxSerializationState -> state.copy(serialization = action)
             else -> state
         }
     }
