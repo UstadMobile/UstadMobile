@@ -125,7 +125,8 @@ fun TextView.getDateTimeInMillis(): Long {
 }
 
 private val singleDayPickCallback = SingleDayPickCallback { singleDay ->
-    println("hey")
+    {
+    }
 }
 
 const val PICKER_TAG = "PrimeDatePickerBottomSheet"
@@ -151,23 +152,31 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
             val maxDateCalendar = null
 
             val today = CalendarFactory.newInstance(calendarType, locale)
+            if(cal.timeInMillis >0) {
+                today.timeInMillis = cal.timeInMillis
+            }
 
             var datePicker: PrimeDatePicker? = null
 
-            datePicker = PrimeDatePicker.dialogWith(today).let {
-                when (pickType) {
-                    PickType.SINGLE -> {
-                        it.pickSingleDay(singleDayPickCallback)
+            datePicker = PrimeDatePicker.Companion.dialogWith(today)
+                .pickSingleDay(
+                    SingleDayPickCallback { singleDay ->
+                        text = singleDay.get(Calendar.YEAR).toString() + "/" +
+                                singleDay.get(Calendar.MONTH).toString() + "/" +
+                                singleDay.get(Calendar.DAY_OF_MONTH).toString()
                     }
+                )
+                .build()
 
-                    else -> null
+            datePicker.setDayPickCallback(
+                SingleDayPickCallback { singleDay ->
+                    text = singleDay.get(Calendar.YEAR).toString() + "/" +
+                            singleDay.get(Calendar.MONTH).toString() + "/" +
+                            singleDay.get(Calendar.DAY_OF_MONTH).toString()
+                    adapterCalendar.timeInMillis = singleDay.timeInMillis
+                    inverseBindingListener.onChange()
                 }
-            }?.let {
-                minDateCalendar?.let { minDate -> it.minPossibleDate(minDate) }
-                maxDateCalendar?.let { maxDate -> it.maxPossibleDate(maxDate) }
-                //it.applyTheme(theme)
-                it.build()
-            }
+            )
 
 
             datePicker?.show(
