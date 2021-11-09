@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.impl
 
 import android.content.Context
-import androidx.core.content.ContextCompat
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import com.google.gson.Gson
@@ -67,19 +66,14 @@ import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import com.ustadmobile.core.impl.di.commonJvmDiModule
-import com.ustadmobile.core.torrent.ContainerTorrentDownloadJob
-import com.ustadmobile.core.torrent.UstadCommunicationManager
-import com.ustadmobile.core.torrent.UstadTorrentManager
-import com.ustadmobile.core.torrent.UstadTorrentManagerImpl
+import com.ustadmobile.core.torrent.*
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.util.getLocalIpAddress
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import kotlinx.coroutines.*
-import java.net.Inet4Address
 import java.net.InetAddress
-import java.net.NetworkInterface
 import java.net.URI
 import java.util.concurrent.Executors
 
@@ -161,8 +155,9 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton{
-            val containerStorage by di.instance<ContainerStorageManager>()
-            val containerFolder = File(URI(containerStorage.storageList.first().dirUri))
+            val containerStorage: ContainerStorageManager by di.on(context).instance()
+            val uri = containerStorage.storageList.firstOrNull()?.dirUri ?: throw IllegalStateException("internal storage missing?")
+            val containerFolder = File(URI(uri))
             containerFolder.mkdirs()
             containerFolder
         }
@@ -258,8 +253,16 @@ open class UstadApp : BaseUstadApp(), DIAware {
             XmlPullParserFactory.newInstance()
         }
 
+        bind<ConnectionManager>() with singleton{
+            ConnectionManager(applicationContext, di)
+        }
+
         bind<XmlSerializer>() with provider {
             instance<XmlPullParserFactory>().newSerializer()
+        }
+
+        bind<CommunicationWorkers>() with singleton {
+            CommunicationWorkers()
         }
 
         bind<DestinationProvider>() with singleton {
@@ -270,8 +273,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
             UstadTorrentManagerImpl(endpoint = context, di = di)
         }
 
-        bind<UstadCommunicationManager>() with singleton {
-            UstadCommunicationManager()
+        bind<UstadCommunicationManager>() with provider {
+            instance<ConnectionManager>().requireCommunicationManager()
         }
 
         bind<Pbkdf2Params>() with singleton {
@@ -296,19 +299,14 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<BleGattServer>()
             instance<NetworkManagerBle>()
             instance<EmbeddedHTTPD>()
-
-            val address: InetAddress? = getLocalIpAddress()
-            if(address != null){
-                instance<UstadCommunicationManager>().start(address)
-            }
+            instance<ConnectionManager>().start()
 
             Picasso.setSingletonInstance(Picasso.Builder(applicationContext)
                     .downloader(OkHttp3Downloader(instance<OkHttpClient>()))
                     .build())
+
         }
     }
-
-    lateinit var connectionManager: ConnectionManager
 
     override val di: DI by DI.lazy {
         import(diModule)
@@ -319,13 +317,11 @@ open class UstadApp : BaseUstadApp(), DIAware {
         val systemImpl: UstadMobileSystemImpl = di.direct.instance()
         systemImpl.messageIdMap = MessageIDMap.ID_MAP
         Napier.base(DebugAntilog())
-        connectionManager = ConnectionManager(this, di)
-        connectionManager.startNetworkCallback()
     }
 
     override fun onTerminate() {
         super.onTerminate()
-        connectionManager.stopNetworkCallback()
+        di.direct.instance<ConnectionManager>().stop()
     }
 
     override fun attachBaseContext(base: Context) {

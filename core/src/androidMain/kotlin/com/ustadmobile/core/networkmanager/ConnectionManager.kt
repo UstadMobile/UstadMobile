@@ -4,17 +4,25 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkRequest
-import com.turn.ttorrent.client.CommunicationManager
+import com.ustadmobile.core.torrent.UstadCommunicationManager
 import com.ustadmobile.core.util.getLocalIpAddress
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
+import java.util.concurrent.atomic.AtomicReference
 
-class ConnectionManager(val context: Context,
-                        di: DI)  {
+class ConnectionManager(
+        val context: Context,
+        di: DI
+)  {
 
-    val communicationManager: CommunicationManager by di.instance()
+    private val communicationManagerRef: AtomicReference<UstadCommunicationManager?> = AtomicReference(null)
 
-    fun startNetworkCallback(){
+    fun requireCommunicationManager(): UstadCommunicationManager {
+        return communicationManagerRef.get() ?: throw IllegalStateException("no connectivity ref")
+    }
+
+    fun start(){
         val cm: ConnectivityManager =
                 context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val builder: NetworkRequest.Builder = NetworkRequest.Builder()
@@ -28,7 +36,7 @@ class ConnectionManager(val context: Context,
         }
     }
 
-    fun stopNetworkCallback() {
+    fun stop() {
         val cm: ConnectivityManager =
                 context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         cm.unregisterNetworkCallback(networkCallback)
@@ -37,19 +45,23 @@ class ConnectionManager(val context: Context,
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
 
         override fun onAvailable(network: Network) {
-            if(!communicationManager.isRunning){
-                communicationManager.start(getLocalIpAddress())
+            val manager = communicationManagerRef.get() ?: UstadCommunicationManager(di.direct.instance())
+            communicationManagerRef.set(manager)
+            if(!manager.isRunning){
+                manager.start(getLocalIpAddress())
             }
         }
 
         override fun onLost(network: Network) {
             super.onLost(network)
-            communicationManager.stop()
+            communicationManagerRef.get()?.stop()
+            communicationManagerRef.set(null)
         }
 
         override fun onUnavailable() {
             super.onUnavailable()
-            communicationManager.stop()
+            communicationManagerRef.get()?.stop()
+            communicationManagerRef.set(null)
         }
         
     }

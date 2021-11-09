@@ -44,7 +44,7 @@ class ContainerTorrentDownloadJob(private var context: Any, private val endpoint
 
     private val containerDir = di.direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
-    private val torrentDir = di.direct.instance<File>(tag = DiTag.TAG_TORRENT_DIR)
+    private val torrentDir by di.on(endpoint).instance<File>(tag = DiTag.TAG_TORRENT_DIR)
 
     private val ustadTorrentManager: UstadTorrentManager = di.direct.instance<UstadTorrentManager>()
 
@@ -75,7 +75,6 @@ class ContainerTorrentDownloadJob(private var context: Any, private val endpoint
 
         // check if torrent file already exists
         val torrentFile = File(torrentDir, "$containerUid.torrent")
-
         return withContext(Dispatchers.Default) {
 
             try {
@@ -142,9 +141,9 @@ class ContainerTorrentDownloadJob(private var context: Any, private val endpoint
                         }
                     }
 
-                    ustadTorrentManager.addDownloadListener(containerUid, torrentListener)
+                    ustadTorrentManager.addDownloadListener(containerUid, torrentListener as TorrentDownloadListener)
                     torrentDeferred.await()
-                    ustadTorrentManager.removeDownloadListener(containerUid, torrentListener)
+                    ustadTorrentManager.removeDownloadListener(containerUid)
 
                 }
 
@@ -195,6 +194,7 @@ class ContainerTorrentDownloadJob(private var context: Any, private val endpoint
                 progress.onProgress(contentJobItem)
 
             } catch (c: CancellationException) {
+                ustadTorrentManager.removeDownloadListener(containerUid)
                 throw c
             }
 

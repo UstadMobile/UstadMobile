@@ -26,8 +26,6 @@ class DeleteContainerPlugin(private var context: Any, private val endpoint: Endp
 
     val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    private val torrentDir = di.direct.instance<File>(tag = DiTag.TAG_TORRENT_DIR)
-
     private val ustadTorrentManager: UstadTorrentManager = di.direct.instance<UstadTorrentManager>()
 
     override val pluginId: Int

@@ -5,14 +5,5 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class UstadCommunicationManager(
-        val workerLE: ExecutorService = Executors.newFixedThreadPool(10),
-        val validatorLE: ExecutorService = Executors.newFixedThreadPool(4))
-    : CommunicationManager(workerLE, validatorLE){
-
-    override fun stop() {
-        super.stop()
-        workerLE.shutdown()
-        validatorLE.shutdown()
-    }
-
-}
+        val worker: CommunicationWorkers
+) : CommunicationManager(worker.workerLE, worker.validatorLE)

@@ -10,7 +10,9 @@ import com.ustadmobile.core.util.DiTag
 import kotlinx.coroutines.*
 import org.kodein.di.DI
 import org.kodein.di.direct
+import org.kodein.di.on
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.io.File
@@ -18,17 +20,15 @@ import java.io.File
 
 class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : UstadTorrentManager {
 
-    private val torrentDir: File = di.direct.instance<File>(tag = DiTag.TAG_TORRENT_DIR)
+    private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
 
-    private val containerDir = di.direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+    private val containerDir by di.on(endpoint).instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
     private var containerInfoHashMap = mutableMapOf<Long, String>()
 
     private var containerManagerMap = mutableMapOf<Long, TorrentManager>()
 
     private var containerListenerMap = mutableMapOf<Long, DownloadListenerAdapter>()
-
-    private val communicationManager = di.direct.instance<UstadCommunicationManager>()
 
     // lock add and removeTorrent
     private val torrentLock = Mutex()
@@ -38,7 +38,7 @@ class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : Ust
     }
 
     override suspend fun start() {
-        torrentDir.listFiles { file: File ->
+        torrentDir.listFiles() { file: File ->
             file.name.endsWith(".torrent")
         }?.forEach { torrentFile ->
             torrentLock.withLock {
@@ -50,6 +50,7 @@ class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : Ust
     override suspend fun addTorrent(containerUid: Long, downloadPath: String?) {
         withContext(Dispatchers.Default){
 
+            val communicationManager: UstadCommunicationManager = di.direct.instanceOrNull() ?: throw IllegalStateException("no connectivity")
             val startTime = System.currentTimeMillis()
 
             val torrentFile = File(torrentDir, "$containerUid.torrent")
@@ -82,7 +83,7 @@ class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : Ust
         manager?.addListener(adapter)
     }
 
-    override fun removeDownloadListener(containerUid: Long, downloadListener: TorrentDownloadListener) {
+    override fun removeDownloadListener(containerUid: Long) {
         val manager = containerManagerMap.remove(containerUid)
         val adapter = containerListenerMap.remove(containerUid)
         manager?.removeListener(adapter)
@@ -94,6 +95,7 @@ class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : Ust
         if(torrentFile.exists()){
             torrentFile.delete()
         }
+        val communicationManager: UstadCommunicationManager = di.direct.instanceOrNull() ?: throw IllegalStateException("no connectivity")
         communicationManager.removeTorrent(hexInfoHash)
     }
 
