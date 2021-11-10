@@ -31,7 +31,11 @@ import org.xmlpull.v1.XmlPullParserFactory
 import kotlinx.coroutines.*
 import kotlinx.coroutines.CancellationException
 
-class XapiTypePluginCommonJvm(private var context: Any, private val endpoint: Endpoint, override val di: DI) : ContentPlugin {
+class XapiTypePluginCommonJvm(
+        private var context: Any,
+        private val endpoint: Endpoint,
+        override val di: DI
+) : ContentPlugin {
 
     val viewName: String
         get() = XapiPackageContentView.VIEW_NAME

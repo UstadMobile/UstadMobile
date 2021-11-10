@@ -50,7 +50,11 @@ val licenseMap = mapOf(
         "U" to ContentEntry.LICENSE_TYPE_OTHER
 )
 
-class H5PTypePluginCommonJvm(private var context: Any, val endpoint: Endpoint,override val di: DI): ContentPlugin {
+class H5PTypePluginCommonJvm(
+        private var context: Any,
+        val endpoint: Endpoint,
+        override val di: DI
+): ContentPlugin {
 
         val viewName: String
     get() = XapiPackageContentView.VIEW_NAME

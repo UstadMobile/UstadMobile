@@ -44,7 +44,11 @@ import org.kodein.di.on
 import java.io.File
 
 
-class VideoTypePluginAndroid(private var context: Any, private val endpoint: Endpoint, override val di: DI) : VideoTypePlugin() {
+class VideoTypePluginAndroid(
+        private var context: Any,
+        private val endpoint: Endpoint,
+        override val di: DI
+) : VideoTypePlugin() {
 
     private val VIDEO_ANDROID = "VideoPluginAndroid"
 

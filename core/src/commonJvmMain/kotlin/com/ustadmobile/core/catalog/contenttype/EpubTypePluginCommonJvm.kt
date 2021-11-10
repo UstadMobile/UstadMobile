@@ -33,7 +33,11 @@ import java.util.zip.ZipInputStream
 import kotlinx.coroutines.*
 import kotlinx.coroutines.CancellationException
 
-class EpubTypePluginCommonJvm(private var context: Any, private val endpoint: Endpoint, override val di: DI) : ContentPlugin {
+class EpubTypePluginCommonJvm(
+        private var context: Any,
+        private val endpoint: Endpoint,
+        override val di: DI
+) : ContentPlugin {
 
     val viewName: String
         get() = EpubContentView.VIEW_NAME

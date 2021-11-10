@@ -4,7 +4,9 @@ import com.turn.ttorrent.client.PeerInformation
 import com.turn.ttorrent.client.PieceInformation
 import com.turn.ttorrent.client.TorrentListener
 
-class DownloadListenerAdapter(val destListener: TorrentDownloadListener) : TorrentListener {
+class DownloadListenerAdapter(
+        val destListener: TorrentDownloadListener
+) : TorrentListener {
 
     var totalDownloaded: Int = 0
 

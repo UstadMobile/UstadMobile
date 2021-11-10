@@ -18,7 +18,10 @@ import kotlinx.coroutines.sync.withLock
 import java.io.File
 
 
-class UstadTorrentManagerImpl(val endpoint: Endpoint, override val di: DI) : UstadTorrentManager {
+class UstadTorrentManagerImpl(
+        val endpoint: Endpoint,
+        override val di: DI
+) : UstadTorrentManager {
 
     private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
 

@@ -34,7 +34,11 @@ import java.io.InputStream
 import java.net.URI
 import kotlin.coroutines.cancellation.CancellationException
 
-class ContainerTorrentDownloadJob(private var context: Any, private val endpoint: Endpoint, override val di: DI) : ContentPlugin {
+class ContainerTorrentDownloadJob(
+        private var context: Any,
+        private val endpoint: Endpoint,
+        override val di: DI
+) : ContentPlugin {
 
     private val httpClient: HttpClient = di.direct.instance()
 
