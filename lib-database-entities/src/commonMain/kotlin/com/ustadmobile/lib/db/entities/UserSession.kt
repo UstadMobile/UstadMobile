@@ -25,6 +25,27 @@ import kotlinx.serialization.Serializable
 //
 //    """])
 @Serializable
+@ReplicateEntity(tableId = UserSession.TABLE_ID, tracker = UserSessionTrkr::class)
+@Triggers(arrayOf(
+    Trigger(name="usersession_remote_ins",
+        order = Trigger.Order.INSTEAD_OF,
+        on = Trigger.On.RECEIVEVIEW,
+        events = [Trigger.Event.INSERT],
+        sqlStatements = arrayOf(
+            """
+                REPLACE INTO UserSession(usUid, usPcsn, usLcsn, usLcb, usLct, usPersonUid, 
+                             usClientNodeId, usStartTime, usEndTime, usStatus, usReason, usAuth, 
+                             usSessionType)
+                      VALUES (NEW.usUid, NEW.usPcsn, NEW.usLcsn, NEW.usLcb, NEW.usLct, NEW.usPersonUid,
+                             NEW.usClientNodeId, NEW.usStartTime, NEW.usEndTime, NEW.usStatus, 
+                             NEW.usReason, NEW.usAuth, NEW.usSessionType)
+                /*postgres ON CONFLICT (usUid) DO UPDATE
+                             SET usStatus = EXCLUDED.usStatus,
+                                 usEndTime = EXCLUDED.usEndTime,
+                                 usReason = EXCLUDED.usReason */
+            """
+        ))
+))
 class UserSession {
 
     @PrimaryKey(autoGenerate = true)
@@ -39,6 +60,7 @@ class UserSession {
     @LastChangedBy
     var usLcb: Int = 0
 
+    @ReplicationVersionId
     @LastChangedTime
     var usLct: Long = 0
 
