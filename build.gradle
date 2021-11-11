@@ -2,10 +2,10 @@
 import org.apache.tools.ant.filters.*
 
 buildscript {
-    ext.version_kotlin = '1.5.21'
+    ext.version_kotlin = '1.5.31'
     ext.version_shadow = "7.1.0"
     ext.version_gradle_versions_plugin = "0.28.0"
-    ext.atomicfu_version = '0.16.2'
+    ext.atomicfu_version = '0.16.3'
     ext.version_execfork = "0.1.15"
 
     repositories {
@@ -17,12 +17,12 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.2'
-        classpath 'com.google.gms:google-services:4.3.8'
+        classpath 'com.android.tools.build:gradle:7.0.3'
+        classpath 'com.google.gms:google-services:4.3.10'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
         classpath "org.jetbrains.kotlinx:atomicfu-gradle-plugin:$atomicfu_version"
-        classpath "com.gradle:gradle-enterprise-gradle-plugin:3.1.1"
+        classpath "com.gradle:gradle-enterprise-gradle-plugin:3.7.1"
         classpath "com.github.ben-manes:gradle-versions-plugin:$version_gradle_versions_plugin"
 
         // NOTE: Do not place your application dependencies here; they belong
