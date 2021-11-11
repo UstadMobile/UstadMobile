@@ -112,9 +112,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
                     val networkManager: NetworkManagerBle = di.direct.instance()
                     it.connectivityStatusDao.commitLiveConnectivityStatus(networkManager.connectivityStatus)
                 }
-            GlobalScope.launch {
-                di.on(context).direct.instance<UstadTorrentManager>().start()
-            }
             db
         }
 
@@ -270,7 +267,9 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<UstadTorrentManager>() with scoped(EndpointScope.Default).singleton {
-            UstadTorrentManagerImpl(endpoint = context, di = di)
+            UstadTorrentManagerImpl(endpoint = context, di = di).also{
+                instance<ConnectionManager>().addCommunicationManagerListener(it)
+            }
         }
 
         bind<UstadCommunicationManager>() with provider {

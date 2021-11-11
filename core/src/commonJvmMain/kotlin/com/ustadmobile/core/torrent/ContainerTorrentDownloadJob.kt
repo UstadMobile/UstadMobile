@@ -199,6 +199,9 @@ class ContainerTorrentDownloadJob(
 
             } catch (c: CancellationException) {
                 ustadTorrentManager.removeDownloadListener(containerUid)
+                if(torrentFile.exists()){
+                    torrentFile.delete()
+                }
                 throw c
             }
 
