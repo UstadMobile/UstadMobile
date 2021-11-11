@@ -5,7 +5,6 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
-import com.ustadmobile.core.catalog.contenttype.H5PTypePluginCommonJvm
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ProcessContext

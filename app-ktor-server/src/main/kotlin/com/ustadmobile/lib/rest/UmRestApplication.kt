@@ -113,7 +113,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
     val dbMode = dbModeOverride ?:
         appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
-    val trackerAnnounceUrlConfig: String = appConfig.propertyOrNull("ktor.ustad.trackerAnnounceUrl")?.getString() ?: ""
+    val trackerAnnounceUrlConfig: String = appConfig.propertyOrNull("ktor.ustad.trackerAnnounceUrl")?.getString()
+            ?: throw IllegalStateException("need trackerAnnounceUrl on conf file. check README")
     val trackerAnnounceUrl = URL(trackerAnnounceUrlConfig)
     val dataDirPath = File(environment.config.propertyOrNull("ktor.ustad.datadir")?.getString() ?: "data")
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
