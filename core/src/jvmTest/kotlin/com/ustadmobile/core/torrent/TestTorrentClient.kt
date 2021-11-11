@@ -36,7 +36,7 @@ class TestTorrentClient {
                 UstadTorrentManagerImpl(endpoint = context, di = di)
             }
             bind<UstadCommunicationManager>() with singleton {
-                UstadCommunicationManager()
+                UstadCommunicationManager(CommunicationWorkers())
             }
             onReady {
                 instance<UstadCommunicationManager>().start(InetAddress.getByName(trackerUrl.host))

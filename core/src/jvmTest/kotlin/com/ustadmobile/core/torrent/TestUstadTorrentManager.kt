@@ -103,6 +103,12 @@ class TestUstadTorrentManager {
 
     private lateinit var serverRepo: UmAppDatabase
 
+    private lateinit var tracker: Tracker
+
+    private lateinit var serverCommManager: UstadCommunicationManager
+
+    private lateinit var clientCommManager: UstadCommunicationManager
+
     private var fileToDownloadPath = "/com/ustadmobile/core/contentformats/english.h5p"
 
     @Before
@@ -138,6 +144,8 @@ class TestUstadTorrentManager {
         }
 
         serverTrackerUrl = URL("http://127.0.0.1:6677/announce")
+        tracker = Tracker(serverTrackerUrl.port, serverTrackerUrl.toString())
+        serverCommManager =  UstadCommunicationManager(CommunicationWorkers())
 
         server = embeddedServer(Netty, 7711) {
              install(DIFeature) {
@@ -164,10 +172,10 @@ class TestUstadTorrentManager {
                     serverTorrentManager
                 }
                 bind<UstadCommunicationManager>() with singleton {
-                    UstadCommunicationManager()
+                   serverCommManager
                 }
                 bind<Tracker>() with singleton {
-                    Tracker(serverTrackerUrl.port, serverTrackerUrl.toString())
+                   tracker
                 }
                 bind<TorrentTracker>() with scoped(EndpointScope.Default).singleton {
                     TorrentTracker(endpoint = context, di)
@@ -237,6 +245,8 @@ class TestUstadTorrentManager {
         }
         server.start()
 
+        clientCommManager = UstadCommunicationManager(CommunicationWorkers())
+
         clientDi = DI {
             import(ustadTestRule.diModule)
             bind<ContainerTorrentDownloadJob>() with scoped(ustadTestRule.endpointScope).singleton {
@@ -249,7 +259,7 @@ class TestUstadTorrentManager {
                 UstadTorrentManagerImpl(endpoint = context, di = di)
             }
             bind<UstadCommunicationManager>() with singleton {
-                UstadCommunicationManager()
+                clientCommManager
             }
             onReady {
                 instance<UstadCommunicationManager>().start(InetAddress.getByName("0.0.0.0"))
@@ -359,6 +369,12 @@ class TestUstadTorrentManager {
 
     @AfterTest
     fun after(){
+        tracker.stop()
+        serverCommManager.stop()
+        clientCommManager.stop()
+        runBlocking {
+            serverTorrentManager.stop()
+        }
         server.stop(10, 10)
     }
 

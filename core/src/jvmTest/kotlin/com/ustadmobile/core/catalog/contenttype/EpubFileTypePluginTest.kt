@@ -5,6 +5,7 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.torrent.CommunicationWorkers
 import com.ustadmobile.core.torrent.UstadCommunicationManager
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.torrent.UstadTorrentManagerImpl
@@ -53,7 +54,7 @@ class EpubFileTypePluginTest {
                 UstadTorrentManagerImpl(endpoint = context, di = di)
             }
             bind<UstadCommunicationManager>() with singleton {
-                UstadCommunicationManager()
+                UstadCommunicationManager(CommunicationWorkers())
             }
             onReady {
                 instance<UstadCommunicationManager>().start(InetAddress.getByName(trackerUrl.host))
