@@ -10,7 +10,6 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.io.ext.addEntryToContainerFromResource
@@ -46,6 +45,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -238,7 +238,6 @@ class TestUstadTorrentManager {
                 }
             }
             routing {
-                UmAppDatabase_KtorRoute(true)
                 ContainerDownload()
                 TorrentFileRoute()
             }
@@ -367,7 +366,7 @@ class TestUstadTorrentManager {
         }
     }
 
-    @AfterTest
+    @After
     fun after(){
         tracker.stop()
         serverCommManager.stop()
