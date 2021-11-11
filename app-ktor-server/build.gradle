@@ -23,6 +23,11 @@ compileTestKotlin {
     }
 }
 
+sourceSets.main {
+    java.srcDirs("$buildDir/generated/source/door")
+}
+
+
 dependencies {
     implementation "io.ktor:ktor-client-core:$version_ktor"
     implementation "io.ktor:ktor-client-json:$version_ktor"

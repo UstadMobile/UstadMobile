@@ -219,9 +219,9 @@ class TestUstadTorrentManager {
                                     this.contentJobItem = jobItem
                                 }
 
-                                containerTorrentDownloadJob.processJob(jobAndItem, ProcessContext(temporaryFolder.newFolder().toDoorUri(), mutableMapOf())){
-
-                                        }
+                                containerTorrentDownloadJob.processJob(jobAndItem,
+                                    ProcessContext(temporaryFolder.newFolder().toDoorUri(),
+                                        mutableMapOf())) { }
                             }
 
                         }
