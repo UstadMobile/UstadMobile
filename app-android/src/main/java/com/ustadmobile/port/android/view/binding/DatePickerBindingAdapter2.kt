@@ -124,11 +124,6 @@ fun TextView.getDateTimeInMillis(): Long {
     return adapterCalendar.timeInMillis
 }
 
-private val singleDayPickCallback = SingleDayPickCallback { singleDay ->
-    {
-    }
-}
-
 const val PICKER_TAG = "PrimeDatePickerBottomSheet"
 
 @BindingAdapter("dateTimeInMillisAttrChanged")
@@ -147,32 +142,28 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
 
             val calendarType = CalendarType.PERSIAN
             val locale = Locale(localeString)
-            val pickType = PickType.SINGLE
-            val minDateCalendar = null
-            val maxDateCalendar = null
 
+            val timeOffset = Long.MAX_VALUE - (1000*60*60*26)
+            val calTimeInMillis = cal.timeInMillis
             val today = CalendarFactory.newInstance(calendarType, locale)
-            if(cal.timeInMillis >0) {
-                today.timeInMillis = cal.timeInMillis
+
+            if(calTimeInMillis < timeOffset && calTimeInMillis > 0){
+                today.timeInMillis = calTimeInMillis
             }
 
             var datePicker: PrimeDatePicker? = null
 
             datePicker = PrimeDatePicker.Companion.dialogWith(today)
-                .pickSingleDay(
-                    SingleDayPickCallback { singleDay ->
-                        text = singleDay.get(Calendar.YEAR).toString() + "/" +
-                                singleDay.get(Calendar.MONTH).toString() + "/" +
-                                singleDay.get(Calendar.DAY_OF_MONTH).toString()
-                    }
-                )
+                .pickSingleDay()
+                .initiallyPickedSingleDay(today)
                 .build()
 
             datePicker.setDayPickCallback(
                 SingleDayPickCallback { singleDay ->
-                    text = singleDay.get(Calendar.YEAR).toString() + "/" +
-                            singleDay.get(Calendar.MONTH).toString() + "/" +
+                    val dateText = singleDay.get(Calendar.YEAR).toString() + "/" +
+                            (singleDay.get(Calendar.MONTH) + 1).toString() + "/" +
                             singleDay.get(Calendar.DAY_OF_MONTH).toString()
+                    text = dateText
                     adapterCalendar.timeInMillis = singleDay.timeInMillis
                     inverseBindingListener.onChange()
                 }
@@ -238,9 +229,6 @@ fun TextView.setTextFromToDateTimeMillis(textFromDateLong: Long, textToDateLong:
 
         val calendarType = CalendarType.PERSIAN
         val locale = Locale(localeString)
-        val pickType = PickType.SINGLE
-        val minDateCalendar = null
-        val maxDateCalendar = null
         val today = CalendarFactory.newInstance(calendarType, locale)
         val timeZone =adapterDateFormat.timeZone
 
@@ -252,11 +240,11 @@ fun TextView.setTextFromToDateTimeMillis(textFromDateLong: Long, textToDateLong:
             it.timeInMillis = textToDateLong}
 
         val persianFromText = persianFromCalendar.get(Calendar.YEAR).toString() + "/" +
-                persianFromCalendar.get(Calendar.MONTH).toString() + "/" +
+                (persianFromCalendar.get(Calendar.MONTH) + 1).toString() + "/" +
                 persianFromCalendar.get(Calendar.DAY_OF_MONTH).toString()
 
         val persianToText = persianToCalendar.get(Calendar.YEAR).toString() + "/" +
-                persianToCalendar.get(Calendar.MONTH).toString() + "/" +
+                (persianToCalendar.get(Calendar.MONTH) + 1).toString() + "/" +
                 persianToCalendar.get(Calendar.DAY_OF_MONTH).toString()
 
         "${if (textFromDateLong > 0) persianFromText else ""} -" +
