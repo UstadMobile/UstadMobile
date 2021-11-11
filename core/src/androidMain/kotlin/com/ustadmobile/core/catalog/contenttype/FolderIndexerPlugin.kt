@@ -23,7 +23,11 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.lang.Exception
 
-class FolderIndexerPlugin(private var context: Any, private val endpoint: Endpoint, override val di: DI): ContentPlugin {
+class FolderIndexerPlugin(
+        private var context: Any,
+        private val endpoint: Endpoint,
+        override val di: DI
+): ContentPlugin {
 
     override val pluginId: Int
         get() = PLUGIN_ID

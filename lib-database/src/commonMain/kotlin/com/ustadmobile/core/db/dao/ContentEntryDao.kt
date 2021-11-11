@@ -232,8 +232,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                                                         WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
                                                      ORDER BY cntLastModified DESC LIMIT 1)
                  WHERE ccjClazzUid = :clazzUid 
-                   AND ccjActive
-                   AND (NOT ContentEntry.ceInactive OR ContentEntry.ceInactive = :showHidden)
+                  AND (ccjActive OR NOT ccjActive = :showHidden)
               ORDER BY CASE(:sortOrder)
                         WHEN $SORT_TITLE_ASC THEN ContentEntry.title
                         ELSE ''

@@ -12,7 +12,8 @@ import java.io.File
 actual suspend fun deleteFilesForContentEntry(
         db: UmAppDatabase,
         contentEntryUid: Long,
-        ustadTorrentManager: UstadTorrentManager): Int{
+        ustadTorrentManager: UstadTorrentManager
+): Int{
 
     var numberOfFailedDeletion = 0
     withContext(Dispatchers.IO) {

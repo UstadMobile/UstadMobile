@@ -21,10 +21,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.io.UploadSessionManager
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
-import com.ustadmobile.core.torrent.ContainerTorrentDownloadJob
-import com.ustadmobile.core.torrent.UstadCommunicationManager
-import com.ustadmobile.core.torrent.UstadTorrentManager
-import com.ustadmobile.core.torrent.UstadTorrentManagerImpl
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
@@ -34,6 +30,7 @@ import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.core.catalog.contenttype.ApacheIndexerPlugin
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
+import com.ustadmobile.core.torrent.*
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.PersonAuth2
 import com.ustadmobile.lib.rest.ext.databasePropertiesFromSection
@@ -261,7 +258,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             TorrentTracker(endpoint = context, di)
         }
         bind<UstadCommunicationManager>() with singleton {
-            UstadCommunicationManager()
+            UstadCommunicationManager(CommunicationWorkers())
         }
         bind<UstadTorrentManager>() with scoped(EndpointScope.Default).singleton {
             UstadTorrentManagerImpl(endpoint = context, di)

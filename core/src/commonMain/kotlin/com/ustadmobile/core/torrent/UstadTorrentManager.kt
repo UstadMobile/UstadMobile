@@ -10,7 +10,7 @@ interface UstadTorrentManager : DIAware {
 
     fun addDownloadListener(containerUid: Long,downloadListener: TorrentDownloadListener)
 
-    fun removeDownloadListener(containerUid: Long, downloadListener: TorrentDownloadListener)
+    fun removeDownloadListener(containerUid: Long)
 
     suspend fun removeTorrent(containerUid: Long)
 

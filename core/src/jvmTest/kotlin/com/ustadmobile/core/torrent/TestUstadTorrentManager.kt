@@ -9,7 +9,6 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.io.ext.addEntryToContainerFromResource
@@ -45,6 +44,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -102,6 +102,12 @@ class TestUstadTorrentManager {
 
     private lateinit var serverRepo: UmAppDatabase
 
+    private lateinit var tracker: Tracker
+
+    private lateinit var serverCommManager: UstadCommunicationManager
+
+    private lateinit var clientCommManager: UstadCommunicationManager
+
     private var fileToDownloadPath = "/com/ustadmobile/core/contentformats/english.h5p"
 
     @Before
@@ -137,6 +143,8 @@ class TestUstadTorrentManager {
         }
 
         serverTrackerUrl = URL("http://127.0.0.1:6677/announce")
+        tracker = Tracker(serverTrackerUrl.port, serverTrackerUrl.toString())
+        serverCommManager =  UstadCommunicationManager(CommunicationWorkers())
 
         server = embeddedServer(Netty, 7711) {
              install(DIFeature) {
@@ -163,10 +171,10 @@ class TestUstadTorrentManager {
                     serverTorrentManager
                 }
                 bind<UstadCommunicationManager>() with singleton {
-                    UstadCommunicationManager()
+                   serverCommManager
                 }
                 bind<Tracker>() with singleton {
-                    Tracker(serverTrackerUrl.port, serverTrackerUrl.toString())
+                   tracker
                 }
                 bind<TorrentTracker>() with scoped(EndpointScope.Default).singleton {
                     TorrentTracker(endpoint = context, di)
@@ -210,9 +218,9 @@ class TestUstadTorrentManager {
                                     this.contentJobItem = jobItem
                                 }
 
-                                containerTorrentDownloadJob.processJob(jobAndItem, ProcessContext(temporaryFolder.newFolder().toDoorUri(), mutableMapOf())){
-
-                                        }
+                                containerTorrentDownloadJob.processJob(jobAndItem,
+                                    ProcessContext(temporaryFolder.newFolder().toDoorUri(),
+                                        mutableMapOf())) { }
                             }
 
                         }
@@ -229,12 +237,13 @@ class TestUstadTorrentManager {
                 }
             }
             routing {
-                UmAppDatabase_KtorRoute(true)
                 ContainerDownload()
                 TorrentFileRoute()
             }
         }
         server.start()
+
+        clientCommManager = UstadCommunicationManager(CommunicationWorkers())
 
         clientDi = DI {
             import(ustadTestRule.diModule)
@@ -248,7 +257,7 @@ class TestUstadTorrentManager {
                 UstadTorrentManagerImpl(endpoint = context, di = di)
             }
             bind<UstadCommunicationManager>() with singleton {
-                UstadCommunicationManager()
+                clientCommManager
             }
             onReady {
                 instance<UstadCommunicationManager>().start(InetAddress.getByName("0.0.0.0"))
@@ -356,8 +365,14 @@ class TestUstadTorrentManager {
         }
     }
 
-    @AfterTest
+    @After
     fun after(){
+        tracker.stop()
+        serverCommManager.stop()
+        clientCommManager.stop()
+        runBlocking {
+            serverTorrentManager.stop()
+        }
         server.stop(10, 10)
     }
 

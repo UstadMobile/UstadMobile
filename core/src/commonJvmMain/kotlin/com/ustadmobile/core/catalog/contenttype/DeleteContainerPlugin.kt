@@ -20,13 +20,15 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
 
-class DeleteContainerPlugin(private var context: Any, private val endpoint: Endpoint, override val di: DI): ContentPlugin {
+class DeleteContainerPlugin(
+        private var context: Any,
+        private val endpoint: Endpoint,
+        override val di: DI
+): ContentPlugin {
 
     val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
     val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
-
-    private val torrentDir = di.direct.instance<File>(tag = DiTag.TAG_TORRENT_DIR)
 
     private val ustadTorrentManager: UstadTorrentManager = di.direct.instance<UstadTorrentManager>()
 
