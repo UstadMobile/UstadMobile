@@ -145,18 +145,6 @@ android {
         missingDimensionStrategy 'api', 'api18'
     }
 
-    //flavorDimensions "config"
-
-//    productFlavors {
-//        /**
-//         * Used for day to day work in Android studio to avoid the need to use multidex when running tests
-//         */
-//        devMinApi21 {
-//            dimension "config"
-//            minSdkVersion 21
-//        }
-//    }
-
     buildTypes {
         release {
             minifyEnabled true
@@ -486,26 +474,3 @@ afterEvaluate {
         }
     }
 }
-
-/*
-publishing {
-    publications {
-        //For the moment - publish only vanilla debug variant. Can publish others as per:
-        // https://github.com/wupdigital/android-maven-publish
-        mavenLocalconfigAar(MavenPublication) {
-            from components.findByName("androidVanillaDebug")
-            groupId rootProject.group
-            artifactId project.name
-            version rootProject.version
-        }
-
-    }
-
-    repositories {
-        //Set this in projectdir/extrasettings.gradle
-        maven {
-            url rootProject.ext.buildConfigProperties['repo.dir']
-        }
-    }
-}
-*/

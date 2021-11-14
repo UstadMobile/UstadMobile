@@ -4,10 +4,8 @@ plugins {
     id 'kotlin'
     id 'maven-publish'
 
-    // 4/Nov/2021: This causes any multiplatform component consuming it to fail to resolve dependencies
-    //id 'com.github.johnrengelman.shadow' version "$version_shadow"
+    id 'com.github.johnrengelman.shadow' version "$version_shadow"
     id 'kotlinx-serialization'
-    id 'com.github.psxpaul.execfork' version "$version_execfork"
 }
 
 

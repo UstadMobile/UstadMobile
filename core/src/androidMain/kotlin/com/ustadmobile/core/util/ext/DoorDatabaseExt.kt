@@ -9,7 +9,7 @@ internal class ChangeListenerRequestInvalidationObserver(
     private val changeListenerRequest: ChangeListenerRequest
 ) : InvalidationTracker.Observer(changeListenerRequest.tableNames.toTypedArray()) {
     override fun onInvalidated(tables: MutableSet<String>) {
-        changeListenerRequest.onChange(tables.toList())
+        changeListenerRequest.onInvalidated.onTablesInvalidated(tables.toList())
     }
 
     override fun equals(other: Any?): Boolean {

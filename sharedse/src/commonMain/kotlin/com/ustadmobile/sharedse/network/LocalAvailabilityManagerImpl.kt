@@ -87,11 +87,6 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
                 if(statusRequestUids.isNotEmpty()) {
                     sendRequest(networkNode, statusRequestUids.toList())
                 }
-
-                val mirrorId = (repo as? DoorDatabaseRepository)?.addMirror(
-                        "http://localhost:$localHttpPort/bleproxy/${networkNode.bluetoothMacAddress}/${UMURLEncoder.encodeUTF8(endpoint.url)}/",
-                        100) ?: 0
-                mirrorIdMap.takeIf { mirrorId != 0 }?.put(bluetoothAddr, mirrorId)
             }
         }
     }
@@ -100,8 +95,6 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
         val lostBluetoothAddr = node.bluetoothMacAddress ?: return
         GlobalScope.launch {
             handleNodesLost(listOf(lostBluetoothAddr))
-            val mirrorId = mirrorIdMap.get(lostBluetoothAddr) ?: 0
-            (repo as? DoorDatabaseRepository)?.takeIf { mirrorId != 0 }?.removeMirror(mirrorId)
         }
     }
 
