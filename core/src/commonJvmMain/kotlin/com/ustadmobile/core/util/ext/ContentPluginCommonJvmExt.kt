@@ -1,5 +1,6 @@
 package com.ustadmobile.core.util.ext
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
@@ -8,12 +9,22 @@ import com.ustadmobile.door.DoorUri
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
 import java.io.File
+import org.kodein.di.DI
+import org.kodein.di.on
+import org.kodein.di.instance
+import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.door.ext.DoorTag
 
 actual suspend fun deleteFilesForContentEntry(
-        db: UmAppDatabase,
         contentEntryUid: Long,
-        ustadTorrentManager: UstadTorrentManager
-): Int{
+        di: DI,
+        endpoint: Endpoint
+): Int {
+
+    val torrentDirFile: File by di.on(endpoint).instance()
+    val db:UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
+    val torrentManager: UstadTorrentManager by di.on(endpoint).instance()
+
 
     var numberOfFailedDeletion = 0
     withContext(Dispatchers.IO) {
@@ -39,7 +50,11 @@ actual suspend fun deleteFilesForContentEntry(
         val containers = db.containerDao.findContainersForContentEntryUid(contentEntryUid)
 
         containers.forEach {
-            ustadTorrentManager.removeTorrent(it.containerUid)
+            torrentManager.removeTorrent(it.containerUid)
+            val torrentFile = File(torrentDirFile, "${it.containerUid}.torrent")
+            if(torrentFile.exists()){
+                torrentFile.delete()
+            }
         }
     }
 

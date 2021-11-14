@@ -9,6 +9,7 @@ import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.core.io.ext.emptyRecursively
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.torrent.UstadTorrentManager
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.DoorUri
@@ -35,7 +36,7 @@ import kotlin.math.min
  */
 class ContentJobRunner(
     val jobId: Long,
-    endpoint: Endpoint,
+    val endpoint: Endpoint,
     override val di: DI,
     val numProcessors: Int = DEFAULT_NUM_PROCESSORS,
     val maxItemAttempts: Int = DEFAULT_NUM_RETRIES
@@ -61,7 +62,7 @@ class ContentJobRunner(
 
     private val connectivityLiveData: ConnectivityLiveData by on(endpoint).instance()
 
-    private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
+
 
     @ExperimentalCoroutinesApi
     private fun CoroutineScope.produceJobs() = produce<ContentJobItemAndContentJob> {
@@ -187,9 +188,9 @@ class ContentJobRunner(
                         processException is FatalContentJobException -> JobStatus.FAILED
                         processException is ConnectivityException -> JobStatus.QUEUED
                         processException is CancellationException && processException !is ConnectivityException -> {
-                            deleteFilesForContentEntry(db,
-                                            item.contentJobItem?.cjiContentEntryUid ?: 0,
-                                            ustadTorrentManager)
+                            deleteFilesForContentEntry(
+                                    item.contentJobItem?.cjiContentEntryUid ?: 0,
+                                            di, endpoint)
                             JobStatus.CANCELED
                         }
                         (item.contentJobItem?.cjiAttemptCount ?: maxItemAttempts) >= maxItemAttempts -> JobStatus.FAILED

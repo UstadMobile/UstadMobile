@@ -2,8 +2,6 @@ package com.ustadmobile.core.torrent
 
 import com.turn.ttorrent.client.*
 import com.turn.ttorrent.client.storage.FairPieceStorageFactory
-import com.turn.ttorrent.tracker.TrackedTorrent
-import com.turn.ttorrent.tracker.Tracker
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.io.ext.UstadFileCollectionStorage.createFileCollectionStorage
 import com.ustadmobile.core.util.DiTag
@@ -21,7 +19,6 @@ import java.io.File
 interface CommunicationManagerListener {
 
     fun onCommunicationManagerChanged(
-            communicationManager: UstadCommunicationManager?,
             meteredNetwork: Boolean
     )
 }
@@ -37,9 +34,18 @@ class UstadTorrentManagerImpl(
 
     private var containerInfoHashMap = mutableMapOf<Long, String>()
 
+    private var activeTorrentDownloadMap = mutableMapOf<Long, ActiveTorrentInfo>()
+
+ /*   private var containerDownloadPathMap = mutableMapOf<Long, String>()
+
     private var containerManagerMap = mutableMapOf<Long, TorrentManager>()
 
-    private var containerListenerMap = mutableMapOf<Long, DownloadListenerAdapter>()
+    private var containerListenerMap = mutableMapOf<Long, DownloadListenerAdapter>()*/
+
+    // on android, di uses connectionManager and a provider to get the current communicationManager
+    // on jvm, communicationManager is a singleton
+    private val communicationManager: UstadCommunicationManager?
+        get() = di.direct.instanceOrNull()
 
     // lock add and removeTorrent
     private val torrentLock = Mutex()
@@ -48,7 +54,11 @@ class UstadTorrentManagerImpl(
         FairPieceStorageFactory.INSTANCE
     }
 
-    override suspend fun start() {
+    private fun requireCommunicationManager(): UstadCommunicationManager{
+        return communicationManager ?: throw IllegalStateException("no communicationManager found")
+    }
+
+    override suspend fun startSeeding() {
         torrentDir.listFiles() { file: File ->
             file.name.endsWith(".torrent")
         }?.forEach { torrentFile ->
@@ -61,7 +71,6 @@ class UstadTorrentManagerImpl(
     override suspend fun addTorrent(containerUid: Long, downloadPath: String?) {
         withContext(Dispatchers.Default){
 
-            val communicationManager: UstadCommunicationManager = di.direct.instanceOrNull() ?: throw IllegalStateException("no connectivity")
             val startTime = System.currentTimeMillis()
 
             val torrentFile = File(torrentDir, "$containerUid.torrent")
@@ -69,10 +78,8 @@ class UstadTorrentManagerImpl(
             val containerFilesDir = if(downloadPath != null) File(downloadPath)
                                     else File(containerDir, containerUid.toString())
             containerFilesDir.mkdirs()
-
             if(!torrentFile.exists())
                 throw IllegalArgumentException("torrent file does not exist ${torrentFile.absolutePath}")
-
 
             // create the torrent
             val metadataProvider = FileMetadataProvider(torrentFile.absolutePath)
@@ -82,40 +89,50 @@ class UstadTorrentManagerImpl(
             // add to map for ref
             containerInfoHashMap[containerUid] = metadataProvider.torrentMetadata.hexInfoHash
             println("prepared to add torrent in ${System.currentTimeMillis() - startTime} ms")
-            val manager = communicationManager.addTorrent(metadataProvider, pieceStorage)
-            containerManagerMap[containerUid] = manager
+            val manager = requireCommunicationManager().addTorrent(metadataProvider, pieceStorage)
+
+            val checkActiveTorrent = activeTorrentDownloadMap[containerUid]
+            activeTorrentDownloadMap[containerUid] = ActiveTorrentInfo(containerFilesDir.path, manager, checkActiveTorrent?.downloadListener)
         }
     }
 
     override fun addDownloadListener(containerUid: Long, downloadListener: TorrentDownloadListener) {
-        val manager = containerManagerMap[containerUid]
+        val activeTorrent = activeTorrentDownloadMap[containerUid] ?: return
         val adapter = DownloadListenerAdapter(downloadListener)
-        containerListenerMap[containerUid] = adapter
-        manager?.addListener(adapter)
+        activeTorrent.downloadListener = adapter
+        activeTorrent.torrentManager.addListener(adapter)
+        activeTorrentDownloadMap[containerUid] = activeTorrent
     }
 
     override fun removeDownloadListener(containerUid: Long) {
-        val manager = containerManagerMap.remove(containerUid)
-        val adapter = containerListenerMap.remove(containerUid)
-        manager?.removeListener(adapter)
+        val activeTorrent = activeTorrentDownloadMap.remove(containerUid)
+        activeTorrent?.torrentManager?.removeListener(activeTorrent.downloadListener)
     }
 
     override suspend fun removeTorrent(containerUid: Long) {
         val hexInfoHash = containerInfoHashMap.remove(containerUid) ?: return
-        val communicationManager: UstadCommunicationManager = di.direct.instanceOrNull() ?: throw IllegalStateException("no connectivity")
-        communicationManager.removeTorrent(hexInfoHash)
+        removeDownloadListener(containerUid)
+        communicationManager?.removeTorrent(hexInfoHash)
     }
 
-    override suspend fun stop() {
-        containerInfoHashMap.keys.toList().forEach {
-            torrentLock.withLock {
-                removeTorrent(it)
+    override fun onCommunicationManagerChanged(meteredNetwork: Boolean) {
+        GlobalScope.launch(Dispatchers.Default){
+
+            // go through map for active downloads
+            activeTorrentDownloadMap.forEach {
+                // need to re-add the torrents to the new communcationManager
+                torrentLock.withLock{
+                    addTorrent(it.key, it.value.downloadPath)
+                    it.value.torrentManager.addListener(it.value.downloadListener)
+                }
             }
-        }
-    }
+            // start seeding
+            if(!meteredNetwork){
+                startSeeding()
+            }
 
-    override fun onCommunicationManagerChanged(communicationManager: UstadCommunicationManager?, meteredNetwork: Boolean) {
-        // start or stop torrent
+
+        }
     }
 
 }

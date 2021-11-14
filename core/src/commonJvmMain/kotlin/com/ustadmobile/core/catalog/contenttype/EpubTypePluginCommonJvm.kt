@@ -13,7 +13,6 @@ import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.alternative
 import com.ustadmobile.core.util.ext.checkConnectivityToDoJob
-import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag

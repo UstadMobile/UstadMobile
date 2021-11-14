@@ -67,12 +67,10 @@ import java.io.File
 import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.torrent.*
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
-import com.ustadmobile.core.util.getLocalIpAddress
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import kotlinx.coroutines.*
-import java.net.InetAddress
 import java.net.URI
 import java.util.concurrent.Executors
 

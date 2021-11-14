@@ -20,7 +20,6 @@ import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.clearAllTablesAndResetSync
 import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentJobItem
@@ -201,7 +200,7 @@ class TestUstadTorrentManager {
                         serverTorrentTracker.start()
 
                         serverTorrentManager = di.on(Endpoint("localhost")).direct.instance()
-                        serverTorrentManager.start()
+                        serverTorrentManager.startSeeding()
 
                         val containerTorrentDownloadJob: ContainerTorrentDownloadJob = di.on(Endpoint("localhost")).direct.instance()
 
@@ -370,9 +369,6 @@ class TestUstadTorrentManager {
         tracker.stop()
         serverCommManager.stop()
         clientCommManager.stop()
-        runBlocking {
-            serverTorrentManager.stop()
-        }
         server.stop(10, 10)
     }
 

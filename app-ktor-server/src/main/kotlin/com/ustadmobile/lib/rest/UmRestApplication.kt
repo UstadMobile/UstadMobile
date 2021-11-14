@@ -184,7 +184,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                     connectedOrConnecting = true
                 })
                 di.on(context).direct.instance<TorrentTracker>().start()
-                di.on(context).direct.instance<UstadTorrentManager>().start()
+                di.on(context).direct.instance<UstadTorrentManager>().startSeeding()
             }
             db
         }

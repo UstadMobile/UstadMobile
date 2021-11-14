@@ -4,7 +4,7 @@ import org.kodein.di.DIAware
 
 interface UstadTorrentManager : DIAware {
 
-    suspend fun start()
+    suspend fun startSeeding()
 
     suspend fun addTorrent(containerUid: Long, downloadPath: String?)
 
@@ -13,7 +13,5 @@ interface UstadTorrentManager : DIAware {
     fun removeDownloadListener(containerUid: Long)
 
     suspend fun removeTorrent(containerUid: Long)
-
-    suspend fun stop()
 
 }

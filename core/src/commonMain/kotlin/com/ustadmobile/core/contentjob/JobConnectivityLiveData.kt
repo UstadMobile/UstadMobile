@@ -4,6 +4,13 @@ import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMediatorLiveData
 
+
+/**
+ *  LiveDataMediator that combines live data for the current connectivity
+ *  and whether or not the job can run on a metered network.
+ *  This LiveData can then be used as a source to make a decision
+ *  about whether or not a job needs to stop.
+ */
 class JobConnectivityLiveData(
         val connectivityLiveData: ConnectivityLiveData,
         val meteredAllowedLiveData: DoorLiveData<Boolean>

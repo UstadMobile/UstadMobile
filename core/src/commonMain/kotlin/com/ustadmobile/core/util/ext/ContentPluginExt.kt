@@ -18,11 +18,12 @@ import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
+import org.kodein.di.DI
 
 
 expect suspend fun ContentPlugin.withWifiLock(context: Any, block: suspend () -> Unit)
 
-expect suspend fun deleteFilesForContentEntry(db: UmAppDatabase, contentEntryUid: Long, ustadTorrentManager: UstadTorrentManager): Int
+expect suspend fun deleteFilesForContentEntry(contentEntryUid: Long, di: DI, endpoint: Endpoint): Int
 
 suspend fun ContentPlugin.uploadContentIfNeeded(contentNeedUpload: Boolean,
                                                 contentJobItem: ContentJobItem,

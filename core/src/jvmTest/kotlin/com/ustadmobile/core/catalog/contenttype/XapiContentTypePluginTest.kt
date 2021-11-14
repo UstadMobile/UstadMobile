@@ -59,7 +59,7 @@ class XapiContentTypePluginTest {
                 instance<UstadCommunicationManager>().start(InetAddress.getByName(trackerUrl.host))
                 GlobalScope.launch {
                     val ustadTorrentManager: UstadTorrentManager = di.on(Endpoint("localhost")).direct.instance()
-                    ustadTorrentManager.start()
+                    ustadTorrentManager.startSeeding()
 
                 }
             }
