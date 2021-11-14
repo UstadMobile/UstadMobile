@@ -5,7 +5,6 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
-import com.ustadmobile.core.catalog.contenttype.H5PTypePluginCommonJvm
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ProcessContext
@@ -59,7 +58,6 @@ import java.io.File
 import java.net.InetAddress
 import java.net.URL
 import kotlin.random.Random
-import kotlin.test.AfterTest
 import kotlin.test.assertTrue
 
 
@@ -365,6 +363,7 @@ class TestUstadTorrentManager {
             clientDb.assertContainerEqualToOther(serverContainer.containerUid, serverDb)
         }
     }
+
 
     @After
     fun after(){

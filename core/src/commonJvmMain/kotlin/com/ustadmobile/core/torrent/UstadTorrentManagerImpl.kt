@@ -18,10 +18,18 @@ import kotlinx.coroutines.sync.withLock
 import java.io.File
 
 
+interface CommunicationManagerListener {
+
+    fun onCommunicationManagerChanged(
+            communicationManager: UstadCommunicationManager?,
+            meteredNetwork: Boolean
+    )
+}
+
 class UstadTorrentManagerImpl(
         val endpoint: Endpoint,
         override val di: DI
-) : UstadTorrentManager {
+) : UstadTorrentManager, CommunicationManagerListener {
 
     private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
 
@@ -94,10 +102,6 @@ class UstadTorrentManagerImpl(
 
     override suspend fun removeTorrent(containerUid: Long) {
         val hexInfoHash = containerInfoHashMap.remove(containerUid) ?: return
-        val torrentFile = File(torrentDir, "${containerUid}.torrent")
-        if(torrentFile.exists()){
-            torrentFile.delete()
-        }
         val communicationManager: UstadCommunicationManager = di.direct.instanceOrNull() ?: throw IllegalStateException("no connectivity")
         communicationManager.removeTorrent(hexInfoHash)
     }
@@ -108,6 +112,10 @@ class UstadTorrentManagerImpl(
                 removeTorrent(it)
             }
         }
+    }
+
+    override fun onCommunicationManagerChanged(communicationManager: UstadCommunicationManager?, meteredNetwork: Boolean) {
+        // start or stop torrent
     }
 
 }
