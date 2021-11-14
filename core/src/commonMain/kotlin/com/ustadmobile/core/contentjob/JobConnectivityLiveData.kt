@@ -6,8 +6,8 @@ import com.ustadmobile.door.DoorMediatorLiveData
 
 class JobConnectivityLiveData(
         val connectivityLiveData: ConnectivityLiveData,
-        val meteredAllowedLiveData: DoorLiveData<Boolean>)
-    : DoorMediatorLiveData<Pair<Int, Boolean>>() {
+        val meteredAllowedLiveData: DoorLiveData<Boolean>
+) : DoorMediatorLiveData<Pair<Int, Boolean>>() {
 
     var connectivityState: Int? = null
 

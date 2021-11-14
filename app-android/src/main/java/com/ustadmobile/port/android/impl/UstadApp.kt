@@ -17,7 +17,6 @@ import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobManagerAndroid
 import com.ustadmobile.core.contentjob.ContentPluginManager
-import com.ustadmobile.core.contentjob.ContentPluginManagerImpl
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
@@ -202,7 +201,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
-            ContentPluginManagerImpl(listOf(
+            ContentPluginManager(listOf(
                     EpubTypePluginCommonJvm(applicationContext, context, di),
                     H5PTypePluginCommonJvm(applicationContext, context, di),
                     XapiTypePluginCommonJvm(applicationContext, context, di),
