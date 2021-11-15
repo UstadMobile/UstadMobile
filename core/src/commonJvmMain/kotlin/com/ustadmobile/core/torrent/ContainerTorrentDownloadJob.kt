@@ -5,13 +5,13 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.ConnectivityException
 import com.ustadmobile.core.io.ext.getUnCompressedSize
 import com.ustadmobile.core.io.ext.isGzipped
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.createSymLink
 import com.ustadmobile.core.util.ext.base64EncodedToHexString
-import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.core.util.ext.maxQueryParamListSize
 import com.ustadmobile.core.util.ext.withWifiLock
 import com.ustadmobile.door.DoorUri
@@ -198,10 +198,6 @@ class ContainerTorrentDownloadJob(
                 progress.onProgress(contentJobItem)
 
             } catch (c: CancellationException) {
-                ustadTorrentManager.removeDownloadListener(containerUid)
-                if(torrentFile.exists()){
-                    torrentFile.delete()
-                }
                 throw c
             }
 

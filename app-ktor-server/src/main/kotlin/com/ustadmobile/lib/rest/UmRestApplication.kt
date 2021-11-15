@@ -367,7 +367,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         SiteRoute()
         ContentEntryLinkImporter()
         TorrentFileRoute()
-        StartFile()
         /*
           This is a temporary redirect approach for users who open an app link but don't
           have the app installed. Because the uri scheme of views is #ViewName?args, this
