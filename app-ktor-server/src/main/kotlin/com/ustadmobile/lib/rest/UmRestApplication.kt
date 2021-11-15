@@ -10,7 +10,6 @@ import com.ustadmobile.core.catalog.contenttype.XapiTypePluginCommonJvm
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobManagerJvm
 import com.ustadmobile.core.contentjob.ContentPluginManager
-import com.ustadmobile.core.contentjob.ContentPluginManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.db.ext.addSyncCallback
@@ -185,7 +184,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                     connectedOrConnecting = true
                 })
                 di.on(context).direct.instance<TorrentTracker>().start()
-                di.on(context).direct.instance<UstadTorrentManager>().start()
+                di.on(context).direct.instance<UstadTorrentManager>().startSeeding()
             }
             db
         }
@@ -216,7 +215,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         }
 
         bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
-            ContentPluginManagerImpl(listOf(
+            ContentPluginManager(listOf(
                     di.on(context).direct.instance<EpubTypePluginCommonJvm>(),
                     di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
                     di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
@@ -368,7 +367,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         SiteRoute()
         ContentEntryLinkImporter()
         TorrentFileRoute()
-        StartFile()
         /*
           This is a temporary redirect approach for users who open an app link but don't
           have the app installed. Because the uri scheme of views is #ViewName?args, this

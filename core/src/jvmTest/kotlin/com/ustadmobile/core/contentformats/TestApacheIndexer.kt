@@ -5,7 +5,6 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentjob.ContentPluginManager
-import com.ustadmobile.core.contentjob.ContentPluginManagerImpl
 import com.ustadmobile.core.contentjob.ProcessContext
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
@@ -68,7 +67,7 @@ class TestApacheIndexer {
                 VideoTypePluginJvm(Any(), context, di)
             }
             bind<ContentPluginManager>() with scoped(ustadTestRule.endpointScope).singleton {
-                ContentPluginManagerImpl(listOf(
+                ContentPluginManager(listOf(
                         EpubTypePluginCommonJvm(Any(), context, di)
                     )
                 )

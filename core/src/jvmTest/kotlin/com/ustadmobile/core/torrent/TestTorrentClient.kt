@@ -42,7 +42,7 @@ class TestTorrentClient {
                 instance<UstadCommunicationManager>().start(InetAddress.getByName(trackerUrl.host))
                 GlobalScope.launch {
                     val ustadTorrentManager: UstadTorrentManager = di.on(Endpoint("localhost")).direct.instance()
-                    ustadTorrentManager.start()
+                    ustadTorrentManager.startSeeding()
                 }
             }
         }
@@ -57,7 +57,7 @@ class TestTorrentClient {
         val containerDownloadJob: ContainerTorrentDownloadJob = localDi.on(accountManager.activeEndpoint).direct.instance()
         val seedManager: UstadTorrentManager = localDi.on(accountManager.activeEndpoint).direct.instance()
         GlobalScope.launch {
-            seedManager.start()
+            seedManager.startSeeding()
         }
 
         runBlocking {

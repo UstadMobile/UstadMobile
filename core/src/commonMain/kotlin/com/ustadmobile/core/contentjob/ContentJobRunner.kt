@@ -9,6 +9,7 @@ import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.core.io.ext.emptyRecursively
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.torrent.UstadTorrentManager
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.DoorUri
@@ -35,7 +36,7 @@ import kotlin.math.min
  */
 class ContentJobRunner(
     val jobId: Long,
-    endpoint: Endpoint,
+    val endpoint: Endpoint,
     override val di: DI,
     val numProcessors: Int = DEFAULT_NUM_PROCESSORS,
     val maxItemAttempts: Int = DEFAULT_NUM_RETRIES
@@ -61,7 +62,7 @@ class ContentJobRunner(
 
     private val connectivityLiveData: ConnectivityLiveData by on(endpoint).instance()
 
-    private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
+
 
     @ExperimentalCoroutinesApi
     private fun CoroutineScope.produceJobs() = produce<ContentJobItemAndContentJob> {
@@ -150,8 +151,8 @@ class ContentJobRunner(
 
                 val plugin = contentPluginManager.getPluginById(pluginId)
 
-                val job = async {
-                    processResult = plugin.processJob(item, processContext, this@ContentJobRunner)
+                val jobResult = async {
+                     plugin.processJob(item, processContext, this@ContentJobRunner)
                 }
 
                 mediatorObserver = DoorObserver {
@@ -161,7 +162,7 @@ class ContentJobRunner(
                     if(item.contentJobItem?.cjiConnectivityNeeded == true
                             && (state == ConnectivityStatus.STATE_DISCONNECTED ||
                                     !isMeteredAllowed && state == ConnectivityStatus.STATE_METERED)){
-                        job.cancel(ConnectivityException("connectivity not acceptable"))
+                        jobResult.cancel(ConnectivityException("connectivity not acceptable"))
                     }
 
                 }
@@ -170,9 +171,9 @@ class ContentJobRunner(
                     mediatorLiveData.observeForever(mediatorObserver)
                 }
 
-                job.await()
+                processResult = jobResult.await()
 
-                db.contentJobItemDao.updateItemStatus(item.contentJobItem?.cjiUid ?: 0, processResult?.status ?: 0)
+                db.contentJobItemDao.updateItemStatus(item.contentJobItem?.cjiUid ?: 0, processResult.status)
                 db.contentJobItemDao.updateFinishTimeForJob(item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
                 println("Processor #$id completed job #${item.contentJobItem?.cjiUid}")
             }catch(e: Exception) {
@@ -183,13 +184,13 @@ class ContentJobRunner(
             }finally {
                 withContext(NonCancellable) {
                     val finalStatus: Int = when {
-                        processResult != null -> processResult?.status ?: JobStatus.FAILED
+                        processResult != null -> processResult.status
                         processException is FatalContentJobException -> JobStatus.FAILED
                         processException is ConnectivityException -> JobStatus.QUEUED
                         processException is CancellationException && processException !is ConnectivityException -> {
-                            deleteFilesForContentEntry(db,
-                                            item.contentJobItem?.cjiContentEntryUid ?: 0,
-                                            ustadTorrentManager)
+                            deleteFilesForContentEntry(
+                                    item.contentJobItem?.cjiContentEntryUid ?: 0,
+                                            di, endpoint)
                             JobStatus.CANCELED
                         }
                         (item.contentJobItem?.cjiAttemptCount ?: maxItemAttempts) >= maxItemAttempts -> JobStatus.FAILED

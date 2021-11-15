@@ -17,7 +17,6 @@ import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobManagerAndroid
 import com.ustadmobile.core.contentjob.ContentPluginManager
-import com.ustadmobile.core.contentjob.ContentPluginManagerImpl
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
@@ -68,12 +67,10 @@ import java.io.File
 import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.torrent.*
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
-import com.ustadmobile.core.util.getLocalIpAddress
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import kotlinx.coroutines.*
-import java.net.InetAddress
 import java.net.URI
 import java.util.concurrent.Executors
 
@@ -202,7 +199,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
-            ContentPluginManagerImpl(listOf(
+            ContentPluginManager(listOf(
                     EpubTypePluginCommonJvm(applicationContext, context, di),
                     H5PTypePluginCommonJvm(applicationContext, context, di),
                     XapiTypePluginCommonJvm(applicationContext, context, di),
