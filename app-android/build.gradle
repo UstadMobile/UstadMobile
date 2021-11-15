@@ -394,9 +394,6 @@ dependencies {
     implementation "org.wordpress:utils:$version_android_wordpress_utils"
     implementation "com.android.volley:volley:$version_android_volley"
 
-    //Persian-Date-Picker
-    //implementation 'com.github.varunasingh:Persian-Date-Picker-Dialog-Strings:primary-SNAPSHOT'
-
     //Persian Calendar Date Picker
     implementation 'com.github.varunasingh:PrimeDatePicker:primary-SNAPSHOT'
     implementation 'com.github.varunasingh:PrimeCalendar:primary-SNAPSHOT'

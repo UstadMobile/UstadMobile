@@ -24,13 +24,8 @@ import com.aminography.primecalendar.common.CalendarType
 import com.aminography.primedatepicker.common.PickType
 import com.aminography.primedatepicker.picker.PrimeDatePicker
 import com.aminography.primedatepicker.picker.callback.SingleDayPickCallback
-import com.aminography.primecalendar.PrimeCalendar
 import com.aminography.primecalendar.persian.PersianCalendar
-import com.aminography.primedatepicker.picker.theme.DarkThemeFactory
-import com.aminography.primedatepicker.picker.theme.LightThemeFactory
-import com.aminography.primedatepicker.picker.theme.base.ThemeFactory
 import com.ustadmobile.port.android.view.UstadBaseFragment
-import com.aminography.primecalendar.common.toPersian
 
 
 const val MODE_START_OF_DAY = 1
@@ -151,7 +146,7 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
                 today.timeInMillis = calTimeInMillis
             }
 
-            var datePicker: PrimeDatePicker? = null
+            var datePicker: PrimeDatePicker?
 
             datePicker = PrimeDatePicker.Companion.dialogWith(today)
                 .pickSingleDay()
@@ -170,11 +165,11 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
             )
 
 
-            datePicker?.show(
+            datePicker.show(
                 findFragment<UstadBaseFragment>().childFragmentManager, PICKER_TAG
             )
 
-            datePicker?.setOnDismissListener { datePicker = null }
+            datePicker.setOnDismissListener { datePicker = null }
 
         }else {
 
