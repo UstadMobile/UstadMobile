@@ -27,9 +27,6 @@ import com.ustadmobile.lib.rest.ext.*
 import com.ustadmobile.lib.rest.messaging.MailProperties
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import io.ktor.application.Application
-import io.ktor.application.ApplicationCall
-import io.ktor.application.install
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
@@ -42,7 +39,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.request.header
-import io.ktor.routing.Routing
 import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
 import org.quartz.Scheduler
@@ -57,6 +53,10 @@ import jakarta.mail.PasswordAuthentication
 import org.xmlpull.v1.XmlPullParserFactory
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.lib.db.entities.PersonAuth2
+import io.ktor.application.*
+import io.ktor.client.features.get
+import io.ktor.response.*
+import io.ktor.routing.*
 import kotlinx.coroutines.runBlocking
 
 const val TAG_UPLOAD_DIR = 10
@@ -307,13 +307,30 @@ fun Application.umRestApplication(dbModeOverride: String? = null,
 
           The static route will redirect /umapp/#ViewName?args to
           /getapp/?uri=(encoded full uri including #ViewName?args)
-         */
+
         static("umapp") {
             resource("/", "/static/getappredirect/index.html")
         }
+        */
+
         GetAppRoute()
+
         if (devMode) {
             DevModeRoute()
+        }
+
+        static("umapp") {
+            resources("umapp")
+            static("/") {
+                defaultResource("umapp/index.html")
+            }
+        }
+
+        //Handle default route when running behind proxy
+        route("/"){
+            get{
+                call.respondRedirect("umapp/")
+            }
         }
     }
 }
