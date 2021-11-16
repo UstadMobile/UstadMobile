@@ -1,7 +1,7 @@
 package com.ustadmobile.core.catalog.contenttype
 
 import com.ustadmobile.core.contentjob.ContentPlugin
-import com.ustadmobile.core.contentjob.ProcessContext
+import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_EXT_LIST
 import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP

@@ -60,7 +60,7 @@ class ContainerTorrentDownloadJob(
     override val supportedFileExtensions: List<String>
         get() = listOf(".container")
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
 
         // check valid uri format, valid endpoint, valid container
         val containerUid = uri.uri.toString().substringAfterLast("/").toLongOrNull() ?: return null
@@ -73,7 +73,7 @@ class ContainerTorrentDownloadJob(
         return MetadataResult(contentEntry as ContentEntryWithLanguage, PLUGIN_ID)
     }
 
-    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
         val containerUid = contentJobItem.cjiContainerUid
 

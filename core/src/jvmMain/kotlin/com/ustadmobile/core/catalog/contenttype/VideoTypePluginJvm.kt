@@ -4,14 +4,13 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.ContentJobProgressListener
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.contentjob.ProcessContext
+import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.util.ext.uploadContentIfNeeded
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.io.ext.addTorrentFileFromContainer
-import com.ustadmobile.core.io.ext.getLocalUri
 import com.ustadmobile.core.io.ext.isRemote
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
@@ -56,17 +55,24 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
 
     private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
+    override suspend fun extractMetadata(
+        uri: DoorUri,
+        process: ContentJobProcessContext
+    ): MetadataResult? {
         return getEntry(uri, process)
     }
 
-    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+    override suspend fun processJob(
+        jobItem: ContentJobItemAndContentJob,
+        process: ContentJobProcessContext,
+        progress: ContentJobProgressListener
+    ): ProcessResult {
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
         return withContext(Dispatchers.Default) {
 
             val uri = contentJobItem.sourceUri ?: throw IllegalStateException("missing uri")
             val videoUri = DoorUri.parse(uri)
-            val videoFile = process.getLocalUri(videoUri, context, di).toFile()
+            val videoFile = process.getLocalOrCachedUri().toFile()
             var newVideo = File(videoFile.parentFile, "new${videoFile.nameWithoutExtension}.mp4")
 
             try {
@@ -147,10 +153,10 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
         }
     }
 
-    suspend fun getEntry(uri: DoorUri, process: ProcessContext): MetadataResult? {
+    suspend fun getEntry(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
         return withContext(Dispatchers.Default){
 
-            val localUri = process.getLocalUri(uri, context, di)
+            val localUri = process.getLocalOrCachedUri()
 
             val fileName = localUri.getFileName(context)
 

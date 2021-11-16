@@ -4,7 +4,7 @@ package com.ustadmobile.core.catalog.contenttype
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentjob.ProcessContext
+import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.torrent.CommunicationWorkers
@@ -106,10 +106,9 @@ class H5PTypePluginTest {
         val tempUri = DoorUri.parse(tempFolder.toURI().toString())
 
         val metadata = runBlocking {
-            h5pPlugin.extractMetadata(DoorUri.parse(tempH5pFile.toURI().toString()),
-                    ProcessContext(
-                            tempUri,
-                            params = mutableMapOf<String,String>()))
+            val h5pUri = DoorUri.parse(tempH5pFile.toURI().toString())
+            val processContext = ContentJobProcessContext(h5pUri, tempUri, mutableMapOf(), di)
+            h5pPlugin.extractMetadata(h5pUri,processContext)
         }!!
 
         Assert.assertEquals("Got ContentEntry with expected title",
@@ -139,7 +138,8 @@ class H5PTypePluginTest {
         runBlocking {
 
             val doorUri = DoorUri.parse(mockWebServer.url("/com/ustadmobile/core/contenttype/dialog-cards-620.h5p").toString())
-            val processContext = ProcessContext(tempUri, params = mutableMapOf<String,String>())
+            val processContext = ContentJobProcessContext(doorUri, tempUri, params = mutableMapOf(),
+                    di)
 
             val uid = repo.contentEntryDao.insert(ContentEntry().apply{
                 title = "hello"

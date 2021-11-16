@@ -15,11 +15,11 @@ class TestPlugin(override val di: DI, val metadata: MetadataResult) : ContentPlu
         get() = listOf()
 
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
         return metadata
     }
 
-    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
         return ProcessResult(JobStatus.COMPLETE)
     }
 

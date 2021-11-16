@@ -9,7 +9,7 @@ class ContentPluginManager(val pluginList: List<ContentPlugin>) {
         return pluginList.find { it.pluginId == id } ?: throw FatalContentJobException("invalid pluginId")
     }
 
-    suspend fun extractMetadata(uri: DoorUri, processContext: ProcessContext): MetadataResult? {
+    suspend fun extractMetadata(uri: DoorUri, processContext: ContentJobProcessContext): MetadataResult? {
         pluginList.forEach {
             try {
                 return it.extractMetadata(uri, processContext) ?: return@forEach

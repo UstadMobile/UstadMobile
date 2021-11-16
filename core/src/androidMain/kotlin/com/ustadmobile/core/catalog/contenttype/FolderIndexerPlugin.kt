@@ -40,7 +40,7 @@ class FolderIndexerPlugin(
 
     private val pluginManager: ContentPluginManager by di.on(endpoint).instance()
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
 
         val docUri = try {
             DocumentsContract.buildDocumentUriUsingTree(uri.uri, DocumentsContract.getDocumentId(uri.uri))
@@ -64,7 +64,7 @@ class FolderIndexerPlugin(
         return MetadataResult(entry, PLUGIN_ID)
     }
 
-    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
         val jobUri = contentJobItem.sourceUri ?: return ProcessResult(JobStatus.FAILED)
         withContext(Dispatchers.Default) {
@@ -102,10 +102,9 @@ class FolderIndexerPlugin(
             progress.onProgress(contentJobItem)
 
             uriList.forEachIndexed { index, fileUri ->
+                val fileDocument = DocumentFile.fromSingleUri(context as Context, fileUri) ?: return@forEachIndexed
 
-                val fileDocument = DocumentFile.fromSingleUri(context as Context, fileUri)
-
-                if(fileDocument?.isDirectory == true){
+                if(fileDocument.isDirectory){
 
                     ContentJobItem().apply {
                         cjiJobUid = contentJobItem.cjiJobUid
@@ -121,16 +120,16 @@ class FolderIndexerPlugin(
                     }
 
                 }else{
-
-                    val processContext = ProcessContext(apacheDir, mutableMapOf())
-                    val hrefDoorUri = DoorUri.parse(fileDocument?.uri.toString())
+                    val processContext = ContentJobProcessContext(DoorUri(fileDocument.uri),
+                            apacheDir, mutableMapOf(), di)
+                    val hrefDoorUri = DoorUri.parse(fileDocument.uri.toString())
                     val metadataResult = pluginManager.extractMetadata(hrefDoorUri, processContext)
                     if(metadataResult != null){
 
                         ContentJobItem().apply {
                             cjiJobUid = contentJobItem.cjiJobUid
-                            sourceUri = fileDocument?.uri.toString()
-                            cjiItemTotal = fileDocument?.length() ?: -1L
+                            sourceUri = fileDocument.uri.toString()
+                            cjiItemTotal = fileDocument.length()
                             cjiContentEntryUid = 0
                             cjiIsLeaf = true
                             cjiPluginId = metadataResult.pluginId
@@ -141,7 +140,7 @@ class FolderIndexerPlugin(
                         }
 
                     }else{
-                        println("no metadata found for file ${fileDocument?.name}")
+                        println("no metadata found for file ${fileDocument.name}")
                     }
                 }
 

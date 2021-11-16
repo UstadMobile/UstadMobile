@@ -2,7 +2,7 @@ package com.ustadmobile.core.torrent
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentjob.ProcessContext
+import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.ContentJobItem
@@ -60,13 +60,13 @@ class TestTorrentClient {
             seedManager.startSeeding()
         }
 
-        runBlocking {
-            containerDownloadJob.processJob(ContentJobItemAndContentJob().apply{
-                contentJobItem = ContentJobItem(cjiContainerUid = 225824306785447936)
-            },
-                ProcessContext(DoorUri.parse(""), params = mutableMapOf())){
-            }
-        }
+//        runBlocking {
+//            containerDownloadJob.processJob(ContentJobItemAndContentJob().apply{
+//                contentJobItem = ContentJobItem(cjiContainerUid = 225824306785447936)
+//            },
+//                ContentJobProcessContext(DoorUri.parse(""), params = mutableMapOf())){
+//            }
+//        }
 
     }
 

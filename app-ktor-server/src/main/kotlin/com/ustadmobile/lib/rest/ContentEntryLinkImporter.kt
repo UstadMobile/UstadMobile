@@ -5,7 +5,7 @@ import io.github.aakira.napier.Napier
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.contentjob.ProcessContext
+import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.getSize
@@ -39,10 +39,12 @@ fun Route.ContentEntryLinkImporter() {
 
         post("validateLink") {
             val url = call.request.queryParameters["url"]?: ""
-            val pluginManager: ContentPluginManager by closestDI().on(call).instance()
+            val di = closestDI()
+            val pluginManager: ContentPluginManager by di.on(call).instance()
             var metadata: MetadataResult? = null
             try{
-                val processContext = ProcessContext(createTemporaryDir("content"), mutableMapOf())
+                val processContext = ContentJobProcessContext(DoorUri.parse(url),
+                        createTemporaryDir("content"), mutableMapOf(), di)
                 metadata = withTimeout(IMPORT_LINK_TIMEOUT_DEFAULT) {
                     pluginManager.extractMetadata(DoorUri.parse(url), processContext)
                 }

@@ -62,13 +62,13 @@ class XapiTypePluginCommonJvm(
 
     private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
         val mimeType = uri.guessMimeType(context, di)
         if (mimeType != null && !supportedMimeTypes.contains(mimeType)) {
             return null
         }
         return withContext(Dispatchers.Default) {
-            val localUri = process.getLocalUri(uri, context, di)
+            val localUri = process.getLocalOrCachedUri()
             val inputStream = localUri.openInputStream(context)
             return@withContext ZipInputStream(inputStream).use {
                 it.skipToEntry { it.name == TINCAN_FILENAME } ?: return@withContext null
@@ -95,7 +95,7 @@ class XapiTypePluginCommonJvm(
         }
     }
 
-    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("mising job item")
         val uri = contentJobItem.sourceUri ?: return ProcessResult(JobStatus.FAILED)
         return withContext(Dispatchers.Default) {
@@ -103,7 +103,7 @@ class XapiTypePluginCommonJvm(
             try {
 
                 val doorUri = DoorUri.parse(uri)
-                val localUri = process.getLocalUri(doorUri, context, di)
+                val localUri = process.getLocalOrCachedUri()
                 val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                         ?: throw IllegalArgumentException("missing tracker url")
                 val contentNeedUpload = !doorUri.isRemote()

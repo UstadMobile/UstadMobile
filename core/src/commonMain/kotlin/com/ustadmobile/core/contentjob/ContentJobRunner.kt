@@ -106,7 +106,9 @@ class ContentJobRunner(
         val tmpDir = createTemporaryDir("job-$id")
 
         for(item in channel) {
-            val processContext = ProcessContext(tmpDir, mutableMapOf())
+            val itemUri = item.contentJobItem?.sourceUri?.let { DoorUri.parse(it) } ?: continue
+
+            val processContext = ContentJobProcessContext(itemUri, tmpDir, mutableMapOf(), di)
             println("Proessor #$id processing job #${item.contentJobItem?.cjiUid} attempt #${item.contentJobItem?.cjiAttemptCount}")
 
             var processResult: ProcessResult? = null

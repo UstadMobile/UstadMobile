@@ -80,13 +80,13 @@ class H5PTypePluginCommonJvm(
     override val pluginId: Int
         get() = PLUGIN_ID
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
         val mimeType = uri.guessMimeType(context, di)
         if(mimeType != null && !supportedMimeTypes.contains(mimeType)){
             return null
         }
         return withContext(Dispatchers.Default) {
-            val localUri = process.getLocalUri(uri, context, di)
+            val localUri = process.getLocalOrCachedUri()
             val inputStream = localUri.openInputStream(context)
             return@withContext ZipInputStream(inputStream).use {
                 it.skipToEntry { it.name == H5P_PATH } ?: return@withContext null
@@ -125,7 +125,7 @@ class H5PTypePluginCommonJvm(
         }
     }
 
-    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
         val jobUri = contentJobItem.sourceUri ?: return ProcessResult(JobStatus.FAILED)
         return withContext(Dispatchers.Default) {
@@ -133,7 +133,7 @@ class H5PTypePluginCommonJvm(
             try{
 
                 val doorUri = DoorUri.parse(jobUri)
-                val localUri = process.getLocalUri(doorUri, context, di)
+                val localUri = process.getLocalOrCachedUri()
                 val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                         ?: throw IllegalArgumentException("missing tracker url")
                 val contentNeedUpload = !doorUri.isRemote()

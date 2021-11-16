@@ -3,7 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.contentjob.ProcessContext
+import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.KEY_SELECTED_ITEMS
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
@@ -48,12 +48,14 @@ import org.kodein.di.instance
 import org.kodein.di.on
 
 
-class ContentEntryEdit2Presenter(context: Any,
-                                 arguments: Map<String, String>, view: ContentEntryEdit2View,
-                                 lifecycleOwner: DoorLifecycleOwner,
-                                 di: DI)
-    : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view, di, lifecycleOwner),
-        ContentEntryAddOptionsListener {
+class ContentEntryEdit2Presenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: ContentEntryEdit2View,
+    lifecycleOwner: DoorLifecycleOwner,
+    di: DI
+) : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view,
+        di, lifecycleOwner), ContentEntryAddOptionsListener {
 
     private val pluginManager: ContentPluginManager by on(accountManager.activeAccount).instance()
 
@@ -350,20 +352,23 @@ class ContentEntryEdit2Presenter(context: Any,
 
         var entry: ContentEntryWithLanguage? = null
         try {
-
-            val processContext = ProcessContext(createTemporaryDir("content"), mutableMapOf())
-            val metadata = pluginManager.extractMetadata(DoorUri.parse(uri), processContext)
+            val doorUri = DoorUri.parse(uri)
+            ContentJobProcessContext(doorUri, createTemporaryDir("content"),
+                    mutableMapOf(), di).use { processContext ->
+                val metadata = pluginManager.extractMetadata(DoorUri.parse(uri), processContext)
                     ?: throw IllegalArgumentException("no metadata found")
-            view.metadataResult = metadata
-            val plugin = pluginManager.getPluginById(metadata.pluginId)
-            entry = metadata.entry
-            arguments[ARG_ENTITY_UID]?.let { entry.contentEntryUid = it.toLong() }
-            view.fileImportErrorVisible = false
-            fromUri = uri
-            if (plugin.supportedMimeTypes.firstOrNull()?.startsWith("video/") == true &&
+                view.metadataResult = metadata
+                val plugin = pluginManager.getPluginById(metadata.pluginId)
+                entry = metadata.entry
+                arguments[ARG_ENTITY_UID]?.let { entry?.contentEntryUid = it.toLong() }
+                view.fileImportErrorVisible = false
+                fromUri = uri
+                if (plugin.supportedMimeTypes.firstOrNull()?.startsWith("video/") == true &&
                     !uri.lowercase().startsWith("https://drive.google.com")) {
-                        view.videoUri = uri
+                    view.videoUri = uri
+                }
             }
+
         }catch (e: Exception){
             view.showSnackBar(systemImpl.getString(MessageID.import_link_content_not_supported, context))
             repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, e, this)

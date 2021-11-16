@@ -7,7 +7,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.ContentJobManager
-import com.ustadmobile.core.contentjob.ProcessContext
+import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
@@ -216,9 +216,9 @@ class TestUstadTorrentManager {
                                     this.contentJobItem = jobItem
                                 }
 
-                                containerTorrentDownloadJob.processJob(jobAndItem,
-                                    ProcessContext(temporaryFolder.newFolder().toDoorUri(),
-                                        mutableMapOf())) { }
+                                val context = ContentJobProcessContext(DoorUri.parse(jobItem!!.sourceUri!!),
+                                        temporaryFolder.newFolder().toDoorUri(), mutableMapOf(), di)
+                                containerTorrentDownloadJob.processJob(jobAndItem,context) { }
                             }
 
                         }
@@ -300,9 +300,12 @@ class TestUstadTorrentManager {
             serverTorrentManager.addTorrent(serverContainer.containerUid, null)
             serverTorrentTracker.addTorrentFile(File(serverTorrentFolder, "${serverContainer.containerUid}.torrent"))
 
+            val sourceUri = DoorUri.parse("http://localhost/container/")
+            val processContext = ContentJobProcessContext(sourceUri,
+                    temporaryFolder.newFolder().toDoorUri(), mutableMapOf(), clientDi)
             containerDownloadJob.processJob(ContentJobItemAndContentJob().apply {
                 contentJobItem = ContentJobItem(cjiContainerUid = serverContainer.containerUid)
-            }, ProcessContext(DoorUri.parse(""), params = mutableMapOf())){
+            }, processContext){
 
             }
             clientDb.assertContainerEqualToOther(serverContainer.containerUid, serverDb)
@@ -341,12 +344,12 @@ class TestUstadTorrentManager {
                     "image3", clientDi,
                     ContainerAddOptions(clientContainerFolder.toDoorUri()))
 
+            val sourceUri = DoorUri.parse("http://localhost/container/")
+            val processContext = ContentJobProcessContext(sourceUri,
+                temporaryFolder.newFolder().toDoorUri(), mutableMapOf(), clientDi)
             containerDownloadJob.processJob(ContentJobItemAndContentJob().apply {
                 contentJobItem = ContentJobItem(cjiContainerUid = serverContainer.containerUid)
-            },
-                    ProcessContext(DoorUri.parse(""), params = mutableMapOf())){
-
-            }
+            }, processContext) { }
 
             var downloadComplete = false
             val containerFiles = File(clientContainerFolder, serverContainer.containerUid.toString())

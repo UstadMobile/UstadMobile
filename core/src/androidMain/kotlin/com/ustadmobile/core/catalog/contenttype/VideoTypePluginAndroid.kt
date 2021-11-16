@@ -13,7 +13,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.ContentJobProgressListener
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.contentjob.ProcessContext
+import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.util.ext.uploadContentIfNeeded
 import com.ustadmobile.core.db.JobStatus
@@ -64,11 +64,11 @@ class VideoTypePluginAndroid(
 
     private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
         return getEntry(uri, process)
     }
 
-    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, jobProgress: ContentJobProgressListener): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, jobProgress: ContentJobProgressListener): ProcessResult {
         val contentJobItem = jobItem.contentJobItem
                 ?: throw IllegalArgumentException("missing job item")
         return withContext(Dispatchers.Default) {
@@ -76,7 +76,7 @@ class VideoTypePluginAndroid(
             val uri = contentJobItem.sourceUri ?: throw IllegalStateException("missing uri")
             val videoUri = DoorUri.parse(uri)
             val contentNeedUpload = !videoUri.isRemote()
-            val localUri = process.getLocalUri(videoUri, context, di)
+            val localUri = process.getLocalOrCachedUri()
             val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                     ?: throw IllegalArgumentException("missing tracker url")
 
@@ -245,10 +245,10 @@ class VideoTypePluginAndroid(
         }
     }
 
-    suspend fun getEntry(doorUri: DoorUri, process: ProcessContext): MetadataResult? {
+    suspend fun getEntry(doorUri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
         return withContext(Dispatchers.Default) {
 
-            val localUri = process.getLocalUri(doorUri, context, di)
+            val localUri = process.getLocalOrCachedUri()
 
             val fileName = localUri.getFileName(context)
 

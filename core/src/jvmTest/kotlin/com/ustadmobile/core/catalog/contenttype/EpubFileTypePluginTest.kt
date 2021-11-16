@@ -3,7 +3,7 @@ package com.ustadmobile.core.catalog.contenttype
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentjob.ProcessContext
+import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.torrent.CommunicationWorkers
 import com.ustadmobile.core.torrent.UstadCommunicationManager
@@ -89,7 +89,10 @@ class EpubFileTypePluginTest {
 
         val epubPlugin = EpubTypePluginCommonJvm(Any(), Endpoint("http://localhost/dummy"), di)
         runBlocking {
-            val metadata = epubPlugin.extractMetadata(DoorUri.parse(tempEpubFile.toURI().toString()), ProcessContext(tempUri, params = mutableMapOf<String,String>()))
+            val epubUri = DoorUri.parse(tempEpubFile.toURI().toString())
+            val processContext = ContentJobProcessContext(epubUri, tempUri, params = mutableMapOf(),
+                    di)
+            val metadata = epubPlugin.extractMetadata(epubUri, processContext)
             Assert.assertEquals("Got ContentEntry with expected title",
                     "A Textbook of Sources for Teachers and Teacher-Training Classes",
                     metadata!!.entry.title)
@@ -111,7 +114,7 @@ class EpubFileTypePluginTest {
         runBlocking{
 
             val doorUri = DoorUri.parse(mockWebServer.url("/com/ustadmobile/core/contenttype/childrens-literature.epub").toString())
-            val processContext = ProcessContext(tempUri, params = mutableMapOf<String,String>())
+            val processContext = ContentJobProcessContext(doorUri, tempUri, mutableMapOf(), di)
 
             val uid = repo.contentEntryDao.insert(ContentEntry().apply{
                 title = "hello"

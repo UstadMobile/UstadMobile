@@ -62,7 +62,7 @@ class EpubTypePluginCommonJvm(
 
     private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
             val mimeType = uri.guessMimeType(context, di)
             if(mimeType != null && !supportedMimeTypes.contains(mimeType)){
                 return null
@@ -70,7 +70,7 @@ class EpubTypePluginCommonJvm(
             return withContext(Dispatchers.Default) {
                 val xppFactory = XmlPullParserFactory.newInstance()
                 try {
-                    val localUri = process.getLocalUri(uri, context, di)
+                    val localUri = process.getLocalOrCachedUri()
                     val opfPath = ZipInputStream(localUri.openInputStream(context)).use {
                         it.skipToEntry { entry -> entry.name == OCF_CONTAINER_PATH } ?: return@use null
 
@@ -117,7 +117,7 @@ class EpubTypePluginCommonJvm(
             }
         }
 
-        override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+        override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
             val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
             val jobUri = contentJobItem.sourceUri ?: return ProcessResult(JobStatus.FAILED)
             return withContext(Dispatchers.Default) {
@@ -129,7 +129,7 @@ class EpubTypePluginCommonJvm(
                     val contentNeedUpload = !uri.isRemote()
                     val progressSize = if (contentNeedUpload) 2 else 1
 
-                    val localUri = process.getLocalUri(uri, context, di)
+                    val localUri = process.getLocalOrCachedUri()
                     val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                             ?: throw IllegalArgumentException("missing tracker url")
 
@@ -187,11 +187,11 @@ class EpubTypePluginCommonJvm(
         }
 
 
-        suspend fun findOpfPath(uri: DoorUri, process: ProcessContext): String? {
+        suspend fun findOpfPath(uri: DoorUri, process: ContentJobProcessContext): String? {
             val xppFactory = XmlPullParserFactory.newInstance()
             try {
 
-                val localUri = process.getLocalUri(uri, context,di)
+                val localUri = process.getLocalOrCachedUri()
 
                 ZipInputStream(localUri.openInputStream(context)).use {
                     it.skipToEntry { entry -> entry.name == OCF_CONTAINER_PATH } ?: return null

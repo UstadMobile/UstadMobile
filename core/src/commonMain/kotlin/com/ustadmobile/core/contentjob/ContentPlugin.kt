@@ -22,7 +22,7 @@ interface ContentPlugin : DIAware {
      * The plugin should extract metadata from the given uri (if possible) and return a
      * MetadataResult if Metadata is retrieved, or null otherwise.
      */
-    suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult?
+    suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult?
 
     /**
      * The plugin should actually process the given ContentJobItem (e.g. import, download, etc).
@@ -31,9 +31,9 @@ interface ContentPlugin : DIAware {
      * is thrown, processJob may be retried by ContentJobRunner
      */
     suspend fun processJob(
-            jobItem: ContentJobItemAndContentJob,
-            process: ProcessContext,
-            progress: ContentJobProgressListener
+        jobItem: ContentJobItemAndContentJob,
+        process: ContentJobProcessContext,
+        progress: ContentJobProgressListener
     ) : ProcessResult
 
 }
