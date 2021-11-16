@@ -5,4 +5,6 @@ expect object UmPlatform {
     var isWeb: Boolean
 
     fun debug()
+
+    fun console(content: Any)
 }

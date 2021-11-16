@@ -58,6 +58,7 @@ dependencies {
     implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom:$version_kotlin_react_router_dom"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-redux:$version_kotlin_redux"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-react-redux:$version_kotlin_react_redux"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-extensions:$version_kotlin_extensions"
     implementation "com.ccfraser.muirwik:muirwik-components:$version_muirwik_components"
     implementation project(":lib-database-mpp")
     implementation project(":core")
@@ -79,3 +80,16 @@ dependencies {
 }
 
 tasks.findByName("processDceDevKotlinJs").finalizedBy(fixMissingKotlinExtensionModule)
+
+task distro {
+    def destDir = rootProject.file("app-ktor-server/src/main/resources/umapp/")
+    destDir.mkdirs()
+    doLast{
+        copy {
+            from project.file("build/distributions").path
+            into destDir.path
+        }
+    }
+}
+
+distro.dependsOn(project.tasks.findByName("browserDistribution"))

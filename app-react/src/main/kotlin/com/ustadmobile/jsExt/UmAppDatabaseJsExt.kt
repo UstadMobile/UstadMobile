@@ -1,15 +1,10 @@
 package com.ustadmobile.jsExt
 
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.ext.grantScopedPermission
-import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.lib.util.randomString
-import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
+import kotlinx.browser.localStorage
 
 suspend fun UmAppDatabase.insertContentEntryWithParentChildJoinAndMostRecentContainer(
     numEntries: Int, parentEntryUid: Long, nonLeafIndexes: MutableList<Int> = mutableListOf()
@@ -48,23 +43,11 @@ suspend fun UmAppDatabase.insertContentEntryWithParentChildJoinAndMostRecentCont
     }
 }
 
-suspend fun UmAppDatabase.createAdminInfo(accountManager: UstadAccountManager, endpointUrl: String){
+suspend fun UmAppDatabase.initJsRepo(preloaded: Boolean){
 
-    //For Development purpose
-    val person = Person().apply {
-        personUid = 244449308287250432L
-        firstNames = "Admin"
-        lastName = "User"
-        admin = true
-        username = "admin"
-    }
-
-    val localPerson = personDao.findByUid(person.personUid)
-
-    if(localPerson == null){
-        insertPersonAndGroup(person)
-        grantScopedPermission(person, Role.ALL_PERMISSIONS, ScopedGrant.ALL_TABLES,
-            ScopedGrant.ALL_ENTITIES)
+    if(!preloaded){
+        localStorage.clear()
+        roleDao.insertDefaultRolesIfRequired()
     }
 
     val site = siteDao.getSiteAsync()

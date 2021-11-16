@@ -140,8 +140,9 @@ abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P,
         r?.run()
     }
 
-    override val di: DI
-        get() = getCurrentState().di.instance
+    override val di: DI by DI.lazy {
+        extend(getCurrentState().di.instance)
+    }
 
     override fun addObserver(observer: DoorLifecycleObserver) {
         lifecycleObservers.add(observer)

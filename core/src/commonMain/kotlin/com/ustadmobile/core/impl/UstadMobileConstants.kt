@@ -77,7 +77,7 @@ object UstadMobileConstants {
     /**
      * Default number of iterations for pbkdf2 hashing
      */
-    const val PBKDF2_ITERATIONS = 10000
+    const val PBKDF2_ITERATIONS = 1000 //changed to improve performance, it was 10000
 
     /**
      * Default key length for PBKDF2 hashing

@@ -123,8 +123,6 @@ interface UstadView {
 
         const val CURRENT_DEST = ""
 
-        const val ARG_WEB_PLATFORM = "webPlatform"
-
         const val ROOT_DEST = "root"
 
         const val ARG_CURRENT = "current"
@@ -186,8 +184,6 @@ interface UstadView {
         const val ARG_INTENT_MESSAGE = "intMsg"
 
         const val ARG_TITLE = "title"
-
-        const val ARG_API_URL = "apiUrl"
 
         /**
          * Indicates whether this view is a top level view reached via navigation or a subview (

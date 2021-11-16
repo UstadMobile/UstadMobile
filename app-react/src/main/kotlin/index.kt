@@ -50,11 +50,8 @@ fun main() {
     window.onload = {
         render(document.getElementById("root")) {
             val diState = ReduxDiState(
-                DI.lazy {
-                    import(diModule)
-                }
+                DI.lazy { import(diModule) }
             )
-
             val theme = createAppTheme()
             provider(createStore(diState, ReduxThemeState(theme))){
                 mThemeProvider(theme) {
@@ -158,11 +155,9 @@ private val diModule = DI.Module("UstadApp-React"){
 
     bind<Pbkdf2Params>() with singleton {
         val systemImpl: UstadMobileSystemImpl = instance()
-        val numIterations = systemImpl.getAppConfigInt(
-            AppConfig.KEY_PBKDF2_ITERATIONS,
+        val numIterations = systemImpl.getAppConfigInt(AppConfig.KEY_PBKDF2_ITERATIONS,
             UstadMobileConstants.PBKDF2_ITERATIONS, this)
-        val keyLength = systemImpl.getAppConfigInt(
-            AppConfig.KEY_PBKDF2_KEYLENGTH,
+        val keyLength = systemImpl.getAppConfigInt(AppConfig.KEY_PBKDF2_KEYLENGTH,
             UstadMobileConstants.PBKDF2_KEYLENGTH, this)
 
         Pbkdf2Params(numIterations, keyLength)

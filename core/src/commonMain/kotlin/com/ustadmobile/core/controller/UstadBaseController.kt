@@ -95,6 +95,7 @@ abstract class UstadBaseController<V : UstadView>(
 
     private val activeSessionObserver = DoorObserver<UserSessionWithPersonAndEndpoint?> {
         if(it == null) {
+            UmPlatform.console("Called base")
             presenterScope.launch {
                 navigateToStartNewUserSession()
             }
@@ -348,8 +349,7 @@ abstract class UstadBaseController<V : UstadView>(
             }
 
             numAccountsRemaining == 0 && !canSelectServer -> {
-                //change later to login
-                impl.go(ContentEntryListTabsView.VIEW_NAME, mapOf(), context, goOptions)
+                impl.go(Login2View.VIEW_NAME, mapOf(), context, goOptions)
             }
 
             numAccountsRemaining > 0 -> {

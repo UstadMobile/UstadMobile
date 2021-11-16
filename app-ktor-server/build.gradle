@@ -139,6 +139,8 @@ shadowJar {
     configurations = [runtimeClasspath]
 }
 
+shadowJar.dependsOn(":app-react:distro")
+
 
 sourceCompatibility = "8"
 targetCompatibility = "8"

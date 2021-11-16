@@ -329,14 +329,16 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     }
 
     val contentContainer by css {
-        marginLeft = 3.spacingUnits
-        marginRight = 3.spacingUnits
+        marginLeft = 1.spacingUnits
+        marginRight = 1.spacingUnits
         height = LinearDimension("100vh")
         overflow = Overflow.scroll
         paddingBottom = 16.spacingUnits
-        width = LinearDimension("92.5%")
+        width = LinearDimension("95.5%")
         media(theme.breakpoints.up(tabletAndHighEnd)){
             width = LinearDimension("96.5%")
+            marginLeft = 3.spacingUnits
+            marginRight = 3.spacingUnits
         }
     }
 

@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UmPlatform
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeParseList
@@ -332,6 +333,18 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
         }
 
         val responseAccount = loginResponse.receive<UmAccount>()
+
+        //TODO: Remove this when repo & sync for web is in place
+        if(UmPlatform.isWeb){
+            val person = repo.personDao.findByUid(responseAccount.personUid)
+            if(person != null){
+                repo.personDao.updateAsync(responseAccount.toPerson())
+            }else{
+                repo.insertPersonAndGroup(responseAccount.toPerson())
+            }
+            repo.grantScopedPermission(responseAccount.toPerson(),
+                Role.ALL_PERMISSIONS, ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
+        }
 
         responseAccount.endpointUrl = endpointUrl
         val person = repo.personDao.findByUid(responseAccount.personUid)
