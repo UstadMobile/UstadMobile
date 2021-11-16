@@ -4,6 +4,11 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DIAware
 
+/**
+ * Implementations of ContentPlugin manage how content is imported, downloaded, and uploaded. There
+ * is generally one ContentPlugin implementation for each type of supported content import, and
+ * there is another ContentPlugin that implements downloading a Container using a Torrent.
+ */
 interface ContentPlugin : DIAware {
 
     /**

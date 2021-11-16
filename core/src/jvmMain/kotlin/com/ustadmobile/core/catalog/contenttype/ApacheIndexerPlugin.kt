@@ -35,7 +35,8 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    val pluginManager = ContentPluginManager(listOf(
+    //Plugins that supoprt direct download using HTTP
+    private val pluginManager = ContentPluginManager(listOf(
             di.on(endpoint).direct.instance<EpubTypePluginCommonJvm>(),
             di.on(endpoint).direct.instance<XapiTypePluginCommonJvm>(),
             di.on(endpoint).direct.instance<H5PTypePluginCommonJvm>(),

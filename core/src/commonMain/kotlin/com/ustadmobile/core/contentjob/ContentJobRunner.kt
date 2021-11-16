@@ -8,15 +8,12 @@ import com.ustadmobile.core.util.EventCollator
 import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.core.io.ext.emptyRecursively
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
-import com.ustadmobile.core.torrent.UstadTorrentManager
-import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
-import com.ustadmobile.door.getFirstValue
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -189,7 +186,7 @@ class ContentJobRunner(
                         processResult != null -> processResult.status
                         processException is FatalContentJobException -> JobStatus.FAILED
                         processException is ConnectivityException -> JobStatus.QUEUED
-                        processException is CancellationException && processException !is ConnectivityException -> {
+                        processException is CancellationException -> {
                             deleteFilesForContentEntry(
                                     item.contentJobItem?.cjiContentEntryUid ?: 0,
                                             di, endpoint)
@@ -255,7 +252,6 @@ class ContentJobRunner(
             checkQueueSignalChannel.send(true)
         }
 
-        //TODO: get the final status by doing a query
         return ContentJobResult(JobStatus.COMPLETE)
     }
 
