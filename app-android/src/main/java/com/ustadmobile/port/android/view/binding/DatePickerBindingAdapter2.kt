@@ -105,7 +105,7 @@ fun TextView.setDateTime2(timeInMillis: Long, timeZoneId: String?, dateTimeInMil
                 it.timeInMillis = adapterCalendar.timeInMillis}
 
             persianCalendar.get(Calendar.YEAR).toString() + "/" +
-                    persianCalendar.get(Calendar.MONTH).toString() + "/" +
+                    (persianCalendar.get(Calendar.MONTH) + 1).toString() + "/" +
                     persianCalendar.get(Calendar.DAY_OF_MONTH).toString()
 
 
