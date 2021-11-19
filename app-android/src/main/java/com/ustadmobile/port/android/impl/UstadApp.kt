@@ -133,19 +133,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<ContainerStorageManager> () with scoped(EndpointScope.Default).singleton{
-            val systemImpl: UstadMobileSystemImpl = instance()
-            val storageList = mutableListOf<ContainerStorageDir>()
-            applicationContext.filesDir.listFiles()?.mapIndexed { index, it ->
-                val siteDir = it.parentFile.siteDataSubDir(context)
-                val storageDir = File(siteDir, UstadMobileSystemCommon.SUBDIR_CONTAINER_NAME)
-                storageDir.takeIf { !it.exists() }?.mkdirs()
-                val nameMessageId = if(index == 0) MessageID.phone_memory else MessageID.memory_card
-                storageList.add(
-                        ContainerStorageDir(storageDir.toURI().toString(),
-                                systemImpl.getString(nameMessageId, applicationContext),
-                        it.usableSpace, index == 0))
-            }
-            ContainerStorageManager(storageList.toList())
+            ContainerStorageManager(applicationContext, context, di)
         }
 
         bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton{

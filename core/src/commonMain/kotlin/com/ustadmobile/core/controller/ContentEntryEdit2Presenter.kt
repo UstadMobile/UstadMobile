@@ -33,6 +33,7 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
+import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -371,6 +372,7 @@ class ContentEntryEdit2Presenter(
 
         }catch (e: Exception){
             view.showSnackBar(systemImpl.getString(MessageID.import_link_content_not_supported, context))
+            Napier.e("Error extracting metadata", e)
             repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, e, this)
         }finally {
             view.loading = false

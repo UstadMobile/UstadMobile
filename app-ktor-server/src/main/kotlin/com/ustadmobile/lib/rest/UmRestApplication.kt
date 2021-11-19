@@ -13,10 +13,6 @@ import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.db.ext.addSyncCallback
-import com.ustadmobile.core.impl.AppConfig
-import com.ustadmobile.core.impl.UstadMobileConstants
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.io.UploadSessionManager
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
@@ -29,6 +25,7 @@ import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.core.catalog.contenttype.ApacheIndexerPlugin
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
+import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.torrent.*
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.PersonAuth2
@@ -132,6 +129,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             File(dataDirPath, context.identifier(dbMode)).also {
                 it.takeIf { !it.exists() }?.mkdirs()
             }
+        }
+
+        bind<ContainerStorageManager>() with scoped(EndpointScope.Default).singleton {
+            ContainerStorageManager(listOf(instance<File>(tag = TAG_CONTEXT_DATA_ROOT)))
         }
 
         bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
