@@ -138,8 +138,6 @@ class FolderIndexerPlugin(
                             cjiUid = db.contentJobItemDao.insertJobItem(this)
                         }
 
-                    }else{
-                        println("no metadata found for file ${fileDocument.name}")
                     }
                 }
 

@@ -88,14 +88,15 @@ class ContentEntryListRecyclerAdapter(var itemListener: ContentEntryListItemList
         holder.itemBinding.contentEntry = item
         holder.itemView.setSelectedIfInList(item, selectedItems, ContentEntryList2Fragment.DIFF_CALLBACK)
         if(item != null) {
-            GlobalScope.launch(Dispatchers.Main.immediate) {
-                holder.downloadJobItemLiveData = RateLimitedLiveData(appDatabase, listOf("ContentJobItem"), 1000) {
-                    appDatabase.contentJobItemDao.findStatusForActiveContentJobItem(item.contentEntryUid)
-                }
-                holder.contentJobItemProgress = RateLimitedLiveData(appDatabase, listOf("ContentJobItem"), 1000) {
-                    appDatabase.contentJobItemDao.findProgressForActiveContentJobItem(item.contentEntryUid)
-                }
+            holder.downloadJobItemLiveData = RateLimitedLiveData(appDatabase, listOf("ContentJobItem"), 1000) {
+                appDatabase.contentJobItemDao.findStatusForActiveContentJobItem(item.contentEntryUid)
             }
+            holder.contentJobItemProgress = RateLimitedLiveData(appDatabase, listOf("ContentJobItem"), 1000) {
+                appDatabase.contentJobItemDao.findProgressForActiveContentJobItem(item.contentEntryUid)
+            }
+        }else{
+            holder.downloadJobItemLiveData = null
+            holder.contentJobItemProgress = null
         }
     }
 

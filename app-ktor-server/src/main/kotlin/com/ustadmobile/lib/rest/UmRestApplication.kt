@@ -184,7 +184,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                     connectivityState = ConnectivityStatus.STATE_UNMETERED
                     connectedOrConnecting = true
                 })
-                di.on(context).direct.instance<TorrentTracker>().start()
                 di.on(context).direct.instance<UstadTorrentManager>().startSeeding()
             }
             db
@@ -252,10 +251,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
         bind<Tracker>() with singleton {
             Tracker(trackerAnnounceUrl.port, trackerAnnounceUrl.toString())
-        }
-
-        bind<TorrentTracker>() with scoped(EndpointScope.Default).singleton {
-            TorrentTracker(endpoint = context, di)
         }
         bind<UstadCommunicationManager>() with singleton {
             UstadCommunicationManager(CommunicationWorkers())

@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.content.ContentResolver
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -21,7 +20,6 @@ import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.kotlin.mock
 
 @AdbScreenRecord("Content entry edit screen tests")
 class ContentEntryEdit2FragmentTest : TestCase() {

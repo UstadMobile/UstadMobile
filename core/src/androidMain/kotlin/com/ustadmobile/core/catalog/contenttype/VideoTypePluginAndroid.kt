@@ -11,10 +11,7 @@ import com.linkedin.android.litr.TransformationOptions
 import com.linkedin.android.litr.analytics.TrackTransformationInfo
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
-import com.ustadmobile.core.contentjob.ContentJobProgressListener
-import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.contentjob.ContentJobProcessContext
-import com.ustadmobile.core.contentjob.ProcessResult
+import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.util.ext.uploadContentIfNeeded
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
@@ -89,6 +86,7 @@ class VideoTypePluginAndroid(
                     MapSerializer(String.serializer(), String.serializer()),
                     jobItem.contentJob?.params ?: "")
             val compressVideo: Boolean = params["compress"]?.toBoolean() ?: false
+            val mediaTransformer = MediaTransformer(context as Context)
 
             try {
 
@@ -130,47 +128,47 @@ class VideoTypePluginAndroid(
 
                     val videoCompleted = CompletableDeferred<Boolean>()
 
-                    val mediaTransformer = MediaTransformer(context as Context)
-                    mediaTransformer.transform(contentJobItem.cjiContentEntryUid.toString(), localUri.uri, newVideo.path,
+                    try {
+
+                        mediaTransformer.transform(contentJobItem.cjiContentEntryUid.toString(), localUri.uri, newVideo.path,
                             videoTarget, audioTarget, object : TransformationListener {
-                        override fun onStarted(id: String) {
-                            Napier.d(tag = VIDEO_ANDROID, message = "started transform")
-                        }
+                            override fun onStarted(id: String) {
+                                Napier.d(tag = VIDEO_ANDROID, message = "started transform")
+                            }
 
-                        override fun onProgress(id: String, progress: Float) {
-                            Napier.d(tag = VIDEO_ANDROID, message = "progress at value ${progress * 100}")
-                            contentJobItem.cjiItemProgress = ((progress * contentJobItem.cjiItemTotal) / progressSize).toLong()
-                            jobProgress.onProgress(contentJobItem)
-                        }
+                            override fun onProgress(id: String, progress: Float) {
+                                Napier.d(tag = VIDEO_ANDROID, message = "progress at value ${progress * 100}")
+                                contentJobItem.cjiItemProgress = ((progress * contentJobItem.cjiItemTotal) / progressSize).toLong()
+                                jobProgress.onProgress(contentJobItem)
+                            }
 
-                        override fun onCompleted(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
-                            Napier.d(tag = VIDEO_ANDROID, message = "completed transform")
-                            contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
-                            jobProgress.onProgress(contentJobItem)
-                            videoCompleted.complete(true)
-                        }
+                            override fun onCompleted(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
+                                Napier.d(tag = VIDEO_ANDROID, message = "completed transform")
+                                contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
+                                jobProgress.onProgress(contentJobItem)
+                                videoCompleted.complete(true)
+                            }
 
-                        override fun onCancelled(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
-                            Napier.d(tag = VIDEO_ANDROID, message = "cancelled transform")
-                            videoCompleted.complete(false)
-                        }
+                            override fun onCancelled(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
+                                Napier.d(tag = VIDEO_ANDROID, message = "cancelled transform")
+                                videoCompleted.complete(false)
+                            }
 
-                        override fun onError(id: String, cause: Throwable?, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
-                            videoCompleted.completeExceptionally(cause
-                                    ?: RuntimeException("error on video id: $id"))
-                        }
+                            override fun onError(id: String, cause: Throwable?, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
+                                videoCompleted.completeExceptionally(cause
+                                        ?: RuntimeException("error on video id: $id"))
+                            }
 
-                    }, TransformationOptions.Builder()
+                        }, TransformationOptions.Builder()
                             .setGranularity(MediaTransformer.GRANULARITY_DEFAULT)
                             .setVideoFilters(null)
                             .build()
-                    )
+                        )
 
-
-                    try {
                         videoCompleted.await()
                     } catch (e: Exception) {
                         Napier.e(tag = VIDEO_ANDROID, throwable = e, message = e.message ?: "")
+                        throw FatalContentJobException("ContentJobItem #${jobItem.contentJobItem?.cjiUid}: cannot compress video")
                     } finally {
                         mediaTransformer.release()
                     }
@@ -184,9 +182,8 @@ class VideoTypePluginAndroid(
                             cntLastModified = System.currentTimeMillis()
                             mimeType = supportedMimeTypes.first()
                             containerUid = repo.containerDao.insertAsync(this)
-                            contentJobItem.cjiContainerUid = containerUid
                         }
-
+                contentJobItem.cjiContainerUid = container.containerUid
                 db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
 
                 val containerFolder = jobItem.contentJob?.toUri
@@ -233,8 +230,9 @@ class VideoTypePluginAndroid(
             }catch(c: CancellationException){
 
                 withContext(NonCancellable){
+                    mediaTransformer.release()
                     newVideo.delete()
-                    videoTempDir.delete()
+                    videoTempDir.deleteRecursively()
                     localUri.toFile().delete()
                 }
 
