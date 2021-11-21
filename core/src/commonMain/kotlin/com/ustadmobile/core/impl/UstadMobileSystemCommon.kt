@@ -281,9 +281,6 @@ abstract class UstadMobileSystemCommon {
                 availableLangs.map { it to (LANGUAGE_NAMES[it] ?: it) }
     }
 
-    @JsName("getStorageDirAsync")
-    abstract suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?>
-
     /**
      * Return the mime type for the given extension
      *

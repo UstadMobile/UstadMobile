@@ -44,7 +44,6 @@ import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 import com.ustadmobile.core.db.ext.addSyncCallback
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_ITERATIONS
 import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_KEYLENGTH
@@ -194,7 +193,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
                     VideoTypePluginAndroid(applicationContext, context, di),
                     ContainerTorrentDownloadJob(applicationContext, context, di),
                     FolderIndexerPlugin(applicationContext, context, di),
-                    DeleteContainerPlugin(applicationContext, context, di)
+                    DeleteContentEntryPlugin(applicationContext, context, di)
                 )
             )
         }

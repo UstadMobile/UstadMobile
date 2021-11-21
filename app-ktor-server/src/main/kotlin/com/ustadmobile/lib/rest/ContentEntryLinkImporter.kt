@@ -41,22 +41,24 @@ fun Route.ContentEntryLinkImporter() {
             val url = call.request.queryParameters["url"]?: ""
             val di = closestDI()
             val pluginManager: ContentPluginManager by di.on(call).instance()
-            var metadata: MetadataResult? = null
-            try{
-                val processContext = ContentJobProcessContext(DoorUri.parse(url),
-                        createTemporaryDir("content"), mutableMapOf(), di)
-                metadata = withTimeout(IMPORT_LINK_TIMEOUT_DEFAULT) {
-                    pluginManager.extractMetadata(DoorUri.parse(url), processContext)
-                }
-            }catch (e: Exception){
-                Napier.e("Exception extracting metadata to validateLink: $url", e)
-            }
 
-            if (metadata == null) {
-                call.respond(HttpStatusCode.BadRequest, "Unsupported")
-            } else {
-                call.respond(metadata)
-            }
+            ContentJobProcessContext(DoorUri.parse(url),
+                    createTemporaryDir("content"), mutableMapOf(), di).use { processContext ->
+                val metadata: MetadataResult?
+                try{
+                    metadata = withTimeout(IMPORT_LINK_TIMEOUT_DEFAULT) {
+                        pluginManager.extractMetadata(DoorUri.parse(url), processContext)
+                    }
+                    if (metadata == null) {
+                        call.respond(HttpStatusCode.BadRequest, "Unsupported")
+                    } else {
+                        call.respond(metadata)
+                    }
+                }catch (e: Exception){
+                    Napier.e("Exception extracting metadata to validateLink: $url", e)
+                }
+           }
+
         }
 
         post("downloadLink") {

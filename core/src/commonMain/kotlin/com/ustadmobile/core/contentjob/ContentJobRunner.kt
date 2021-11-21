@@ -3,7 +3,6 @@ package com.ustadmobile.core.contentjob
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.ConnectivityException
 import com.ustadmobile.core.util.EventCollator
 import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.core.io.ext.emptyRecursively
@@ -161,7 +160,7 @@ class ContentJobRunner(
                     if(item.contentJobItem?.cjiConnectivityNeeded == true
                             && (state == ConnectivityStatus.STATE_DISCONNECTED ||
                                     !isMeteredAllowed && state == ConnectivityStatus.STATE_METERED)){
-                        jobResult.cancel(ConnectivityException("connectivity not acceptable"))
+                        jobResult.cancel(ConnectivityCancellationException("connectivity not acceptable"))
                     }
 
                 }
@@ -185,7 +184,7 @@ class ContentJobRunner(
                     val finalStatus: Int = when {
                         processResult != null -> processResult.status
                         processException is FatalContentJobException -> JobStatus.FAILED
-                        processException is ConnectivityException -> JobStatus.QUEUED
+                        processException is ConnectivityCancellationException -> JobStatus.QUEUED
                         processException is CancellationException -> {
                             deleteFilesForContentEntry(
                                     item.contentJobItem?.cjiContentEntryUid ?: 0,

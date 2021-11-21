@@ -148,7 +148,7 @@ class H5PTypePluginCommonJvm(
                             contentJobItem.cjiContainerUid = containerUid
                     }
 
-                db.contentJobItemDao.updateContainer(contentJobItem.cjiUid, container.containerUid)
+                db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
 
                 val containerFolder = jobItem.contentJob?.toUri ?: defaultContainerDir.toURI().toString()
                 val containerFolderUri = DoorUri.parse(containerFolder)
@@ -207,7 +207,7 @@ class H5PTypePluginCommonJvm(
                         "index.html", context, di, containerAddOptions)
                 tmpIndexHtmlFile.delete()
 
-                repo.addTorrentFileFromContainer(
+                repo.writeContainerTorrentFile(
                         container.containerUid,
                         DoorUri.parse(torrentDir.toURI().toString()),
                         trackerUrl, containerFolderUri
@@ -228,11 +228,8 @@ class H5PTypePluginCommonJvm(
                     return@withContext ProcessResult(JobStatus.QUEUED)
                 }
 
-
                 val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
                 uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient,  torrentFileBytes, endpoint)
-
-                repo.containerDao.findByUid(container.containerUid)
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)
 

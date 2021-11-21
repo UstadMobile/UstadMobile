@@ -87,10 +87,7 @@ class ContentEntryEdit2PresenterTest {
         contentPluginManager = mock { }
         systemImpl = mock {
 
-            onBlocking { getStorageDirsAsync(any()) }.thenAnswer {
-                mutableListOf(UMStorageDir("", "", removableMedia = false,
-                        isAvailable = false))
-            }
+
 
             on { getString(any(), any()) }.thenAnswer { errorMessage }
         }

@@ -5,7 +5,6 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.ConnectivityException
 import com.ustadmobile.core.io.ext.getUnCompressedSize
 import com.ustadmobile.core.io.ext.isGzipped
 import com.ustadmobile.core.util.DiTag

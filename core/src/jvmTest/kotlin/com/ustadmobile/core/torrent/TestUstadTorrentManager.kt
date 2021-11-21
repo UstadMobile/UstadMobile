@@ -12,7 +12,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.io.ext.addEntryToContainerFromResource
-import com.ustadmobile.core.io.ext.addTorrentFileFromContainer
+import com.ustadmobile.core.io.ext.writeContainerTorrentFile
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.*
@@ -292,7 +292,7 @@ class TestUstadTorrentManager {
 
         runBlocking {
                 val serverContainer = createContainer(serverRepo, serverContainerFolder)
-                serverRepo.addTorrentFileFromContainer(
+                serverRepo.writeContainerTorrentFile(
                         serverContainer.containerUid,
                         serverTorrentFolder.toDoorUri(), serverTrackerUrl.toString(), serverContainerFolder.toDoorUri()
                 )
@@ -323,7 +323,7 @@ class TestUstadTorrentManager {
         runBlocking {
 
             val serverContainer = createContainer(serverRepo, serverContainerFolder)
-            serverRepo.addTorrentFileFromContainer(
+            serverRepo.writeContainerTorrentFile(
                     serverContainer.containerUid,
                     serverTorrentFolder.toDoorUri(), serverTrackerUrl.toString(), serverContainerFolder.toDoorUri()
             )

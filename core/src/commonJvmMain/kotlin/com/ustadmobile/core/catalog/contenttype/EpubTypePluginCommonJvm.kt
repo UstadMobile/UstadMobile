@@ -16,7 +16,6 @@ import com.ustadmobile.core.util.ext.checkConnectivityToDoJob
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.*
@@ -142,7 +141,7 @@ class EpubTypePluginCommonJvm(
                                 contentJobItem.cjiContainerUid = containerUid
                             }
 
-                    db.contentJobItemDao.updateContainer(contentJobItem.cjiUid, container.containerUid)
+                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
 
                     val containerFolder = jobItem.contentJob?.toUri
                             ?: defaultContainerDir.toURI().toString()
@@ -152,7 +151,7 @@ class EpubTypePluginCommonJvm(
                             localUri,
                             ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
-                    repo.addTorrentFileFromContainer(
+                    repo.writeContainerTorrentFile(
                             container.containerUid,
                             DoorUri.parse(torrentDir.toURI().toString()),
                             trackerUrl, containerFolderUri
@@ -176,8 +175,6 @@ class EpubTypePluginCommonJvm(
 
                     val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
                     uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient, torrentFileBytes, endpoint)
-
-                    repo.containerDao.findByUid(container.containerUid)
 
                     return@withContext ProcessResult(JobStatus.COMPLETE)
                 }catch (c: CancellationException){

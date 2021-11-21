@@ -174,7 +174,7 @@ abstract class ContentJobItemDao {
            SET cjiContainerUid = :containerUid
          WHERE cjiUid = :cjiUid  
     """)
-    abstract suspend fun updateContainer(cjiUid: Long, containerUid: Long)
+    abstract suspend fun updateContentJobItemContainer(cjiUid: Long, containerUid: Long)
 
     @Query("""
         SELECT * 

@@ -9,6 +9,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.io.ext.guessMimeType
 import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
@@ -120,11 +121,12 @@ class FolderIndexerPlugin(
                     }
 
                 }else{
-                    val processContext = ContentJobProcessContext(DoorUri(fileDocument.uri),
-                            apacheDir, mutableMapOf(), di)
+
                     val hrefDoorUri = DoorUri.parse(fileDocument.uri.toString())
-                    val metadataResult = pluginManager.extractMetadata(hrefDoorUri, processContext)
-                    if(metadataResult != null){
+                    val mimeType = hrefDoorUri.guessMimeType(context, di)
+                    val isSupported = mimeType?.let { pluginManager.isMimeTypeSupported(it) } ?: true
+
+                    if(isSupported){
 
                         ContentJobItem().apply {
                             cjiJobUid = contentJobItem.cjiJobUid
@@ -132,7 +134,7 @@ class FolderIndexerPlugin(
                             cjiItemTotal = fileDocument.length()
                             cjiContentEntryUid = 0
                             cjiIsLeaf = true
-                            cjiPluginId = metadataResult.pluginId
+                            cjiPluginId = 0
                             cjiParentContentEntryUid = contentJobItem.cjiContentEntryUid
                             cjiConnectivityNeeded = false
                             cjiStatus = JobStatus.QUEUED

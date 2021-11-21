@@ -88,8 +88,6 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
             val data: InputStream? = localUri.openInputStream(context)
             val document = Jsoup.parse(data, "UTF-8", uri.uri.toURL().toString())
 
-            val apacheDir = createTemporaryDir("apache-${jobItem.contentJobItem?.cjiUid}")
-
             document.select("tr:has([alt])").forEachIndexed { counter, it ->
 
                 val alt = it.select("td [alt]").attr("alt")
@@ -124,11 +122,10 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                     } else {
 
                         val hrefDoorUri = DoorUri.parse(hrefUrl.toURI().toString())
-                        val processContext = ContentJobProcessContext(hrefDoorUri, apacheDir,
-                                mutableMapOf(), di)
+                        val mimeType = hrefDoorUri.guessMimeType(context, di)
+                        val isSupported = mimeType?.let { pluginManager.isMimeTypeSupported(it) } ?: true
 
-                        val metadataResult = pluginManager.extractMetadata(hrefDoorUri, processContext)
-                        if(metadataResult != null){
+                        if(isSupported){
 
                             ContentJobItem().apply {
                                 cjiJobUid = contentJobItem.cjiJobUid
@@ -136,7 +133,7 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                                 cjiItemTotal = sourceUri?.let { DoorUri.parse(it).getSize(context, di)  } ?: 0L
                                 cjiContentEntryUid = 0
                                 cjiIsLeaf = true
-                                cjiPluginId = metadataResult.pluginId
+                                cjiPluginId = 0
                                 cjiParentCjiUid = contentJobItem.cjiUid
                                 cjiParentContentEntryUid = contentJobItem.cjiContentEntryUid
                                 cjiConnectivityNeeded = false
@@ -144,8 +141,6 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                                 cjiUid = db.contentJobItemDao.insertJobItem(this)
                             }
 
-                        }else{
-                            println("no metadata found for url ${hrefUrl.toURI()}")
                         }
 
                     }

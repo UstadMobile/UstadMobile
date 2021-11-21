@@ -18,7 +18,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
 
-class DeleteContainerPlugin(
+class DeleteContentEntryPlugin(
         private var context: Any,
         private val endpoint: Endpoint,
         override val di: DI
@@ -28,16 +28,12 @@ class DeleteContainerPlugin(
 
     val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    private val ustadTorrentManager: UstadTorrentManager = di.direct.instance<UstadTorrentManager>()
-
-    private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
-
     override val pluginId: Int
         get() = PLUGIN_ID
     override val supportedMimeTypes: List<String>
-        get() = TODO("Not yet implemented")
+        get() = listOf()
     override val supportedFileExtensions: List<String>
-        get() = TODO("Not yet implemented")
+        get() = listOf()
 
     override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
         val containerUid = uri.uri.toString().substringAfterLast("/").toLongOrNull() ?: return null

@@ -10,7 +10,7 @@ import com.ustadmobile.core.util.ext.uploadContentIfNeeded
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
-import com.ustadmobile.core.io.ext.addTorrentFileFromContainer
+import com.ustadmobile.core.io.ext.writeContainerTorrentFile
 import com.ustadmobile.core.io.ext.isRemote
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
@@ -102,7 +102,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
                             contentJobItem.cjiContainerUid = containerUid
                         }
 
-                db.contentJobItemDao.updateContainer(contentJobItem.cjiUid, container.containerUid)
+                db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
 
 
                 val containerFolder = jobItem.contentJob?.toUri
@@ -114,7 +114,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
                         di,
                         ContainerAddOptions(containerFolderUri))
 
-                repo.addTorrentFileFromContainer(
+                repo.writeContainerTorrentFile(
                         container.containerUid,
                         DoorUri.parse(torrentDir.toURI().toString()),
                         trackerUrl, containerFolderUri
@@ -123,7 +123,6 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
                 val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
                 containerUidFolder.mkdirs()
                 ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
-
 
                 contentJobItem.cjiConnectivityNeeded = true
                 db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
@@ -135,8 +134,6 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
 
                 val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
                 uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient, torrentFileBytes, endpoint)
-
-                repo.containerDao.findByUid(container.containerUid)
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)
             }catch (c: CancellationException){

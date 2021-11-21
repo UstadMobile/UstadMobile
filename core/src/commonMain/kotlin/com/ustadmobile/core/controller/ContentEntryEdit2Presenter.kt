@@ -361,7 +361,9 @@ class ContentEntryEdit2Presenter(
                 view.metadataResult = metadata
                 val plugin = pluginManager.getPluginById(metadata.pluginId)
                 entry = metadata.entry
-                arguments[ARG_ENTITY_UID]?.let { entry?.contentEntryUid = it.toLong() }
+                arguments[ARG_ENTITY_UID]?.also {
+                    entry?.contentEntryUid = it.toLong()
+                }
                 view.fileImportErrorVisible = false
                 fromUri = uri
                 if (plugin.supportedMimeTypes.firstOrNull()?.startsWith("video/") == true &&

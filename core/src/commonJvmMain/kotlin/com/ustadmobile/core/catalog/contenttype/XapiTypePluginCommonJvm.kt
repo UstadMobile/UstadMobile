@@ -19,7 +19,6 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toFile
-import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -118,7 +117,7 @@ class XapiTypePluginCommonJvm(
                             contentJobItem.cjiContainerUid = containerUid
                         }
 
-                db.contentJobItemDao.updateContainer(contentJobItem.cjiUid, container.containerUid)
+                db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
 
 
                 val containerFolder = jobItem.contentJob?.toUri
@@ -129,7 +128,7 @@ class XapiTypePluginCommonJvm(
                         localUri,
                         ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
-                repo.addTorrentFileFromContainer(
+                repo.writeContainerTorrentFile(
                         container.containerUid,
                         DoorUri.parse(torrentDir.toURI().toString()),
                         trackerUrl, containerFolderUri)
@@ -152,8 +151,6 @@ class XapiTypePluginCommonJvm(
 
                 val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
                 uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient, torrentFileBytes, endpoint)
-
-                repo.containerDao.findByUid(container.containerUid)
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)
 
