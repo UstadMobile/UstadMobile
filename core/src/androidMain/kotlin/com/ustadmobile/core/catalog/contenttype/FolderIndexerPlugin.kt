@@ -10,7 +10,6 @@ import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.guessMimeType
-import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -70,8 +69,6 @@ class FolderIndexerPlugin(
         val jobUri = contentJobItem.sourceUri ?: return ProcessResult(JobStatus.FAILED)
         withContext(Dispatchers.Default) {
             val uri = DoorUri.parse(jobUri)
-
-            val apacheDir = createTemporaryDir("folder-${jobItem.contentJobItem?.cjiUid}")
 
             val startingUri = try{
                 DocumentsContract.buildChildDocumentsUriUsingTree(uri.uri, DocumentsContract.getDocumentId(uri.uri))

@@ -23,7 +23,6 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.ext.checkConnectivityToDoJob
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.lib.db.entities.*
 import io.ktor.client.*
@@ -223,7 +222,7 @@ class H5PTypePluginCommonJvm(
                 contentJobItem.cjiConnectivityNeeded = true
                 db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
 
-                val haveConnectivityToContinueJob = checkConnectivityToDoJob(db, jobItem)
+                val haveConnectivityToContinueJob =  db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid ?: 0)
                 if(!haveConnectivityToContinueJob){
                     return@withContext ProcessResult(JobStatus.QUEUED)
                 }

@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
 
@@ -59,5 +60,26 @@ abstract class ContentJobDao {
                              OR cjiParentContentEntryUid = :contentEntryUid)
     """)
     abstract suspend fun updateMeteredAllowedForEntry(contentEntryUid: Long, meteredAllowed: Boolean)
+
+    /**
+     *  This query is only called when connectivity IS needed, so there is no need for the job item id.
+     *  It's only purpose is to check if the connectivity is acceptable for the job
+     *  e.g. connectivity == unmetered or (connectivity == metered and meteredNetworkAllowed == true)
+     */
+    @Query("""
+          WITH ConnectivityStateCte(state) AS 
+             (SELECT COALESCE(
+                     (SELECT connectivityState 
+                        FROM ConnectivityStatus 
+                       LIMIT 1), 0))
+   
+           SELECT COALESCE((SELECT 1 
+            FROM ContentJob 
+           WHERE cjUid = 1
+             AND (cjIsMeteredAllowed 
+             AND (SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_METERED})
+			  OR (SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_UNMETERED}),0)
+    """)
+    abstract suspend fun isConnectivityAcceptableForJob(jobId: Long): Boolean
 
 }

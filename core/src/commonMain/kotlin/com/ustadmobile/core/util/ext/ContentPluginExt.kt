@@ -61,10 +61,3 @@ suspend fun ContentPlugin.uploadContentIfNeeded(contentNeedUpload: Boolean,
         }
     }
 }
-
-fun checkConnectivityToDoJob(db: UmAppDatabase, jobItemAndContentJob: ContentJobItemAndContentJob): Boolean{
-    val connectivityState = db.connectivityStatusDao.status()?.connectivityState ?: throw IllegalStateException("no connectivity status")
-
-    return !(connectivityState == ConnectivityStatus.STATE_DISCONNECTED ||
-            (connectivityState == ConnectivityStatus.STATE_METERED && jobItemAndContentJob.contentJob?.cjIsMeteredAllowed == false))
-}

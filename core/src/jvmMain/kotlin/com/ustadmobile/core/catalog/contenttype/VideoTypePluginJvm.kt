@@ -15,7 +15,6 @@ import com.ustadmobile.core.io.ext.isRemote
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ShrinkUtils
-import com.ustadmobile.core.util.ext.checkConnectivityToDoJob
 import com.ustadmobile.core.util.ext.fitWithin
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
@@ -127,7 +126,7 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
                 contentJobItem.cjiConnectivityNeeded = true
                 db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
 
-                val haveConnectivityToContinueJob = checkConnectivityToDoJob(db, jobItem)
+                val haveConnectivityToContinueJob =  db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid ?: 0)
                 if (!haveConnectivityToContinueJob) {
                     return@withContext ProcessResult(JobStatus.QUEUED)
                 }

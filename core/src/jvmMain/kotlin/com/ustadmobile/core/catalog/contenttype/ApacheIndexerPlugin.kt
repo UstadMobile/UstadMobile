@@ -6,7 +6,6 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.getSize
 import com.ustadmobile.core.io.ext.guessMimeType
-import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.openInputStream

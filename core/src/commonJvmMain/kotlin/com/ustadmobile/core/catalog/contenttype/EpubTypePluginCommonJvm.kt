@@ -12,7 +12,6 @@ import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.alternative
-import com.ustadmobile.core.util.ext.checkConnectivityToDoJob
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
@@ -167,7 +166,7 @@ class EpubTypePluginCommonJvm(
                     contentJobItem.cjiConnectivityNeeded = true
                     db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
 
-                    val haveConnectivityToContinueJob = checkConnectivityToDoJob(db, jobItem)
+                    val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid ?: 0)
                     if (!haveConnectivityToContinueJob) {
                         return@withContext ProcessResult(JobStatus.QUEUED)
                     }

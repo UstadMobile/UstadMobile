@@ -221,7 +221,7 @@ class VideoTypePluginAndroid(
                 contentJobItem.cjiConnectivityNeeded = true
                 db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
 
-                val haveConnectivityToContinueJob = checkConnectivityToDoJob(db, jobItem)
+                val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid)
                 if (!haveConnectivityToContinueJob) {
                     return@withContext ProcessResult(JobStatus.QUEUED)
                 }
