@@ -40,8 +40,6 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndp
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.*
-import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
-import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
@@ -58,7 +56,6 @@ import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import okhttp3.OkHttpClient
-
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
@@ -177,8 +174,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<LocalAvailabilityManager>() with scoped(EndpointScope.Default).singleton {
             LocalAvailabilityManagerImpl(di, context)
         }
-
-        bind<ContainerFetcher>() with singleton { ContainerFetcherJvm(di) }
 
         bind<ContentEntryOpener>() with scoped(EndpointScope.Default).singleton {
             ContentEntryOpener(di, context)
