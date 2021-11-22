@@ -41,6 +41,7 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.junit.Assert
 import org.junit.Before
@@ -118,7 +119,7 @@ class TestXapiStatementResponder {
                     .addSyncCallback(nodeIdAndAuth, false)
                     .build()
                     .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, false)
-                    .also { it.preload() })
+                    .also { runBlocking { it.preload() } })
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {

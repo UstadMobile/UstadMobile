@@ -15,6 +15,7 @@ import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
+import kotlinx.coroutines.runBlocking
 import org.kodein.di.*
 import javax.naming.InitialContext
 import kotlin.random.Random
@@ -32,7 +33,7 @@ fun DI.Builder.bindDbAndRepoWithEndpoint(endpointScope: EndpointScope, clientMod
             .addSyncCallback(nodeIdAndAuth, false)
             .build()
             .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId)
-            .also { it.preload() })
+            .also { runBlocking { it.preload() } })
     }
 
     bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {

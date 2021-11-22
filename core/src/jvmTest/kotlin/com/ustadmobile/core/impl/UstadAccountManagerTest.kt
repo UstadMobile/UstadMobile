@@ -118,6 +118,13 @@ class UstadAccountManagerTest {
                 ))
             }
 
+            bind<ClientId>(tag = UstadMobileSystemCommon.TAG_CLIENT_ID) with scoped(endpointScope).singleton {
+                val repo: UmAppDatabase by di.on(Endpoint(mockServerUrl)).instance(tag = DoorTag.TAG_REPO)
+                val nodeId = (repo as? DoorDatabaseSyncRepository)?.clientId
+                    ?: throw IllegalStateException("Could not open repo for endpoint ${context.url}")
+                ClientId(nodeId)
+            }
+
             bind<OkHttpClient>() with singleton {
                 OkHttpClient().newBuilder().build()
             }

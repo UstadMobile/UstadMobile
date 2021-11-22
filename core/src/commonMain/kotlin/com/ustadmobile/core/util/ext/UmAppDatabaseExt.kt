@@ -20,9 +20,11 @@ import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 fun UmAppDatabase.runPreload() {
-    preload()
+    GlobalScope.launch { preload() }
 }
 
 /**

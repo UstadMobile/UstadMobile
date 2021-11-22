@@ -37,6 +37,7 @@ import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
@@ -113,7 +114,7 @@ class UstadTestRule: TestWatcher() {
                     .addSyncCallback(nodeIdAndAuth, false)
                     .build()
                     .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId)
-                    .also { it.preload() })
+                    .also { runBlocking { it.preload() } })
             }
 
             bind<HttpClient>() with singleton{
