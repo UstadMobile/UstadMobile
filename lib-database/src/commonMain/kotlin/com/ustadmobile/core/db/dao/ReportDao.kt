@@ -63,7 +63,7 @@ abstract class ReportDao : BaseDao<Report> {
 
     @JsName("findByUidList")
     @Query("SELECT reportUid FROM Report WHERE reportUid IN (:uidList)")
-    abstract fun findByUidList(uidList: List<Long>): List<Long>
+    abstract suspend fun findByUidList(uidList: List<Long>): List<Long>
 
 
     @Query("""UPDATE Report SET reportInactive = :toggleVisibility, 
@@ -74,9 +74,9 @@ abstract class ReportDao : BaseDao<Report> {
 
     @JsName("replaceList")
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun replaceList(entityList: List<Report>)
+    abstract suspend fun replaceList(entityList: List<Report>)
 
-    fun initPreloadedTemplates() {
+    suspend fun initPreloadedTemplates() {
         val uidsInserted = findByUidList(Report.FIXED_TEMPLATES.map { it.reportUid })
         val templateListToInsert = Report.FIXED_TEMPLATES.filter { it.reportUid !in uidsInserted }
         replaceList(templateListToInsert)

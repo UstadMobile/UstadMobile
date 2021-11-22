@@ -26,7 +26,10 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.kodein.di.*
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.instance
+import org.kodein.di.on
 
 class SplashPresenter(private val view: SplashView): DIAware {
 
@@ -57,13 +60,13 @@ class SplashPresenter(private val view: SplashView): DIAware {
         val dbBuilder =  DatabaseBuilder.databaseBuilder<UmAppDatabase>(builderOptions)
         val umAppDatabase =  dbBuilder.build()
 
-        umAppDatabase.initJsRepo(impl.getAppPref(TAG_LOADED, this).toBoolean())
-
         dispatch(ReduxDbState(umAppDatabase))
 
         val accountManager: UstadAccountManager by instance()
         val nodeIdAndAuth:NodeIdAndAuth by di.on(accountManager.activeAccount).instance()
         dbBuilder.addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
+
+        umAppDatabase.initJsRepo(impl.getAppPref(TAG_LOADED, this).toBoolean())
 
         val localeCode = impl.getDisplayedLocale(this)
         val defaultLocale = impl.getAppPref(AppConfig.KEY_DEFAULT_LANGUAGE, this)
@@ -91,9 +94,6 @@ class SplashPresenter(private val view: SplashView): DIAware {
         impl.setAppPref(TAG_LOADED,"true", this)
         view.loading = false
     }
-
-
-    fun onDestroy() {}
 
     override val di: DI
         get() = getCurrentState().di.instance

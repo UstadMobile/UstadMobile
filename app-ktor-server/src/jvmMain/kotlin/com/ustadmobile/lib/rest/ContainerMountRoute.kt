@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.rest
 
-import io.github.aakira.napier.Napier
 import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID

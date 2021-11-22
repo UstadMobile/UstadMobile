@@ -15,7 +15,7 @@ class TimezoneHelperTest {
     @Test
     fun givenTimeZone_whenAskedForARawOffset_shouldProvideIt(){
         val offset = getRawTimezoneOffset("Asia/Dubai")
-        assertEquals(14400000,offset)
+        assertEquals(240000,offset)
     }
 
     @Test

@@ -224,7 +224,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-json-js:$version_ktor"
                 implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
-                implementation npm("pbkdf2","$version_npm_pbkdf2")
+                implementation npm("asmcrypto.js","$version_npm_pbkdf2")
                 implementation npm("buffer","$version_npm_buffer")
             }
         }
@@ -232,6 +232,8 @@ kotlin {
         jsTest {
             dependencies {
                 implementation kotlin('test-js')
+                implementation npm("moment","$version_npm_moment")
+                implementation npm("moment-timezone","$version_npm_moment_timezone")
             }
         }
 

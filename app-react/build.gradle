@@ -37,7 +37,7 @@ kotlin {
 task fixMissingKotlinExtensionModule {
     doLast{
         rootProject.fileTree (dir: "build/js/packages",
-                includes: ['**/kotlin-dce-dev/kotlin-extensions.js'], exclude: '**/*.meta.js')
+                includes: ['**/kotlin-dce-dev/kotlin-extensions.js', '**/kotlin-dce/kotlin-extensions.js'], exclude: '**/*.meta.js')
                 .each() { File file ->
                     File extFile = new File(file.parentFile.absolutePath, "kotlin-wrappers-kotlin-extensions-js-legacy.js")
                     String fileContent = new String(Files.readAllBytes(Paths.get(file.path)), "UTF-8")
@@ -66,6 +66,7 @@ dependencies {
     implementation project(":lib-database")
     implementation project(":lib-database-entities")
     implementation npm("moment","$version_npm_moment")
+    implementation npm("moment-timezone","$version_npm_moment_timezone")
     implementation npm("@date-io/moment","$version_npm_mement_io")
     implementation npm("@material-ui/pickers","$version_npm_picker_ui")
     implementation "com.ustadmobile.door:room-annotations:$version_door"
@@ -79,8 +80,6 @@ dependencies {
     implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
 }
 
-tasks.findByName("processDceDevKotlinJs").finalizedBy(fixMissingKotlinExtensionModule)
-
 task distro {
     def destDir = rootProject.file("app-ktor-server/src/main/resources/umapp/")
     destDir.mkdirs()
@@ -92,4 +91,6 @@ task distro {
     }
 }
 
+tasks.findByName("processDceDevKotlinJs").finalizedBy(fixMissingKotlinExtensionModule)
+tasks.findByName("browserProductionWebpack").dependsOn(fixMissingKotlinExtensionModule)
 distro.dependsOn(project.tasks.findByName("browserDistribution"))

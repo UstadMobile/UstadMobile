@@ -92,7 +92,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     /**
      * Preload a few entities where we have fixed UIDs for fixed items (e.g. Xapi Verbs)
      */
-    fun preload() {
+    suspend fun preload() {
         verbDao.initPreloadedVerbs()
         reportDao.initPreloadedTemplates()
         leavingReasonDao.initPreloadedLeavingReasons()

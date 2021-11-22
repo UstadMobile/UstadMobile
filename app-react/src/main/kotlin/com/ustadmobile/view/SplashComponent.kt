@@ -71,7 +71,6 @@ class SplashComponent (props: RProps): RComponent<RProps, RState>(props), Splash
     }
 
     override fun componentWillUnmount() {
-        mPresenter?.onDestroy()
         mPresenter = null
     }
 }

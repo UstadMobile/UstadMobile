@@ -189,7 +189,7 @@ fun Application.umRestApplication(dbModeOverride: String? = null,
 
             //Add listener that will end sessions when authentication has been updated
             repo.addSyncListener(PersonAuth2::class, EndSessionPersonAuth2SyncListener(repo))
-            repo.preload()
+            runBlocking { repo.preload() }
             repo.ktorInitRepo()
             runBlocking { repo.initAdminUser(context, di) }
 

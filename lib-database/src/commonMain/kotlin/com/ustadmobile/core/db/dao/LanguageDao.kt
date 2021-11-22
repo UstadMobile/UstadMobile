@@ -72,7 +72,7 @@ abstract class LanguageDao : BaseDao<Language> {
 
     @JsName("findByUidList")
     @Query("SELECT langUid FROM LANGUAGE WHERE langUid IN (:uidList)")
-    abstract fun findByUidList(uidList: List<Long>): List<Long>
+    abstract suspend fun findByUidList(uidList: List<Long>): List<Long>
 
 
     @Query("""UPDATE Language SET languageActive = :toggleVisibility, 
@@ -82,9 +82,9 @@ abstract class LanguageDao : BaseDao<Language> {
 
     @JsName("replaceList")
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun replaceList(entityList: List<Language>)
+    abstract suspend fun replaceList(entityList: List<Language>)
 
-    fun initPreloadedLanguages() {
+    suspend fun initPreloadedLanguages() {
         val uidsInserted = findByUidList(Language.FIXED_LANGUAGES.map { it.langUid })
         val templateListToInsert = Language.FIXED_LANGUAGES.filter { it.langUid !in uidsInserted }
         replaceList(templateListToInsert)
