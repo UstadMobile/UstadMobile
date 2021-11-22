@@ -25,6 +25,7 @@ expect suspend fun ContentPlugin.withWifiLock(context: Any, block: suspend () ->
 
 expect suspend fun deleteFilesForContentEntry(contentEntryUid: Long, di: DI, endpoint: Endpoint): Int
 
+@Deprecated("Replaced with ContentPluginUploader so it can be mocked in tests")
 suspend fun ContentPlugin.uploadContentIfNeeded(contentNeedUpload: Boolean,
                                                 contentJobItem: ContentJobItem,
                                                 progress: ContentJobProgressListener,
