@@ -2,11 +2,7 @@ package com.ustadmobile.core.catalog.contenttype
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
-import com.ustadmobile.core.contentjob.ContentJobProgressListener
-import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.contentjob.ContentJobProcessContext
-import com.ustadmobile.core.contentjob.ProcessResult
-import com.ustadmobile.core.util.ext.uploadContentIfNeeded
+import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
@@ -38,7 +34,12 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
 import org.kodein.di.direct
 
-class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoint, override val di: DI): VideoTypePlugin() {
+class VideoTypePluginJvm(
+        private var context: Any,
+        private val endpoint: Endpoint,
+        override val di: DI,
+        private val uploader: ContentPluginUploader = DefaultContentPluginUploader()
+): VideoTypePlugin() {
 
     private val VIDEO_JVM = "VideoPluginJVM"
 
@@ -132,7 +133,11 @@ class VideoTypePluginJvm(private var context: Any, private val endpoint: Endpoin
                 }
 
                 val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
-                uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient, torrentFileBytes, endpoint)
+                if(contentNeedUpload) {
+                    uploader.upload(
+                            contentJobItem, progress, httpClient, torrentFileBytes,
+                            endpoint)
+                }
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)
             }catch (c: CancellationException){

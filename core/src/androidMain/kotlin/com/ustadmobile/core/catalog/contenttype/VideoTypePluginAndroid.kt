@@ -12,7 +12,6 @@ import com.linkedin.android.litr.analytics.TrackTransformationInfo
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.*
-import com.ustadmobile.core.util.ext.uploadContentIfNeeded
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.*
@@ -44,7 +43,8 @@ import java.io.File
 class VideoTypePluginAndroid(
         private var context: Any,
         private val endpoint: Endpoint,
-        override val di: DI
+        override val di: DI,
+        private val uploader: ContentPluginUploader = DefaultContentPluginUploader()
 ) : VideoTypePlugin() {
 
     private val VIDEO_ANDROID = "VideoPluginAndroid"
@@ -218,13 +218,17 @@ class VideoTypePluginAndroid(
                 contentJobItem.cjiConnectivityNeeded = true
                 db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
 
-                val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid)
+                val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid ?: 0)
                 if (!haveConnectivityToContinueJob) {
                     return@withContext ProcessResult(JobStatus.QUEUED)
                 }
 
                 val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
-                uploadContentIfNeeded(contentNeedUpload, contentJobItem, jobProgress, httpClient, torrentFileBytes, endpoint)
+                if(contentNeedUpload) {
+                    uploader.upload(
+                            contentJobItem, jobProgress, httpClient, torrentFileBytes,
+                            endpoint)
+                }
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)
             }catch(c: CancellationException){

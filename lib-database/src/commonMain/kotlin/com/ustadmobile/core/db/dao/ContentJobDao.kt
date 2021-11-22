@@ -75,7 +75,7 @@ abstract class ContentJobDao {
    
            SELECT COALESCE((SELECT 1 
             FROM ContentJob 
-           WHERE cjUid = 1
+           WHERE cjUid = :jobId
              AND (cjIsMeteredAllowed 
              AND (SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_METERED})
 			  OR (SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_UNMETERED}),0)

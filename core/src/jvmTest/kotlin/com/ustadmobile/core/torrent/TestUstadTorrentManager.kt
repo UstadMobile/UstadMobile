@@ -26,7 +26,6 @@ import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import com.ustadmobile.lib.rest.ContainerDownload
 import com.ustadmobile.lib.rest.TorrentFileRoute
-import com.ustadmobile.lib.rest.TorrentTracker
 import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
 import io.ktor.application.*
 import io.ktor.client.*
@@ -72,7 +71,6 @@ class TestUstadTorrentManager {
     private lateinit var serverTorrentFolder: File
 
     private lateinit var serverTorrentManager: UstadTorrentManager
-    private lateinit var serverTorrentTracker: TorrentTracker
 
     private lateinit var server: ApplicationEngine
 
@@ -174,9 +172,6 @@ class TestUstadTorrentManager {
                 bind<Tracker>() with singleton {
                    tracker
                 }
-                bind<TorrentTracker>() with scoped(EndpointScope.Default).singleton {
-                    TorrentTracker(endpoint = context, di)
-                }
                  bind<ContainerTorrentDownloadJob>() with scoped(endpointScope).singleton {
                      ContainerTorrentDownloadJob(Any(),context, di)
                  }
@@ -196,9 +191,6 @@ class TestUstadTorrentManager {
                     tracker.start(true)
                     instance<UstadCommunicationManager>().start(InetAddress.getByName(serverTrackerUrl.host))
                     GlobalScope.launch {
-                        serverTorrentTracker = di.on(Endpoint("localhost")).direct.instance()
-                        serverTorrentTracker.start()
-
                         serverTorrentManager = di.on(Endpoint("localhost")).direct.instance()
                         serverTorrentManager.startSeeding()
 
@@ -298,7 +290,6 @@ class TestUstadTorrentManager {
                 )
 
             serverTorrentManager.addTorrent(serverContainer.containerUid, null)
-            serverTorrentTracker.addTorrentFile(File(serverTorrentFolder, "${serverContainer.containerUid}.torrent"))
 
             val sourceUri = DoorUri.parse("http://localhost/container/")
             val processContext = ContentJobProcessContext(sourceUri,
@@ -328,7 +319,6 @@ class TestUstadTorrentManager {
                     serverTorrentFolder.toDoorUri(), serverTrackerUrl.toString(), serverContainerFolder.toDoorUri()
             )
             serverTorrentManager.addTorrent(serverContainer.containerUid, null)
-            serverTorrentTracker.addTorrentFile(File(serverTorrentFolder, "${serverContainer.containerUid}.torrent"))
 
 
             clientRepo.addEntryToContainerFromResource(clientContainer.containerUid,

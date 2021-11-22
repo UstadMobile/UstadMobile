@@ -1,7 +1,6 @@
 package com.ustadmobile.core.util
 
 import com.google.gson.Gson
-import com.turn.ttorrent.tracker.Tracker
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
@@ -14,9 +13,6 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.core.torrent.UstadCommunicationManager
-import com.ustadmobile.core.torrent.UstadTorrentManager
-import com.ustadmobile.core.torrent.UstadTorrentManagerImpl
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
@@ -28,7 +24,6 @@ import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.lib.rest.TorrentTracker
 import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
