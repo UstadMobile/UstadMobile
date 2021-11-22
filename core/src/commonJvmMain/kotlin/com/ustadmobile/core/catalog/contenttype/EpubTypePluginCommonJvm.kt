@@ -33,7 +33,8 @@ import kotlinx.coroutines.CancellationException
 class EpubTypePluginCommonJvm(
         private var context: Any,
         private val endpoint: Endpoint,
-        override val di: DI
+        override val di: DI,
+        private val uploader: ContentPluginUploader = DefaultContentPluginUploader()
 ) : ContentPlugin {
 
     val viewName: String
@@ -173,7 +174,11 @@ class EpubTypePluginCommonJvm(
 
 
                     val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
-                    uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient, torrentFileBytes, endpoint)
+                    if(contentNeedUpload) {
+                        uploader.upload(
+                            contentJobItem, progress, httpClient, torrentFileBytes,
+                            endpoint)
+                    }
 
                     return@withContext ProcessResult(JobStatus.COMPLETE)
                 }catch (c: CancellationException){
