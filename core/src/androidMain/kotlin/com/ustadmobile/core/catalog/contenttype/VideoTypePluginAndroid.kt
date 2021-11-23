@@ -87,143 +87,150 @@ class VideoTypePluginAndroid(
                     jobItem.contentJob?.params ?: "")
             val compressVideo: Boolean = params["compress"]?.toBoolean() ?: false
             val mediaTransformer = MediaTransformer(context as Context)
+            val videoIsProcessed = contentJobItem.cjiContainerUid != 0L
 
             try {
 
-                Napier.d(tag = VIDEO_ANDROID, message = "conversion Params compress video is $compressVideo")
+                if(videoIsProcessed) {
 
-                if (compressVideo) {
+                    Napier.d(tag = VIDEO_ANDROID, message = "conversion Params compress video is $compressVideo")
 
-                    Napier.d(tag = VIDEO_ANDROID, message = "start import for new video file $newVideo.name")
+                    if (compressVideo) {
 
-                    val dimensionsArray = params["dimensions"]?.split("x") ?: listOf()
-                    val storageDimensions = localUri.extractVideoResolutionMetadata(context as Context)
-                    val originalVideoDimensions = if (dimensionsArray.isEmpty()) {
-                        storageDimensions
-                    } else {
-                        val aspectRatio = dimensionsArray[0].toFloat() / dimensionsArray[1].toFloat()
-                        Pair(storageDimensions.first, (storageDimensions.first / aspectRatio).toInt())
-                    }
-                    val newVideoDimensions = originalVideoDimensions.fitWithin()
+                        Napier.d(tag = VIDEO_ANDROID, message = "start import for new video file $newVideo.name")
 
-                    Napier.d(tag = VIDEO_ANDROID, message = "width of old video is ${originalVideoDimensions.first}, height of old video is ${originalVideoDimensions.second}")
-                    Napier.d(tag = VIDEO_ANDROID, message = "width of new video is ${newVideoDimensions.first}, height of new video is ${newVideoDimensions.second}")
-
-                    val videoTarget = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, newVideoDimensions.first, newVideoDimensions.second).apply {
-                        setInteger(MediaFormat.KEY_BIT_RATE, VIDEO_BIT_RATE)
-                        setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, VIDEO_FRAME_INTERVAL)
-                        setInteger(MediaFormat.KEY_FRAME_RATE, VIDEO_FRAME_RATE)
-                        setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
-                    }
-
-                    val audioCodecInfo = MediaExtractor().useThenRelease {
-                        it.setDataSource(context as Context, localUri.uri, null)
-                        it.getFirstAudioCodecInfo()
-                    }
-
-                    val audioTarget = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC,
-                            audioCodecInfo.sampleRate, audioCodecInfo.channelCount).apply {
-                        setInteger(MediaFormat.KEY_BIT_RATE, AUDIO_BIT_RATE)
-                    }
-
-                    val videoCompleted = CompletableDeferred<Boolean>()
-
-                    try {
-
-                        mediaTransformer.transform(contentJobItem.cjiContentEntryUid.toString(), localUri.uri, newVideo.path,
-                            videoTarget, audioTarget, object : TransformationListener {
-                            override fun onStarted(id: String) {
-                                Napier.d(tag = VIDEO_ANDROID, message = "started transform")
-                            }
-
-                            override fun onProgress(id: String, progress: Float) {
-                                Napier.d(tag = VIDEO_ANDROID, message = "progress at value ${progress * 100}")
-                                contentJobItem.cjiItemProgress = ((progress * contentJobItem.cjiItemTotal) / progressSize).toLong()
-                                jobProgress.onProgress(contentJobItem)
-                            }
-
-                            override fun onCompleted(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
-                                Napier.d(tag = VIDEO_ANDROID, message = "completed transform")
-                                contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
-                                jobProgress.onProgress(contentJobItem)
-                                videoCompleted.complete(true)
-                            }
-
-                            override fun onCancelled(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
-                                Napier.d(tag = VIDEO_ANDROID, message = "cancelled transform")
-                                videoCompleted.complete(false)
-                            }
-
-                            override fun onError(id: String, cause: Throwable?, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
-                                videoCompleted.completeExceptionally(cause
-                                        ?: RuntimeException("error on video id: $id"))
-                            }
-
-                        }, TransformationOptions.Builder()
-                            .setGranularity(MediaTransformer.GRANULARITY_DEFAULT)
-                            .setVideoFilters(null)
-                            .build()
-                        )
-
-                        videoCompleted.await()
-                    } catch (e: Exception) {
-                        Napier.e(tag = VIDEO_ANDROID, throwable = e, message = e.message ?: "")
-                        throw FatalContentJobException("ContentJobItem #${jobItem.contentJobItem?.cjiUid}: cannot compress video")
-                    } finally {
-                        mediaTransformer.release()
-                    }
-
-                }
-
-
-                val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
-                        ?: Container().apply {
-                            containerContentEntryUid = contentJobItem.cjiContentEntryUid
-                            cntLastModified = System.currentTimeMillis()
-                            mimeType = supportedMimeTypes.first()
-                            containerUid = repo.containerDao.insertAsync(this)
+                        val dimensionsArray = params["dimensions"]?.split("x") ?: listOf()
+                        val storageDimensions = localUri.extractVideoResolutionMetadata(context as Context)
+                        val originalVideoDimensions = if (dimensionsArray.isEmpty()) {
+                            storageDimensions
+                        } else {
+                            val aspectRatio = dimensionsArray[0].toFloat() / dimensionsArray[1].toFloat()
+                            Pair(storageDimensions.first, (storageDimensions.first / aspectRatio).toInt())
                         }
-                contentJobItem.cjiContainerUid = container.containerUid
-                db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
+                        val newVideoDimensions = originalVideoDimensions.fitWithin()
 
-                val containerFolder = jobItem.contentJob?.toUri
-                        ?: defaultContainerDir.toURI().toString()
-                val containerFolderUri = DoorUri.parse(containerFolder)
+                        Napier.d(tag = VIDEO_ANDROID, message = "width of old video is ${originalVideoDimensions.first}, height of old video is ${originalVideoDimensions.second}")
+                        Napier.d(tag = VIDEO_ANDROID, message = "width of new video is ${newVideoDimensions.first}, height of new video is ${newVideoDimensions.second}")
 
-                if (compressVideo) {
-                    repo.addFileToContainer(container.containerUid, newVideo.toDoorUri(), newVideo.name,
-                            context,
-                            di,
-                            ContainerAddOptions(containerFolderUri))
-                } else {
-                    repo.addContainerFromUri(container.containerUid, localUri, context, di,
-                            localUri.getFileName(context),
-                            ContainerAddOptions(containerFolderUri))
+                        val videoTarget = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, newVideoDimensions.first, newVideoDimensions.second).apply {
+                            setInteger(MediaFormat.KEY_BIT_RATE, VIDEO_BIT_RATE)
+                            setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, VIDEO_FRAME_INTERVAL)
+                            setInteger(MediaFormat.KEY_FRAME_RATE, VIDEO_FRAME_RATE)
+                            setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
+                        }
 
-                    contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
-                    jobProgress.onProgress(contentJobItem)
+                        val audioCodecInfo = MediaExtractor().useThenRelease {
+                            it.setDataSource(context as Context, localUri.uri, null)
+                            it.getFirstAudioCodecInfo()
+                        }
+
+                        val audioTarget = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC,
+                                audioCodecInfo.sampleRate, audioCodecInfo.channelCount).apply {
+                            setInteger(MediaFormat.KEY_BIT_RATE, AUDIO_BIT_RATE)
+                        }
+
+                        val videoCompleted = CompletableDeferred<Boolean>()
+
+                        try {
+
+                            mediaTransformer.transform(contentJobItem.cjiContentEntryUid.toString(), localUri.uri, newVideo.path,
+                                    videoTarget, audioTarget, object : TransformationListener {
+                                override fun onStarted(id: String) {
+                                    Napier.d(tag = VIDEO_ANDROID, message = "started transform")
+                                }
+
+                                override fun onProgress(id: String, progress: Float) {
+                                    Napier.d(tag = VIDEO_ANDROID, message = "progress at value ${progress * 100}")
+                                    contentJobItem.cjiItemProgress = ((progress * contentJobItem.cjiItemTotal) / progressSize).toLong()
+                                    jobProgress.onProgress(contentJobItem)
+                                }
+
+                                override fun onCompleted(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
+                                    Napier.d(tag = VIDEO_ANDROID, message = "completed transform")
+                                    contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
+                                    jobProgress.onProgress(contentJobItem)
+                                    videoCompleted.complete(true)
+                                }
+
+                                override fun onCancelled(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
+                                    Napier.d(tag = VIDEO_ANDROID, message = "cancelled transform")
+                                    videoCompleted.complete(false)
+                                }
+
+                                override fun onError(id: String, cause: Throwable?, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
+                                    videoCompleted.completeExceptionally(cause
+                                            ?: RuntimeException("error on video id: $id"))
+                                }
+
+                            }, TransformationOptions.Builder()
+                                    .setGranularity(MediaTransformer.GRANULARITY_DEFAULT)
+                                    .setVideoFilters(null)
+                                    .build()
+                            )
+
+                            videoCompleted.await()
+                        } catch (e: Exception) {
+                            Napier.e(tag = VIDEO_ANDROID, throwable = e, message = e.message ?: "")
+                            throw FatalContentJobException("ContentJobItem #${jobItem.contentJobItem?.cjiUid}: cannot compress video")
+                        } finally {
+                            mediaTransformer.release()
+                        }
+
+                    }
+
+
+                    val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
+                            ?: Container().apply {
+                                containerContentEntryUid = contentJobItem.cjiContentEntryUid
+                                cntLastModified = System.currentTimeMillis()
+                                mimeType = supportedMimeTypes.first()
+                                containerUid = repo.containerDao.insertAsync(this)
+                            }
+
+                    val containerFolder = jobItem.contentJob?.toUri
+                            ?: defaultContainerDir.toURI().toString()
+                    val containerFolderUri = DoorUri.parse(containerFolder)
+
+                    if (compressVideo) {
+                        repo.addFileToContainer(container.containerUid, newVideo.toDoorUri(), newVideo.name,
+                                context,
+                                di,
+                                ContainerAddOptions(containerFolderUri))
+                    } else {
+                        repo.addContainerFromUri(container.containerUid, localUri, context, di,
+                                localUri.getFileName(context),
+                                ContainerAddOptions(containerFolderUri))
+
+                        contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
+                        jobProgress.onProgress(contentJobItem)
+                    }
+                    videoTempDir.delete()
+
+                    repo.writeContainerTorrentFile(
+                            container.containerUid,
+                            DoorUri.parse(torrentDir.toURI().toString()),
+                            trackerUrl, containerFolderUri
+                    )
+
+                    val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
+                    containerUidFolder.mkdirs()
+                    ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
+
+                    contentJobItem.cjiContainerUid = container.containerUid
+                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
+
+                    contentJobItem.cjiConnectivityNeeded = true
+                    db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
+
+                    val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid
+                            ?: 0)
+                    if (!haveConnectivityToContinueJob) {
+                        return@withContext ProcessResult(JobStatus.QUEUED)
+                    }
+
                 }
-                videoTempDir.delete()
 
-                repo.writeContainerTorrentFile(
-                        container.containerUid,
-                        DoorUri.parse(torrentDir.toURI().toString()),
-                        trackerUrl, containerFolderUri
-                )
-
-                val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
-                containerUidFolder.mkdirs()
-                ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
-
-                contentJobItem.cjiConnectivityNeeded = true
-                db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
-
-                val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid ?: 0)
-                if (!haveConnectivityToContinueJob) {
-                    return@withContext ProcessResult(JobStatus.QUEUED)
-                }
-
-                val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
+                val torrentFileBytes = File(torrentDir, "${contentJobItem.cjiContainerUid}.torrent").readBytes()
                 if(contentNeedUpload) {
                     uploader.upload(
                             contentJobItem, jobProgress, httpClient, torrentFileBytes,

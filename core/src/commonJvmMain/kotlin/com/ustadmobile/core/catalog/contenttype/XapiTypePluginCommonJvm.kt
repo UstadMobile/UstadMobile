@@ -106,49 +106,52 @@ class XapiTypePluginCommonJvm(
                         ?: throw IllegalArgumentException("missing tracker url")
                 val contentNeedUpload = !doorUri.isRemote()
                 val progressSize = if (contentNeedUpload) 2 else 1
+                val xapiIsProcessed = contentJobItem.cjiContainerUid != 0L
 
-                val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
-                        ?: Container().apply {
-                            containerContentEntryUid = contentJobItem.cjiContentEntryUid
-                            cntLastModified = System.currentTimeMillis()
-                            mimeType = supportedMimeTypes.first()
-                            containerUid = repo.containerDao.insertAsync(this)
-                            contentJobItem.cjiContainerUid = containerUid
-                        }
+                if(xapiIsProcessed) {
 
-                db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
+                    val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
+                            ?: Container().apply {
+                                containerContentEntryUid = contentJobItem.cjiContentEntryUid
+                                cntLastModified = System.currentTimeMillis()
+                                mimeType = supportedMimeTypes.first()
+                                containerUid = repo.containerDao.insertAsync(this)
+                            }
 
+                    val containerFolder = jobItem.contentJob?.toUri
+                            ?: defaultContainerDir.toURI().toString()
+                    val containerFolderUri = DoorUri.parse(containerFolder)
 
-                val containerFolder = jobItem.contentJob?.toUri
-                        ?: defaultContainerDir.toURI().toString()
-                val containerFolderUri = DoorUri.parse(containerFolder)
+                    repo.addEntriesToContainerFromZip(container.containerUid,
+                            localUri,
+                            ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
-                repo.addEntriesToContainerFromZip(container.containerUid,
-                        localUri,
-                        ContainerAddOptions(storageDirUri = containerFolderUri), context)
+                    repo.writeContainerTorrentFile(
+                            container.containerUid,
+                            DoorUri.parse(torrentDir.toURI().toString()),
+                            trackerUrl, containerFolderUri)
 
-                repo.writeContainerTorrentFile(
-                        container.containerUid,
-                        DoorUri.parse(torrentDir.toURI().toString()),
-                        trackerUrl, containerFolderUri)
+                    val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
+                    containerUidFolder.mkdirs()
+                    ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
 
-                val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
-                containerUidFolder.mkdirs()
-                ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
+                    contentJobItem.cjiContainerUid = container.containerUid
+                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
+
+                    contentJobItem.cjiConnectivityNeeded = true
+                    db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
+
+                    val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid
+                            ?: 0)
+                    if (!haveConnectivityToContinueJob) {
+                        return@withContext ProcessResult(JobStatus.QUEUED)
+                    }
+                }
 
                 contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
                 progress.onProgress(contentJobItem)
 
-
-                contentJobItem.cjiConnectivityNeeded = true
-                db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
-
-                val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid ?: 0)
-                if (!haveConnectivityToContinueJob) {
-                    return@withContext ProcessResult(JobStatus.QUEUED)
-                }
-
-                val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
+                val torrentFileBytes = File(torrentDir, "${contentJobItem.cjiContainerUid}.torrent").readBytes()
                 if(contentNeedUpload) {
                     uploader.upload(
                             contentJobItem, progress, httpClient, torrentFileBytes,

@@ -193,6 +193,7 @@ class ContainerTorrentDownloadJob(
                 progress.onProgress(contentJobItem)
 
             } catch (c: CancellationException) {
+                ustadTorrentManager.removeTorrent(containerUid)
                 throw c
             }
 
