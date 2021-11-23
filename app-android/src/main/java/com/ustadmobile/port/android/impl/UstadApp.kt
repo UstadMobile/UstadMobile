@@ -97,9 +97,9 @@ open class UstadApp : BaseUstadApp(), DIAware {
             val dbName = sanitizeDbNameFromUrl(context.url)
             val nodeIdAndAuth: NodeIdAndAuth = instance()
             DatabaseBuilder.databaseBuilder(applicationContext, UmAppDatabase::class, dbName)
-                .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                 .addSyncCallback(nodeIdAndAuth, false)
                     .addCallback(ContentJobItemTriggersCallback())
+                .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                 .build()
                 .also {
                     val networkManager: NetworkManagerBle = di.direct.instance()
@@ -281,7 +281,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
             Picasso.setSingletonInstance(Picasso.Builder(applicationContext)
                     .downloader(OkHttp3Downloader(instance<OkHttpClient>()))
                     .build())
-
         }
     }
 
