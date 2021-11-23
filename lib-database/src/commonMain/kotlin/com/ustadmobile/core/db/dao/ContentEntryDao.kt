@@ -116,7 +116,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                     ON ContentJobItem.cjiJobUid = ContentJob.cjUid
                WHERE cjiContentEntryUid = :contentEntryUid
                 AND cjiRecursiveStatus >= ${JobStatus.RUNNING_MIN}
-                AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX}),0) AS Status
+                AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX} LIMIT 1),0) AS Status
         FROM ContentEntry
        WHERE contentEntryUid = :contentEntryUid
     """)

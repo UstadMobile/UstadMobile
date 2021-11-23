@@ -238,9 +238,6 @@ class DownloadDialogPresenter(
             ContentJobItem.STATUS_COMPLETE -> GlobalScope.launch {
                 createDeleteJob()
             }
-            JobStatus.PAUSED -> GlobalScope.launch {
-                // TODO handle paused state
-            }
             else -> GlobalScope.launch {
                 createDownloadJob()
             }
@@ -285,19 +282,7 @@ class DownloadDialogPresenter(
 
     fun handleClickStackedButton(idClicked: Int) {
             when (idClicked) {
-              /*  STACKED_BUTTON_PAUSE -> GlobalScope.launch {
-                    // TODO pause download
-                    //containerDownloadManager.pause(currentDownloadJobItemVal.djiDjUid)
-                }*/
-
-                //If the download is already running, this will have no effect
-              /*  STACKED_BUTTON_CONTINUE -> GlobalScope.launch {
-                    // TODO back to running download
-                    //containerDownloadManager.enqueue(currentDownloadJobItemVal.djiDjUid)
-                }
-*/
                 STACKED_BUTTON_CANCEL -> GlobalScope.launch {
-                    // TODO cancel download
                     createCancelJob()
                 }
             }
@@ -330,20 +315,8 @@ class DownloadDialogPresenter(
     companion object {
 
         const val STACKED_BUTTON_CANCEL = 0
-/*
-        const val STACKED_BUTTON_PAUSE = 1
-
-        const val STACKED_BUTTON_CONTINUE = 2*/
-
-        //Previously internal: This does not compile since Kotlin 1.3.61
-       /* val STACKED_OPTIONS = intArrayOf(STACKED_BUTTON_PAUSE, STACKED_BUTTON_CANCEL,
-                STACKED_BUTTON_CONTINUE)*/
 
         val STACKED_OPTIONS = intArrayOf(STACKED_BUTTON_CANCEL)
-
-        //Previously internal: This does not compile since Kotlin 1.3.61
-       /* val STACKED_TEXT_MESSAGE_IDS = listOf(MessageID.pause_download,
-                MessageID.download_cancel_label, MessageID.download_continue_stacked_label)*/
 
         val STACKED_TEXT_MESSAGE_IDS = listOf(
                 MessageID.download_cancel_label)

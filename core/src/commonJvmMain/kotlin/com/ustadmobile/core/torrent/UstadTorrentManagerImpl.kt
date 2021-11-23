@@ -82,8 +82,7 @@ class UstadTorrentManagerImpl(
             val metadataProvider = FileMetadataProvider(torrentFile.absolutePath)
             val fileCollectionStorage = createFileCollectionStorage(
                     metadataProvider.torrentMetadata,
-                    containerFilesDir,
-                    db)
+                    containerFilesDir)
 
             val pieceStorage = pieceStorage.createStorage(metadataProvider.torrentMetadata, fileCollectionStorage)
 
