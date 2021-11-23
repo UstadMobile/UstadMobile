@@ -3,6 +3,7 @@ package com.ustadmobile.core.torrent
 import com.turn.ttorrent.client.*
 import com.turn.ttorrent.client.storage.FairPieceStorageFactory
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.UstadFileCollectionStorage.createFileCollectionStorage
 import com.ustadmobile.core.util.DiTag
 import kotlinx.coroutines.*
@@ -32,15 +33,11 @@ class UstadTorrentManagerImpl(
 
     private val containerDir by di.on(endpoint).instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
+    private val db: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
+
     private var containerInfoHashMap = mutableMapOf<Long, String>()
 
     private var activeTorrentDownloadMap = mutableMapOf<Long, ActiveTorrentInfo>()
-
- /*   private var containerDownloadPathMap = mutableMapOf<Long, String>()
-
-    private var containerManagerMap = mutableMapOf<Long, TorrentManager>()
-
-    private var containerListenerMap = mutableMapOf<Long, DownloadListenerAdapter>()*/
 
     // on android, di uses connectionManager and a provider to get the current communicationManager
     // on jvm, communicationManager is a singleton
@@ -50,7 +47,7 @@ class UstadTorrentManagerImpl(
     // lock add and removeTorrent
     private val torrentLock = Mutex()
 
-    val pieceStorage: FairPieceStorageFactory by lazy {
+    private val pieceStorage: FairPieceStorageFactory by lazy {
         FairPieceStorageFactory.INSTANCE
     }
 
@@ -83,7 +80,11 @@ class UstadTorrentManagerImpl(
 
             // create the torrent
             val metadataProvider = FileMetadataProvider(torrentFile.absolutePath)
-            val fileCollectionStorage = createFileCollectionStorage(metadataProvider.torrentMetadata, containerFilesDir)
+            val fileCollectionStorage = createFileCollectionStorage(
+                    metadataProvider.torrentMetadata,
+                    containerFilesDir,
+                    db)
+
             val pieceStorage = pieceStorage.createStorage(metadataProvider.torrentMetadata, fileCollectionStorage)
 
             // add to map for ref
@@ -120,7 +121,7 @@ class UstadTorrentManagerImpl(
 
             // go through map for active downloads
             activeTorrentDownloadMap.forEach {
-                // need to re-add the torrents to the new communcationManager
+                // need to re-add the torrents to the new communicationManager
                 torrentLock.withLock{
                     addTorrent(it.key, it.value.downloadPath)
                     it.value.torrentManager.addListener(it.value.downloadListener)

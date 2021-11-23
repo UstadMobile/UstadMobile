@@ -81,10 +81,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
     private var appConfig: Properties? = null
 
-    private val deviceStorageIndex = 0
-
-    private val sdCardStorageIndex = 1
-
     private var appPreferences: SharedPreferences? = null
 
     var messageIdMap: Map<Int, Int> = mapOf()
