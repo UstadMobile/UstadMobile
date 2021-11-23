@@ -22,9 +22,18 @@ actual class ContainerStorageManager(
         val list = mutableListOf<ContainerStorageDir>()
 
         //Main phone memory
-        list += ContainerStorageDir(context.filesDir.siteDataSubDir(endpoint).toUri().toString(),
+        val internalStorageFolder = context.filesDir.siteDataSubDir(endpoint)
+        internalStorageFolder.takeIf { !it.exists() }?.mkdirs()
+        list += ContainerStorageDir(internalStorageFolder.toUri().toString(),
             systemImpl.getString(MessageID.phone_memory, context), context.filesDir.usableSpace,
             false)
+
+        context.getExternalFilesDir(null)?.also {
+            it.mkdirs()
+            list += ContainerStorageDir(it.toUri().toString(),
+                    systemImpl.getString(MessageID.memory_card, context), it.usableSpace,
+                    true)
+        }
 
         storageList = list.toList()
     }

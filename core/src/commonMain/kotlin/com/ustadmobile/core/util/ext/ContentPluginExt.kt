@@ -28,37 +28,3 @@ import org.kodein.di.DI
 expect suspend fun ContentPlugin.withWifiLock(context: Any, block: suspend () -> Unit)
 
 expect suspend fun deleteFilesForContentEntry(contentEntryUid: Long, di: DI, endpoint: Endpoint): Int
-
-@Deprecated("Replaced with ContentPluginUploader so it can be mocked in tests")
-suspend fun ContentPlugin.uploadContentIfNeeded(contentNeedUpload: Boolean,
-                                                contentJobItem: ContentJobItem,
-                                                progress: ContentJobProgressListener,
-                                                httpClient: HttpClient, torrentFileBytes: ByteArray,
-                                                endpoint: Endpoint
-){
-    withContext(Dispatchers.Default) {
-        if (contentNeedUpload) {
-            val containerUid = contentJobItem.cjiContainerUid
-            val contentEntryUid = contentJobItem.cjiContentEntryUid
-            val path = UMFileUtil.joinPaths(endpoint.url, "containers/${containerUid}/$contentEntryUid/upload")
-            val torrentFileName = "${containerUid}.torrent"
-            try {
-                contentJobItem.cjiServerJobId = httpClient.post(path) {
-                    body = MultiPartFormDataContent(formData {
-                        append("torrentFile", torrentFileBytes,
-                                Headers.build {
-                                    append(HttpHeaders.ContentType, "application/x-bittorrent")
-                                    append(HttpHeaders.ContentDisposition, "filename=$torrentFileName")
-                                })
-                    })
-                    onUpload { bytesSentTotal, contentLength ->
-                        contentJobItem.cjiItemProgress = (contentJobItem.cjiItemTotal / 2) + (((bytesSentTotal / contentLength) * contentJobItem.cjiItemTotal) / 2)
-                        progress.onProgress(contentJobItem)
-                    }
-                }
-            }catch (c: CancellationException){
-                httpClient.cancel()
-            }
-        }
-    }
-}

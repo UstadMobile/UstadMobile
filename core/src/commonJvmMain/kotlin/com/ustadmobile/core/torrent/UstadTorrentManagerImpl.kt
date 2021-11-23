@@ -59,40 +59,43 @@ class UstadTorrentManagerImpl(
         torrentDir.listFiles() { file: File ->
             file.name.endsWith(".torrent")
         }?.forEach { torrentFile ->
-            torrentLock.withLock {
-                    addTorrent(torrentFile.nameWithoutExtension.toLong(), null)
-            }
+            addTorrent(torrentFile.nameWithoutExtension.toLong(), null)
         }
     }
 
     override suspend fun addTorrent(containerUid: Long, downloadPath: String?) {
         withContext(Dispatchers.Default){
+            torrentLock.withLock {
 
-            val startTime = System.currentTimeMillis()
+                val startTime = System.currentTimeMillis()
 
-            val torrentFile = File(torrentDir, "$containerUid.torrent")
+                val torrentFile = File(torrentDir, "$containerUid.torrent")
 
-            val containerFilesDir = if(downloadPath != null) File(downloadPath)
-                                    else File(containerDir, containerUid.toString())
-            containerFilesDir.mkdirs()
-            if(!torrentFile.exists())
-                throw IllegalArgumentException("torrent file does not exist ${torrentFile.absolutePath}")
+                val containerFilesDir = if(downloadPath != null) File(downloadPath)
+                                        else File(containerDir, containerUid.toString())
+                containerFilesDir.mkdirs()
+                if(!torrentFile.exists())
+                    throw IllegalArgumentException("torrent file does not exist ${torrentFile.absolutePath}")
 
-            // create the torrent
-            val metadataProvider = FileMetadataProvider(torrentFile.absolutePath)
-            val fileCollectionStorage = createFileCollectionStorage(
-                    metadataProvider.torrentMetadata,
-                    containerFilesDir)
+                // create the torrent
+                val metadataProvider = FileMetadataProvider(torrentFile.absolutePath)
+                val fileCollectionStorage = createFileCollectionStorage(
+                        metadataProvider.torrentMetadata,
+                        containerFilesDir)
 
-            val pieceStorage = pieceStorage.createStorage(metadataProvider.torrentMetadata, fileCollectionStorage)
+                val pieceStorage = pieceStorage.createStorage(metadataProvider.torrentMetadata, fileCollectionStorage)
 
-            // add to map for ref
-            containerInfoHashMap[containerUid] = metadataProvider.torrentMetadata.hexInfoHash
-            println("prepared to add torrent in ${System.currentTimeMillis() - startTime} ms")
-            val manager = requireCommunicationManager().addTorrent(metadataProvider, pieceStorage)
+                // add to map for ref
+                containerInfoHashMap[containerUid] = metadataProvider.torrentMetadata.hexInfoHash
+                println("prepared to add torrent in ${System.currentTimeMillis() - startTime} ms")
+                val manager = requireCommunicationManager().addTorrent(metadataProvider, pieceStorage)
 
-            val checkActiveTorrent = activeTorrentDownloadMap[containerUid]
-            activeTorrentDownloadMap[containerUid] = ActiveTorrentInfo(containerFilesDir.path, manager, checkActiveTorrent?.downloadListener)
+                val checkActiveTorrent = activeTorrentDownloadMap[containerUid]
+                activeTorrentDownloadMap[containerUid] = ActiveTorrentInfo(
+                        containerFilesDir.path,
+                        manager,
+                        checkActiveTorrent?.downloadListener)
+            }
         }
     }
 
@@ -121,18 +124,13 @@ class UstadTorrentManagerImpl(
             // go through map for active downloads
             activeTorrentDownloadMap.forEach {
                 // need to re-add the torrents to the new communicationManager
-                torrentLock.withLock{
-                    addTorrent(it.key, it.value.downloadPath)
-                    it.value.torrentManager.addListener(it.value.downloadListener)
-                }
+                addTorrent(it.key, it.value.downloadPath)
+                it.value.torrentManager.addListener(it.value.downloadListener)
             }
             // start seeding
             if(!meteredNetwork){
                 startSeeding()
             }
-
-
         }
     }
-
 }
