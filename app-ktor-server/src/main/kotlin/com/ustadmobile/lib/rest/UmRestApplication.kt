@@ -14,7 +14,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.di.commonJvmDiModule
-import com.ustadmobile.core.io.UploadSessionManager
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
@@ -245,10 +244,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             repo
         }
 
-        bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {
-            UploadSessionManager(context, di)
-        }
-
         bind<Tracker>() with singleton {
             Tracker(trackerAnnounceUrl.port, trackerAnnounceUrl.toString())
         }
@@ -358,7 +353,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         ContainerDownload()
         personAuthRegisterRoute()
         ContainerMountRoute()
-        ContainerUploadRoute2()
         UmAppDatabase_KtorRoute(true)
         SiteRoute()
         ContentEntryLinkImporter()
