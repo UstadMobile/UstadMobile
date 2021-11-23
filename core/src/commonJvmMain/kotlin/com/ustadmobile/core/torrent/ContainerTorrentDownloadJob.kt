@@ -134,13 +134,9 @@ class ContainerTorrentDownloadJob(
                             contentJobItem.cjiItemProgress = (progressSize * 0.75).toLong()
                             progress.onProgress(contentJobItem)
                         }
-                    }
-                    GlobalScope.launch(Dispatchers.Default) {
-                        while (true) {
-                            delay(100)
-                            if (!isActive) {
-                                torrentDeferred.completeExceptionally(CancellationException())
-                            }
+
+                        override fun onDownloadFailed(cause: Throwable?) {
+                            torrentDeferred.completeExceptionally(CancellationException())
                         }
                     }
 
