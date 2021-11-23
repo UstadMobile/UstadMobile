@@ -43,6 +43,7 @@ class ConnectionManager(
 
     fun addCommunicationManagerListener(listener: CommunicationManagerListener){
         listeners += listener
+        start()
     }
 
     fun stop() {
@@ -69,6 +70,7 @@ class ConnectionManager(
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
 
         override fun onAvailable(network: Network) {
+            stopCommunicationManager()
             val isMetered = isMeteredConnection()
             val manager = UstadCommunicationManager(di.direct.instance())
                     .also {
