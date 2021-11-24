@@ -1,6 +1,7 @@
 package com.ustadmobile.core.contentjob
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import io.ktor.client.*
@@ -8,17 +9,13 @@ import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 
 /**
  * Default implementation of uploading a container to the server
  */
 class DefaultContentPluginUploader: ContentPluginUploader {
 
-    //TODO: Needs to wait for the server to confirm completion of receiving the container
     override suspend fun upload(
         contentJobItem: ContentJobItem,
         progress: ContentJobProgressListener,
@@ -40,15 +37,17 @@ class DefaultContentPluginUploader: ContentPluginUploader {
                                     append(HttpHeaders.ContentDisposition, "filename=$torrentFileName")
                                 })
                     })
-                    onUpload { bytesSentTotal, contentLength ->
-                        contentJobItem.cjiItemProgress = (contentJobItem.cjiItemTotal / 2) + (((bytesSentTotal / contentLength) * contentJobItem.cjiItemTotal) / 2)
-                        progress.onProgress(contentJobItem)
-                    }
                 }
+                val statusPath = UMFileUtil.joinPaths(endpoint.url, "containers/${contentJobItem.cjiServerJobId}/status")
+                do{
+                    delay(1000)
+                    val serverJobItem: ContentJobItem = httpClient.get(statusPath)
+                    contentJobItem.cjiItemProgress = (contentJobItem.cjiItemTotal / 2) +
+                            (((serverJobItem.cjiRecursiveProgress / serverJobItem.cjiRecursiveTotal)
+                                    * contentJobItem.cjiItemTotal) / 2)
+                    progress.onProgress(contentJobItem)
 
-
-
-
+                }while (serverJobItem.cjiRecursiveStatus <= JobStatus.COMPLETE_MIN)
 
 
             } catch (c: CancellationException) {

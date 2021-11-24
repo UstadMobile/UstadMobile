@@ -91,11 +91,11 @@ fun Route.TorrentFileRoute(){
 
             val db: UmAppDatabase by closestDI().on(call).instance(tag = UmAppDatabase.TAG_DB)
             val jobUid: Long = call.parameters["jobUid"]?.toLongOrNull() ?: 0L
-            val jobItem = db.contentJobItemDao.findByJobId(jobUid)
+            val jobItem: ContentJobItem? = db.contentJobItemDao.findByJobId(jobUid)
 
             with(call) {
                 if (jobItem != null) {
-                    respond(jobItem.cjiStatus)
+                    respond(jobItem)
                 }else{
                     respond(HttpStatusCode.NotFound)
                 }

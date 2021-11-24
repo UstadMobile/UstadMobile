@@ -110,7 +110,8 @@ abstract class ContentJobItemDao {
     @Query("""
         SELECT * 
           FROM ContentJobItem
-         WHERE cjiJobUid = :jobUid
+         WHERE cjiJobUid = :jobUid 
+           AND cjiParentCjiUid = 0 LIMIT 1
     """)
     abstract fun findByJobId(jobUid: Long): ContentJobItem?
 
