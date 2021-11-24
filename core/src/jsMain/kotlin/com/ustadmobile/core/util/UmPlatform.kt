@@ -11,7 +11,7 @@ actual object UmPlatform {
     }
 
     actual fun console(content: Any) {
-        console.log(Date(),content)
+        console.log(JSON.stringify(content))
     }
 
 }

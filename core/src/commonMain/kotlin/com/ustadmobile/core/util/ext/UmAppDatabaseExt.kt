@@ -136,7 +136,7 @@ suspend fun UmAppDatabase.processEnrolmentIntoClass(
 
     parentsToEnrol.forEach { parentJoin ->
         onRepoWithFallbackToDb(2500) {
-            it.personDao.findByUid(parentJoin.parentPersonUid)
+            it.personDao.findByUidAsync(parentJoin.parentPersonUid)
         }?.also { parentPerson ->
             enrolPersonIntoClazzAtLocalTimezone(parentPerson, enrolment.clazzEnrolmentClazzUid,
                 ClazzEnrolment.ROLE_PARENT, clazzWithSchoolVal)

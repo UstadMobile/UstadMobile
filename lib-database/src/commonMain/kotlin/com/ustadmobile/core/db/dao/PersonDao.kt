@@ -177,7 +177,7 @@ abstract class PersonDao : BaseDao<Person> {
 
     @JsName("findByUid")
     @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")
-    abstract suspend fun findByUid(uid: Long): Person?
+    abstract fun findByUid(uid: Long): Person?
 
     @JsName("findPersonAccountByUid")
     @Query("SELECT Person.*, null as newPassword, null as currentPassword,null as confirmedPassword" +

@@ -236,6 +236,15 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
             usUid = endpointRepo.userSessionDao.insertSession(this)
         }
 
+        //TODO: Remove this when sync is in place
+        if(UmPlatform.isWeb){
+            endpointRepo.personAuth2Dao.insertAsync(PersonAuth2().apply {
+                pauthUid = person.personUid
+                pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
+                pauthAuth = userSession.usAuth
+            })
+        }
+
         return UserSessionWithPersonAndEndpoint(userSession, person, endpoint)
     }
 
@@ -336,18 +345,19 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
 
         //TODO: Remove this when repo & sync for web is in place
         if(UmPlatform.isWeb){
-            val person = repo.personDao.findByUid(responseAccount.personUid)
-            if(person != null){
-                repo.personDao.updateAsync(responseAccount.toPerson())
-            }else{
-                repo.insertPersonAndGroup(responseAccount.toPerson())
+            var person = repo.personDao.findByUidAsync(responseAccount.personUid)
+            if(person == null){
+                person = responseAccount.toPerson().apply {
+                    active = true
+                }
+                repo.insertPersonAndGroup(person)
+                repo.grantScopedPermission(person,
+                    Role.ALL_PERMISSIONS, ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
             }
-            repo.grantScopedPermission(responseAccount.toPerson(),
-                Role.ALL_PERMISSIONS, ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
         }
 
         responseAccount.endpointUrl = endpointUrl
-        val person = repo.personDao.findByUid(responseAccount.personUid)
+        val person = repo.personDao.findByUidAsync(responseAccount.personUid)
             ?: throw IllegalStateException("Internal error: could not get person object")
         val newSession = addSession(person, endpointUrl, password)
 

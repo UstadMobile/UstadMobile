@@ -71,7 +71,7 @@ class AuthManager(
                         && person.passwordHash?.substring(2) == password)
                         ||(person.passwordHash?.startsWith(PersonAuthDao.ENCRYPTED_PASS_PREFIX) == true &&
                         authenticateEncryptedPassword(password, person.passwordHash?.substring(2) ?: "")))) {
-                authorizedPerson = db.personDao.findByUid(person.personUid)
+                authorizedPerson = db.personDao.findByUidAsync(person.personUid)
 
                 //Create the auth object
                 repo.personAuth2Dao.insertAsync(PersonAuth2().apply {
