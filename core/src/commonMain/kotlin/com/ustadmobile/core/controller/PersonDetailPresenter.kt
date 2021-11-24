@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
@@ -30,7 +31,7 @@ class PersonDetailPresenter(context: Any,
 
         GlobalScope.launch(doorMainDispatcher()) {
             val person = repo.onRepoWithFallbackToDb(5000) { dbToUse ->
-                dbToUse.takeIf { entityUid != 0L }?.personDao?.findByUid(entityUid)
+                dbToUse.takeIf { entityUid != 0L }?.personDao?.findByUidAsync(entityUid)
             } ?: Person()
 
             //Reset password uses additional seeked permission
@@ -61,8 +62,13 @@ class PersonDetailPresenter(context: Any,
 
     override fun handleClickEdit() {
         val personUid = view.entity?.personUid ?: return
-        systemImpl.go(PersonEditView.VIEW_NAME,
-                mapOf(ARG_ENTITY_UID to personUid.toString()), context)
+        navigateForResult(
+            NavigateForResultOptions(this,
+                null, PersonEditView.VIEW_NAME, PersonWithAccount::class,
+                PersonWithAccount.serializer(), SAVEDSTATE_KEY_PERSON,
+                arguments = mutableMapOf(ARG_ENTITY_UID to personUid.toString())
+            )
+        )
     }
 
     fun handleChangePassword(){
@@ -87,6 +93,10 @@ class PersonDetailPresenter(context: Any,
         }else {
             view.showSnackBar(systemImpl.getString(MessageID.error, context))
         }
+    }
+
+    companion object {
+        const val SAVEDSTATE_KEY_PERSON = "Person"
     }
 
 

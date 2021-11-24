@@ -47,7 +47,7 @@ class ClazzEnrolmentListPresenter(context: Any, arguments: Map<String, String>, 
 
     private fun updateListOnView() {
         GlobalScope.launch(doorMainDispatcher()){
-            view.person = repo.personDao.findByUid(selectedPerson)
+            view.person = repo.personDao.findByUidAsync(selectedPerson)
             view.clazz = repo.clazzDao.findByUidAsync(selectedClazz)
 
             view.enrolmentList = repo.clazzEnrolmentDao.findAllEnrolmentsByPersonAndClazzUid(

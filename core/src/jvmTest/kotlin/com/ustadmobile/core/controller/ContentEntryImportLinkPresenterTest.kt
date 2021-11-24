@@ -90,7 +90,7 @@ class ContentEntryImportLinkPresenterTest {
 
         presenter.handleClickSave(mockWebServer.url("/").toString())
 
-        verify(mockView, timeout(5000)).showHideProgress = false
+        verify(mockView, timeout(5000)).showProgress = false
         //verify(mockView, timeout(5000)).finishWithResult(importedContentEntryMetaData)
     }
 
@@ -102,9 +102,9 @@ class ContentEntryImportLinkPresenterTest {
 
         presenter.handleClickSave(mockWebServer.url("/").toString())
 
-        verify(mockView, timeout(5000)).showHideProgress = false
+        verify(mockView, timeout(5000)).showProgress = false
         verify(mockView, timeout(5000)).validLink = false
-        verify(mockView, timeout(5000)).showHideProgress = true
+        verify(mockView, timeout(5000)).showProgress = true
     }
 
 }

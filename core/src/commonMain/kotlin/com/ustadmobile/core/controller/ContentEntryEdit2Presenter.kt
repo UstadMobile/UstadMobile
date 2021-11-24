@@ -26,7 +26,6 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
-import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -113,16 +112,17 @@ class ContentEntryEdit2Presenter(context: Any,
         view.showCompletionCriteria = isLeaf ?: false
         val metaData = arguments[ARG_IMPORTED_METADATA]
         val uri = arguments[ARG_URI]
-        if (db is DoorDatabaseRepository) {
-            if (uri != null) {
-                return handleFileSelection(uri)
-            }
-            if (metaData != null) {
-                val importedMetadata = safeParse(di, ImportedContentEntryMetaData.serializer(), metaData)
-                view.entryMetaData = importedMetadata
-                return importedMetadata.contentEntry
-            }
+        if (db is DoorDatabaseRepository) {}
+
+        if (uri != null) {
+            return handleFileSelection(uri)
         }
+        if (metaData != null) {
+            val importedMetadata = safeParse(di, ImportedContentEntryMetaData.serializer(), metaData)
+            view.entryMetaData = importedMetadata
+            return importedMetadata.contentEntry
+        }
+
         return withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.contentEntryDao?.findEntryWithLanguageByEntryIdAsync(entityUid)
         } ?: ContentEntryWithLanguage().apply {
@@ -223,7 +223,6 @@ class ContentEntryEdit2Presenter(context: Any,
                 } else {
                     repo.contentEntryDao.updateAsync(entity)
                 }
-                Napier.d("Hit here")
 
                 val language = entity.language
                 if (language != null && language.langUid == 0L) {

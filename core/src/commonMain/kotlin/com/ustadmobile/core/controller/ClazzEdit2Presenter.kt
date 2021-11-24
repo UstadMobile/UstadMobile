@@ -288,7 +288,7 @@ class ClazzEdit2Presenter(context: Any,
                         arguments.plus(UstadView.ARG_CLAZZUID to entity.clazzUid.toString()),
                         context)
             }else{
-                onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity)
+                onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity, ClazzWithHolidayCalendarAndSchool.serializer())
             }
         }
     }

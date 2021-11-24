@@ -39,10 +39,14 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON
 
+    override fun onLoadFromJson(bundle: Map<String, String>): String? {
+        return ""
+    }
+
     override fun handleClickSave(entity: String) {
         GlobalScope.launch(doorMainDispatcher()) {
 
-            view.showHideProgress = false
+            view.showProgress = true
             try {
                 currentHttpClient.post<HttpStatement>() {
                     url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
@@ -54,12 +58,12 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                     val status = it.status
                     if (status.value != 200) {
                         view.validLink = false
-                        view.showHideProgress = true
+                        view.showProgress = false
                         return@execute
                     }
 
                     val data = it.receive<ImportedContentEntryMetaData>()
-                    view.showHideProgress = true
+                    view.showProgress = false
 
                     if (arguments.containsKey(ARG_RESULT_DEST_KEY)) {
                         finishWithResult(safeStringify(di, ListSerializer(ImportedContentEntryMetaData.serializer()), listOf(data)))
@@ -68,18 +72,16 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                         args.putEntityAsJson(
                             ARG_IMPORTED_METADATA,
                             ImportedContentEntryMetaData.serializer(), data)
-                        args[ARG_POPUPTO_ON_FINISH] = ContentEntryImportLinkView.VIEW_NAME
+                        args[ARG_POPUPTO_ON_FINISH] = ContentEntryListTabsView.VIEW_NAME
                         args.putFromOtherMapIfPresent(arguments, ARG_LEAF)
                         args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
                         systemImpl.go(ContentEntryEdit2View.VIEW_NAME,
                             args, context)
                     }
-
-
                 }
 
             } catch (e: Exception) {
-                view.showHideProgress = true
+                view.showProgress = true
                 view.showSnackBar(systemImpl.getString(MessageID.import_link_error, context))
                 dumpException(e)
             }

@@ -228,9 +228,10 @@ fun RBuilder.createItemWithIconTitleAndDescription(iconName: String, title: Stri
             umProfileAvatar(-1,iconName)
         }
 
-        umItem(MGridSize.cells10, if(scaleOnLargeSmall) MGridSize.cells9 else MGridSize.cells11){
+        umItem(MGridSize.cells8, if(scaleOnLargeSmall) MGridSize.cells8 else MGridSize.cells10){
             css{
                 marginTop = LinearDimension("5px")
+                marginLeft = 2.spacingUnits
             }
             if(title != null){
                 umItem(MGridSize.cells11){
@@ -261,7 +262,10 @@ fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(leftIcon: String,right
             umProfileAvatar(-1,leftIcon)
         }
 
-        umItem(MGridSize.cells8){
+        umItem(MGridSize.cells7){
+            css{
+                marginLeft = 2.spacingUnits
+            }
             umItem(MGridSize.cells11){
                 mTypography(title,
                     variant = MTypographyVariant.body1,

@@ -18,6 +18,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import org.kodein.di.DI
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.LeavingReasonListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
@@ -197,7 +198,7 @@ class ClazzEnrolmentEditPresenter(context: Any,
                 repo.clazzEnrolmentDao.updateAsync(entity)
             }
 
-            view.finishWithResult(listOf(entity))
+            finishWithResult(safeStringify(di, ListSerializer(ClazzEnrolmentWithLeavingReason.serializer()) , listOf(entity)))
         }
     }
 

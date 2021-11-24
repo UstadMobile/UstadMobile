@@ -143,7 +143,7 @@ class SchoolEditPresenter(context: Any,
                     FLAG_STUDENT_GROUP to entity.schoolStudentsPersonGroupUid)
             )
 
-            onFinish(SchoolDetailView.VIEW_NAME, entity.schoolUid, entity)
+            onFinish(SchoolDetailView.VIEW_NAME, entity.schoolUid, entity, SchoolWithHolidayCalendar.serializer())
         }
     }
 

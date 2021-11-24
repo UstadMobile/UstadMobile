@@ -185,7 +185,7 @@ class ClazzAssignmentEditPresenter(context: Any,
 
             repo.clazzAssignmentRollUpDao.deleteCachedInactiveContent()
 
-            onFinish(ClazzAssignmentDetailView.VIEW_NAME, entity.caUid, entity)
+            onFinish(ClazzAssignmentDetailView.VIEW_NAME, entity.caUid, entity, ClazzAssignment.serializer())
 
             view.loading = false
             view.fieldsEnabled = true

@@ -283,7 +283,7 @@ class PersonEditPresenter(
                             arguments.plus(UstadView.ARG_PERSON_UID to entity.personUid.toString()),
                             context)
                 }else{
-                    onFinish(PersonDetailView.VIEW_NAME, entity.personUid, entity)
+                    onFinish(PersonDetailView.VIEW_NAME, entity.personUid, entity, PersonWithAccount.serializer())
                 }
             }
         }
