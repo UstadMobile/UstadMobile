@@ -80,7 +80,7 @@ class VideoTypePluginJvm(
 
             try {
 
-                if(videoIsProcessed) {
+                if(!videoIsProcessed) {
 
                     val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                             ?: throw IllegalArgumentException("missing tracker url")

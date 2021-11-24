@@ -91,7 +91,7 @@ class VideoTypePluginAndroid(
 
             try {
 
-                if(videoIsProcessed) {
+                if(!videoIsProcessed) {
 
                     Napier.d(tag = VIDEO_ANDROID, message = "conversion Params compress video is $compressVideo")
 

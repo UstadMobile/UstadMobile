@@ -139,7 +139,7 @@ class H5PTypePluginCommonJvm(
                 val progressSize = if(contentNeedUpload) 2 else 1
                 val h5pIsProcessed = contentJobItem.cjiContainerUid != 0L
 
-                if(h5pIsProcessed) {
+                if(!h5pIsProcessed) {
 
                     val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
                             ?: Container().apply {

@@ -103,6 +103,19 @@ fun Route.TorrentFileRoute(){
 
         }
 
+        delete("{jobId}/cancel"){
+
+            val jobUid: Long = call.parameters["jobId"]?.toLongOrNull() ?: 0L
+
+            // TODO handle virtualhostmode for endpoint
+            val endpoint = Endpoint(call.request.header("Host") ?: "localhost")
+
+            val contentJobManager: ContentJobManager by closestDI().instance()
+            contentJobManager.cancelContentJob(endpoint, jobUid)
+            call.respond(HttpStatusCode.OK)
+        }
+
+
 
     }
 }

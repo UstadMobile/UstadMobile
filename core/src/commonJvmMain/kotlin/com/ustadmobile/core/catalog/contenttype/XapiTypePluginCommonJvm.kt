@@ -108,7 +108,7 @@ class XapiTypePluginCommonJvm(
                 val progressSize = if (contentNeedUpload) 2 else 1
                 val xapiIsProcessed = contentJobItem.cjiContainerUid != 0L
 
-                if(xapiIsProcessed) {
+                if(!xapiIsProcessed) {
 
                     val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
                             ?: Container().apply {

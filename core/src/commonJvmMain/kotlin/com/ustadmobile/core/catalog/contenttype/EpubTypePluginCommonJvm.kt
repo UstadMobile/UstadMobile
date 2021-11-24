@@ -131,7 +131,7 @@ class EpubTypePluginCommonJvm(
                             ?: throw IllegalArgumentException("missing tracker url")
                     val epubIsProcessed = contentJobItem.cjiContainerUid != 0L
 
-                    if(epubIsProcessed) {
+                    if(!epubIsProcessed) {
 
                         val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
                                 ?: Container().apply {
