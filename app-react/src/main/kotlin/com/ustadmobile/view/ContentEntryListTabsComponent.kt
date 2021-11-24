@@ -24,6 +24,7 @@ class ContentEntryListTabsComponent(mProps: RProps) :UstadBaseComponent<RProps, 
 
     override fun onCreateView() {
         super.onCreateView()
+        title = getString(MessageID.contents)
         val parentUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: MASTER_SERVER_ROOT_ENTRY_UID
 
         val defArgs = "?${ARG_PARENT_ENTRY_UID}=" +

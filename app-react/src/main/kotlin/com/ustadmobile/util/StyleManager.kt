@@ -159,6 +159,13 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         }
     }
 
+    val switchMargin by css {
+        paddingRight = 5.spacingUnits
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            paddingRight = 1.spacingUnits
+        }
+    }
+
     val attendance by css {
         marginRight = 0.spacingUnits
         media(theme.breakpoints.up(tabletAndHighEnd)) {
@@ -291,6 +298,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
             bottom = 15.px
         }
     }
+
 
     val languageComponentLanguageSelectorFormControl by css {
         margin(1.spacingUnits)

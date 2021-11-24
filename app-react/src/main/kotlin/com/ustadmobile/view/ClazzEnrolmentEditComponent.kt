@@ -13,7 +13,6 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.util.StyleManager
@@ -21,6 +20,9 @@ import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.standardFormat
+import com.ustadmobile.util.ext.toDate
+import com.ustadmobile.view.components.MDateTimePickerType
+import com.ustadmobile.view.components.mDateTimePicker
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import react.RBuilder
@@ -201,39 +203,40 @@ class ClazzEnrolmentEditComponent (mProps: RProps): UstadEditComponent<ClazzEnro
 
 
                     umGridContainer(MGridSpacing.spacing4) {
+
                         umItem(MGridSize.cells12, MGridSize.cells6 ) {
-                            mTextField(label = "${startDateLabel.text}",
-                                value = Date(entity?.clazzEnrolmentDateJoined ?: 0).standardFormat(),
+                            mDateTimePicker(
+                                label = "${startDateLabel.text}",
+                                ruleSet = defaultFullWidth,
                                 error = startDateLabel.error,
-                                disabled = !fieldsEnabled,
                                 helperText = startDateLabel.errorText,
-                                variant = MFormControlVariant.outlined,
-                                onChange = {
-                                    it.persist()
+                                value = entity?.clazzEnrolmentDateJoined.toDate(),
+                                inputVariant = MFormControlVariant.outlined,
+                                pickerType = MDateTimePickerType.date,
+                                onChange = { mills, _ ->
                                     setState {
-                                        entity?.clazzEnrolmentDateJoined = it.targetInputValue.toLong()
+                                        entity?.clazzEnrolmentDateJoined = mills
+                                        startDateErrorWithDate = null;
                                     }
-                                }){
-                                css(defaultFullWidth)
-                            }
+                                })
                         }
 
                         umItem(MGridSize.cells12, MGridSize.cells6 ) {
-                            mTextField(label = "${endDateLabel.text}",
-                                value = Date(entity?.clazzEnrolmentDateLeft ?: systemTimeInMillis()).standardFormat(),
+
+                            mDateTimePicker(
+                                label = "${endDateLabel.text}",
+                                ruleSet = defaultFullWidth,
                                 error = endDateLabel.error,
-                                disabled = !fieldsEnabled,
                                 helperText = endDateLabel.errorText,
-                                variant = MFormControlVariant.outlined,
-                                onChange = {
-                                    it.persist()
+                                value = entity?.clazzEnrolmentDateLeft.toDate(),
+                                inputVariant = MFormControlVariant.outlined,
+                                pickerType = MDateTimePickerType.date,
+                                onChange = { mills, utc ->
                                     setState {
-                                        entity?.clazzEnrolmentDateLeft = it.targetInputValue.toLong()
+                                        entity?.clazzEnrolmentDateLeft = mills
                                         endDateError = null
                                     }
-                                }){
-                                css(defaultFullWidth)
-                            }
+                                })
                         }
                     }
 

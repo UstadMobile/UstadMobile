@@ -22,11 +22,12 @@ class ContentEntryImportLinkFragment() : UstadEditFragment<String>(), ContentEnt
 
     private var menuDoneItem: MenuItem? = null
 
-    override var showHideProgress: Boolean = false
+    override var showProgress: Boolean = false
         set(value) {
             field = value
-            mBinding?.entryImportLinkTextInput?.isEnabled = value
-            menuDoneItem?.isEnabled = value
+            loading = value
+            mBinding?.entryImportLinkTextInput?.isEnabled = !value
+            menuDoneItem?.isEnabled = !value
         }
 
     override var validLink: Boolean = false
@@ -36,11 +37,7 @@ class ContentEntryImportLinkFragment() : UstadEditFragment<String>(), ContentEnt
             field = value
         }
     override var entity: String? = null
-        get() = field
-        set(value) {
-            field = value
-            mBinding?.importLink = value
-        }
+        get() = mBinding?.importLink
 
     override var fieldsEnabled: Boolean = false
         get() = field
@@ -68,7 +65,7 @@ class ContentEntryImportLinkFragment() : UstadEditFragment<String>(), ContentEnt
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_done, menu)
+        super.onCreateOptionsMenu(menu, inflater)
         menuDoneItem = menu.findItem(R.id.menu_done)
     }
 

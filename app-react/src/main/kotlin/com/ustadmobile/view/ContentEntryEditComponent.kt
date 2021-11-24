@@ -17,7 +17,9 @@ import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.displayProperty
+import com.ustadmobile.util.StyleManager.switchMargin
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
@@ -219,6 +221,7 @@ class ContentEntryEditComponent (mProps: RProps): UstadEditComponent<ContentEntr
                             umItem(MGridSize.cells12){
                                 css{
                                     display = displayProperty(entity?.leaf == true)
+                                    +defaultMarginTop
                                 }
                                 mTypography(getString(MessageID.supported_files),
                                     variant = MTypographyVariant.body2,
@@ -447,6 +450,7 @@ fun RBuilder.createSwitchItem(label: String, enabled: Boolean, onClick: (MouseEv
                 css{
                     +StyleManager.alignTextToStart
                     marginTop = LinearDimension("3px")
+                    marginRight = LinearDimension("10px")
                 }
             }
         }
@@ -457,7 +461,7 @@ fun RBuilder.createSwitchItem(label: String, enabled: Boolean, onClick: (MouseEv
             }
         }
         css{
-            marginLeft = LinearDimension("20px")
+            +switchMargin
             marginTop = LinearDimension("16px")
             marginBottom = LinearDimension("16px")
         }

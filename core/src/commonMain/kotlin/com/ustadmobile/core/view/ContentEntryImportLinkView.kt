@@ -2,7 +2,7 @@ package com.ustadmobile.core.view
 
 interface ContentEntryImportLinkView : UstadEditView<String> {
 
-    var showHideProgress: Boolean
+    var showProgress: Boolean
 
     var validLink: Boolean
 

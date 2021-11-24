@@ -9,6 +9,7 @@ import com.ccfraser.muirwik.components.input.mInput
 import com.ccfraser.muirwik.components.list.mList
 import com.ccfraser.muirwik.components.list.mListItemWithIcon
 import com.ccfraser.muirwik.components.styles.up
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.AccountListView
@@ -55,6 +56,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.css.*
 import kotlinx.html.id
+import org.kodein.di.instance
+import org.kodein.di.on
 import react.RBuilder
 import react.RProps
 import react.RState
@@ -148,18 +151,24 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
 
                         mToolbar {
                             attrs.asDynamic().id = "um-toolbar"
+                            attrs.asDynamic().onClick = {
+                                GlobalScope.launch {
+                                    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+                                    repo.exportDatabase()
+                                }
+                            }
                             css(mainComponentToolbarMargins)
 
                             umGridContainer {
 
-                                mHidden(xsDown = true) {
-                                    umItem(MGridSize.cells1, MGridSize.cells5){
+                                mHidden(xsDown = currentDestination.showSearch) {
+                                    umItem(if(currentDestination.showSearch) MGridSize.cells1 else MGridSize.cells9, MGridSize.cells5){
                                         css{marginTop = 4.px}
                                         mToolbarTitle(appState.appToolbar.title ?: "")
                                     }
                                 }
 
-                                umItem(MGridSize.cells10,MGridSize.cells6){
+                                umItem(if(currentDestination.showSearch) MGridSize.cells9 else MGridSize.cells1,MGridSize.cells6){
 
                                     styledDiv {
 

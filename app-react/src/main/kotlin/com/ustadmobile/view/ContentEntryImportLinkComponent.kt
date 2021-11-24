@@ -33,7 +33,7 @@ class ContentEntryImportLinkComponent(mProps: RProps): UstadEditComponent<String
 
     var importLinkLabel = FieldLabel(getString(MessageID.enter_url))
 
-    override var showHideProgress: Boolean = false
+    override var showProgress: Boolean = false
         get() = field
         set(value) {
             loading = value
@@ -45,13 +45,13 @@ class ContentEntryImportLinkComponent(mProps: RProps): UstadEditComponent<String
     override var validLink: Boolean = false
         get() = field
         set(value) {
-            console.log(value)
             setState {
                 field = value
                 importLinkLabel = importLinkLabel.copy(errorText = if(value) null
                 else getString(MessageID.invalid_link))
             }
         }
+
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
@@ -70,6 +70,7 @@ class ContentEntryImportLinkComponent(mProps: RProps): UstadEditComponent<String
 
     override fun onCreateView() {
         super.onCreateView()
+        title = getString(MessageID.enter_url)
         mPresenter = ContentEntryImportLinkPresenter(this, arguments, this, this, di)
         mPresenter?.onCreate(mapOf())
     }
@@ -86,7 +87,7 @@ class ContentEntryImportLinkComponent(mProps: RProps): UstadEditComponent<String
                 mTextField(label = "${importLinkLabel.text}",
                     helperText = importLinkLabel.errorText,
                     value = entity, error = importLinkLabel.error,
-                    disabled = showHideProgress,
+                    disabled = showProgress,
                     variant = MFormControlVariant.outlined,
                     onChange = {
                         it.persist()
