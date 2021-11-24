@@ -12,6 +12,7 @@ import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.contentjob.ContentPluginUploader
 import com.ustadmobile.core.contentjob.DefaultContentPluginUploader
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
@@ -29,6 +30,7 @@ import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
+import com.ustadmobile.lib.db.entities.toProgressUpdate
 import com.ustadmobile.lib.rest.ContainerDownload
 import com.ustadmobile.lib.rest.TorrentFileRoute
 import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
@@ -216,7 +218,17 @@ class TestUstadTorrentManager {
 
                                 val context = ContentJobProcessContext(DoorUri.parse(jobItem!!.sourceUri!!),
                                         temporaryFolder.newFolder().toDoorUri(), mutableMapOf(), di)
-                                containerTorrentDownloadJob.processJob(jobAndItem,context) { }
+                                containerTorrentDownloadJob.processJob(jobAndItem,context) {
+
+                                    val progressUpdate = it.toProgressUpdate()
+                                    if(progressUpdate.cjiItemProgress == progressUpdate.cjiItemTotal){
+                                        launch {
+                                            serverDb.contentJobItemDao.updateItemStatus(it.cjiUid, JobStatus.COMPLETE)
+                                        }
+
+                                    }
+
+                                }
                             }
 
                         }
