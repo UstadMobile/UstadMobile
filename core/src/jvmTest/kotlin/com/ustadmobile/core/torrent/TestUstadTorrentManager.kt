@@ -5,9 +5,13 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
+import com.ustadmobile.core.catalog.contenttype.VideoTypePluginJvm
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobProcessContext
+import com.ustadmobile.core.contentjob.ContentPluginUploader
+import com.ustadmobile.core.contentjob.DefaultContentPluginUploader
+import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
@@ -124,6 +128,7 @@ class TestUstadTorrentManager {
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
         serverDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
                 .addSyncCallback(nodeIdAndAuth, true)
+                .addCallback(ContentJobItemTriggersCallback())
                 .build()
                 .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
         serverRepo = serverDb.asRepository(RepositoryConfig.repositoryConfig(Any(), "http://localhost/",
@@ -198,7 +203,7 @@ class TestUstadTorrentManager {
 
                         whenever(contentJobManager.enqueueContentJob(any(), any())).then {
 
-                            runBlocking {
+                            GlobalScope.launch {
                                 val jobId = it.arguments[1] as Long
 
                                 val jobItem =  serverDb.contentJobItemDao.findByJobId(jobId)
@@ -354,6 +359,44 @@ class TestUstadTorrentManager {
             assertTrue(downloadComplete)
             clientDb.assertContainerEqualToOther(serverContainer.containerUid, serverDb)
         }
+    }
+
+    @Test
+    fun givenClientImportsJob_thenUploadContentToServer(){
+
+        val clientContainer = Container().apply {
+            containerUid = clientRepo.containerDao.insert(this)
+        }
+        runBlocking {
+            clientRepo.addEntryToContainerFromResource(clientContainer.containerUid,
+                    this::class.java, "/com/ustadmobile/core/contentformats/epub/image_1.jpg",
+                    "image1", clientDi,
+                    ContainerAddOptions(clientContainerFolder.toDoorUri()))
+
+            clientRepo.writeContainerTorrentFile(
+                    clientContainer.containerUid,
+                    clientTorrentFolder.toDoorUri(),
+                    serverTrackerUrl.toString(), clientContainerFolder.toDoorUri())
+
+            val torrentFileBytes = File(clientTorrentFolder, "${clientContainer.containerUid}.torrent").readBytes()
+            val job = ContentJobItemAndContentJob().apply {
+                contentJobItem = ContentJobItem(cjiContainerUid = clientContainer.containerUid,
+                        cjiItemTotal = 100, cjiRecursiveTotal = 100)
+            }
+            val accountManager: UstadAccountManager by clientDi.instance()
+            accountManager.activeEndpoint = Endpoint("http://localhost:7711/")
+
+            DefaultContentPluginUploader().upload(job!!.contentJobItem!!, {
+
+            }, clientDi.direct.instance(), torrentFileBytes, accountManager.activeEndpoint)
+
+        }
+
+
+
+
+
+
     }
 
 

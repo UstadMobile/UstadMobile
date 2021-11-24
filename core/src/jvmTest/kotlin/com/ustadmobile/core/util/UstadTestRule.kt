@@ -7,6 +7,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
@@ -127,6 +128,7 @@ class UstadTestRule: TestWatcher() {
                 spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
                     .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                     .addSyncCallback(nodeIdAndAuth, primary = false)
+                        .addCallback(ContentJobItemTriggersCallback())
                     .build()
                     .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, isPrimary = false))
             }

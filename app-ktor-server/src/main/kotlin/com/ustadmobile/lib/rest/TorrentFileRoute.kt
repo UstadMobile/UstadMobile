@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.rest
 
+import com.turn.ttorrent.client.FileMetadataProvider
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.db.UmAppDatabase
@@ -64,6 +65,9 @@ fun Route.TorrentFileRoute(){
                 call.respond(HttpStatusCode.InternalServerError, "Upload error: $e")
             }
 
+            val metadataProvider = FileMetadataProvider(torrentFile.absolutePath)
+            val fileSize = metadataProvider.torrentMetadata.files.sumOf { it.size }
+
             val job = ContentJob().apply {
                 toUri = containerFolder.toURI().toString()
                 cjIsMeteredAllowed = true
@@ -76,13 +80,14 @@ fun Route.TorrentFileRoute(){
                 sourceUri = "content://${contentEntryUid}"
                 cjiContentEntryUid = contentEntryUid
                 cjiPluginId = ContainerTorrentDownloadJob.PLUGIN_ID
+                cjiItemTotal = fileSize
+                cjiRecursiveTotal = fileSize
                 cjiIsLeaf = true
                 cjiConnectivityNeeded = false
                 cjiUid = db.contentJobItemDao.insertJobItem(this)
             }
 
             contentJobManager.enqueueContentJob(endpoint, job.cjUid)
-
             call.respond(job.cjUid)
 
         }
