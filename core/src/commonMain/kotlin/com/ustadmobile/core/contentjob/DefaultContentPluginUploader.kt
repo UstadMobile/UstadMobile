@@ -8,6 +8,7 @@ import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.*
 
@@ -51,7 +52,12 @@ class DefaultContentPluginUploader: ContentPluginUploader {
 
 
             } catch (c: CancellationException) {
-                httpClient.cancel()
+                withContext(NonCancellable){
+                    httpClient.cancel()
+                    val deletePath = UMFileUtil.joinPaths(endpoint.url, "containers/${contentJobItem.cjiServerJobId}/cancel")
+                    httpClient.delete<HttpStatement>(deletePath)
+                }
+                throw c
             }
         }
     }
