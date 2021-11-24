@@ -19,6 +19,7 @@ import com.ustadmobile.core.io.ext.addEntryToContainerFromResource
 import com.ustadmobile.core.io.ext.writeContainerTorrentFile
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.getLocalIpAddress
 import com.ustadmobile.door.*
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
@@ -75,6 +76,7 @@ class TestUstadTorrentManager {
     private lateinit var serverTorrentFolder: File
 
     private lateinit var serverTorrentManager: UstadTorrentManager
+    private lateinit var clientTorrentManager: UstadTorrentManager
 
     private lateinit var server: ApplicationEngine
 
@@ -157,8 +159,10 @@ class TestUstadTorrentManager {
                 }
 
                 bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
+                    runBlocking {
+                        di.on(context).direct.instance<UstadTorrentManager>().startSeeding()
+                    }
                     serverRepo
-
                 }
                 bind<File>(tag = DiTag.TAG_TORRENT_DIR) with scoped(endpointScope).singleton {
                     serverTorrentFolder
@@ -196,9 +200,6 @@ class TestUstadTorrentManager {
                     tracker.start(true)
                     instance<UstadCommunicationManager>().start(InetAddress.getByName(serverTrackerUrl.host))
                     GlobalScope.launch {
-                        serverTorrentManager = di.on(Endpoint("localhost")).direct.instance()
-                        serverTorrentManager.startSeeding()
-
                         val containerTorrentDownloadJob: ContainerTorrentDownloadJob = di.on(Endpoint("localhost")).direct.instance()
 
                         whenever(contentJobManager.enqueueContentJob(any(), any())).then {
@@ -255,7 +256,7 @@ class TestUstadTorrentManager {
                 clientCommManager
             }
             onReady {
-                instance<UstadCommunicationManager>().start(InetAddress.getByName("0.0.0.0"))
+                instance<UstadCommunicationManager>().start(getLocalIpAddress(), null)
             }
         }
 
@@ -266,6 +267,7 @@ class TestUstadTorrentManager {
         clientRepo = clientDi.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_REPO)
         containerDownloadJob = clientDi.on(accountManager.activeEndpoint).direct.instance()
         clientTorrentFolder = clientDi.on(accountManager.activeEndpoint).direct.instance(tag = DiTag.TAG_TORRENT_DIR)
+        clientTorrentManager = clientDi.on(accountManager.activeEndpoint).direct.instance()
         clientContainerFolder = clientDi.on(accountManager.activeEndpoint).direct.instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
         epubPlugin = clientDi.on(accountManager.activeEndpoint).direct.instance()
 
@@ -351,7 +353,7 @@ class TestUstadTorrentManager {
             val fileList = containerFiles.listFiles()
             fileList?.forEach {
 
-                if(it.name.endsWith(".part")){
+                if (it.name.endsWith(".part")) {
                     return@forEach
                 }
                 downloadComplete = true
@@ -378,7 +380,11 @@ class TestUstadTorrentManager {
                     clientTorrentFolder.toDoorUri(),
                     serverTrackerUrl.toString(), clientContainerFolder.toDoorUri())
 
-            val torrentFileBytes = File(clientTorrentFolder, "${clientContainer.containerUid}.torrent").readBytes()
+            val torrentFileName = "${clientContainer.containerUid}.torrent"
+            val torrentFile = File(clientTorrentFolder, torrentFileName)
+            val torrentFileBytes = torrentFile.readBytes()
+            clientTorrentManager.addTorrent(clientContainer.containerUid, null)
+
             val job = ContentJobItemAndContentJob().apply {
                 contentJobItem = ContentJobItem(cjiContainerUid = clientContainer.containerUid,
                         cjiItemTotal = 100, cjiRecursiveTotal = 100)
