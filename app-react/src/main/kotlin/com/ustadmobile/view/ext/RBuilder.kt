@@ -258,11 +258,11 @@ fun RBuilder.createItemWithIconTitleAndDescription(iconName: String, title: Stri
 
 fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(leftIcon: String,rightIcon: String, title: String?, description: String?, onClick:()-> Unit){
     umGridContainer(MGridSpacing.spacing4) {
-        umItem(MGridSize.cells2){
+        umItem(MGridSize.cells2, MGridSize.cells1){
             umProfileAvatar(-1,leftIcon)
         }
 
-        umItem(MGridSize.cells7){
+        umItem(MGridSize.cells7, MGridSize.cells9){
             css{
                 marginLeft = 2.spacingUnits
             }
@@ -283,7 +283,7 @@ fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(leftIcon: String,right
             }
         }
 
-        umItem(MGridSize.cells2){
+        umItem(MGridSize.cells2, MGridSize.cells1){
             css{
                 alignContent = Align.center
                 alignItems = Align.center

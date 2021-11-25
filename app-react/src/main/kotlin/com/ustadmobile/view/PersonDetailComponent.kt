@@ -25,6 +25,7 @@ import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.*
 import kotlinx.css.display
 import kotlinx.css.marginTop
+import kotlinx.css.padding
 import kotlinx.css.px
 import react.RBuilder
 import react.RProps
@@ -143,7 +144,10 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
                         }
 
                         umItem(MGridSize.cells12, MGridSize.cells8) {
-                            css(defaultMarginTop)
+                            css{
+                                +defaultMarginTop
+                                padding = "16px"
+                            }
                             umGridContainer(MGridSpacing.spacing4){
 
                                 umItem(MGridSize.cells12){

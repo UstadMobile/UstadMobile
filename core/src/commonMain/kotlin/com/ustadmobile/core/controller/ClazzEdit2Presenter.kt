@@ -130,7 +130,7 @@ class ClazzEdit2Presenter(context: Any,
                 it.scopedGrantDao.findByTableIdAndEntityUid(Clazz.TABLE_ID, clazzUid)
             }
             scopedGrantOneToManyHelper.liveList.setVal(scopedGrants)
-        }else if(db is DoorDatabaseRepository){
+        }else { //TODO: DoorDatabaseRepository check -> Handle if(db is DoorDatabaseRepository) once repo is in place
             /*
             This should be enabled once a field has been added on Clazz for the adminGroupUid
             scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {

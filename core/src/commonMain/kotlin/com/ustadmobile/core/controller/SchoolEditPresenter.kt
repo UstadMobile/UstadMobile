@@ -83,7 +83,7 @@ class SchoolEditPresenter(context: Any,
             }
 
             scopedGrantOneToManyHelper.liveList.setVal(scopedGrants)
-        }else if(db is DoorDatabaseRepository){
+        } else { //TODO: DoorDatabaseRepository check -> Handle if(db is DoorDatabaseRepository) once repo is in place
             //Add default roles
             scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
                 name = "Teachers"

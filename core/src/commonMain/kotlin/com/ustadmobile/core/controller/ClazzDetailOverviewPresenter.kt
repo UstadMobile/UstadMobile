@@ -2,14 +2,17 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.NavigateForResultOptions
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ClazzDetailOverviewView
+import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
+import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
+import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 

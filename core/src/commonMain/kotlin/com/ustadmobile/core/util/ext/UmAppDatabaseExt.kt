@@ -451,14 +451,15 @@ suspend fun UmAppDatabase.enrollPersonToSchool(schoolUid: Long,
     val matches = schoolMemberDao.findBySchoolAndPersonAndRole(schoolUid, personUid,  role)
     if(matches.isEmpty()) {
 
-        val schoolMember = SchoolMember()
-        schoolMember.schoolMemberActive = true
-        schoolMember.schoolMemberPersonUid = personUid
-        schoolMember.schoolMemberSchoolUid = schoolUid
-        schoolMember.schoolMemberRole = role
-        schoolMember.schoolMemberJoinDate = systemTimeInMillis()
+        val schoolMember = SchoolMember().apply {
+            schoolMemberActive = true
+            schoolMemberPersonUid = personUid
+            schoolMemberSchoolUid = schoolUid
+            schoolMemberRole = role
+            schoolMemberJoinDate = systemTimeInMillis()
+            schoolMemberUid = schoolMemberDao.insertAsync(this)
+        }
 
-        schoolMember.schoolMemberUid = schoolMemberDao.insert(schoolMember)
 
         val personGroupUid = when(role) {
             Role.ROLE_SCHOOL_STAFF_UID -> school.schoolTeachersPersonGroupUid

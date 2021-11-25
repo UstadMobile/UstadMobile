@@ -54,6 +54,7 @@ class SchoolMemberListComponent(mProps: RProps): UstadListComponent<SchoolMember
     private var pendingStudents: List<SchoolMemberWithPerson>? = null
 
     private val observer = ObserverFnWrapper<List<SchoolMemberWithPerson>>{
+        console.log(it)
         setState {
             pendingStudents = it
         }
@@ -70,6 +71,7 @@ class SchoolMemberListComponent(mProps: RProps): UstadListComponent<SchoolMember
     override fun onCreateView() {
         super.onCreateView()
         addPersonKeyName = "Person_${arguments[UstadView.ARG_FILTER_BY_ROLE]}"
+        console.log(addPersonKeyName)
         filterByRole = arguments[UstadView.ARG_FILTER_BY_ROLE]?.toInt() ?: 0
         filterBySchoolUid = arguments[UstadView.ARG_FILTER_BY_SCHOOLUID]?.toLong() ?: 0
         roleStudent = filterByRole != Role.ROLE_SCHOOL_STAFF_UID
@@ -90,6 +92,7 @@ class SchoolMemberListComponent(mProps: RProps): UstadListComponent<SchoolMember
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
             Person.serializer(), addPersonKeyName) {
             val memberAdded = it.firstOrNull() ?: return@observeResult
+            console.log(memberAdded)
             mPresenter?.handleEnrolMember(filterBySchoolUid, memberAdded.personUid,
                 arguments[UstadView.ARG_FILTER_BY_ROLE]?.toInt() ?: 0)
         }

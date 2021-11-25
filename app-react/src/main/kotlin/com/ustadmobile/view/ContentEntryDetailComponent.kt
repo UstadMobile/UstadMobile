@@ -6,6 +6,8 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ContentEntryDetailAttemptsListView
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.view.ContentEntryDetailView
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ACTIVE_TAB_INDEX
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.util.urlSearchParamsToMap
 import react.RBuilder
@@ -27,9 +29,9 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
         get() = field
         set(value) {
             field = value
-            tabsToRender = value?.map {
-                val messageId = viewNameToTitleMap[it.substringBefore("?",)] ?: 0
-                UstadTab(
+            tabsToRender = value?.mapIndexed { index, it ->
+                val messageId = viewNameToTitleMap[it.substringBefore("?")] ?: 0
+                UstadTab(index,
                     it.substringBefore("?"),
                     urlSearchParamsToMap(it.substring(it.lastIndexOf("?"))),
                     getString( messageId)
@@ -53,7 +55,7 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
 
     override fun RBuilder.render() {
         tabsToRender?.let {
-            renderTabs(it, true)
+            renderTabs(it, true, arguments[ARG_ACTIVE_TAB_INDEX]?.toInt() ?: 0)
         }
     }
 

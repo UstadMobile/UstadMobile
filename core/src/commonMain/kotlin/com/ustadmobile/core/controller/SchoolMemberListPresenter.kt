@@ -55,7 +55,6 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
 
     override suspend fun onLoadFromDb() {
         super.onLoadFromDb()
-
         updateListOnView()
     }
 

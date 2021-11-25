@@ -12,6 +12,7 @@ import com.ustadmobile.lib.db.entities.ScopedGrant
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
+import com.ustadmobile.util.StyleManager.switchMargin
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
@@ -114,7 +115,7 @@ class ScopedGrantEditComponent (mProps: RProps): UstadEditComponent<ScopedGrant>
 
         override fun RBuilder.renderListItem(item: BitmaskFlag) {
             umGridContainer {
-                umItem(MGridSize.cells11){
+                umItem(MGridSize.cells10, MGridSize.cells11){
                     mTypography(getString(item.messageId),
                         variant = MTypographyVariant.body1,
                         color = MTypographyColor.textPrimary,
@@ -126,7 +127,10 @@ class ScopedGrantEditComponent (mProps: RProps): UstadEditComponent<ScopedGrant>
                     }
                 }
 
-                umItem(MGridSize.cells1){
+                umItem(MGridSize.cells2, MGridSize.cells1){
+                    css{
+                        +switchMargin
+                    }
                     mSwitch(item.enabled)
                 }
                 css{

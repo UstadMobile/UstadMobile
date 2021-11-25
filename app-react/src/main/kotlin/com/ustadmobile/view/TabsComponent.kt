@@ -1,9 +1,12 @@
 package com.ustadmobile.view
 
 import com.ccfraser.muirwik.components.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ACTIVE_TAB_INDEX
 import com.ustadmobile.navigation.RouteManager.lookupDestinationName
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.tabsContainer
+import com.ustadmobile.util.getViewNameFromUrl
+import com.ustadmobile.util.urlSearchParamsToMap
 import kotlinx.css.*
 import react.RBuilder
 import react.RProps
@@ -15,9 +18,10 @@ import styled.styledDiv
 interface TabsProps: RProps {
     var tabs: List<UstadTab>
     var showTabs: Boolean
+    var activeTabIndex: Int
 }
 
-data class UstadTab(var viewName: String, val args: Map<String,String>, var title: String)
+data class UstadTab(var index: Int, var viewName: String, val args: Map<String,String>, var title: String)
 
 
 class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,RState>(mProps){
@@ -33,8 +37,16 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,RState>(mP
         }
     }
 
+    private fun updateUrl(selected: String){
+        val index = props.tabs.indexOfFirst { it.title == selected }
+        val params = urlSearchParamsToMap().toMutableMap()
+        params[ARG_ACTIVE_TAB_INDEX] = index.toString()
+        console.log(params.size)
+        systemImpl.go("${getViewNameFromUrl()}",params, this)
+    }
+
     override fun RState.init(props: TabsProps) {
-        selectedTabTitle = props.tabs.first().title
+        selectedTabTitle = props.tabs[props.activeTabIndex].title
     }
 
     override fun RBuilder.render() {
@@ -75,7 +87,8 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,RState>(mP
     }
 }
 
-fun RBuilder.renderTabs(tabs: List<UstadTab>, showTabs: Boolean = true) = child(TabsComponent::class) {
+fun RBuilder.renderTabs(tabs: List<UstadTab>, showTabs: Boolean = true, activeTabIndex: Int) = child(TabsComponent::class) {
     attrs.tabs = tabs
     attrs.showTabs = showTabs
+    attrs.activeTabIndex = activeTabIndex
 }

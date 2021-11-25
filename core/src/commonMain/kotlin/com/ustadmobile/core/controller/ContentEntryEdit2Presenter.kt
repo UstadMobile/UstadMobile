@@ -123,6 +123,8 @@ class ContentEntryEdit2Presenter(context: Any,
             return importedMetadata.contentEntry
         }
 
+        //TODO: DoorDatabaseRepository check -> Handle if(db is DoorDatabaseRepository) and add above two cases once repo is in place
+
         return withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.contentEntryDao?.findEntryWithLanguageByEntryIdAsync(entityUid)
         } ?: ContentEntryWithLanguage().apply {

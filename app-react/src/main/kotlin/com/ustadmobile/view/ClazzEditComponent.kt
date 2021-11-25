@@ -314,7 +314,7 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
                                 mPresenter?.scopedGrantOneToManyHelper?.onClickNew()
                             }
 
-                            renderScopedGrants(presenter.scopedGrantOneToManyHelper, scopeList,
+                            renderScopedGrants(presenter.scopedGrantOneToManyHelper, scopeList.distinctBy { it.name },
                                 newItem){ scope ->
                                 mPresenter?.scopedGrantOneToManyHelper?.onClickEdit(scope)
                             }

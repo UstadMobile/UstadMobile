@@ -6,6 +6,7 @@ import com.ustadmobile.core.controller.ClazzDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ACTIVE_TAB_INDEX
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.util.StyleManager.clazzDetailExtraInfo
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -36,9 +37,9 @@ class ClazzDetailComponent(mProps: RProps): UstadDetailComponent<Clazz>(mProps),
     override var tabs: List<String>? = null
         set(value) {
             field = value
-            tabsToRender = value?.map {
+            tabsToRender = value?.mapIndexed{ index, it ->
                 val messageId = VIEWNAME_TO_TITLE_MAP[it.substringBefore("?",)] ?: 0
-                UstadTab(
+                UstadTab(index,
                     it.substringBefore("?"),
                     urlSearchParamsToMap(it.substring(it.lastIndexOf("?"))),
                     getString(messageId)
@@ -80,7 +81,7 @@ class ClazzDetailComponent(mProps: RProps): UstadDetailComponent<Clazz>(mProps),
                         }
 
                         tabsToRender?.let { tabs ->
-                            renderTabs(tabs)
+                            renderTabs(tabs, activeTabIndex = arguments[ARG_ACTIVE_TAB_INDEX]?.toInt() ?: 0)
                         }
                     }
                 }

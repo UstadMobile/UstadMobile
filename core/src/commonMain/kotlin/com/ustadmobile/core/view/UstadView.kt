@@ -191,6 +191,8 @@ interface UstadView {
          */
         const val ARG_NAV_CHILD = "navChild"
 
+        const val ARG_ACTIVE_TAB_INDEX = "activeTabIndex"
+
         /**
          * Used to 'enforce' a minimum age policy for certain screens (e.g. parent - child consent
          * management). This can be used on AccountList to show only adult accounts (e.g.

@@ -10,6 +10,7 @@ import com.ustadmobile.core.view.SchoolDetailOverviewView
 import com.ustadmobile.core.view.SchoolDetailView
 import com.ustadmobile.core.view.SchoolMemberListView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ACTIVE_TAB_INDEX
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.util.StyleManager
@@ -58,22 +59,23 @@ class SchoolDetailComponent(mProps:RProps): UstadDetailComponent<School>(mProps)
             SchoolDetailOverviewView.VIEW_NAME.appendQueryArgs(
                 commonArgs + mapOf(UstadView.ARG_ENTITY_UID to entityUidValue)
             ),
+
             SchoolMemberListView.VIEW_NAME.appendQueryArgs(
                 commonArgs + mapOf(
-                    UstadView.ARG_FILTER_BY_ROLE to Role.ROLE_SCHOOL_STUDENT_UID.toString(),
+                    UstadView.ARG_FILTER_BY_ROLE to Role.ROLE_SCHOOL_STAFF_UID.toString(),
                     UstadView.ARG_FILTER_BY_SCHOOLUID to entityUidValue)
             ),
             SchoolMemberListView.VIEW_NAME.appendQueryArgs(
                 commonArgs + mapOf(
-                    UstadView.ARG_FILTER_BY_ROLE to Role.ROLE_SCHOOL_STAFF_UID.toString(),
+                    UstadView.ARG_FILTER_BY_ROLE to Role.ROLE_SCHOOL_STUDENT_UID.toString(),
                     UstadView.ARG_FILTER_BY_SCHOOLUID to entityUidValue)
             )
         )
 
         setState {
-            tabsToRender = tabs.map {
-                val titles = listOf(MessageID.overview, MessageID.students, MessageID.staff)
-                UstadTab(it.substringBefore("?"),
+            tabsToRender = tabs.mapIndexed { index, it ->
+                val titles = listOf(MessageID.overview, MessageID.staff, MessageID.students)
+                UstadTab(index,it.substringBefore("?"),
                     urlSearchParamsToMap(it.substring(it.lastIndexOf("?"))),
                     getString(titles[tabs.indexOf(it)]))
             }
@@ -99,7 +101,7 @@ class SchoolDetailComponent(mProps:RProps): UstadDetailComponent<School>(mProps)
                         }
 
                         tabsToRender?.let { tabs ->
-                            renderTabs(tabs)
+                            renderTabs(tabs,activeTabIndex = arguments[ARG_ACTIVE_TAB_INDEX]?.toInt() ?: 0)
                         }
                     }
                 }

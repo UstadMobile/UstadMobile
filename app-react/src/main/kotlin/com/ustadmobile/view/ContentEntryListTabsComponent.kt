@@ -6,6 +6,7 @@ import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CON
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_OPTION
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_PARENT
 import com.ustadmobile.core.view.ContentEntryListTabsView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.util.ext.toArgumentsMap
@@ -32,10 +33,10 @@ class ContentEntryListTabsComponent(mProps: RProps) :UstadBaseComponent<RProps, 
 
         setState {
             tabsToRender = listOf(
-                UstadTab(ContentEntryList2View.VIEW_NAME,
+                UstadTab(0,ContentEntryList2View.VIEW_NAME,
                     "$defArgs${ARG_DISPLAY_CONTENT_BY_PARENT}".toArgumentsMap(),
                     getString(MessageID.libraries)),
-                UstadTab(ContentEntryList2View.VIEW_NAME,
+                UstadTab(1,ContentEntryList2View.VIEW_NAME,
                     "$defArgs${ARG_DISPLAY_CONTENT_BY_DOWNLOADED}".toArgumentsMap(),
                     getString(MessageID.downloaded))
             )
@@ -46,7 +47,7 @@ class ContentEntryListTabsComponent(mProps: RProps) :UstadBaseComponent<RProps, 
 
     override fun RBuilder.render() {
         tabsToRender?.let {
-            renderTabs(it, true)
+            renderTabs(it, true, arguments[UstadView.ARG_ACTIVE_TAB_INDEX]?.toInt() ?: 0)
         }
     }
 

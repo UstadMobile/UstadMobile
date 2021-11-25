@@ -236,7 +236,7 @@ class SchoolEditComponent (mProps: RProps): UstadEditComponent<SchoolWithHoliday
                                 mPresenter?.scopedGrantOneToManyHelper?.onClickNew()
                             }
 
-                            renderScopedGrants(presenter.scopedGrantOneToManyHelper, scopeList, newItem){ scope ->
+                            renderScopedGrants(presenter.scopedGrantOneToManyHelper, scopeList.distinctBy { it.name}, newItem){ scope ->
                                 mPresenter?.scopedGrantOneToManyHelper?.onClickEdit(scope)
                             }
                         }

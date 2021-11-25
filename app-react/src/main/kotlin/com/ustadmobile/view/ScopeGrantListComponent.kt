@@ -14,10 +14,10 @@ import react.RBuilder
 class ScopeGrantListComponent(mProps: ListProps<ScopedGrantAndName>): UstadSimpleList<ListProps<ScopedGrantAndName>>(mProps){
 
     override fun RBuilder.renderListItem(item: ScopedGrantAndName) {
-        val showDeleteIcon = item.scopedGrant?.sgFlags?.hasFlag(ScopedGrant.FLAG_NO_DELETE) == true
+        val showDelete = item.scopedGrant?.sgFlags?.hasFlag(ScopedGrant.FLAG_NO_DELETE) == false
         val permissionList = permissionListText(systemImpl,Clazz.TABLE_ID,
             item.scopedGrant?.sgPermissions ?: 0)
-        if(showDeleteIcon){
+        if(showDelete){
             createItemWithIconTitleDescriptionAndIconBtn("admin_panel_settings",
                 "delete",item.name, permissionList){
                 props.listener.onClickDelete(item)
