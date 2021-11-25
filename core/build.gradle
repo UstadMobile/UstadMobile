@@ -224,7 +224,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-json-js:$version_ktor"
                 implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
-                implementation npm("asmcrypto.js","$version_npm_pbkdf2")
+                implementation npm("asmcrypto.js","$version_npm_asmcrypto")
                 implementation npm("buffer","$version_npm_buffer")
             }
         }

@@ -1,6 +1,3 @@
-import java.nio.file.Files
-import java.nio.file.Paths
-
 plugins {
     id 'org.jetbrains.kotlin.js'
 }
@@ -34,22 +31,6 @@ kotlin {
     }
 }
 
-task fixMissingKotlinExtensionModule {
-    doLast{
-        rootProject.fileTree (dir: "build/js/packages",
-                includes: ['**/kotlin-dce-dev/kotlin-extensions.js', '**/kotlin-dce/kotlin-extensions.js'], exclude: '**/*.meta.js')
-                .each() { File file ->
-                    File extFile = new File(file.parentFile.absolutePath, "kotlin-wrappers-kotlin-extensions-js-legacy.js")
-                    String fileContent = new String(Files.readAllBytes(Paths.get(file.path)), "UTF-8")
-                    fileContent = fileContent.replace("kotlin-extensions", "kotlin-wrappers-kotlin-extensions-js-legacy")
-                    FileWriter writer = new FileWriter(extFile)
-                    writer.write(fileContent)
-                    writer.flush()
-                    println(file.absolutePath +" fixed")
-                }
-    }
-}
-
 dependencies {
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
     implementation "org.jetbrains.kotlin-wrappers:kotlin-react:$version_kotlin_react"
@@ -58,17 +39,17 @@ dependencies {
     implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom:$version_kotlin_react_router_dom"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-redux:$version_kotlin_redux"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-react-redux:$version_kotlin_react_redux"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-extensions:$version_kotlin_extensions"
-    implementation "com.ccfraser.muirwik:muirwik-components:$version_muirwik_components"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-mui:$version_kotlin_mui"
     implementation project(":lib-database-mpp")
     implementation project(":core")
     implementation project(":lib-util")
     implementation project(":lib-database")
     implementation project(":lib-database-entities")
+    implementation npm("@emotion/react", "$version_npm_emotion")
+    implementation npm("@emotion/styled", "$version_npm_emotion")
     implementation npm("moment","$version_npm_moment")
     implementation npm("moment-timezone","$version_npm_moment_timezone")
     implementation npm("@date-io/moment","$version_npm_mement_io")
-    implementation npm("@material-ui/pickers","$version_npm_picker_ui")
     implementation "com.ustadmobile.door:room-annotations:$version_door"
     implementation "org.kodein.di:kodein-di:$version_kodein_di"
     implementation npm("react-google-charts","$version_npm_google_charts")
@@ -91,6 +72,4 @@ task distro {
     }
 }
 
-tasks.findByName("processDceDevKotlinJs").finalizedBy(fixMissingKotlinExtensionModule)
-tasks.findByName("browserProductionWebpack").dependsOn(fixMissingKotlinExtensionModule)
 distro.dependsOn(project.tasks.findByName("browserDistribution"))
