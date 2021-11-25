@@ -1,30 +1,13 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.MColor
-import com.ccfraser.muirwik.components.button.mButton
-import com.ccfraser.muirwik.components.dialog.mDialog
-import com.ccfraser.muirwik.components.dialog.mDialogActions
-import com.ccfraser.muirwik.components.dialog.mDialogContent
-import com.ccfraser.muirwik.components.dialog.mDialogTitle
-import com.ccfraser.muirwik.components.list.mList
-import com.ccfraser.muirwik.components.list.mListItem
-import com.ccfraser.muirwik.components.list.mListItemAvatar
-import com.ccfraser.muirwik.components.list.mListItemText
-import com.ccfraser.muirwik.components.mAvatar
-import com.ccfraser.muirwik.components.mIcon
-import com.ccfraser.muirwik.components.styles.Breakpoint
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import kotlinx.css.LinearDimension
-import kotlinx.css.width
 import react.*
-import styled.css
-import styled.styledDiv
 import kotlin.js.Date
+import com.ustadmobile.util.*
 
 data class PopUpOptionItem(var icon: String?, var primaryText: Int, var secondaryText: Int = 0, val onOptionItemClicked: (() -> Unit)? = null)
 
-interface OptionsProps: RProps {
+interface OptionsProps: UmProps {
     var optionItems: List<PopUpOptionItem>
     var systemImpl: UstadMobileSystemImpl
     var shownAt: Long
@@ -32,14 +15,14 @@ interface OptionsProps: RProps {
     var onDialogClosed: () -> Unit
 }
 
-class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, RState>(mProps) {
+class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, UmState>(mProps) {
 
     private var showDialog: Boolean = true
 
     private var lastShownAt = 0L
 
     override fun RBuilder.render() {
-        mDialog(showDialog, onClose = { _, _ ->
+/*        mDialog(showDialog, onClose = { _, _ ->
             handleDialogClosed()
         },fullWidth = true, maxWidth = Breakpoint.sm) {
             if(props.title != null){
@@ -58,7 +41,7 @@ class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, RSta
                         props.optionItems.forEach { option ->
                             mListItem(
                                 button = true,
-                                onClick = { option.onOptionItemClicked?.invoke() }) {
+                                onClick = { option.onOptionItemClicked?.com.ustadmobile.components.theming.invoke() }) {
                                 if(option.icon != null){
                                     mListItemAvatar {
                                         mAvatar {
@@ -84,7 +67,7 @@ class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, RSta
                     }
                 )
             }
-        }
+        }*/
     }
 
     private fun handleDialogClosed(){
@@ -95,11 +78,11 @@ class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, RSta
         }
     }
 
-    override fun componentDidUpdate(prevProps: OptionsProps, prevState: RState, snapshot: Any) {
+    override fun componentDidUpdate(prevProps: OptionsProps, prevState: UmState, snapshot: Any) {
 
     }
 
-    override fun componentWillUpdate(nextProps: OptionsProps, nextState: RState) {
+    override fun componentWillUpdate(nextProps: OptionsProps, nextState: UmState) {
         showDialog = nextProps.shownAt != props.shownAt
     }
 }

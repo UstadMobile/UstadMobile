@@ -1,40 +1,19 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.button.MButtonSize
-import com.ccfraser.muirwik.components.button.MButtonVariant
-import com.ccfraser.muirwik.components.button.mButton
 import com.ustadmobile.core.controller.ContentEntryDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
 import com.ustadmobile.lib.db.entities.DownloadJobItem
-import com.ustadmobile.util.StyleManager.alignTextToStart
-import com.ustadmobile.util.StyleManager.chipSetFilter
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.displayProperty
-import com.ustadmobile.util.StyleManager.contentEntryDetailOverviewComponentOpenBtn
-import com.ustadmobile.util.StyleManager.contentEntryDetailOverviewExtraInfo
-import com.ustadmobile.util.StyleManager.defaultMarginTop
-import com.ustadmobile.util.Util.ASSET_BOOK
-import com.ustadmobile.util.Util.ASSET_FOLDER
-import com.ustadmobile.util.ext.joinString
-import com.ustadmobile.view.ext.umEntityAvatar
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import kotlinx.css.*
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
 
-class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ContentEntryWithMostRecentContainer>(mProps),
+class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ContentEntryWithMostRecentContainer>(mProps),
     ContentEntryDetailOverviewView {
 
     private var mPresenter: ContentEntryDetailOverviewPresenter? = null
@@ -95,7 +74,7 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
     }
 
     override fun RBuilder.render() {
-        styledDiv {
+        /*styledDiv {
             css{
                 +defaultMarginTop
                 +contentContainer
@@ -203,7 +182,7 @@ class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<
                     }
                 }
             }
-        }
+        }*/
     }
 
     override fun onFabClicked() {

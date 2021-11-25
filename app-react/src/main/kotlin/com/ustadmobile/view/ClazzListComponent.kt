@@ -1,38 +1,17 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.alignTextToStart
-import com.ustadmobile.util.StyleManager.gridListSecondaryItemDesc
-import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
-import com.ustadmobile.util.StyleManager.clazzListRoleChip
-import com.ustadmobile.util.ext.breakToWork
-import com.ustadmobile.util.ext.format
-import com.ustadmobile.view.ext.circleIndicator
-import com.ustadmobile.view.ext.umEntityAvatar
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import kotlinx.css.*
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
 import kotlin.js.Date
 
-class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
+class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
         ClazzWithListDisplayDetails>(props), ClazzList2View {
 
     private var mPresenter: ClazzListPresenter? = null
@@ -48,8 +27,6 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
 
     override fun onCreateView() {
         super.onCreateView()
-        val accountManager: UstadAccountManager by instance()
-        dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
         fabManager?.text = getString(MessageID.clazz)
         title = getString(MessageID.classes)
         listTypeSingleColumn = false
@@ -58,7 +35,7 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
     }
 
     override fun RBuilder.renderListItem(item: ClazzWithListDisplayDetails) {
-        styledDiv {
+       /* styledDiv {
             css{
                 position = Position.relative
             }
@@ -137,7 +114,7 @@ class ClazzListComponent (props: RProps): UstadListComponent<Clazz,
 
                 }
             }
-        }
+        }*/
     }
 
     override fun handleClickEntry(entry: ClazzWithListDisplayDetails) {

@@ -1,75 +1,26 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.button.MButtonSize
-import com.ccfraser.muirwik.components.button.MButtonVariant
-import com.ccfraser.muirwik.components.button.mButton
-import com.ccfraser.muirwik.components.button.mFab
-import com.ccfraser.muirwik.components.input.mInput
-import com.ccfraser.muirwik.components.list.mList
-import com.ccfraser.muirwik.components.list.mListItemWithIcon
-import com.ccfraser.muirwik.components.styles.up
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
-import com.ustadmobile.core.view.AccountListView
-import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.navigation.UstadDestination
 import com.ustadmobile.navigation.RouteManager.defaultDestination
-import com.ustadmobile.navigation.RouteManager.destinationList
 import com.ustadmobile.navigation.RouteManager.lookupDestinationName
+import com.ustadmobile.navigation.UstadDestination
 import com.ustadmobile.redux.ReduxAppState
-import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxAppStateManager.subscribe
-import com.ustadmobile.redux.ReduxSnackBarState
 import com.ustadmobile.redux.ReduxStore
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.alignTextToStart
-import com.ustadmobile.util.StyleManager.defaultFullWidth
-import com.ustadmobile.util.StyleManager.displayProperty
-import com.ustadmobile.util.StyleManager.drawerWidth
-import com.ustadmobile.util.StyleManager.mainComponentBrandIcon
-import com.ustadmobile.util.StyleManager.mainComponentBrandIconContainer
-import com.ustadmobile.util.StyleManager.mainComponentAppBar
-import com.ustadmobile.util.StyleManager.mainComponentAppBarWithNoNav
-import com.ustadmobile.util.StyleManager.mainComponentBottomNav
-import com.ustadmobile.util.StyleManager.mainComponentProfileOuterAvatar
-import com.ustadmobile.util.StyleManager.mainComponentProfileInnerAvatar
-import com.ustadmobile.util.StyleManager.mainComponentContainer
-import com.ustadmobile.util.StyleManager.mainComponentContentContainer
-import com.ustadmobile.util.StyleManager.mainComponentFab
-import com.ustadmobile.util.StyleManager.mainComponentProgressIndicator
-import com.ustadmobile.util.StyleManager.mainComponentSearch
-import com.ustadmobile.util.StyleManager.mainComponentSearchIcon
-import com.ustadmobile.util.StyleManager.mainComponentSideNavMenuList
-import com.ustadmobile.util.StyleManager.mainComponentWrapperContainer
-import com.ustadmobile.util.StyleManager.mainComponentToolbarMargins
-import com.ustadmobile.util.StyleManager.tabletAndHighEnd
-import com.ustadmobile.util.ThemeManager.isDarkModeActive
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
 import com.ustadmobile.util.getViewNameFromUrl
-import com.ustadmobile.view.ext.*
-import kotlinext.js.jsObject
 import kotlinx.browser.window
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.css.*
-import kotlinx.html.id
-import org.kodein.di.instance
-import org.kodein.di.on
 import react.RBuilder
-import react.RProps
-import react.RState
-import react.dom.div
-import react.dom.span
 import react.setState
-import styled.css
-import styled.styledDiv
-import styled.styledImg
 
 
-class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
+class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props){
 
     private var activeAccount: UmAccount? = null
 
@@ -129,7 +80,7 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
 
 
     override fun RBuilder.render() {
-        themeContext.Consumer { theme ->
+       /* themeContext.Consumer { theme ->
 
             styledDiv {
                 css (mainComponentWrapperContainer)
@@ -259,11 +210,11 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
         errorBoundary(errorFallBack(getString(MessageID.error))){
             mCssBaseline()
 
-        }
+        }*/
     }
 
     private fun RBuilder.renderBottomNavigation(){
-        mHidden(smUp = true) {
+      /*  mHidden(smUp = true) {
             mBottomNavigation(currentDestination, true,
                 onChange = { _, value -> setState {
                 val destination = value as UstadDestination
@@ -280,17 +231,17 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
                     }
                 }
             }
-        }
+        }*/
     }
 
     private fun RBuilder.renderSideNavigation(){
-        val p: MPaperProps = jsObject { }
+       /* val p: MPaperProps = jsObject { }
         p.asDynamic().style = kotlinext.js.js {
             position = "relative"; width = drawerWidth.px.value; display = "block"; height =
             "100%"; minHeight = "100vh"
-        }
+        }*/
 
-        mHidden(xsDown = true) {
+       /* mHidden(xsDown = true) {
             mDrawer(true, MDrawerAnchor.left, MDrawerVariant.permanent, paperProps = p) {
                 styledDiv {
                     css(mainComponentBrandIconContainer)
@@ -320,11 +271,11 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
                     renderLanguages(systemImpl)
                 }
             }
-        }
+        }*/
     }
 
     private fun RBuilder.renderSnackBar(){
-        mSnackbar(altBuilder.span { +"${appState.appSnackBar.message}"},
+       /* mSnackbar(altBuilder.span { +"${appState.appSnackBar.message}"},
             open = appState.appSnackBar.message != null,
             horizAnchor = MSnackbarHorizAnchor.center, autoHideDuration = 3000,
             onClose = { _, _ ->
@@ -341,7 +292,7 @@ class MainComponent(props: RProps): UstadBaseComponent<RProps, RState>(props){
                         })
                 }
             }
-        }
+        }*/
     }
 
 

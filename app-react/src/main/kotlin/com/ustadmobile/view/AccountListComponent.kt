@@ -1,37 +1,14 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.button.MButtonSize
-import com.ccfraser.muirwik.components.button.MButtonVariant
-import com.ccfraser.muirwik.components.button.mButton
-import com.ccfraser.muirwik.components.button.mIconButton
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.controller.AccountListPresenter
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.ObserverFnWrapper
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultMarginTop
-import com.ustadmobile.util.StyleManager.defaultPaddingTop
-import com.ustadmobile.util.ext.format
-import com.ustadmobile.view.ext.createCreateNewItem
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import com.ustadmobile.view.ext.umProfileAvatar
-import kotlinx.css.Cursor
-import kotlinx.css.cursor
-import kotlinx.css.marginTop
-import kotlinx.html.js.onClickFunction
-import react.RBuilder
-import react.RProps
-import react.RState
-import react.setState
-import styled.css
-import styled.styledDiv
+import react.*
+import com.ustadmobile.util.*
 
-class AccountListComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(mProps), AccountListView  {
+class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps), AccountListView  {
 
     private var mPresenter: AccountListPresenter? = null
 
@@ -83,7 +60,7 @@ class AccountListComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(m
     }
 
     override fun RBuilder.render() {
-        styledDiv {
+     /*   styledDiv {
             css{
                 +defaultPaddingTop
                 +contentContainer
@@ -110,7 +87,7 @@ class AccountListComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(m
                 createCreateNewItem(getString(MessageID.add_another)
                     .format(getString(MessageID.account)))
             }
-        }
+        }*/
     }
 
     override fun onDestroyView() {
@@ -141,7 +118,7 @@ class AccountListComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(m
         override fun RBuilder.renderListItem(item: UserSessionWithPersonAndEndpoint) {
             val presenter = props.presenter as AccountListPresenter
 
-            umGridContainer {
+           /* umGridContainer {
                umItem(MGridSize.cells3, MGridSize.cells2){
                    umProfileAvatar(item.person.personUid, "person")
                }
@@ -221,7 +198,7 @@ class AccountListComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(m
                        })
                    }
                }
-           }
+           }*/
         }
 
     }

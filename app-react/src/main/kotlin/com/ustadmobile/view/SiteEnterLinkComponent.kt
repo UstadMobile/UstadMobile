@@ -1,35 +1,14 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.button.MButtonSize
-import com.ccfraser.muirwik.components.button.MButtonVariant
-import com.ccfraser.muirwik.components.button.mButton
-import com.ccfraser.muirwik.components.form.MFormControlVariant
 import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.controller.SiteEnterLinkPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.SiteEnterLinkView
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultFullWidth
-import com.ustadmobile.util.StyleManager.defaultMarginTop
-import com.ustadmobile.util.ext.clean
-import com.ustadmobile.view.ext.createCreateNewItem
-import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import kotlinx.browser.window
-import kotlinx.css.height
-import kotlinx.css.marginTop
-import kotlinx.css.px
 import react.RBuilder
-import react.RProps
-import react.RState
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
 
-class SiteEnterLinkComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(mProps), SiteEnterLinkView {
+class SiteEnterLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps), SiteEnterLinkView {
 
     private var mPresenter: SiteEnterLinkPresenter? = null
 
@@ -83,7 +62,7 @@ class SiteEnterLinkComponent(mProps: RProps): UstadBaseComponent<RProps, RState>
 
 
     override fun RBuilder.render() {
-        styledDiv {
+       /* styledDiv {
             css {
                 +contentContainer
                 marginTop = 4.spacingUnits
@@ -172,7 +151,7 @@ class SiteEnterLinkComponent(mProps: RProps): UstadBaseComponent<RProps, RState>
                     umItem(MGridSize.cells3){}
                 }
             }
-        }
+        }*/
     }
 
     override fun onDestroyView() {

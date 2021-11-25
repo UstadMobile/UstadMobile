@@ -1,13 +1,5 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.button.*
-import com.ccfraser.muirwik.components.form.MFormControlVariant
-import com.ccfraser.muirwik.components.form.mFormControl
-import com.ccfraser.muirwik.components.form.mFormHelperText
-import com.ccfraser.muirwik.components.input.mInputLabel
-import com.ccfraser.muirwik.components.input.mOutlinedInput
-import com.ccfraser.muirwik.components.menu.mMenuItem
 import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
@@ -16,23 +8,13 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.defaultMarginTop
-import com.ustadmobile.util.StyleManager.displayProperty
-import com.ustadmobile.util.StyleManager.switchMargin
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import kotlinx.css.*
-import kotlinx.html.InputType
 import org.w3c.dom.events.MouseEvent
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
 
-class ContentEntryEditComponent (mProps: RProps): UstadEditComponent<ContentEntryWithLanguage>(mProps),
+class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEntryWithLanguage>(mProps),
     ContentEntryEdit2View {
 
     private var mPresenter: ContentEntryEdit2Presenter? = null
@@ -176,7 +158,7 @@ class ContentEntryEditComponent (mProps: RProps): UstadEditComponent<ContentEntr
     }
 
     override fun RBuilder.render() {
-        styledDiv {
+      /*  styledDiv {
             css{
                 if(entity?.leaf == true){
                     +StyleManager.contentContainer
@@ -428,7 +410,7 @@ class ContentEntryEditComponent (mProps: RProps): UstadEditComponent<ContentEntr
                 }
 
             }
-        }
+        }*/
     }
 
     override fun onDestroyView() {
@@ -441,7 +423,7 @@ class ContentEntryEditComponent (mProps: RProps): UstadEditComponent<ContentEntr
 }
 
 fun RBuilder.createSwitchItem(label: String, enabled: Boolean, onClick: (MouseEvent)->Unit){
-    umGridContainer {
+    /*umGridContainer {
         umItem(MGridSize.cells11){
             mTypography(label,
                 variant = MTypographyVariant.body1,
@@ -465,5 +447,5 @@ fun RBuilder.createSwitchItem(label: String, enabled: Boolean, onClick: (MouseEv
             marginTop = LinearDimension("16px")
             marginBottom = LinearDimension("16px")
         }
-    }
+    }*/
 }

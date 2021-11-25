@@ -1,29 +1,16 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.form.MFormControlVariant
 import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.controller.HolidayEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.HolidayEditView
 import com.ustadmobile.lib.db.entities.Holiday
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultFullWidth
-import com.ustadmobile.util.StyleManager.defaultPaddingTop
-import com.ustadmobile.util.ext.toDate
-import com.ustadmobile.view.components.MDateTimePickerType
-import com.ustadmobile.view.components.mDateTimePicker
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import kotlinx.css.padding
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
 
-class HolidayEditComponent(mProps: RProps): UstadEditComponent<Holiday>(mProps), HolidayEditView {
+class HolidayEditComponent(mProps: UmProps): UstadEditComponent<Holiday>(mProps), HolidayEditView {
 
     private var mPresenter: HolidayEditPresenter? = null
 
@@ -65,7 +52,7 @@ class HolidayEditComponent(mProps: RProps): UstadEditComponent<Holiday>(mProps),
     }
 
     override fun RBuilder.render() {
-        styledDiv {
+       /* styledDiv {
             css {
                 +contentContainer
                 +defaultPaddingTop
@@ -128,7 +115,7 @@ class HolidayEditComponent(mProps: RProps): UstadEditComponent<Holiday>(mProps),
                     }
                 }
             }
-        }
+        }*/
     }
 
     override fun onDestroyView() {

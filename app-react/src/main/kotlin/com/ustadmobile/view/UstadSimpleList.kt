@@ -1,28 +1,17 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.list.MListItemAlignItems
-import com.ccfraser.muirwik.components.list.alignItems
-import com.ccfraser.muirwik.components.list.mList
-import com.ccfraser.muirwik.components.list.mListItem
 import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.util.OneToManyJoinEditListener
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.horizontalList
 import com.ustadmobile.util.StyleManager.listComponentContainer
 import com.ustadmobile.util.StyleManager.listComponentContainerWithScroll
-import com.ustadmobile.util.StyleManager.theme
-import com.ustadmobile.view.ext.createCreateNewItem
-import kotlinx.css.Color
+import com.ustadmobile.util.*
 import kotlinx.css.LinearDimension
-import kotlinx.css.backgroundColor
 import kotlinx.css.width
 import react.RBuilder
-import react.RProps
-import react.RState
 import styled.css
 import styled.styledDiv
 
-interface ListProps<T>: RProps {
+interface ListProps<T>: UmProps {
     var entries: List<T>
     var onEntryClicked: ((entry: dynamic) -> Unit)?
     var createNewItem: CreateNewItem?
@@ -42,7 +31,7 @@ interface ListProps<T>: RProps {
 
 data class CreateNewItem(var visible: Boolean = false, var labelId: Int = 0, var onClickCreateNew: (() -> Unit)? = null)
 
-abstract class UstadSimpleList<P: ListProps<*>>(mProps: P) : UstadBaseComponent<P,RState>(mProps){
+abstract class UstadSimpleList<P: ListProps<*>>(mProps: P) : UstadBaseComponent<P,UmState>(mProps){
 
     override val viewName: String?
         get() = ""
@@ -62,7 +51,7 @@ abstract class UstadSimpleList<P: ListProps<*>>(mProps: P) : UstadBaseComponent<
     }
 
     private fun RBuilder.renderList(){
-        mList {
+        /*mList {
             css(horizontalList)
 
             if(props.createNewItem?.visible == true && props.createNewItem?.labelId != 0){
@@ -72,7 +61,7 @@ abstract class UstadSimpleList<P: ListProps<*>>(mProps: P) : UstadBaseComponent<
                     attrs.button = true
                     attrs.divider = true
                     attrs.onClick = {
-                        props.createNewItem?.onClickCreateNew?.invoke()
+                        props.createNewItem?.onClickCreateNew?.com.ustadmobile.components.theming.invoke()
                     }
                     createCreateNewItem(getString(props.createNewItem?.labelId ?: 0))
                 }
@@ -88,12 +77,12 @@ abstract class UstadSimpleList<P: ListProps<*>>(mProps: P) : UstadBaseComponent<
                     attrs.button = true
                     attrs.divider = true
                     attrs.onClick = {
-                        props.onEntryClicked?.invoke(entry)
+                        props.onEntryClicked?.com.ustadmobile.components.theming.invoke(entry)
                     }
                     renderListItem(entry)
                 }
             }
-        }
+        }*/
     }
 
     abstract fun RBuilder.renderListItem(item: dynamic)

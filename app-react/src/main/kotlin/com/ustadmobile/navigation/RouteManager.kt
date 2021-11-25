@@ -4,7 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.*
 import com.ustadmobile.view.*
 import react.Component
-import react.RProps
+import com.ustadmobile.util.*
 import kotlin.reflect.KClass
 
 /**
@@ -12,7 +12,7 @@ import kotlin.reflect.KClass
  */
 object RouteManager {
 
-    val defaultRoute: KClass<out Component<RProps, *>> = RedirectComponent::class
+    val defaultRoute: KClass<out Component<UmProps, *>> = RedirectComponent::class
 
     val destinationList = listOf(
         UstadDestination("library_books", MessageID.content, ContentEntryListTabsView.VIEW_NAME,

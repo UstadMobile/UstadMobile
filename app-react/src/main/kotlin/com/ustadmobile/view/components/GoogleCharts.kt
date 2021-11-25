@@ -1,7 +1,6 @@
 package com.ustadmobile.view.components
 
-import com.ccfraser.muirwik.components.createStyled
-import com.ccfraser.muirwik.components.setStyledPropsAndRunHandler
+/*
 import react.RBuilder
 import react.RComponent
 import react.RState
@@ -42,4 +41,4 @@ fun RBuilder.mChart(data: Array<Array<Any>>,
     attrs.data = data
     attrs.options = options
     setStyledPropsAndRunHandler(className, handler)
-}
+}*/

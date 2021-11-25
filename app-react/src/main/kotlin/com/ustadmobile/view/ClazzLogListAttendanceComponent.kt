@@ -1,29 +1,17 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.MGridSize
-import com.ccfraser.muirwik.components.MGridSpacing
-import com.ccfraser.muirwik.components.spacingUnits
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
-import com.ustadmobile.util.StyleManager.attendance
-import com.ustadmobile.view.components.MChartType
-import com.ustadmobile.view.components.mChart
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import kotlinx.css.margin
 import react.RBuilder
-import react.RProps
-import react.RState
-import styled.css
-import styled.styledDiv
+import com.ustadmobile.util.*
 
-class ClazzLogListAttendanceComponent(mProps: RProps) : UstadBaseComponent<RProps, RState>(mProps){
+class ClazzLogListAttendanceComponent(mProps: UmProps) : UstadBaseComponent<UmProps, UmState>(mProps){
 
     override val viewName: String
         get() = ClazzLogListAttendanceView.VIEW_NAME
 
 
     override fun RBuilder.render() {
-        styledDiv {
+       /* styledDiv {
             css(attendance)
             umGridContainer(MGridSpacing.spacing4) {
 
@@ -49,7 +37,7 @@ class ClazzLogListAttendanceComponent(mProps: RProps) : UstadBaseComponent<RProp
                     }
                 }
             }
-        }
+        }*/
     }
 
 }

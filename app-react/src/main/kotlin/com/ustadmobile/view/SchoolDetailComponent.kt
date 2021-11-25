@@ -1,7 +1,5 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.MGridSize
-import com.ccfraser.muirwik.components.MGridSpacing
 import com.ustadmobile.core.controller.SchoolDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -10,25 +8,15 @@ import com.ustadmobile.core.view.SchoolDetailOverviewView
 import com.ustadmobile.core.view.SchoolDetailView
 import com.ustadmobile.core.view.SchoolMemberListView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ACTIVE_TAB_INDEX
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.School
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultPaddingTop
-import com.ustadmobile.util.Util
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.urlSearchParamsToMap
-import com.ustadmobile.view.ext.umEntityAvatar
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
 
-class SchoolDetailComponent(mProps:RProps): UstadDetailComponent<School>(mProps), SchoolDetailView {
+class SchoolDetailComponent(mProps:UmProps): UstadDetailComponent<School>(mProps), SchoolDetailView {
 
     private var mPresenter: SchoolDetailPresenter? = null
 
@@ -83,7 +71,7 @@ class SchoolDetailComponent(mProps:RProps): UstadDetailComponent<School>(mProps)
     }
 
     override fun RBuilder.render() {
-        styledDiv {
+      /*  styledDiv {
             css{
                 +defaultPaddingTop
                 +contentContainer
@@ -106,7 +94,7 @@ class SchoolDetailComponent(mProps:RProps): UstadDetailComponent<School>(mProps)
                     }
                 }
             }
-        }
+        }*/
     }
 
     override fun onDestroyView() {

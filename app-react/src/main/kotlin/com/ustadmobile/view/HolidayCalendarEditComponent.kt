@@ -1,7 +1,5 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.form.MFormControlVariant
 import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.controller.HolidayCalendarEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
@@ -11,23 +9,12 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultFullWidth
-import com.ustadmobile.util.StyleManager.defaultPaddingTop
+import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.util.ext.standardFormat
-import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import kotlinx.css.padding
 import react.RBuilder
-import react.RProps
 import react.setState
-import styled.css
-import styled.styledDiv
-import kotlin.js.Date
 
-class HolidayCalendarEditComponent(mProps: RProps): UstadEditComponent<HolidayCalendar>(mProps),
+class HolidayCalendarEditComponent(mProps: UmProps): UstadEditComponent<HolidayCalendar>(mProps),
     HolidayCalendarEditView{
 
     private var mPresenter: HolidayCalendarEditPresenter? = null
@@ -82,7 +69,7 @@ class HolidayCalendarEditComponent(mProps: RProps): UstadEditComponent<HolidayCa
     }
 
     override fun RBuilder.render() {
-        styledDiv {
+      /*  styledDiv {
             css {
                 +contentContainer
                 +defaultPaddingTop
@@ -118,7 +105,7 @@ class HolidayCalendarEditComponent(mProps: RProps): UstadEditComponent<HolidayCa
                     mPresenter?.holidayToManyJoinListener?.onClickEdit(holiday)
                 }
             }
-        }
+        }*/
     }
 
     override fun onDestroyView() {
@@ -132,7 +119,7 @@ class HolidayCalendarEditComponent(mProps: RProps): UstadEditComponent<HolidayCa
 
 class HolidayListComponent(mProps: ListProps<Holiday>): UstadSimpleList<ListProps<Holiday>>(mProps){
     override fun RBuilder.renderListItem(item: Holiday) {
-        createItemWithIconTitleAndDescription("date_range",item.holName, "${Date(item.holStartTime).standardFormat()} - ${Date(item.holEndTime).standardFormat()}")
+        //createItemWithIconTitleAndDescription("date_range",item.holName, "${Date(item.holStartTime).standardFormat()} - ${Date(item.holEndTime).standardFormat()}")
     }
 }
 

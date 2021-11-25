@@ -1,8 +1,8 @@
 package com.ustadmobile.util
 
-import com.ccfraser.muirwik.components.styles.Theme
-import com.ccfraser.muirwik.components.styles.ThemeOptions
-import com.ccfraser.muirwik.components.styles.createMuiTheme
+import com.ustadmobile.mui.theme.Theme
+import com.ustadmobile.mui.theme.ThemeOptions
+import com.ustadmobile.mui.theme.createMuiTheme
 import kotlinx.browser.window
 
 /**
@@ -35,7 +35,7 @@ object ThemeManager {
      * Create a theme to be applied to the app
      */
     fun createAppTheme(): Theme {
-        themeOptions.palette?.type = if (isDarkModeActive()) "dark" else "light"
+        themeOptions.palette?.mode = if (isDarkModeActive()) "dark" else "light"
         themeOptions.palette?.primary.light = if(isDarkModeActive()) primaryLightColor else primaryLightColor
         themeOptions.palette?.primary.main = if(isDarkModeActive()) primaryColor else primaryColor
         themeOptions.palette?.primary.dark = if(isDarkModeActive()) primaryDarkColor else primaryDarkColor

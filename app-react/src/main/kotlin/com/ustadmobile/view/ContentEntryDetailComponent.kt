@@ -6,14 +6,13 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ContentEntryDetailAttemptsListView
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.view.ContentEntryDetailView
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ACTIVE_TAB_INDEX
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.util.urlSearchParamsToMap
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 
-class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentEntry>(mProps), ContentEntryDetailView {
+class ContentEntryDetailComponent(mProps: UmProps): UstadDetailComponent<ContentEntry>(mProps), ContentEntryDetailView {
 
     private var mPresenter: ContentEntryDetailPresenter? = null
 

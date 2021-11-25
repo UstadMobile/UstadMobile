@@ -1,5 +1,6 @@
 package com.ustadmobile.view.ext
 
+/*
 import com.ccfraser.muirwik.components.*
 import com.ccfraser.muirwik.components.button.MIconButtonSize
 import com.ccfraser.muirwik.components.button.mIconButton
@@ -292,7 +293,7 @@ fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(leftIcon: String,right
             mIconButton(rightIcon, size = MIconButtonSize.medium,
                 onClick = {
                     it.stopPropagation()
-                    onClick.invoke()
+                    onClick.com.ustadmobile.components.theming.invoke()
                 }
             ){
                 css(defaultMarginTop)
@@ -360,7 +361,7 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(personUid: Lon
                         umItem(MGridSize.cells4){
                             mIconButton("check",
                                 onClick = {
-                                    onClickAccept?.invoke()
+                                    onClickAccept?.com.ustadmobile.components.theming.invoke()
                                 },
                                 className = "${StyleManager.name}-successClass",
                                 size = MIconButtonSize.small)
@@ -369,7 +370,7 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(personUid: Lon
                         umItem(MGridSize.cells4){
                             mIconButton("close",
                                 onClick = {
-                                    onClickDecline?.invoke()
+                                    onClickDecline?.com.ustadmobile.components.theming.invoke()
                                 },
                                 className = "${StyleManager.name}-errorClass",
                                 size = MIconButtonSize.small)
@@ -457,4 +458,4 @@ fun RBuilder.mSpacer(
             }
         }
     }
-}
+}*/

@@ -1,7 +1,5 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.form.MFormControlVariant
 import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
@@ -13,22 +11,12 @@ import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ScopedGrantAndName
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultFullWidth
-import com.ustadmobile.util.StyleManager.defaultPaddingTop
-import com.ustadmobile.util.Util.ASSET_ENTRY
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.util.ext.toDate
-import com.ustadmobile.view.components.MDateTimePickerType
-import com.ustadmobile.view.components.mDateTimePicker
-import com.ustadmobile.view.ext.*
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
 
-class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCalendarAndSchool>(mProps),
+class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayCalendarAndSchool>(mProps),
     ClazzEdit2View {
 
     private var mPresenter: ClazzEdit2Presenter? = null
@@ -129,7 +117,7 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
     }
 
     override fun RBuilder.render() {
-        styledDiv {
+       /* styledDiv {
             css{
                 +contentContainer
                 +defaultPaddingTop
@@ -324,7 +312,7 @@ class ClazzEditComponent (mProps: RProps): UstadEditComponent<ClazzWithHolidayCa
                 }
 
             }
-        }
+        }*/
     }
 
     override fun onDestroyView() {

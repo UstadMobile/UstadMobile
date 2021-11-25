@@ -3,6 +3,8 @@ package com.ustadmobile.view
 import com.ustadmobile.util.PaginateOnScrollManager
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.iframeComponentResponsiveIframe
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
 import kotlinx.browser.document
 import kotlinx.html.id
 import kotlinx.html.js.onLoadFunction
@@ -12,13 +14,13 @@ import styled.css
 import styled.styledDiv
 import styled.styledIframe
 
-interface IframeProps: RProps {
+interface IframeProps: UmProps {
     var sources: List<String>?
     var pageSize: Int
 }
 
 
-class  IframeComponent(mProps: IframeProps): RComponent<IframeProps,RState>(mProps){
+class  IframeComponent(mProps: IframeProps): RComponent<IframeProps, UmState>(mProps){
 
     private var sourceToLoad: HashSet<String> = hashSetOf()
 
@@ -51,7 +53,7 @@ class  IframeComponent(mProps: IframeProps): RComponent<IframeProps,RState>(mPro
        }
     }
 
-    override fun componentDidUpdate(prevProps: IframeProps, prevState: RState, snapshot: Any) {
+    override fun componentDidUpdate(prevProps: IframeProps, prevState: UmState, snapshot: Any) {
         if(!didUpdate && prevProps.sources?.isNotEmpty() == true){
             didUpdate = true
             val sources = props.sources

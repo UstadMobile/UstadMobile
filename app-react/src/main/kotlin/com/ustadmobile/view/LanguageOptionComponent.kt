@@ -1,26 +1,14 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.form.MFormControlVariant
-import com.ccfraser.muirwik.components.form.mFormControl
-import com.ccfraser.muirwik.components.form.mFormHelperText
-import com.ccfraser.muirwik.components.input.mInputLabel
-import com.ccfraser.muirwik.components.input.mOutlinedInput
-import com.ccfraser.muirwik.components.mSelect
-import com.ccfraser.muirwik.components.menu.mMenuItem
-import com.ccfraser.muirwik.components.targetValue
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.util.StyleManager.alignTextToStart
-import com.ustadmobile.util.StyleManager.languageComponentLanguageSelectorFormControl
 import kotlinx.browser.window
 import kotlinx.css.LinearDimension
 import kotlinx.css.px
-import kotlinx.css.width
+import com.ustadmobile.util.*
 import org.w3c.dom.events.Event
 import react.*
-import styled.css
 
-interface LanguageProps: RProps {
+interface LanguageProps: UmProps {
     var systemImpl: UstadMobileSystemImpl
     var width: LinearDimension
     var caption: String?
@@ -28,13 +16,13 @@ interface LanguageProps: RProps {
 }
 
 
-class  LanguageOptionComponent(mProps: LanguageProps): RComponent<LanguageProps,RState>(mProps){
+class  LanguageOptionComponent(mProps: LanguageProps): RComponent<LanguageProps,UmState>(mProps){
 
     private lateinit var languageOptions: List<Pair<String, String>>
 
     private lateinit var selectedLanguage: Any
 
-    override fun RState.init(props: LanguageProps) {
+    override fun UmState.init(props: LanguageProps) {
         languageOptions = props.systemImpl.getAllUiLanguagesList(this)
         val selectedLocaleIndex = languageOptions.indexOfFirst {
             it.first == props.systemImpl.getDisplayedLocale(this) }
@@ -42,7 +30,7 @@ class  LanguageOptionComponent(mProps: LanguageProps): RComponent<LanguageProps,
     }
 
     override fun RBuilder.render() {
-        mFormControl(variant = MFormControlVariant.outlined) {
+        /*mFormControl(variant = MFormControlVariant.outlined) {
             css(languageComponentLanguageSelectorFormControl)
 
             val text = props.label ?: props.systemImpl.getString(MessageID.language, this)
@@ -65,14 +53,14 @@ class  LanguageOptionComponent(mProps: LanguageProps): RComponent<LanguageProps,
             mFormHelperText(props.caption?:""){
                 css(alignTextToStart)
             }
-        }
+        }*/
     }
 
     private fun handleOnLanguageChange(event: Event){
-        val value = event.targetValue.toString()
+        /*val value = event.targetValue.toString()
         props.systemImpl.setLocale(value,this)
         setState { selectedLanguage = value }
-        window.location.reload()
+        window.location.reload()*/
     }
 }
 

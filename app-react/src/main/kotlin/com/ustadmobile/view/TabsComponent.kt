@@ -1,21 +1,13 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ACTIVE_TAB_INDEX
-import com.ustadmobile.navigation.RouteManager.lookupDestinationName
-import com.ustadmobile.util.StyleManager.displayProperty
-import com.ustadmobile.util.StyleManager.tabsContainer
 import com.ustadmobile.util.getViewNameFromUrl
 import com.ustadmobile.util.urlSearchParamsToMap
-import kotlinx.css.*
 import react.RBuilder
-import react.RProps
-import react.RState
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
 
-interface TabsProps: RProps {
+interface TabsProps: UmProps {
     var tabs: List<UstadTab>
     var showTabs: Boolean
     var activeTabIndex: Int
@@ -24,7 +16,7 @@ interface TabsProps: RProps {
 data class UstadTab(var index: Int, var viewName: String, val args: Map<String,String>, var title: String)
 
 
-class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,RState>(mProps){
+class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,UmState>(mProps){
 
     private lateinit var selectedTabTitle: String
 
@@ -45,12 +37,12 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,RState>(mP
         systemImpl.go("${getViewNameFromUrl()}",params, this)
     }
 
-    override fun RState.init(props: TabsProps) {
+    override fun UmState.init(props: TabsProps) {
         selectedTabTitle = props.tabs[props.activeTabIndex].title
     }
 
     override fun RBuilder.render() {
-        mAppBar(position = MAppBarPosition.static) {
+/*        mAppBar(position = MAppBarPosition.static) {
             css{
                 display = displayProperty(props.showTabs)
             }
@@ -83,7 +75,7 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,RState>(mP
                     attrs.asDynamic().arguments = selectedTab.args
                 }
             }
-        }
+        }*/
     }
 }
 

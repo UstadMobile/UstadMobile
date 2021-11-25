@@ -1,6 +1,5 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
 import com.ustadmobile.core.controller.PersonListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -8,19 +7,11 @@ import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
-import com.ustadmobile.util.StyleManager.alignTextToStart
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import com.ustadmobile.view.ext.umProfileAvatar
-import kotlinx.css.paddingBottom
-import kotlinx.css.paddingTop
-import kotlinx.css.px
 import react.RBuilder
-import react.RProps
-import styled.css
+import com.ustadmobile.util.*
 
 
-class PersonListComponent(mProps: RProps): UstadListComponent<Person, PersonWithDisplayDetails>(mProps),
+class PersonListComponent(mProps: UmProps): UstadListComponent<Person, PersonWithDisplayDetails>(mProps),
     PersonListView{
 
     private var mPresenter: PersonListPresenter? = null
@@ -49,7 +40,7 @@ class PersonListComponent(mProps: RProps): UstadListComponent<Person, PersonWith
 
     override fun RBuilder.renderListItem(item: PersonWithDisplayDetails) {
 
-        umGridContainer(MGridSpacing.spacing5) {
+       /* umGridContainer(MGridSpacing.spacing5) {
             css{
                 paddingTop = 4.px
                 paddingBottom = 4.px
@@ -75,7 +66,7 @@ class PersonListComponent(mProps: RProps): UstadListComponent<Person, PersonWith
                     }
                 }
             }
-        }
+        }*/
     }
 
     override fun handleClickEntry(entry: PersonWithDisplayDetails) {

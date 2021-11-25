@@ -1,26 +1,16 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.form.MFormControlVariant
 import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.SiteEnterLinkView
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultFullWidth
-import com.ustadmobile.util.StyleManager.defaultMarginTop
-import com.ustadmobile.view.ext.umItem
-import kotlinx.css.marginTop
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
 
-class ContentEntryImportLinkComponent(mProps: RProps): UstadEditComponent<String>(mProps),
+class ContentEntryImportLinkComponent(mProps: UmProps): UstadEditComponent<String>(mProps),
     ContentEntryImportLinkView {
 
     private var mPresenter: ContentEntryImportLinkPresenter? = null
@@ -77,7 +67,7 @@ class ContentEntryImportLinkComponent(mProps: RProps): UstadEditComponent<String
 
 
     override fun RBuilder.render() {
-        styledDiv {
+       /* styledDiv {
             css {
                 +contentContainer
                 marginTop = 4.spacingUnits
@@ -108,7 +98,7 @@ class ContentEntryImportLinkComponent(mProps: RProps): UstadEditComponent<String
                     css (StyleManager.alignTextToStart)
                 }
             }
-        }
+        }*/
     }
 
     override fun onDestroyView() {

@@ -5,17 +5,15 @@ import com.ustadmobile.core.controller.TimeZoneListPresenter
 import com.ustadmobile.core.view.TimeZoneListView
 import com.ustadmobile.util.TimeZone
 import com.ustadmobile.util.TimeZonesUtil
-import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import react.RBuilder
-import react.RProps
-import react.RState
+import com.ustadmobile.util.*
 import react.setState
 
-class TimeZoneListComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(mProps) , TimeZoneListView,
+class TimeZoneListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps) , TimeZoneListView,
     OnSearchSubmitted {
 
     private var mPresenter: TimeZoneListPresenter? = null
@@ -69,7 +67,7 @@ class ZonesListComponent(mProps: ListProps<TimeZone>):
     UstadSimpleList<ListProps<TimeZone>>(mProps){
 
     override fun RBuilder.renderListItem(item: TimeZone) {
-        createItemWithIconTitleAndDescription("query_builder",item.name, item.timeName)
+        /*createItemWithIconTitleAndDescription("query_builder",item.name, item.timeName)*/
     }
 }
 

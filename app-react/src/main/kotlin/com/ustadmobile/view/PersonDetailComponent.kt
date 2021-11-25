@@ -1,10 +1,7 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ustadmobile.core.controller.PersonConstants.GENDER_MESSAGE_ID_MAP
 import com.ustadmobile.core.controller.PersonDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.outcomeToString
 import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.core.view.PersonDetailView
@@ -12,29 +9,13 @@ import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
-import com.ustadmobile.util.StyleManager.alignTextToStart
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultFullWidth
-import com.ustadmobile.util.StyleManager.defaultMarginTop
-import com.ustadmobile.util.StyleManager.defaultPaddingTop
-import com.ustadmobile.util.StyleManager.displayProperty
-import com.ustadmobile.util.StyleManager.personDetailComponentActionIcon
-import com.ustadmobile.util.StyleManager.personDetailComponentActions
+import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.standardFormat
-import com.ustadmobile.util.ext.toDate
-import com.ustadmobile.view.ext.*
-import kotlinx.css.display
-import kotlinx.css.marginTop
-import kotlinx.css.padding
-import kotlinx.css.px
 import react.RBuilder
-import react.RProps
 import react.setState
-import styled.css
-import styled.styledDiv
 import kotlin.js.Date
 
-class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPersonParentJoin>(mProps),
+class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPersonParentJoin>(mProps),
     PersonDetailView {
 
     private var mPresenter: PersonDetailPresenter? = null
@@ -94,7 +75,7 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
     }
 
     override fun RBuilder.render() {
-        styledDiv {
+       /* styledDiv {
             css{
                 +contentContainer
                 +defaultPaddingTop
@@ -207,11 +188,11 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
                     }
                 }
             }
-        }
+        }*/
     }
 
 
-    private fun RBuilder.createAction(icon: String, messageId: Int, xs: MGridSize,
+    /*private fun RBuilder.createAction(icon: String, messageId: Int, xs: MGridSize,
                                       sm: MGridSize? = null, visible: Boolean = false,
                                       action:() -> Unit){
         umItem(xs, sm){
@@ -235,7 +216,7 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
                 }
             }
         }
-    }
+    }*/
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -255,8 +236,8 @@ class PersonDetailComponent(mProps: RProps): UstadDetailComponent<PersonWithPers
                     "- ${Date(item.clazzEnrolmentDateLeft).standardFormat()}"
 
 
-            createListItemWithAttendance("people", title, enrollmentPeriod,
-                item.attendance, getString(MessageID.x_percent_attended))
+            /*createListItemWithAttendance("people", title, enrollmentPeriod,
+                item.attendance, getString(MessageID.x_percent_attended))*/
 
         }
     }

@@ -1,4 +1,3 @@
-import com.ccfraser.muirwik.components.mThemeProvider
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.AppConfig
@@ -16,10 +15,11 @@ import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.jsExt.DoorDatabaseRepositoryJs
 import com.ustadmobile.jsExt.container.ContainerMounterJs
+import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
+import com.ustadmobile.mui.components.umThemeProvider
 import com.ustadmobile.navigation.NavControllerJs
 import com.ustadmobile.redux.ReduxAppStateManager.createStore
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
@@ -54,7 +54,7 @@ fun main() {
             )
             val theme = createAppTheme()
             provider(createStore(diState, ReduxThemeState(theme))){
-                mThemeProvider(theme) {
+                umThemeProvider(theme) {
                     splashComponent()
                 }
             }

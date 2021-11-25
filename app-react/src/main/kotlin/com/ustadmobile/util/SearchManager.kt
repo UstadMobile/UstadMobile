@@ -1,7 +1,7 @@
 package com.ustadmobile.util
 
-import com.ccfraser.muirwik.components.targetInputValue
 import com.ustadmobile.core.controller.OnSearchSubmitted
+import com.ustadmobile.mui.ext.targetInputValue
 import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.Element

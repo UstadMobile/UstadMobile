@@ -1,34 +1,14 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.button.*
-import com.ccfraser.muirwik.components.form.MFormControlVariant
-import com.ccfraser.muirwik.components.form.mFormControl
-import com.ccfraser.muirwik.components.form.mFormHelperText
-import com.ccfraser.muirwik.components.input.mInputAdornment
-import com.ccfraser.muirwik.components.input.mInputLabel
-import com.ccfraser.muirwik.components.input.mOutlinedInput
 import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.controller.Login2Presenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.alignTextCenter
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultFullWidth
-import com.ustadmobile.util.StyleManager.displayProperty
-import com.ustadmobile.util.StyleManager.errorTextClass
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import kotlinx.css.*
-import kotlinx.html.InputType
 import react.RBuilder
-import react.RProps
-import react.RState
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
 
-class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), Login2View {
+class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props), Login2View {
 
     private var mPresenter: Login2Presenter? = null
 
@@ -124,7 +104,7 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
     }
 
     override fun RBuilder.render() {
-        val spacing = MGridSpacing.spacing6
+       /* val spacing = MGridSpacing.spacing6
         val gridSizeOnLeft = MGridSize.cells3
         val gridSizeOnCenterOnMdDown = MGridSize.cells6
         val gridSizeOnCenterLgUp = MGridSize.cells4
@@ -290,7 +270,7 @@ class LoginComponent(props: RProps): UstadBaseComponent<RProps,RState>(props), L
                     }
                 }
             }
-        }
+        }*/
     }
 
     override fun clearFields() {

@@ -6,12 +6,10 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.util.ext.saveStateToCurrentBackStackStateHandle
+import com.ustadmobile.util.*
 import kotlinx.browser.window
-import react.RProps
-import react.RState
 
-abstract class UstadEditComponent<T: Any>(mProps: RProps): UstadBaseComponent<RProps, RState>(mProps), UstadEditView<T> {
+abstract class UstadEditComponent<T: Any>(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps), UstadEditView<T> {
 
     abstract protected val mEditPresenter : UstadEditPresenter<*, T>?
 
@@ -51,6 +49,4 @@ abstract class UstadEditComponent<T: Any>(mProps: RProps): UstadBaseComponent<RP
             }
         }, STATE_CHANGE_DELAY * 2)
     }
-
-    protected open fun onSaveStateToBackStackStateHandle() = mEditPresenter?.saveStateToCurrentBackStackStateHandle(navController)
 }

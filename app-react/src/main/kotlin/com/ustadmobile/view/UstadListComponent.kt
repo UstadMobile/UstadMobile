@@ -1,11 +1,5 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.button.mIconButton
-import com.ccfraser.muirwik.components.list.MListItemAlignItems
-import com.ccfraser.muirwik.components.list.alignItems
-import com.ccfraser.muirwik.components.list.mList
-import com.ccfraser.muirwik.components.list.mListItem
 import com.ustadmobile.EmptyList
 import com.ustadmobile.core.controller.OnSortOptionSelected
 import com.ustadmobile.core.controller.UstadListPresenter
@@ -20,22 +14,7 @@ import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.door.ext.concurrentSafeListOf
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.centerContainer
-import com.ustadmobile.util.StyleManager.centerItem
-import com.ustadmobile.util.StyleManager.chipSetFilter
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.displayProperty
-import com.ustadmobile.util.StyleManager.horizontalList
-import com.ustadmobile.util.StyleManager.horizontalListEmpty
-import com.ustadmobile.util.StyleManager.listComponentContainer
-import com.ustadmobile.util.StyleManager.listCreateNewContainer
-import com.ustadmobile.util.StyleManager.selectionContainer
-import com.ustadmobile.util.StyleManager.theme
-import com.ustadmobile.util.ext.format
-import com.ustadmobile.view.ext.createCreateNewItem
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.util.*
 import kotlinx.browser.window
 import kotlinx.css.*
 import org.kodein.di.direct
@@ -43,13 +22,9 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import org.w3c.dom.events.Event
 import react.RBuilder
-import react.RProps
-import react.RState
 import react.setState
-import styled.css
-import styled.styledDiv
 
-abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<RProps,RState>(mProps),
+abstract class UstadListComponent<RT, DT>(mProps: UmProps) : UstadBaseComponent<UmProps,UmState>(mProps),
     UstadListView<RT, DT>, OnSortOptionSelected {
 
     protected abstract val displayTypeRepo: Any?
@@ -82,13 +57,13 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
             field = value
         }
 
-    private var multiColumnItemSize = MGridSize.cells4
+ /*   private var multiColumnItemSize = MGridSize.cells4
         get() = field
         set(value) {
             setState {
                 field = value
             }
-        }
+        }*/
 
     /**
      * Flag to indicate whether the list should be multi (Grid Layout)
@@ -183,7 +158,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
     }
 
     override fun RBuilder.render() {
-        styledDiv {
+        /*styledDiv {
             css{
                 if(listTypeSingleColumn){
                     +listComponentContainer
@@ -201,7 +176,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                 renderMultiColumnList()
 
             renderFooterView()
-        }
+        }*/
 
         //Render dialog UI to be shown when fab is clicked
         renderAddEntryOptionsDialog()
@@ -209,7 +184,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
 
 
     private fun RBuilder.renderEmptyList(){
-        umGridContainer {
+       /* umGridContainer {
             css (centerContainer)
             styledDiv {
                 css{
@@ -226,11 +201,11 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                     }
                 }
             }
-        }
+        }*/
     }
 
     private fun RBuilder.renderNewItem(multiColumn: Boolean = false){
-        if(showCreateNewItem){
+       /* if(showCreateNewItem){
             if(multiColumn){
                 umItem(MGridSize.cells12) {
                     css{
@@ -255,12 +230,12 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                     createCreateNewItem(createNewText)
                 }
             }
-        }
+        }*/
     }
 
 
     private fun RBuilder.renderMultiColumnList(){
-        umGridContainer {
+       /* umGridContainer {
 
             renderNewItem()
 
@@ -294,11 +269,11 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                     }
                 }
             }
-        }
+        }*/
     }
 
     private fun RBuilder.renderSingleColumnList(){
-        mList {
+       /* mList {
             css{ +(styleList() ?: if(listItems.isNotEmpty()) horizontalList else horizontalListEmpty) }
 
             renderNewItem(false)
@@ -327,7 +302,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                     }
                 }
             }
-        }
+        }*/
     }
 
 
@@ -369,7 +344,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
 
     private fun RBuilder.renderFilters(){
         if(listFilterOptionChips == null) return
-        styledDiv {
+        /*styledDiv {
             css{
                 margin = "16px"
                 +chipSetFilter
@@ -392,13 +367,13 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
             }
             if(checkedFilterOptionChip == null)
                 checkedFilterOptionChip = listFilterOptionChips?.firstOrNull()
-        }
+        }*/
     }
 
 
     private fun RBuilder.renderMenuOptions(){
         val hideOptions = selectedEntries.isNullOrEmpty() or !showEditOptionsMenu
-        umGridContainer {
+        /*umGridContainer {
             css(selectionContainer)
             umItem(MGridSize.cells7, MGridSize.cells8){
                 mTypography(variant = MTypographyVariant.subtitle1,
@@ -434,7 +409,7 @@ abstract class UstadListComponent<RT, DT>(mProps: RProps) : UstadBaseComponent<R
                 }
             }
 
-        }
+        }*/
     }
 
     open fun RBuilder.renderAddEntryOptionsDialog(){}

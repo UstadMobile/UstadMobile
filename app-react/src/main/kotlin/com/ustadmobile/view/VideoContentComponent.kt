@@ -8,17 +8,16 @@ import com.ustadmobile.core.view.VideoContentView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.util.StyleManager.videoComponentResponsiveMedia
+import com.ustadmobile.util.*
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import react.RBuilder
-import react.RProps
-import react.RState
 import react.setState
 import styled.css
 import styled.styledVideo
 
-class VideoContentComponent(mProps:RProps):UstadBaseComponent<RProps, RState>(mProps), VideoContentView{
+class VideoContentComponent(mProps: UmProps):UstadBaseComponent<UmProps, UmState>(mProps), VideoContentView{
 
     override var entry: ContentEntry? = null
         get() = field

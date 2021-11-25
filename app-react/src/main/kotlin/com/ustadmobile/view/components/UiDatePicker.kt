@@ -1,11 +1,6 @@
 package com.ustadmobile.view.components
 
-import com.ccfraser.muirwik.components.MTextFieldProps
-import com.ccfraser.muirwik.components.createStyled
-import com.ccfraser.muirwik.components.form.MFormControlVariant
-import com.ccfraser.muirwik.components.form.variant
-import com.ccfraser.muirwik.components.mTextField
-import com.ccfraser.muirwik.components.setStyledPropsAndRunHandler
+/*
 import kotlinx.css.RuleSet
 import react.RBuilder
 import react.RComponent
@@ -307,3 +302,4 @@ fun RBuilder.mDateTimePicker(
             }
     }
 }
+*/

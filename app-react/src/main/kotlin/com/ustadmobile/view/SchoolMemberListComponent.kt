@@ -10,13 +10,11 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.ext.observeResult
-import com.ustadmobile.view.ext.createListSectionTitle
-import com.ustadmobile.view.ext.createListItemWithPersonAttendanceAndPendingRequests
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
 
-class SchoolMemberListComponent(mProps: RProps): UstadListComponent<SchoolMember, SchoolMemberWithPerson>(mProps),
+class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMember, SchoolMemberWithPerson>(mProps),
     SchoolMemberListView {
 
     private var mPresenter: SchoolMemberListPresenter? = null
@@ -103,8 +101,8 @@ class SchoolMemberListComponent(mProps: RProps): UstadListComponent<SchoolMember
 
 
     override fun RBuilder.renderListItem(item: SchoolMemberWithPerson) {
-        createListItemWithPersonAttendanceAndPendingRequests(item.person?.personUid ?: 0,
-            item.person?.fullName() ?: "", student = roleStudent)
+        /*createListItemWithPersonAttendanceAndPendingRequests(item.person?.personUid ?: 0,
+            item.person?.fullName() ?: "", student = roleStudent)*/
     }
 
     override fun handleClickEntry(entry: SchoolMemberWithPerson) {
@@ -115,7 +113,7 @@ class SchoolMemberListComponent(mProps: RProps): UstadListComponent<SchoolMember
         if(roleStudent){
             pendingStudents?.let { students ->
 
-                createListSectionTitle(getString(MessageID.pending_requests))
+                //createListSectionTitle(getString(MessageID.pending_requests))
 
                 child(MembersListComponent::class){
                     attrs.entries = students
@@ -143,14 +141,14 @@ class SchoolMemberListComponent(mProps: RProps): UstadListComponent<SchoolMember
 
         override fun RBuilder.renderListItem(item: SchoolMemberWithPerson) {
             val presenter = props.presenter as SchoolMemberListPresenter
-            createListItemWithPersonAttendanceAndPendingRequests(item.person?.personUid ?: 0,
+           /* createListItemWithPersonAttendanceAndPendingRequests(item.person?.personUid ?: 0,
                 item.person?.fullName() ?: "",true,
                 onClickAccept = {
                     presenter.handleClickPendingRequest(item, true)
                 },
                 onClickDecline = {
                     presenter.handleClickPendingRequest(item, false)
-                })
+                })*/
         }
     }
 }

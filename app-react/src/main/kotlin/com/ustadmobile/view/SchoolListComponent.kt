@@ -1,29 +1,17 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
 import com.ustadmobile.core.controller.SchoolListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.SchoolListView
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.alignTextToStart
-import com.ustadmobile.util.StyleManager.displayProperty
-import com.ustadmobile.util.StyleManager.gridListSecondaryItemDesc
-import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
-import com.ustadmobile.util.ext.breakToWork
-import com.ustadmobile.util.ext.format
-import com.ustadmobile.view.ext.*
-import kotlinx.css.*
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
 import kotlin.js.Date
 
-class SchoolListComponent(mProps: RProps) : UstadListComponent<School, SchoolWithMemberCountAndLocation>(mProps),
+class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWithMemberCountAndLocation>(mProps),
     SchoolListView{
 
     private var mPresenter: SchoolListPresenter? = null
@@ -59,7 +47,7 @@ class SchoolListComponent(mProps: RProps) : UstadListComponent<School, SchoolWit
 
     override fun RBuilder.renderListItem(item: SchoolWithMemberCountAndLocation) {
 
-        styledDiv {
+       /* styledDiv {
             css{
                 position = Position.relative
             }
@@ -130,7 +118,7 @@ class SchoolListComponent(mProps: RProps) : UstadListComponent<School, SchoolWit
 
                 }
             }
-        }
+        }*/
     }
 
     override fun onFabClicked() {

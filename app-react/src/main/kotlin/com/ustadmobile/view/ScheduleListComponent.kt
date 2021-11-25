@@ -1,28 +1,14 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.MGridSize
-import com.ccfraser.muirwik.components.MTypographyColor
-import com.ccfraser.muirwik.components.MTypographyVariant
-import com.ccfraser.muirwik.components.button.MIconButtonSize
-import com.ccfraser.muirwik.components.button.mIconButton
-import com.ccfraser.muirwik.components.mTypography
-import com.ustadmobile.core.controller.ScheduleEditPresenter
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.OneToManyJoinEditListener
 import com.ustadmobile.lib.db.entities.Schedule
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.ext.formattedInHoursAndMinutes
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
 import react.RBuilder
-import styled.css
-import kotlin.js.Date
 
 
 class ScheduleListComponent(mProps: ListProps<Schedule>): UstadSimpleList<ListProps<Schedule>>(mProps){
 
     override fun RBuilder.renderListItem(item: Schedule) {
-        umGridContainer {
+       /* umGridContainer {
             val frequencyMessageId = ScheduleEditPresenter.FrequencyOption.values()
                 .firstOrNull { it.optionVal == item.scheduleFrequency }?.messageId ?: MessageID.None
             val dayMessageId = ScheduleEditPresenter.DayOptions.values()
@@ -47,7 +33,7 @@ class ScheduleListComponent(mProps: ListProps<Schedule>): UstadSimpleList<ListPr
                     props.listener.onClickDelete(item)
                 })
             }
-        }
+        }*/
     }
 
 }

@@ -4,11 +4,11 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.UstadDetailView
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
 import kotlinx.browser.window
-import react.RProps
-import react.RState
 
-abstract class UstadDetailComponent<T: Any>(mProps: RProps) : UstadBaseComponent<RProps,RState>(mProps),
+abstract class UstadDetailComponent<T: Any>(mProps: UmProps) : UstadBaseComponent<UmProps, UmState>(mProps),
     UstadDetailView<T> {
 
     abstract val detailPresenter: UstadDetailPresenter<*, *>?

@@ -1,25 +1,17 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.form.MFormControlVariant
 import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.controller.LanguageEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.LanguageEditView
 import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
 
-class LanguageEditComponent (mProps: RProps): UstadEditComponent<Language>(mProps),
+class LanguageEditComponent (mProps: UmProps): UstadEditComponent<Language>(mProps),
     LanguageEditView {
 
     private var mPresenter: LanguageEditPresenter? = null
@@ -72,7 +64,7 @@ class LanguageEditComponent (mProps: RProps): UstadEditComponent<Language>(mProp
 
     override fun RBuilder.render() {
 
-        styledDiv {
+       /* styledDiv {
             css {
                 +StyleManager.fieldsOnlyFormScreen
             }
@@ -127,7 +119,7 @@ class LanguageEditComponent (mProps: RProps): UstadEditComponent<Language>(mProp
                     }
                 }
             }
-        }
+        }*/
     }
 
     override fun onDestroyView() {

@@ -1,36 +1,17 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.form.MFormControlVariant
-import com.ccfraser.muirwik.components.form.mFormControl
-import com.ccfraser.muirwik.components.form.mFormHelperText
-import com.ccfraser.muirwik.components.input.mInputLabel
-import com.ccfraser.muirwik.components.input.mOutlinedInput
-import com.ccfraser.muirwik.components.menu.mMenuItem
 import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.lib.db.entities.Schedule
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.alignTextToStart
-import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.util.ext.standardFormat
-import com.ustadmobile.util.ext.toDate
-import com.ustadmobile.view.components.MDateTimePickerType
-import com.ustadmobile.view.components.mDateTimePicker
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
-import kotlin.js.Date
 
-class ScheduleEditComponent (mProps: RProps): UstadEditComponent<Schedule>(mProps),
+class ScheduleEditComponent (mProps: UmProps): UstadEditComponent<Schedule>(mProps),
     ScheduleEditView {
 
     private var mPresenter: ScheduleEditPresenter? = null
@@ -95,7 +76,7 @@ class ScheduleEditComponent (mProps: RProps): UstadEditComponent<Schedule>(mProp
 
     override fun RBuilder.render() {
 
-        styledDiv {
+       /* styledDiv {
             css {
                 +StyleManager.fieldsOnlyFormScreen
             }
@@ -175,7 +156,7 @@ class ScheduleEditComponent (mProps: RProps): UstadEditComponent<Schedule>(mProp
                     }
                 }
             }
-        }
+        }*/
     }
 
     override fun onDestroyView() {

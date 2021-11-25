@@ -1,11 +1,9 @@
 package com.ustadmobile.util
 
-import com.ccfraser.muirwik.components.spacingUnits
-import com.ccfraser.muirwik.components.styles.Breakpoint
-import com.ccfraser.muirwik.components.styles.down
-import com.ccfraser.muirwik.components.styles.up
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.mui.components.spacingUnits
 import com.ustadmobile.redux.ReduxAppStateManager
+import down
 import kotlinx.css.*
 import kotlinx.css.properties.Timing
 import kotlinx.css.properties.Transition
@@ -14,6 +12,7 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import styled.StyleSheet
+import up
 
 /**
  * Responsible for styling HTML elements, to customize particular
@@ -242,9 +241,9 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         marginTop = 4.px
         display = Display.none
         borderRadius = theme.shape.borderRadius.px
-        backgroundColor = Color(fade(theme.palette.common.white, 0.15))
+        //backgroundColor = Color(fade(theme.palette.common.white, 0.15))
         hover {
-            backgroundColor = Color(fade(theme.palette.common.white, 0.25))
+            //backgroundColor = Color(fade(theme.palette.common.white, 0.25))
         }
         marginLeft = 0.px
         marginRight = 30.px

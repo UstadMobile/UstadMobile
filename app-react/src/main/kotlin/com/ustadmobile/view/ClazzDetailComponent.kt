@@ -1,28 +1,16 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.MGridSize
-import com.ccfraser.muirwik.components.MGridSpacing
 import com.ustadmobile.core.controller.ClazzDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ACTIVE_TAB_INDEX
 import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.util.StyleManager.clazzDetailExtraInfo
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultPaddingTop
-import com.ustadmobile.util.Util.ASSET_ENTRY
 import com.ustadmobile.util.urlSearchParamsToMap
-import com.ustadmobile.view.ext.umEntityAvatar
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
 
-class ClazzDetailComponent(mProps: RProps): UstadDetailComponent<Clazz>(mProps), ClazzDetailView {
+class ClazzDetailComponent(mProps: UmProps): UstadDetailComponent<Clazz>(mProps), ClazzDetailView {
 
     private var mPresenter: ClazzDetailPresenter? = null
 
@@ -64,7 +52,7 @@ class ClazzDetailComponent(mProps: RProps): UstadDetailComponent<Clazz>(mProps),
     }
 
     override fun RBuilder.render() {
-        styledDiv {
+       /* styledDiv {
             css{
                 +defaultPaddingTop
                 +contentContainer
@@ -86,7 +74,7 @@ class ClazzDetailComponent(mProps: RProps): UstadDetailComponent<Clazz>(mProps),
                     }
                 }
             }
-        }
+        }*/
     }
 
     override fun onDestroyView() {

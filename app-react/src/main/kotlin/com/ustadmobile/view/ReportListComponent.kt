@@ -6,9 +6,9 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ReportListView
 import com.ustadmobile.lib.db.entities.Report
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 
-class ReportListComponent(mProps: RProps):  UstadListComponent<Report, Report>(mProps),
+class ReportListComponent(mProps: UmProps):  UstadListComponent<Report, Report>(mProps),
     ReportListView {
 
     private var mPresenter: ReportListPresenter? = null

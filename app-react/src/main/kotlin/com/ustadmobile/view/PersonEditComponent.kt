@@ -1,15 +1,5 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.button.MIconEdge
-import com.ccfraser.muirwik.components.button.mIconButton
-import com.ccfraser.muirwik.components.form.MFormControlVariant
-import com.ccfraser.muirwik.components.form.mFormControl
-import com.ccfraser.muirwik.components.form.mFormHelperText
-import com.ccfraser.muirwik.components.input.mInputAdornment
-import com.ccfraser.muirwik.components.input.mInputLabel
-import com.ccfraser.muirwik.components.input.mOutlinedInput
-import com.ccfraser.muirwik.components.menu.mMenuItem
 import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.controller.PersonEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
@@ -21,32 +11,14 @@ import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.util.StyleManager.alignTextToStart
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultFullWidth
-import com.ustadmobile.util.StyleManager.defaultMarginTop
-import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.displayProperty
-import com.ustadmobile.util.StyleManager.errorTextClass
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.util.ext.toDate
-import com.ustadmobile.view.components.MDateTimePickerType
-import com.ustadmobile.view.components.mDateTimePicker
-import com.ustadmobile.view.ext.umEntityAvatar
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
 import kotlinx.css.Display
-import kotlinx.css.display
-import kotlinx.css.marginTop
-import kotlinx.css.px
-import kotlinx.html.InputType
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
 
-class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount>(mProps), PersonEditView {
+class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccount>(mProps), PersonEditView {
 
     private var mPresenter: PersonEditPresenter? = null
 
@@ -244,7 +216,7 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
     }
 
     override fun RBuilder.render() {
-        styledDiv {
+       /* styledDiv {
             css{
                 +contentContainer
                 +defaultPaddingTop
@@ -497,7 +469,7 @@ class PersonEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount
                 }
 
             }
-        }
+        }*/
     }
 
     override fun onDestroyView() {

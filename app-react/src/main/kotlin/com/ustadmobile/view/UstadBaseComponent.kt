@@ -1,7 +1,6 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.view.UstadView
@@ -22,12 +21,9 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.events.Event
-import react.RBuilder
-import react.RComponent
-import react.RProps
-import react.RState
+import react.*
 
-abstract class UstadBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(props),
+abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<P, S>(props),
     UstadView, DIAware, DoorLifecycleOwner {
 
     private val lifecycleObservers: MutableList<DoorLifecycleObserver> = concurrentSafeListOf()

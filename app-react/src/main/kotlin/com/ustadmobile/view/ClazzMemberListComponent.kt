@@ -13,14 +13,13 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 import com.ustadmobile.util.StyleManager.defaultMarginTop
-import com.ustadmobile.view.ext.*
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
 import styled.css
 import styled.styledDiv
 
-class ClazzMemberListComponent(mProps: RProps):UstadListComponent<PersonWithClazzEnrolmentDetails, PersonWithClazzEnrolmentDetails>(mProps),
+class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithClazzEnrolmentDetails, PersonWithClazzEnrolmentDetails>(mProps),
     ClazzMemberListView{
 
     private var mPresenter: ClazzMemberListPresenter? = null
@@ -91,13 +90,13 @@ class ClazzMemberListComponent(mProps: RProps):UstadListComponent<PersonWithClaz
     }
 
     override fun RBuilder.renderHeaderView() {
-        createListSectionTitle(getString(MessageID.teachers_literal))
+        //createListSectionTitle(getString(MessageID.teachers_literal))
     }
 
     override fun RBuilder.renderListItem(item: PersonWithClazzEnrolmentDetails) {
-        createListItemWithPersonAttendanceAndPendingRequests(item.personUid, item.fullName(), attendance = item.attendance,
+       /* createListItemWithPersonAttendanceAndPendingRequests(item.personUid, item.fullName(), attendance = item.attendance,
             attendanceLabel = getString(MessageID.x_percent_attended),
-            student = false)
+            student = false)*/
     }
 
     override fun RBuilder.renderFooterView() {
@@ -127,7 +126,7 @@ class ClazzMemberListComponent(mProps: RProps):UstadListComponent<PersonWithClaz
                                           pending: Boolean = false){
         styledDiv {
             css(defaultMarginTop)
-            createListSectionTitle(sectionTitle)
+            //createListSectionTitle(sectionTitle)
         }
 
         styledDiv {
@@ -178,13 +177,13 @@ class MembersListComponent(mProps: MemberListProps):
 
     override fun RBuilder.renderListItem(item: PersonWithClazzEnrolmentDetails) {
         val presenter = props.presenter as ClazzMemberListPresenter
-        createListItemWithPersonAttendanceAndPendingRequests(item.personUid, item.fullName(),props.pending,item.attendance,
+/*        createListItemWithPersonAttendanceAndPendingRequests(item.personUid, item.fullName(),props.pending,item.attendance,
             getString(MessageID.x_percent_attended),
             onClickAccept = {
                 presenter.handleClickPendingRequest(item, true)
             }, onClickDecline = {
                 presenter.handleClickPendingRequest(item, false)
-            })
+            })*/
     }
 }
 

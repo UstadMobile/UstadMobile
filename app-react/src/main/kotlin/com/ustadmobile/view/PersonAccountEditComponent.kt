@@ -1,39 +1,16 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.button.MIconEdge
-import com.ccfraser.muirwik.components.button.mIconButton
-import com.ccfraser.muirwik.components.form.MFormControlVariant
-import com.ccfraser.muirwik.components.form.mFormControl
-import com.ccfraser.muirwik.components.form.mFormHelperText
-import com.ccfraser.muirwik.components.input.mInputAdornment
-import com.ccfraser.muirwik.components.input.mInputLabel
-import com.ccfraser.muirwik.components.input.mOutlinedInput
 import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.controller.PersonAccountEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.lib.db.entities.PersonWithAccount
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.alignTextCenter
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultDoubleMarginTop
-import com.ustadmobile.util.StyleManager.defaultFullWidth
-import com.ustadmobile.util.StyleManager.displayProperty
-import com.ustadmobile.util.StyleManager.errorTextClass
-import com.ustadmobile.util.ext.clean
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import kotlinx.css.display
-import kotlinx.html.InputType
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
 
-class PersonAccountEditComponent(mProps: RProps) : UstadEditComponent<PersonWithAccount>(mProps),
+class PersonAccountEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccount>(mProps),
     PersonAccountEditView {
 
     private var mPresenter: PersonAccountEditPresenter? = null
@@ -126,7 +103,7 @@ class PersonAccountEditComponent(mProps: RProps) : UstadEditComponent<PersonWith
             }
         }
 
-    val spacing = MGridSpacing.spacing6
+    //val spacing = MGridSpacing.spacing6
 
     override fun onCreateView() {
         super.onCreateView()
@@ -135,7 +112,7 @@ class PersonAccountEditComponent(mProps: RProps) : UstadEditComponent<PersonWith
     }
 
     override fun RBuilder.render() {
-        styledDiv{
+      /*  styledDiv{
             css{
                 +contentContainer
                 +defaultDoubleMarginTop
@@ -321,7 +298,7 @@ class PersonAccountEditComponent(mProps: RProps) : UstadEditComponent<PersonWith
                     }
                 }
             }
-        }
+        }*/
     }
 
     override fun onDestroyView() {

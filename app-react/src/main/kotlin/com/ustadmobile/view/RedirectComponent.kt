@@ -3,10 +3,9 @@ package com.ustadmobile.view
 import com.ustadmobile.core.controller.RedirectPresenter
 import com.ustadmobile.core.view.RedirectView
 import react.RBuilder
-import react.RProps
-import react.RState
+import com.ustadmobile.util.*
 
-class RedirectComponent (props: RProps): UstadBaseComponent<RProps, RState>(props), RedirectView {
+class RedirectComponent (props: UmProps): UstadBaseComponent<UmProps, UmState>(props), RedirectView {
 
     private var mPresenter: RedirectPresenter? = null
 

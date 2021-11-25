@@ -1,10 +1,5 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.button.MButtonSize
-import com.ccfraser.muirwik.components.button.MButtonVariant
-import com.ccfraser.muirwik.components.button.mButton
-import com.ccfraser.muirwik.components.form.MFormControlVariant
 import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.controller.JoinWithCodePresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -12,21 +7,12 @@ import com.ustadmobile.core.view.JoinWithCodeView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.School
-import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.*
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import kotlinx.css.LinearDimension
-import kotlinx.css.marginTop
-import kotlinx.css.padding
 import react.RBuilder
-import react.RProps
-import react.RState
 import react.setState
-import styled.css
-import styled.styledDiv
 
-class JoinWithCodeComponent (mProps: RProps): UstadBaseComponent<RProps, RState>(mProps),
+class JoinWithCodeComponent (mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps),
     JoinWithCodeView {
 
     private var mPresenter: JoinWithCodePresenter? = null
@@ -108,7 +94,7 @@ class JoinWithCodeComponent (mProps: RProps): UstadBaseComponent<RProps, RState>
 
     override fun RBuilder.render() {
 
-        styledDiv {
+      /*  styledDiv {
             css {
                 +StyleManager.fieldsOnlyFormScreen
             }
@@ -164,7 +150,7 @@ class JoinWithCodeComponent (mProps: RProps): UstadBaseComponent<RProps, RState>
                     }
                 }
             }
-        }
+        }*/
     }
 
     override fun onDestroyView() {

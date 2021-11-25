@@ -1,7 +1,5 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.form.MFormControlVariant
 import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.controller.SchoolEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
@@ -11,20 +9,12 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.lib.db.entities.ScopedGrantAndName
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultFullWidth
-import com.ustadmobile.util.StyleManager.defaultPaddingTop
-import com.ustadmobile.util.Util.ASSET_ENTRY
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.view.ext.*
-import kotlinx.html.InputType
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
 
-class SchoolEditComponent (mProps: RProps): UstadEditComponent<SchoolWithHolidayCalendar>(mProps),
+class SchoolEditComponent (mProps: UmProps): UstadEditComponent<SchoolWithHolidayCalendar>(mProps),
     SchoolEditView {
 
     private var mPresenter: SchoolEditPresenter? = null
@@ -93,7 +83,7 @@ class SchoolEditComponent (mProps: RProps): UstadEditComponent<SchoolWithHoliday
     }
 
     override fun RBuilder.render() {
-        styledDiv {
+       /* styledDiv {
             css{
                 +contentContainer
                 +defaultPaddingTop
@@ -245,7 +235,7 @@ class SchoolEditComponent (mProps: RProps): UstadEditComponent<SchoolWithHoliday
                 }
 
             }
-        }
+        }*/
     }
 
     override fun onDestroyView() {

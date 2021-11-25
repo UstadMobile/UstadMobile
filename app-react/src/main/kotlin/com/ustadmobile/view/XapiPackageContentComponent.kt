@@ -3,11 +3,10 @@ package com.ustadmobile.view
 import com.ustadmobile.core.controller.XapiPackageContentPresenter
 import com.ustadmobile.core.view.XapiPackageContentView
 import react.RBuilder
-import react.RProps
-import react.RState
+import com.ustadmobile.util.*
 import react.setState
 
-class XapiPackageContentComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(mProps),
+class XapiPackageContentComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps),
     XapiPackageContentView {
 
     override var contentTitle: String = ""

@@ -1,33 +1,17 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
 import com.ustadmobile.core.controller.SchoolDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.SchoolDetailOverviewView
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
-import com.ustadmobile.util.StyleManager.alignTextToStart
-import com.ustadmobile.util.StyleManager.contentAfterIconMarginLeft
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultMarginTop
-import com.ustadmobile.util.StyleManager.defaultPaddingTop
-import com.ustadmobile.util.StyleManager.umItemWithIconAndText
-import com.ustadmobile.util.Util
-import com.ustadmobile.util.ext.format
-import com.ustadmobile.view.ext.*
-import kotlinx.css.paddingBottom
-import kotlinx.css.paddingTop
-import kotlinx.css.px
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
 
-class SchoolDetailOverviewComponent(mProps: RProps): UstadDetailComponent<SchoolWithHolidayCalendar>(mProps),
+class SchoolDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<SchoolWithHolidayCalendar>(mProps),
     SchoolDetailOverviewView{
 
     private var mPresenter: SchoolDetailOverviewPresenter? = null
@@ -77,7 +61,7 @@ class SchoolDetailOverviewComponent(mProps: RProps): UstadDetailComponent<School
     }
 
     override fun RBuilder.render() {
-        styledDiv {
+      /*  styledDiv {
             css {
                 +defaultPaddingTop
                 +contentContainer
@@ -134,7 +118,7 @@ class SchoolDetailOverviewComponent(mProps: RProps): UstadDetailComponent<School
                 }
 
             }
-        }
+        }*/
     }
 
 
@@ -150,7 +134,7 @@ class SchoolDetailOverviewComponent(mProps: RProps): UstadDetailComponent<School
         UstadSimpleList<ListProps<ClazzWithListDisplayDetails>>(mProps){
 
         override fun RBuilder.renderListItem(item: ClazzWithListDisplayDetails) {
-            umGridContainer(MGridSpacing.spacing5) {
+           /* umGridContainer(MGridSpacing.spacing5) {
                 css{
                     paddingTop = 4.px
                     paddingBottom = 4.px
@@ -191,7 +175,7 @@ class SchoolDetailOverviewComponent(mProps: RProps): UstadDetailComponent<School
                     }
 
                 }
-            }
+            }*/
         }
     }
 }

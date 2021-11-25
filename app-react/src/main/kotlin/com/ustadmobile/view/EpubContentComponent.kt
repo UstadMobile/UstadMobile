@@ -4,11 +4,10 @@ import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.controller.EpubContentPresenter
 import com.ustadmobile.core.view.EpubContentView
 import react.RBuilder
-import react.RProps
-import react.RState
+import com.ustadmobile.util.*
 import react.setState
 
-class EpubContentComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(mProps), EpubContentView{
+class EpubContentComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps), EpubContentView{
 
     override var containerTitle: String? = null
         get() = field

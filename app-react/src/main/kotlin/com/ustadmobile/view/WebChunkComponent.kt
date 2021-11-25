@@ -4,10 +4,9 @@ import com.ustadmobile.core.controller.WebChunkPresenter
 import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import react.RBuilder
-import react.RProps
-import react.RState
+import com.ustadmobile.util.*
 
-class WebChunkComponent(mProps: RProps): UstadBaseComponent<RProps, RState>(mProps), WebChunkView  {
+class WebChunkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps), WebChunkView  {
 
     private var mPresenter: WebChunkPresenter? = null
 

@@ -1,6 +1,5 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.MGridSpacing
 import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -9,17 +8,12 @@ import com.ustadmobile.core.util.LongWrapper
 import com.ustadmobile.core.view.BitmaskEditView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.ObserverFnWrapper
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.view.ext.umGridContainer
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
 
-class BitmaskEditComponent (mProps: RProps): UstadEditComponent<LongWrapper>(mProps),
+class BitmaskEditComponent (mProps: UmProps): UstadEditComponent<LongWrapper>(mProps),
     BitmaskEditView {
 
     private var mPresenter: BitmaskEditPresenter? = null
@@ -73,7 +67,7 @@ class BitmaskEditComponent (mProps: RProps): UstadEditComponent<LongWrapper>(mPr
     }
 
     override fun RBuilder.render() {
-        styledDiv {
+      /*  styledDiv {
             css{
                 +contentContainer
                 +defaultPaddingTop
@@ -94,7 +88,7 @@ class BitmaskEditComponent (mProps: RProps): UstadEditComponent<LongWrapper>(mPr
                 }
 
             }
-        }
+        }*/
     }
 
     override fun onDestroyView() {

@@ -11,11 +11,10 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.util.ext.toArgumentsMap
 import react.RBuilder
-import react.RProps
-import react.RState
 import react.setState
+import com.ustadmobile.util.*
 
-class ContentEntryListTabsComponent(mProps: RProps) :UstadBaseComponent<RProps, RState>(mProps),
+class ContentEntryListTabsComponent(mProps: UmProps) :UstadBaseComponent<UmProps, UmState>(mProps),
     ContentEntryListTabsView {
 
     override val viewName: String
@@ -33,7 +32,7 @@ class ContentEntryListTabsComponent(mProps: RProps) :UstadBaseComponent<RProps, 
 
         setState {
             tabsToRender = listOf(
-                UstadTab(0,ContentEntryList2View.VIEW_NAME,
+                UstadTab(0, ContentEntryList2View.VIEW_NAME,
                     "$defArgs${ARG_DISPLAY_CONTENT_BY_PARENT}".toArgumentsMap(),
                     getString(MessageID.libraries)),
                 UstadTab(1,ContentEntryList2View.VIEW_NAME,

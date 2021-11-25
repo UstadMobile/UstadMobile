@@ -1,38 +1,18 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.MGridSize
-import com.ccfraser.muirwik.components.MTypographyColor
-import com.ccfraser.muirwik.components.MTypographyVariant
-import com.ccfraser.muirwik.components.mTypography
 import com.ustadmobile.core.controller.ClazzDetailOverviewPresenter
-import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.lib.db.entities.Schedule
-import com.ustadmobile.util.StyleManager.alignTextToStart
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultPaddingTop
-import com.ustadmobile.util.Util.copyToClipboard
-import com.ustadmobile.util.ext.format
-import com.ustadmobile.util.ext.formattedInHoursAndMinutes
-import com.ustadmobile.util.ext.standardFormat
-import com.ustadmobile.view.ext.createInformation
-import com.ustadmobile.view.ext.createListSectionTitle
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
-import kotlin.js.Date
 
-class ClazzDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ClazzWithDisplayDetails>(mProps),
+class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzWithDisplayDetails>(mProps),
     ClazzDetailOverviewView {
 
     private var mPresenter: ClazzDetailOverviewPresenter? = null
@@ -84,7 +64,7 @@ class ClazzDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ClazzWi
     }
 
     override fun RBuilder.render() {
-        styledDiv {
+      /*  styledDiv {
             css {
                 +defaultPaddingTop
                 +contentContainer
@@ -136,7 +116,7 @@ class ClazzDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ClazzWi
                 }
 
             }
-        }
+        }*/
     }
 
     override fun onDestroyView() {
@@ -150,7 +130,7 @@ class ClazzDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ClazzWi
     class SchedulesComponent(mProps: ListProps<Schedule>): UstadSimpleList<ListProps<Schedule>>(mProps){
 
         override fun RBuilder.renderListItem(item: Schedule) {
-            styledDiv {
+            /*styledDiv {
                 val frequencyMessageId = ScheduleEditPresenter.FrequencyOption.values()
                     .firstOrNull { it.optionVal == item.scheduleFrequency }?.messageId ?: MessageID.None
                 val dayMessageId = ScheduleEditPresenter.DayOptions.values()
@@ -167,7 +147,7 @@ class ClazzDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ClazzWi
                     gutterBottom = true){
                     css(alignTextToStart)
                 }
-            }
+            }*/
         }
 
     }

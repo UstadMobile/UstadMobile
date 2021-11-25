@@ -1,11 +1,5 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.button.MButtonVariant
-import com.ccfraser.muirwik.components.button.mButton
-import com.ccfraser.muirwik.components.button.mIconButton
-import com.ccfraser.muirwik.components.menu.mMenu
-import com.ccfraser.muirwik.components.menu.mMenuItem
 import com.ustadmobile.core.controller.ContentEntryList2Presenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -15,25 +9,14 @@ import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_SELECT_FOLD
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.alignTextToStart
-import com.ustadmobile.util.StyleManager.displayProperty
-import com.ustadmobile.util.Util
-import com.ustadmobile.util.ext.format
-import com.ustadmobile.view.ext.umEntityAvatar
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import kotlinx.css.*
 import org.w3c.dom.Node
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
 import kotlin.js.Date
 
 
-class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
+class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry,
         ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>(props), ContentEntryList2View{
 
     private var mPresenter: ContentEntryList2Presenter? = null
@@ -72,7 +55,7 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
         val showSelectBtn = arguments.determineListMode().toString() == ListViewMode.PICKER.toString() &&
                 (arguments[ARG_SELECT_FOLDER_VISIBLE]?.toBoolean() == true || item.leaf)
 
-        umGridContainer(MGridSpacing.spacing7) {
+       /* umGridContainer(MGridSpacing.spacing7) {
             umItem(MGridSize.cells4, MGridSize.cells3){
                 umEntityAvatar(item.thumbnailUrl,
                     if(item.leaf) Util.ASSET_BOOK else Util.ASSET_FOLDER,
@@ -138,7 +121,7 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
                     }
                 }
             }
-        }
+        }*/
     }
 
     override fun handleClickEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
@@ -193,7 +176,7 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
     }
 
     override fun RBuilder.renderEditOptionMenu() {
-        mGridItem {
+       /* mGridItem {
             css{
                 display = displayProperty(editOptionVisible)
             }
@@ -225,7 +208,7 @@ class ContentEntryListComponent(props: RProps): UstadListComponent<ContentEntry,
                     }
                 )
             }
-        }
+        }*/
     }
 
 

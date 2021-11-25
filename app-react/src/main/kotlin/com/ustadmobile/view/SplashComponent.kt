@@ -1,20 +1,24 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
 import com.ustadmobile.controller.SplashPresenter
+import com.ustadmobile.mui.components.UmLinearProgressColor
+import com.ustadmobile.mui.components.themeContext
+import com.ustadmobile.mui.components.umCssBaseline
+import com.ustadmobile.mui.components.umLinearProgress
+import kotlinx.browser.document
+import kotlinx.coroutines.Runnable
+import react.*
+import com.ustadmobile.util.*
 import com.ustadmobile.util.StyleManager.splashComponentContainer
 import com.ustadmobile.util.StyleManager.splashComponentLoadingImage
 import com.ustadmobile.util.StyleManager.splashComponentPreloadContainer
 import com.ustadmobile.util.StyleManager.splashComponentPreloadProgressBar
 import com.ustadmobile.util.ThemeManager.isDarkModeActive
-import kotlinx.browser.document
-import kotlinx.coroutines.Runnable
-import react.*
 import styled.css
 import styled.styledDiv
 import styled.styledImg
 
-class SplashComponent (props: RProps): RComponent<RProps, RState>(props), SplashView {
+class SplashComponent (props: UmProps): RComponent<UmProps, UmState>(props), SplashView {
 
     private var mPresenter: SplashPresenter? = null
 
@@ -42,7 +46,7 @@ class SplashComponent (props: RProps): RComponent<RProps, RState>(props), Splash
     override fun runOnUiThread(r: Runnable?) {}
 
     override fun RBuilder.render() {
-        mCssBaseline()
+        umCssBaseline()
         themeContext.Consumer { _ ->
 
             styledDiv {
@@ -56,12 +60,14 @@ class SplashComponent (props: RProps): RComponent<RProps, RState>(props), Splash
                             css (splashComponentLoadingImage)
                             attrs.src = "assets/logo.png"
                         }
-                        mLinearProgress {
+
+                        val color = when {
+                            isDarkModeActive() -> UmLinearProgressColor.secondary
+                            else -> UmLinearProgressColor.primary
+                        }
+
+                        umLinearProgress(color = color) {
                             css(splashComponentPreloadProgressBar)
-                            attrs.color = when {
-                                isDarkModeActive() -> MLinearProgressColor.secondary
-                                else -> MLinearProgressColor.primary
-                            }
                         }
                     }
 

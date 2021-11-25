@@ -1,6 +1,5 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.*
 import com.ustadmobile.core.controller.ScopedGrantEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -9,24 +8,12 @@ import com.ustadmobile.core.view.ScopedGrantEditView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ScopedGrant
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.defaultPaddingTop
-import com.ustadmobile.util.StyleManager.switchMargin
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import kotlinx.css.LinearDimension
-import kotlinx.css.marginBottom
-import kotlinx.css.marginLeft
-import kotlinx.css.marginTop
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
-import styled.css
-import styled.styledDiv
 
-class ScopedGrantEditComponent (mProps: RProps): UstadEditComponent<ScopedGrant>(mProps),
+class ScopedGrantEditComponent (mProps: UmProps): UstadEditComponent<ScopedGrant>(mProps),
     ScopedGrantEditView{
 
     private var mPresenter: ScopedGrantEditPresenter? = null
@@ -80,7 +67,7 @@ class ScopedGrantEditComponent (mProps: RProps): UstadEditComponent<ScopedGrant>
     }
 
     override fun RBuilder.render() {
-        styledDiv {
+        /*styledDiv {
             css{
                 +contentContainer
                 +defaultPaddingTop
@@ -101,7 +88,7 @@ class ScopedGrantEditComponent (mProps: RProps): UstadEditComponent<ScopedGrant>
                 }
 
             }
-        }
+        }*/
     }
 
     override fun onDestroyView() {
@@ -114,7 +101,7 @@ class ScopedGrantEditComponent (mProps: RProps): UstadEditComponent<ScopedGrant>
     class ScopedGrantComponent(mProps: ListProps<BitmaskFlag>): UstadSimpleList<ListProps<BitmaskFlag>>(mProps){
 
         override fun RBuilder.renderListItem(item: BitmaskFlag) {
-            umGridContainer {
+           /* umGridContainer {
                 umItem(MGridSize.cells10, MGridSize.cells11){
                     mTypography(getString(item.messageId),
                         variant = MTypographyVariant.body1,
@@ -138,7 +125,7 @@ class ScopedGrantEditComponent (mProps: RProps): UstadEditComponent<ScopedGrant>
                     marginTop = LinearDimension("16px")
                     marginBottom = LinearDimension("16px")
                 }
-            }
+            }*/
         }
 
     }

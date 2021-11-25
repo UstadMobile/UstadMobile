@@ -1,8 +1,5 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.MGridSize
-import com.ccfraser.muirwik.components.MTypographyVariant
-import com.ccfraser.muirwik.components.mTypography
 import com.ustadmobile.core.controller.ClazzLogListAttendancePresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -10,21 +7,15 @@ import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzLog
-import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.util.ext.formatDate
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import com.ustadmobile.view.ext.umProfileAvatar
 import kotlinx.css.*
 import react.RBuilder
-import react.RProps
+import com.ustadmobile.util.*
 import react.setState
 import styled.css
 import styled.styledDiv
-import kotlin.js.Date
 
-class ClazzLogListComponent (mProps: RProps) : UstadListComponent<ClazzLog, ClazzLog>(mProps),
+class ClazzLogListComponent (mProps: UmProps) : UstadListComponent<ClazzLog, ClazzLog>(mProps),
     ClazzLogListAttendanceView {
 
     private var mPresenter: ClazzLogListAttendancePresenter? = null
@@ -128,7 +119,7 @@ class ClazzLogListComponent (mProps: RProps) : UstadListComponent<ClazzLog, Claz
 
         val total = (item.clazzLogNumPresent + item.clazzLogNumPartial + item.clazzLogNumAbsent).toDouble()
 
-        umGridContainer {
+       /* umGridContainer {
             umItem(MGridSize.cells3){
                 umProfileAvatar(-1, "calendar_today")
             }
@@ -166,7 +157,7 @@ class ClazzLogListComponent (mProps: RProps) : UstadListComponent<ClazzLog, Claz
                     }
                 }
             }
-        }
+        }*/
     }
 
     override fun handleClickEntry(entry: ClazzLog) {
