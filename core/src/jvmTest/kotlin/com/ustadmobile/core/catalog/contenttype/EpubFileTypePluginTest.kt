@@ -12,6 +12,7 @@ import com.ustadmobile.core.torrent.UstadTorrentManagerImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import kotlinx.coroutines.GlobalScope
@@ -85,7 +86,7 @@ class EpubFileTypePluginTest {
         tempEpubFile.copyInputStreamToFile(inputStream)
 
         val tempFolder = tmpFolder.newFolder("newFolder")
-        val tempUri = DoorUri.parse(tempFolder.toURI().toString())
+        val tempUri = tempFolder.toDoorUri()
 
         val epubPlugin = EpubTypePluginCommonJvm(Any(), Endpoint("http://localhost/dummy"), di)
         runBlocking {
