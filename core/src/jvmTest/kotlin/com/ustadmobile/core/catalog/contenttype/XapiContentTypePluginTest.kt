@@ -3,7 +3,7 @@ package com.ustadmobile.core.catalog.contenttype
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentjob.ProcessContext
+import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.torrent.CommunicationWorkers
 import com.ustadmobile.core.torrent.UstadCommunicationManager
@@ -59,7 +59,7 @@ class XapiContentTypePluginTest {
                 instance<UstadCommunicationManager>().start(InetAddress.getByName(trackerUrl.host))
                 GlobalScope.launch {
                     val ustadTorrentManager: UstadTorrentManager = di.on(Endpoint("localhost")).direct.instance()
-                    ustadTorrentManager.start()
+                    ustadTorrentManager.startSeeding()
 
                 }
             }
@@ -87,8 +87,10 @@ class XapiContentTypePluginTest {
 
         val xapiPlugin =  XapiTypePluginCommonJvm(Any(), Endpoint("http://localhost/dummy"), di)
         val metadata = runBlocking {
-            xapiPlugin.extractMetadata(DoorUri.parse(tempFile.toURI().toString()),
-                    ProcessContext(tempUri, params = mutableMapOf<String,String>()))
+            val xapiFileUri = DoorUri.parse(tempFile.toURI().toString())
+            val processContext = ContentJobProcessContext(xapiFileUri, tempUri, mutableMapOf(),
+                    di)
+            xapiPlugin.extractMetadata(xapiFileUri, processContext)
         }!!
 
         Assert.assertEquals("Got expected title",
@@ -111,7 +113,8 @@ class XapiContentTypePluginTest {
         runBlocking{
 
             val doorUri = DoorUri.parse(mockWebServer.url("/com/ustadmobile/core/contenttype/ustad-tincan.zip").toString())
-            val processContext = ProcessContext(tempUri, params = mutableMapOf<String,String>())
+            val processContext = ContentJobProcessContext(doorUri, tempUri, mutableMapOf(),
+                    di)
 
             val uid = repo.contentEntryDao.insert(ContentEntry().apply{
                 title = "hello"

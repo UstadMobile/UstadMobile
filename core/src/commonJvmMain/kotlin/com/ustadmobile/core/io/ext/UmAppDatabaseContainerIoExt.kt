@@ -20,13 +20,11 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import com.ustadmobile.door.ext.openInputStream
 import org.kodein.di.DI
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import kotlinx.coroutines.NonCancellable
 import com.ustadmobile.core.contentformats.har.HarEntry
-import com.ustadmobile.core.impl.ConnectivityException
+import com.ustadmobile.core.contentjob.ConnectivityCancellationException
 import com.ustadmobile.core.torrent.ContainerTorrentDownloadJob.Companion.MANIFEST_FILE_NAME
 import com.ustadmobile.core.util.createSymLink
 import com.ustadmobile.lib.db.entities.ContainerManifest
@@ -72,7 +70,7 @@ actual suspend fun UmAppDatabase.addFileToContainer(containerUid: Long, fileUri:
     containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
 }
 
-actual suspend fun UmAppDatabase.addTorrentFileFromContainer(
+actual suspend fun UmAppDatabase.writeContainerTorrentFile(
         containerUid: Long,
         torrentDirUri: com.ustadmobile.door.DoorUri,
         trackerUrl: String,
@@ -371,7 +369,7 @@ suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
                 }
             }
         } catch (e: CancellationException) {
-            if(e !is ConnectivityException){
+            if(e !is ConnectivityCancellationException){
                 val storageFolder = addOptions.storageDirUri.toFile()
                 val containerFolder = File(storageFolder, containerUid.toString())
                 containerFolder.delete()

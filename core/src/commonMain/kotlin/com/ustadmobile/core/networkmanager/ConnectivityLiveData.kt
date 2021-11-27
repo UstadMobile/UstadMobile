@@ -9,4 +9,6 @@ import com.ustadmobile.lib.db.entities.ConnectivityStatus
  *
  * This is kept in the DI to avoid multiple classes creating their own copy.
  */
-class ConnectivityLiveData(val liveData: DoorLiveData<ConnectivityStatus?>)
+class ConnectivityLiveData(
+        val liveData: DoorLiveData<ConnectivityStatus?>
+)

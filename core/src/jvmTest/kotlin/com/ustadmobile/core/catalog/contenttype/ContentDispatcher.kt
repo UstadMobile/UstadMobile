@@ -38,6 +38,7 @@ class ContentDispatcher() : Dispatcher() {
 
         } catch (e: Exception) {
             e.printStackTrace()
+            MockResponse().setResponseCode(500)
             System.err.println(request.path)
         }
 

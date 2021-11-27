@@ -5,19 +5,15 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentjob.*
-import com.ustadmobile.core.util.ext.uploadContentIfNeeded
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.alternative
-import com.ustadmobile.core.util.ext.checkConnectivityToDoJob
-import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.*
@@ -36,7 +32,8 @@ import kotlinx.coroutines.CancellationException
 class EpubTypePluginCommonJvm(
         private var context: Any,
         private val endpoint: Endpoint,
-        override val di: DI
+        override val di: DI,
+        private val uploader: ContentPluginUploader = DefaultContentPluginUploader()
 ) : ContentPlugin {
 
     val viewName: String
@@ -63,7 +60,7 @@ class EpubTypePluginCommonJvm(
 
     private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
             val mimeType = uri.guessMimeType(context, di)
             if(mimeType != null && !supportedMimeTypes.contains(mimeType)){
                 return null
@@ -71,7 +68,7 @@ class EpubTypePluginCommonJvm(
             return withContext(Dispatchers.Default) {
                 val xppFactory = XmlPullParserFactory.newInstance()
                 try {
-                    val localUri = process.getLocalUri(uri, context, di)
+                    val localUri = process.getLocalOrCachedUri()
                     val opfPath = ZipInputStream(localUri.openInputStream(context)).use {
                         it.skipToEntry { entry -> entry.name == OCF_CONTAINER_PATH } ?: return@use null
 
@@ -118,7 +115,7 @@ class EpubTypePluginCommonJvm(
             }
         }
 
-        override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+        override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
             val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
             val jobUri = contentJobItem.sourceUri ?: return ProcessResult(JobStatus.FAILED)
             return withContext(Dispatchers.Default) {
@@ -129,56 +126,63 @@ class EpubTypePluginCommonJvm(
 
                     val contentNeedUpload = !uri.isRemote()
                     val progressSize = if (contentNeedUpload) 2 else 1
-
-                    val localUri = process.getLocalUri(uri, context, di)
+                    val localUri = process.getLocalOrCachedUri()
                     val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                             ?: throw IllegalArgumentException("missing tracker url")
+                    val epubIsProcessed = contentJobItem.cjiContainerUid != 0L
 
-                    val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
-                            ?: Container().apply {
-                                containerContentEntryUid = contentJobItem.cjiContentEntryUid
-                                cntLastModified = System.currentTimeMillis()
-                                mimeType = supportedMimeTypes.first()
-                                containerUid = repo.containerDao.insertAsync(this)
-                                contentJobItem.cjiContainerUid = containerUid
-                            }
+                    if(!epubIsProcessed) {
 
-                    db.contentJobItemDao.updateContainer(contentJobItem.cjiUid, container.containerUid)
+                        val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
+                                ?: Container().apply {
+                                    containerContentEntryUid = contentJobItem.cjiContentEntryUid
+                                    cntLastModified = System.currentTimeMillis()
+                                    mimeType = supportedMimeTypes.first()
+                                    containerUid = repo.containerDao.insertAsync(this)
 
-                    val containerFolder = jobItem.contentJob?.toUri
-                            ?: defaultContainerDir.toURI().toString()
-                    val containerFolderUri = DoorUri.parse(containerFolder)
+                                }
 
-                    repo.addEntriesToContainerFromZip(container.containerUid,
-                            localUri,
-                            ContainerAddOptions(storageDirUri = containerFolderUri), context)
+                        val containerFolder = jobItem.contentJob?.toUri
+                                ?: defaultContainerDir.toURI().toString()
+                        val containerFolderUri = DoorUri.parse(containerFolder)
 
-                    repo.addTorrentFileFromContainer(
-                            container.containerUid,
-                            DoorUri.parse(torrentDir.toURI().toString()),
-                            trackerUrl, containerFolderUri
-                    )
+                        repo.addEntriesToContainerFromZip(container.containerUid,
+                                localUri,
+                                ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
-                    val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
-                    containerUidFolder.mkdirs()
-                    ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
+                        repo.writeContainerTorrentFile(
+                                container.containerUid,
+                                DoorUri.parse(torrentDir.toURI().toString()),
+                                trackerUrl, containerFolderUri
+                        )
 
-                    contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
-                    progress.onProgress(contentJobItem)
+                        val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
+                        containerUidFolder.mkdirs()
+                        ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
 
-                    contentJobItem.cjiConnectivityNeeded = true
-                    db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
+                        contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
+                        progress.onProgress(contentJobItem)
 
-                    val haveConnectivityToContinueJob = checkConnectivityToDoJob(db, jobItem)
-                    if (!haveConnectivityToContinueJob) {
-                        return@withContext ProcessResult(JobStatus.QUEUED)
+                        contentJobItem.cjiContainerUid = container.containerUid
+                        db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
+
+                        contentJobItem.cjiConnectivityNeeded = true
+                        db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
+
+                        val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid
+                                ?: 0)
+                        if (!haveConnectivityToContinueJob) {
+                            return@withContext ProcessResult(JobStatus.QUEUED)
+                        }
                     }
 
 
-                    val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
-                    uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient, torrentFileBytes, endpoint)
-
-                    repo.containerDao.findByUid(container.containerUid)
+                    val torrentFileBytes = File(torrentDir, "${contentJobItem.cjiContainerUid}.torrent").readBytes()
+                    if(contentNeedUpload) {
+                        uploader.upload(
+                            contentJobItem, progress, httpClient, torrentFileBytes,
+                            endpoint)
+                    }
 
                     return@withContext ProcessResult(JobStatus.COMPLETE)
                 }catch (c: CancellationException){
@@ -188,11 +192,11 @@ class EpubTypePluginCommonJvm(
         }
 
 
-        suspend fun findOpfPath(uri: DoorUri, process: ProcessContext): String? {
+        suspend fun findOpfPath(uri: DoorUri, process: ContentJobProcessContext): String? {
             val xppFactory = XmlPullParserFactory.newInstance()
             try {
 
-                val localUri = process.getLocalUri(uri, context,di)
+                val localUri = process.getLocalOrCachedUri()
 
                 ZipInputStream(localUri.openInputStream(context)).use {
                     it.skipToEntry { entry -> entry.name == OCF_CONTAINER_PATH } ?: return null

@@ -32,7 +32,7 @@ class DownloadListenerAdapter(
     }
 
     override fun downloadFailed(cause: Throwable?) {
-
+        destListener.onDownloadFailed(cause)
     }
 
     override fun validationComplete(validpieces: Int, totalpieces: Int) {

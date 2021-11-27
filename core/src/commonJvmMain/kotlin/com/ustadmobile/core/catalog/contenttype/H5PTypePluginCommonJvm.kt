@@ -18,13 +18,10 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.core.container.PrefixContainerFileNamer
 import com.ustadmobile.core.contentjob.*
-import com.ustadmobile.core.util.ext.uploadContentIfNeeded
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.ext.checkConnectivityToDoJob
-import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.lib.db.entities.*
 import io.ktor.client.*
@@ -53,7 +50,8 @@ val licenseMap = mapOf(
 class H5PTypePluginCommonJvm(
         private var context: Any,
         val endpoint: Endpoint,
-        override val di: DI
+        override val di: DI,
+        private val uploader: ContentPluginUploader = DefaultContentPluginUploader()
 ): ContentPlugin {
 
         val viewName: String
@@ -81,13 +79,13 @@ class H5PTypePluginCommonJvm(
     override val pluginId: Int
         get() = PLUGIN_ID
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
         val mimeType = uri.guessMimeType(context, di)
         if(mimeType != null && !supportedMimeTypes.contains(mimeType)){
             return null
         }
         return withContext(Dispatchers.Default) {
-            val localUri = process.getLocalUri(uri, context, di)
+            val localUri = process.getLocalOrCachedUri()
             val inputStream = localUri.openInputStream(context)
             return@withContext ZipInputStream(inputStream).use {
                 it.skipToEntry { it.name == H5P_PATH } ?: return@withContext null
@@ -126,7 +124,7 @@ class H5PTypePluginCommonJvm(
         }
     }
 
-    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
         val jobUri = contentJobItem.sourceUri ?: return ProcessResult(JobStatus.FAILED)
         return withContext(Dispatchers.Default) {
@@ -134,43 +132,44 @@ class H5PTypePluginCommonJvm(
             try{
 
                 val doorUri = DoorUri.parse(jobUri)
-                val localUri = process.getLocalUri(doorUri, context, di)
+                val localUri = process.getLocalOrCachedUri()
                 val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                         ?: throw IllegalArgumentException("missing tracker url")
                 val contentNeedUpload = !doorUri.isRemote()
                 val progressSize = if(contentNeedUpload) 2 else 1
+                val h5pIsProcessed = contentJobItem.cjiContainerUid != 0L
 
-                val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid) ?:
-                    Container().apply {
-                            containerContentEntryUid = contentJobItem.cjiContentEntryUid
-                            cntLastModified = System.currentTimeMillis()
-                            mimeType = supportedMimeTypes.first()
-                            containerUid = repo.containerDao.insertAsync(this)
-                            contentJobItem.cjiContainerUid = containerUid
-                    }
+                if(!h5pIsProcessed) {
 
-                db.contentJobItemDao.updateContainer(contentJobItem.cjiUid, container.containerUid)
+                    val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
+                            ?: Container().apply {
+                                containerContentEntryUid = contentJobItem.cjiContentEntryUid
+                                cntLastModified = System.currentTimeMillis()
+                                mimeType = supportedMimeTypes.first()
+                                containerUid = repo.containerDao.insertAsync(this)
+                            }
 
-                val containerFolder = jobItem.contentJob?.toUri ?: defaultContainerDir.toURI().toString()
-                val containerFolderUri = DoorUri.parse(containerFolder)
-                val entry = db.contentEntryDao.findByUid(contentJobItem.cjiContentEntryUid)
+                    val containerFolder = jobItem.contentJob?.toUri
+                            ?: defaultContainerDir.toURI().toString()
+                    val containerFolderUri = DoorUri.parse(containerFolder)
+                    val entry = db.contentEntryDao.findByUid(contentJobItem.cjiContentEntryUid)
 
-                val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolderUri)
-                repo.addEntriesToContainerFromZip(container.containerUid, localUri,
-                        ContainerAddOptions(storageDirUri = containerFolderUri,
-                                fileNamer = PrefixContainerFileNamer("workspace/")), context)
+                    val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolderUri)
+                    repo.addEntriesToContainerFromZip(container.containerUid, localUri,
+                            ContainerAddOptions(storageDirUri = containerFolderUri,
+                                    fileNamer = PrefixContainerFileNamer("workspace/")), context)
 
-                val h5pDistTmpFile = File.createTempFile("h5p-dist", "zip")
-                val h5pDistIn = getAssetFromResource("/com/ustadmobile/core/h5p/dist.zip", context, this::class)
-                        ?: throw IllegalStateException("Could not find h5p dist file")
-                h5pDistIn.writeToFile(h5pDistTmpFile)
-                repo.addEntriesToContainerFromZip(container.containerUid, h5pDistTmpFile.toDoorUri(),
-                        containerAddOptions, context)
-                h5pDistTmpFile.delete()
+                    val h5pDistTmpFile = File.createTempFile("h5p-dist", "zip")
+                    val h5pDistIn = getAssetFromResource("/com/ustadmobile/core/h5p/dist.zip", context, this::class)
+                            ?: throw IllegalStateException("Could not find h5p dist file")
+                    h5pDistIn.writeToFile(h5pDistTmpFile)
+                    repo.addEntriesToContainerFromZip(container.containerUid, h5pDistTmpFile.toDoorUri(),
+                            containerAddOptions, context)
+                    h5pDistTmpFile.delete()
 
 
-                // generate tincan.xml
-                val tinCan = """
+                    // generate tincan.xml
+                    val tinCan = """
                 <?xml version="1.0" encoding="UTF-8"?>
                 <tincan xmlns="http://projecttincan.com/tincan.xsd">
                     <activities>
@@ -183,15 +182,15 @@ class H5PTypePluginCommonJvm(
                 </tincan>
             """.trimIndent()
 
-                val tmpTinCanFile = File.createTempFile("h5p-tincan", "xml")
-                tmpTinCanFile.writeText(tinCan)
-                repo.addFileToContainer(container.containerUid, tmpTinCanFile.toDoorUri(),
-                        "tincan.xml", context, di, containerAddOptions)
-                tmpTinCanFile.delete()
+                    val tmpTinCanFile = File.createTempFile("h5p-tincan", "xml")
+                    tmpTinCanFile.writeText(tinCan)
+                    repo.addFileToContainer(container.containerUid, tmpTinCanFile.toDoorUri(),
+                            "tincan.xml", context, di, containerAddOptions)
+                    tmpTinCanFile.delete()
 
 
-                // generate index.html
-                val index = """
+                    // generate index.html
+                    val index = """
                 <html>
                 <head>
                     <meta charset="utf-8" />
@@ -202,38 +201,44 @@ class H5PTypePluginCommonJvm(
                 </body>
                 </html>
             """.trimIndent()
-                val tmpIndexHtmlFile = File.createTempFile("h5p-index", "html")
-                tmpIndexHtmlFile.writeText(index)
-                repo.addFileToContainer(container.containerUid, tmpIndexHtmlFile.toDoorUri(),
-                        "index.html", context, di, containerAddOptions)
-                tmpIndexHtmlFile.delete()
+                    val tmpIndexHtmlFile = File.createTempFile("h5p-index", "html")
+                    tmpIndexHtmlFile.writeText(index)
+                    repo.addFileToContainer(container.containerUid, tmpIndexHtmlFile.toDoorUri(),
+                            "index.html", context, di, containerAddOptions)
+                    tmpIndexHtmlFile.delete()
 
-                repo.addTorrentFileFromContainer(
-                        container.containerUid,
-                        DoorUri.parse(torrentDir.toURI().toString()),
-                        trackerUrl, containerFolderUri
-                )
+                    repo.writeContainerTorrentFile(
+                            container.containerUid,
+                            DoorUri.parse(torrentDir.toURI().toString()),
+                            trackerUrl, containerFolderUri
+                    )
 
-                val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
-                containerUidFolder.mkdirs()
-                ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
+                    val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
+                    containerUidFolder.mkdirs()
+                    ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
+
+                    contentJobItem.cjiContainerUid = container.containerUid
+                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
+
+                    contentJobItem.cjiConnectivityNeeded = true
+                    db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
+
+                    val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid
+                            ?: 0)
+                    if (!haveConnectivityToContinueJob) {
+                        return@withContext ProcessResult(JobStatus.QUEUED)
+                    }
+                }
 
                 contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
                 progress.onProgress(contentJobItem)
 
-                contentJobItem.cjiConnectivityNeeded = true
-                db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
-
-                val haveConnectivityToContinueJob = checkConnectivityToDoJob(db, jobItem)
-                if(!haveConnectivityToContinueJob){
-                    return@withContext ProcessResult(JobStatus.QUEUED)
+                val torrentFileBytes = File(torrentDir, "${contentJobItem.cjiContainerUid}.torrent").readBytes()
+                if(contentNeedUpload) {
+                    uploader.upload(
+                            contentJobItem, progress, httpClient, torrentFileBytes,
+                            endpoint)
                 }
-
-
-                val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
-                uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient,  torrentFileBytes, endpoint)
-
-                repo.containerDao.findByUid(container.containerUid)
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)
 

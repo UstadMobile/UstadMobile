@@ -11,7 +11,6 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.createSymLink
 import com.ustadmobile.core.util.ext.base64EncodedToHexString
-import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.core.util.ext.maxQueryParamListSize
 import com.ustadmobile.core.util.ext.withWifiLock
 import com.ustadmobile.door.DoorUri
@@ -60,7 +59,7 @@ class ContainerTorrentDownloadJob(
     override val supportedFileExtensions: List<String>
         get() = listOf(".container")
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
 
         // check valid uri format, valid endpoint, valid container
         val containerUid = uri.uri.toString().substringAfterLast("/").toLongOrNull() ?: return null
@@ -73,7 +72,7 @@ class ContainerTorrentDownloadJob(
         return MetadataResult(contentEntry as ContentEntryWithLanguage, PLUGIN_ID)
     }
 
-    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
         val containerUid = contentJobItem.cjiContainerUid
 
@@ -135,13 +134,9 @@ class ContainerTorrentDownloadJob(
                             contentJobItem.cjiItemProgress = (progressSize * 0.75).toLong()
                             progress.onProgress(contentJobItem)
                         }
-                    }
-                    GlobalScope.launch(Dispatchers.Default) {
-                        while (true) {
-                            delay(100)
-                            if (!isActive) {
-                                torrentDeferred.completeExceptionally(CancellationException())
-                            }
+
+                        override fun onDownloadFailed(cause: Throwable?) {
+                            torrentDeferred.completeExceptionally(CancellationException())
                         }
                     }
 
@@ -198,7 +193,7 @@ class ContainerTorrentDownloadJob(
                 progress.onProgress(contentJobItem)
 
             } catch (c: CancellationException) {
-                ustadTorrentManager.removeDownloadListener(containerUid)
+                ustadTorrentManager.removeTorrent(containerUid)
                 throw c
             }
 

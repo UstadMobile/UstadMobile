@@ -8,19 +8,15 @@ import java.io.IOException
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.*
-import com.ustadmobile.core.util.ext.uploadContentIfNeeded
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.ext.checkConnectivityToDoJob
-import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toFile
-import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -34,7 +30,8 @@ import kotlinx.coroutines.CancellationException
 class XapiTypePluginCommonJvm(
         private var context: Any,
         private val endpoint: Endpoint,
-        override val di: DI
+        override val di: DI,
+        private val uploader: ContentPluginUploader = DefaultContentPluginUploader()
 ) : ContentPlugin {
 
     val viewName: String
@@ -63,13 +60,13 @@ class XapiTypePluginCommonJvm(
 
     private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
         val mimeType = uri.guessMimeType(context, di)
         if (mimeType != null && !supportedMimeTypes.contains(mimeType)) {
             return null
         }
         return withContext(Dispatchers.Default) {
-            val localUri = process.getLocalUri(uri, context, di)
+            val localUri = process.getLocalOrCachedUri()
             val inputStream = localUri.openInputStream(context)
             return@withContext ZipInputStream(inputStream).use {
                 it.skipToEntry { it.name == TINCAN_FILENAME } ?: return@withContext null
@@ -96,7 +93,7 @@ class XapiTypePluginCommonJvm(
         }
     }
 
-    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("mising job item")
         val uri = contentJobItem.sourceUri ?: return ProcessResult(JobStatus.FAILED)
         return withContext(Dispatchers.Default) {
@@ -104,57 +101,62 @@ class XapiTypePluginCommonJvm(
             try {
 
                 val doorUri = DoorUri.parse(uri)
-                val localUri = process.getLocalUri(doorUri, context, di)
+                val localUri = process.getLocalOrCachedUri()
                 val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
                         ?: throw IllegalArgumentException("missing tracker url")
                 val contentNeedUpload = !doorUri.isRemote()
                 val progressSize = if (contentNeedUpload) 2 else 1
+                val xapiIsProcessed = contentJobItem.cjiContainerUid != 0L
 
-                val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
-                        ?: Container().apply {
-                            containerContentEntryUid = contentJobItem.cjiContentEntryUid
-                            cntLastModified = System.currentTimeMillis()
-                            mimeType = supportedMimeTypes.first()
-                            containerUid = repo.containerDao.insertAsync(this)
-                            contentJobItem.cjiContainerUid = containerUid
-                        }
+                if(!xapiIsProcessed) {
 
-                db.contentJobItemDao.updateContainer(contentJobItem.cjiUid, container.containerUid)
+                    val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
+                            ?: Container().apply {
+                                containerContentEntryUid = contentJobItem.cjiContentEntryUid
+                                cntLastModified = System.currentTimeMillis()
+                                mimeType = supportedMimeTypes.first()
+                                containerUid = repo.containerDao.insertAsync(this)
+                            }
 
+                    val containerFolder = jobItem.contentJob?.toUri
+                            ?: defaultContainerDir.toURI().toString()
+                    val containerFolderUri = DoorUri.parse(containerFolder)
 
-                val containerFolder = jobItem.contentJob?.toUri
-                        ?: defaultContainerDir.toURI().toString()
-                val containerFolderUri = DoorUri.parse(containerFolder)
+                    repo.addEntriesToContainerFromZip(container.containerUid,
+                            localUri,
+                            ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
-                repo.addEntriesToContainerFromZip(container.containerUid,
-                        localUri,
-                        ContainerAddOptions(storageDirUri = containerFolderUri), context)
+                    repo.writeContainerTorrentFile(
+                            container.containerUid,
+                            DoorUri.parse(torrentDir.toURI().toString()),
+                            trackerUrl, containerFolderUri)
 
-                repo.addTorrentFileFromContainer(
-                        container.containerUid,
-                        DoorUri.parse(torrentDir.toURI().toString()),
-                        trackerUrl, containerFolderUri)
+                    val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
+                    containerUidFolder.mkdirs()
+                    ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
 
-                val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
-                containerUidFolder.mkdirs()
-                ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
+                    contentJobItem.cjiContainerUid = container.containerUid
+                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
+
+                    contentJobItem.cjiConnectivityNeeded = true
+                    db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
+
+                    val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid
+                            ?: 0)
+                    if (!haveConnectivityToContinueJob) {
+                        return@withContext ProcessResult(JobStatus.QUEUED)
+                    }
+                }
 
                 contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
                 progress.onProgress(contentJobItem)
 
-
-                contentJobItem.cjiConnectivityNeeded = true
-                db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
-
-                val haveConnectivityToContinueJob = checkConnectivityToDoJob(db, jobItem)
-                if (!haveConnectivityToContinueJob) {
-                    return@withContext ProcessResult(JobStatus.QUEUED)
+                val torrentFileBytes = File(torrentDir, "${contentJobItem.cjiContainerUid}.torrent").readBytes()
+                if(contentNeedUpload) {
+                    uploader.upload(
+                            contentJobItem, progress, httpClient, torrentFileBytes,
+                            endpoint)
                 }
-
-                val torrentFileBytes = File(torrentDir, "${container.containerUid}.torrent").readBytes()
-                uploadContentIfNeeded(contentNeedUpload, contentJobItem, progress, httpClient, torrentFileBytes, endpoint)
-
-                repo.containerDao.findByUid(container.containerUid)
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)
 

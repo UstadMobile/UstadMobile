@@ -5,25 +5,19 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.ContentJobItem
 
-fun Int.isStatusQueuedOrDownloading() = this >= JobStatus.WAITING_MIN && this < JobStatus.COMPLETE_MIN
-
 fun Int.isStatusPaused() = this == JobStatus.PAUSED
-
-fun Int.isStatusCompletedSuccessfully() = this == JobStatus.COMPLETE
 
 fun Int.isStatusCompleted() = this >= JobStatus.COMPLETE_MIN
 
-fun Int.isStatusPausedOrQueuedOrDownloading() = this >= JobStatus.PAUSED && this < JobStatus.COMPLETE_MIN
-
-fun ContentJobItem?.isStatusQueuedOrDownloading() = this?.cjiRecursiveStatus?.isStatusQueuedOrDownloading() ?: false
+fun ContentJobItem?.isStatusQueuedOrDownloading() = this?.cjiRecursiveStatus?.let {it >= JobStatus.WAITING_MIN && it < JobStatus.COMPLETE_MIN } ?: false
 
 fun ContentJobItem?.isStatusPaused() = this?.cjiRecursiveStatus?.isStatusPaused() ?: false
 
-fun ContentJobItem?.isStatusCompletedSuccessfully() = this?.cjiRecursiveStatus?.isStatusCompletedSuccessfully() ?: false
+fun ContentJobItem?.isStatusCompletedSuccessfully() = this?.cjiRecursiveStatus?.let {  it == JobStatus.COMPLETE } ?: false
 
 fun ContentJobItem?.isStatusCompleted() = this?.cjiRecursiveStatus?.isStatusCompleted() ?: false
 
-fun ContentJobItem?.isStatusPausedOrQueuedOrDownloading() = this?.cjiRecursiveStatus?.isStatusPausedOrQueuedOrDownloading() ?: false
+fun ContentJobItem?.isStatusPausedOrQueuedOrDownloading() = this?.cjiRecursiveStatus?.let {it >= JobStatus.PAUSED && it < JobStatus.COMPLETE_MIN } ?: false
 
 
 /**

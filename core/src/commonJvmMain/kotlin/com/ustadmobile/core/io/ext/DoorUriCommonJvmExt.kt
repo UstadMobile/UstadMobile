@@ -47,3 +47,9 @@ actual suspend fun DoorUri.emptyRecursively() {
         }
     }
 }
+
+actual suspend fun DoorUri.deleteRecursively() {
+    withContext(Dispatchers.IO) {
+        toFile().deleteRecursively()
+    }
+}

@@ -5,7 +5,6 @@ import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
 import com.ustadmobile.core.impl.ContainerStorageDir
-import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView
 import com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
 import com.ustadmobile.port.android.view.StorageOptionsAutocompleteTextView

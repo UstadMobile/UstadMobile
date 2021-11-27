@@ -20,3 +20,9 @@ expect suspend fun DoorUri.isRemote(): Boolean
  * not delete the directory itself
  */
 expect suspend fun DoorUri.emptyRecursively()
+
+/**
+ * Delete the Uri itself, and delete any sub items recursively. On Android/JVM, this ONLY works on
+ * files and directories.
+ */
+expect suspend fun DoorUri.deleteRecursively()

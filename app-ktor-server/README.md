@@ -19,7 +19,12 @@ cd app-ktor-server
 cp src/jvmMain/resources/application.conf ./
 ```
 
-2. Run using the runserver.sh script:
+3. inside the application.conf
+need to set the torrentTracker for torrent downloads/uploads .
+e.g  trackerAnnounceUrl = "http://192.163.1.13:6699/announce"
+
+
+4. Run using the runserver.sh script:
 
 ```
 # Linux

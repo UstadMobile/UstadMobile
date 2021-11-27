@@ -4,15 +4,12 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.ext.getLocalUri
 import com.ustadmobile.core.io.ext.getSize
 import com.ustadmobile.core.io.ext.guessMimeType
-import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.door.ext.openInputStream
-import io.github.aakira.napier.Napier
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
@@ -37,13 +34,14 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    val pluginManager = ContentPluginManagerImpl(listOf(
+    //Plugins that supoprt direct download using HTTP
+    private val pluginManager = ContentPluginManager(listOf(
             di.on(endpoint).direct.instance<EpubTypePluginCommonJvm>(),
             di.on(endpoint).direct.instance<XapiTypePluginCommonJvm>(),
             di.on(endpoint).direct.instance<H5PTypePluginCommonJvm>(),
             di.on(endpoint).direct.instance<VideoTypePluginJvm>()))
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
         val mimeType = uri.guessMimeType(context, di)?.substringBefore(";")
         if(mimeType != null && !supportedMimeTypes.contains(mimeType)){
             return null
@@ -51,7 +49,7 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
         return withContext(Dispatchers.Default) {
 
 
-            val localUri = process.getLocalUri(uri, context, di)
+            val localUri = process.getLocalOrCachedUri()
 
             val data: InputStream? = localUri.openInputStream(context)
             val document = Jsoup.parse(data, "UTF-8", uri.uri.toURL().toString())
@@ -76,16 +74,18 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
         }
     }
 
-    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+    override suspend fun processJob(
+        jobItem: ContentJobItemAndContentJob,
+        process: ContentJobProcessContext,
+        progress: ContentJobProgressListener
+    ): ProcessResult {
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
         val jobUri = contentJobItem.sourceUri ?: return ProcessResult(JobStatus.FAILED)
         withContext(Dispatchers.Default) {
             val uri = DoorUri.parse(jobUri)
-            val localUri = process.getLocalUri(uri, context, di)
+            val localUri = process.getLocalOrCachedUri()
             val data: InputStream? = localUri.openInputStream(context)
             val document = Jsoup.parse(data, "UTF-8", uri.uri.toURL().toString())
-
-            val apacheDir = createTemporaryDir("apache-${jobItem.contentJobItem?.cjiUid}")
 
             document.select("tr:has([alt])").forEachIndexed { counter, it ->
 
@@ -120,10 +120,11 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
 
                     } else {
 
-                        val processContext = ProcessContext(apacheDir, mutableMapOf())
                         val hrefDoorUri = DoorUri.parse(hrefUrl.toURI().toString())
-                        val metadataResult = pluginManager.extractMetadata(hrefDoorUri, processContext)
-                        if(metadataResult != null){
+                        val mimeType = hrefDoorUri.guessMimeType(context, di)
+                        val isSupported = mimeType?.let { pluginManager.isMimeTypeSupported(it) } ?: true
+
+                        if(isSupported){
 
                             ContentJobItem().apply {
                                 cjiJobUid = contentJobItem.cjiJobUid
@@ -131,7 +132,7 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                                 cjiItemTotal = sourceUri?.let { DoorUri.parse(it).getSize(context, di)  } ?: 0L
                                 cjiContentEntryUid = 0
                                 cjiIsLeaf = true
-                                cjiPluginId = metadataResult.pluginId
+                                cjiPluginId = 0
                                 cjiParentCjiUid = contentJobItem.cjiUid
                                 cjiParentContentEntryUid = contentJobItem.cjiContentEntryUid
                                 cjiConnectivityNeeded = false
@@ -139,8 +140,6 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                                 cjiUid = db.contentJobItemDao.insertJobItem(this)
                             }
 
-                        }else{
-                            println("no metadata found for url ${hrefUrl.toURI()}")
                         }
 
                     }

@@ -251,8 +251,12 @@ tasks.whenTaskAdded { task ->
         //TODO: Fix lib-content-editor to track up to date correctly, then add ":lib-content-editor:build" dependency
         task.dependsOn(generateCoreStringToAndroidResMap)
     }
-}
 
+    // TODO remove after merge with replication
+    if (task.name.equals("lint")) {
+        task.enabled = false
+    }
+}
 
 configurations.all {
     resolutionStrategy {

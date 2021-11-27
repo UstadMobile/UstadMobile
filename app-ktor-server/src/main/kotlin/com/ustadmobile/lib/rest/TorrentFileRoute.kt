@@ -90,18 +90,31 @@ fun Route.TorrentFileRoute(){
         get("{jobUid}/status"){
 
             val db: UmAppDatabase by closestDI().on(call).instance(tag = UmAppDatabase.TAG_DB)
-            val jobUid: Long = call.parameters["containerUid"]?.toLongOrNull() ?: 0L
-            val jobItem = db.contentJobItemDao.findByJobId(jobUid)
+            val jobUid: Long = call.parameters["jobUid"]?.toLongOrNull() ?: 0L
+            val jobItem: ContentJobItem? = db.contentJobItemDao.findByJobId(jobUid)
 
             with(call) {
                 if (jobItem != null) {
-                    respond(jobItem.cjiStatus)
+                    respond(jobItem)
                 }else{
                     respond(HttpStatusCode.NotFound)
                 }
             }
 
         }
+
+        delete("{jobId}/cancel"){
+
+            val jobUid: Long = call.parameters["jobId"]?.toLongOrNull() ?: 0L
+
+            // TODO handle virtualhostmode for endpoint
+            val endpoint = Endpoint(call.request.header("Host") ?: "localhost")
+
+            val contentJobManager: ContentJobManager by closestDI().instance()
+            contentJobManager.cancelContentJob(endpoint, jobUid)
+            call.respond(HttpStatusCode.OK)
+        }
+
 
 
     }

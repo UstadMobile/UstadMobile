@@ -73,7 +73,7 @@ subprojects {
 
 
 //Major.minor.database version
-version = "0.3.41"
+version = "0.3.42"
 group = "com.ustadmobile.app"
 
 /**
@@ -83,7 +83,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 218
+    ustadVersionCode = 219
 
     version_door = "0.0.40l"
     version_xmlpullparserkmp = '0.0.18'
@@ -132,10 +132,11 @@ ext {
     version_napier = "2.1.0"
     version_browser_proxy = "2.1.5"
     version_logback = "1.0.13"
-    version_kodein_di = "7.8.0"
+    version_kodein_di = "7.9.0"
     version_netty_tcnative = "2.0.39.Final"
     version_quartz_scheduler = "2.3.2"
     version_ttorrent = "ttorrent-2.0.12"
+    version_jargs = "1.0"
 
 
     version_android_buildtools = "30.0.2"
@@ -143,7 +144,7 @@ ext {
     version_android_target_sdk = 30
     version_android_min_sdk = 21
     version_android_picasso = 2.71828
-    version_android_desugar_jdk_libs = "1.0.10"
+    version_android_desugar_jdk_libs = "1.1.5"
     version_kaspresso = "1.2.1"
 
     //Androidx versions as per https://developer.android.com/jetpack/androidx/versions

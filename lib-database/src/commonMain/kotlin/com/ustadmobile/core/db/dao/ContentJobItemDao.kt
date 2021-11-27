@@ -110,7 +110,8 @@ abstract class ContentJobItemDao {
     @Query("""
         SELECT * 
           FROM ContentJobItem
-         WHERE cjiJobUid = :jobUid
+         WHERE cjiJobUid = :jobUid 
+           AND cjiParentCjiUid = 0 LIMIT 1
     """)
     abstract fun findByJobId(jobUid: Long): ContentJobItem?
 
@@ -174,7 +175,7 @@ abstract class ContentJobItemDao {
            SET cjiContainerUid = :containerUid
          WHERE cjiUid = :cjiUid  
     """)
-    abstract suspend fun updateContainer(cjiUid: Long, containerUid: Long)
+    abstract suspend fun updateContentJobItemContainer(cjiUid: Long, containerUid: Long)
 
     @Query("""
         SELECT * 

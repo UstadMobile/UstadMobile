@@ -5,8 +5,7 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentjob.ContentPluginManager
-import com.ustadmobile.core.contentjob.ContentPluginManagerImpl
-import com.ustadmobile.core.contentjob.ProcessContext
+import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.getSize
@@ -68,7 +67,7 @@ class TestApacheIndexer {
                 VideoTypePluginJvm(Any(), context, di)
             }
             bind<ContentPluginManager>() with scoped(ustadTestRule.endpointScope).singleton {
-                ContentPluginManagerImpl(listOf(
+                ContentPluginManager(listOf(
                         EpubTypePluginCommonJvm(Any(), context, di)
                     )
                 )
@@ -100,9 +99,11 @@ class TestApacheIndexer {
                 toUri = containerDir.toURI().toString()
                 cjUid = db.contentJobDao.insertAsync(this)
             }
+            val sourceURL = URL(mockWebServer.url("/json/com/ustadmobile/core/contenttype/folder.txt")
+                    .toString())
             val item = ContentJobItem().apply {
                 cjiJobUid = job.cjUid
-                sourceUri = URL(mockWebServer.url("/json/com/ustadmobile/core/contenttype/folder.txt").toString()).toURI().toString()
+                sourceUri = sourceURL.toURI().toString()
                 cjiItemTotal = sourceUri?.let { DoorUri.parse(it).getSize(Any(), di)  } ?: 0L
                 cjiPluginId = ApacheIndexerPlugin.PLUGIN_ID
                 cjiContentEntryUid = 42
@@ -115,7 +116,9 @@ class TestApacheIndexer {
             jobAndItem.contentJob = job
             jobAndItem.contentJobItem = item
 
-            apacheIndexer.processJob(jobAndItem, ProcessContext(tmpDir.toDoorUri(), mutableMapOf())){
+            val processContext = ContentJobProcessContext(DoorUri(sourceURL.toURI()),
+                tmpDir.toDoorUri(), mutableMapOf(), di)
+            apacheIndexer.processJob(jobAndItem, processContext){
 
             }
 

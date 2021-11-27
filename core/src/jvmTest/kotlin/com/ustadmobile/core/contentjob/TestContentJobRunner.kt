@@ -50,7 +50,7 @@ class TestContentJobRunner {
 
         override suspend fun extractMetadata(
             uri: DoorUri,
-            process: ProcessContext
+            process: ContentJobProcessContext
         ): MetadataResult {
             return MetadataResult(ContentEntryWithLanguage().apply {
                 title = uri.toString().substringAfterLast("/")
@@ -59,9 +59,9 @@ class TestContentJobRunner {
         }
 
         override suspend fun processJob(
-                jobItem: ContentJobItemAndContentJob,
-                process: ProcessContext,
-                progress: ContentJobProgressListener
+            jobItem: ContentJobItemAndContentJob,
+            process: ContentJobProcessContext,
+            progress: ContentJobProgressListener
         ): ProcessResult {
             delay(100)
 

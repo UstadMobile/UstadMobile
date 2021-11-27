@@ -109,7 +109,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "com.github.SamihMustafa:ttorrent:$version_ttorrent"
-                compileOnly 'net.sf:jargs:1.0'
+                compileOnly "net.sf:jargs:$version_jargs"
                 compileOnly "net.sf.kxml:kxml2:$version_kxml"
                 compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')

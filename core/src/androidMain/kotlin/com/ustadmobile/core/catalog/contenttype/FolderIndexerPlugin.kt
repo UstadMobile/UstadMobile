@@ -9,7 +9,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.createTemporaryDir
+import com.ustadmobile.core.io.ext.guessMimeType
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -40,7 +40,7 @@ class FolderIndexerPlugin(
 
     private val pluginManager: ContentPluginManager by di.on(endpoint).instance()
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
 
         val docUri = try {
             DocumentsContract.buildDocumentUriUsingTree(uri.uri, DocumentsContract.getDocumentId(uri.uri))
@@ -64,13 +64,11 @@ class FolderIndexerPlugin(
         return MetadataResult(entry, PLUGIN_ID)
     }
 
-    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
         val jobUri = contentJobItem.sourceUri ?: return ProcessResult(JobStatus.FAILED)
         withContext(Dispatchers.Default) {
             val uri = DoorUri.parse(jobUri)
-
-            val apacheDir = createTemporaryDir("folder-${jobItem.contentJobItem?.cjiUid}")
 
             val startingUri = try{
                 DocumentsContract.buildChildDocumentsUriUsingTree(uri.uri, DocumentsContract.getDocumentId(uri.uri))
@@ -102,10 +100,9 @@ class FolderIndexerPlugin(
             progress.onProgress(contentJobItem)
 
             uriList.forEachIndexed { index, fileUri ->
+                val fileDocument = DocumentFile.fromSingleUri(context as Context, fileUri) ?: return@forEachIndexed
 
-                val fileDocument = DocumentFile.fromSingleUri(context as Context, fileUri)
-
-                if(fileDocument?.isDirectory == true){
+                if(fileDocument.isDirectory){
 
                     ContentJobItem().apply {
                         cjiJobUid = contentJobItem.cjiJobUid
@@ -122,26 +119,25 @@ class FolderIndexerPlugin(
 
                 }else{
 
-                    val processContext = ProcessContext(apacheDir, mutableMapOf())
-                    val hrefDoorUri = DoorUri.parse(fileDocument?.uri.toString())
-                    val metadataResult = pluginManager.extractMetadata(hrefDoorUri, processContext)
-                    if(metadataResult != null){
+                    val hrefDoorUri = DoorUri.parse(fileDocument.uri.toString())
+                    val mimeType = hrefDoorUri.guessMimeType(context, di)
+                    val isSupported = mimeType?.let { pluginManager.isMimeTypeSupported(it) } ?: true
+
+                    if(isSupported){
 
                         ContentJobItem().apply {
                             cjiJobUid = contentJobItem.cjiJobUid
-                            sourceUri = fileDocument?.uri.toString()
-                            cjiItemTotal = fileDocument?.length() ?: -1L
+                            sourceUri = fileDocument.uri.toString()
+                            cjiItemTotal = fileDocument.length()
                             cjiContentEntryUid = 0
                             cjiIsLeaf = true
-                            cjiPluginId = metadataResult.pluginId
+                            cjiPluginId = 0
                             cjiParentContentEntryUid = contentJobItem.cjiContentEntryUid
                             cjiConnectivityNeeded = false
                             cjiStatus = JobStatus.QUEUED
                             cjiUid = db.contentJobItemDao.insertJobItem(this)
                         }
 
-                    }else{
-                        println("no metadata found for file ${fileDocument?.name}")
                     }
                 }
 

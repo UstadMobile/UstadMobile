@@ -31,11 +31,8 @@
 
 package com.ustadmobile.core.impl
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.UMFileUtil
 import java.io.*
 import java.util.*
-import kotlin.collections.ArrayList
 import com.ustadmobile.core.generated.locale.MessageIdMap
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.impl.locale.getStringsXmlResource
@@ -127,26 +124,6 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
         }
 
         return stringsXml[messageId]
-    }
-
-
-    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> {
-        val dirList = ArrayList<UMStorageDir>()
-        val systemBaseDir = System.getProperty("user.dir")
-        val contentDirName = getContentDirName(context)
-
-        dirList.add(UMStorageDir(systemBaseDir, getString(MessageID.device, context),
-                removableMedia = false, isAvailable = true,
-                usableSpace = File(systemBaseDir).usableSpace))
-
-        //Find external directories
-        val externalDirs = findRemovableStorage()
-        for (extDir in externalDirs) {
-            dirList.add(UMStorageDir(UMFileUtil.joinPaths(extDir!!, contentDirName!!),
-                    getString(MessageID.memory_card, context),
-                    true, true, false))
-        }
-        return dirList
     }
 
 

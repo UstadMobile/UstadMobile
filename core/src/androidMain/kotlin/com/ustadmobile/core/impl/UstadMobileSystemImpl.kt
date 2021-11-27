@@ -39,8 +39,6 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.AsyncTask
-import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.VisibleForTesting
@@ -82,10 +80,6 @@ import java.util.zip.ZipOutputStream
 actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
     private var appConfig: Properties? = null
-
-    private val deviceStorageIndex = 0
-
-    private val sdCardStorageIndex = 1
 
     private var appPreferences: SharedPreferences? = null
 
@@ -318,50 +312,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     actual override fun getSystemLocale(context: Any): String {
         return Locale.getDefault().toString()
-    }
-
-
-    /**
-     * Get a list of available directories on Android. Get the internal directory and the memory
-     * card (if any). This will result in a lis tof UMStorageDir with a path in the following format:
-     * ExternalFilesDir[i]/sitedata/container
-     */
-    @SuppressLint("UsableSpace")
-    suspend fun getStorageDirsAsync(context: Context, endpoint: Endpoint) : List<UMStorageDir> = withContext(Dispatchers.IO) {
-        ContextCompat.getExternalFilesDirs(context, null).mapIndexed { index, it ->
-            val siteDir = it.siteDataSubDir(endpoint)
-            val storageDir = File(siteDir, SUBDIR_CONTAINER_NAME)
-            storageDir.takeIf { !it.exists() }?.mkdirs()
-            val nameMessageId = if(index == 0) MessageID.phone_memory else MessageID.memory_card
-            UMStorageDir(storageDir.toUri().toString(), name = getString(nameMessageId, context),
-                    removableMedia = index == 0, isAvailable = true, isWritable = true,
-                    usableSpace = it.usableSpace)
-        }
-    }
-
-    @Deprecated("This is not really a cross platform function. Selecting a storage directory should be done at a platform level e.g. it may lead to a file picker dialog, etc")
-    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> = withContext(Dispatchers.IO){
-        val dirList = ArrayList<UMStorageDir>()
-        val storageOptions = ContextCompat.getExternalFilesDirs(context as Context, null)
-        val contentDirName = getContentDirName(context)
-
-        var umDir = File(storageOptions[deviceStorageIndex], contentDirName!!)
-        if (!umDir.exists()) umDir.mkdirs()
-        dirList.add(UMStorageDir(umDir.toURI().toString(),
-                getString(MessageID.phone_memory, context), true,
-                isAvailable = true, isWritable = canWriteFileInDir(umDir.absolutePath),
-                usableSpace = umDir.usableSpace))
-
-        if (storageOptions.size > 1) {
-            val sdCardStorage = storageOptions[sdCardStorageIndex]
-            umDir = File(sdCardStorage, contentDirName)
-            if (!umDir.exists()) umDir.mkdirs()
-            dirList.add(UMStorageDir(umDir.toURI().toString(),
-                    getString(MessageID.memory_card, context), true,
-                    isAvailable = true, isWritable = canWriteFileInDir(umDir.absolutePath),
-                    usableSpace = umDir.usableSpace))
-        }
-        return@withContext dirList
     }
 
     /**

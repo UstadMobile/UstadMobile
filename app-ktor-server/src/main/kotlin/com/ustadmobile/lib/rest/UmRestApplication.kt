@@ -10,16 +10,10 @@ import com.ustadmobile.core.catalog.contenttype.XapiTypePluginCommonJvm
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobManagerJvm
 import com.ustadmobile.core.contentjob.ContentPluginManager
-import com.ustadmobile.core.contentjob.ContentPluginManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.db.ext.addSyncCallback
-import com.ustadmobile.core.impl.AppConfig
-import com.ustadmobile.core.impl.UstadMobileConstants
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.di.commonJvmDiModule
-import com.ustadmobile.core.io.UploadSessionManager
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
@@ -30,6 +24,7 @@ import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.core.catalog.contenttype.ApacheIndexerPlugin
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
+import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.torrent.*
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.PersonAuth2
@@ -114,7 +109,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
     val dbMode = dbModeOverride ?:
         appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
-    val trackerAnnounceUrlConfig: String = appConfig.propertyOrNull("ktor.ustad.trackerAnnounceUrl")?.getString() ?: ""
+    val trackerAnnounceUrlConfig: String = appConfig.propertyOrNull("ktor.ustad.trackerAnnounceUrl")?.getString()
+            ?: throw IllegalStateException("need trackerAnnounceUrl on conf file. check README")
     val trackerAnnounceUrl = URL(trackerAnnounceUrlConfig)
     val dataDirPath = File(environment.config.propertyOrNull("ktor.ustad.datadir")?.getString() ?: "data")
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
@@ -133,6 +129,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             File(dataDirPath, context.identifier(dbMode)).also {
                 it.takeIf { !it.exists() }?.mkdirs()
             }
+        }
+
+        bind<ContainerStorageManager>() with scoped(EndpointScope.Default).singleton {
+            ContainerStorageManager(listOf(instance<File>(tag = TAG_CONTEXT_DATA_ROOT)))
         }
 
         bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
@@ -184,8 +184,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                     connectivityState = ConnectivityStatus.STATE_UNMETERED
                     connectedOrConnecting = true
                 })
-                di.on(context).direct.instance<TorrentTracker>().start()
-                di.on(context).direct.instance<UstadTorrentManager>().start()
+                di.on(context).direct.instance<UstadTorrentManager>().startSeeding()
             }
             db
         }
@@ -216,7 +215,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         }
 
         bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
-            ContentPluginManagerImpl(listOf(
+            ContentPluginManager(listOf(
                     di.on(context).direct.instance<EpubTypePluginCommonJvm>(),
                     di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
                     di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
@@ -246,16 +245,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             repo
         }
 
-        bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {
-            UploadSessionManager(context, di)
-        }
-
         bind<Tracker>() with singleton {
             Tracker(trackerAnnounceUrl.port, trackerAnnounceUrl.toString())
-        }
-
-        bind<TorrentTracker>() with scoped(EndpointScope.Default).singleton {
-            TorrentTracker(endpoint = context, di)
         }
         bind<UstadCommunicationManager>() with singleton {
             UstadCommunicationManager(CommunicationWorkers())
@@ -363,12 +354,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         ContainerDownload()
         personAuthRegisterRoute()
         ContainerMountRoute()
-        ContainerUploadRoute2()
         UmAppDatabase_KtorRoute(true)
         SiteRoute()
         ContentEntryLinkImporter()
         TorrentFileRoute()
-        StartFile()
         /*
           This is a temporary redirect approach for users who open an app link but don't
           have the app installed. Because the uri scheme of views is #ViewName?args, this

@@ -4,6 +4,11 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DIAware
 
+/**
+ * Implementations of ContentPlugin manage how content is imported, downloaded, and uploaded. There
+ * is generally one ContentPlugin implementation for each type of supported content import, and
+ * there is another ContentPlugin that implements downloading a Container using a Torrent.
+ */
 interface ContentPlugin : DIAware {
 
     /**
@@ -22,7 +27,7 @@ interface ContentPlugin : DIAware {
      * The plugin should extract metadata from the given uri (if possible) and return a
      * MetadataResult if Metadata is retrieved, or null otherwise.
      */
-    suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult?
+    suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult?
 
     /**
      * The plugin should actually process the given ContentJobItem (e.g. import, download, etc).
@@ -31,9 +36,9 @@ interface ContentPlugin : DIAware {
      * is thrown, processJob may be retried by ContentJobRunner
      */
     suspend fun processJob(
-            jobItem: ContentJobItemAndContentJob,
-            process: ProcessContext,
-            progress: ContentJobProgressListener
+        jobItem: ContentJobItemAndContentJob,
+        process: ContentJobProcessContext,
+        progress: ContentJobProgressListener
     ) : ProcessResult
 
 }

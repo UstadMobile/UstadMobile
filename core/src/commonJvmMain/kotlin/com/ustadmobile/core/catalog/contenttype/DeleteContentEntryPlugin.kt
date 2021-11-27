@@ -9,8 +9,6 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import io.ktor.client.*
@@ -20,7 +18,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
 
-class DeleteContainerPlugin(
+class DeleteContentEntryPlugin(
         private var context: Any,
         private val endpoint: Endpoint,
         override val di: DI
@@ -30,16 +28,14 @@ class DeleteContainerPlugin(
 
     val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    private val ustadTorrentManager: UstadTorrentManager = di.direct.instance<UstadTorrentManager>()
-
     override val pluginId: Int
         get() = PLUGIN_ID
     override val supportedMimeTypes: List<String>
-        get() = TODO("Not yet implemented")
+        get() = listOf()
     override val supportedFileExtensions: List<String>
-        get() = TODO("Not yet implemented")
+        get() = listOf()
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ProcessContext): MetadataResult? {
+    override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
         val containerUid = uri.uri.toString().substringAfterLast("/").toLongOrNull() ?: return null
 
         val containerWithFiles = db.containerEntryDao.findByContainer(containerUid)
@@ -56,7 +52,7 @@ class DeleteContainerPlugin(
         return MetadataResult(contentEntry as ContentEntryWithLanguage, PLUGIN_ID)
     }
 
-    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ProcessContext, progress: ContentJobProgressListener): ProcessResult {
+    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
 
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
 
@@ -65,8 +61,7 @@ class DeleteContainerPlugin(
         progress.onProgress(contentJobItem)
 
         // delete all containerEntries, containerEntryFiles and torrentFile for this contentEntry
-        val numFailures = deleteFilesForContentEntry(db,
-                contentJobItem.cjiContentEntryUid, ustadTorrentManager)
+        val numFailures = deleteFilesForContentEntry(contentJobItem.cjiContentEntryUid, di, endpoint)
 
         contentJobItem.cjiItemProgress = 100
         progress.onProgress(contentJobItem)
