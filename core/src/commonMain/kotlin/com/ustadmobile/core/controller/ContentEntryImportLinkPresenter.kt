@@ -36,7 +36,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
     private val currentHttpClient: HttpClient by instance()
 
     fun handleClickDone(link: String) {
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch(doorMainDispatcher()) {
 
             view.showHideProgress(false)
             try {
