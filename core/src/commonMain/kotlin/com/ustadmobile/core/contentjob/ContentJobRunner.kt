@@ -16,6 +16,7 @@ import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -64,24 +65,28 @@ class ContentJobRunner(
     private fun CoroutineScope.produceJobs() = produce<ContentJobItemAndContentJob> {
         var done : Boolean
         try {
+            Napier.d("connectivity observer forever")
             withContext(doorMainDispatcher()) {
                 connectivityLiveData.liveData.observeForever(this@ContentJobRunner)
             }
 
             do {
+                Napier.d("waiting for signal to check queue")
                 checkQueueSignalChannel.receive()
                 val numProcessorsAvailable = numProcessors - activeJobItemIds.size
-                if(numProcessorsAvailable > 0) {
+                Napier.d("num process available :$numProcessorsAvailable")
+                if (numProcessorsAvailable > 0) {
                     //Check queue and filter out any duplicates that are being actively processed
                     val queueItems = db.contentJobItemDao.findNextItemsInQueue(jobId, numProcessors * 2).filter {
                         (it.contentJobItem?.cjiUid ?: 0) !in activeJobItemIds
                     }
 
                     val numJobsToAdd = min(numProcessorsAvailable, queueItems.size)
+                    Napier.d("num of Jobs to add :$numJobsToAdd")
 
-                    for(i in 0 until numJobsToAdd) {
+                    for (i in 0 until numJobsToAdd) {
                         val contentJobItemUid = queueItems[i].contentJobItem?.cjiUid ?: 0L
-                        activeJobItemIds +=  contentJobItemUid
+                        activeJobItemIds += contentJobItemUid
                         db.contentJobItemDao.updateItemStatus(contentJobItemUid, JobStatus.RUNNING)
                         send(queueItems[i])
                     }
@@ -89,17 +94,22 @@ class ContentJobRunner(
 
 
                 done = db.contentJobItemDao.isJobDone(jobId)
-            }while(!done)
+                Napier.d("is job Done :$done")
+            } while (!done)
+        }catch(e: Exception) {
+            Napier.d(e.stackTraceToString(), e)
         }finally {
             withContext(NonCancellable + doorMainDispatcher()) {
                 connectivityLiveData.liveData.removeObserver(this@ContentJobRunner)
             }
+            Napier.d("close produce job")
             close()
         }
     }
 
     private fun CoroutineScope.launchProcessor(id: Int, channel: ReceiveChannel<ContentJobItemAndContentJob>) = launch {
         val tmpDir = createTemporaryDir("job-$id")
+        Napier.d("created tempDir job-$id")
 
         for(item in channel) {
             val itemUri = item.contentJobItem?.sourceUri?.let { DoorUri.parse(it) } ?: continue
@@ -245,9 +255,11 @@ class ContentJobRunner(
             }
 
             repeat(numProcessors) {
+                Napier.d("launch processor $it")
                 launchProcessor(it, producerVal)
             }
 
+            Napier.d("run Job, send queue signal")
             checkQueueSignalChannel.send(true)
         }
 

@@ -8,6 +8,7 @@ import com.ustadmobile.core.torrent.ContainerTorrentDownloadJob
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.rest.ext.dbModeToEndpoint
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.http.content.*
@@ -39,8 +40,7 @@ fun Route.TorrentFileRoute(){
             val contentJobManager: ContentJobManager by closestDI().instance()
             val containerFolder: File by closestDI().on(call).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
             val db: UmAppDatabase by closestDI().on(call).instance(tag = UmAppDatabase.TAG_DB)
-            // TODO handle virtualhostmode for endpoint
-            val endpoint = Endpoint(call.request.header("Host") ?: "localhost")
+            val endpoint = call.application.environment.config.dbModeToEndpoint(call = call)
 
             val containerUid = call.parameters["containerUid"]?.toLong() ?: 0L
             val contentEntryUid = call.parameters["contentEntryUid"]?.toLong() ?: 0L
@@ -111,10 +111,7 @@ fun Route.TorrentFileRoute(){
         delete("{jobId}/cancel"){
 
             val jobUid: Long = call.parameters["jobId"]?.toLongOrNull() ?: 0L
-
-            // TODO handle virtualhostmode for endpoint
-            val endpoint = Endpoint(call.request.header("Host") ?: "localhost")
-
+            val endpoint = call.application.environment.config.dbModeToEndpoint(call = call)
             val contentJobManager: ContentJobManager by closestDI().instance()
             contentJobManager.cancelContentJob(endpoint, jobUid)
             call.respond(HttpStatusCode.OK)

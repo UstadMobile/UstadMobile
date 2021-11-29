@@ -28,10 +28,7 @@ import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.torrent.*
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.PersonAuth2
-import com.ustadmobile.lib.rest.ext.databasePropertiesFromSection
-import com.ustadmobile.lib.rest.ext.initAdminUser
-import com.ustadmobile.lib.rest.ext.ktorInitRepo
-import com.ustadmobile.lib.rest.ext.toProperties
+import com.ustadmobile.lib.rest.ext.*
 import com.ustadmobile.lib.rest.messaging.MailProperties
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
@@ -168,6 +165,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         bind<Gson>() with singleton { Gson() }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
+            Napier.d("creating database for context: ${context.url}")
             val dbHostName = context.identifier(dbMode, singletonDbName)
             val dbProperties = appConfig.databasePropertiesFromSection("ktor.database",
                 defaultUrl = "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
@@ -327,11 +325,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         }
 
         registerContextTranslator { call: ApplicationCall ->
-            if(dbMode == CONF_DBMODE_SINGLETON) {
-                Endpoint("localhost")
-            }else {
-                Endpoint(call.request.header("Host") ?: "localhost")
-            }
+            appConfig.dbModeToEndpoint(call, dbMode)
         }
 
         onReady {
@@ -346,7 +340,15 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             tracker.setAcceptForeignTorrents(true)
             tracker.start(true)
             instance<UstadCommunicationManager>().start(InetAddress.getByName(trackerAnnounceUrl.host))
+
+            Runtime.getRuntime().addShutdownHook(Thread{
+                instance<Scheduler>().shutdown()
+            })
         }
+
+
+
+
     }
 
     install(Routing) {

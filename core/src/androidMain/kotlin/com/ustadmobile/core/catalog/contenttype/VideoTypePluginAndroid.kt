@@ -244,7 +244,9 @@ class VideoTypePluginAndroid(
                     mediaTransformer.release()
                     newVideo.delete()
                     videoTempDir.deleteRecursively()
-                    localUri.toFile().delete()
+                    if(videoUri.isRemote()){
+                        localUri.toFile().delete()
+                    }
                 }
 
                 throw c

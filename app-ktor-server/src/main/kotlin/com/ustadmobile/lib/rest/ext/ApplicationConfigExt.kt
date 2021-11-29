@@ -1,7 +1,11 @@
 package com.ustadmobile.lib.rest.ext
 
+import com.ustadmobile.lib.rest.CONF_DBMODE_SINGLETON
 import io.ktor.config.*
+import io.ktor.request.*
 import java.util.*
+import com.ustadmobile.core.account.Endpoint
+import io.ktor.application.*
 
 /**
  * Create a Properties object from a HOCON config section.
@@ -34,5 +38,14 @@ fun ApplicationConfig.databasePropertiesFromSection(section: String,
             propertyOrNull("$section.user")?.getString() ?: "")
         setProperty("password",
             propertyOrNull("$section.password")?.getString() ?: "")
+    }
+}
+
+fun ApplicationConfig.dbModeToEndpoint(call: ApplicationCall, dbModeOverride: String? = null): Endpoint{
+    val dbMode: String = dbModeOverride ?: propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
+    return if(dbMode == CONF_DBMODE_SINGLETON) {
+        Endpoint("localhost")
+    }else {
+        Endpoint(call.request.header("Host") ?: "localhost")
     }
 }
