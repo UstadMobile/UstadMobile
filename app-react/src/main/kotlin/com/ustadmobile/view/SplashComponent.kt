@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.controller.SplashPresenter
-import com.ustadmobile.mui.components.UmLinearProgressColor
+import com.ustadmobile.mui.components.LinearProgressColor
 import com.ustadmobile.mui.components.themeContext
 import com.ustadmobile.mui.components.umCssBaseline
 import com.ustadmobile.mui.components.umLinearProgress
@@ -62,8 +62,8 @@ class SplashComponent (props: UmProps): RComponent<UmProps, UmState>(props), Spl
                         }
 
                         val color = when {
-                            isDarkModeActive() -> UmLinearProgressColor.secondary
-                            else -> UmLinearProgressColor.primary
+                            isDarkModeActive() -> LinearProgressColor.secondary
+                            else -> LinearProgressColor.primary
                         }
 
                         umLinearProgress(color = color) {

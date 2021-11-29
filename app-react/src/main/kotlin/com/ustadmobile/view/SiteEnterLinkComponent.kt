@@ -4,9 +4,26 @@ import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.controller.SiteEnterLinkPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.SiteEnterLinkView
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.ext.targetInputValue
+import com.ustadmobile.mui.theme.UMColor
 import react.RBuilder
 import com.ustadmobile.util.*
+import com.ustadmobile.util.StyleManager.contentContainer
+import com.ustadmobile.util.StyleManager.defaultFullWidth
+import com.ustadmobile.util.StyleManager.defaultMarginTop
+import com.ustadmobile.util.ext.clean
+import com.ustadmobile.view.ext.createCreateNewItem
+import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
+import kotlinx.browser.window
+import kotlinx.css.LinearDimension
+import kotlinx.css.height
+import kotlinx.css.marginTop
 import react.setState
+import styled.css
+import styled.styledDiv
 
 class SiteEnterLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps), SiteEnterLinkView {
 
@@ -62,33 +79,32 @@ class SiteEnterLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmSta
 
 
     override fun RBuilder.render() {
-       /* styledDiv {
+        styledDiv {
             css {
                 +contentContainer
                 marginTop = 4.spacingUnits
             }
             umGridContainer {
-                mHidden(smDown = true){
-                    umItem(MGridSize.cells3){}
+                umHidden(smDown = true){
+                    umItem(GridSize.column3){}
                 }
-                umItem(MGridSize.cells12, MGridSize.cells6){
+                umItem(GridSize.column12, GridSize.column6){
                     umGridContainer {
 
-                        umItem(MGridSize.cells12){
-                            mTypography(getString(MessageID.please_enter_the_linK),
-                                variant = MTypographyVariant.body2,
-                                color = MTypographyColor.textPrimary){
+                        umItem(GridSize.column12){
+                            umTypography(getString(MessageID.please_enter_the_linK),
+                                variant = TypographyVariant.body2,
+                                color = TypographyColor.textPrimary){
                                 css (StyleManager.alignTextToStart)
                             }
                         }
 
-                        umItem(MGridSize.cells12){
-                            mTextField(label = "${siteLInkLabel.text}",
+                        umItem(GridSize.column12){
+                            umTextField(label = "${siteLInkLabel.text}",
                                 helperText = siteLInkLabel.errorText,
                                 value = siteLink, error = siteLInkLabel.error,
-                                variant = MFormControlVariant.outlined,
+                                variant = FormControlVariant.outlined,
                                 onChange = {
-                                    it.persist()
                                     window.clearTimeout(handlerTimeoutId)
                                     handlerTimeoutId = window.setTimeout(inputCheckHandler,
                                         INPUT_CHECK_DELAY)
@@ -102,43 +118,43 @@ class SiteEnterLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmSta
                         }
 
                         if(validLink){
-                            umItem(MGridSize.cells12) {
+                            umItem(GridSize.column12) {
                                 css(defaultMarginTop)
-                                mButton(getString(MessageID.next),
-                                    size = MButtonSize.large,
-                                    color = MColor.secondary,
-                                    variant = MButtonVariant.contained,
+                                umButton(getString(MessageID.next),
+                                    size = ButtonSize.large,
+                                    color = UMColor.secondary,
+                                    variant = ButtonVariant.contained,
                                     onClick = {
                                         mPresenter?.handleClickNext()
                                     }){
                                     css {
                                         +defaultFullWidth
-                                        height = 50.px
+                                        height = LinearDimension("50px")
                                     }}
                             }
                         }
 
-                        umItem(MGridSize.cells12){
+                        umItem(GridSize.column12){
                             umGridContainer(
-                                justify = MGridJustify.center,
-                                alignItems = MGridAlignItems.center) {
-                                umItem(MGridSize.cells1){
+                                justify = GridJustify.center,
+                                alignItems = GridAlignItems.center) {
+                                umItem(GridSize.column1){
                                     css(defaultMarginTop)
-                                    mTypography(getString(MessageID.or),
-                                        variant = MTypographyVariant.h6,
-                                        align = MTypographyAlign.center,
-                                        color = MTypographyColor.textPrimary){
+                                    umTypography(getString(MessageID.or),
+                                        variant = TypographyVariant.h6,
+                                        align = TypographyAlign.center,
+                                        color = TypographyColor.textPrimary){
                                         css (StyleManager.alignTextToStart)
                                     }
                                 }
                             }
                         }
 
-                        umItem(MGridSize.cells12){
+                        umItem(GridSize.column12){
                             createCreateNewItem(getString(MessageID.create_site))
                         }
 
-                        umItem(MGridSize.cells12){
+                        umItem(GridSize.column12){
                             css(defaultMarginTop)
                             createItemWithIconTitleAndDescription("info",
                                 description = getString(MessageID.sites_can_be_help_text).clean(),
@@ -147,11 +163,11 @@ class SiteEnterLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmSta
                         }
                     }
                 }
-                mHidden(smDown = true){
-                    umItem(MGridSize.cells3){}
+                umHidden(smDown = true){
+                    umItem(GridSize.column3){}
                 }
             }
-        }*/
+        }
     }
 
     override fun onDestroyView() {

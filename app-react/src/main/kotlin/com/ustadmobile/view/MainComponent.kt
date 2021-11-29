@@ -1,23 +1,70 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
+import com.ustadmobile.core.view.AccountListView
+import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.navigation.RouteManager.defaultDestination
+import com.ustadmobile.navigation.RouteManager.destinationList
 import com.ustadmobile.navigation.RouteManager.lookupDestinationName
 import com.ustadmobile.navigation.UstadDestination
 import com.ustadmobile.redux.ReduxAppState
+import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxAppStateManager.subscribe
+import com.ustadmobile.redux.ReduxSnackBarState
 import com.ustadmobile.redux.ReduxStore
+import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.alignTextToStart
+import com.ustadmobile.util.StyleManager.defaultFullWidth
+import com.ustadmobile.util.StyleManager.displayProperty
+import com.ustadmobile.util.StyleManager.mainComponentAppBar
+import com.ustadmobile.util.StyleManager.mainComponentAppBarWithNoNav
+import com.ustadmobile.util.StyleManager.mainComponentBottomNav
+import com.ustadmobile.util.StyleManager.mainComponentBrandIcon
+import com.ustadmobile.util.StyleManager.mainComponentBrandIconContainer
+import com.ustadmobile.util.StyleManager.mainComponentContainer
+import com.ustadmobile.util.StyleManager.mainComponentContentContainer
+import com.ustadmobile.util.StyleManager.mainComponentFab
+import com.ustadmobile.util.StyleManager.mainComponentProfileInnerAvatar
+import com.ustadmobile.util.StyleManager.mainComponentProfileOuterAvatar
+import com.ustadmobile.util.StyleManager.mainComponentProgressIndicator
+import com.ustadmobile.util.StyleManager.mainComponentSearch
+import com.ustadmobile.util.StyleManager.mainComponentSearchIcon
+import com.ustadmobile.util.StyleManager.mainComponentSideNavMenuList
+import com.ustadmobile.util.StyleManager.mainComponentToolbarMargins
+import com.ustadmobile.util.StyleManager.mainComponentWrapperContainer
+import com.ustadmobile.util.ThemeManager.isDarkModeActive
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.util.getViewNameFromUrl
+import com.ustadmobile.view.ext.*
+import kotlinext.js.jsObject
 import kotlinx.browser.window
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.css.Display
+import kotlinx.css.LinearDimension
+import kotlinx.css.display
+import kotlinx.css.marginTop
+import mui.material.InputBaseComponentProps
+import mui.material.InputBaseProps
+import mui.material.PaperProps
+import org.kodein.di.instance
+import org.kodein.di.on
+import react.Props
 import react.RBuilder
+import react.ReactElement
+import react.dom.div
+import react.dom.span
 import react.setState
+import styled.css
+import styled.styledDiv
+import styled.styledImg
 
 
 class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props){
@@ -80,27 +127,26 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
 
 
     override fun RBuilder.render() {
-       /* themeContext.Consumer { theme ->
+        themeContext.Consumer { theme ->
 
             styledDiv {
                 css (mainComponentWrapperContainer)
 
                 //Loading indicator
-                mLinearProgress {
+                umLinearProgress(color = if(isDarkModeActive()) LinearProgressColor.secondary
+                else LinearProgressColor.primary) {
                     css(mainComponentProgressIndicator)
                     attrs.asDynamic().id = "um-progress"
-                    attrs.color = if(isDarkModeActive()) MLinearProgressColor.secondary
-                    else MLinearProgressColor.primary
                 }
 
                 styledDiv {
                     css(mainComponentContainer)
 
-                    mAppBar(position = MAppBarPosition.fixed) {
+                    umAppBar(position = AppBarPosition.fixed) {
                         css (if(currentDestination.showNavigation) mainComponentAppBar
                         else mainComponentAppBarWithNoNav)
 
-                        mToolbar {
+                        umToolbar {
                             attrs.asDynamic().id = "um-toolbar"
                             attrs.asDynamic().onClick = {
                                 GlobalScope.launch {
@@ -112,14 +158,14 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
 
                             umGridContainer {
 
-                                mHidden(xsDown = currentDestination.showSearch) {
-                                    umItem(if(currentDestination.showSearch) MGridSize.cells1 else MGridSize.cells9, MGridSize.cells5){
-                                        css{marginTop = 4.px}
-                                        mToolbarTitle(appState.appToolbar.title ?: "")
+                                umHidden(xsDown = currentDestination.showSearch) {
+                                    umItem(if(currentDestination.showSearch) GridSize.column1 else GridSize.column9, GridSize.column5){
+                                        css{marginTop = LinearDimension("4px") }
+                                        umToolbarTitle(appState.appToolbar.title ?: "")
                                     }
                                 }
 
-                                umItem(if(currentDestination.showSearch) MGridSize.cells9 else MGridSize.cells1,MGridSize.cells6){
+                                umItem(if(currentDestination.showSearch) GridSize.column9 else GridSize.column1,GridSize.column6){
 
                                     styledDiv {
 
@@ -130,23 +176,23 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
 
                                         styledDiv {
                                             css(mainComponentSearchIcon)
-                                            mIcon("search")
+                                            umIcon("search")
                                         }
 
-                                        val inputProps = object: RProps {
+                                        val inputProps = object: Props {
                                             val className = "${StyleManager.name}-mainComponentInputSearchClass"
                                             val id = "um-search"
                                         }
 
-                                        mInput(placeholder = "${getString(MessageID.search)}...",
+                                        umInput(placeholder = "${getString(MessageID.search)}...",
                                             disableUnderline = true) {
-                                            attrs.inputProps = inputProps
+                                            attrs.inputProps = inputProps as InputBaseComponentProps
                                         }
                                     }
                                 }
 
-                                umItem(MGridSize.cells2, MGridSize.cells1){
-                                    mAvatar {
+                                umItem(GridSize.column2, GridSize.column1){
+                                    umAvatar {
                                         css {
                                             display = displayProperty(currentDestination.showNavigation)
                                             +mainComponentProfileOuterAvatar
@@ -158,13 +204,13 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                                             }
                                         }
 
-                                        mAvatar{
+                                        umAvatar{
                                             css (mainComponentProfileInnerAvatar)
-                                            mTypography("${activeAccount?.firstName?.first()}",
-                                                align = MTypographyAlign.center,
-                                                variant = MTypographyVariant.h5){
+                                            umTypography("${activeAccount?.firstName?.first()}",
+                                                align = TypographyAlign.center,
+                                                variant = TypographyVariant.h5){
                                                 css{
-                                                    marginTop = (1.5).px
+                                                    marginTop = LinearDimension("1.5px")
                                                 }
                                             }
                                         }
@@ -185,7 +231,7 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                         css(mainComponentContentContainer)
                         appBarSpacer()
                         styledDiv {
-                            attrs.id = "main-content"
+                            attrs.asDynamic().id = "main-content"
                             renderRoutes()
                         }
                     }
@@ -194,9 +240,9 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                         renderBottomNavigation()
                     }
 
-                    mFab("","",
-                        color = MColor.secondary) {
-                        attrs.id = "um-fab"
+                    umFab("","",
+                        color = UMColor.secondary) {
+                        attrs.asDynamic().id = "um-fab"
                         css{
                             display = Display.none
                             +mainComponentFab
@@ -207,57 +253,56 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
             }
         }
 
-        errorBoundary(errorFallBack(getString(MessageID.error))){
-            mCssBaseline()
+ /*       errorBoundary(errorFallBack(getString(MessageID.error))){
+            umCssBaseline()
 
         }*/
     }
 
     private fun RBuilder.renderBottomNavigation(){
-      /*  mHidden(smUp = true) {
-            mBottomNavigation(currentDestination, true,
-                onChange = { _, value -> setState {
-                val destination = value as UstadDestination
-                systemImpl.go(destination.view, mapOf(),this)
-            }}) {
+        umHidden(smUp = true) {
+            umBottomNavigation(currentDestination, true) {
                 css (mainComponentBottomNav)
-
+                attrs.onChange = { _, value -> setState {
+                    val destination = value as UstadDestination
+                    systemImpl.go(destination.view, mapOf(),this)
+                }}
                 destinationList.filter { it.icon != null && it.view != SettingsView.VIEW_NAME }.forEach { destination ->
                     destination.icon?.let {
-                        mBottomNavigationAction(getString(destination.labelId),
-                            mIcon(it, addAsChild = false),
+                        umBottomNavigationAction(label = getString(destination.labelId).asDynamic() as ReactElement?,
+                            it.asDynamic() as ReactElement?,
                             value = destination,
                             showLabel = true)
                     }
                 }
             }
-        }*/
+        }
     }
 
     private fun RBuilder.renderSideNavigation(){
-       /* val p: MPaperProps = jsObject { }
+        val p: PaperProps = jsObject { }
         p.asDynamic().style = kotlinext.js.js {
             position = "relative"; width = drawerWidth.px.value; display = "block"; height =
             "100%"; minHeight = "100vh"
-        }*/
+        }
 
-       /* mHidden(xsDown = true) {
-            mDrawer(true, MDrawerAnchor.left, MDrawerVariant.permanent, paperProps = p) {
+        umHidden(xsDown = true) {
+            umDrawer(true, DrawerAnchor.left, DrawerVariant.permanent, paperProps = p) {
                 styledDiv {
                     css(mainComponentBrandIconContainer)
                     styledImg(src = "assets/brand-logo.png"){
                         css(mainComponentBrandIcon)
                     }
                 }
-                mDivider {
+                umDivider {
                     css(defaultFullWidth)
                 }
                 themeContext.Consumer { _ ->
-                    mList {
+                    umList {
                         css (mainComponentSideNavMenuList)
                         destinationList.filter { it.icon != null }.forEach { destination ->
                             destination.icon?.let {
-                                mListItemWithIcon(it, getString(destination.labelId),
+                                umListItemWithIcon(it, getString(destination.labelId),
                                     divider = destination.divider ,
                                     onClick = {
                                         systemImpl.go(destination.view, mapOf(),this)
@@ -271,28 +316,25 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                     renderLanguages(systemImpl)
                 }
             }
-        }*/
+        }
     }
 
     private fun RBuilder.renderSnackBar(){
-       /* mSnackbar(altBuilder.span { +"${appState.appSnackBar.message}"},
+        umSnackbar(altBuilder.span { +"${appState.appSnackBar.message}"}.toString(),
             open = appState.appSnackBar.message != null,
-            horizAnchor = MSnackbarHorizAnchor.center, autoHideDuration = 3000,
-            onClose = { _, _ ->
-                dispatch(ReduxSnackBarState())
-            }) {
+            horizAnchor = SnackbarHorizAnchor.center, autoHideDuration = 3000) {
 
             if(!appState.appSnackBar.actionLabel.isNullOrBlank()){
                 attrs.action = altBuilder.div {
-                    mButton("${appState.appSnackBar.actionLabel}", color = MColor.secondary,
-                        variant = MButtonVariant.text, size = MButtonSize.small,
+                    umButton("${appState.appSnackBar.actionLabel}", color = UMColor.secondary,
+                        variant = ButtonVariant.text, size = ButtonSize.small,
                         onClick = {
                             appState.appSnackBar.onClick
                             dispatch(ReduxSnackBarState())
                         })
-                }
+                } as ReactElement
             }
-        }*/
+        }
     }
 
 

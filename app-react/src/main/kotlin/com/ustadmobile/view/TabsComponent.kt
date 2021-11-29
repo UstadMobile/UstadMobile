@@ -1,11 +1,18 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ACTIVE_TAB_INDEX
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.navigation.RouteManager.lookupDestinationName
 import com.ustadmobile.util.getViewNameFromUrl
 import com.ustadmobile.util.urlSearchParamsToMap
 import react.RBuilder
 import com.ustadmobile.util.*
+import com.ustadmobile.util.StyleManager.displayProperty
+import com.ustadmobile.util.StyleManager.tabsContainer
+import kotlinx.css.*
 import react.setState
+import styled.css
+import styled.styledDiv
 
 interface TabsProps: UmProps {
     var tabs: List<UstadTab>
@@ -42,13 +49,13 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,UmState>(m
     }
 
     override fun RBuilder.render() {
-/*        mAppBar(position = MAppBarPosition.static) {
+        umAppBar(position = AppBarPosition.static) {
             css{
                 display = displayProperty(props.showTabs)
             }
-            mTabs(selectedTabTitle,
-                scrollButtons = MTabScrollButtons.auto,
-                variant = MTabVariant.scrollable,
+            umTabs(selectedTabTitle,
+                scrollButtons = TabScrollButtons.auto,
+                variant = TabVariant.scrollable,
                 onChange = { _, value ->
                     tabChangeListener(value)
                 }) {
@@ -57,7 +64,7 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,UmState>(m
                 }
                 attrs.asDynamic().id = "um-tabs"
                 props.tabs.forEachIndexed { _, it ->
-                    mTab(it.title, it.title) {
+                    umTab(it.title, it.title) {
                         css {
                             display = Display.block
                             width = LinearDimension("100%")
@@ -75,7 +82,7 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,UmState>(m
                     attrs.asDynamic().arguments = selectedTab.args
                 }
             }
-        }*/
+        }
     }
 }
 

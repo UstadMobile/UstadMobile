@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import react.RBuilder
 import com.ustadmobile.util.*
+import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
 import react.setState
 
 class TimeZoneListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps) , TimeZoneListView,
@@ -67,7 +68,7 @@ class ZonesListComponent(mProps: ListProps<TimeZone>):
     UstadSimpleList<ListProps<TimeZone>>(mProps){
 
     override fun RBuilder.renderListItem(item: TimeZone) {
-        /*createItemWithIconTitleAndDescription("query_builder",item.name, item.timeName)*/
+        createItemWithIconTitleAndDescription("query_builder",item.name, item.timeName)
     }
 }
 

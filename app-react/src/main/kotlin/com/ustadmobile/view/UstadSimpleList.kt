@@ -2,10 +2,18 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.util.OneToManyJoinEditListener
+import com.ustadmobile.mui.components.ListItemAlignItems
+import com.ustadmobile.mui.components.umList
+import com.ustadmobile.mui.components.umListItem
 import com.ustadmobile.util.StyleManager.listComponentContainer
 import com.ustadmobile.util.StyleManager.listComponentContainerWithScroll
 import com.ustadmobile.util.*
+import com.ustadmobile.util.StyleManager.horizontalList
+import com.ustadmobile.util.StyleManager.theme
+import com.ustadmobile.view.ext.createCreateNewItem
+import kotlinx.css.Color
 import kotlinx.css.LinearDimension
+import kotlinx.css.backgroundColor
 import kotlinx.css.width
 import react.RBuilder
 import styled.css
@@ -51,38 +59,34 @@ abstract class UstadSimpleList<P: ListProps<*>>(mProps: P) : UstadBaseComponent<
     }
 
     private fun RBuilder.renderList(){
-        /*mList {
+        umList {
             css(horizontalList)
 
             if(props.createNewItem?.visible == true && props.createNewItem?.labelId != 0){
-                mListItem {
+                umListItem(button = true, alignItems = ListItemAlignItems.flexStart) {
                     css(StyleManager.listCreateNewContainer)
-                    attrs.alignItems = MListItemAlignItems.flexStart
-                    attrs.button = true
                     attrs.divider = true
                     attrs.onClick = {
-                        props.createNewItem?.onClickCreateNew?.com.ustadmobile.components.theming.invoke()
+                        props.createNewItem?.onClickCreateNew?.invoke()
                     }
                     createCreateNewItem(getString(props.createNewItem?.labelId ?: 0))
                 }
             }
 
             props.entries.forEach {entry->
-                mListItem {
+                umListItem(button = true, alignItems = ListItemAlignItems.flexStart) {
                     css{
                         backgroundColor = Color(theme.palette.background.paper)
                         width = LinearDimension("100%")
                     }
-                    attrs.alignItems = MListItemAlignItems.flexStart
-                    attrs.button = true
-                    attrs.divider = true
                     attrs.onClick = {
-                        props.onEntryClicked?.com.ustadmobile.components.theming.invoke(entry)
+                        props.onEntryClicked?.invoke(entry)
                     }
+                    attrs.divider = true
                     renderListItem(entry)
                 }
             }
-        }*/
+        }
     }
 
     abstract fun RBuilder.renderListItem(item: dynamic)

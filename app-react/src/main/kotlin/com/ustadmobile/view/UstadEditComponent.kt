@@ -35,7 +35,7 @@ abstract class UstadEditComponent<T: Any>(mProps: UmProps): UstadBaseComponent<U
     }
 
     override fun finishWithResult(result: List<T>) {
-        TODO("Not used anymore, handle it MPP way")
+        TODO("finishWithResult: Not used anymore, handle it MPP way")
     }
 
     protected fun setEditTitle(newTitleId: Int, editStringId: Int) {
