@@ -1,39 +1,29 @@
-/*
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
-import org.mockito.kotlin.*
-import com.ustadmobile.core.contentformats.ContentImportManager
-import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.ContainerStorageManager
-import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.*
+import org.mockito.kotlin.*
 
 
 class ContentEntryEdit2PresenterTest {
@@ -74,7 +64,7 @@ class ContentEntryEdit2PresenterTest {
 
     private val metadataResult =  MetadataResult(ContentEntryWithLanguage(), TestPlugin.PLUGIN_ID)
 
-    private val storageDir = ContainerStorageDir(createTemporaryDir("container").uri.toString(), "container", 100, false)
+    private val storageDir = createTemporaryDir("container").toFile()
 
 
     @Before
@@ -84,11 +74,12 @@ class ContentEntryEdit2PresenterTest {
         contentEntry = createMockEntryWithLanguage()
         mockLifecycleOwner = mock { }
         contentJobManager = mock { }
-        contentPluginManager = mock { }
+        contentPluginManager = mock {
+            onBlocking { extractMetadata(any(), any()) }.thenAnswer {
+                    metadataResult
+            }
+        }
         systemImpl = mock {
-
-
-
             on { getString(any(), any()) }.thenAnswer { errorMessage }
         }
 
@@ -98,6 +89,12 @@ class ContentEntryEdit2PresenterTest {
             bind<UstadMobileSystemImpl>(overrides = true) with singleton { systemImpl }
             bind<ContainerStorageManager>() with scoped(ustadTestRule.endpointScope).singleton {
                 ContainerStorageManager(listOf(storageDir))
+            }
+            bind<ContentPluginManager>() with scoped(ustadTestRule.endpointScope).singleton {
+                contentPluginManager
+            }
+            bind<ContentJobManager>() with singleton {
+                contentJobManager
             }
         }
 
@@ -123,7 +120,7 @@ class ContentEntryEdit2PresenterTest {
             on { compressionEnabled }.thenAnswer{ true }
             on { videoDimensions }.thenAnswer{ Pair(0,0) }
             on { selectedStorageIndex }.thenAnswer { 0 }
-            on { storageOptions }.thenAnswer { listOf(storageDir) }
+            on { storageOptions }.thenAnswer { di.onActiveAccountDirect().instance<ContainerStorageManager>().storageList }
             on { metadataResult }.thenAnswer {
                 if (isUriNull) null else
                     metadataResult
@@ -268,4 +265,4 @@ class ContentEntryEdit2PresenterTest {
         }
     }
 
-}*/
+}

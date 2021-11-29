@@ -206,7 +206,7 @@ class ContentEntryEdit2Presenter(
         view.fieldsEnabled = false
         view.titleErrorEnabled = false
         view.fileImportErrorVisible = false
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch(doorMainDispatcher()) {
 
             val canCreate = isImportValid(entity)
 
