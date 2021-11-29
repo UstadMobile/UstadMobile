@@ -1,0 +1,113 @@
+package com.ustadmobile.mui.components
+
+import com.ustadmobile.mui.ext.createStyledComponent
+import mui.material.ListItem
+import mui.material.ListItemBaseProps
+import mui.material.ListItemProps
+import org.w3c.dom.events.Event
+import react.Props
+import react.PropsWithClassName
+import react.RBuilder
+import styled.StyledHandler
+
+@Suppress("EnumEntryName")
+enum class ListItemAlignItems {
+    flexStart, center;
+    override fun toString(): String {
+        return super.toString().toHyphenCase()
+    }
+}
+
+fun RBuilder.umListItem(
+    selected: Boolean = false,
+    key: String? = null,
+    alignItems: ListItemAlignItems = ListItemAlignItems.center,
+    divider: Boolean = true,
+    onClick: ((Event) -> Unit)? = null,
+    className: String? = null,
+    handler: StyledHandler<UMListItemProps>? = null
+) = umListItem(button = true, selected = selected, key = key, alignItems = alignItems, divider = divider,
+    onClick = onClick, className = className) {
+    if (handler != null) handler()
+}
+
+
+fun RBuilder.umListItemWithIcon(
+    iconName: String,
+    primaryText: String,
+    secondaryText: String? = null,
+    selected: Boolean = false,
+    key: String? = null,
+    alignItems: ListItemAlignItems = ListItemAlignItems.center,
+    divider: Boolean = true,
+    useAvatar: Boolean = false,
+    onClick: ((Event) -> Unit)? = null,
+    className: String? = null,
+    handler: StyledHandler<UMListItemProps>? = null
+) = umListItem(button = true, selected = selected, key = key, alignItems = alignItems, divider = divider,
+    onClick = onClick, className = className) {
+
+    if (useAvatar) {
+        umListItemAvatar { umAvatar { umIcon(iconName) } }
+    } else {
+        umListItemIcon(iconName)
+    }
+    umListItemText(primaryText, secondaryText)
+
+    // We don't call setStyledPropsAndRunHandler as this is called in the original mListItem above (but the handler below is not)
+    if (handler != null) handler()
+}
+
+
+fun RBuilder.mListItemWithAvatar(
+    avatarSrc: String,
+    primaryText: String,
+    secondaryText: String? = null,
+    selected: Boolean = false,
+    key: String? = null,
+    alignItems: ListItemAlignItems = ListItemAlignItems.center,
+    divider: Boolean = true,
+    onClick: ((Event) -> Unit)? = null,
+    className: String? = null,
+    handler: StyledHandler<UMListItemProps>? = null
+) = umListItem(button = true, selected = selected, key = key, alignItems = alignItems, divider = divider,
+    onClick =  onClick, className = className) {
+    umListItemAvatar { umAvatar(avatarSrc) }
+    umListItemText(primaryText, secondaryText)
+    if (handler != null) handler()
+}
+
+external interface UMListItemProps: ListItemProps,ListItemBaseProps, PropsWithClassName{
+    var onClick: (Event) -> Unit
+}
+
+fun RBuilder.umListItem(
+    button: Boolean = false,
+    component: String? = null,
+    containerComponent: String = "li",
+    selected: Boolean = false,
+    key: String? = null,
+    alignItems: ListItemAlignItems = ListItemAlignItems.center,
+    containerProps: Props? = null,
+    dense: Boolean = false,
+    disableGutters: Boolean = false,
+    divider: Boolean = false,
+    autoFocus: Boolean = false,
+    onClick: ((Event) -> Unit)? = null,
+    className: String? = null,
+    handler: StyledHandler<UMListItemProps>? = null
+) = createStyledComponent(ListItem, className, handler) {
+    attrs.asDynamic().alignItems = alignItems
+    attrs.autoFocus = autoFocus
+    attrs.asDynamic().button = button
+    component?.let { attrs.asDynamic().component = component }
+    attrs.asDynamic().containerComponent = containerComponent
+    containerProps?.let { attrs.asDynamic().containerProps = containerProps }
+    attrs.dense = dense
+    attrs.disableGutters = disableGutters
+    attrs.divider = divider
+    onClick?.let { attrs.onClick = onClick }
+    attrs.selected = selected
+    key?.let { attrs.asDynamic().key = key }
+    attrs.selected = selected
+}

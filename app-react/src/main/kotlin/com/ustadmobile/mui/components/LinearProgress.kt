@@ -7,12 +7,12 @@ import react.RBuilder
 import styled.StyledHandler
 
 @Suppress("EnumEntryName")
-enum class UmLinearProgressColor {
+enum class LinearProgressColor {
     primary, secondary
 }
 
 @Suppress("EnumEntryName")
-enum class UmLinearProgressVariant {
+enum class LinearProgressVariant {
     determinate, indeterminate, buffer, query
 }
 
@@ -20,8 +20,8 @@ enum class UmLinearProgressVariant {
 fun RBuilder.umLinearProgress(
     value: Double? = null,
     valueBuffer: Double? = null,
-    variant: UmLinearProgressVariant = UmLinearProgressVariant.indeterminate,
-    color: UmLinearProgressColor = UmLinearProgressColor.primary,
+    variant: LinearProgressVariant = LinearProgressVariant.indeterminate,
+    color: LinearProgressColor = LinearProgressColor.primary,
     className: String? = null,
     handler: StyledHandler<LinearProgressProps>?
 ) = createStyledComponent(LinearProgress, className, handler){

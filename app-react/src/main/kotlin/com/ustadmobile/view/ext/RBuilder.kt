@@ -1,13 +1,11 @@
 package com.ustadmobile.view.ext
 
-/*
-import com.ccfraser.muirwik.components.*
-import com.ccfraser.muirwik.components.button.MIconButtonSize
-import com.ccfraser.muirwik.components.button.mIconButton
-import com.ccfraser.muirwik.components.list.mListItemIcon
+
 import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.ScopedGrantEditPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.ext.toolbarJsCssToPartialCss
 import com.ustadmobile.navigation.RouteManager.defaultRoute
 import com.ustadmobile.navigation.RouteManager.destinationList
 import com.ustadmobile.util.StyleManager
@@ -23,13 +21,13 @@ import com.ustadmobile.util.Util.ASSET_ACCOUNT
 import com.ustadmobile.util.ext.format
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
+import mui.material.GridProps
+import mui.material.GridWrap
+import org.w3c.dom.HTMLImageElement
 import org.w3c.dom.events.Event
 import react.RBuilder
-import react.RProps
-import react.ReactElement
-import react.router.dom.hashRouter
-import react.router.dom.route
-import react.router.dom.switch
+import react.router.dom.HashRouter
+import react.dom.html.ImgHTMLAttributes
 import styled.StyledHandler
 import styled.css
 import styled.styledDiv
@@ -45,17 +43,17 @@ fun RBuilder.appBarSpacer() {
     }
 }
 
-fun RBuilder.errorFallBack(text: String): ReactElement {
+fun RBuilder.errorFallBack(text: String) {
     // Note we purposely use a new RBuilder so we don't render into our normal display
-    return RBuilder().mPaper {
+    RBuilder().umPaper {
         css(mainComponentErrorPaper)
-        mTypography(text)
+        umTypography(text)
     }
 }
 
 fun RBuilder.renderRoutes() {
-    hashRouter {
-        switch{
+    HashRouter {
+        switch {
             route(path = arrayOf("/"), defaultRoute, exact = true)
             destinationList.forEach {
                 route(path = arrayOf("/${it.view}"), it.component, exact = true)
@@ -64,34 +62,45 @@ fun RBuilder.renderRoutes() {
     }
 }
 
-fun RBuilder.umGridContainer(spacing: MGridSpacing = MGridSpacing.spacing0,
-                             alignContent: MGridAlignContent = MGridAlignContent.stretch,
-                             alignItems: MGridAlignItems = MGridAlignItems.stretch,
-                             justify: MGridJustify = MGridJustify.flexStart,
-                             wrap: MGridWrap = MGridWrap.wrap, className: String? = null, handler: StyledHandler<MGridProps>? = null) {
-    mGridContainer(spacing,alignContent,alignItems,justify, wrap) {
-        setStyledPropsAndRunHandler(className, handler)
-    }
+/**
+ * Simplest version of the grid container that is frequently used by the app
+ */
+fun RBuilder.umGridContainer(
+    spacing: GridSpacing = GridSpacing.spacing0,
+    alignContent: GridAlignContent = GridAlignContent.stretch,
+    alignItems: GridAlignItems = GridAlignItems.stretch,
+    justify: GridJustify = GridJustify.flexStart,
+    wrap: GridWrap = GridWrap.wrap, className: String? = null,
+    handler: StyledHandler<GridProps>? = null) {
+    gridContainer(spacing,alignContent,alignItems,justify, wrap,
+        handler = handler, className = className)
 }
 
-fun RBuilder.umItem(xs: MGridSize, sm: MGridSize? = null, lg: MGridSize? = null, className: String? = null, handler: StyledHandler<MGridProps>? = null) {
-    mGridItem(xs = xs) {
-        sm?.let { attrs.sm = it }
-        lg?.let { attrs.md = it }
-        setStyledPropsAndRunHandler(className, handler)
-    }
+/**
+ * Simplest version of the GridItem used by the app
+ */
+fun RBuilder.umItem(
+    xs: GridSize,
+    sm: GridSize? = null,
+    lg: GridSize? = null,
+    className: String? = null,
+    alignItems: GridAlignItems? = null,
+    handler: StyledHandler<GridProps>? = null) {
+    gridItem(xs = xs,sm = sm, lg = lg, alignItems = alignItems , className = className, handler = handler)
 }
 
-fun RBuilder.umEntityAvatar (src: String? = null,
-                             fallbackSrc: String? = ASSET_ACCOUNT,
-                             iconName: String = "add_a_photo",
-                             imgProps: RProps? = null,
-                             variant: MAvatarVariant = MAvatarVariant.rounded,
-                             showIcon: Boolean = true,
-                             listItem: Boolean = false,
-                             className: String? = "${StyleManager.name}-entityImageClass",
-                             iconClassName: String? = "${StyleManager.name}-entityImageIconClass",
-                             clickEvent:((Event) -> Unit)? = null){
+fun RBuilder.umEntityAvatar (
+    src: String? = null,
+    fallbackSrc: String? = ASSET_ACCOUNT,
+    iconName: String = "add_a_photo",
+    imgProps: ImgHTMLAttributes<HTMLImageElement>? = null,
+    variant: AvatarVariant = AvatarVariant.rounded,
+    showIcon: Boolean = true,
+    listItem: Boolean = false,
+    className: String? = "${StyleManager.name}-entityImageClass",
+    iconClassName: String? = "${StyleManager.name}-entityImageIconClass",
+    clickEvent:((Event) -> Unit)? = null)
+{
 
     styledDiv {
         css{
@@ -100,7 +109,7 @@ fun RBuilder.umEntityAvatar (src: String? = null,
                 margin = "1.5%"
             }
         }
-        mAvatar(src = if(src.isNullOrEmpty()) fallbackSrc else src,
+        umAvatar(src = if(src.isNullOrEmpty()) fallbackSrc else src,
             variant = variant, imgProps = imgProps, className = className) {
             styledSpan{
                 css{
@@ -113,7 +122,7 @@ fun RBuilder.umEntityAvatar (src: String? = null,
                 }
 
                 if(showIcon){
-                    mIcon(iconName, className = iconClassName)
+                    umIcon(iconName, className = iconClassName)
                 }
             }
         }
@@ -123,9 +132,9 @@ fun RBuilder.umEntityAvatar (src: String? = null,
 //Handle this when attachment system is in place
 fun RBuilder.umProfileAvatar(attachmentId: Long, fallback: String){
     val src = null
-    mAvatar(src,variant = MAvatarVariant.circular){
+    umAvatar(src,variant = AvatarVariant.circular){
         css (personListItemAvatar)
-        if(src == null) mIcon(fallback, className= "${StyleManager.name}-fallBackAvatarClass")
+        if(src == null) umIcon(fallback, className= "${StyleManager.name}-fallBackAvatarClass")
     }
 }
 
@@ -148,9 +157,9 @@ fun RBuilder.createListSectionTitle(titleText: String){
             +defaultMarginBottom
             +defaultMarginTop
         }
-        mTypography(titleText,
-            variant = MTypographyVariant.body2,
-            color = MTypographyColor.textPrimary){
+        umTypography(titleText,
+            variant = TypographyVariant.body2,
+            color = TypographyColor.textPrimary){
             css (StyleManager.alignTextToStart)
         }
     }
@@ -162,28 +171,28 @@ fun RBuilder.createInformation(icon:String? = null, data: String?, label: String
             +defaultMarginTop
             display = displayProperty(data != "0" && !data.isNullOrEmpty(), true)
         }
-        umItem(MGridSize.cells2){
+        umItem(GridSize.column2){
             if(icon != null){
-                mIcon(icon, className = "${StyleManager.name}-detailIconClass")
+                umIcon(icon, className = "${StyleManager.name}-detailIconClass")
             }
         }
 
-        umItem(MGridSize.cells10){
+        umItem(GridSize.column10){
             if(onClick != null){
                 attrs.asDynamic().onClick = {
                     onClick()
                 }
             }
-            mTypography("$data",
-                color = MTypographyColor.textPrimary,
-                variant = MTypographyVariant.body1){
+            umTypography("$data",
+                color = TypographyColor.textPrimary,
+                variant = TypographyVariant.body1){
                 css(StyleManager.alignTextToStart)
             }
 
             if(!label.isNullOrBlank()){
-                mTypography(label,
-                    color = MTypographyColor.textPrimary,
-                    variant = MTypographyVariant.body2){
+                umTypography(label,
+                    color = TypographyColor.textPrimary,
+                    variant = TypographyVariant.body2){
                     css(StyleManager.alignTextToStart)
                 }
             }
@@ -192,11 +201,11 @@ fun RBuilder.createInformation(icon:String? = null, data: String?, label: String
 }
 
 fun RBuilder.circleIndicator(threshold: kotlin.Float) {
-    mIcon("circle",
+    umIcon("circle",
         color = when {
-            threshold > 0.8f -> MIconColor.primary
-            threshold > 0.6f -> MIconColor.inherit
-            else -> MIconColor.error
+            threshold > 0.8f -> IconColor.primary
+            threshold > 0.6f -> IconColor.inherit
+            else -> IconColor.error
         }){
         css(gridListSecondaryItemIcons)
     }
@@ -205,9 +214,9 @@ fun RBuilder.circleIndicator(threshold: kotlin.Float) {
 fun RBuilder.createCreateNewItem(createNewText: String){
     styledDiv {
         css(listItemCreateNewDiv)
-        mListItemIcon("add","${StyleManager.name}-listCreateNewIconClass")
-        mTypography(createNewText,variant = MTypographyVariant.button,
-            color = MTypographyColor.textPrimary) {
+        umListItemIcon("add","${StyleManager.name}-listCreateNewIconClass")
+        umTypography(createNewText,variant = TypographyVariant.button,
+            color = TypographyColor.textPrimary) {
             css{
                 marginTop = 4.px
             }
@@ -221,34 +230,36 @@ fun RBuilder.setBitmaskListText(systemImpl: UstadMobileSystemImpl,textBitmaskVal
     }.joinToString { systemImpl.getString(it.messageId, this) }
 }
 
-fun RBuilder.createItemWithIconTitleAndDescription(iconName: String, title: String? = null,
-                                                   description: String? = null,
-                                                   scaleOnLargeSmall: Boolean = false){
-    umGridContainer(MGridSpacing.spacing4) {
-        umItem(MGridSize.cells2, if(scaleOnLargeSmall) MGridSize.cells3 else MGridSize.cells1){
+fun RBuilder.createItemWithIconTitleAndDescription(
+    iconName: String, title: String? = null,
+    description: String? = null,
+    scaleOnLargeSmall: Boolean = false){
+
+    umGridContainer(GridSpacing.spacing4) {
+        umItem(GridSize.column2, if(scaleOnLargeSmall) GridSize.column3 else GridSize.column1){
             umProfileAvatar(-1,iconName)
         }
 
-        umItem(MGridSize.cells8, if(scaleOnLargeSmall) MGridSize.cells8 else MGridSize.cells10){
+        umItem(GridSize.column8, if(scaleOnLargeSmall) GridSize.column8 else GridSize.column10){
             css{
                 marginTop = LinearDimension("5px")
                 marginLeft = 2.spacingUnits
             }
             if(title != null){
-                umItem(MGridSize.cells11){
-                    mTypography(title,
-                        variant = MTypographyVariant.body1,
-                        color = MTypographyColor.textPrimary){
+                umItem(GridSize.column11){
+                    umTypography(title,
+                        variant = TypographyVariant.body1,
+                        color = TypographyColor.textPrimary){
                         css (StyleManager.alignTextToStart)
                     }
                 }
             }
 
             if(description != null){
-                umItem(MGridSize.cells11){
-                    mTypography(description,
-                        variant = MTypographyVariant.body2,
-                        color = MTypographyColor.textPrimary){
+                umItem(GridSize.column11){
+                    umTypography(description,
+                        variant = TypographyVariant.body2,
+                        color = TypographyColor.textPrimary){
                         css (StyleManager.alignTextToStart)
                     }
                 }
@@ -257,43 +268,49 @@ fun RBuilder.createItemWithIconTitleAndDescription(iconName: String, title: Stri
     }
 }
 
-fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(leftIcon: String,rightIcon: String, title: String?, description: String?, onClick:()-> Unit){
-    umGridContainer(MGridSpacing.spacing4) {
-        umItem(MGridSize.cells2, MGridSize.cells1){
+fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(
+    leftIcon: String,
+    rightIcon: String,
+    title: String?,
+    description: String?,
+    onClick:()-> Unit)
+{
+    umGridContainer(GridSpacing.spacing4) {
+        umItem(GridSize.column2, GridSize.column1){
             umProfileAvatar(-1,leftIcon)
         }
 
-        umItem(MGridSize.cells7, MGridSize.cells9){
+        umItem(GridSize.column7, GridSize.column9){
             css{
                 marginLeft = 2.spacingUnits
             }
-            umItem(MGridSize.cells11){
-                mTypography(title,
-                    variant = MTypographyVariant.body1,
-                    color = MTypographyColor.textPrimary){
+            umItem(GridSize.column11){
+                umTypography(title,
+                    variant = TypographyVariant.body1,
+                    color = TypographyColor.textPrimary){
                     css (StyleManager.alignTextToStart)
                 }
             }
 
-            umItem(MGridSize.cells11){
-                mTypography(description,
-                    variant = MTypographyVariant.body2,
-                    color = MTypographyColor.textPrimary){
+            umItem(GridSize.column11){
+                umTypography(description,
+                    variant = TypographyVariant.body2,
+                    color = TypographyColor.textPrimary){
                     css (StyleManager.alignTextToStart)
                 }
             }
         }
 
-        umItem(MGridSize.cells2, MGridSize.cells1){
+        umItem(GridSize.column2, GridSize.column1){
             css{
                 alignContent = Align.center
                 alignItems = Align.center
             }
 
-            mIconButton(rightIcon, size = MIconButtonSize.medium,
+            mIconButton(rightIcon, size = IconButtonSize.medium,
                 onClick = {
                     it.stopPropagation()
-                    onClick.com.ustadmobile.components.theming.invoke()
+                    onClick()
                 }
             ){
                 css(defaultMarginTop)
@@ -302,29 +319,30 @@ fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(leftIcon: String,right
     }
 }
 
-fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(personUid: Long, fullName: String,
-                                                                  pending: Boolean = false,
-                                                                  attendance: kotlin.Float = -1f,
-                                                                  attendanceLabel: String? = null,
-                                                                  student: Boolean = true,
-                                                                  onClickDecline: (() -> Unit)? = null,
-                                                                  onClickAccept: (() -> Unit)? = null){
-    umGridContainer(MGridSpacing.spacing5) {
+fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
+    personUid: Long, fullName: String,
+    pending: Boolean = false,
+    attendance: kotlin.Float = -1f,
+    attendanceLabel: String? = null,
+    student: Boolean = true,
+    onClickDecline: (() -> Unit)? = null,
+    onClickAccept: (() -> Unit)? = null){
+    umGridContainer(GridSpacing.spacing5) {
         css{
             paddingTop = 4.px
             paddingBottom = 4.px
             width = LinearDimension("100%")
         }
 
-        umItem(MGridSize.cells3, MGridSize.cells2){
+        umItem(GridSize.column3, GridSize.column2){
             umProfileAvatar(personUid, "person")
         }
 
-        umItem(MGridSize.cells9, MGridSize.cells10){
-            umItem(MGridSize.cells12){
-                mTypography(fullName,
-                    variant = MTypographyVariant.h6,
-                    color = MTypographyColor.textPrimary){
+        umItem(GridSize.column9, GridSize.column10){
+            umItem(GridSize.column12){
+                umTypography(fullName,
+                    variant = TypographyVariant.h6,
+                    color = TypographyColor.textPrimary){
                     css (StyleManager.alignTextToStart)
                 }
             }
@@ -335,14 +353,14 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(personUid: Lon
                 }
 
                 if(attendance >= 0f){
-                    umItem(MGridSize.cells1){
+                    umItem(GridSize.column1){
                         circleIndicator(attendance)
                     }
                 }
 
-                umItem(MGridSize.cells8){
-                    mTypography(attendanceLabel?.format(attendance * 100),
-                        color = MTypographyColor.textPrimary
+                umItem(GridSize.column8){
+                    umTypography(attendanceLabel?.format(attendance * 100),
+                        color = TypographyColor.textPrimary
                     ){
                         css{
                             +StyleManager.alignTextToStart
@@ -352,28 +370,28 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(personUid: Lon
 
                 }
 
-                umItem(MGridSize.cells3){
+                umItem(GridSize.column3){
                     css{
                         display = displayProperty(pending, true)
                         paddingLeft = 5.spacingUnits
                     }
-                    umGridContainer(MGridSpacing.spacing4) {
-                        umItem(MGridSize.cells4){
+                    umGridContainer(GridSpacing.spacing4) {
+                        umItem(GridSize.column4){
                             mIconButton("check",
                                 onClick = {
-                                    onClickAccept?.com.ustadmobile.components.theming.invoke()
+                                    onClickAccept?.invoke()
                                 },
                                 className = "${StyleManager.name}-successClass",
-                                size = MIconButtonSize.small)
+                                size = IconButtonSize.small)
                         }
 
-                        umItem(MGridSize.cells4){
+                        umItem(GridSize.column4){
                             mIconButton("close",
                                 onClick = {
-                                    onClickDecline?.com.ustadmobile.components.theming.invoke()
+                                    onClickDecline?.invoke()
                                 },
                                 className = "${StyleManager.name}-errorClass",
-                                size = MIconButtonSize.small)
+                                size = IconButtonSize.small)
                         }
                     }
                 }
@@ -382,38 +400,39 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(personUid: Lon
     }
 }
 
-fun RBuilder.createListItemWithAttendance(iconName: String, title: String,
-                                          subTitle: String, attendance: kotlin.Float = -1f,
-                                          attendanceLabel: String){
+fun RBuilder.createListItemWithAttendance(
+    iconName: String, title: String,
+    subTitle: String, attendance: kotlin.Float = -1f,
+    attendanceLabel: String){
     umGridContainer {
-        umItem(MGridSize.cells2){
+        umItem(GridSize.column2){
             umProfileAvatar(-1, iconName)
         }
 
-        umItem(MGridSize.cells10){
-            umItem(MGridSize.cells12){
-                mTypography(title,
-                    variant = MTypographyVariant.body1){
+        umItem(GridSize.column10){
+            umItem(GridSize.column12){
+                umTypography(title,
+                    variant = TypographyVariant.body1){
                     css(StyleManager.alignTextToStart)
                 }
             }
 
-            umItem(MGridSize.cells12){
-                mTypography(subTitle,
-                    variant = MTypographyVariant.body2){
+            umItem(GridSize.column12){
+                umTypography(subTitle,
+                    variant = TypographyVariant.body2){
                     css(StyleManager.alignTextToStart)
                 }
             }
 
-            umItem(MGridSize.cells12){
+            umItem(GridSize.column12){
                 umGridContainer{
-                    umItem(MGridSize.cells1){
+                    umItem(GridSize.column1){
                         circleIndicator(attendance)
                     }
 
-                    umItem(MGridSize.cells4){
-                        mTypography(attendanceLabel.format(attendance * 100),
-                            color = MTypographyColor.textPrimary
+                    umItem(GridSize.column4){
+                        umTypography(attendanceLabel.format(attendance * 100),
+                            color = TypographyColor.textPrimary
                         ){
                             css{
                                 +StyleManager.alignTextToStart
@@ -428,7 +447,10 @@ fun RBuilder.createListItemWithAttendance(iconName: String, title: String,
     }
 }
 
-fun RBuilder.permissionListText(systemImpl: UstadMobileSystemImpl,tableId: Int, bitmaskValue: Long): String? {
+fun RBuilder.permissionListText(
+    systemImpl: UstadMobileSystemImpl,
+    tableId: Int, bitmaskValue: Long): String? {
+
     val flagMessageIds = ScopedGrantEditPresenter.PERMISSION_LIST_MAP[tableId]
     return flagMessageIds?.map { it.toBitmaskFlag(bitmaskValue) }
         ?.filter { it.enabled }
@@ -458,4 +480,4 @@ fun RBuilder.mSpacer(
             }
         }
     }
-}*/
+}

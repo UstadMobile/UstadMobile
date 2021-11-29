@@ -9,6 +9,17 @@ external interface ShapeOptions {
     var borderRadius: Int
 }
 
+
+@Suppress("EnumEntryName")
+enum class UMColor {
+    default, inherit, primary, secondary
+}
+
+@Suppress("EnumEntryName")
+enum class UMOptionColor {
+    primary, secondary, default
+}
+
 external interface Spacing
 
 external interface ThemeOptions {
