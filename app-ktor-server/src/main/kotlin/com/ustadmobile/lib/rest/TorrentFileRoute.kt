@@ -4,7 +4,7 @@ import com.turn.ttorrent.client.FileMetadataProvider
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.torrent.ContainerTorrentDownloadJob
+import com.ustadmobile.core.contentjob.ContentPluginIds.CONTAINER_TORRENT_DOWNLOAD_PLUGIN
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
@@ -79,7 +79,7 @@ fun Route.TorrentFileRoute(){
                 cjiContainerUid = containerUid
                 sourceUri = "content://${contentEntryUid}"
                 cjiContentEntryUid = contentEntryUid
-                cjiPluginId = ContainerTorrentDownloadJob.PLUGIN_ID
+                cjiPluginId = CONTAINER_TORRENT_DOWNLOAD_PLUGIN
                 cjiItemTotal = fileSize
                 cjiRecursiveTotal = fileSize
                 cjiIsLeaf = true

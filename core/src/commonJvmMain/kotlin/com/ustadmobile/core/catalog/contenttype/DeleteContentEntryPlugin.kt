@@ -2,6 +2,7 @@ package com.ustadmobile.core.catalog.contenttype
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.*
+import com.ustadmobile.core.contentjob.ContentPluginIds.DELETE_CONTENT_ENTRY_PLUGIN
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.torrent.UstadTorrentManager
@@ -29,7 +30,7 @@ class DeleteContentEntryPlugin(
     val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
     override val pluginId: Int
-        get() = PLUGIN_ID
+        get() = DELETE_CONTENT_ENTRY_PLUGIN
     override val supportedMimeTypes: List<String>
         get() = listOf()
     override val supportedFileExtensions: List<String>
@@ -49,7 +50,7 @@ class DeleteContentEntryPlugin(
         val contentEntry = repo.contentEntryDao.findByUid(container.containerUid)
                 ?: throw IllegalArgumentException("no entry found from container")
 
-        return MetadataResult(contentEntry as ContentEntryWithLanguage, PLUGIN_ID)
+        return MetadataResult(contentEntry as ContentEntryWithLanguage, DELETE_CONTENT_ENTRY_PLUGIN)
     }
 
     override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
@@ -71,10 +72,5 @@ class DeleteContentEntryPlugin(
         }else{
             ProcessResult(JobStatus.FAILED)
         }
-    }
-
-    companion object {
-
-        const val PLUGIN_ID = 14
     }
 }

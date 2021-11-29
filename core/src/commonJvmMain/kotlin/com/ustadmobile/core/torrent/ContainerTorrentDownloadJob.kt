@@ -3,6 +3,7 @@ package com.ustadmobile.core.torrent
 import com.turn.ttorrent.client.FileMetadataProvider
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.*
+import com.ustadmobile.core.contentjob.ContentPluginIds.CONTAINER_TORRENT_DOWNLOAD_PLUGIN
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.getUnCompressedSize
@@ -15,7 +16,6 @@ import com.ustadmobile.core.util.ext.maxQueryParamListSize
 import com.ustadmobile.core.util.ext.withWifiLock
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_NONE
@@ -52,7 +52,7 @@ class ContainerTorrentDownloadJob(
     private val ustadTorrentManager: UstadTorrentManager = di.direct.instance<UstadTorrentManager>()
 
     override val pluginId: Int
-        get() = PLUGIN_ID
+        get() = CONTAINER_TORRENT_DOWNLOAD_PLUGIN
 
     override val supportedMimeTypes: List<String>
         get() = listOf("application/ustad-container")
@@ -69,7 +69,7 @@ class ContainerTorrentDownloadJob(
         val contentEntry = repo.contentEntryDao.findByUid(container.containerContentEntryUid)
                 ?: throw IllegalArgumentException("no entry found from container")
 
-        return MetadataResult(contentEntry as ContentEntryWithLanguage, PLUGIN_ID)
+        return MetadataResult(contentEntry as ContentEntryWithLanguage, CONTAINER_TORRENT_DOWNLOAD_PLUGIN)
     }
 
     override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
@@ -207,7 +207,6 @@ class ContainerTorrentDownloadJob(
 
         internal const val MANIFEST_FILE_NAME = "USTAD-MANIFEST.json"
 
-        const val PLUGIN_ID = 10
     }
 
 }
