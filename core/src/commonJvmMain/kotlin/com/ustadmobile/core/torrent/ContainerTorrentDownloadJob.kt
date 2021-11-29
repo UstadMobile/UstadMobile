@@ -171,18 +171,25 @@ class ContainerTorrentDownloadJob(
                 val manifestJson = manifestFile.readText()
                 val manifest: ContainerManifest = Json.decodeFromString(
                         ContainerManifest.serializer(), manifestJson)
+
                 val newContainerEntry = mutableListOf<ContainerEntry>()
-                manifest.entryMap?.entries?.forEach { entry ->
-                    if (entry.key == MANIFEST_FILE_NAME) {
+                val md5List: List<String> = manifest.entryMap?.entries
+                        ?.filter{ it.key != MANIFEST_FILE_NAME }
+                        ?.map { it.key.base64EncodedToHexString() } ?: listOf()
+
+                val containerEntryFiles = db.containerEntryFileDao.findEntriesByMd5SumsSafe(md5List, db)
+                manifest.entryMap?.entries?.forEach { map ->
+                    if (map.key == MANIFEST_FILE_NAME) {
                         return@forEach
                     }
-                    entry.value.forEach { path ->
-                        val cefUid = db.containerEntryFileDao.findEntryByMd5Sum(entry.key.base64EncodedToHexString())?.cefUid
-                                ?: throw IllegalArgumentException("missed a file during download ${entry.key} with path $path")
+                    map.value.forEach { path ->
+                        val entryFile = containerEntryFiles.find {
+                            map.key.base64EncodedToHexString() == it.cefMd5
+                        } ?: throw IllegalArgumentException("missed a file during download ${map.key} with path $path")
                         val containerEntry = ContainerEntry().apply {
                             ceContainerUid = containerUid
                             cePath = path
-                            ceCefUid = cefUid
+                            ceCefUid = entryFile.cefUid
                         }
                         newContainerEntry.add(containerEntry)
                     }
