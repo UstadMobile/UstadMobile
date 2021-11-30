@@ -5,7 +5,6 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import io.ktor.client.*
-import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
@@ -40,12 +39,13 @@ class DefaultContentPluginUploader: ContentPluginUploader {
                     })
                 }
                 val statusPath = UMFileUtil.joinPaths(endpoint.url, "containers/${contentJobItem.cjiServerJobId}/status")
+                val halfProgress = contentJobItem.cjiItemTotal / 2
                 do{
                     delay(1000)
                     val serverJobItem: ContentJobItem = httpClient.get(statusPath)
-                    contentJobItem.cjiItemProgress = (contentJobItem.cjiItemTotal / 2) +
-                            (((serverJobItem.cjiRecursiveProgress / serverJobItem.cjiRecursiveTotal)
-                                    * contentJobItem.cjiItemTotal) / 2)
+                    contentJobItem.cjiItemProgress = halfProgress +
+                            ((serverJobItem.cjiRecursiveProgress / serverJobItem.cjiRecursiveTotal)
+                                    * halfProgress)
                     progress.onProgress(contentJobItem)
 
                 }while (serverJobItem.cjiRecursiveStatus <= JobStatus.COMPLETE_MIN)

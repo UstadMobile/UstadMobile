@@ -21,7 +21,7 @@ actual suspend fun deleteFilesForContentEntry(
         endpoint: Endpoint
 ): Int {
 
-    val torrentDirFile: File by di.on(endpoint).instance()
+    val torrentDirFile: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
     val db:UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
     val torrentManager: UstadTorrentManager by di.on(endpoint).instance()
 

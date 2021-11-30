@@ -3,10 +3,10 @@ package com.ustadmobile.core.contentjob
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.EventCollator
-import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.core.io.ext.emptyRecursively
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
+import com.ustadmobile.core.util.EventCollator
+import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.DoorUri
@@ -184,6 +184,7 @@ class ContentJobRunner(
                 db.contentJobItemDao.updateItemStatus(item.contentJobItem?.cjiUid ?: 0, processResult.status)
                 db.contentJobItemDao.updateFinishTimeForJob(item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
                 println("Processor #$id completed job #${item.contentJobItem?.cjiUid}")
+                delay(1000)
             }catch(e: Exception) {
                 //something went wrong
                 processException = e

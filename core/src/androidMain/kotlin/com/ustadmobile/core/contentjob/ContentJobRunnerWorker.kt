@@ -7,7 +7,10 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat.getSystemService
-import androidx.work.*
+import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
+import androidx.work.WorkManager
+import androidx.work.WorkerParameters
 import com.ustadmobile.core.R
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
@@ -21,12 +24,12 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import org.kodein.di.instance
 import org.kodein.di.on
-import java.lang.IllegalStateException
 
 class ContentJobRunnerWorker(
     context: Context,
@@ -65,7 +68,16 @@ class ContentJobRunnerWorker(
         }
 
         val jobObserver = DoorObserver<ContentJobItem?> {
-            notification.setProgress(it?.cjiRecursiveTotal?.toInt() ?: 100, it?.cjiRecursiveProgress?.toInt() ?: 0, false)
+            when(it?.cjiRecursiveStatus){
+                JobStatus.COMPLETE, JobStatus.FAILED, JobStatus.PARTIAL_FAILED -> {
+                    notification.setProgress(100, 100, false)
+                }
+                else ->{
+                    notification.setProgress(it?.cjiRecursiveTotal?.toInt() ?: 100,
+                            it?.cjiRecursiveProgress?.toInt() ?: 0,
+                            false)
+                }
+            }
             notification.setContentText(it.toStatusString(systemImpl, applicationContext))
             setForegroundAsync(ForegroundInfo(jobId.toInt(), notification.build()))
         }
