@@ -20,12 +20,14 @@ enum class IconFontSize {
 
 fun RBuilder.umIcon(
     iconName: String,
-    color: IconColor = IconColor.inherit,
+    color: IconColor? = IconColor.inherit,
     fontSize: IconFontSize = IconFontSize.default,
     className: String? = null,
     handler: StyledHandler<IconProps>? = null
 ) = createStyledComponent(Icon, className, handler) {
-    attrs.color = color.toString()
+    color?.let {
+        attrs.color = it.toString()
+    }
     attrs.fontSize = fontSize.toString()
     childList.add(ReactNode(iconName))
 }

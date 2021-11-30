@@ -2,7 +2,9 @@ package com.ustadmobile.util
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.mui.components.spacingUnits
+import com.ustadmobile.mui.theme.styledModule
 import com.ustadmobile.redux.ReduxAppStateManager
+import csstype.Padding
 import down
 import kotlinx.css.*
 import kotlinx.css.properties.Timing
@@ -29,7 +31,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
     const val drawerWidth = 240
 
-    val tabletAndHighEnd = Breakpoint.md
+    val tabletAndHighEnd = Breakpoint.sm
 
     val alignTextToStart by css {
         textAlign = TextAlign.start
@@ -212,11 +214,25 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         width = drawerWidth.px
     }
 
+    val toolbarTitle by css {
+        if(systemImpl.isRtlActive()){
+            textAlign = TextAlign.start
+            marginRight = drawerWidth.px
+            media(theme.breakpoints.down(tabletAndHighEnd)) {
+                marginRight = 0.px
+
+            }
+        }
+    }
+
     val mainComponentProfileOuterAvatar by css {
         width = 40.px
         height = 40.px
         cursor = Cursor.pointer
-        margin = "0px ${if(systemImpl.isRtlActive()) 40 else 0 }% 0 ${if(systemImpl.isRtlActive()) 0 else 40 }%"
+        margin = "0px ${if(systemImpl.isRtlActive()) 10 else 0 }% 0 ${if(systemImpl.isRtlActive()) 0 else 10 }%"
+        media(theme.breakpoints.down(tabletAndHighEnd)) {
+            margin = "0px ${if(systemImpl.isRtlActive()) 10 else 3 }% 0 ${if(systemImpl.isRtlActive()) 0 else 10 }%"
+        }
         backgroundColor = Color(theme.palette.primary.light)
         alignItems = Align.center
         alignContent = Align.center
@@ -235,44 +251,43 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         backgroundColor = Color(theme.palette.primary.dark)
     }
 
-
-    val mainComponentSearch by css {
-        position = Position.relative
-        marginTop = 4.px
-        display = Display.none
-        borderRadius = theme.shape.borderRadius.px
-        //backgroundColor = Color(fade(theme.palette.common.white, 0.15))
-        hover {
-            //backgroundColor = Color(fade(theme.palette.common.white, 0.25))
-        }
-        marginLeft = 0.px
-        marginRight = 30.px
-        media(theme.breakpoints.up(Breakpoint.sm)) {
-            marginLeft = 1.spacingUnits
-            width = LinearDimension.auto
-        }
-    }
-
     val mainComponentInputSearchClass by css {
-        paddingTop = 1.spacingUnits
-        paddingRight = 1.spacingUnits
-        paddingBottom = 1.spacingUnits
-        paddingLeft = 10.spacingUnits
+        padding = "8px 8px 8px 50px"
         transition += Transition("width", theme.transitions.duration.standard.ms, Timing.easeInOut, 0.ms)
-        width = 100.pct
-        media(theme.breakpoints.up(Breakpoint.sm)) {
-            width = 120.px
+        width = LinearDimension("30ch")
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            width = LinearDimension("40ch")
             focus {
-                width = 300.px
+                width = LinearDimension("50ch")
             }
         }
+        flexGrow = 1.0
         color = Color.inherit
         paddingRight = (if(systemImpl.isRtlActive()) 60 else 0).px
     }
 
+    val mainComponentSearch by css {
+        position = Position.relative
+        borderRadius = theme.shape.borderRadius.px
+        backgroundColor = styledModule.alpha(theme.palette.common.white, 0.15)
+        hover {
+            backgroundColor =  styledModule.alpha(theme.palette.common.white, 0.25)
+        }
+        marginLeft = 0.px
+        width = LinearDimension("100%")
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            marginLeft = 1.spacingUnits
+            width = LinearDimension("auto")
+        }
+
+        media(theme.breakpoints.down(tabletAndHighEnd)) {
+            width = LinearDimension("80%")
+        }
+    }
+
     val mainComponentSearchIcon by css {
-        width = 9.spacingUnits
-        height = 100.pct
+        padding = "0 16px"
+        height = LinearDimension("100%")
         position = Position.absolute
         pointerEvents = PointerEvents.none
         display = Display.flex
@@ -555,6 +570,20 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     val gridListSecondaryItemDesc by css {
         marginTop = 4.px
         fontSize = LinearDimension("0.68rem")
+    }
+
+    val hideOnMobile by css {
+        display = Display.none
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            display = Display.block
+        }
+    }
+
+    val showOnMobile by css {
+        display = Display.block
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            display = Display.none
+        }
     }
 
     override val di: DI

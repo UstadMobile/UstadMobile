@@ -21,11 +21,10 @@ fun RBuilder.umListItemAvatar(
     alt: String? = null,
     srcSet: String? = null,
     variant: AvatarVariant = AvatarVariant.circular,
-    component: String = "div",
     imgProps: ImgHTMLAttributes<HTMLImageElement>? = null,
     sizes: String? = null,
     className: String? = null,
     handler: StyledHandler<ListItemAvatarProps>? = null
 ) = createStyledComponent(ListItemAvatar, className, handler) {
-    umAvatar(src, srcSet, alt, variant, component, imgProps, sizes)
+    umAvatar(src, srcSet, alt, variant, imgProps, sizes)
 }

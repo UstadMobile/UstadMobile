@@ -213,8 +213,7 @@ abstract class UstadListComponent<RT, DT>(mProps: UmProps) : UstadBaseComponent<
                 umIcon(emptyList.icon ?: "crop_free", className = "${StyleManager.name}-emptyListIcon")
                 umTypography(emptyList.text ?: getString(MessageID.nothing_here),
                     variant = TypographyVariant.h6,
-                    align = TypographyAlign.center,
-                    color = TypographyColor.textPrimary){
+                    align = TypographyAlign.center){
                     css {
                         marginTop = LinearDimension("20px")
                     }
@@ -391,8 +390,7 @@ abstract class UstadListComponent<RT, DT>(mProps: UmProps) : UstadBaseComponent<
         umGridContainer {
             css(selectionContainer)
             umItem(GridSize.column7, GridSize.column8){
-                umTypography(variant = TypographyVariant.subtitle1,
-                    color = TypographyColor.textPrimary){
+                umTypography(variant = TypographyVariant.subtitle1){
                     css {
                         width = 10.pc
                         marginTop = 10.px
@@ -410,7 +408,7 @@ abstract class UstadListComponent<RT, DT>(mProps: UmProps) : UstadBaseComponent<
                             css {
                                 display = displayProperty(!hideOptions)
                             }
-                            mIconButton(SELECTION_ICONS_MAP[option]?:"delete",
+                            umIconButton(SELECTION_ICONS_MAP[option]?:"delete",
                                 color = UMColor.default){
                                 attrs.onClick = {
                                     listPresenter?.handleClickSelectionOption(selectedEntries, option)

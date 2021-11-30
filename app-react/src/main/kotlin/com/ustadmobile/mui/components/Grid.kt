@@ -109,30 +109,27 @@ fun RBuilder.gridContainer(
     attrs.asDynamic().alignItems = alignItems
     attrs.container = true
     attrs.asDynamic().justify = justify
-    attrs.asDynamic().columnSpacing = spacing
-    attrs.asDynamic().rowSpacing = spacing
+    attrs.spacing = spacing.size.asDynamic()
     attrs.wrap = wrap
 }
 
 fun RBuilder.gridItem(
-    xs: GridSize = GridSize.columnFalse,
+    xs: GridSize? = GridSize.columnFalse,
     sm: GridSize? = GridSize.columnFalse,
-    md: GridSize = GridSize.columnFalse,
+    md: GridSize? = GridSize.columnFalse,
     lg: GridSize? = GridSize.columnFalse,
-    xl: GridSize = GridSize.columnFalse,
+    xl: GridSize? = GridSize.columnFalse,
     alignItems: GridAlignItems? = GridAlignItems.flexStart,
     zeroMinWidth: Boolean? = null,
     className: String? = null,
     handler: StyledHandler<GridProps>? = null
 ) = createStyledComponent(Grid, className, handler) {
     attrs.item = true
-    attrs.sm = sm
-    attrs.md = md
-    attrs.lg = lg
-    attrs.xs = xs
-    attrs.xl = xl
-    sm?.let { attrs.sm = it }
-    lg?.let { attrs.lg = it }
-    attrs.asDynamic().alignItems = alignItems
+    sm?.let { attrs.sm = it.sizeVal }
+    md?.let { attrs.md = it.sizeVal }
+    xs?.let { attrs.xs = it.sizeVal }
+    xl?.let { attrs.xl = it.sizeVal }
+    lg?.let { attrs.lg = it.sizeVal }
+    attrs.asDynamic().alignItems = alignItems.toString()
     zeroMinWidth?.let { attrs.zeroMinWidth = it }
 }

@@ -8,6 +8,8 @@ import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.ext.toolbarJsCssToPartialCss
 import com.ustadmobile.navigation.RouteManager.defaultRoute
 import com.ustadmobile.navigation.RouteManager.destinationList
+import com.ustadmobile.navigation.UstadDestination
+import com.ustadmobile.redux.ReduxAppState
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.defaultMarginBottom
 import com.ustadmobile.util.StyleManager.defaultMarginTop
@@ -16,7 +18,10 @@ import com.ustadmobile.util.StyleManager.entryItemImageContainer
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
 import com.ustadmobile.util.StyleManager.listItemCreateNewDiv
 import com.ustadmobile.util.StyleManager.mainComponentErrorPaper
+import com.ustadmobile.util.StyleManager.mainComponentSearch
+import com.ustadmobile.util.StyleManager.mainComponentSearchIcon
 import com.ustadmobile.util.StyleManager.personListItemAvatar
+import com.ustadmobile.util.StyleManager.toolbarTitle
 import com.ustadmobile.util.Util.ASSET_ACCOUNT
 import com.ustadmobile.util.ext.format
 import kotlinx.css.*
@@ -25,9 +30,13 @@ import mui.material.GridProps
 import mui.material.GridWrap
 import org.w3c.dom.HTMLImageElement
 import org.w3c.dom.events.Event
+import react.Props
 import react.RBuilder
-import react.router.dom.HashRouter
+import react.createElement
 import react.dom.html.ImgHTMLAttributes
+import react.router.Route
+import react.router.Routes
+import react.router.dom.HashRouter
 import styled.StyledHandler
 import styled.css
 import styled.styledDiv
@@ -52,11 +61,21 @@ fun RBuilder.errorFallBack(text: String) {
 }
 
 fun RBuilder.renderRoutes() {
-    HashRouter {
-        switch {
-            route(path = arrayOf("/"), defaultRoute, exact = true)
+    HashRouter{
+        Routes{
+            Route{
+                attrs.path = "/"
+                attrs.element = createElement {
+                    child(defaultRoute){}
+                }
+            }
             destinationList.forEach {
-                route(path = arrayOf("/${it.view}"), it.component, exact = true)
+                Route{
+                    attrs.path = "/${it.view}"
+                    attrs.element = createElement {
+                        child(it.component){}
+                    }
+                }
             }
         }
     }
@@ -159,7 +178,7 @@ fun RBuilder.createListSectionTitle(titleText: String){
         }
         umTypography(titleText,
             variant = TypographyVariant.body2,
-            color = TypographyColor.textPrimary){
+            ){
             css (StyleManager.alignTextToStart)
         }
     }
@@ -184,14 +203,12 @@ fun RBuilder.createInformation(icon:String? = null, data: String?, label: String
                 }
             }
             umTypography("$data",
-                color = TypographyColor.textPrimary,
                 variant = TypographyVariant.body1){
                 css(StyleManager.alignTextToStart)
             }
 
             if(!label.isNullOrBlank()){
                 umTypography(label,
-                    color = TypographyColor.textPrimary,
                     variant = TypographyVariant.body2){
                     css(StyleManager.alignTextToStart)
                 }
@@ -216,7 +233,7 @@ fun RBuilder.createCreateNewItem(createNewText: String){
         css(listItemCreateNewDiv)
         umListItemIcon("add","${StyleManager.name}-listCreateNewIconClass")
         umTypography(createNewText,variant = TypographyVariant.button,
-            color = TypographyColor.textPrimary) {
+            ) {
             css{
                 marginTop = 4.px
             }
@@ -249,7 +266,7 @@ fun RBuilder.createItemWithIconTitleAndDescription(
                 umItem(GridSize.column11){
                     umTypography(title,
                         variant = TypographyVariant.body1,
-                        color = TypographyColor.textPrimary){
+                        ){
                         css (StyleManager.alignTextToStart)
                     }
                 }
@@ -259,7 +276,7 @@ fun RBuilder.createItemWithIconTitleAndDescription(
                 umItem(GridSize.column11){
                     umTypography(description,
                         variant = TypographyVariant.body2,
-                        color = TypographyColor.textPrimary){
+                        ){
                         css (StyleManager.alignTextToStart)
                     }
                 }
@@ -287,7 +304,7 @@ fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(
             umItem(GridSize.column11){
                 umTypography(title,
                     variant = TypographyVariant.body1,
-                    color = TypographyColor.textPrimary){
+                    ){
                     css (StyleManager.alignTextToStart)
                 }
             }
@@ -295,7 +312,7 @@ fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(
             umItem(GridSize.column11){
                 umTypography(description,
                     variant = TypographyVariant.body2,
-                    color = TypographyColor.textPrimary){
+                    ){
                     css (StyleManager.alignTextToStart)
                 }
             }
@@ -307,7 +324,7 @@ fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(
                 alignItems = Align.center
             }
 
-            mIconButton(rightIcon, size = IconButtonSize.medium,
+            umIconButton(rightIcon, size = IconButtonSize.medium,
                 onClick = {
                     it.stopPropagation()
                     onClick()
@@ -342,7 +359,7 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
             umItem(GridSize.column12){
                 umTypography(fullName,
                     variant = TypographyVariant.h6,
-                    color = TypographyColor.textPrimary){
+                    ){
                     css (StyleManager.alignTextToStart)
                 }
             }
@@ -359,8 +376,8 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
                 }
 
                 umItem(GridSize.column8){
-                    umTypography(attendanceLabel?.format(attendance * 100),
-                        color = TypographyColor.textPrimary
+                    umTypography(attendanceLabel?.format(attendance * 100)
+                        
                     ){
                         css{
                             +StyleManager.alignTextToStart
@@ -377,7 +394,7 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
                     }
                     umGridContainer(GridSpacing.spacing4) {
                         umItem(GridSize.column4){
-                            mIconButton("check",
+                            umIconButton("check",
                                 onClick = {
                                     onClickAccept?.invoke()
                                 },
@@ -386,7 +403,7 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
                         }
 
                         umItem(GridSize.column4){
-                            mIconButton("close",
+                            umIconButton("close",
                                 onClick = {
                                     onClickDecline?.invoke()
                                 },
@@ -431,9 +448,7 @@ fun RBuilder.createListItemWithAttendance(
                     }
 
                     umItem(GridSize.column4){
-                        umTypography(attendanceLabel.format(attendance * 100),
-                            color = TypographyColor.textPrimary
-                        ){
+                        umTypography(attendanceLabel.format(attendance * 100)){
                             css{
                                 +StyleManager.alignTextToStart
                                 +StyleManager.gridListSecondaryItemDesc
@@ -477,6 +492,65 @@ fun RBuilder.mSpacer(
 
             if (bottom != null) {
                 marginBottom = bottom
+            }
+        }
+    }
+}
+
+fun RBuilder.umTopBar(appState: ReduxAppState, currentDestination: UstadDestination, searchLabel: String, name: String? = null, onClick: (() -> Unit)?){
+    umAppBar(position = AppBarPosition.fixed) {
+        css (if(currentDestination.showNavigation) StyleManager.mainComponentAppBar
+        else StyleManager.mainComponentAppBarWithNoNav)
+
+        umToolbar {
+            attrs.asDynamic().id = "um-toolbar"
+            umTypography(appState.appToolbar.title ?: "",variant = TypographyVariant.h6, noWrap = true, component = "div") {
+                val props = { }
+                props.asDynamic().style = kotlinext.js.js {
+                    flexGrow = 1; display = { sm = "block" } }
+                attrs.asDynamic().sx = props
+                css{
+                    flexGrow = 1.0
+                    +toolbarTitle
+                }
+            }
+
+            styledDiv {
+                css {
+                    +mainComponentSearch
+                    display = displayProperty(currentDestination.showSearch)
+                }
+                styledDiv {
+                    css(mainComponentSearchIcon)
+                    umIcon("search")
+                }
+
+                umInput(placeholder = searchLabel,
+                    disableUnderline = true) {
+                    attrs.asDynamic().inputProps = object: Props {
+                        val className = "${StyleManager.name}-mainComponentInputSearchClass"
+                        val id = "um-search"
+                    }
+                }
+            }
+
+            umAvatar {
+                css {
+                    display = displayProperty(currentDestination.showNavigation)
+                    +StyleManager.mainComponentProfileOuterAvatar
+                }
+                attrs.onClick = { onClick?.invoke() }
+
+                umAvatar{
+                    css (StyleManager.mainComponentProfileInnerAvatar)
+                    umTypography("${name?.first()}",
+                        align = TypographyAlign.center,
+                        variant = TypographyVariant.h5){
+                        css{
+                            marginTop = LinearDimension("1.5px")
+                        }
+                    }
+                }
             }
         }
     }

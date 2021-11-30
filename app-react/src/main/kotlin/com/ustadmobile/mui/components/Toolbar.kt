@@ -22,10 +22,3 @@ fun RBuilder.umToolbar(
     attrs.disableGutters = disableGutters
     attrs.variant = variant.toString()
 }
-
-
-fun RBuilder.umToolbarTitle(text: String)  = umTypography(text, variant = TypographyVariant.h6, color = TypographyColor.inherit, noWrap = true) {
-    css {
-        flexGrow = 1.0
-    }
-}

@@ -12,6 +12,7 @@ import com.ustadmobile.util.*
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.StyleManager.defaultMarginTop
+import com.ustadmobile.util.StyleManager.hideOnMobile
 import com.ustadmobile.util.ext.clean
 import com.ustadmobile.view.ext.createCreateNewItem
 import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
@@ -85,16 +86,15 @@ class SiteEnterLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmSta
                 marginTop = 4.spacingUnits
             }
             umGridContainer {
-                umHidden(smDown = true){
-                    umItem(GridSize.column3){}
+                umItem(GridSize.column3){
+                    css(hideOnMobile)
                 }
                 umItem(GridSize.column12, GridSize.column6){
                     umGridContainer {
 
                         umItem(GridSize.column12){
                             umTypography(getString(MessageID.please_enter_the_linK),
-                                variant = TypographyVariant.body2,
-                                color = TypographyColor.textPrimary){
+                                variant = TypographyVariant.body2){
                                 css (StyleManager.alignTextToStart)
                             }
                         }
@@ -142,8 +142,7 @@ class SiteEnterLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmSta
                                     css(defaultMarginTop)
                                     umTypography(getString(MessageID.or),
                                         variant = TypographyVariant.h6,
-                                        align = TypographyAlign.center,
-                                        color = TypographyColor.textPrimary){
+                                        align = TypographyAlign.center){
                                         css (StyleManager.alignTextToStart)
                                     }
                                 }
@@ -163,8 +162,8 @@ class SiteEnterLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmSta
                         }
                     }
                 }
-                umHidden(smDown = true){
-                    umItem(GridSize.column3){}
+                umItem(GridSize.column3){
+                    css(hideOnMobile)
                 }
             }
         }

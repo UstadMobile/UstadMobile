@@ -17,7 +17,7 @@ enum class IconEdge {
     start, end
 }
 
-fun RBuilder.mIconButton(
+fun RBuilder.umIconButton(
     iconName: String? = null,
     color: UMColor = UMColor.default,
     disabled: Boolean = false,
@@ -28,11 +28,14 @@ fun RBuilder.mIconButton(
     className: String? = null,
     handler: StyledHandler<IconButtonProps>? = null
 ) = createStyledComponent(IconButton, className, handler) {
-    attrs.asDynamic().color = color
+    attrs.color = color.toString()
     attrs.disabled = disabled
     attrs.disableFocusRipple = disabled
-    edge?.let { attrs.asDynamic().edge = it }
-    onClick?.let { attrs.asDynamic().onClick = onClick }
+    attrs.size = size.toString()
+    edge?.let { attrs.edge = it.toString() }
+    attrs.onClick = {
+        onClick?.invoke(it.nativeEvent)
+    }
 
     var colorToApply = iconColor
     // If the iconColor is null, we shall map to the button color if we can
@@ -44,7 +47,7 @@ fun RBuilder.mIconButton(
             UMColor.primary -> IconColor.primary
         }
     }
-    attrs.asDynamic().size = size.toString()
+
     if (iconName != null) {
         val fontSize = when (size) {
             IconButtonSize.small -> IconFontSize.small

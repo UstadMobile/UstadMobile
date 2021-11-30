@@ -57,9 +57,9 @@ class NavControllerJs: UstadNavController {
         }
 
         if(hasOption){
-            window.location.replace("#$viewName$params")
+            window.location.replace("#/$viewName$params")
         }else{
-            window.location.assign("#$viewName$params")
+            window.location.assign("#/$viewName$params")
         }
     }
 

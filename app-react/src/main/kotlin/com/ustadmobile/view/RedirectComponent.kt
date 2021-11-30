@@ -14,6 +14,7 @@ class RedirectComponent (props: UmProps): UstadBaseComponent<UmProps, UmState>(p
 
     override fun onCreateView() {
         super.onCreateView()
+        console.log("Redirect hit")
         val args = arguments.toMutableMap()
         mPresenter = RedirectPresenter(this, args, this, di)
         mPresenter?.onCreate(mapOf())

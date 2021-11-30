@@ -1,13 +1,15 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.mui.ext.createStyledComponent
+import mui.material.ContainerProps
 import mui.material.ListItem
 import mui.material.ListItemBaseProps
 import mui.material.ListItemProps
+import org.w3c.dom.HTMLDialogElement
+import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.events.Event
-import react.Props
-import react.PropsWithClassName
-import react.RBuilder
+import react.*
+import react.dom.html.HTMLAttributes
 import styled.StyledHandler
 
 @Suppress("EnumEntryName")
@@ -88,7 +90,7 @@ fun RBuilder.umListItem(
     selected: Boolean = false,
     key: String? = null,
     alignItems: ListItemAlignItems = ListItemAlignItems.center,
-    containerProps: Props? = null,
+    containerProps: ContainerProps? = null,
     dense: Boolean = false,
     disableGutters: Boolean = false,
     divider: Boolean = false,
@@ -97,12 +99,12 @@ fun RBuilder.umListItem(
     className: String? = null,
     handler: StyledHandler<UMListItemProps>? = null
 ) = createStyledComponent(ListItem, className, handler) {
-    attrs.asDynamic().alignItems = alignItems
+    attrs.alignItems = alignItems.toString()
     attrs.autoFocus = autoFocus
     attrs.asDynamic().button = button
     component?.let { attrs.asDynamic().component = component }
-    attrs.asDynamic().containerComponent = containerComponent
-    containerProps?.let { attrs.asDynamic().containerProps = containerProps }
+    attrs.ContainerComponent = containerComponent as ElementType<HTMLAttributes<HTMLDivElement>>
+    containerProps?.let { attrs.ContainerProps = containerProps }
     attrs.dense = dense
     attrs.disableGutters = disableGutters
     attrs.divider = divider

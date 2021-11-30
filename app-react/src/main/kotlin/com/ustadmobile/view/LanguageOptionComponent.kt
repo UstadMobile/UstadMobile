@@ -1,12 +1,21 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.ext.targetChangeValue
+import com.ustadmobile.mui.ext.targetInputValue
 import kotlinx.browser.window
 import kotlinx.css.LinearDimension
 import kotlinx.css.px
 import com.ustadmobile.util.*
+import com.ustadmobile.util.StyleManager.alignTextToStart
+import com.ustadmobile.util.StyleManager.languageComponentLanguageSelectorFormControl
+import kotlinx.css.label
+import kotlinx.css.width
 import org.w3c.dom.events.Event
 import react.*
+import styled.css
 
 interface LanguageProps: UmProps {
     var systemImpl: UstadMobileSystemImpl
@@ -30,37 +39,39 @@ class  LanguageOptionComponent(mProps: LanguageProps): RComponent<LanguageProps,
     }
 
     override fun RBuilder.render() {
-        /*mFormControl(variant = MFormControlVariant.outlined) {
+        umFormControl(variant = FormControlVariant.outlined) {
             css(languageComponentLanguageSelectorFormControl)
 
             val text = props.label ?: props.systemImpl.getString(MessageID.language, this)
-            mInputLabel(text, htmlFor = "language", variant = MFormControlVariant.outlined) {
+            umInputLabel(text, id = "language-label", variant = FormControlVariant.outlined) {
                 css(alignTextToStart)
             }
-            val input = mOutlinedInput(name = "language", id = "language", addAsChild = false, labelWidth = 100)
 
-            mSelect(selectedLanguage, native = false,
-                input = input, onChange = { event, _ -> handleOnLanguageChange(event)}) {
+            umSelect(selectedLanguage, native = false,
+                labelId = "language-label",
+                label = text,
+                onChange = { event, _ -> handleOnLanguageChange(event)}) {
                 css {
                     width = props.width
                 }
                 languageOptions.forEach {
-                    mMenuItem(it.second, value = it.first){
+                    umMenuItem(it.second, value = it.first){
                         css(alignTextToStart)
                     }
                 }
             }
-            mFormHelperText(props.caption?:""){
+            umFormHelperText(props.caption?:""){
                 css(alignTextToStart)
             }
-        }*/
+        }
     }
 
     private fun handleOnLanguageChange(event: Event){
-        /*val value = event.targetValue.toString()
+        val value = event.targetChangeValue
+        console.log(value)
         props.systemImpl.setLocale(value,this)
         setState { selectedLanguage = value }
-        window.location.reload()*/
+        window.location.reload()
     }
 }
 

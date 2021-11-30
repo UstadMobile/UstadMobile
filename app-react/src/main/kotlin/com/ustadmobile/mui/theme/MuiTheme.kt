@@ -50,13 +50,8 @@ external interface Theme {
     var zIndex: ZIndex
 }
 
-@JsModule("@mui/material/styles/createTheme")
-@JsNonModule
-private external val createMuiThemeModule: dynamic
-
-
 @Suppress("UnsafeCastFromDynamic")
 fun createMuiTheme(themeOptions: ThemeOptions? = null, args: dynamic = null): Theme {
     val ourThemeOptions = themeOptions ?: jsObject {  }
-    return createMuiThemeModule.default(ourThemeOptions, args)
+    return styledModule.createTheme(ourThemeOptions, args)
 }

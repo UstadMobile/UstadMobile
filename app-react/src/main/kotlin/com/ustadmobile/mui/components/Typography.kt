@@ -17,6 +17,9 @@ enum class TypographyColor {
     initial, inherit, primary, secondary, textPrimary, textSecondary, error
 }
 
+val TypographyColor.textPrimary: String
+    get() = ""
+
 @Suppress("EnumEntryName")
 enum class TypographyVariant {
     h1, h2, h3, h4, h5, h6, body1, body2, subtitle1, subtitle2, caption, button, overline, srOnly, inherit
@@ -26,18 +29,20 @@ enum class TypographyVariant {
 fun RBuilder.umTypography(
     text: String? = null,
     variant: TypographyVariant = TypographyVariant.body1,
-    color: TypographyColor = TypographyColor.initial,
     align: TypographyAlign = TypographyAlign.left,
     gutterBottom: Boolean = false,
     noWrap: Boolean = false,
+    component: String? = null,
     paragraph: Boolean = false,
     className: String? = null,
     handler: StyledHandler<TypographyProps>? = null
 ) = createStyledComponent(Typography, className, handler) {
     attrs.asDynamic().align = align.toString()
-    attrs.asDynamic().color = color.toString()
     attrs.gutterBottom = gutterBottom
     attrs.noWrap = noWrap
+    component?.let {
+        attrs.asDynamic().component = it
+    }
     attrs.paragraph = paragraph
     attrs.asDynamic().variant = variant.toString()
     text?.let {

@@ -11,15 +11,13 @@ enum class PaperVariant {
 }
 
 fun RBuilder.umPaper(
-    component: String = "div",
     elevation: Int = 2,
     square: Boolean = false,
     variant: PaperVariant = PaperVariant.elevation,
     className: String? = null,
     handler: StyledHandler<PaperProps>? = null
 ) = createStyledComponent(Paper, className, handler) {
-    attrs.asDynamic().component = component
     attrs.elevation = elevation
     attrs.square = square
-    attrs.asDynamic().variant = variant
+    attrs.variant = variant.toString()
 }

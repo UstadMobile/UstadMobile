@@ -59,36 +59,15 @@ fun RBuilder.umTabs(
 ) = createStyledComponent(Tabs, className, handler) {
     action?.let { attrs.asDynamic().action = it }
     attrs.centered = centered
-    attrs.asDynamic().indicatorColor = indicatorColor
+    attrs.indicatorColor = indicatorColor.toString()
     onChange?.let { attrs.asDynamic().onChange = it }
-    attrs.asDynamic().orientation = orientation
+    attrs.orientation = orientation.toString()
     scrollButtonComponent?.let { attrs.ScrollButtonComponent = it }
-    attrs.asDynamic().scrollButtons = scrollButtons
+    attrs.scrollButtons = scrollButtons.toString()
     tabIndicatorProps?.let { attrs.TabIndicatorProps = it }
-    attrs.asDynamic().textColor = textColor
-    attrs.asDynamic().value = value
-    attrs.asDynamic().variant = variant
-}
-
-fun RBuilder.umTab(
-    label: ReactElement? = null,
-    value: Any? = null,
-    icon: ReactElement? = null,
-    disabled: Boolean = false,
-    disableRipple: Boolean? = null,
-    disableFocusRipple: Boolean? = null,
-    wrapped: Boolean = false,
-
-    className: String? = null,
-    handler: StyledHandler<TabProps>? = null
-) = createStyledComponent(Tab, className, handler) {
-    attrs.disabled = disabled
-    disableFocusRipple?.let { attrs.disableFocusRipple = it }
-    disableRipple?.let { attrs.asDynamic().disableRipple = it }
-    icon?.let { attrs.icon = icon }
-    label?.let {attrs.label = label }
-    value?.let { attrs.value = value }
-    attrs.wrapped = wrapped
+    attrs.textColor = textColor.toString()
+    attrs.value = value
+    attrs.variant = variant.toString()
 }
 
 fun RBuilder.umTab(

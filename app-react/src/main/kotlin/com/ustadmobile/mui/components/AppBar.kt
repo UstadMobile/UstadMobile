@@ -19,8 +19,10 @@ fun RBuilder.umAppBar(
     color: AppBarColor = AppBarColor.primary,
     position: AppBarPosition = AppBarPosition.fixed,
     className: String? = null,
+    enableColorOnDark: Boolean = false,
     handler: StyledHandler<AppBarProps>? = null
 ) = createStyledComponent(AppBar, className, handler) {
-    attrs.asDynamic().color = color
-    attrs.asDynamic().position = position
+    attrs.color = color.toString()
+    attrs.position = position.toString()
+    attrs.enableColorOnDark = enableColorOnDark
 }

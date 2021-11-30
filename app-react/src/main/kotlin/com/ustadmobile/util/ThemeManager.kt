@@ -15,14 +15,6 @@ object ThemeManager {
     private val themeOptions: ThemeOptions = js("({palette: { type: 'placeholder'," +
             " primary: {main: 'placeholder'}, secondary: {main: 'placeholder'}}})")
 
-    private const val primaryColor = "#00796b"
-
-    private const val primaryLightColor = "#48a999"
-
-    private const val primaryDarkColor = "#005E55"
-
-    private const val secondaryColor = "#ff9800"
-
     /**
      * Check if the device theme setting is current on dark mode.
      * @return TRUE if is in dark mode otherwise FALSE.
@@ -35,11 +27,13 @@ object ThemeManager {
      * Create a theme to be applied to the app
      */
     fun createAppTheme(): Theme {
-        themeOptions.palette?.mode = if (isDarkModeActive()) "dark" else "light"
-        themeOptions.palette?.primary.light = if(isDarkModeActive()) primaryLightColor else primaryLightColor
-        themeOptions.palette?.primary.main = if(isDarkModeActive()) primaryColor else primaryColor
-        themeOptions.palette?.primary.dark = if(isDarkModeActive()) primaryDarkColor else primaryDarkColor
-        themeOptions.palette?.secondary.main = secondaryColor
+        themeOptions.palette?.mode = if(isDarkModeActive()) "dark" else "light"
+        themeOptions.palette?.primary.light = if(isDarkModeActive()) "#424242" else "#48a999"
+        themeOptions.palette?.primary.main = if(isDarkModeActive()) "#303030" else "#00796b"
+        themeOptions.palette?.primary.dark = if(isDarkModeActive()) "#303030" else "#005E55"
+        themeOptions.palette?.primary.contrastText = "#fff"
+        themeOptions.palette?.secondary.main = if(isDarkModeActive()) "#00796b" else "#ff9800"
+        themeOptions.palette?.secondary.contrastText = if(isDarkModeActive()) "#fff" else "#000000"
         return createMuiTheme(themeOptions)
     }
 }

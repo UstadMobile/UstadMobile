@@ -6,6 +6,7 @@ import mui.material.ChipProps
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.ReactElement
+import react.ReactNode
 import styled.StyledHandler
 
 
@@ -37,12 +38,12 @@ fun RBuilder.umChip(
     handler: StyledHandler<ChipProps>? = null
 ) = createStyledComponent(Chip, className, handler) {
     avatar?.let { attrs.avatar = it }
-    attrs.asDynamic().color = color
+    attrs.color = color.toString()
     attrs.asDynamic().component = "div"
-    attrs.label = label.asDynamic()
+    attrs.label = ReactNode(label)
     key?.let { attrs.asDynamic().key = it }
     onClick?.let { attrs.asDynamic().onClick = it }
     onDelete?.let { attrs.onDelete = it }
-    attrs.asDynamic().size = size
-    attrs.asDynamic().variant = variant
+    attrs.size = size.toString()
+    attrs.variant = variant.toString()
 }
