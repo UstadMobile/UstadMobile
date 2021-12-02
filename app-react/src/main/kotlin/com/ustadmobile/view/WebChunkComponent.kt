@@ -3,8 +3,9 @@ package com.ustadmobile.view
 import com.ustadmobile.core.controller.WebChunkPresenter
 import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
 import react.RBuilder
-import com.ustadmobile.util.*
 
 class WebChunkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps), WebChunkView  {
 

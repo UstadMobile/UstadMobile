@@ -2,8 +2,9 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.controller.XapiPackageContentPresenter
 import com.ustadmobile.core.view.XapiPackageContentView
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
 import react.RBuilder
-import com.ustadmobile.util.*
 import react.setState
 
 class XapiPackageContentComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps),

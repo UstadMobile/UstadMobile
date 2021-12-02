@@ -29,7 +29,6 @@ abstract class UstadDetailComponent<T: Any>(mProps: UmProps) : UstadBaseComponen
     }
 
     override fun onFabClicked() {
-        super.onFabClicked()
         detailPresenter?.handleClickEdit()
     }
 }

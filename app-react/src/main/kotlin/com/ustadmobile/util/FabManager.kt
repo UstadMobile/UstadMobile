@@ -4,7 +4,6 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.Element
 import org.w3c.dom.events.Event
-import org.w3c.dom.get
 
 /**
  * Manages Floating action button functionality
@@ -56,15 +55,9 @@ class  FabManager(private val viewId: String = "um-fab", visible: Boolean = fals
 
     private fun updateIconAndFabText(){
         if(!text.isNullOrBlank() && !icon.isNullOrBlank()){
-            val fabInnerHTML = """
-            <span class="MuiFab-label">
-                <span class="material-icons MuiIcon-root sc-gKAaRy" aria-hidden="true">
-                    $icon
-                </span>
-                $text
-            """.trimIndent()
-            fabView?.getElementsByClassName("MuiFab-label")
-                ?.get(0)?.parentElement?.innerHTML = fabInnerHTML
+            fabView?.childNodes?.item(0)?.textContent = icon
+            fabView?.childNodes?.item(1)?.textContent = text
+
         }else{
             visible = false
         }

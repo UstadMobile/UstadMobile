@@ -3,12 +3,28 @@ package com.ustadmobile.view
 import com.ustadmobile.core.controller.ClazzListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.alignTextToStart
+import com.ustadmobile.util.StyleManager.clazzListRoleChip
+import com.ustadmobile.util.StyleManager.gridListSecondaryItemDesc
+import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.ext.breakToWork
+import com.ustadmobile.util.ext.format
+import com.ustadmobile.view.ext.circleIndicator
+import com.ustadmobile.view.ext.umEntityAvatar
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
+import kotlinx.css.*
 import react.RBuilder
-import com.ustadmobile.util.*
 import react.setState
+import styled.css
+import styled.styledDiv
 import kotlin.js.Date
 
 class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
@@ -29,16 +45,17 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
         super.onCreateView()
         fabManager?.text = getString(MessageID.clazz)
         title = getString(MessageID.classes)
-        listTypeSingleColumn = false
+        linearLayout = false
         mPresenter = ClazzListPresenter(this, arguments, this,di,this)
         mPresenter?.onCreate(mapOf())
     }
 
     override fun RBuilder.renderListItem(item: ClazzWithListDisplayDetails) {
-       /* styledDiv {
+        styledDiv {
             css{
                 position = Position.relative
             }
+
             umEntityAvatar(
                 className = "${StyleManager.name}-clazzItemClass",
                 listItem = true,
@@ -47,9 +64,9 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
             val memberRole = "${item.clazzActiveEnrolment?.roleToString(this,systemImpl)}"
 
             if(item.clazzActiveEnrolment != null){
-                mChip(memberRole,color = MChipColor.primary){
+                umChip(memberRole,color = ChipColor.primary){
                     css(clazzListRoleChip)
-                    attrs.asDynamic().icon = mIcon("badge"){
+                    attrs.asDynamic().icon = umIcon("badge"){
                         css{
                             fontSize = LinearDimension("1.2em")
                         }
@@ -57,37 +74,31 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
                 }
             }
         }
+
         styledDiv {
             css {
                 padding(2.spacingUnits)
             }
 
-            mTypography(item.clazzName,
-                variant = MTypographyVariant.h6,
-                color = MTypographyColor.textPrimary){
+            umTypography(item.clazzName,TypographyVariant.h6){
                 css(alignTextToStart)
             }
 
-            mTypography(item.clazzDesc?.breakToWork(),
-                variant = MTypographyVariant.body1,
-                color = MTypographyColor.textPrimary
-            ){
+            umTypography(item.clazzDesc?.breakToWork(),TypographyVariant.body1){
                 css(alignTextToStart)
             }
 
             umGridContainer{
-                umItem(MGridSize.cells1){
-                    mIcon("people", color = MIconColor.inherit){
+                umItem(GridSize.cells1){
+                    umIcon("people", color = IconColor.inherit){
                         css(gridListSecondaryItemIcons)
                     }
                 }
 
-                umItem(MGridSize.cells6){
+                umItem(GridSize.cells6){
                     val numOfStudentTeachers = getString(MessageID.x_teachers_y_students)
                         .format(item.numTeachers, item.numStudents)
-                    mTypography(numOfStudentTeachers,
-                        color = MTypographyColor.textPrimary
-                    ){
+                    umTypography(numOfStudentTeachers){
                         css{
                             +alignTextToStart
                             +gridListSecondaryItemDesc
@@ -96,16 +107,14 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
 
                 }
 
-                umItem(MGridSize.cells1){
+                umItem(GridSize.cells1){
                     circleIndicator(item.attendanceAverage)
                 }
 
-                umItem(MGridSize.cells4){
+                umItem(GridSize.cells4){
                     val attendancesPercentage = getString(MessageID.x_percent_attended)
                         .format(item.attendanceAverage * 100)
-                    mTypography(attendancesPercentage,
-                        color = MTypographyColor.textPrimary
-                    ){
+                    umTypography(attendancesPercentage){
                         css{
                             +alignTextToStart
                             +gridListSecondaryItemDesc
@@ -114,12 +123,13 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
 
                 }
             }
-        }*/
+        }
     }
 
     override fun handleClickEntry(entry: ClazzWithListDisplayDetails) {
         mPresenter?.onClickClazz(entry)
     }
+
     override fun onFabClicked() {
         setState {
             showAddEntryOptions = true

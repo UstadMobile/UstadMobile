@@ -1,7 +1,5 @@
 package com.ustadmobile.core.util
 
-import kotlin.js.Date
-
 actual object UmPlatform {
 
     actual var isWeb: Boolean = true

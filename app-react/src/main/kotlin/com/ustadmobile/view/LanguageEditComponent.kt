@@ -6,10 +6,19 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.LanguageEditView
 import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.mui.components.FormControlVariant
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.GridSpacing
+import com.ustadmobile.mui.components.umTextField
+import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
 import react.RBuilder
-import com.ustadmobile.util.*
 import react.setState
+import styled.css
+import styled.styledDiv
 
 class LanguageEditComponent (mProps: UmProps): UstadEditComponent<Language>(mProps),
     LanguageEditView {
@@ -63,63 +72,55 @@ class LanguageEditComponent (mProps: UmProps): UstadEditComponent<Language>(mPro
     }
 
     override fun RBuilder.render() {
-
-       /* styledDiv {
+        styledDiv {
             css {
                 +StyleManager.fieldsOnlyFormScreen
             }
 
-            umItem(MGridSize.cells12){
-                mTextField(label = "${nameLabel.text}",
+            umItem(GridSize.cells12){
+                umTextField(label = "${nameLabel.text}",
                     helperText = nameLabel.errorText,
                     value = entity?.name, error = nameLabel.error,
                     disabled = !fieldsEnabled,
-                    variant = MFormControlVariant.outlined,
+                    variant = FormControlVariant.outlined,
                     onChange = {
-                        it.persist()
                         setState {
-                            entity?.name = it.targetInputValue
+                            entity?.name = it
                             langNameError = null
                         }
-                    }){
-                    css(defaultFullWidth)
-                }
+                    })
             }
 
-            umGridContainer(MGridSpacing.spacing4) {
-                umItem(MGridSize.cells12, MGridSize.cells6){
-                    mTextField(label = "${twoLetterLabel.text}",
+            umGridContainer(GridSpacing.spacing4) {
+                umItem(GridSize.cells12, GridSize.cells6){
+                    umTextField(
+                        label = "${twoLetterLabel.text}",
                         helperText = twoLetterLabel.errorText,
-                        value = entity?.iso_639_2_standard, error = twoLetterLabel.error,
+                        value = entity?.iso_639_2_standard,
+                        error = twoLetterLabel.error,
                         disabled = !fieldsEnabled,
-                        variant = MFormControlVariant.outlined,
+                        variant = FormControlVariant.outlined,
                         onChange = {
-                            it.persist()
                             setState {
-                                entity?.iso_639_2_standard = it.targetInputValue
+                                entity?.iso_639_2_standard = it
                             }
-                        }){
-                        css(defaultFullWidth)
-                    }
+                        })
                 }
 
-                umItem(MGridSize.cells12, MGridSize.cells6){
-                    mTextField(label = "${threeLetterLabel.text}",
+                umItem(GridSize.cells12, GridSize.cells6){
+                    umTextField(label = "${threeLetterLabel.text}",
                         helperText = threeLetterLabel.errorText,
                         value = entity?.iso_639_3_standard, error = threeLetterLabel.error,
                         disabled = !fieldsEnabled,
-                        variant = MFormControlVariant.outlined,
+                        variant = FormControlVariant.outlined,
                         onChange = {
-                            it.persist()
                             setState {
-                                entity?.iso_639_3_standard = it.targetInputValue
+                                entity?.iso_639_3_standard = it
                             }
-                        }){
-                        css(defaultFullWidth)
-                    }
+                        })
                 }
             }
-        }*/
+        }
     }
 
     override fun onDestroyView() {

@@ -1,14 +1,23 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.controller.ScheduleEditPresenter
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.OneToManyJoinEditListener
 import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.ext.formattedInHoursAndMinutes
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
 import react.RBuilder
+import styled.css
+import kotlin.js.Date
 
 
 class ScheduleListComponent(mProps: ListProps<Schedule>): UstadSimpleList<ListProps<Schedule>>(mProps){
 
     override fun RBuilder.renderListItem(item: Schedule) {
-       /* umGridContainer {
+        umGridContainer {
             val frequencyMessageId = ScheduleEditPresenter.FrequencyOption.values()
                 .firstOrNull { it.optionVal == item.scheduleFrequency }?.messageId ?: MessageID.None
             val dayMessageId = ScheduleEditPresenter.DayOptions.values()
@@ -19,21 +28,22 @@ class ScheduleListComponent(mProps: ListProps<Schedule>): UstadSimpleList<ListPr
             val startEndTime = "${Date(item.sceduleStartTime).formattedInHoursAndMinutes()} " +
                     "- ${Date(item.scheduleEndTime).formattedInHoursAndMinutes()}"
 
-            umItem(MGridSize.cells10, MGridSize.cells11){
-                mTypography("$scheduleDays $startEndTime",
-                    variant = MTypographyVariant.body2,
-                    color = MTypographyColor.textPrimary,
+            umItem(GridSize.cells10, GridSize.cells11){
+                umTypography("$scheduleDays $startEndTime",
+                    variant = TypographyVariant.body2,
                     gutterBottom = true){
                     css(StyleManager.alignTextToStart)
                 }
             }
 
-            umItem(MGridSize.cells2, MGridSize.cells1){
-                mIconButton("delete", size = MIconButtonSize.small, onClick = {
+            umItem(GridSize.cells2, GridSize.cells1){
+                umIconButton("delete",
+                    size = IconButtonSize.small,
+                    onClick = {
                     props.listener.onClickDelete(item)
                 })
             }
-        }*/
+        }
     }
 
 }

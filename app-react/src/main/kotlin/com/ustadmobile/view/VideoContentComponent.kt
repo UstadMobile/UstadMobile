@@ -8,7 +8,8 @@ import com.ustadmobile.core.view.VideoContentView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.util.StyleManager.videoComponentResponsiveMedia
-import com.ustadmobile.util.*
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on

@@ -21,7 +21,8 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.events.Event
-import react.*
+import react.RBuilder
+import react.RComponent
 
 abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<P, S>(props),
     UstadView, DIAware, DoorLifecycleOwner {
@@ -78,6 +79,7 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
         }
         fabManager?.visible = false
         fabManager?.icon = "add"
+        fabManager?.text = ""
         fabManager?.onClickListener = {
             onFabClicked()
         }

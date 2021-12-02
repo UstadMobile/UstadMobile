@@ -1,9 +1,20 @@
 package com.ustadmobile.view
 
+import Breakpoint
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import react.*
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.theme.UMColor
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
+import kotlinx.css.LinearDimension
+import kotlinx.css.width
+import react.RBuilder
+import react.RComponent
+import react.setState
+import styled.css
+import styled.styledDiv
 import kotlin.js.Date
-import com.ustadmobile.util.*
 
 data class PopUpOptionItem(var icon: String?, var primaryText: Int, var secondaryText: Int = 0, val onOptionItemClicked: (() -> Unit)? = null)
 
@@ -22,13 +33,14 @@ class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, UmSt
     private var lastShownAt = 0L
 
     override fun RBuilder.render() {
-/*        mDialog(showDialog, onClose = { _, _ ->
-            handleDialogClosed()
-        },fullWidth = true, maxWidth = Breakpoint.sm) {
+        umDialog(showDialog,
+            onClose = {handleDialogClosed()},
+            fullWidth = true,
+            maxWidth = Breakpoint.sm) {
             if(props.title != null){
-                mDialogTitle("${props.title}")
+                umDialogTitle("${props.title}")
             }
-            mDialogContent {
+            umDialogContent {
                 css {
                     width = LinearDimension("100%")
                 }
@@ -37,20 +49,22 @@ class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, UmSt
                         width = LinearDimension("100%")
                     }
 
-                    mList {
+                    umList {
                         props.optionItems.forEach { option ->
-                            mListItem(
+                            umListItem(
                                 button = true,
-                                onClick = { option.onOptionItemClicked?.com.ustadmobile.components.theming.invoke() }) {
+                                onClick = {
+                                    option.onOptionItemClicked?.invoke()
+                                }) {
                                 if(option.icon != null){
-                                    mListItemAvatar {
-                                        mAvatar {
-                                            mIcon("${option.icon}")
+                                    umListItemAvatar {
+                                        umAvatar {
+                                            umIcon("${option.icon}")
                                         }
                                     }
                                 }
 
-                                mListItemText(
+                                umListItemText(
                                     primary = props.systemImpl.getString(option.primaryText, this),
                                     secondary = if(option.secondaryText != 0)
                                         props.systemImpl.getString(option.secondaryText, this) else "")
@@ -60,14 +74,16 @@ class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, UmSt
                 }
             }
 
-            mDialogActions {
-                mButton(props.systemImpl.getString(MessageID.cancel, this), color = MColor.primary,
+            umDialogActions {
+                umButton(
+                    props.systemImpl.getString(MessageID.cancel, this),
+                    color = UMColor.secondary,
                     onClick = {
                        handleDialogClosed()
                     }
                 )
             }
-        }*/
+        }
     }
 
     private fun handleDialogClosed(){

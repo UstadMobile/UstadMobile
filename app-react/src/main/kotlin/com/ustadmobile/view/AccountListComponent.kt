@@ -2,11 +2,32 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.controller.AccountListPresenter
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.ObserverFnWrapper
-import react.*
-import com.ustadmobile.util.*
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.theme.UMColor
+import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.contentContainer
+import com.ustadmobile.util.StyleManager.defaultMarginTop
+import com.ustadmobile.util.StyleManager.defaultPaddingTop
+import com.ustadmobile.util.StyleManager.defaultPaddingTopBottom
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
+import com.ustadmobile.util.ext.format
+import com.ustadmobile.view.ext.createCreateNewItem
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.view.ext.umProfileAvatar
+import kotlinx.css.Cursor
+import kotlinx.css.cursor
+import kotlinx.css.marginTop
+import kotlinx.html.js.onClickFunction
+import react.RBuilder
+import react.setState
+import styled.css
+import styled.styledDiv
 
 class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps), AccountListView  {
 
@@ -60,7 +81,7 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
     }
 
     override fun RBuilder.render() {
-     /*   styledDiv {
+        styledDiv {
             css{
                 +defaultPaddingTop
                 +contentContainer
@@ -87,7 +108,7 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
                 createCreateNewItem(getString(MessageID.add_another)
                     .format(getString(MessageID.account)))
             }
-        }*/
+        }
     }
 
     override fun onDestroyView() {
@@ -118,56 +139,57 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
         override fun RBuilder.renderListItem(item: UserSessionWithPersonAndEndpoint) {
             val presenter = props.presenter as AccountListPresenter
 
-           /* umGridContainer {
-               umItem(MGridSize.cells3, MGridSize.cells2){
+            umGridContainer {
+                css(defaultPaddingTopBottom)
+               umItem(GridSize.cells3, GridSize.cells2){
                    umProfileAvatar(item.person.personUid, "person")
                }
 
-               umItem(if(!props.activeAccount) MGridSize.cells7 else MGridSize.cells9,
-                   if(!props.activeAccount) MGridSize.cells8 else MGridSize.cells10){
+               umItem(if(!props.activeAccount) GridSize.cells7 else GridSize.cells9,
+                   if(!props.activeAccount) GridSize.cells8 else GridSize.cells10){
 
-                   umItem(MGridSize.cells12){
-                       mTypography(item.person.fullName(),
-                           variant = MTypographyVariant.body1){
+                   umItem(GridSize.cells12){
+                       umTypography(item.person.fullName(),
+                           variant = TypographyVariant.body1){
                            css(StyleManager.alignTextToStart)
                        }
                    }
 
-                   umItem(MGridSize.cells12){
+                   umItem(GridSize.cells12){
 
                        umGridContainer {
-                           umItem(MGridSize.cells2,MGridSize.cells1){
-                               mIcon("person")
+                           umItem(GridSize.cells2,GridSize.cells1){
+                               umIcon("person")
                            }
 
-                           umItem(MGridSize.cells10, MGridSize.cells3){
-                               mTypography(item.person.username,
-                                   variant = MTypographyVariant.body2){
+                           umItem(GridSize.cells10, GridSize.cells3){
+                               umTypography(item.person.username,
+                                   variant = TypographyVariant.body2){
                                    css(StyleManager.alignTextToStart)
                                }
                            }
 
-                           umItem(MGridSize.cells2,MGridSize.cells1){
-                               mIcon("link")
+                           umItem(GridSize.cells2,GridSize.cells1){
+                               umIcon("link")
                            }
 
-                           umItem(MGridSize.cells10, MGridSize.cells7){
-                               mTypography(item.endpoint.url,
-                                   variant = MTypographyVariant.body2){
+                           umItem(GridSize.cells10, GridSize.cells7){
+                               umTypography(item.endpoint.url,
+                                   variant = TypographyVariant.body2){
                                    css(StyleManager.alignTextToStart)
                                }
                            }
                        }
                    }
 
-                   umItem(MGridSize.cells12){
+                   umItem(GridSize.cells12){
                        css(defaultMarginTop)
-                       umGridContainer(MGridSpacing.spacing2) {
-                           umItem(MGridSize.cells7,MGridSize.cells4){
-                               mButton(getString(MessageID.my).format(getString(MessageID.profile)),
-                                   size = MButtonSize.large,
-                                   variant = MButtonVariant.outlined,
-                                   color = MColor.primary,
+                       umGridContainer(GridSpacing.spacing2) {
+                           umItem(GridSize.cells7,GridSize.cells4){
+                               umButton(getString(MessageID.my).format(getString(MessageID.profile)),
+                                   size = ButtonSize.large,
+                                   variant = ButtonVariant.outlined,
+                                   color = UMColor.secondary,
                                    onClick = {
                                        it.stopPropagation()
                                        presenter.handleClickProfile(item.person.personUid)
@@ -175,11 +197,11 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
                            }
 
                            if(props.activeAccount){
-                               umItem(MGridSize.cells5,MGridSize.cells4){
-                                   mButton(getString(MessageID.logout),
-                                       size = MButtonSize.large,
-                                       variant = MButtonVariant.outlined,
-                                       color = MColor.primary,
+                               umItem(GridSize.cells5,GridSize.cells4){
+                                   umButton(getString(MessageID.logout),
+                                       size = ButtonSize.large,
+                                       variant = ButtonVariant.outlined,
+                                       color = UMColor.secondary,
                                        onClick = {
                                            it.stopPropagation()
                                            presenter.handleClickLogout(item)
@@ -192,13 +214,13 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
                }
 
                if(!props.activeAccount){
-                   umItem(MGridSize.cells2){
-                       mIconButton("delete", onClick = {
+                   umItem(GridSize.cells2){
+                       umIconButton("delete", onClick = {
                            presenter.handleClickDeleteSession(item)
                        })
                    }
                }
-           }*/
+           }
         }
 
     }

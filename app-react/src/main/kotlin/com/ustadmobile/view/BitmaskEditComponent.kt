@@ -8,10 +8,16 @@ import com.ustadmobile.core.util.LongWrapper
 import com.ustadmobile.core.view.BitmaskEditView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.ObserverFnWrapper
+import com.ustadmobile.mui.components.GridSpacing
+import com.ustadmobile.util.StyleManager.contentContainer
+import com.ustadmobile.util.StyleManager.defaultPaddingTop
+import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.view.ext.umGridContainer
 import react.RBuilder
-import com.ustadmobile.util.*
 import react.setState
+import styled.css
+import styled.styledDiv
 
 class BitmaskEditComponent (mProps: UmProps): UstadEditComponent<LongWrapper>(mProps),
     BitmaskEditView {
@@ -67,13 +73,13 @@ class BitmaskEditComponent (mProps: UmProps): UstadEditComponent<LongWrapper>(mP
     }
 
     override fun RBuilder.render() {
-      /*  styledDiv {
+        styledDiv {
             css{
                 +contentContainer
                 +defaultPaddingTop
             }
 
-            umGridContainer(MGridSpacing.spacing4) {
+            umGridContainer(GridSpacing.spacing4) {
 
                 scopeList?.let { scopes ->
                     child(ScopedGrantEditComponent.ScopedGrantComponent::class) {
@@ -86,9 +92,8 @@ class BitmaskEditComponent (mProps: UmProps): UstadEditComponent<LongWrapper>(mP
                         }
                     }
                 }
-
             }
-        }*/
+        }
     }
 
     override fun onDestroyView() {

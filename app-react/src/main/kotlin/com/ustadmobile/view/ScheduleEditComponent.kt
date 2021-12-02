@@ -6,10 +6,17 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.util.ext.toDate
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
 import react.RBuilder
-import com.ustadmobile.util.*
 import react.setState
+import styled.css
+import styled.styledDiv
 
 class ScheduleEditComponent (mProps: UmProps): UstadEditComponent<Schedule>(mProps),
     ScheduleEditView {
@@ -38,7 +45,7 @@ class ScheduleEditComponent (mProps: UmProps): UstadEditComponent<Schedule>(mPro
     override var fromTimeError: String? = null
         set(value) {
             setState {
-                fromTimeLabel = toTimeLabel.copy(errorText = value)
+                fromTimeLabel = fromTimeLabel.copy(errorText = value)
             }
         }
 
@@ -75,80 +82,56 @@ class ScheduleEditComponent (mProps: UmProps): UstadEditComponent<Schedule>(mPro
     }
 
     override fun RBuilder.render() {
-
-       /* styledDiv {
+        styledDiv {
             css {
                 +StyleManager.fieldsOnlyFormScreen
             }
 
-            umGridContainer(MGridSpacing.spacing4) {
-                umItem(MGridSize.cells12){
-                    mFormControl(variant = MFormControlVariant.outlined) {
-                        css(defaultFullWidth)
-                        mInputLabel("${daysOptionLabel.text}",
-                            htmlFor = "days",
-                            variant = MFormControlVariant.outlined) {
-                            css(alignTextToStart)
-                        }
-                        mSelect("${entity?.scheduleDay ?: 0}",
-                            native = false,
-                            input = mOutlinedInput(name = "days",
-                                id = "days", addAsChild = false,
-                                labelWidth = daysOptionLabel.width),
-                            onChange = { it, _ ->
-                                setState {
-                                    entity?.scheduleDay = it.targetValue.toString().toInt()
-                                }
-                            }) {
-                            dayOptions?.forEach {
-                                mMenuItem(primaryText = it.toString(), value = it.optionId.toString()){
-                                    css(alignTextToStart)
-                                }
-                            }
-                        }
+            umGridContainer(GridSpacing.spacing4) {
+                umItem(GridSize.cells12){
 
-                        daysOptionLabel.errorText?.let { error ->
-                            mFormHelperText(error){
-                                css(StyleManager.errorTextClass)
+                    umTextFieldSelect("${daysOptionLabel.text}",
+                        entity?.scheduleDay.toString(),
+                        daysOptionLabel.errorText ?: "",
+                        error = daysOptionLabel.error,
+                        values = dayOptions?.map {
+                            Pair(it.optionId.toString(), it.toString())
+                        }?.toList(),
+                        onChange = {
+                            setState {
+                                entity?.scheduleDay = it.toInt()
                             }
-                        }
-                    }
+                        })
                 }
 
-                umItem(MGridSize.cells12){
-                    umGridContainer(MGridSpacing.spacing4) {
-                        umItem(MGridSize.cells12, MGridSize.cells6 ) {
+                umItem(GridSize.cells12){
+                    umGridContainer(GridSpacing.spacing4) {
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
 
-                            mDateTimePicker(
+                            umTimePicker(
                                 label = "${fromTimeLabel.text}",
-                                ruleSet = defaultFullWidth,
                                 error = fromTimeLabel.error,
                                 helperText = fromTimeLabel.errorText,
                                 value = entity?.sceduleStartTime.toDate(),
-                                inputVariant = MFormControlVariant.outlined,
-                                pickerType = MDateTimePickerType.time,
-                                onChange = { mills, _ ->
+                                inputVariant = FormControlVariant.outlined,
+                                onChange = {
                                     setState {
-                                        entity?.sceduleStartTime = mills
+                                        entity?.sceduleStartTime = it.getTime().toLong()
                                         fromTimeError = null
                                     }
                                 })
                         }
 
-                        umItem(MGridSize.cells12, MGridSize.cells6 ) {
-
-
-                            mDateTimePicker(
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
+                            umTimePicker(
                                 label = "${toTimeLabel.text}",
-                                ruleSet = defaultFullWidth,
                                 error = toTimeLabel.error,
                                 helperText = toTimeLabel.errorText,
                                 value = entity?.scheduleEndTime.toDate(),
-                                inputVariant = MFormControlVariant.outlined,
-                                pickerType = MDateTimePickerType.time,
-                                onChange = { mills, _ ->
+                                inputVariant = FormControlVariant.outlined,
+                                onChange = {
                                     setState {
-                                        entity?.scheduleEndTime = mills
+                                        entity?.scheduleEndTime = it.getTime().toLong()
                                         toTimeError = null
                                     }
                                 })
@@ -156,7 +139,7 @@ class ScheduleEditComponent (mProps: UmProps): UstadEditComponent<Schedule>(mPro
                     }
                 }
             }
-        }*/
+        }
     }
 
     override fun onDestroyView() {

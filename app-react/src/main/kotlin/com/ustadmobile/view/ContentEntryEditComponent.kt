@@ -8,11 +8,24 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.theme.UMColor
+import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.contentContainer
+import com.ustadmobile.util.StyleManager.defaultMarginTop
+import com.ustadmobile.util.StyleManager.defaultPaddingTop
+import com.ustadmobile.util.StyleManager.displayProperty
+import com.ustadmobile.util.StyleManager.switchMargin
+import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
+import kotlinx.css.*
 import org.w3c.dom.events.MouseEvent
 import react.RBuilder
-import com.ustadmobile.util.*
 import react.setState
+import styled.css
+import styled.styledDiv
 
 class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEntryWithLanguage>(mProps),
     ContentEntryEdit2View {
@@ -158,20 +171,20 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
     }
 
     override fun RBuilder.render() {
-      /*  styledDiv {
+        styledDiv {
             css{
                 if(entity?.leaf == true){
-                    +StyleManager.contentContainer
+                    +contentContainer
                 }else{
                     +StyleManager.fieldsOnlyFormScreen
                 }
-                +StyleManager.defaultPaddingTop
+                +defaultPaddingTop
             }
 
-            umGridContainer(MGridSpacing.spacing4) {
+            umGridContainer(GridSpacing.spacing4) {
 
                 if(entity?.leaf == true){
-                    umItem(MGridSize.cells12, MGridSize.cells4){
+                    umItem(GridSize.cells12, GridSize.cells4){
                         css{
                             marginTop = 12.px
                         }
@@ -183,10 +196,10 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                         }
 
                         if((entity?.leaf == true || (entity?.contentEntryUid ?: 0L) != 0L)){
-                            mButton(getString(MessageID.update_content),
-                                size = MButtonSize.large,
-                                color = MColor.secondary,
-                                variant = MButtonVariant.contained,
+                            umButton(getString(MessageID.update_content),
+                                size = ButtonSize.large,
+                                color = UMColor.secondary,
+                                variant = ButtonVariant.contained,
                                 onClick = {
                                     //update
                                 }){
@@ -200,14 +213,13 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
 
 
                         if(entity?.leaf == true){
-                            umItem(MGridSize.cells12){
+                            umItem(GridSize.cells12){
                                 css{
                                     display = displayProperty(entity?.leaf == true)
                                     +defaultMarginTop
                                 }
-                                mTypography(getString(MessageID.supported_files),
-                                    variant = MTypographyVariant.body2,
-                                    color = MTypographyColor.textPrimary){
+                                umTypography(getString(MessageID.supported_files),
+                                    variant = TypographyVariant.body2){
                                     css (StyleManager.alignTextToStart)
                                 }
                             }
@@ -217,32 +229,30 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
 
                 }
 
-                umItem(MGridSize.cells12, if(entity?.leaf == true) MGridSize.cells8 else MGridSize.cells12){
+                umItem(GridSize.cells12, if(entity?.leaf == true) GridSize.cells8 else GridSize.cells12){
 
-                    mTextField(label = "${titleLabel.text}",
+                    umTextField(label = "${titleLabel.text}",
                         helperText = titleLabel.errorText,
                         value = entity?.title, error = titleLabel.error,
                         disabled = !fieldsEnabled,
-                        variant = MFormControlVariant.outlined,
+                        variant = FormControlVariant.outlined,
                         onChange = {
-                            it.persist()
                             setState {
-                                entity?.title = it.targetInputValue
+                                entity?.title = it
                             }
                         }){
                         css(StyleManager.defaultFullWidth)
                     }
 
 
-                    mTextField(label = "${descLabel.text}",
+                    umTextField(label = "${descLabel.text}",
                         value = entity?.description,
                         error = descLabel.error, disabled = !fieldsEnabled,
                         helperText = descLabel.errorText,
-                        variant = MFormControlVariant.outlined,
+                        variant = FormControlVariant.outlined,
                         onChange = {
-                            it.persist()
                             setState {
-                                entity?.description = it.targetInputValue
+                                entity?.description = it
                             }
                         }){
                         css(StyleManager.defaultFullWidth)
@@ -250,147 +260,109 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
 
 
                     if(showCompletionCriteria){
-                        umGridContainer(MGridSpacing.spacing4) {
+                        umGridContainer(GridSpacing.spacing4) {
 
-                            umItem(MGridSize.cells12, MGridSize.cells6 ) {
-                                css(StyleManager.defaultMarginTop)
-                                mFormControl(variant = MFormControlVariant.outlined) {
-                                    css(StyleManager.defaultFullWidth)
-                                    mInputLabel("${completionLabel.text}",
-                                        htmlFor = "completion",
-                                        variant = MFormControlVariant.outlined) {
-                                        css(StyleManager.alignTextToStart)
-                                    }
-                                    mSelect("${entity?.completionCriteria ?: 0}",
-                                        native = false,
-                                        input = mOutlinedInput(name = "completion",
-                                            id = "completion", addAsChild = false,
-                                            labelWidth = completionLabel.width),
-                                        onChange = { it, _ ->
-                                            setState {
-                                                entity?.completionCriteria = it.targetValue.toString().toInt()
-                                            }
-                                        }) {
-                                        completionCriteriaOptions?.forEach {
-                                            mMenuItem(primaryText = it.toString(), value = it.messageId.toString()){
-                                                css(StyleManager.alignTextToStart)
-                                            }
+                            umItem(GridSize.cells12, GridSize.cells6 ) {
+                                css(defaultMarginTop)
+                                umTextFieldSelect(
+                                    label = "${completionLabel.text}",
+                                    value =  entity?.completionCriteria.toString(),
+                                    error = completionLabel.error,
+                                    values = completionCriteriaOptions?.map {
+                                        Pair(it.messageId.toString(), it.toString())
+                                    }?.toList(),
+                                    onChange = {
+                                        setState {
+                                            entity?.completionCriteria = it.toInt()
                                         }
                                     }
-                                    completionLabel.errorText?.let { error ->
-                                        mFormHelperText(error){
-                                            css(StyleManager.errorTextClass)
-                                        }
-                                    }
-                                }
+                                )
                             }
 
-                            umItem(MGridSize.cells12, MGridSize.cells6 ) {
+                            umItem(GridSize.cells12, GridSize.cells6 ) {
 
-                                mTextField(label = "${minScoreLabel.text}",
+                                umTextField(label = "${minScoreLabel.text}",
                                     value = "${entity?.minScore}",
                                     error = minScoreLabel.error, disabled = !fieldsEnabled,
                                     helperText = minScoreLabel.errorText,
-                                    variant = MFormControlVariant.outlined,
-                                    type = InputType.number,
+                                    variant = FormControlVariant.outlined,
                                     onChange = {
-                                        it.persist()
                                         setState {
-                                            entity?.minScore = if(it.targetInputValue.isEmpty()) 0 else it.targetInputValue.toInt()
+                                            entity?.minScore = if(it.isEmpty()) 0 else it.toInt()
                                         }
-                                    }){
-                                    css(StyleManager.defaultFullWidth)
-                                }
+                                    })
 
                             }
                         }
                     }
 
-                    mTextField(label = "${authorLabel.text}",
+                    umTextField(label = "${authorLabel.text}",
                         value = entity?.author,
                         error = authorLabel.error, disabled = !fieldsEnabled,
                         helperText = authorLabel.errorText,
-                        variant = MFormControlVariant.outlined,
+                        variant = FormControlVariant.outlined,
                         onChange = {
-                            it.persist()
                             setState {
-                                entity?.author = it.targetInputValue
+                                entity?.author = it
                             }
                         }){
                         css(StyleManager.defaultFullWidth)
                     }
 
-                    mTextField(label = "${publisherLabel.text}",
+                    umTextField(label = "${publisherLabel.text}",
                         value = entity?.publisher,
                         error = publisherLabel.error, disabled = !fieldsEnabled,
                         helperText = publisherLabel.errorText,
-                        variant = MFormControlVariant.outlined,
+                        variant = FormControlVariant.outlined,
                         onChange = {
-                            it.persist()
                             setState {
-                                entity?.publisher = it.targetInputValue
+                                entity?.publisher = it
                             }
                         }){
                         css(StyleManager.defaultFullWidth)
                     }
 
-                    umGridContainer(MGridSpacing.spacing4) {
-                        umItem(MGridSize.cells12, MGridSize.cells6 ) {
-                            css(StyleManager.defaultMarginTop)
-                            mFormControl(variant = MFormControlVariant.outlined) {
-                                css(StyleManager.defaultFullWidth)
-                                mInputLabel("${licenseLabel.text}",
-                                    htmlFor = "licence",
-                                    variant = MFormControlVariant.outlined) {
-                                    css(StyleManager.alignTextToStart)
-                                }
-                                mSelect("${entity?.licenseType ?: 0}",
-                                    native = false,
-                                    input = mOutlinedInput(name = "licence",
-                                        id = "licence", addAsChild = false,
-                                        labelWidth = completionLabel.width),
-                                    onChange = { it, _ ->
-                                        setState {
-                                            entity?.licenseType = it.targetValue.toString().toInt()
-                                        }
-                                    }) {
-                                    licenceOptions?.forEach {
-                                        mMenuItem(primaryText = it.toString(), value = it.messageId.toString()){
-                                            css(StyleManager.alignTextToStart)
-                                        }
+                    umGridContainer(GridSpacing.spacing4) {
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
+                            umTextFieldSelect(
+                                label = "${licenseLabel.text}",
+                                value = entity?.licenseType.toString(),
+                                error = licenseLabel.error,
+                                disabled = !fieldsEnabled,
+                                helperText = licenseLabel.errorText,
+                                values = licenceOptions?.map {
+                                    Pair(it.messageId.toString(), it.toString())
+                                }?.toList(),
+                                variant = FormControlVariant.outlined,
+                                onChange = {
+                                    setState {
+                                        entity?.licenseType = it.toInt()
                                     }
-                                }
-                                licenseLabel.errorText?.let { error ->
-                                    mFormHelperText(error){
-                                        css(StyleManager.errorTextClass)
-                                    }
-                                }
-                            }
+                                })
+
                         }
 
-                        umItem(MGridSize.cells12, MGridSize.cells6 ) {
-                            mTextField(label = "${languageLabel.text}",
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
+                            umTextField(label = "${languageLabel.text}",
                                 helperText = languageLabel.errorText,
                                 value = entity?.language?.name,
                                 error = languageLabel.error,
                                 disabled = !fieldsEnabled,
-                                variant = MFormControlVariant.outlined,
+                                variant = FormControlVariant.outlined,
                                 onChange = {
-                                    it.persist()
                                     setState {}
                                 }) {
                                 attrs.asDynamic().onClick = {
                                     mPresenter?.handleClickLanguage()
                                 }
-                                css(StyleManager.defaultFullWidth)
                             }
                         }
                     }
 
-                    umGridContainer(MGridSpacing.spacing4) {
+                    umGridContainer(GridSpacing.spacing4) {
 
                        if(entryMetaData != null){
-                           umItem(MGridSize.cells12, if(entryMetaData == null) MGridSize.cells6 else MGridSize.cells12) {
+                           umItem(sm = GridSize.cells12) {
                                createSwitchItem(getString(MessageID.compress), compressionEnabled){
                                    setState {
                                        compressionEnabled = !compressionEnabled
@@ -399,7 +371,7 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                            }
                        }
 
-                        umItem(MGridSize.cells12, if(entryMetaData != null) MGridSize.cells6 else MGridSize.cells12) {
+                        umItem(sm = GridSize.cells12) {
                             createSwitchItem(getString(MessageID.publicly_accessible), entity?.publik == true){
                                 setState {
                                     entity?.publik = !(entity?.publik ?: false)
@@ -410,7 +382,7 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                 }
 
             }
-        }*/
+        }
     }
 
     override fun onDestroyView() {
@@ -423,11 +395,10 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
 }
 
 fun RBuilder.createSwitchItem(label: String, enabled: Boolean, onClick: (MouseEvent)->Unit){
-    /*umGridContainer {
-        umItem(MGridSize.cells11){
-            mTypography(label,
-                variant = MTypographyVariant.body1,
-                color = MTypographyColor.textPrimary,
+    umGridContainer {
+        umItem(GridSize.cells11){
+            umTypography(label,
+                variant = TypographyVariant.body1,
                 gutterBottom = true){
                 css{
                     +StyleManager.alignTextToStart
@@ -437,9 +408,11 @@ fun RBuilder.createSwitchItem(label: String, enabled: Boolean, onClick: (MouseEv
             }
         }
 
-        umItem(MGridSize.cells1){
-            mSwitch(enabled){
-                attrs.onClick = onClick
+        umItem(GridSize.cells1){
+            umSwitch(enabled){
+                attrs.onClick = {
+                    onClick.invoke(it.nativeEvent)
+                }
             }
         }
         css{
@@ -447,5 +420,5 @@ fun RBuilder.createSwitchItem(label: String, enabled: Boolean, onClick: (MouseEv
             marginTop = LinearDimension("16px")
             marginBottom = LinearDimension("16px")
         }
-    }*/
+    }
 }

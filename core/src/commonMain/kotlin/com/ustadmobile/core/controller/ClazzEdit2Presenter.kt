@@ -13,7 +13,6 @@ import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SCHOOL_UID
-import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
@@ -174,10 +173,10 @@ class ClazzEdit2Presenter(context: Any,
         super.onLoadFromJson(bundle)
         val clazzJsonStr = bundle[ARG_ENTITY_JSON]
         var clazz: ClazzWithHolidayCalendarAndSchool? = null
-        if(clazzJsonStr != null) {
-            clazz = safeParse(di, ClazzWithHolidayCalendarAndSchool.serializer(), clazzJsonStr)
+        clazz = if(clazzJsonStr != null) {
+            safeParse(di, ClazzWithHolidayCalendarAndSchool.serializer(), clazzJsonStr)
         }else {
-            clazz = ClazzWithHolidayCalendarAndSchool()
+            ClazzWithHolidayCalendarAndSchool()
         }
 
         scheduleOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)

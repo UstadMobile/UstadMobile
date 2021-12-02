@@ -6,12 +6,22 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.alignTextToStart
+import com.ustadmobile.util.StyleManager.defaultFullWidth
+import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.standardFormat
+import com.ustadmobile.util.ext.toDate
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
 import react.RBuilder
-import com.ustadmobile.util.*
 import react.setState
+import styled.css
+import styled.styledDiv
 import kotlin.js.Date
 
 class ClazzEnrolmentEditComponent (mProps: UmProps): UstadEditComponent<ClazzEnrolmentWithLeavingReason>(mProps),
@@ -29,9 +39,9 @@ class ClazzEnrolmentEditComponent (mProps: UmProps): UstadEditComponent<ClazzEnr
 
     private var endDateLabel = FieldLabel(text = getString(MessageID.end_date))
 
-    private var roleLabel = FieldLabel(text = getString(MessageID.role))
+    private var roleLabel = FieldLabel(text = getString(MessageID.role), id = "role-label")
 
-    private var outcomeLabel = FieldLabel(text = getString(MessageID.outcome))
+    private var outcomeLabel = FieldLabel(text = getString(MessageID.outcome), id = "outcome-label")
 
     private var leavingLabel = FieldLabel(text = getString(MessageID.leaving_reason))
 
@@ -104,136 +114,101 @@ class ClazzEnrolmentEditComponent (mProps: UmProps): UstadEditComponent<ClazzEnr
 
     override fun RBuilder.render() {
 
-        /*styledDiv {
+        styledDiv {
             css {
                 +StyleManager.fieldsOnlyFormScreen
             }
 
-            umGridContainer(MGridSpacing.spacing4) {
+            umGridContainer(GridSpacing.spacing4) {
 
-                umItem(MGridSize.cells12){
+                umItem(GridSize.cells12){
 
-                    umGridContainer(MGridSpacing.spacing4) {
+                    umGridContainer(GridSpacing.spacing4) {
 
-                        umItem(MGridSize.cells12, MGridSize.cells6 ){
-                            mFormControl(variant = MFormControlVariant.outlined) {
-                                css(defaultFullWidth)
-                                mInputLabel("${roleLabel.text}",
-                                    htmlFor = "role",
-                                    variant = MFormControlVariant.outlined) {
-                                    css(alignTextToStart)
-                                }
-                                mSelect("${entity?.clazzEnrolmentRole ?: 0}",
-                                    native = false,
-                                    input = mOutlinedInput(name = "role",
-                                        id = "role", addAsChild = false,
-                                        labelWidth = roleLabel.width),
-                                    onChange = { it, _ ->
-                                        setState {
-                                            entity?.clazzEnrolmentRole = it.targetValue.toString().toInt()
-                                        }
-                                    }) {
-                                    roleList?.forEach {
-                                        mMenuItem(primaryText = it.toString(), value = it.optionId.toString()){
-                                            css(alignTextToStart)
-                                        }
+                        umItem(GridSize.cells12, GridSize.cells6 ){
+
+                            umTextFieldSelect("${roleLabel.text}",
+                                entity?.clazzEnrolmentRole.toString(),
+                                roleLabel.errorText ?:"",
+                                values = roleList?.map {
+                                    Pair(it.optionId.toString(), it.toString())
+                                }?.toList(),
+                                error = roleLabel.error,
+                                variant = FormControlVariant.outlined,
+                                onChange = {
+                                    setState {
+                                        entity?.clazzEnrolmentRole = it.toInt()
                                     }
-                                }
-
-                                roleLabel.errorText?.let { error ->
-                                    mFormHelperText(error){
-                                        css(StyleManager.errorTextClass)
-                                    }
-                                }
+                                }){
+                                css(alignTextToStart)
                             }
                         }
 
-                        umItem(MGridSize.cells12, MGridSize.cells6 ){
-                            mFormControl(variant = MFormControlVariant.outlined) {
-                                css(defaultFullWidth)
-                                mInputLabel("${outcomeLabel.text}",
-                                    htmlFor = "outcome",
-                                    variant = MFormControlVariant.outlined) {
-                                    css(alignTextToStart)
-                                }
-                                mSelect("${entity?.clazzEnrolmentOutcome ?: 0}",
-                                    native = false,
-                                    input = mOutlinedInput(name = "outcome",
-                                        id = "outcome", addAsChild = false,
-                                        labelWidth = outcomeLabel.width),
-                                    onChange = { it, _ ->
-                                        setState {
-                                            entity?.clazzEnrolmentOutcome = it.targetValue.toString().toInt()
-                                        }
-                                    }) {
-                                    statusList?.forEach {
-                                        mMenuItem(primaryText = it.toString(), value = it.optionId.toString()){
-                                            css(alignTextToStart)
-                                        }
-                                    }
-                                }
+                        umItem(GridSize.cells12, GridSize.cells6 ){
 
-                                outcomeLabel.errorText?.let { error ->
-                                    mFormHelperText(error){
-                                        css(StyleManager.errorTextClass)
+                            umTextFieldSelect("${outcomeLabel.text}",
+                                entity?.clazzEnrolmentOutcome.toString(),
+                                outcomeLabel.errorText ?:"",
+                                values = statusList?.map {
+                                    Pair(it.optionId.toString(), it.toString())
+                                }?.toList(),
+                                error = outcomeLabel.error,
+                                variant = FormControlVariant.outlined,
+                                onChange = {
+                                    setState {
+                                        entity?.clazzEnrolmentOutcome = it.toInt()
                                     }
-                                }
-                            }
+                                })
                         }
 
                     }
 
 
-                    umGridContainer(MGridSpacing.spacing4) {
+                    umGridContainer(GridSpacing.spacing4) {
 
-                        umItem(MGridSize.cells12, MGridSize.cells6 ) {
-                            mDateTimePicker(
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
+                            umDatePicker(
                                 label = "${startDateLabel.text}",
-                                ruleSet = defaultFullWidth,
                                 error = startDateLabel.error,
                                 helperText = startDateLabel.errorText,
                                 value = entity?.clazzEnrolmentDateJoined.toDate(),
-                                inputVariant = MFormControlVariant.outlined,
-                                pickerType = MDateTimePickerType.date,
-                                onChange = { mills, _ ->
+                                inputVariant = FormControlVariant.outlined,
+                                onChange = {
                                     setState {
-                                        entity?.clazzEnrolmentDateJoined = mills
-                                        startDateErrorWithDate = null;
+                                        entity?.clazzEnrolmentDateJoined = it.getTime().toLong()
+                                        startDateErrorWithDate = null
                                     }
                                 })
                         }
 
-                        umItem(MGridSize.cells12, MGridSize.cells6 ) {
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
 
-                            mDateTimePicker(
+                            umDatePicker(
                                 label = "${endDateLabel.text}",
-                                ruleSet = defaultFullWidth,
                                 error = endDateLabel.error,
                                 helperText = endDateLabel.errorText,
                                 value = entity?.clazzEnrolmentDateLeft.toDate(),
-                                inputVariant = MFormControlVariant.outlined,
-                                pickerType = MDateTimePickerType.date,
-                                onChange = { mills, utc ->
+                                inputVariant = FormControlVariant.outlined,
+                                onChange = {
                                     setState {
-                                        entity?.clazzEnrolmentDateLeft = mills
+                                        entity?.clazzEnrolmentDateLeft = it.getTime().toLong()
                                         endDateError = null
                                     }
                                 })
                         }
                     }
 
-                    mTextField(
+                    umTextField(
                         label = "${leavingLabel.text}",
                         helperText = leavingLabel.errorText,
                         value = entity?.leavingReason?.leavingReasonTitle,
                         error = leavingLabel.error,
                         disabled = !fieldsEnabled ||
                                 entity?.clazzEnrolmentOutcome == ClazzEnrolment.OUTCOME_IN_PROGRESS,
-                        variant = MFormControlVariant.outlined,
+                        variant = FormControlVariant.outlined,
                         onChange = {
-                            it.persist()
                             setState {
-                                entity?.leavingReason?.leavingReasonTitle = it.targetInputValue
+                                entity?.leavingReason?.leavingReasonTitle = it
                             }
                         }){
                         attrs.asDynamic().onClick = {
@@ -243,7 +218,7 @@ class ClazzEnrolmentEditComponent (mProps: UmProps): UstadEditComponent<ClazzEnr
                     }
                 }
             }
-        }*/
+        }
     }
 
     override fun onDestroyView() {

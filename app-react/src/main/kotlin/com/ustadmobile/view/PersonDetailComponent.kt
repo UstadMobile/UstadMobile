@@ -1,7 +1,9 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.controller.PersonConstants.GENDER_MESSAGE_ID_MAP
 import com.ustadmobile.core.controller.PersonDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.outcomeToString
 import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.core.view.PersonDetailView
@@ -9,10 +11,27 @@ import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.StyleManager.alignTextToStart
+import com.ustadmobile.util.StyleManager.contentContainer
+import com.ustadmobile.util.StyleManager.defaultFullWidth
+import com.ustadmobile.util.StyleManager.defaultMarginTop
+import com.ustadmobile.util.StyleManager.defaultPaddingTop
+import com.ustadmobile.util.StyleManager.displayProperty
+import com.ustadmobile.util.StyleManager.personDetailComponentActionIcon
+import com.ustadmobile.util.StyleManager.personDetailComponentActions
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.standardFormat
+import com.ustadmobile.util.ext.toDate
+import com.ustadmobile.view.ext.*
+import kotlinx.css.LinearDimension
+import kotlinx.css.display
+import kotlinx.css.marginTop
+import kotlinx.css.padding
 import react.RBuilder
 import react.setState
+import styled.css
+import styled.styledDiv
 import kotlin.js.Date
 
 class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPersonParentJoin>(mProps),
@@ -75,39 +94,39 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
     }
 
     override fun RBuilder.render() {
-       /* styledDiv {
+        styledDiv {
             css{
                 +contentContainer
                 +defaultPaddingTop
             }
             umGridContainer {
-                umItem(MGridSize.cells12){
-                    umGridContainer(MGridSpacing.spacing4) {
-                        createAction("call",MessageID.call, MGridSize.cells4, MGridSize.cells2,
+                umItem(GridSize.cells12){
+                    umGridContainer(GridSpacing.spacing4) {
+                        createAction("call", MessageID.call, GridSize.cells4, GridSize.cells2,
                             entity?.phoneNum != null){
                             onClickCall(entity?.phoneNum)
                         }
-                        createAction("message",MessageID.text, MGridSize.cells4, MGridSize.cells2,
+                        createAction("message",MessageID.text, GridSize.cells4, GridSize.cells2,
                             entity?.phoneNum != null){
                             onClickSMS(entity?.phoneNum)
                         }
-                        createAction("email",MessageID.email, MGridSize.cells4, MGridSize.cells2,
+                        createAction("email",MessageID.email, GridSize.cells4, GridSize.cells2,
                             entity?.emailAddr != null){
                             onClickEmail(entity?.emailAddr)
                         }
-                        createAction("vpn_key",MessageID.change_password, MGridSize.cells6, MGridSize.cells3,
+                        createAction("vpn_key",MessageID.change_password, GridSize.cells6, GridSize.cells3,
                             changePasswordVisible){
                             mPresenter?.handleChangePassword()
                         }
-                        createAction("person_add",MessageID.create_account, MGridSize.cells6, MGridSize.cells3,
+                        createAction("person_add",MessageID.create_account, GridSize.cells6, GridSize.cells3,
                             showCreateAccountVisible){
                             mPresenter?.handleCreateAccount()
                         }
                     }
                 }
 
-                umItem(MGridSize.cells12){
-                    mDivider {
+                umItem(GridSize.cells12){
+                    umDivider {
                         css{
                             +defaultFullWidth
                             +defaultMarginTop
@@ -115,53 +134,60 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
                     }
                 }
 
-                umItem(MGridSize.cells12){
-                    umGridContainer(MGridSpacing.spacing6) {
-                        umItem(MGridSize.cells12, MGridSize.cells4){
+                umItem(GridSize.cells12){
+                    umGridContainer(GridSpacing.spacing6) {
+
+                        umItem(GridSize.cells12, GridSize.cells4){
                             css{
-                                marginTop = 12.px
+                                marginTop = LinearDimension("12px")
                             }
                             umEntityAvatar(showIcon = false) {}
                         }
 
-                        umItem(MGridSize.cells12, MGridSize.cells8) {
+                        umItem(GridSize.cells12, GridSize.cells8) {
                             css{
                                 +defaultMarginTop
                                 padding = "16px"
                             }
-                            umGridContainer(MGridSpacing.spacing4){
+                            umGridContainer(GridSpacing.spacing4){
 
-                                umItem(MGridSize.cells12){
-                                    mTypography(getString(MessageID.basic_details),
-                                        variant = MTypographyVariant.caption){
+                                umItem(GridSize.cells12){
+                                    umTypography(getString(MessageID.basic_details),
+                                        variant = TypographyVariant.caption){
                                         css(alignTextToStart)
                                     }
                                 }
 
-                                umItem(MGridSize.cells12){
+                                umItem(GridSize.cells12){
                                     if(entity?.dateOfBirth ?: 0 > 0)
                                     createInformation("event",
                                         entity?.dateOfBirth.toDate().standardFormat(),
-                                        getString(MessageID.birthday))
+                                        getString(MessageID.birthday)
+                                    )
 
                                     createInformation(null,
                                         getString(GENDER_MESSAGE_ID_MAP[entity?.gender] ?: 0),
-                                        getString(MessageID.field_person_gender))
+                                        getString(MessageID.field_person_gender)
+                                    )
 
                                     if(!entity?.personOrgId.isNullOrBlank()){
-                                        createInformation("badge", entity?.personOrgId, getString(MessageID.organization_id))
+                                        createInformation("badge", entity?.personOrgId, 
+                                            getString(MessageID.organization_id)
+                                        )
                                     }
-                                    createInformation("account_circle", entity?.username, getString(MessageID.username))
+                                    createInformation("account_circle", entity?.username,
+                                        getString(MessageID.username)
+                                    )
                                 }
 
-                                umItem(MGridSize.cells12){
-                                    mTypography(getString(MessageID.contact_details),
-                                        variant = MTypographyVariant.caption){
+                                umItem(GridSize.cells12){
+                                    umTypography(getString(MessageID.contact_details),
+                                        variant = TypographyVariant.caption){
                                         css(alignTextToStart)
                                     }
                                 }
 
-                                umItem(MGridSize.cells12){
+                                umItem(GridSize.cells12){
                                     createInformation("call",entity?.phoneNum,getString(MessageID.phone_number))
                                     createInformation("email",entity?.emailAddr,getString(MessageID.email))
                                     createInformation("place",entity?.personAddress,getString(MessageID.address))
@@ -170,7 +196,7 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
 
                                 if(classList != null && classList?.isNotEmpty() == true){
 
-                                    umItem(MGridSize.cells12){
+                                    umItem(GridSize.cells12){
                                         createListSectionTitle(getString(MessageID.classes))
 
                                         classList?.let { clazzes ->
@@ -188,35 +214,40 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
                     }
                 }
             }
-        }*/
+        }
     }
 
 
-    /*private fun RBuilder.createAction(icon: String, messageId: Int, xs: MGridSize,
-                                      sm: MGridSize? = null, visible: Boolean = false,
+    private fun RBuilder.createAction(icon: String, messageId: Int, xs: GridSize,
+                                      sm: GridSize? = null, visible: Boolean = false,
                                       action:() -> Unit){
         umItem(xs, sm){
             css{
                 display = displayProperty(visible, true)
             }
-            mPaper(variant = MPaperVariant.elevation) {
+            
+            umPaper(variant = PaperVariant.elevation) {
                 attrs.onClick = {
                     action()
                 }
                 css {
                     +personDetailComponentActions
                 }
-                mIcon(icon){
+                
+                umIcon(icon){
                     css{
                         +personDetailComponentActionIcon
                     }
                 }
-                mTypography(getString(messageId), variant = MTypographyVariant.body1, gutterBottom = true){
+                
+                umTypography(getString(messageId), 
+                    variant = TypographyVariant.body1, 
+                    gutterBottom = true){
                     css(alignTextToStart)
                 }
             }
         }
-    }*/
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

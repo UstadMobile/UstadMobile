@@ -3,14 +3,15 @@ package com.ustadmobile.mui.components
 import com.ustadmobile.mui.ext.createStyledComponent
 import mui.material.OutlinedInput
 import mui.material.OutlinedInputProps
-import org.w3c.dom.events.Event
 import react.RBuilder
+import react.ReactNode
 import react.dom.html.InputType
 import styled.StyledHandler
 
 fun RBuilder.umOutlinedInput(
     value: String? = null,
     required: Boolean? = null,
+    label: String? = null,
     disabled: Boolean? = null,
     readOnly: Boolean? = null,
     error: Boolean? = null,
@@ -25,7 +26,7 @@ fun RBuilder.umOutlinedInput(
     multiline: Boolean = false,
     rows: Int? = null,
     rowsMax: Int? = null,
-    onChange: ((Event) -> Unit)? = null,
+    onChange: ((String) -> Unit)? = null,
     className: String? = null,
     handler: StyledHandler<OutlinedInputProps>? = null
 ) = createStyledComponent(OutlinedInput, className, handler) {
@@ -33,13 +34,14 @@ fun RBuilder.umOutlinedInput(
     defaultValue?.let { attrs.defaultValue = it }
     disabled?.let { attrs.disabled = it }
     error?.let { attrs.error = it }
+    label?.let { attrs.label = ReactNode(it) }
     attrs.fullWidth = fullWidth
     id?.let { attrs.id = it }
     attrs.multiline = multiline
     name?.let { attrs.name = it }
     notched?.let { attrs.notched = it }
     attrs.onChange = {
-        onChange?.invoke(it.nativeEvent)
+        onChange?.invoke(it.target.asDynamic().value.toString())
     }
     placeholder?.let { attrs.placeholder = it }
     readOnly?.let { attrs.readOnly = it }

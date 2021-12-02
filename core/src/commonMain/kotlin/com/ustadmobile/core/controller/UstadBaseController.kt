@@ -95,7 +95,6 @@ abstract class UstadBaseController<V : UstadView>(
 
     private val activeSessionObserver = DoorObserver<UserSessionWithPersonAndEndpoint?> {
         if(it == null) {
-            UmPlatform.console("Called base")
             presenterScope.launch {
                 navigateToStartNewUserSession()
             }
@@ -245,7 +244,7 @@ abstract class UstadBaseController<V : UstadView>(
      * the backstack to lookup, and what key name should be used in the saved state handle once
      * it has been looked up.
      */
-    protected fun finishWithResult(result: String) {
+    fun finishWithResult(result: String) {
         val saveToViewName = arguments[ARG_RESULT_DEST_VIEWNAME]
         val saveToKey = arguments[ARG_RESULT_DEST_KEY]
 

@@ -9,10 +9,24 @@ import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_SELECT_FOLD
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import org.w3c.dom.Node
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.theme.UMColor
+import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.alignTextToStart
+import com.ustadmobile.util.StyleManager.displayProperty
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.Util
+import com.ustadmobile.util.ext.format
+import com.ustadmobile.view.ext.umEntityAvatar
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
+import kotlinx.browser.document
+import kotlinx.css.*
+import org.w3c.dom.Element
 import react.RBuilder
-import com.ustadmobile.util.*
 import react.setState
+import styled.css
+import styled.styledDiv
 import kotlin.js.Date
 
 
@@ -23,7 +37,7 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
 
     private var showingEditOptions = false
 
-    private var anchorElement: Node? = null
+    private var anchorElement: Element? = null
 
     override val listPresenter: UstadListPresenter<*, in ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?
         get() = mPresenter
@@ -55,19 +69,18 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
         val showSelectBtn = arguments.determineListMode().toString() == ListViewMode.PICKER.toString() &&
                 (arguments[ARG_SELECT_FOLDER_VISIBLE]?.toBoolean() == true || item.leaf)
 
-       /* umGridContainer(MGridSpacing.spacing7) {
-            umItem(MGridSize.cells4, MGridSize.cells3){
+        umGridContainer(GridSpacing.spacing7) {
+            umItem(GridSize.cells4, GridSize.cells3){
                 umEntityAvatar(item.thumbnailUrl,
                     if(item.leaf) Util.ASSET_BOOK else Util.ASSET_FOLDER,
                     showIcon = false,
                     className = "${StyleManager.name}-entityThumbnailClass")
             }
 
-            umItem(MGridSize.cells8, MGridSize.cells9){
-                umItem(MGridSize.cells12){
-                    mTypography(item.title,
-                        variant = MTypographyVariant.h6,
-                        color = MTypographyColor.textPrimary){
+            umItem(GridSize.cells8, GridSize.cells9){
+                umItem(GridSize.cells12){
+                    umTypography(item.title,
+                        variant = TypographyVariant.h6){
                         css {
                             +alignTextToStart
                             marginBottom = LinearDimension("10px")
@@ -75,40 +88,39 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
                     }
                 }
 
-                umItem(MGridSize.cells12){
-                    mTypography(item.description,
-                        variant = MTypographyVariant.body1,
-                        paragraph = true,
-                        color = MTypographyColor.textPrimary){
+                umItem(GridSize.cells12){
+                    umTypography(item.description,
+                        variant = TypographyVariant.body1,
+                        paragraph = true){
                         css(alignTextToStart)
                     }
                 }
 
-                umItem(MGridSize.cells12){
-                    mGridContainer(spacing= MGridSpacing.spacing1){
+                umItem(GridSize.cells12){
+                    umGridContainer(spacing= GridSpacing.spacing1){
                         css{
                             display = displayProperty(item.leaf, true)
                         }
                         val messageId = CONTENT_ENTRY_TYPE_LABEL_MAP[item.contentTypeFlag] ?: MessageID.untitled
                         val icon = CONTENT_ENTRY_TYPE_ICON_MAP[item.contentTypeFlag] ?: ""
-                        umItem(MGridSize.cells2, MGridSize.cells1) {
-                            mAvatar(className = "${StyleManager.name}-contentEntryListContentAvatarClass") {
-                                mIcon(icon, className= "${StyleManager.name}-contentEntryListContentTyeIconClass"){
+                        umItem(GridSize.cells2, GridSize.cells1) {
+                            umAvatar(className = "${StyleManager.name}-contentEntryListContentAvatarClass") {
+                                umIcon(icon, className= "${StyleManager.name}-contentEntryListContentTyeIconClass"){
                                     css{marginTop = 4.px}
                                 }
                             }
                         }
 
-                        umItem(MGridSize.cells8, MGridSize.cells9) {
-                            mTypography(getString(messageId),
-                                variant = MTypographyVariant.body2,
+                        umItem(GridSize.cells8, GridSize.cells9) {
+                            umTypography(getString(messageId),
+                                variant = TypographyVariant.body2,
                                 gutterBottom = true)
                         }
 
-                        umItem(MGridSize.cells2){
-                            mButton(getString(MessageID.select_item).format(""),
-                                variant = MButtonVariant.outlined,
-                                color = MColor.primary,
+                        umItem(GridSize.cells2){
+                            umButton(getString(MessageID.select_item).format(""),
+                                variant = ButtonVariant.outlined,
+                                color = UMColor.secondary,
                                 onClick = {
                                     it.stopPropagation()
                                     mPresenter?.onClickSelectContentEntry(item)
@@ -121,7 +133,7 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
                     }
                 }
             }
-        }*/
+        }
     }
 
     override fun handleClickEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
@@ -176,39 +188,45 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
     }
 
     override fun RBuilder.renderEditOptionMenu() {
-       /* mGridItem {
+        umItem(GridSize.cells1) {
             css{
                 display = displayProperty(editOptionVisible)
             }
-            mIconButton("more_vert",
-                color = MColor.default,
+
+            umIconButton("more_vert",
                 onClick = {
-                    val target =  it.currentTarget
+                    console.log(it.currentTarget)
                     setState {
-                        showingEditOptions = true; anchorElement = target.asDynamic()
+                        showingEditOptions = true
+                        anchorElement = document.getElementById("more-option")
                     }
-            })
+            }){
+                attrs.id = "more-option"
+            }
         }
 
         styledDiv{
-            mMenu(showingEditOptions,
+            umMenu(showingEditOptions,
                 anchorElement = anchorElement,
-                onClose = { _, _ -> setState {
-                    showingEditOptions = false; anchorElement = null
-                }}) {
+                onClose = {
+                    setState {
+                        showingEditOptions = false;
+                        anchorElement = null
+                    }
+                }) {
 
-                mMenuItem(getString(MessageID.edit),
+                umMenuItem(getString(MessageID.edit),
                     onClick = {
                         mPresenter?.handleClickEditFolder()
                     }
                 )
-                mMenuItem(getString(MessageID.show_hidden_items),
+                umMenuItem(getString(MessageID.show_hidden_items),
                     onClick = {
                         mPresenter?.handleClickShowHiddenItems()
                     }
                 )
             }
-        }*/
+        }
     }
 
 

@@ -4,11 +4,23 @@ import com.ustadmobile.core.controller.ClazzDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ACTIVE_TAB_INDEX
 import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.GridSpacing
+import com.ustadmobile.util.StyleManager.clazzDetailExtraInfo
+import com.ustadmobile.util.StyleManager.contentContainer
+import com.ustadmobile.util.StyleManager.defaultPaddingTop
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.Util.ASSET_ENTRY
 import com.ustadmobile.util.urlSearchParamsToMap
+import com.ustadmobile.view.ext.umEntityAvatar
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
 import react.RBuilder
-import com.ustadmobile.util.*
 import react.setState
+import styled.css
+import styled.styledDiv
 
 class ClazzDetailComponent(mProps: UmProps): UstadDetailComponent<Clazz>(mProps), ClazzDetailView {
 
@@ -52,17 +64,17 @@ class ClazzDetailComponent(mProps: UmProps): UstadDetailComponent<Clazz>(mProps)
     }
 
     override fun RBuilder.render() {
-       /* styledDiv {
+        styledDiv {
             css{
                 +defaultPaddingTop
                 +contentContainer
             }
-            umGridContainer(MGridSpacing.spacing6) {
-                umItem(MGridSize.cells12, MGridSize.cells4){
+            umGridContainer(GridSpacing.spacing6) {
+                umItem(GridSize.cells12, GridSize.cells4){
                     umEntityAvatar(listItem = true, fallbackSrc = ASSET_ENTRY)
                 }
 
-                umItem(MGridSize.cells12, MGridSize.cells8){
+                umItem(GridSize.cells12, GridSize.cells8){
                     styledDiv {
                         css {
                             +clazzDetailExtraInfo
@@ -74,7 +86,7 @@ class ClazzDetailComponent(mProps: UmProps): UstadDetailComponent<Clazz>(mProps)
                     }
                 }
             }
-        }*/
+        }
     }
 
     override fun onDestroyView() {

@@ -12,7 +12,6 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_CLAZZ_INSERT
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 

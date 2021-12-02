@@ -7,13 +7,22 @@ import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzLog
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.TypographyVariant
+import com.ustadmobile.mui.components.umTypography
+import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.format
+import com.ustadmobile.util.ext.formatDate
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.view.ext.umProfileAvatar
 import kotlinx.css.*
 import react.RBuilder
-import com.ustadmobile.util.*
 import react.setState
 import styled.css
 import styled.styledDiv
+import kotlin.js.Date
 
 class ClazzLogListComponent (mProps: UmProps) : UstadListComponent<ClazzLog, ClazzLog>(mProps),
     ClazzLogListAttendanceView {
@@ -119,22 +128,22 @@ class ClazzLogListComponent (mProps: UmProps) : UstadListComponent<ClazzLog, Cla
 
         val total = (item.clazzLogNumPresent + item.clazzLogNumPartial + item.clazzLogNumAbsent).toDouble()
 
-       /* umGridContainer {
-            umItem(MGridSize.cells3){
+        umGridContainer {
+            umItem(GridSize.cells3){
                 umProfileAvatar(-1, "calendar_today")
             }
 
-            umItem(MGridSize.cells9){
+            umItem(GridSize.cells9){
                 umGridContainer {
-                    umItem(MGridSize.cells12){
-                        mTypography(
-                            Date(item.logDate).formatDate("dddd, MMMM DD h:m A"),
-                            variant = MTypographyVariant.body1){
+                    umItem(GridSize.cells12){
+                        umTypography(Date(item.logDate).formatDate("dddd, MMMM DD h:m A"),
+                            variant = TypographyVariant.body1
+                        ){
                             css(StyleManager.alignTextToStart)
                         }
                     }
 
-                    umItem(MGridSize.cells12){
+                    umItem(GridSize.cells12){
                         css{
                             display = Display.flex
                             marginTop = 5.px
@@ -150,14 +159,16 @@ class ClazzLogListComponent (mProps: UmProps) : UstadListComponent<ClazzLog, Cla
 
                     }
 
-                    umItem(MGridSize.cells12){
-                        mTypography(makeStatus(item),variant = MTypographyVariant.body2){
+                    umItem(GridSize.cells12){
+                        umTypography(makeStatus(item),
+                            variant = TypographyVariant.body2
+                        ){
                             css(StyleManager.alignTextToStart)
                         }
                     }
                 }
             }
-        }*/
+        }
     }
 
     override fun handleClickEntry(entry: ClazzLog) {

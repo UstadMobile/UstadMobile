@@ -7,10 +7,21 @@ import com.ustadmobile.core.view.JoinWithCodeView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.School
-import com.ustadmobile.util.*
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.theme.UMColor
+import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
 import com.ustadmobile.util.ext.format
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
+import kotlinx.css.LinearDimension
+import kotlinx.css.marginTop
+import kotlinx.css.padding
 import react.RBuilder
 import react.setState
+import styled.css
+import styled.styledDiv
 
 class JoinWithCodeComponent (mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps),
     JoinWithCodeView {
@@ -94,33 +105,31 @@ class JoinWithCodeComponent (mProps: UmProps): UstadBaseComponent<UmProps, UmSta
 
     override fun RBuilder.render() {
 
-      /*  styledDiv {
+        styledDiv {
             css {
                 +StyleManager.fieldsOnlyFormScreen
             }
 
-            umGridContainer(MGridSpacing.spacing4) {
-                umItem(MGridSize.cells12){
-                    mTypography(
+            umGridContainer(GridSpacing.spacing4) {
+                umItem(GridSize.cells12){
+                    umTypography(
                         text = getString(MessageID.join_code_instructions),
-                        variant = MTypographyVariant.body2,
-                        color = MTypographyColor.textPrimary
+                        variant = TypographyVariant.body2
                     )
                 }
 
-                umItem(MGridSize.cells12){
-                    umGridContainer(MGridSpacing.spacing4) {
-                        umItem(MGridSize.cells12, MGridSize.cells8 ) {
-                            mTextField(label = "${codeLabel.text}",
+                umItem(GridSize.cells12){
+                    umGridContainer(GridSpacing.spacing4) {
+                        umItem(GridSize.cells12, GridSize.cells8) {
+                            umTextField(label = "${codeLabel.text}",
                                 helperText = codeLabel.errorText,
                                 value = code,
                                 error = codeLabel.error,
                                 disabled = !buttonEnabled,
-                                variant = MFormControlVariant.outlined,
+                                variant = FormControlVariant.outlined,
                                 onChange = {
-                                    it.persist()
                                     setState {
-                                        code = it.targetInputValue
+                                        code = it
                                         errorText = null
                                     }
                                 }){
@@ -128,12 +137,13 @@ class JoinWithCodeComponent (mProps: UmProps): UstadBaseComponent<UmProps, UmSta
                             }
                         }
 
-                        umItem(MGridSize.cells12, MGridSize.cells4 ) {
-                            mButton(
+                        umItem(GridSize.cells12, GridSize.cells4) {
+                            umButton(
                                 caption = buttonLabel ?: "",
-                                variant = MButtonVariant.contained,
-                                color = MColor.secondary,
-                                size = MButtonSize.large,
+                                disabled = code.isNullOrEmpty(),
+                                variant = ButtonVariant.contained,
+                                color = UMColor.secondary,
+                                size = ButtonSize.large,
                                 onClick = {
                                     code?.let { code ->
                                         mPresenter?.handleClickDone(code)
@@ -150,7 +160,7 @@ class JoinWithCodeComponent (mProps: UmProps): UstadBaseComponent<UmProps, UmSta
                     }
                 }
             }
-        }*/
+        }
     }
 
     override fun onDestroyView() {

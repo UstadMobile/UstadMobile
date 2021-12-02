@@ -16,7 +16,7 @@ import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
-import com.ustadmobile.util.*
+import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.centerContainer
 import com.ustadmobile.util.StyleManager.centerItem
 import com.ustadmobile.util.StyleManager.chipSetFilter
@@ -28,6 +28,8 @@ import com.ustadmobile.util.StyleManager.listComponentContainer
 import com.ustadmobile.util.StyleManager.listCreateNewContainer
 import com.ustadmobile.util.StyleManager.selectionContainer
 import com.ustadmobile.util.StyleManager.theme
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.createCreateNewItem
 import com.ustadmobile.view.ext.umGridContainer
@@ -43,7 +45,7 @@ import react.setState
 import styled.css
 import styled.styledDiv
 
-abstract class UstadListComponent<RT, DT>(mProps: UmProps) : UstadBaseComponent<UmProps,UmState>(mProps),
+abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<UmProps,UmState>(props),
     UstadListView<RT, DT>, OnSortOptionSelected {
 
     protected abstract val displayTypeRepo: Any?
@@ -76,7 +78,7 @@ abstract class UstadListComponent<RT, DT>(mProps: UmProps) : UstadBaseComponent<
             field = value
         }
 
-    private var multiColumnItemSize = GridSize.column4
+    private var multiColumnItemSize = GridSize.cells4
         get() = field
         set(value) {
             setState {
@@ -88,7 +90,7 @@ abstract class UstadListComponent<RT, DT>(mProps: UmProps) : UstadBaseComponent<
      * Flag to indicate whether the list should be multi (Grid Layout)
      * or single column (Linear Layout)
      */
-    protected var listTypeSingleColumn: Boolean = true
+    protected var linearLayout: Boolean = true
         get() = field
         set(value) {
             setState {
@@ -147,9 +149,6 @@ abstract class UstadListComponent<RT, DT>(mProps: UmProps) : UstadBaseComponent<
             window.setTimeout({
                 fabManager?.visible = value == ListViewAddMode.FAB
             }, STATE_CHANGE_DELAY)
-            fabManager?.onClickListener = {
-                onFabClicked()
-            }
         }
 
     override var listFilterOptionChips: List<ListFilterIdOption>? = null
@@ -179,7 +178,7 @@ abstract class UstadListComponent<RT, DT>(mProps: UmProps) : UstadBaseComponent<
     override fun RBuilder.render() {
         styledDiv {
             css{
-                if(listTypeSingleColumn){
+                if(linearLayout){
                     +listComponentContainer
                 }
                 +contentContainer
@@ -189,7 +188,7 @@ abstract class UstadListComponent<RT, DT>(mProps: UmProps) : UstadBaseComponent<
             renderMenuOptions()
 
             renderHeaderView()
-            if(listTypeSingleColumn)
+            if(linearLayout)
                 renderSingleColumnList()
             else
                 renderMultiColumnList()
@@ -225,7 +224,7 @@ abstract class UstadListComponent<RT, DT>(mProps: UmProps) : UstadBaseComponent<
     private fun RBuilder.renderNewItem(multiColumn: Boolean = false){
        if(showCreateNewItem){
             if(multiColumn){
-                umItem(GridSize.column12) {
+                umItem(GridSize.cells12) {
                     css{
                         +listCreateNewContainer
                         +horizontalList
@@ -257,10 +256,10 @@ abstract class UstadListComponent<RT, DT>(mProps: UmProps) : UstadBaseComponent<
             if(listItems.isEmpty()){
                 renderEmptyList()
             }else {
-                umItem(GridSize.column12){
+                umItem(GridSize.cells12){
                     umGridContainer(GridSpacing.spacing4) {
                         listItems.forEach {entry->
-                            umItem(GridSize.column12, multiColumnItemSize){
+                            umItem(GridSize.cells12, multiColumnItemSize){
                                 css{
                                     cursor = Cursor.pointer
                                     backgroundColor = Color(if(selectedEntries.indexOf(entry) != -1)
@@ -389,10 +388,12 @@ abstract class UstadListComponent<RT, DT>(mProps: UmProps) : UstadBaseComponent<
         val hideOptions = selectedEntries.isNullOrEmpty() or !showEditOptionsMenu
         umGridContainer {
             css(selectionContainer)
-            umItem(GridSize.column7, GridSize.column8){
+            val titleMd = if(selectedEntries.isNullOrEmpty()) GridSize.cells11 else GridSize.cells8
+            val iconsMd = if(selectedEntries.isNullOrEmpty()) GridSize.cellsAuto else GridSize.cells4
+            umItem(sm = titleMd){
                 umTypography(variant = TypographyVariant.subtitle1){
                     css {
-                        width = 10.pc
+                        width = 10.pct
                         marginTop = 10.px
                         marginLeft = 16.px
                         display = displayProperty(!hideOptions)
@@ -401,8 +402,8 @@ abstract class UstadListComponent<RT, DT>(mProps: UmProps) : UstadBaseComponent<
                 }
             }
 
-            umItem(GridSize.column5, GridSize.column4){
-                umGridContainer(spacing= GridSpacing.spacing2, justify =GridJustify.flexEnd){
+            umItem(sm = iconsMd){
+                umGridContainer(spacing= GridSpacing.spacing2, justify = GridJustify.flexEnd){
                     selectionOptions?.forEach { option ->
                         gridItem {
                             css {

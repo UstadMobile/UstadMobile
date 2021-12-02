@@ -5,11 +5,13 @@ import com.ustadmobile.core.util.OneToManyJoinEditListener
 import com.ustadmobile.mui.components.ListItemAlignItems
 import com.ustadmobile.mui.components.umList
 import com.ustadmobile.mui.components.umListItem
+import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.horizontalList
 import com.ustadmobile.util.StyleManager.listComponentContainer
 import com.ustadmobile.util.StyleManager.listComponentContainerWithScroll
-import com.ustadmobile.util.*
-import com.ustadmobile.util.StyleManager.horizontalList
 import com.ustadmobile.util.StyleManager.theme
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
 import com.ustadmobile.view.ext.createCreateNewItem
 import kotlinx.css.Color
 import kotlinx.css.LinearDimension

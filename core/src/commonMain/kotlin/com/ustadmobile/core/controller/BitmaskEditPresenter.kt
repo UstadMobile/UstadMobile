@@ -6,12 +6,14 @@ import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.LongWrapper
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.BitmaskEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -68,7 +70,7 @@ class BitmaskEditPresenter(context: Any, arguments: Map<String, String>, view: B
         val saveVal = view.bitmaskList?.getValue()?.fold(0L, {acc, flag ->
             acc + (if(flag.enabled) flag.flagVal else 0)
         }) ?: 0L
-        view.finishWithResult(listOf(LongWrapper(saveVal)))
+        finishWithResult(safeStringify(di, ListSerializer(LongWrapper.serializer()), listOf(LongWrapper(saveVal))))
     }
 
     companion object {

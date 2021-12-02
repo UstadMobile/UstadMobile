@@ -6,9 +6,24 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.lib.db.entities.PersonWithAccount
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.alignTextCenter
+import com.ustadmobile.util.StyleManager.contentContainer
+import com.ustadmobile.util.StyleManager.defaultDoubleMarginTop
+import com.ustadmobile.util.StyleManager.defaultPaddingTop
+import com.ustadmobile.util.StyleManager.displayProperty
+import com.ustadmobile.util.StyleManager.errorTextClass
+import com.ustadmobile.util.StyleManager.hideOnMobile
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
+import kotlinx.css.display
 import react.RBuilder
-import com.ustadmobile.util.*
+import react.dom.html.InputType
 import react.setState
+import styled.css
+import styled.styledDiv
 
 class PersonAccountEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccount>(mProps),
     PersonAccountEditView {
@@ -103,7 +118,7 @@ class PersonAccountEditComponent(mProps: UmProps) : UstadEditComponent<PersonWit
             }
         }
 
-    //val spacing = MGridSpacing.spacing6
+    val spacing = GridSpacing.spacing6
 
     override fun onCreateView() {
         super.onCreateView()
@@ -112,168 +127,78 @@ class PersonAccountEditComponent(mProps: UmProps) : UstadEditComponent<PersonWit
     }
 
     override fun RBuilder.render() {
-      /*  styledDiv{
+        styledDiv{
             css{
                 +contentContainer
                 +defaultDoubleMarginTop
             }
+
             umGridContainer(spacing) {
                 css(alignTextCenter)
 
-                umItem(MGridSize.cells12, MGridSize.cells12){
+                umItem(GridSize.cells12, GridSize.cells12){
 
                     umGridContainer(spacing) {
 
-                        mHidden(xsDown = true) {
-                            umItem(MGridSize.cells12, MGridSize.cells3){}
+                        umItem(GridSize.cells12, GridSize.cells3){
+                            css(hideOnMobile)
                         }
 
-                        umItem(MGridSize.cells12, MGridSize.cells6){
-                            mTextField(label = "${usernameLabel.text}",
+                        umItem(GridSize.cells12, GridSize.cells6){
+                            umTextField(
+                                label = "${usernameLabel.text}",
                                 value = entity?.username,
                                 error = usernameLabel.error,
                                 disabled = !fieldsEnabled,
                                 helperText = usernameLabel.errorText,
-                                variant = MFormControlVariant.outlined,
+                                variant = FormControlVariant.outlined,
                                 onChange = {
-                                    it.persist()
                                     setState {
-                                        entity?.username = it.targetInputValue
+                                        entity?.username = it
                                         usernameError = null
                                         errorMessage = ""
                                     }
-                                }) {
-                                css(defaultFullWidth)
-                            }
+                                })
                         }
                     }
 
                     umGridContainer(spacing) {
                         css{
+                            +defaultPaddingTop
                             display = displayProperty(currentPasswordVisible, true)
                         }
 
-                        mHidden(xsDown = true) {
-                            umItem(MGridSize.cells12, MGridSize.cells3){}
+                        umItem(GridSize.cells12, GridSize.cells3){
+                            css(hideOnMobile)
                         }
 
-                        umItem(MGridSize.cells12, MGridSize.cells6){
-                            mFormControl {
-                                css(defaultFullWidth)
-                                mInputLabel("${currentPasswordLabel.text}",
+                        umItem(GridSize.cells12, GridSize.cells6){
+                            umFormControl(variant = FormControlVariant.outlined) {
+                                umInputLabel("${currentPasswordLabel.text}",
                                     error = currentPasswordLabel.error,
-                                    variant = MFormControlVariant.outlined,
-                                    htmlFor = "current-password")
-                                mOutlinedInput(value = entity?.currentPassword,
-                                    labelWidth = currentPasswordLabel.width,
-                                    error = currentPasswordError != null,
-                                    id = "current-password",
-                                    type = if(showCurrentPassword) InputType.text else InputType.password,
+                                    variant = FormControlVariant.outlined,
+                                    htmlFor = currentPasswordLabel.id)
+                                umOutlinedInput(
+                                    id = currentPasswordLabel.id,
+                                    value = entity?.currentPassword,
+                                    disabled = !fieldsEnabled,
+                                    error = currentPasswordLabel.error,
+                                    type =  if(showCurrentPassword) InputType.text else InputType.password,
                                     onChange = {
-                                        it.persist()
                                         setState {
-                                            entity?.currentPassword = it.targetInputValue
+                                            entity?.currentPassword = it
                                             currentPasswordError = null
-                                            errorMessage = ""
                                         }
                                     }) {
-                                    attrs.endAdornment = mInputAdornment {
-                                        mIconButton(if(showCurrentPassword) "visibility" else "visibility_off",
-                                            edge = MIconEdge.end,
-                                            onClick = {
-                                                setState {
-                                                    showCurrentPassword = !showCurrentPassword
-                                                }
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    umGridContainer(spacing) {
-                        mHidden(xsDown = true) {
-                            umItem(MGridSize.cells12, MGridSize.cells3){}
-                        }
-
-                        umItem(MGridSize.cells12, MGridSize.cells6){
-                            mFormControl {
-                                css(defaultFullWidth)
-
-                                mInputLabel("${newPasswordLabel.text}",
-                                    error = newPasswordError != null,
-                                    variant = MFormControlVariant.outlined,
-                                    htmlFor = "new-password")
-
-                                mOutlinedInput(value = entity?.newPassword,
-                                    labelWidth = newPasswordLabel.width,
-                                    error = newPasswordError != null, id = "new-password",
-                                    type = if(showNewPassword) InputType.text else InputType.password,
-                                    onChange = {
+                                    attrs.endAdornment = umIconButton(if(showCurrentPassword) "visibility" else "visibility_off", edge = IconEdge.end, onClick = {
                                         setState {
-                                            entity?.newPassword = it.targetInputValue
-                                            newPasswordError = null
-                                            errorMessage = ""
+                                            showCurrentPassword = !showCurrentPassword
                                         }
-                                    }) {
-                                    attrs.endAdornment = mInputAdornment {
-                                        mIconButton(if(showNewPassword) "visibility" else "visibility_off",
-                                            edge = MIconEdge.end,
-                                            onClick = {
-                                                setState {
-                                                    showNewPassword = !showNewPassword
-                                                }
-                                            }
-                                        )
-                                    }
-                                }
+                                    })
 
-                                newPasswordLabel.errorText?.let { error ->
-                                    mFormHelperText(error){
-                                        css(errorTextClass)
-                                    }
                                 }
-                            }
-                        }
-                    }
-
-                    umGridContainer(spacing) {
-                        mHidden(xsDown = true) {
-                            umItem(MGridSize.cells12, MGridSize.cells3){}
-                        }
-
-                        umItem(MGridSize.cells12, MGridSize.cells6){
-                            mFormControl {
-                                css(defaultFullWidth)
-                                mInputLabel("${confirmPasswordLabel.text?.clean()}",
-                                    error = confirmPasswordLabel.error,
-                                    variant = MFormControlVariant.outlined,
-                                    htmlFor = "confirm-password")
-                                mOutlinedInput(value = entity?.confirmedPassword,
-                                    labelWidth = confirmPasswordLabel.width,
-                                    error = confirmPasswordLabel.error,
-                                    id = "confirm-password",
-                                    type = if(showConfirmPassword) InputType.text else InputType.password,
-                                    onChange = {
-                                        setState {
-                                            entity?.confirmedPassword = it.targetInputValue
-                                            confirmedPasswordError = null
-                                            errorMessage = "" }
-                                    }) {
-                                    attrs.endAdornment = mInputAdornment {
-                                        mIconButton(if(showConfirmPassword) "visibility" else "visibility_off",
-                                            edge = MIconEdge.end,
-                                            onClick = {
-                                                setState {
-                                                    showConfirmPassword = !showConfirmPassword
-                                                }
-                                            }
-                                        )
-                                    }
-                                }
-                                confirmPasswordLabel.errorText?.let { error ->
-                                    mFormHelperText(error){
+                                currentPasswordLabel.errorText?.let { error ->
+                                    umFormHelperText(error){
                                         css(errorTextClass)
                                     }
                                 }
@@ -283,22 +208,113 @@ class PersonAccountEditComponent(mProps: UmProps) : UstadEditComponent<PersonWit
 
                     umGridContainer(spacing) {
                         css{
+                            +defaultPaddingTop
+                        }
+                        umItem(GridSize.cells12, GridSize.cells3){
+                            css(hideOnMobile)
+                        }
+
+                        umItem(GridSize.cells12, GridSize.cells6){
+                            umFormControl(variant = FormControlVariant.outlined) {
+                                css(StyleManager.defaultFullWidth)
+                                umInputLabel("${newPasswordLabel.text}",
+                                    error = newPasswordLabel.error,
+                                    variant = FormControlVariant.outlined,
+                                    htmlFor = newPasswordLabel.id)
+                                umOutlinedInput(
+                                    id = newPasswordLabel.id,
+                                    value = entity?.newPassword,
+                                    disabled = !fieldsEnabled,
+                                    error = newPasswordLabel.error,
+                                    type =  if(showNewPassword) InputType.text else InputType.password,
+                                    onChange = {
+                                        setState {
+                                            entity?.newPassword = it
+                                            newPasswordError = null
+                                        }
+                                    }) {
+                                    attrs.endAdornment = umIconButton(if(showNewPassword) "visibility" else "visibility_off", edge = IconEdge.end, onClick = {
+                                        setState {
+                                            showNewPassword = !showNewPassword
+                                        }
+                                    })
+
+                                }
+                                newPasswordLabel.errorText?.let { error ->
+                                    umFormHelperText(error){
+                                        css(errorTextClass)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    umGridContainer(spacing) {
+                        css{
+                            +defaultPaddingTop
+                        }
+                        umItem(GridSize.cells12, GridSize.cells3){
+                            css(hideOnMobile)
+                        }
+
+                        umItem(GridSize.cells12, GridSize.cells6){
+                            umFormControl(variant = FormControlVariant.outlined) {
+                                umInputLabel("${confirmPasswordLabel.text}",
+                                    error = confirmPasswordLabel.error,
+                                    variant = FormControlVariant.outlined,
+                                    htmlFor = confirmPasswordLabel.id)
+                                umOutlinedInput(
+                                    id = confirmPasswordLabel.id,
+                                    value = entity?.confirmedPassword,
+                                    disabled = !fieldsEnabled,
+                                    error = confirmPasswordLabel.error,
+                                    type =  if(showConfirmPassword) InputType.text else InputType.password,
+                                    onChange = {
+                                        setState {
+                                            entity?.confirmedPassword = it
+                                            confirmedPasswordError = null
+                                        }
+                                    }) {
+                                    attrs.endAdornment = umIconButton(
+                                        if(showConfirmPassword) "visibility" else "visibility_off",
+                                        edge = IconEdge.end,
+                                        onClick = {
+                                            setState {
+                                                showConfirmPassword = !showConfirmPassword
+                                            }
+                                        })
+
+                                }
+                                confirmPasswordLabel.errorText?.let { error ->
+                                    umFormHelperText(error){
+                                        css(errorTextClass)
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+
+                    umGridContainer(spacing) {
+                        css{
+                            +defaultPaddingTop
                             display = displayProperty(errorMessage?.isNotEmpty() == true)
                         }
 
-                        mHidden(xsDown = true) {
-                            umItem(MGridSize.cells12, MGridSize.cells3){}
+                        umItem(GridSize.cells12, GridSize.cells3){
+                            css(hideOnMobile)
                         }
 
-                        umItem(MGridSize.cells12, MGridSize.cells6){
-                            mTypography(errorMessage, variant = MTypographyVariant.subtitle2,
+                        umItem(GridSize.cells12, GridSize.cells6){
+                            umTypography(errorMessage,
+                                variant = TypographyVariant.subtitle2,
                                 className = "${StyleManager.name}-errorTextClass",
-                                align = MTypographyAlign.center)
+                                align = TypographyAlign.center)
                         }
                     }
                 }
             }
-        }*/
+        }
     }
 
     override fun onDestroyView() {

@@ -11,10 +11,18 @@ import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ScopedGrantAndName
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.StyleManager.contentContainer
+import com.ustadmobile.util.StyleManager.defaultPaddingTop
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.Util.ASSET_ENTRY
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.util.ext.toDate
+import com.ustadmobile.view.ext.*
 import react.RBuilder
-import com.ustadmobile.util.*
 import react.setState
+import styled.css
+import styled.styledDiv
 
 class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayCalendarAndSchool>(mProps),
     ClazzEdit2View {
@@ -43,12 +51,13 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
 
     private var featureLabel = FieldLabel(text = getString(MessageID.features_enabled))
 
-    private var scheduleList: List<Schedule>? = null
+    private var scheduleList: List<Schedule> = listOf()
 
     private val scheduleObserver = ObserverFnWrapper<List<Schedule>?> {
-            setState {
-                scheduleList = it
-            }
+        if(it.isNullOrEmpty()) return@ObserverFnWrapper
+        setState {
+            scheduleList = it
+        }
     }
 
     override var clazzSchedules: DoorMutableLiveData<List<Schedule>>? = null
@@ -117,83 +126,74 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
     }
 
     override fun RBuilder.render() {
-       /* styledDiv {
+        styledDiv {
             css{
                 +contentContainer
                 +defaultPaddingTop
             }
-            umGridContainer(MGridSpacing.spacing4) {
-                umItem(MGridSize.cells12, MGridSize.cells4){
+            umGridContainer(GridSpacing.spacing4) {
+                umItem(GridSize.cells12, GridSize.cells4){
                     umEntityAvatar(fallbackSrc = ASSET_ENTRY, listItem = true)
                 }
 
-                umItem(MGridSize.cells12, MGridSize.cells8){
+                umItem(GridSize.cells12, GridSize.cells8){
 
                     createListSectionTitle(getString(MessageID.basic_details))
 
-                    mTextField(label = "${clazzNameLabel.text}",
+                    umTextField(label = "${clazzNameLabel.text}",
                         helperText = clazzNameLabel.errorText,
                         value = entity?.clazzName,
                         error = clazzNameLabel.error,
+                        fullWidth = true,
                         disabled = !fieldsEnabled,
-                        variant = MFormControlVariant.outlined,
+                        variant = FormControlVariant.outlined,
                         onChange = {
-                            it.persist()
                             setState {
-                                entity?.clazzName = it.targetInputValue
+                                entity?.clazzName = it
                             }
-                        }){
-                        css(defaultFullWidth)
-                    }
+                        })
 
 
-                    mTextField(label = "${clazzDescLabel.text}",
+                    umTextField(label = "${clazzDescLabel.text}",
                         value = entity?.clazzDesc,
                         error = clazzDescLabel.error,
                         disabled = !fieldsEnabled,
                         helperText = clazzDescLabel.errorText,
-                        variant = MFormControlVariant.outlined,
+                        variant = FormControlVariant.outlined,
                         onChange = {
-                            it.persist()
                             setState {
-                                entity?.clazzDesc = it.targetInputValue
+                                entity?.clazzDesc = it
                             }
-                        }){
-                        css(defaultFullWidth)
-                    }
+                        })
 
-                    umGridContainer(MGridSpacing.spacing4) {
+                    umGridContainer(GridSpacing.spacing4) {
 
-                        umItem(MGridSize.cells12, MGridSize.cells6 ) {
-                            mDateTimePicker(
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
+                            umDatePicker(
                                 label = "${startDateLabel.text}",
-                                ruleSet = defaultFullWidth,
                                 error = startDateLabel.error,
                                 helperText = startDateLabel.errorText,
                                 value = entity?.clazzStartTime.toDate(),
-                                inputVariant = MFormControlVariant.outlined,
-                                pickerType = MDateTimePickerType.date,
-                                onChange = { mills, _ ->
+                                inputVariant = FormControlVariant.outlined,
+                                onChange = {
                                     setState {
-                                        entity?.clazzStartTime = mills
+                                        entity?.clazzStartTime = it.getTime().toLong()
                                         clazzStartDateError = null
                                     }
                                 })
                         }
 
-                        umItem(MGridSize.cells12, MGridSize.cells6 ) {
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
 
-                            mDateTimePicker(
+                            umDatePicker(
                                 label = "${endDateLabel.text}",
-                                ruleSet = defaultFullWidth,
                                 error = endDateLabel.error,
                                 helperText = endDateLabel.errorText,
                                 value = entity?.clazzEndTime.toDate(),
-                                inputVariant = MFormControlVariant.outlined,
-                                pickerType = MDateTimePickerType.date,
-                                onChange = { mills, utc ->
+                                inputVariant = FormControlVariant.outlined,
+                                onChange = {
                                     setState {
-                                        entity?.clazzEndTime = mills
+                                        entity?.clazzEndTime = it.getTime().toLong()
                                         clazzEndDateError = null
                                     }
                                 })
@@ -207,62 +207,52 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                     }
 
                     mPresenter?.let { presenter ->
-                        scheduleList?.let { schedules ->
-                            renderSchedules(presenter.scheduleOneToManyJoinListener, schedules, createNewItem){
-                                mPresenter?.scheduleOneToManyJoinListener?.onClickEdit(it)
-                            }
+                        renderSchedules(presenter.scheduleOneToManyJoinListener, scheduleList, createNewItem){
+                            mPresenter?.scheduleOneToManyJoinListener?.onClickEdit(it)
                         }
                     }
 
-                    mSpacer()
+                    umSpacer()
 
-                    mTextField(label = "${schoolNameLabel.text}",
+                    umTextField(label = "${schoolNameLabel.text}",
                         helperText = schoolNameLabel.errorText,
                         value = entity?.school?.schoolName,
                         error = clazzNameLabel.error,
                         disabled = !fieldsEnabled,
-                        variant = MFormControlVariant.outlined,
-                        onChange = {
-                            it.persist()
-                            setState {}
-                        }){
+                        variant = FormControlVariant.outlined){
                         attrs.asDynamic().onClick = {
                             mPresenter?.handleClickSchool()
                         }
-                        css(defaultFullWidth)
                     }
 
 
-                    umGridContainer(MGridSpacing.spacing4) {
-                        umItem(MGridSize.cells12, MGridSize.cells6 ) {
-                            mTextField(label = "${timeZoneLabel.text}",
+                    umGridContainer(GridSpacing.spacing4) {
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
+                            umTextField(label = "${timeZoneLabel.text}",
                                 value = entity?.clazzTimeZone,
                                 error = timeZoneLabel.error,
                                 disabled = !fieldsEnabled,
                                 helperText = timeZoneLabel.errorText,
-                                variant = MFormControlVariant.outlined,
+                                variant = FormControlVariant.outlined,
                                 onChange = {
-                                    it.persist()
                                     setState {
-                                        entity?.clazzTimeZone = it.targetInputValue
+                                        entity?.clazzTimeZone = it
                                     }
                                 }){
                                 attrs.asDynamic().onClick = {
                                     mPresenter?.handleClickTimezone()
                                 }
-                                css(defaultFullWidth)
                             }
                         }
 
-                        umItem(MGridSize.cells12, MGridSize.cells6 ) {
-                            mTextField(label = "${holidayCalenderLabel.text}",
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
+                            umTextField(label = "${holidayCalenderLabel.text}",
                                 value = entity?.holidayCalendar?.umCalendarName,
                                 error = holidayCalenderLabel.error,
                                 disabled = !fieldsEnabled,
                                 helperText = holidayCalenderLabel.errorText,
-                                variant = MFormControlVariant.outlined,
+                                variant = FormControlVariant.outlined,
                                 onChange = {
-                                    it.persist()
                                     setState {
                                         clazzEndDateError = null
                                     }
@@ -270,27 +260,24 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                                 attrs.asDynamic().onClick = {
                                     mPresenter?.handleHolidayCalendarClicked()
                                 }
-                                css(defaultFullWidth)
                             }
                         }
                     }
 
-                    mTextField(label = "${featureLabel.text}",
+                    umTextField(label = "${featureLabel.text}",
                         helperText = featureLabel.errorText,
                         value = setBitmaskListText(systemImpl,entity?.clazzFeatures),
                         error = clazzNameLabel.error,
                         disabled = !fieldsEnabled,
-                        variant = MFormControlVariant.outlined,
+                        variant = FormControlVariant.outlined,
                         onChange = {
-                            it.persist()
                             setState {
-                                entity?.clazzFeatures = it.targetInputValue.toLong()
+                                entity?.clazzFeatures = it.toLong()
                             }
                         }){
                         attrs.asDynamic().onClick = {
                             mPresenter?.handleClickFeatures()
                         }
-                        css(defaultFullWidth)
                     }
 
                     createListSectionTitle(getString(MessageID.permissions))
@@ -302,8 +289,8 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                                 mPresenter?.scopedGrantOneToManyHelper?.onClickNew()
                             }
 
-                            renderScopedGrants(presenter.scopedGrantOneToManyHelper, scopeList.distinctBy { it.name },
-                                newItem){ scope ->
+                            renderScopedGrants(presenter.scopedGrantOneToManyHelper,
+                                scopeList.distinctBy { it.name }, newItem){ scope ->
                                 mPresenter?.scopedGrantOneToManyHelper?.onClickEdit(scope)
                             }
                         }
@@ -312,7 +299,7 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                 }
 
             }
-        }*/
+        }
     }
 
     override fun onDestroyView() {

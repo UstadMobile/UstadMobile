@@ -6,9 +6,19 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.HolidayEditView
 import com.ustadmobile.lib.db.entities.Holiday
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.ext.targetInputValue
+import com.ustadmobile.util.StyleManager.contentContainer
+import com.ustadmobile.util.StyleManager.defaultPaddingTop
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.ext.toDate
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
+import kotlinx.css.padding
 import react.RBuilder
-import com.ustadmobile.util.*
 import react.setState
+import styled.css
+import styled.styledDiv
 
 class HolidayEditComponent(mProps: UmProps): UstadEditComponent<Holiday>(mProps), HolidayEditView {
 
@@ -52,7 +62,7 @@ class HolidayEditComponent(mProps: UmProps): UstadEditComponent<Holiday>(mProps)
     }
 
     override fun RBuilder.render() {
-       /* styledDiv {
+        styledDiv {
             css {
                 +contentContainer
                 +defaultPaddingTop
@@ -62,60 +72,54 @@ class HolidayEditComponent(mProps: UmProps): UstadEditComponent<Holiday>(mProps)
                 css{
                     padding(2.spacingUnits, 2.spacingUnits,0.spacingUnits)
                 }
-                umItem(MGridSize.cells12) {
-                    mTextField(label = "${holidayName.text}",
+                umItem(GridSize.cells12) {
+                    umTextField(
+                        label = "${holidayName.text}",
                         helperText = holidayName.errorText,
                         value = entity?.holName, error = holidayName.error,
                         disabled = !fieldsEnabled,
-                        variant = MFormControlVariant.outlined,
+                        variant = FormControlVariant.outlined,
                         onChange = {
-                            it.persist()
                             setState {
-                                entity?.holName = it.targetInputValue
+                                entity?.holName = it
                             }
-                        }) {
-                        css(defaultFullWidth)
-                    }
+                        }) {}
                 }
 
-                umGridContainer(MGridSpacing.spacing4) {
+                umGridContainer(GridSpacing.spacing4) {
 
-                    umItem(MGridSize.cells6) {
+                    umItem(GridSize.cells6) {
 
-                        mDateTimePicker(
+                        umDatePicker(
                             label = "${holidayStart.text}",
-                            ruleSet = defaultFullWidth,
                             error = holidayStart.error,
                             helperText = holidayStart.errorText,
                             value = entity?.holStartTime.toDate(),
-                            inputVariant = MFormControlVariant.outlined,
-                            pickerType = MDateTimePickerType.date,
-                            onChange = { mills, _ ->
+                            inputVariant = FormControlVariant.outlined,
+                            onChange = {
                                 setState {
-                                    entity?.holStartTime = mills
+                                    entity?.holStartTime = it.getTime().toLong()
                                 }
                             })
                     }
 
-                    umItem(MGridSize.cells6) {
+                    umItem(GridSize.cells6) {
 
-                        mDateTimePicker(
+                        umDatePicker(
                             label = "${holidayEnd.text}",
-                            ruleSet = defaultFullWidth,
                             error = holidayEnd.error,
                             helperText = holidayEnd.errorText,
                             value = entity?.holEndTime.toDate(),
-                            inputVariant = MFormControlVariant.outlined,
-                            pickerType = MDateTimePickerType.date,
-                            onChange = { mills, _ ->
+                            inputVariant = FormControlVariant.outlined,
+                            onChange = {
                                 setState {
-                                    entity?.holEndTime = mills
+                                    entity?.holEndTime = it.getTime().toLong()
                                 }
                             })
                     }
                 }
             }
-        }*/
+        }
     }
 
     override fun onDestroyView() {

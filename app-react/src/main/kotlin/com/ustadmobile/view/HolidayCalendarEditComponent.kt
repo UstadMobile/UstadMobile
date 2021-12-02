@@ -9,10 +9,21 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.StyleManager.contentContainer
+import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.util.ext.standardFormat
+import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
+import kotlinx.css.padding
 import react.RBuilder
 import react.setState
+import styled.css
+import styled.styledDiv
+import kotlin.js.Date
 
 class HolidayCalendarEditComponent(mProps: UmProps): UstadEditComponent<HolidayCalendar>(mProps),
     HolidayCalendarEditView{
@@ -69,30 +80,28 @@ class HolidayCalendarEditComponent(mProps: UmProps): UstadEditComponent<HolidayC
     }
 
     override fun RBuilder.render() {
-      /*  styledDiv {
+        styledDiv {
             css {
                 +contentContainer
                 +defaultPaddingTop
             }
 
-            umGridContainer(MGridSpacing.spacing4) {
+            umGridContainer(GridSpacing.spacing4) {
                 css{
                     padding(2.spacingUnits, 2.spacingUnits,0.spacingUnits)
                 }
-                umItem(MGridSize.cells12) {
-                    mTextField(label = "${holidayLabel.text}",
+                umItem(GridSize.cells12) {
+                    umTextField(
+                        label = "${holidayLabel.text}",
                         helperText = holidayLabel.errorText,
                         value = entity?.umCalendarName, error = holidayLabel.error,
                         disabled = !fieldsEnabled,
-                        variant = MFormControlVariant.outlined,
+                        variant = FormControlVariant.outlined,
                         onChange = {
-                            it.persist()
                             setState {
-                                entity?.umCalendarName = it.targetInputValue
+                                entity?.umCalendarName = it
                             }
-                        }) {
-                        css(defaultFullWidth)
-                    }
+                        })
                 }
             }
 
@@ -105,7 +114,7 @@ class HolidayCalendarEditComponent(mProps: UmProps): UstadEditComponent<HolidayC
                     mPresenter?.holidayToManyJoinListener?.onClickEdit(holiday)
                 }
             }
-        }*/
+        }
     }
 
     override fun onDestroyView() {
@@ -119,7 +128,9 @@ class HolidayCalendarEditComponent(mProps: UmProps): UstadEditComponent<HolidayC
 
 class HolidayListComponent(mProps: ListProps<Holiday>): UstadSimpleList<ListProps<Holiday>>(mProps){
     override fun RBuilder.renderListItem(item: Holiday) {
-        //createItemWithIconTitleAndDescription("date_range",item.holName, "${Date(item.holStartTime).standardFormat()} - ${Date(item.holEndTime).standardFormat()}")
+        createItemWithIconTitleAndDescription("date_range",item.holName,
+            "${Date(item.holStartTime).standardFormat()} - ${Date(item.holEndTime).standardFormat()}"
+        )
     }
 }
 

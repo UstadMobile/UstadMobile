@@ -6,9 +6,18 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.SiteEnterLinkView
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.contentContainer
+import com.ustadmobile.util.StyleManager.defaultMarginTop
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
+import kotlinx.css.marginTop
 import react.RBuilder
-import com.ustadmobile.util.*
 import react.setState
+import styled.css
+import styled.styledDiv
 
 class ContentEntryImportLinkComponent(mProps: UmProps): UstadEditComponent<String>(mProps),
     ContentEntryImportLinkView {
@@ -67,38 +76,37 @@ class ContentEntryImportLinkComponent(mProps: UmProps): UstadEditComponent<Strin
 
 
     override fun RBuilder.render() {
-       /* styledDiv {
+        styledDiv {
             css {
                 +contentContainer
                 marginTop = 4.spacingUnits
             }
 
-            umItem(MGridSize.cells12){
-                mTextField(label = "${importLinkLabel.text}",
-                    helperText = importLinkLabel.errorText,
-                    value = entity, error = importLinkLabel.error,
-                    disabled = showProgress,
-                    variant = MFormControlVariant.outlined,
-                    onChange = {
-                        it.persist()
-                        setState {
-                            entity = it.targetInputValue
-                        }
-                    }){
-                    css(defaultFullWidth)
-                }
-            }
+            umGridContainer(GridSpacing.spacing4) {
 
-            umItem(MGridSize.cells12){
-                css(defaultMarginTop)
-                mTypography(getString(MessageID.supported_link),
-                    variant = MTypographyVariant.body1,
-                    align = MTypographyAlign.center,
-                    color = MTypographyColor.textPrimary){
-                    css (StyleManager.alignTextToStart)
+                umItem(GridSize.cells12){
+                    umTextField(label = "${importLinkLabel.text}",
+                        helperText = importLinkLabel.errorText,
+                        value = entity, error = importLinkLabel.error,
+                        disabled = showProgress,
+                        variant = FormControlVariant.outlined,
+                        onChange = {
+                            setState {
+                                entity = it
+                            }
+                        })
+                }
+
+                umItem(GridSize.cells12){
+                    css(defaultMarginTop)
+                    umTypography(getString(MessageID.supported_link),
+                        variant = TypographyVariant.body1,
+                        align = TypographyAlign.center){
+                        css (StyleManager.alignTextToStart)
+                    }
                 }
             }
-        }*/
+        }
     }
 
     override fun onDestroyView() {

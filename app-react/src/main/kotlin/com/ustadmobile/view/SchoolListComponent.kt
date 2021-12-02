@@ -6,8 +6,8 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.SchoolListView
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
+import com.ustadmobile.util.UmProps
 import react.RBuilder
-import com.ustadmobile.util.*
 import react.setState
 import kotlin.js.Date
 
@@ -36,7 +36,7 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
 
     override fun onCreateView() {
         super.onCreateView()
-        listTypeSingleColumn = false
+        linearLayout = false
         fabManager?.text = getString(MessageID.school)
         mPresenter = SchoolListPresenter(this, arguments,
             this, di, this)

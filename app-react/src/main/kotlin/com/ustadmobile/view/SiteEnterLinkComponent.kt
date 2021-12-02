@@ -5,14 +5,15 @@ import com.ustadmobile.core.controller.SiteEnterLinkPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.ext.targetInputValue
 import com.ustadmobile.mui.theme.UMColor
-import react.RBuilder
-import com.ustadmobile.util.*
+import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.StyleManager.defaultMarginTop
+import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.hideOnMobile
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
 import com.ustadmobile.util.ext.clean
 import com.ustadmobile.view.ext.createCreateNewItem
 import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
@@ -22,6 +23,7 @@ import kotlinx.browser.window
 import kotlinx.css.LinearDimension
 import kotlinx.css.height
 import kotlinx.css.marginTop
+import react.RBuilder
 import react.setState
 import styled.css
 import styled.styledDiv
@@ -46,7 +48,6 @@ class SiteEnterLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmSta
     override var validLink: Boolean = false
         get() = field
         set(value) {
-            console.log(value)
             setState {
                 field = value
                 siteLInkLabel = siteLInkLabel.copy(errorText = if(value) null
@@ -86,20 +87,23 @@ class SiteEnterLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmSta
                 marginTop = 4.spacingUnits
             }
             umGridContainer {
-                umItem(GridSize.column3){
+                umItem(GridSize.cells3){
                     css(hideOnMobile)
                 }
-                umItem(GridSize.column12, GridSize.column6){
+                umItem(GridSize.cells12, GridSize.cells6){
                     umGridContainer {
 
-                        umItem(GridSize.column12){
+                        umItem(GridSize.cells12){
                             umTypography(getString(MessageID.please_enter_the_linK),
                                 variant = TypographyVariant.body2){
-                                css (StyleManager.alignTextToStart)
+                                css {
+                                    +StyleManager.defaultPaddingTopBottom
+                                    +StyleManager.alignTextToStart
+                                }
                             }
                         }
 
-                        umItem(GridSize.column12){
+                        umItem(GridSize.cells12){
                             umTextField(label = "${siteLInkLabel.text}",
                                 helperText = siteLInkLabel.errorText,
                                 value = siteLink, error = siteLInkLabel.error,
@@ -110,7 +114,7 @@ class SiteEnterLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmSta
                                         INPUT_CHECK_DELAY)
 
                                     setState {
-                                        siteLink = it.targetInputValue
+                                        siteLink = it
                                     }
                                 }){
                                 css(defaultFullWidth)
@@ -118,7 +122,7 @@ class SiteEnterLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmSta
                         }
 
                         if(validLink){
-                            umItem(GridSize.column12) {
+                            umItem(GridSize.cells12) {
                                 css(defaultMarginTop)
                                 umButton(getString(MessageID.next),
                                     size = ButtonSize.large,
@@ -134,26 +138,20 @@ class SiteEnterLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmSta
                             }
                         }
 
-                        umItem(GridSize.column12){
-                            umGridContainer(
-                                justify = GridJustify.center,
-                                alignItems = GridAlignItems.center) {
-                                umItem(GridSize.column1){
-                                    css(defaultMarginTop)
-                                    umTypography(getString(MessageID.or),
-                                        variant = TypographyVariant.h6,
-                                        align = TypographyAlign.center){
-                                        css (StyleManager.alignTextToStart)
-                                    }
-                                }
+                        umItem(GridSize.cells12){
+                            umTypography(getString(MessageID.or),
+                                variant = TypographyVariant.h6,
+                                align = TypographyAlign.center){
+                                css(defaultPaddingTop)
                             }
                         }
 
-                        umItem(GridSize.column12){
+                        umItem(GridSize.cells12){
+                            css(defaultPaddingTop)
                             createCreateNewItem(getString(MessageID.create_site))
                         }
 
-                        umItem(GridSize.column12){
+                        umItem(GridSize.cells12){
                             css(defaultMarginTop)
                             createItemWithIconTitleAndDescription("info",
                                 description = getString(MessageID.sites_can_be_help_text).clean(),
@@ -162,7 +160,7 @@ class SiteEnterLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmSta
                         }
                     }
                 }
-                umItem(GridSize.column3){
+                umItem(GridSize.cells3){
                     css(hideOnMobile)
                 }
             }

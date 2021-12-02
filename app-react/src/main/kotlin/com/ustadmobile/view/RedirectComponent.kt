@@ -2,8 +2,9 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.controller.RedirectPresenter
 import com.ustadmobile.core.view.RedirectView
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
 import react.RBuilder
-import com.ustadmobile.util.*
 
 class RedirectComponent (props: UmProps): UstadBaseComponent<UmProps, UmState>(props), RedirectView {
 
@@ -14,7 +15,6 @@ class RedirectComponent (props: UmProps): UstadBaseComponent<UmProps, UmState>(p
 
     override fun onCreateView() {
         super.onCreateView()
-        console.log("Redirect hit")
         val args = arguments.toMutableMap()
         mPresenter = RedirectPresenter(this, args, this, di)
         mPresenter?.onCreate(mapOf())

@@ -1,10 +1,10 @@
 package com.ustadmobile.util
 
+import Breakpoint
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.mui.components.spacingUnits
 import com.ustadmobile.mui.theme.styledModule
 import com.ustadmobile.redux.ReduxAppStateManager
-import csstype.Padding
 import down
 import kotlinx.css.*
 import kotlinx.css.properties.Timing
@@ -66,6 +66,11 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         paddingTop = 3.spacingUnits
     }
 
+    val defaultPaddingTopBottom by css{
+        paddingTop = 2.spacingUnits
+        paddingBottom = 2.spacingUnits
+    }
+
     val defaultDoubleMarginTop  by css{
         marginTop = 4.spacingUnits
     }
@@ -123,7 +128,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     }
 
     val mainComponentProgressIndicator by css {
-        width = 100.pc
+        width = 100.pct
         display = Display.none
     }
 
@@ -443,6 +448,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     val selectionContainer by css{
         paddingTop = 12.px
         paddingBottom = 12.px
+        width = LinearDimension("100%")
         backgroundColor = Color(theme.palette.background.default)
     }
 

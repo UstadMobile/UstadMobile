@@ -9,12 +9,13 @@ import com.ustadmobile.core.view.ContentEntryListTabsView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
 import com.ustadmobile.util.ext.toArgumentsMap
 import react.RBuilder
 import react.setState
-import com.ustadmobile.util.*
 
-class ContentEntryListTabsComponent(mProps: UmProps) :UstadBaseComponent<UmProps, UmState>(mProps),
+class ContentEntryListTabsComponent(mProps: UmProps) : UstadBaseComponent<UmProps, UmState>(mProps),
     ContentEntryListTabsView {
 
     override val viewName: String

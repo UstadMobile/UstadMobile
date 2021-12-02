@@ -64,21 +64,21 @@ enum class GridJustify {
 
 @Suppress("EnumEntryName")
 enum class GridSize(internal val sizeVal: Any) {
-    columnFalse(false),
-    columnAuto("auto"),
-    columnTrue(true),
-    column1(1),
-    column2(2),
-    column3(3),
-    column4(4),
-    column5(5),
-    column6(6),
-    column7(7),
-    column8(8),
-    column9(9),
-    column10(10),
-    column11(11),
-    column12(12);
+    cellsFalse(false),
+    cellsAuto("auto"),
+    cellsTrue(true),
+    cells1(1),
+    cells2(2),
+    cells3(3),
+    cells4(4),
+    cells5(5),
+    cells6(6),
+    cells7(7),
+    cells8(8),
+    cells9(9),
+    cells10(10),
+    cells11(11),
+    cells12(12);
 }
 
 enum class GridSpacing(internal val size: Int) {
@@ -114,11 +114,11 @@ fun RBuilder.gridContainer(
 }
 
 fun RBuilder.gridItem(
-    xs: GridSize? = GridSize.columnFalse,
-    sm: GridSize? = GridSize.columnFalse,
-    md: GridSize? = GridSize.columnFalse,
-    lg: GridSize? = GridSize.columnFalse,
-    xl: GridSize? = GridSize.columnFalse,
+    xs: GridSize? = GridSize.cellsFalse,
+    sm: GridSize? = GridSize.cellsFalse,
+    md: GridSize? = GridSize.cellsFalse,
+    lg: GridSize? = GridSize.cellsFalse,
+    xl: GridSize? = GridSize.cellsFalse,
     alignItems: GridAlignItems? = GridAlignItems.flexStart,
     zeroMinWidth: Boolean? = null,
     className: String? = null,
@@ -130,6 +130,6 @@ fun RBuilder.gridItem(
     xs?.let { attrs.xs = it.sizeVal }
     xl?.let { attrs.xl = it.sizeVal }
     lg?.let { attrs.lg = it.sizeVal }
-    attrs.asDynamic().alignItems = alignItems.toString()
+    attrs.asDynamic().textAlign = alignItems.toString()
     zeroMinWidth?.let { attrs.zeroMinWidth = it }
 }

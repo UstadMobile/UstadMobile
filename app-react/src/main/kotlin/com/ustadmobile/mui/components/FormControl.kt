@@ -1,10 +1,12 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.util.StyleManager
 import mui.material.FormControl
 import mui.material.FormControlProps
 import react.RBuilder
 import styled.StyledHandler
+import styled.css
 
 @Suppress("EnumEntryName")
 enum class FormControlComponent {
@@ -16,7 +18,6 @@ enum class FormControlComponent {
 }
 
 fun RBuilder.umFormControl(
-    component: FormControlComponent = FormControlComponent.div,
     disabled: Boolean = false,
     error: Boolean = false,
     fullWidth: Boolean = false,
@@ -28,7 +29,6 @@ fun RBuilder.umFormControl(
     handler: StyledHandler<FormControlProps>? = null
 ) {
     createStyledComponent(FormControl, className, handler) {
-        //attrs.component = component
         attrs.disabled = disabled
         attrs.error = error
         attrs.fullWidth = fullWidth
@@ -36,5 +36,6 @@ fun RBuilder.umFormControl(
         attrs.margin = margin.toString()
         attrs.required = required
         attrs.variant = variant.toString()
+        css(StyleManager.defaultFullWidth)
     }
 }

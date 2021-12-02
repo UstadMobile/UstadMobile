@@ -1,16 +1,18 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.util.StyleManager.alignTextToStart
+import com.ustadmobile.util.StyleManager.defaultFullWidth
 import mui.material.BaseTextFieldProps
 import mui.material.TextField
 import mui.material.TextFieldProps
-import org.w3c.dom.events.Event
 import react.RBuilder
 import react.ReactNode
 import react.dom.html.InputType
 import styled.StyledElementBuilder
 import styled.StyledHandler
 import styled.StyledProps
+import styled.css
 
 @Suppress("EnumEntryName")
 enum class TextFieldColor {
@@ -31,8 +33,8 @@ fun RBuilder.umTextField(
     helperText: String? = null,
     defaultValue: String? = null,
     placeholder: String? = null,
-    variant: FormControlVariant = FormControlVariant.standard,
-    onChange: ((event: Event) -> Unit)? = null,
+    variant: FormControlVariant = FormControlVariant.outlined,
+    onChange: ((value: String) -> Unit)? = null,
     type: InputType = InputType.text,
     required: Boolean = false,
     disabled: Boolean = false,
@@ -46,8 +48,10 @@ fun RBuilder.umTextField(
     className: String? = null,
     handler: StyledHandler<UMTextFieldProps>? = null
 ) = createStyledComponent(TextField, className, handler) {
-    setProps(this, autoComplete, autoFocus, defaultValue, disabled, error, fullWidth, helperText, id, label, margin,
-        false, name, onChange, placeholder, required, null, null, false, type, value, variant)
+    css(defaultFullWidth)
+    setProps(this, autoComplete, autoFocus, defaultValue, disabled, error, fullWidth, helperText,
+        id, label, margin,false, name, onChange,placeholder, required, null, null,
+        false, type, value, variant)
 }
 
 fun RBuilder.umTextFieldMultiLine(
@@ -57,7 +61,7 @@ fun RBuilder.umTextFieldMultiLine(
     defaultValue: String? = null,
     placeholder: String? = null,
     variant: FormControlVariant = FormControlVariant.standard,
-    onChange: ((event: Event) -> Unit)? = null,
+    onChange: ((value: String) -> Unit)? = null,
     required: Boolean = false,
     disabled: Boolean = false,
     error: Boolean = false,
@@ -71,6 +75,7 @@ fun RBuilder.umTextFieldMultiLine(
     className: String? = null,
     handler: StyledHandler<UMTextFieldProps>? = null
 ) = createStyledComponent(TextField, className, handler) {
+    css(defaultFullWidth)
     setProps(this, null, autoFocus, defaultValue, disabled, error, fullWidth, helperText, id, label, margin,
         true, name, onChange, placeholder, required, rows, rowsMax, false, InputType.text, value, variant)
 }
@@ -83,8 +88,9 @@ fun RBuilder.umTextFieldSelect(
     helperText: String? = null,
     defaultValue: String? = null,
     placeholder: String? = null,
-    variant: FormControlVariant = FormControlVariant.standard,
-    onChange: ((event: Event) -> Unit)? = null,
+    values: List<Pair<String, String>>? = listOf(),
+    variant: FormControlVariant = FormControlVariant.outlined,
+    onChange: ((value: String) -> Unit)? = null,
     required: Boolean = false,
     disabled: Boolean = false,
     error: Boolean = false,
@@ -99,6 +105,17 @@ fun RBuilder.umTextFieldSelect(
 ) = createStyledComponent(TextField, className, handler) {
     setProps(this, autoComplete, autoFocus, defaultValue, disabled, error, fullWidth, helperText, id, label, margin,
         false, name, onChange, placeholder, required, null, null, true, InputType.text, value, variant)
+    css{
+        +defaultFullWidth
+        +alignTextToStart
+    }
+    if(!values.isNullOrEmpty()){
+        values.forEach {
+            umMenuItem(it.second, value = it.first){
+                css(alignTextToStart)
+            }
+        }
+    }
 }
 
 
@@ -116,7 +133,7 @@ private fun setProps(
     margin: FormControlMargin,
     multiline: Boolean,
     name: String?,
-    onChange: ((event: Event) -> Unit)?,
+    onChange: ((value: String) -> Unit)?,
     placeholder: String?,
     required: Boolean,
     rows: Int?,
@@ -139,8 +156,10 @@ private fun setProps(
     textField.attrs.multiline = multiline
     name?.let { textField.attrs.name = it }
     textField.attrs.onChange = {
-        it.persist()
-        onChange?.invoke(it.nativeEvent)
+        if(!select){
+            it.persist()
+        }
+        onChange?.invoke(it.target.asDynamic().value.toString())
     }
     placeholder?.let { textField.attrs.placeholder = it }
     textField.attrs.required = required

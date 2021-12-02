@@ -99,7 +99,7 @@ fun RBuilder.umGridContainer(
  * Simplest version of the GridItem used by the app
  */
 fun RBuilder.umItem(
-    xs: GridSize,
+    xs: GridSize? = null,
     sm: GridSize? = null,
     lg: GridSize? = null,
     className: String? = null,
@@ -190,13 +190,13 @@ fun RBuilder.createInformation(icon:String? = null, data: String?, label: String
             +defaultMarginTop
             display = displayProperty(data != "0" && !data.isNullOrEmpty(), true)
         }
-        umItem(GridSize.column2){
+        umItem(GridSize.cells2){
             if(icon != null){
                 umIcon(icon, className = "${StyleManager.name}-detailIconClass")
             }
         }
 
-        umItem(GridSize.column10){
+        umItem(GridSize.cells10){
             if(onClick != null){
                 attrs.asDynamic().onClick = {
                     onClick()
@@ -242,9 +242,8 @@ fun RBuilder.createCreateNewItem(createNewText: String){
 }
 
 fun RBuilder.setBitmaskListText(systemImpl: UstadMobileSystemImpl,textBitmaskValue: Long?): String {
-    return BitmaskEditPresenter.FLAGS_AVAILABLE.filter {
-        (it.flagVal and (textBitmaskValue ?:0) ) == it.flagVal
-    }.joinToString { systemImpl.getString(it.messageId, this) }
+    return BitmaskEditPresenter.FLAGS_AVAILABLE.filter { (it.flagVal and (textBitmaskValue ?: -1)) == it.flagVal }
+        .joinToString { systemImpl.getString(it.messageId, this) }
 }
 
 fun RBuilder.createItemWithIconTitleAndDescription(
@@ -253,17 +252,17 @@ fun RBuilder.createItemWithIconTitleAndDescription(
     scaleOnLargeSmall: Boolean = false){
 
     umGridContainer(GridSpacing.spacing4) {
-        umItem(GridSize.column2, if(scaleOnLargeSmall) GridSize.column3 else GridSize.column1){
+        umItem(GridSize.cells2, if(scaleOnLargeSmall) GridSize.cells2 else GridSize.cells1){
             umProfileAvatar(-1,iconName)
         }
 
-        umItem(GridSize.column8, if(scaleOnLargeSmall) GridSize.column8 else GridSize.column10){
+        umItem(GridSize.cells8, if(scaleOnLargeSmall) GridSize.cells8 else GridSize.cells10){
             css{
                 marginTop = LinearDimension("5px")
                 marginLeft = 2.spacingUnits
             }
             if(title != null){
-                umItem(GridSize.column11){
+                umItem(GridSize.cells11){
                     umTypography(title,
                         variant = TypographyVariant.body1,
                         ){
@@ -273,7 +272,7 @@ fun RBuilder.createItemWithIconTitleAndDescription(
             }
 
             if(description != null){
-                umItem(GridSize.column11){
+                umItem(GridSize.cells11){
                     umTypography(description,
                         variant = TypographyVariant.body2,
                         ){
@@ -293,15 +292,15 @@ fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(
     onClick:()-> Unit)
 {
     umGridContainer(GridSpacing.spacing4) {
-        umItem(GridSize.column2, GridSize.column1){
+        umItem(GridSize.cells2, GridSize.cells1){
             umProfileAvatar(-1,leftIcon)
         }
 
-        umItem(GridSize.column7, GridSize.column9){
+        umItem(GridSize.cells7, GridSize.cells9){
             css{
                 marginLeft = 2.spacingUnits
             }
-            umItem(GridSize.column11){
+            umItem(GridSize.cells11){
                 umTypography(title,
                     variant = TypographyVariant.body1,
                     ){
@@ -309,7 +308,7 @@ fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(
                 }
             }
 
-            umItem(GridSize.column11){
+            umItem(GridSize.cells11){
                 umTypography(description,
                     variant = TypographyVariant.body2,
                     ){
@@ -318,7 +317,7 @@ fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(
             }
         }
 
-        umItem(GridSize.column2, GridSize.column1){
+        umItem(GridSize.cells2, GridSize.cells1){
             css{
                 alignContent = Align.center
                 alignItems = Align.center
@@ -351,12 +350,12 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
             width = LinearDimension("100%")
         }
 
-        umItem(GridSize.column3, GridSize.column2){
+        umItem(GridSize.cells3, GridSize.cells2){
             umProfileAvatar(personUid, "person")
         }
 
-        umItem(GridSize.column9, GridSize.column10){
-            umItem(GridSize.column12){
+        umItem(GridSize.cells9, GridSize.cells10){
+            umItem(GridSize.cells12){
                 umTypography(fullName,
                     variant = TypographyVariant.h6,
                     ){
@@ -370,12 +369,12 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
                 }
 
                 if(attendance >= 0f){
-                    umItem(GridSize.column1){
+                    umItem(GridSize.cells1){
                         circleIndicator(attendance)
                     }
                 }
 
-                umItem(GridSize.column8){
+                umItem(GridSize.cells8){
                     umTypography(attendanceLabel?.format(attendance * 100)
                         
                     ){
@@ -387,13 +386,13 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
 
                 }
 
-                umItem(GridSize.column3){
+                umItem(GridSize.cells3){
                     css{
                         display = displayProperty(pending, true)
                         paddingLeft = 5.spacingUnits
                     }
                     umGridContainer(GridSpacing.spacing4) {
-                        umItem(GridSize.column4){
+                        umItem(GridSize.cells4){
                             umIconButton("check",
                                 onClick = {
                                     onClickAccept?.invoke()
@@ -402,7 +401,7 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
                                 size = IconButtonSize.small)
                         }
 
-                        umItem(GridSize.column4){
+                        umItem(GridSize.cells4){
                             umIconButton("close",
                                 onClick = {
                                     onClickDecline?.invoke()
@@ -422,32 +421,32 @@ fun RBuilder.createListItemWithAttendance(
     subTitle: String, attendance: kotlin.Float = -1f,
     attendanceLabel: String){
     umGridContainer {
-        umItem(GridSize.column2){
+        umItem(GridSize.cells2){
             umProfileAvatar(-1, iconName)
         }
 
-        umItem(GridSize.column10){
-            umItem(GridSize.column12){
+        umItem(GridSize.cells10){
+            umItem(GridSize.cells12){
                 umTypography(title,
                     variant = TypographyVariant.body1){
                     css(StyleManager.alignTextToStart)
                 }
             }
 
-            umItem(GridSize.column12){
+            umItem(GridSize.cells12){
                 umTypography(subTitle,
                     variant = TypographyVariant.body2){
                     css(StyleManager.alignTextToStart)
                 }
             }
 
-            umItem(GridSize.column12){
+            umItem(GridSize.cells12){
                 umGridContainer{
-                    umItem(GridSize.column1){
+                    umItem(GridSize.cells1){
                         circleIndicator(attendance)
                     }
 
-                    umItem(GridSize.column4){
+                    umItem(GridSize.cells4){
                         umTypography(attendanceLabel.format(attendance * 100)){
                             css{
                                 +StyleManager.alignTextToStart
@@ -472,7 +471,7 @@ fun RBuilder.permissionListText(
         ?.joinToString { systemImpl.getString(it.messageId, this) }
 }
 
-fun RBuilder.mSpacer(
+fun RBuilder.umSpacer(
     left: LinearDimension? = null, right: LinearDimension? = null,
     top: LinearDimension? = 1.spacingUnits,
     bottom: LinearDimension? = 1.spacingUnits) {

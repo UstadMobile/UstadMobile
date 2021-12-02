@@ -5,13 +5,14 @@ import com.ustadmobile.core.controller.TimeZoneListPresenter
 import com.ustadmobile.core.view.TimeZoneListView
 import com.ustadmobile.util.TimeZone
 import com.ustadmobile.util.TimeZonesUtil
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
+import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import react.RBuilder
-import com.ustadmobile.util.*
-import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
 import react.setState
 
 class TimeZoneListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps) , TimeZoneListView,
@@ -35,7 +36,6 @@ class TimeZoneListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmStat
         renderZoneList(timeZoneList){ timezone ->
             mPresenter?.handleClickTimeZone(timezone.id)
         }
-
     }
 
     override fun onSearchSubmitted(text: String?) {

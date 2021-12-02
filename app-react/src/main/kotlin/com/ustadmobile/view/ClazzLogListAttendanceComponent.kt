@@ -1,43 +1,39 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.GridSpacing
+import com.ustadmobile.util.StyleManager.attendance
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
 import react.RBuilder
-import com.ustadmobile.util.*
+import styled.css
+import styled.styledDiv
 
 class ClazzLogListAttendanceComponent(mProps: UmProps) : UstadBaseComponent<UmProps, UmState>(mProps){
 
     override val viewName: String
         get() = ClazzLogListAttendanceView.VIEW_NAME
 
-
     override fun RBuilder.render() {
-       /* styledDiv {
+        styledDiv {
             css(attendance)
-            umGridContainer(MGridSpacing.spacing4) {
+            umGridContainer(GridSpacing.spacing4) {
 
-                umItem(MGridSize.cells12, MGridSize.cells7){
+                umItem(GridSize.cells12, GridSize.cells7){
 
-                    mChart(arrayOf(
-                        arrayOf("Year", "Sales", "Expenses"),
-                        arrayOf("2013", 1000, 400),
-                        arrayOf("2014", 1170, 460),
-                        arrayOf("2015", 660, 1120)),
-                        chartType = MChartType.ColumnChart,
-                        width = "100%",
-                        height = "500px"){
-                        css{
-                            margin(3.spacingUnits)
-                        }
-                    }
+                    //chart goes here
                 }
 
-                umItem(MGridSize.cells12, MGridSize.cells5){
+                umItem(GridSize.cells12, GridSize.cells5){
                     renderClazzLogList{
                         console.log(it)
                     }
                 }
             }
-        }*/
+        }
     }
 
 }

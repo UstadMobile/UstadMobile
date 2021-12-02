@@ -3,8 +3,9 @@ package com.ustadmobile.view
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.controller.EpubContentPresenter
 import com.ustadmobile.core.view.EpubContentView
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
 import react.RBuilder
-import com.ustadmobile.util.*
 import react.setState
 
 class EpubContentComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps), EpubContentView{

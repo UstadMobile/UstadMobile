@@ -1,14 +1,13 @@
 package com.ustadmobile.view
 
+import Breakpoint
 import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.controller.Login2Presenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.ext.targetChangeValue
 import com.ustadmobile.mui.theme.UMColor
-import react.RBuilder
-import com.ustadmobile.util.*
+import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextCenter
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultDoubleMarginTop
@@ -17,14 +16,16 @@ import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.errorTextClass
 import com.ustadmobile.util.StyleManager.hideOnMobile
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import down
 import kotlinx.css.*
+import react.RBuilder
 import react.dom.html.InputType
 import react.setState
 import styled.css
-import up
 
 class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props), Login2View {
 
@@ -36,7 +37,7 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
 
     private var showPassword = false
 
-    private var passwordLabel: FieldLabel = FieldLabel(getString(MessageID.password))
+    private var passwordLabel: FieldLabel = FieldLabel(getString(MessageID.password), id = "password-input")
 
     private var usernameLabel: FieldLabel = FieldLabel(getString(MessageID.username))
 
@@ -123,9 +124,9 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
 
     override fun RBuilder.render() {
         val spacing = GridSpacing.spacing1
-        val gridSizeOnLeft = GridSize.column3
-        val gridSizeOnCenterOnMdDown = GridSize.column6
-        val gridSizeOnCenterLgUp = GridSize.column4
+        val gridSizeOnLeft = GridSize.cells3
+        val gridSizeOnCenterOnMdDown = GridSize.cells6
+        val gridSizeOnCenterLgUp = GridSize.cells4
         umGridContainer(spacing) {
             css {
                 +contentContainer
@@ -137,17 +138,17 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
                 }
 
             }
-            umItem(GridSize.column12, GridSize.column12) {
+            umItem(GridSize.cells12, GridSize.cells12) {
 
                 umGridContainer(spacing) {
                     css{
                         display = displayProperty(loginIntentMessage != null)
                     }
-                    umItem(GridSize.column12, gridSizeOnLeft) {
+                    umItem(GridSize.cells12, gridSizeOnLeft) {
                         css(hideOnMobile)
                     }
                     
-                    umItem(GridSize.column12, gridSizeOnCenterOnMdDown) {
+                    umItem(GridSize.cells12, gridSizeOnCenterOnMdDown) {
                         umTypography(loginIntentMessage,
                             variant = TypographyVariant.body2,
                             align = TypographyAlign.center,
@@ -156,10 +157,10 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
                 }
 
                 umGridContainer(spacing) {
-                    umItem(GridSize.column12, gridSizeOnLeft, gridSizeOnCenterLgUp) {
+                    umItem(GridSize.cells12, gridSizeOnLeft, gridSizeOnCenterLgUp) {
                         css(hideOnMobile)
                     }
-                    umItem(GridSize.column12, gridSizeOnCenterOnMdDown, gridSizeOnCenterLgUp) {
+                    umItem(GridSize.cells12, gridSizeOnCenterOnMdDown, gridSizeOnCenterLgUp) {
                         umTextField(label = "${usernameLabel.text}",
                             helperText = usernameLabel.errorText,
                             value = username,
@@ -168,7 +169,7 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
                             variant = FormControlVariant.outlined,
                             onChange = {
                                 setState {
-                                    username = it.targetChangeValue
+                                    username = it
                                     isEmptyUsername = false
                                     errorMessage = ""
                                 }
@@ -179,26 +180,30 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
                 }
 
                 umGridContainer(spacing) {
-                    umItem(GridSize.column12, gridSizeOnLeft,gridSizeOnCenterLgUp) {
+                    umItem(GridSize.cells12, gridSizeOnLeft,gridSizeOnCenterLgUp) {
                         css(hideOnMobile)
                     }
 
-                    umItem(GridSize.column12, gridSizeOnCenterOnMdDown,gridSizeOnCenterLgUp) {
+                    umItem(GridSize.cells12, gridSizeOnCenterOnMdDown,gridSizeOnCenterLgUp) {
                         umFormControl(variant = FormControlVariant.outlined) {
-                            css(defaultFullWidth)
+                            css{
+                                +defaultMarginTop
+                            }
                             umInputLabel("${passwordLabel.text}",
+                                id = passwordLabel.id,
                                 error = passwordLabel.error,
                                 variant = FormControlVariant.outlined,
-                                htmlFor = "password-input")
+                                htmlFor = passwordLabel.id)
                             umOutlinedInput(
-                                id = "password-input",
+                                id = passwordLabel.id,
                                 value = password,
+                                label = passwordLabel.text,
                                 disabled = inProgress,
                                 error = passwordLabel.error,
                                 type =  if(showPassword) InputType.text else InputType.password,
                                 onChange = {
                                     setState {
-                                        password = it.targetChangeValue
+                                        password = it
                                         isEmptyPassword = false
                                         errorMessage = "" }
                                 }) {
@@ -221,10 +226,10 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
                         display = displayProperty(errorMessage.isNotEmpty(), true)
                         +defaultMarginTop
                     }
-                    umItem(GridSize.column12, gridSizeOnLeft,gridSizeOnCenterLgUp) {
+                    umItem(GridSize.cells12, gridSizeOnLeft,gridSizeOnCenterLgUp) {
                         css(hideOnMobile)
                     }
-                    umItem(GridSize.column12, gridSizeOnCenterOnMdDown,gridSizeOnCenterLgUp) {
+                    umItem(GridSize.cells12, gridSizeOnCenterOnMdDown,gridSizeOnCenterLgUp) {
                         umTypography(errorMessage,
                             variant = TypographyVariant.subtitle2,
                             className = "${StyleManager.name}-errorTextClass",
@@ -233,10 +238,10 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
                 }
 
                 umGridContainer(spacing) {
-                    umItem(GridSize.column12, gridSizeOnLeft,gridSizeOnCenterLgUp) {
+                    umItem(GridSize.cells12, gridSizeOnLeft,gridSizeOnCenterLgUp) {
                         css(hideOnMobile)
                     }
-                    umItem(GridSize.column12, gridSizeOnCenterOnMdDown,gridSizeOnCenterLgUp) {
+                    umItem(GridSize.cells12, gridSizeOnCenterOnMdDown,gridSizeOnCenterLgUp) {
                         umButton(getString(MessageID.login),
                             size = ButtonSize.large,
                             disabled = inProgress
@@ -257,11 +262,11 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
                     css{
                         display = displayProperty(createAccountVisible)
                     }
-                    umItem(GridSize.column12, gridSizeOnLeft,gridSizeOnCenterLgUp) {
+                    umItem(GridSize.cells12, gridSizeOnLeft,gridSizeOnCenterLgUp) {
                         css(hideOnMobile)
                     }
 
-                    umItem(GridSize.column12, gridSizeOnCenterOnMdDown,gridSizeOnCenterLgUp) {
+                    umItem(GridSize.cells12, gridSizeOnCenterOnMdDown,gridSizeOnCenterLgUp) {
                         umButton(getString(MessageID.create_account),
                             variant = ButtonVariant.text,
                             color = UMColor.primary,
@@ -280,11 +285,11 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
                         display = displayProperty(connectAsGuestVisible)
                     }
 
-                    umItem(GridSize.column12, gridSizeOnLeft,gridSizeOnCenterLgUp) {
+                    umItem(GridSize.cells12, gridSizeOnLeft,gridSizeOnCenterLgUp) {
                         css(hideOnMobile)
                     }
 
-                    umItem(GridSize.column12, gridSizeOnCenterOnMdDown,gridSizeOnCenterLgUp) {
+                    umItem(GridSize.cells12, gridSizeOnCenterOnMdDown,gridSizeOnCenterLgUp) {
                         umButton(getString(MessageID.connect_as_guest),
                             variant = ButtonVariant.text,
                             color = UMColor.primary,

@@ -1,16 +1,35 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.controller.ClazzDetailOverviewPresenter
+import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.TypographyVariant
+import com.ustadmobile.mui.components.umTypography
+import com.ustadmobile.util.StyleManager.alignTextToStart
+import com.ustadmobile.util.StyleManager.contentContainer
+import com.ustadmobile.util.StyleManager.defaultPaddingTop
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.Util.copyToClipboard
+import com.ustadmobile.util.ext.format
+import com.ustadmobile.util.ext.formattedInHoursAndMinutes
+import com.ustadmobile.util.ext.standardFormat
+import com.ustadmobile.view.ext.createInformation
+import com.ustadmobile.view.ext.createListSectionTitle
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
 import react.RBuilder
-import com.ustadmobile.util.*
 import react.setState
+import styled.css
+import styled.styledDiv
+import kotlin.js.Date
 
 class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzWithDisplayDetails>(mProps),
     ClazzDetailOverviewView {
@@ -64,7 +83,7 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
     }
 
     override fun RBuilder.render() {
-      /*  styledDiv {
+        styledDiv {
             css {
                 +defaultPaddingTop
                 +contentContainer
@@ -72,10 +91,9 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
 
             umGridContainer {
 
-                umItem(MGridSize.cells12){
-                    mTypography(entity?.clazzDesc,
-                        variant = MTypographyVariant.body1,
-                        color = MTypographyColor.textPrimary,
+                umItem(GridSize.cells12){
+                    umTypography(entity?.clazzDesc,
+                        variant = TypographyVariant.body1,
                         gutterBottom = true){
                         css(alignTextToStart)
                     }
@@ -104,7 +122,7 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
 
 
                 if(!schedules.isNullOrEmpty()){
-                    umItem(MGridSize.cells12){
+                    umItem(GridSize.cells12){
                         createListSectionTitle(getString(MessageID.schedule))
                     }
 
@@ -116,7 +134,7 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
                 }
 
             }
-        }*/
+        }
     }
 
     override fun onDestroyView() {
@@ -130,7 +148,7 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
     class SchedulesComponent(mProps: ListProps<Schedule>): UstadSimpleList<ListProps<Schedule>>(mProps){
 
         override fun RBuilder.renderListItem(item: Schedule) {
-            /*styledDiv {
+            styledDiv {
                 val frequencyMessageId = ScheduleEditPresenter.FrequencyOption.values()
                     .firstOrNull { it.optionVal == item.scheduleFrequency }?.messageId ?: MessageID.None
                 val dayMessageId = ScheduleEditPresenter.DayOptions.values()
@@ -141,13 +159,12 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
                 val startEndTime = "${Date(item.sceduleStartTime).formattedInHoursAndMinutes()} " +
                         "- ${Date(item.scheduleEndTime).formattedInHoursAndMinutes()}"
 
-                mTypography("$scheduleDays $startEndTime",
-                    variant = MTypographyVariant.body2,
-                    color = MTypographyColor.textPrimary,
+                umTypography("$scheduleDays $startEndTime",
+                    variant = TypographyVariant.body2,
                     gutterBottom = true){
                     css(alignTextToStart)
                 }
-            }*/
+            }
         }
 
     }

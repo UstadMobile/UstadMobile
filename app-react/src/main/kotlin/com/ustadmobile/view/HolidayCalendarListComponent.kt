@@ -6,8 +6,10 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.HolidayCalendarListView
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.ext.format
+import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
 import react.RBuilder
-import com.ustadmobile.util.*
 
 class HolidayCalendarListComponent(mProps: UmProps): UstadListComponent<HolidayCalendar, HolidayCalendarWithNumEntries>(mProps),
     HolidayCalendarListView {
@@ -33,9 +35,11 @@ class HolidayCalendarListComponent(mProps: UmProps): UstadListComponent<HolidayC
     }
 
     override fun RBuilder.renderListItem(item: HolidayCalendarWithNumEntries) {
-        /*createItemWithIconTitleAndDescription("calendar_today", item.umCalendarName,
-            getString(MessageID.num_items_with_name).format(item.numEntries,
-                getString(MessageID.holidays)))*/
+        val titleText = getString(MessageID.num_items_with_name)
+            .format(item.numEntries, getString(MessageID.holidays))
+        createItemWithIconTitleAndDescription("calendar_today",
+            item.umCalendarName, titleText
+        )
     }
 
     override fun handleClickEntry(entry: HolidayCalendarWithNumEntries) {

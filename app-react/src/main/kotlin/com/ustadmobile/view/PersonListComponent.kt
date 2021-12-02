@@ -7,8 +7,19 @@ import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.GridSpacing
+import com.ustadmobile.mui.components.TypographyVariant
+import com.ustadmobile.mui.components.umTypography
+import com.ustadmobile.util.StyleManager.alignTextToStart
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.view.ext.umProfileAvatar
+import kotlinx.css.LinearDimension
+import kotlinx.css.padding
 import react.RBuilder
-import com.ustadmobile.util.*
+import styled.css
 
 
 class PersonListComponent(mProps: UmProps): UstadListComponent<Person, PersonWithDisplayDetails>(mProps),
@@ -39,34 +50,30 @@ class PersonListComponent(mProps: UmProps): UstadListComponent<Person, PersonWit
     }
 
     override fun RBuilder.renderListItem(item: PersonWithDisplayDetails) {
-
-       /* umGridContainer(MGridSpacing.spacing5) {
+        umGridContainer(GridSpacing.spacing5) {
+            val padding = LinearDimension("4px")
             css{
-                paddingTop = 4.px
-                paddingBottom = 4.px
+                padding(top = padding, bottom = padding)
             }
-            umItem(MGridSize.cells3, MGridSize.cells1){
+            umItem(GridSize.cells3, GridSize.cells1){
                 umProfileAvatar(item.personUid, "person")
             }
 
-            umItem(MGridSize.cells9, MGridSize.cells11){
-                umItem(MGridSize.cells12){
-                    mTypography("${item.firstNames} ${item.lastName}",
-                        variant = MTypographyVariant.h6,
-                        color = MTypographyColor.textPrimary){
+            umItem(GridSize.cells9, GridSize.cells11){
+                umItem(GridSize.cells12){
+                    umTypography("${item.firstNames} ${item.lastName}",
+                        variant = TypographyVariant.h6){
                         css (alignTextToStart)
                     }
                 }
 
-                umItem(MGridSize.cells12){
-                    mTypography("", variant = MTypographyVariant.body1,
-                        paragraph = true,
-                        color = MTypographyColor.textPrimary){
+                umItem(GridSize.cells12){
+                    umTypography("", variant = TypographyVariant.body1, paragraph = true){
                         css(alignTextToStart)
                     }
                 }
             }
-        }*/
+        }
     }
 
     override fun handleClickEntry(entry: PersonWithDisplayDetails) {
