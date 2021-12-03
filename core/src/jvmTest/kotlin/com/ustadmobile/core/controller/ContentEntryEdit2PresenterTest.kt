@@ -152,32 +152,6 @@ class ContentEntryEdit2PresenterTest {
         return container
     }
 
-
-    @Test
-    fun givenPresenterCreatedAndEntryNotCreated_whenClickSave_shouldCreateAnEntry() {
-        createMockView()
-        val presenter = ContentEntryEdit2Presenter(context, mapOf(UstadView.ARG_PARENT_ENTRY_UID to parentUid.toString()), mockView, mockLifecycleOwner, di)
-
-        presenter.onCreate(null)
-
-        val initialEntry = mockView.captureLastEntityValue()
-        presenter.handleClickSave(contentEntry)
-
-        argumentCaptor<ContentEntryWithLanguage>().apply {
-            verifyBlocking(mockEntryDao, timeout(5000)) {
-                insertAsync(capture())
-            }
-            assertEquals("Got expected content entry title", contentEntry.title, firstValue.title)
-        }
-
-        verifyBlocking(contentImportManager, timeout(timeoutInMill)) {
-            queueImportContentFromFile(eq("content://Dummy"), any(), any(),eq(ContainerImportJob.Companion.CLIENT_IMPORT_MODE), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
-        }
-
-
-    }
-
-
     @Test
     fun givenPresenterCreatedAndFolderNotCreated_whenClickSave_shouldCreateAFolder() {
         createMockView()
