@@ -153,29 +153,6 @@ class ContentEntryEdit2PresenterTest {
     }
 
     @Test
-    fun givenPresenterCreatedAndFolderNotCreated_whenClickSave_shouldCreateAFolder() {
-        createMockView()
-        contentEntry.leaf = false
-        val presenter = ContentEntryEdit2Presenter(context, mapOf(UstadView.ARG_PARENT_ENTRY_UID to parentUid.toString()), mockView, mockLifecycleOwner, di)
-
-        presenter.onCreate(null)
-        mockView.captureLastEntityValue()
-        presenter.handleClickSave(contentEntry)
-
-        argumentCaptor<ContentEntryWithLanguage>().apply {
-            verifyBlocking(mockEntryDao, timeout(5000)) {
-                insertAsync(capture())
-            }
-            assertEquals("Got expected folder title", contentEntry.title, firstValue.title)
-        }
-
-        verifyBlocking(contentImportManager, times(0)) {
-            queueImportContentFromFile(eq("content://Dummy"), any(), any(), eq(ContainerImportJob.Companion.CLIENT_IMPORT_MODE), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
-        }
-    }
-
-
-    @Test
     fun givenPresenterCreatedAndEntryCreated_whenClickSave_shouldUpdateAnEntry() {
         createMockView()
         contentEntry.contentEntryUid = repo.contentEntryDao.insert(contentEntry)
