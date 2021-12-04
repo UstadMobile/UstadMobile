@@ -298,7 +298,7 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
                                 genderLabel.errorText ?: "",
                                 error = genderLabel.error,
                                 values = genderOptions?.map {
-                                    Pair(it.messageId.toString(), it.toString())
+                                    Pair(it.code.toString(), it.toString())
                                 }?.toList(),
                                 onChange = {
                                     setState {

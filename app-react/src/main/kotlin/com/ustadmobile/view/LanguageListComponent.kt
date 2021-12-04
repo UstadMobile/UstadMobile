@@ -35,7 +35,8 @@ class LanguageListComponent(mProps: UmProps): UstadListComponent<Language, Langu
     }
 
     override fun RBuilder.renderListItem(item: Language) {
-        createItemWithIconTitleAndDescription("language",item.name,
+        createItemWithIconTitleAndDescription("language",
+            item.name,
             "${item.iso_639_2_standard}/${item.iso_639_3_standard}")
     }
 

@@ -72,12 +72,12 @@ class ClazzLogListComponent (mProps: UmProps) : UstadListComponent<ClazzLog, Cla
         mPresenter?.onCreate(mapOf())
     }
 
-    override fun RBuilder.renderAddEntryOptionsDialog() {
+    override fun RBuilder.renderAddContentOptionsDialog() {
         if(showAddEntryOptions){
             val options = recordAttendanceOptions?.map { clazzLogAttOption ->
                 val optionCode = if(clazzLogAttOption.messageId == MessageID.add_a_new_occurrence) 2 else 1
                 val recordNew = clazzLogAttOption.messageId == MessageID.add_a_new_occurrence
-                PopUpOptionItem(if(recordNew) "add" else "calendar_today",
+                UmDialogOptionItem(if(recordNew) "add" else "calendar_today",
                     clazzLogAttOption.messageId,
                     onOptionItemClicked = {
                         mPresenter?.handleClickRecordAttendance(ClazzLogListAttendancePresenter.RecordAttendanceOption.values().first {
@@ -85,7 +85,7 @@ class ClazzLogListComponent (mProps: UmProps) : UstadListComponent<ClazzLog, Cla
                         })
                     })
             } ?: listOf()
-            renderChoices(systemImpl,options){
+            renderDialogOptions(systemImpl,options){
                 setState {
                     showAddEntryOptions = false
                 }
@@ -182,6 +182,8 @@ class ClazzLogListComponent (mProps: UmProps) : UstadListComponent<ClazzLog, Cla
     }
 }
 
-fun RBuilder.renderClazzLogList(drawGraph: (Any) -> Unit) = child(ClazzLogListComponent::class){
+fun RBuilder.renderClazzLogList(
+    drawGraph: (Any) -> Unit
+) = child(ClazzLogListComponent::class){
     attrs.asDynamic().drawGraph = drawGraph
 }

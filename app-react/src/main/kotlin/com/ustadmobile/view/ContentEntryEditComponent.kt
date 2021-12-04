@@ -263,13 +263,12 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                         umGridContainer(GridSpacing.spacing4) {
 
                             umItem(GridSize.cells12, GridSize.cells6 ) {
-                                css(defaultMarginTop)
                                 umTextFieldSelect(
                                     label = "${completionLabel.text}",
                                     value =  entity?.completionCriteria.toString(),
                                     error = completionLabel.error,
                                     values = completionCriteriaOptions?.map {
-                                        Pair(it.messageId.toString(), it.toString())
+                                        Pair(it.code.toString(), it.toString())
                                     }?.toList(),
                                     onChange = {
                                         setState {
@@ -331,7 +330,7 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                                 disabled = !fieldsEnabled,
                                 helperText = licenseLabel.errorText,
                                 values = licenceOptions?.map {
-                                    Pair(it.messageId.toString(), it.toString())
+                                    Pair(it.code.toString(), it.toString())
                                 }?.toList(),
                                 variant = FormControlVariant.outlined,
                                 onChange = {
@@ -362,7 +361,7 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                     umGridContainer(GridSpacing.spacing4) {
 
                        if(entryMetaData != null){
-                           umItem(sm = GridSize.cells12) {
+                           umItem(GridSize.cells12) {
                                createSwitchItem(getString(MessageID.compress), compressionEnabled){
                                    setState {
                                        compressionEnabled = !compressionEnabled
@@ -371,7 +370,7 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                            }
                        }
 
-                        umItem(sm = GridSize.cells12) {
+                        umItem(GridSize.cells12) {
                             createSwitchItem(getString(MessageID.publicly_accessible), entity?.publik == true){
                                 setState {
                                     entity?.publik = !(entity?.publik ?: false)

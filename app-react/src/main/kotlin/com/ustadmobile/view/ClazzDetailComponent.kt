@@ -32,14 +32,14 @@ class ClazzDetailComponent(mProps: UmProps): UstadDetailComponent<Clazz>(mProps)
     override val viewName: String
         get() = ClazzDetailView.VIEW_NAME
 
-    private var tabsToRender: List<UstadTab>? = null
+    private var tabsToRender: List<UmTab>? = null
 
     override var tabs: List<String>? = null
         set(value) {
             field = value
             tabsToRender = value?.mapIndexed{ index, it ->
                 val messageId = VIEWNAME_TO_TITLE_MAP[it.substringBefore("?",)] ?: 0
-                UstadTab(index,
+                UmTab(index,
                     it.substringBefore("?"),
                     urlSearchParamsToMap(it.substring(it.lastIndexOf("?"))),
                     getString(messageId)

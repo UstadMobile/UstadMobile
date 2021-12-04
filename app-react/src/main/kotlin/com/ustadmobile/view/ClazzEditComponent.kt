@@ -207,7 +207,8 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                     }
 
                     mPresenter?.let { presenter ->
-                        renderSchedules(presenter.scheduleOneToManyJoinListener, scheduleList, createNewItem){
+                        renderSchedules(presenter.scheduleOneToManyJoinListener,
+                            scheduleList.toSet().toList(), createNewItem = createNewItem){
                             mPresenter?.scheduleOneToManyJoinListener?.onClickEdit(it)
                         }
                     }

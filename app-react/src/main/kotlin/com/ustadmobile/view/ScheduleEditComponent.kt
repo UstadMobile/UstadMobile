@@ -95,7 +95,7 @@ class ScheduleEditComponent (mProps: UmProps): UstadEditComponent<Schedule>(mPro
                         daysOptionLabel.errorText ?: "",
                         error = daysOptionLabel.error,
                         values = dayOptions?.map {
-                            Pair(it.optionId.toString(), it.toString())
+                            Pair(it.code.toString(), it.toString())
                         }?.toList(),
                         onChange = {
                             setState {

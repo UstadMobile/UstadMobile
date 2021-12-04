@@ -22,6 +22,7 @@ fun RBuilder.umFab(
     onClick: ((Event) -> Unit)? = null,
     size: ButtonSize = ButtonSize.medium,
     className: String? = null,
+    id: String? = null,
     variant: FabVariant = FabVariant.extended,
     handler: StyledHandler<FabProps>? = null
 ) = createStyledComponent(Fab, className, handler) {
@@ -30,6 +31,7 @@ fun RBuilder.umFab(
     attrs.onClick = {
         onClick?.invoke(it.nativeEvent)
     }
+    id?.let{ attrs.id = id }
     attrs.size = size.toString()
     attrs.variant = variant.toString()
 

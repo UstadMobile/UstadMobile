@@ -8,13 +8,25 @@ import com.ustadmobile.core.view.SchoolDetailOverviewView
 import com.ustadmobile.core.view.SchoolDetailView
 import com.ustadmobile.core.view.SchoolMemberListView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ACTIVE_TAB_INDEX
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.School
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.GridSpacing
+import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.contentContainer
+import com.ustadmobile.util.StyleManager.defaultPaddingTop
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.Util
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.urlSearchParamsToMap
+import com.ustadmobile.view.ext.umEntityAvatar
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
 import react.RBuilder
-import com.ustadmobile.util.*
 import react.setState
+import styled.css
+import styled.styledDiv
 
 class SchoolDetailComponent(mProps:UmProps): UstadDetailComponent<School>(mProps), SchoolDetailView {
 
@@ -32,7 +44,7 @@ class SchoolDetailComponent(mProps:UmProps): UstadDetailComponent<School>(mProps
             title = value?.schoolName
         }
 
-    private var tabsToRender: List<UstadTab>? = null
+    private var tabsToRender: List<UmTab>? = null
 
     override fun onCreateView() {
         super.onCreateView()
@@ -63,7 +75,7 @@ class SchoolDetailComponent(mProps:UmProps): UstadDetailComponent<School>(mProps
         setState {
             tabsToRender = tabs.mapIndexed { index, it ->
                 val titles = listOf(MessageID.overview, MessageID.staff, MessageID.students)
-                UstadTab(index,it.substringBefore("?"),
+                UmTab(index,it.substringBefore("?"),
                     urlSearchParamsToMap(it.substring(it.lastIndexOf("?"))),
                     getString(titles[tabs.indexOf(it)]))
             }
@@ -71,30 +83,33 @@ class SchoolDetailComponent(mProps:UmProps): UstadDetailComponent<School>(mProps
     }
 
     override fun RBuilder.render() {
-      /*  styledDiv {
+        styledDiv {
             css{
                 +defaultPaddingTop
                 +contentContainer
             }
-            umGridContainer(MGridSpacing.spacing6) {
-                umItem(MGridSize.cells12, MGridSize.cells4){
-                    umEntityAvatar(listItem = true, fallbackSrc = Util.ASSET_ENTRY, iconName = "people",
+            umGridContainer(GridSpacing.spacing6) {
+                umItem(GridSize.cells12, GridSize.cells4){
+                    umEntityAvatar(listItem = true,
+                        fallbackSrc = Util.ASSET_ENTRY,
+                        iconName = "people",
                         showIcon = true)
                 }
 
-                umItem(MGridSize.cells12, MGridSize.cells8){
+                umItem(GridSize.cells12, GridSize.cells8){
                     styledDiv {
                         css {
                             +StyleManager.clazzDetailExtraInfo
                         }
 
                         tabsToRender?.let { tabs ->
-                            renderTabs(tabs,activeTabIndex = arguments[ARG_ACTIVE_TAB_INDEX]?.toInt() ?: 0)
+                            renderTabs(tabs,
+                                activeTabIndex = arguments[ARG_ACTIVE_TAB_INDEX]?.toInt() ?: 0)
                         }
                     }
                 }
             }
-        }*/
+        }
     }
 
     override fun onDestroyView() {

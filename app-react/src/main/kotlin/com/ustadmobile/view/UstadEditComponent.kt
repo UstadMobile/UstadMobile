@@ -21,7 +21,6 @@ abstract class UstadEditComponent<T: Any>(mProps: UmProps): UstadBaseComponent<U
         }else {
             getString(MessageID.done)
         }
-
         fabManager?.icon = "check"
         fabManager?.text = textId
         window.setTimeout({

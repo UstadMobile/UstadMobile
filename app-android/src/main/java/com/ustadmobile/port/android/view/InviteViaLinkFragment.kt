@@ -67,7 +67,6 @@ class InviteViaLinkFragment: UstadBaseFragment(), InviteViaLinkView, InvitationL
 
     override fun onDestroyView() {
         super.onDestroyView()
-
         mBinding = null
     }
 

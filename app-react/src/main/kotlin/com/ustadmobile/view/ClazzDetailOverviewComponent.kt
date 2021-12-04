@@ -1,7 +1,6 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.controller.ClazzDetailOverviewPresenter
-import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzDetailOverviewView
@@ -19,7 +18,6 @@ import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util.copyToClipboard
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.util.ext.formattedInHoursAndMinutes
 import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.view.ext.createInformation
 import com.ustadmobile.view.ext.createListSectionTitle
@@ -42,9 +40,10 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
     override val viewName: String
         get() = ClazzDetailOverviewView.VIEW_NAME
 
-    private var schedules: List<Schedule>? = null
+    private var schedules: List<Schedule> = listOf()
 
     private val observer = ObserverFnWrapper<List<Schedule>>{
+        if(it.isEmpty()) return@ObserverFnWrapper
         setState {
             schedules = it
         }
@@ -126,11 +125,7 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
                         createListSectionTitle(getString(MessageID.schedule))
                     }
 
-                    schedules?.let { schedules ->
-                        child(SchedulesComponent::class) {
-                            attrs.entries = schedules
-                        }
-                    }
+                    renderSchedules(schedules = schedules, withDelete = false)
                 }
 
             }
@@ -142,30 +137,5 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
         mPresenter?.onDestroy()
         mPresenter = null
         entity = null
-    }
-
-
-    class SchedulesComponent(mProps: ListProps<Schedule>): UstadSimpleList<ListProps<Schedule>>(mProps){
-
-        override fun RBuilder.renderListItem(item: Schedule) {
-            styledDiv {
-                val frequencyMessageId = ScheduleEditPresenter.FrequencyOption.values()
-                    .firstOrNull { it.optionVal == item.scheduleFrequency }?.messageId ?: MessageID.None
-                val dayMessageId = ScheduleEditPresenter.DayOptions.values()
-                    .firstOrNull { it.optionVal == item.scheduleDay }?.messageId ?: MessageID.None
-
-                val scheduleDays = "${systemImpl.getString(frequencyMessageId, this)} - ${systemImpl.getString(dayMessageId, this)}"
-
-                val startEndTime = "${Date(item.sceduleStartTime).formattedInHoursAndMinutes()} " +
-                        "- ${Date(item.scheduleEndTime).formattedInHoursAndMinutes()}"
-
-                umTypography("$scheduleDays $startEndTime",
-                    variant = TypographyVariant.body2,
-                    gutterBottom = true){
-                    css(alignTextToStart)
-                }
-            }
-        }
-
     }
 }

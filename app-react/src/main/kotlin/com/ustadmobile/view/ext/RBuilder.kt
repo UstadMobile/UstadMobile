@@ -11,6 +11,7 @@ import com.ustadmobile.navigation.RouteManager.destinationList
 import com.ustadmobile.navigation.UstadDestination
 import com.ustadmobile.redux.ReduxAppState
 import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.defaultMarginBottom
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.displayProperty
@@ -179,7 +180,7 @@ fun RBuilder.createListSectionTitle(titleText: String){
         umTypography(titleText,
             variant = TypographyVariant.body2,
             ){
-            css (StyleManager.alignTextToStart)
+            css (alignTextToStart)
         }
     }
 }
@@ -204,13 +205,13 @@ fun RBuilder.createInformation(icon:String? = null, data: String?, label: String
             }
             umTypography("$data",
                 variant = TypographyVariant.body1){
-                css(StyleManager.alignTextToStart)
+                css(alignTextToStart)
             }
 
             if(!label.isNullOrBlank()){
                 umTypography(label,
                     variant = TypographyVariant.body2){
-                    css(StyleManager.alignTextToStart)
+                    css(alignTextToStart)
                 }
             }
         }
@@ -228,10 +229,10 @@ fun RBuilder.circleIndicator(threshold: kotlin.Float) {
     }
 }
 
-fun RBuilder.createCreateNewItem(createNewText: String){
+fun RBuilder.createCreateNewItem(createNewText: String, iconName: String = "add"){
     styledDiv {
         css(listItemCreateNewDiv)
-        umListItemIcon("add","${StyleManager.name}-listCreateNewIconClass")
+        umListItemIcon(iconName,"${StyleManager.name}-listCreateNewIconClass")
         umTypography(createNewText,variant = TypographyVariant.button,
             ) {
             css{
@@ -266,7 +267,7 @@ fun RBuilder.createItemWithIconTitleAndDescription(
                     umTypography(title,
                         variant = TypographyVariant.body1,
                         ){
-                        css (StyleManager.alignTextToStart)
+                        css (alignTextToStart)
                     }
                 }
             }
@@ -276,7 +277,7 @@ fun RBuilder.createItemWithIconTitleAndDescription(
                     umTypography(description,
                         variant = TypographyVariant.body2,
                         ){
-                        css (StyleManager.alignTextToStart)
+                        css (alignTextToStart)
                     }
                 }
             }
@@ -286,12 +287,15 @@ fun RBuilder.createItemWithIconTitleAndDescription(
 
 fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(
     leftIcon: String,
-    rightIcon: String,
+    iconName: String,
     title: String?,
     description: String?,
-    onClick:()-> Unit)
-{
+    onClick:(Boolean, Event)-> Unit) {
     umGridContainer(GridSpacing.spacing4) {
+        attrs.onClick = {
+            it.stopPropagation()
+            onClick.invoke(false, it.nativeEvent)
+        }
         umItem(GridSize.cells2, GridSize.cells1){
             umProfileAvatar(-1,leftIcon)
         }
@@ -304,7 +308,7 @@ fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(
                 umTypography(title,
                     variant = TypographyVariant.body1,
                     ){
-                    css (StyleManager.alignTextToStart)
+                    css (alignTextToStart)
                 }
             }
 
@@ -312,7 +316,7 @@ fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(
                 umTypography(description,
                     variant = TypographyVariant.body2,
                     ){
-                    css (StyleManager.alignTextToStart)
+                    css (alignTextToStart)
                 }
             }
         }
@@ -323,10 +327,10 @@ fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(
                 alignItems = Align.center
             }
 
-            umIconButton(rightIcon, size = IconButtonSize.medium,
+            umIconButton(iconName, size = IconButtonSize.medium,
                 onClick = {
                     it.stopPropagation()
-                    onClick()
+                    onClick.invoke(true, it)
                 }
             ){
                 css(defaultMarginTop)
@@ -336,7 +340,8 @@ fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(
 }
 
 fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
-    personUid: Long, fullName: String,
+    personUid: Long,
+    fullName: String,
     pending: Boolean = false,
     attendance: kotlin.Float = -1f,
     attendanceLabel: String? = null,
@@ -359,7 +364,7 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
                 umTypography(fullName,
                     variant = TypographyVariant.h6,
                     ){
-                    css (StyleManager.alignTextToStart)
+                    css (alignTextToStart)
                 }
             }
 
@@ -379,7 +384,7 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
                         
                     ){
                         css{
-                            +StyleManager.alignTextToStart
+                            +alignTextToStart
                             +StyleManager.gridListSecondaryItemDesc
                         }
                     }
@@ -421,22 +426,22 @@ fun RBuilder.createListItemWithAttendance(
     subTitle: String, attendance: kotlin.Float = -1f,
     attendanceLabel: String){
     umGridContainer {
-        umItem(GridSize.cells2){
+        umItem(GridSize.cells3, GridSize.cells3){
             umProfileAvatar(-1, iconName)
         }
 
-        umItem(GridSize.cells10){
+        umItem(GridSize.cells9, GridSize.cells9){
             umItem(GridSize.cells12){
                 umTypography(title,
                     variant = TypographyVariant.body1){
-                    css(StyleManager.alignTextToStart)
+                    css(alignTextToStart)
                 }
             }
 
             umItem(GridSize.cells12){
                 umTypography(subTitle,
                     variant = TypographyVariant.body2){
-                    css(StyleManager.alignTextToStart)
+                    css(alignTextToStart)
                 }
             }
 
@@ -449,11 +454,39 @@ fun RBuilder.createListItemWithAttendance(
                     umItem(GridSize.cells4){
                         umTypography(attendanceLabel.format(attendance * 100)){
                             css{
-                                +StyleManager.alignTextToStart
+                                +alignTextToStart
                                 +StyleManager.gridListSecondaryItemDesc
                             }
                         }
 
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+fun RBuilder.createItemWithIconAndTitle(
+    iconName: String, title: String, onClick: (() -> Unit)? = null){
+    umGridContainer(GridSpacing.spacing1) {
+        attrs.onClick = {
+            onClick?.invoke()
+        }
+        umItem(GridSize.cells2, GridSize.cells1){
+            umAvatar(variant = AvatarVariant.circle) {
+                umIcon(iconName)
+            }
+        }
+
+        umItem(GridSize.cells10, GridSize.cells11){
+            umItem(GridSize.cells12){
+                umTypography(title,
+                    variant = TypographyVariant.body1){
+                    css{
+                        justifyContent = JustifyContent.left
+                        alignItems = Align.center
+                        +alignTextToStart
                     }
                 }
             }
@@ -496,7 +529,12 @@ fun RBuilder.umSpacer(
     }
 }
 
-fun RBuilder.umTopBar(appState: ReduxAppState, currentDestination: UstadDestination, searchLabel: String, name: String? = null, onClick: (() -> Unit)?){
+fun RBuilder.umTopBar(
+    appState: ReduxAppState,
+    currentDestination: UstadDestination,
+    searchLabel: String,
+    name: String? = null,
+    onClick: (() -> Unit)?){
     umAppBar(position = AppBarPosition.fixed) {
         css (if(currentDestination.showNavigation) StyleManager.mainComponentAppBar
         else StyleManager.mainComponentAppBarWithNoNav)

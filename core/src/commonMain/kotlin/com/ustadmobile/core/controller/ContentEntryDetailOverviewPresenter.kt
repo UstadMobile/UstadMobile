@@ -17,9 +17,9 @@ import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.toDeepLink
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
@@ -179,6 +179,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
                         view.showSnackBar(message)
                     }
                 }
+                throw e
             }
         }
     }

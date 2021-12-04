@@ -4,7 +4,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.UstadBackStackEntry
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.navigation.RouteManager.defaultDestination
 import com.ustadmobile.redux.ReduxAppStateManager
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxNavStackState
@@ -22,8 +21,14 @@ class NavControllerJs: UstadNavController {
     }
 
     override fun popBackStack(viewName: String, inclusive: Boolean) {
-        val mViewName = if(viewName.isEmpty()) defaultDestination.view else viewName
+
+        if(viewName.isEmpty()){
+            navigateUp()
+            return
+        }
+
         var splitIndex = navStack.indexOfLast { it.viewName == viewName } + 1
+
         if(inclusive)
             splitIndex--
 
@@ -33,13 +38,19 @@ class NavControllerJs: UstadNavController {
         dispatch(ReduxNavStackState(navStack))
 
         currentBackStackEntry?.arguments?.let { args ->
-            navigate(mViewName, args, false)
+            navigate(viewName, args, false)
         }
     }
 
     override fun navigate(viewName: String,
                           args: Map<String, String>,
                           goOptions: UstadMobileSystemCommon.UstadGoOptions) {
+
+        if(viewName.isEmpty()){
+            navigateUp()
+            return
+        }
+
         navStack.add(UstadBackStackEntryJs(viewName, args))
         dispatch(ReduxNavStackState(navStack))
 
@@ -68,6 +79,7 @@ class NavControllerJs: UstadNavController {
             1 -> currentBackStackEntry
             else -> navStack[navStack.lastIndex - 1]
         }
+
         if(destinationToPopTo != null){
             popBackStack(destinationToPopTo.viewName, true)
         }

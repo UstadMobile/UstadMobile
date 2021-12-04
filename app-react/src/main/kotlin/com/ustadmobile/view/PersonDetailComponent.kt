@@ -28,6 +28,8 @@ import kotlinx.css.LinearDimension
 import kotlinx.css.display
 import kotlinx.css.marginTop
 import kotlinx.css.padding
+import kotlinx.html.js.onClickFunction
+import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
 import styled.css
@@ -159,22 +161,20 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
                                 }
 
                                 umItem(GridSize.cells12){
-                                    if(entity?.dateOfBirth ?: 0 > 0)
                                     createInformation("event",
                                         entity?.dateOfBirth.toDate().standardFormat(),
                                         getString(MessageID.birthday)
                                     )
 
-                                    createInformation(null,
-                                        getString(GENDER_MESSAGE_ID_MAP[entity?.gender] ?: 0),
+                                    val genderMessageId = GENDER_MESSAGE_ID_MAP[entity?.gender ?: 0]
+                                    createInformation("person", if(genderMessageId == null) "" else getString(genderMessageId),
                                         getString(MessageID.field_person_gender)
                                     )
 
-                                    if(!entity?.personOrgId.isNullOrBlank()){
-                                        createInformation("badge", entity?.personOrgId, 
-                                            getString(MessageID.organization_id)
-                                        )
-                                    }
+                                    createInformation("badge", entity?.personOrgId,
+                                        getString(MessageID.organization_id)
+                                    )
+
                                     createInformation("account_circle", entity?.username,
                                         getString(MessageID.username)
                                     )
@@ -258,18 +258,21 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
     class ClazzEnrolmentWithClazzSimpleListComponent(mProps: ListProps<ClazzEnrolmentWithClazzAndAttendance>):
         UstadSimpleList<ListProps<ClazzEnrolmentWithClazzAndAttendance>>(mProps){
 
-        override fun RBuilder.renderListItem(item: ClazzEnrolmentWithClazzAndAttendance) {
+        override fun RBuilder.renderListItem(item: ClazzEnrolmentWithClazzAndAttendance, onClick: (Event) -> Unit) {
+            styledDiv {
+                attrs.onClickFunction = {
+                    onClick.invoke(it)
+                }
+                val title = "${item.clazz?.clazzName} (${item.roleToString(this, systemImpl)}) " +
+                        "- ${item.outcomeToString(this,  systemImpl)}"
 
-            val title = "${item.clazz?.clazzName} (${item.roleToString(this, systemImpl)}) " +
-                    "- ${item.outcomeToString(this,  systemImpl)}"
-
-            val enrollmentPeriod = "${Date(item.clazzEnrolmentDateJoined).standardFormat()} " +
-                    "- ${Date(item.clazzEnrolmentDateLeft).standardFormat()}"
+                val enrollmentPeriod = "${Date(item.clazzEnrolmentDateJoined).standardFormat()} " +
+                        "- ${Date(item.clazzEnrolmentDateLeft).standardFormat()}"
 
 
-            /*createListItemWithAttendance("people", title, enrollmentPeriod,
-                item.attendance, getString(MessageID.x_percent_attended))*/
-
+                createListItemWithAttendance("people", title, enrollmentPeriod,
+                    item.attendance, getString(MessageID.x_percent_attended))
+            }
         }
     }
 }

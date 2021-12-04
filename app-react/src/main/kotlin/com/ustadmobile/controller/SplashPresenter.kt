@@ -55,7 +55,7 @@ class SplashPresenter(private val view: SplashView): DIAware {
 
         val builderOptions = DatabaseBuilderOptions(
             UmAppDatabase::class,
-            UmAppDatabase_JdbcKt::class, dbName,"./worker.sql-asm.js")
+            UmAppDatabase_JdbcKt::class, dbName,"./worker.sql-wasm.js")
 
         val dbBuilder =  DatabaseBuilder.databaseBuilder<UmAppDatabase>(builderOptions)
         val umAppDatabase =  dbBuilder.build()

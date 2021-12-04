@@ -70,14 +70,14 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
                 (arguments[ARG_SELECT_FOLDER_VISIBLE]?.toBoolean() == true || item.leaf)
 
         umGridContainer(GridSpacing.spacing7) {
-            umItem(GridSize.cells4, GridSize.cells3){
+            umItem(GridSize.cells3){
                 umEntityAvatar(item.thumbnailUrl,
                     if(item.leaf) Util.ASSET_BOOK else Util.ASSET_FOLDER,
                     showIcon = false,
                     className = "${StyleManager.name}-entityThumbnailClass")
             }
 
-            umItem(GridSize.cells8, GridSize.cells9){
+            umItem(GridSize.cells9){
                 umItem(GridSize.cells12){
                     umTypography(item.title,
                         variant = TypographyVariant.h6){
@@ -152,29 +152,29 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
         }
     }
 
-    override fun RBuilder.renderAddEntryOptionsDialog() {
+    override fun RBuilder.renderAddContentOptionsDialog() {
 
         if(showAddEntryOptions){
             val options = mutableListOf(
-                PopUpOptionItem("create_new_folder",
+                UmDialogOptionItem("create_new_folder",
                     MessageID.content_editor_create_new_category) {
                     mPresenter?.onClickNewFolder()
                 },
-                PopUpOptionItem("link",MessageID.add_using_link,
+                UmDialogOptionItem("link",MessageID.add_using_link,
                     MessageID.add_link_description) {
                     mPresenter?.onClickImportLink()
                 },
-                PopUpOptionItem("collections",MessageID.add_from_gallery,
+                UmDialogOptionItem("collections",MessageID.add_from_gallery,
                     MessageID.add_gallery_description) {
                     mPresenter?.onClickImportGallery()
                 },
-                PopUpOptionItem("note_add",MessageID.add_file,
+                UmDialogOptionItem("note_add",MessageID.add_file,
                     MessageID.add_file_description) {
                     mPresenter?.onClickImportFile()
                 }
             )
 
-            renderChoices(systemImpl,options, Date().getTime().toLong()){
+            renderDialogOptions(systemImpl,options, Date().getTime().toLong()){
                 setState {
                     showAddEntryOptions = false
                 }
@@ -184,7 +184,7 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
 
 
     override fun showDownloadDialog(args: Map<String, String>) {
-        TODO("Not yet implemented")
+        TODO("showDownloadDialog: Not yet implemented")
     }
 
     override fun RBuilder.renderEditOptionMenu() {
@@ -194,15 +194,13 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
             }
 
             umIconButton("more_vert",
+                id = "more-option",
                 onClick = {
-                    console.log(it.currentTarget)
                     setState {
                         showingEditOptions = true
                         anchorElement = document.getElementById("more-option")
                     }
-            }){
-                attrs.id = "more-option"
-            }
+            })
         }
 
         styledDiv{

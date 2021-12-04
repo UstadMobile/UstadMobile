@@ -16,17 +16,17 @@ import styled.css
 import styled.styledDiv
 import kotlin.js.Date
 
-data class PopUpOptionItem(var icon: String?, var primaryText: Int, var secondaryText: Int = 0, val onOptionItemClicked: (() -> Unit)? = null)
+data class UmDialogOptionItem(var icon: String?, var primaryText: Int, var secondaryText: Int = 0, val onOptionItemClicked: (() -> Unit)? = null)
 
-interface OptionsProps: UmProps {
-    var optionItems: List<PopUpOptionItem>
+interface UmDialogOptionProps: UmProps {
+    var optionItems: List<UmDialogOptionItem>
     var systemImpl: UstadMobileSystemImpl
     var shownAt: Long
     var title: String?
     var onDialogClosed: () -> Unit
 }
 
-class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, UmState>(mProps) {
+class UmDialogComponent(mProps: UmDialogOptionProps): RComponent<UmDialogOptionProps, UmState>(mProps) {
 
     private var showDialog: Boolean = true
 
@@ -94,20 +94,22 @@ class PopUpOptionsComponent(mProps: OptionsProps): RComponent<OptionsProps, UmSt
         }
     }
 
-    override fun componentDidUpdate(prevProps: OptionsProps, prevState: UmState, snapshot: Any) {
+    override fun componentDidUpdate(prevProps: UmDialogOptionProps, prevState: UmState, snapshot: Any) {
 
     }
 
-    override fun componentWillUpdate(nextProps: OptionsProps, nextState: UmState) {
+    override fun componentWillUpdate(nextProps: UmDialogOptionProps, nextState: UmState) {
         showDialog = nextProps.shownAt != props.shownAt
     }
 }
 
-fun RBuilder.renderChoices(systemImpl: UstadMobileSystemImpl,
-                           optionItems: List<PopUpOptionItem>,
-                           shownAt: Long = Date().getTime().toLong(),
-                           title: String? = null,
-                           onDialogClosed: () -> Unit) = child(PopUpOptionsComponent::class) {
+fun RBuilder.renderDialogOptions(
+    systemImpl: UstadMobileSystemImpl,
+    optionItems: List<UmDialogOptionItem>,
+    shownAt: Long = Date().getTime().toLong(),
+    title: String? = null,
+    onDialogClosed: () -> Unit
+) = child(UmDialogComponent::class) {
     attrs.optionItems = optionItems
     attrs.systemImpl = systemImpl
     attrs.shownAt = shownAt

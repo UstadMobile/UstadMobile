@@ -2,14 +2,29 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.controller.SchoolDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.SchoolDetailOverviewView
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.alignTextToStart
+import com.ustadmobile.util.StyleManager.contentContainer
+import com.ustadmobile.util.StyleManager.defaultPaddingTop
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.Util
+import com.ustadmobile.util.ext.format
+import com.ustadmobile.view.ext.*
+import kotlinx.css.paddingBottom
+import kotlinx.css.paddingTop
+import kotlinx.css.px
+import org.w3c.dom.events.Event
 import react.RBuilder
-import com.ustadmobile.util.*
 import react.setState
+import styled.css
+import styled.styledDiv
 
 class SchoolDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<SchoolWithHolidayCalendar>(mProps),
     SchoolDetailOverviewView{
@@ -61,7 +76,7 @@ class SchoolDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<Schoo
     }
 
     override fun RBuilder.render() {
-      /*  styledDiv {
+        styledDiv {
             css {
                 +defaultPaddingTop
                 +contentContainer
@@ -69,17 +84,17 @@ class SchoolDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<Schoo
 
             umGridContainer {
 
-                umItem(MGridSize.cells12){
-                    mTypography(entity?.schoolDesc,
-                        variant = MTypographyVariant.body1,
-                        color = MTypographyColor.textPrimary,
+                umItem(GridSize.cells12){
+                    umTypography(entity?.schoolDesc,
+                        variant = TypographyVariant.body1,
                         gutterBottom = true){
                         css(alignTextToStart)
                     }
 
                 }
 
-                createInformation("login", entity?.schoolCode ?: "", getString(MessageID.class_code)){
+                createInformation("login", entity?.schoolCode ?: "",
+                    getString(MessageID.class_code)){
                     Util.copyToClipboard(entity?.schoolCode ?: "") {
                         showSnackBar(getString(MessageID.copied_to_clipboard))
                     }
@@ -103,7 +118,7 @@ class SchoolDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<Schoo
                     getString(MessageID.timezone))
 
                 if(!schoolClazzList.isNullOrEmpty()){
-                    umItem(MGridSize.cells12){
+                    umItem(GridSize.cells12){
                         createListSectionTitle(getString(MessageID.classes))
                     }
 
@@ -118,7 +133,7 @@ class SchoolDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<Schoo
                 }
 
             }
-        }*/
+        }
     }
 
 
@@ -133,49 +148,50 @@ class SchoolDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<Schoo
     class SchoolClazzesComponent(mProps: ListProps<ClazzWithListDisplayDetails>):
         UstadSimpleList<ListProps<ClazzWithListDisplayDetails>>(mProps){
 
-        override fun RBuilder.renderListItem(item: ClazzWithListDisplayDetails) {
-           /* umGridContainer(MGridSpacing.spacing5) {
+        override fun RBuilder.renderListItem(item: dynamic, onClick: (Event) -> Unit) {
+            umGridContainer(GridSpacing.spacing5) {
+                attrs.onClick  = {
+                    onClick.invoke(it.nativeEvent)
+                }
                 css{
                     paddingTop = 4.px
                     paddingBottom = 4.px
                 }
-                umItem(MGridSize.cells3, MGridSize.cells2){
+                umItem(GridSize.cells3, GridSize.cells2){
                     umProfileAvatar(item.clazzUid, "group")
                 }
 
-                umItem(MGridSize.cells9, MGridSize.cells10){
-                    umItem(MGridSize.cells12){
-                        mTypography(item.clazzName,
-                            variant = MTypographyVariant.body1,
-                            color = MTypographyColor.textPrimary){
+                umItem(GridSize.cells9, GridSize.cells10){
+                    umItem(GridSize.cells12){
+                        umTypography(item.clazzName,
+                            variant = TypographyVariant.body1){
                             css (alignTextToStart)
                         }
                     }
 
-                    mGridContainer {
-                        css(defaultMarginTop)
+                    umGridContainer {
+                        css(StyleManager.defaultMarginTop)
 
-                        umItem(MGridSize.cells12, MGridSize.cells6){
-                            css(umItemWithIconAndText)
+                        umItem(GridSize.cells12, GridSize.cells6){
+                            css(StyleManager.umItemWithIconAndText)
 
-                            mIcon("people",fontSize = MIconFontSize.small)
+                            umIcon("people",fontSize = IconFontSize.small)
 
                             val numOfStudentTeachers = getString(MessageID.x_teachers_y_students)
                                 .format(item.numTeachers, item.numStudents)
 
-                            mTypography(numOfStudentTeachers, variant = MTypographyVariant.body1,
-                                paragraph = true,
-                                color = MTypographyColor.textPrimary){
+                            umTypography(numOfStudentTeachers, variant = TypographyVariant.body1,
+                                paragraph = true){
                                 css{
                                     +alignTextToStart
-                                    +contentAfterIconMarginLeft
+                                    +StyleManager.contentAfterIconMarginLeft
                                 }
                             }
                         }
                     }
 
                 }
-            }*/
+            }
         }
     }
 }

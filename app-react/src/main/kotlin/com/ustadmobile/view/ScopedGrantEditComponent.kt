@@ -13,7 +13,6 @@ import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
-import com.ustadmobile.util.StyleManager.switchMargin
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.view.ext.umGridContainer
@@ -22,6 +21,7 @@ import kotlinx.css.LinearDimension
 import kotlinx.css.marginBottom
 import kotlinx.css.marginLeft
 import kotlinx.css.marginTop
+import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
 import styled.css
@@ -114,8 +114,11 @@ class ScopedGrantEditComponent (mProps: UmProps): UstadEditComponent<ScopedGrant
 
     class ScopedGrantComponent(mProps: ListProps<BitmaskFlag>): UstadSimpleList<ListProps<BitmaskFlag>>(mProps){
 
-        override fun RBuilder.renderListItem(item: BitmaskFlag) {
+        override fun RBuilder.renderListItem(item: dynamic, onClick: (Event) -> Unit) {
             umGridContainer {
+                attrs.onClick = {
+                    onClick.invoke(it.nativeEvent)
+                }
                 umItem(GridSize.cells10, GridSize.cells11){
                     umTypography(getString(item.messageId),
                         variant = TypographyVariant.body1,
@@ -129,7 +132,7 @@ class ScopedGrantEditComponent (mProps: UmProps): UstadEditComponent<ScopedGrant
 
                 umItem(GridSize.cells2, GridSize.cells1){
                     css{
-                        +switchMargin
+                        +StyleManager.switchMargin
                     }
                     umSwitch(item.enabled, color = UMColor.secondary)
                 }

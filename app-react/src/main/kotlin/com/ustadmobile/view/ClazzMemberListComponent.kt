@@ -16,6 +16,8 @@ import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.view.ext.createListItemWithPersonAttendanceAndPendingRequests
 import com.ustadmobile.view.ext.createListSectionTitle
+import kotlinx.html.js.onClickFunction
+import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
 import styled.css
@@ -180,25 +182,32 @@ interface MemberListProps: ListProps<PersonWithClazzEnrolmentDetails>{
 class MembersListComponent(mProps: MemberListProps):
     UstadSimpleList<MemberListProps>(mProps){
 
-    override fun RBuilder.renderListItem(item: PersonWithClazzEnrolmentDetails) {
-        val presenter = props.presenter as ClazzMemberListPresenter
-        createListItemWithPersonAttendanceAndPendingRequests(
-            item.personUid, item.fullName(),
-            props.pending, item.attendance,
-            getString(MessageID.x_percent_attended),
-            onClickAccept = {
-                presenter.handleClickPendingRequest(item, true)
-            }, onClickDecline = {
-                presenter.handleClickPendingRequest(item, false)
-            })
+    override fun RBuilder.renderListItem(item: PersonWithClazzEnrolmentDetails, onClick: (Event) -> Unit) {
+        styledDiv {
+            attrs.onClickFunction = {
+                onClick.invoke(it)
+            }
+            val presenter = props.presenter as ClazzMemberListPresenter
+            createListItemWithPersonAttendanceAndPendingRequests(
+                item.personUid, item.fullName(),
+                props.pending, item.attendance,
+                getString(MessageID.x_percent_attended),
+                onClickAccept = {
+                    presenter.handleClickPendingRequest(item, true)
+                }, onClickDecline = {
+                    presenter.handleClickPendingRequest(item, false)
+                })
+        }
     }
 }
 
-fun RBuilder.renderMembers(presenter: ClazzMemberListPresenter,
-                           members: List<PersonWithClazzEnrolmentDetails>,
-                           createNewItem: CreateNewItem = CreateNewItem(),
-                           pending: Boolean = false,
-                           onEntryClicked: ((PersonWithClazzEnrolmentDetails) -> Unit)? = null) = child(MembersListComponent::class) {
+fun RBuilder.renderMembers(
+    presenter: ClazzMemberListPresenter,
+    members: List<PersonWithClazzEnrolmentDetails>,
+    createNewItem: CreateNewItem = CreateNewItem(),
+    pending: Boolean = false,
+    onEntryClicked: ((PersonWithClazzEnrolmentDetails) -> Unit)? = null
+) = child(MembersListComponent::class) {
     attrs.entries = members
     attrs.onEntryClicked = onEntryClicked
     attrs.createNewItem = createNewItem

@@ -3,6 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.mui.components.FormControlVariant
+import com.ustadmobile.mui.components.spacingUnits
 import com.ustadmobile.mui.components.umFormControl
 import com.ustadmobile.mui.components.umTextFieldSelect
 import com.ustadmobile.util.StyleManager.languageComponentLanguageSelectorFormControl
@@ -10,7 +11,6 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import kotlinx.browser.window
 import kotlinx.css.LinearDimension
-import kotlinx.css.px
 import react.RBuilder
 import react.RComponent
 import react.setState
@@ -60,8 +60,12 @@ class  LanguageOptionComponent(mProps: LanguageProps): RComponent<LanguageProps,
     }
 }
 
-fun RBuilder.renderLanguages(systemImpl: UstadMobileSystemImpl, width: LinearDimension = 200.px,
-                             label : String? = null, caption: String? = null) = child(LanguageOptionComponent::class) {
+fun RBuilder.renderLanguages(
+    systemImpl: UstadMobileSystemImpl,
+    width: LinearDimension = 40.spacingUnits,
+    label : String? = null,
+    caption: String? = null
+) = child(LanguageOptionComponent::class) {
     attrs.systemImpl = systemImpl
     attrs.width = width
     attrs.label = label

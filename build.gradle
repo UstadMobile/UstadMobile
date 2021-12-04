@@ -2,7 +2,7 @@
 import org.apache.tools.ant.filters.*
 
 buildscript {
-    ext.version_kotlin = '1.6.0'
+    ext.version_kotlin = '1.5.31'
     ext.version_shadow = "5.2.0"
     ext.version_gradle_versions_plugin = "0.28.0"
     ext.atomicfu_version = '0.16.2'
@@ -82,7 +82,7 @@ group = "com.ustadmobile.app"
 ext {
     ustadVersion = project.version
     ustadVersionCode = 219
-    wrapperVersion = "pre.270-kotlin-$version_kotlin"
+    wrapperVersion = "pre.270-kotlin-1.6.0"
 
     version_kotlin_react = "17.0.2-$wrapperVersion"
     version_kotlin_react_router_dom = "6.0.2-$wrapperVersion"
@@ -102,7 +102,7 @@ ext {
     version_npm_emotion = "11.6.0"
     version_npm_google_charts = "^3.0.15"
 
-    version_door = "0.0.32q"
+    version_door = "0.0.32r-js02"
     version_xmlpullparserkmp = '0.0.19'
 
     version_gradle_buildconfig_plugin = "1.1.7"

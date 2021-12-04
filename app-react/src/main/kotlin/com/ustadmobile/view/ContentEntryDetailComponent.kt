@@ -22,7 +22,7 @@ class ContentEntryDetailComponent(mProps: UmProps): UstadDetailComponent<Content
     override val viewName: String
         get() = ContentEntryDetailView.VIEW_NAME
 
-    private var tabsToRender: List<UstadTab>? = null
+    private var tabsToRender: List<UmTab>? = null
 
     override var tabs: List<String>? = null
         get() = field
@@ -30,7 +30,7 @@ class ContentEntryDetailComponent(mProps: UmProps): UstadDetailComponent<Content
             field = value
             tabsToRender = value?.mapIndexed { index, it ->
                 val messageId = viewNameToTitleMap[it.substringBefore("?")] ?: 0
-                UstadTab(index,
+                UmTab(index,
                     it.substringBefore("?"),
                     urlSearchParamsToMap(it.substring(it.lastIndexOf("?"))),
                     getString( messageId)

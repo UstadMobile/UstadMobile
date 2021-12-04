@@ -276,7 +276,7 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
 
     private fun commitActiveEndpointsToPref() {
         val json = Json.encodeToString(ListSerializer(String.serializer()),
-            endpointsWithActiveSessions.map { it.url })
+            endpointsWithActiveSessions.toSet().map { it.url }.toList())
         systemImpl.setAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION, json, appContext)
     }
 

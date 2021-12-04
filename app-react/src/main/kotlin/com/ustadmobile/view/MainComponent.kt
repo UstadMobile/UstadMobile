@@ -56,8 +56,6 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
 
     private var activeAccount: UmAccount? = null
 
-    private val altBuilder = RBuilder()
-
     override var viewName: String? = null
 
     private var appState: ReduxAppState = ReduxAppState()
@@ -112,7 +110,7 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
 
 
     override fun RBuilder.render() {
-        themeContext.Consumer { theme ->
+        themeContext.Consumer { _ ->
 
             styledDiv {
                 css (mainComponentWrapperContainer)
@@ -127,8 +125,11 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                 styledDiv {
                     css(mainComponentContainer)
 
-                    umTopBar(appState, currentDestination,
-                        "${getString(MessageID.search)}...",
+                    umTopBar(appState,
+                        currentDestination,
+                        if(systemImpl.isRtlActive()) "..." else "" +
+                                "${getString(MessageID.search)} " +
+                                if(systemImpl.isRtlActive()) "" else "...",
                         activeAccount?.firstName){
                         systemImpl.go(AccountListView.VIEW_NAME, mapOf(), this)
                     }
@@ -136,7 +137,6 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                     if(currentDestination.showNavigation){
                         renderSideNavigation()
                     }
-
 
                     // Main content area, this div holds the contents
                     styledDiv {
@@ -153,8 +153,8 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                     }
 
                     umFab("","",
+                        id = "um-fab",
                         color = UMColor.secondary) {
-                        attrs.asDynamic().id = "um-fab"
                         css{
                             display = Display.none
                             +mainComponentFab
@@ -178,7 +178,8 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
             }}
             destinationList.filter { it.icon != null && it.view != SettingsView.VIEW_NAME }.forEach { destination ->
                 destination.icon?.let {
-                    umBottomNavigationAction(label = getString(destination.labelId),
+                    umBottomNavigationAction(
+                        label = getString(destination.labelId),
                         it,
                         value = destination,
                         showLabel = true)
@@ -232,11 +233,14 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
     private fun RBuilder.renderSnackBar(){
         umSnackbar("${appState.appSnackBar.message}",
             open = appState.appSnackBar.message != null,
-            horizAnchor = SnackbarHorizAnchor.center, autoHideDuration = 3000) {
+            autoHideDuration = 3000, onClose = {
+                dispatch(ReduxSnackBarState())
+            }) {
 
             if(!appState.appSnackBar.actionLabel.isNullOrBlank()){
-                attrs.action = umButton("${appState.appSnackBar.actionLabel}", color = UMColor.secondary,
-                    variant = ButtonVariant.text, size = ButtonSize.small,
+                attrs.action = umButton("${appState.appSnackBar.actionLabel}",
+                    variant = ButtonVariant.text,
+                    size = ButtonSize.medium,
                     onClick = {
                         appState.appSnackBar.onClick
                         dispatch(ReduxSnackBarState())
@@ -251,4 +255,4 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
     }
 }
 
-fun RBuilder.mainComponent() = child(MainComponent::class) {}
+fun RBuilder.renderMainComponent() = child(MainComponent::class) {}

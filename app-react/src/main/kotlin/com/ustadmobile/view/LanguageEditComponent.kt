@@ -45,7 +45,6 @@ class LanguageEditComponent (mProps: UmProps): UstadEditComponent<Language>(mPro
             }
         }
 
-
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {

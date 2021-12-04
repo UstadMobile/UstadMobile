@@ -114,7 +114,6 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
             }
         }
 
-
     override fun onCreateView() {
         super.onCreateView()
         title = getString(MessageID.login)

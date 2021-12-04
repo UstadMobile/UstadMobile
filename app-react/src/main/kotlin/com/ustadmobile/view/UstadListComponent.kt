@@ -78,6 +78,12 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
             field = value
         }
 
+    var inviteNewText: String = ""
+        get() = field
+        set(value) {
+            field = value
+        }
+
     private var multiColumnItemSize = GridSize.cells4
         get() = field
         set(value) {
@@ -183,11 +189,13 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                 }
                 +contentContainer
             }
+
             renderFilters()
 
             renderMenuOptions()
 
             renderHeaderView()
+
             if(linearLayout)
                 renderSingleColumnList()
             else
@@ -196,8 +204,8 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
             renderFooterView()
         }
 
-        //Render dialog UI to be shown when fab is clicked
-        renderAddEntryOptionsDialog()
+        //Render dialog UI to be shown when fab is clicked  (Bottom sheet replacement)
+        renderAddContentOptionsDialog()
     }
 
 
@@ -234,6 +242,21 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                     }
                     createCreateNewItem(createNewText)
                 }
+
+
+                if(inviteNewText.isNotEmpty()){
+                    umItem(GridSize.cells12) {
+                        css{
+                            +listCreateNewContainer
+                            +horizontalList
+                        }
+                        attrs.asDynamic().onClick = {
+                            handleInviteClicked()
+                        }
+
+                        createCreateNewItem(inviteNewText)
+                    }
+                }
             }else {
                 umListItem( button = true, alignItems = ListItemAlignItems.flexStart) {
                     css(listCreateNewContainer)
@@ -242,6 +265,17 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                         handleClickCreateNewEntry()
                     }
                     createCreateNewItem(createNewText)
+                }
+
+                if(inviteNewText.isNotEmpty()){
+                    umListItem( button = true, alignItems = ListItemAlignItems.flexStart) {
+                        css(listCreateNewContainer)
+                        attrs.divider = true
+                        attrs.onClick = {
+                            handleInviteClicked()
+                        }
+                        createCreateNewItem(inviteNewText, "")
+                    }
                 }
             }
         }
@@ -359,7 +393,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
         if(listFilterOptionChips == null) return
         styledDiv {
             css{
-                margin = "16px"
+                margin(2.spacingUnits)
                 +chipSetFilter
             }
             listFilterOptionChips?.forEach { chip ->
@@ -386,24 +420,30 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     private fun RBuilder.renderMenuOptions(){
         val hideOptions = selectedEntries.isNullOrEmpty() or !showEditOptionsMenu
-        umGridContainer {
-            css(selectionContainer)
-            val titleMd = if(selectedEntries.isNullOrEmpty()) GridSize.cells11 else GridSize.cells8
-            val iconsMd = if(selectedEntries.isNullOrEmpty()) GridSize.cellsAuto else GridSize.cells4
-            umItem(sm = titleMd){
+        umGridContainer(spacing = GridSpacing.spacing2) {
+            css{
+                +selectionContainer
+                marginBottom = 2.spacingUnits
+            }
+            val titleMd = if(selectedEntries.isNullOrEmpty()) GridSize.cells11 else GridSize.cells7
+            val titleMobile = if(selectedEntries.isNullOrEmpty()) GridSize.cells10 else GridSize.cells7
+            val iconsMd = if(selectedEntries.isNullOrEmpty()) GridSize.cellsAuto else GridSize.cells5
+            val iconsMobile = if(selectedEntries.isNullOrEmpty()) GridSize.cells1 else GridSize.cells5
+            umItem(titleMobile, titleMd){
                 umTypography(variant = TypographyVariant.subtitle1){
                     css {
-                        width = 10.pct
                         marginTop = 10.px
-                        marginLeft = 16.px
+                        marginLeft = 2.spacingUnits
                         display = displayProperty(!hideOptions)
                     }
                     +getString(MessageID.items_selected).format(selectedEntries.size)
                 }
             }
 
-            umItem(sm = iconsMd){
-                umGridContainer(spacing= GridSpacing.spacing2, justify = GridJustify.flexEnd){
+            umItem(iconsMobile, iconsMd){
+                umGridContainer(
+                    spacing= GridSpacing.spacing2,
+                    justify = GridJustify.flexEnd){
                     selectionOptions?.forEach { option ->
                         gridItem {
                             css {
@@ -427,7 +467,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
         }
     }
 
-    open fun RBuilder.renderAddEntryOptionsDialog(){}
+    open fun RBuilder.renderAddContentOptionsDialog(){}
 
     open val emptyList: EmptyList = EmptyList()
 
@@ -443,6 +483,8 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
         listPresenter?.handleClickCreateNewFab()
     }
 
+    open fun handleInviteClicked(){}
+
     open fun styleList(): RuleSet? {
         return null
     }
@@ -453,7 +495,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
     }
 
     override fun finishWithResult(result: List<RT>) {
-        TODO("Not used anymore")
+        TODO("finishWithResult: Not used anymore")
     }
 
     override fun onFabClicked() {

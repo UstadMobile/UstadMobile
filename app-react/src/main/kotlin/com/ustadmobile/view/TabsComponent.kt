@@ -16,13 +16,12 @@ import styled.css
 import styled.styledDiv
 
 interface TabsProps: UmProps {
-    var tabs: List<UstadTab>
+    var tabs: List<UmTab>
     var showTabs: Boolean
     var activeTabIndex: Int
 }
 
-data class UstadTab(var index: Int, var viewName: String, val args: Map<String,String>, var title: String)
-
+data class UmTab(var index: Int, var viewName: String, val args: Map<String,String>, var title: String)
 
 class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,UmState>(mProps){
 
@@ -87,7 +86,11 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,UmState>(m
     }
 }
 
-fun RBuilder.renderTabs(tabs: List<UstadTab>, showTabs: Boolean = true, activeTabIndex: Int) = child(TabsComponent::class) {
+fun RBuilder.renderTabs(
+    tabs: List<UmTab>,
+    showTabs: Boolean = true,
+    activeTabIndex: Int
+) = child(TabsComponent::class) {
     attrs.tabs = tabs
     attrs.showTabs = showTabs
     attrs.activeTabIndex = activeTabIndex

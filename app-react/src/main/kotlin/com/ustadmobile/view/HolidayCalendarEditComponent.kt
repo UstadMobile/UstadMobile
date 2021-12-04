@@ -19,6 +19,8 @@ import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.css.padding
+import kotlinx.html.js.onClickFunction
+import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
 import styled.css
@@ -127,16 +129,25 @@ class HolidayCalendarEditComponent(mProps: UmProps): UstadEditComponent<HolidayC
 
 
 class HolidayListComponent(mProps: ListProps<Holiday>): UstadSimpleList<ListProps<Holiday>>(mProps){
-    override fun RBuilder.renderListItem(item: Holiday) {
-        createItemWithIconTitleAndDescription("date_range",item.holName,
-            "${Date(item.holStartTime).standardFormat()} - ${Date(item.holEndTime).standardFormat()}"
-        )
+    override fun RBuilder.renderListItem(item: Holiday, onClick: (Event) -> Unit) {
+        styledDiv {
+            attrs.onClickFunction = {
+                onClick.invoke(it)
+            }
+
+            createItemWithIconTitleAndDescription("date_range",item.holName,
+                "${Date(item.holStartTime).standardFormat()} " +
+                        "- ${Date(item.holEndTime).standardFormat()}"
+            )
+        }
     }
 }
 
-fun RBuilder.renderHolidays(holidays: List<Holiday>,
-                            createNewItem: CreateNewItem = CreateNewItem(),
-                            onEntryClicked: ((Holiday) -> Unit)? = null) = child(HolidayListComponent::class) {
+fun RBuilder.renderHolidays(
+    holidays: List<Holiday>,
+    createNewItem: CreateNewItem = CreateNewItem(),
+    onEntryClicked: ((Holiday) -> Unit)? = null
+) = child(HolidayListComponent::class) {
     attrs.entries = holidays
     attrs.onEntryClicked = onEntryClicked
     attrs.createNewItem = createNewItem

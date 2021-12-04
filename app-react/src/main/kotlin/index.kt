@@ -27,7 +27,7 @@ import com.ustadmobile.redux.ReduxDiState
 import com.ustadmobile.redux.ReduxThemeState
 import com.ustadmobile.util.BrowserTabTracker
 import com.ustadmobile.util.ThemeManager.createAppTheme
-import com.ustadmobile.view.splashComponent
+import com.ustadmobile.view.renderSplashComponent
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.XmlSerializer
 import io.ktor.client.*
@@ -55,7 +55,7 @@ fun main() {
             val theme = createAppTheme()
             provider(createStore(diState, ReduxThemeState(theme))){
                 umThemeProvider(theme) {
-                    splashComponent()
+                    renderSplashComponent()
                 }
             }
         }

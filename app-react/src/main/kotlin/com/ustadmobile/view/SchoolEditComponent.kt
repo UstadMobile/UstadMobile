@@ -9,10 +9,21 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.lib.db.entities.ScopedGrantAndName
+import com.ustadmobile.mui.components.FormControlVariant
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.GridSpacing
+import com.ustadmobile.mui.components.umTextField
+import com.ustadmobile.util.StyleManager.contentContainer
+import com.ustadmobile.util.StyleManager.defaultPaddingTop
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.Util.ASSET_ENTRY
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.view.ext.*
 import react.RBuilder
-import com.ustadmobile.util.*
+import react.dom.html.InputType
 import react.setState
+import styled.css
+import styled.styledDiv
 
 class SchoolEditComponent (mProps: UmProps): UstadEditComponent<SchoolWithHolidayCalendar>(mProps),
     SchoolEditView {
@@ -83,140 +94,127 @@ class SchoolEditComponent (mProps: UmProps): UstadEditComponent<SchoolWithHolida
     }
 
     override fun RBuilder.render() {
-       /* styledDiv {
+        styledDiv {
             css{
                 +contentContainer
                 +defaultPaddingTop
             }
-            umGridContainer(MGridSpacing.spacing4) {
-                umItem(MGridSize.cells12, MGridSize.cells4){
+            umGridContainer(GridSpacing.spacing4) {
+                umItem(GridSize.cells12, GridSize.cells4){
                     umEntityAvatar(fallbackSrc = ASSET_ENTRY, listItem = true)
                 }
 
-                umItem(MGridSize.cells12, MGridSize.cells8){
+                umItem(GridSize.cells12, GridSize.cells8){
 
                     createListSectionTitle(getString(MessageID.basic_details))
 
-                    mTextField(label = "${nameLabel.text}",
+                    umTextField(label = "${nameLabel.text}",
                         helperText = nameLabel.errorText,
                         value = entity?.schoolName,
                         error = nameLabel.error,
                         disabled = !fieldsEnabled,
-                        variant = MFormControlVariant.outlined,
+                        variant = FormControlVariant.outlined,
                         onChange = {
-                            it.persist()
+                            
                             setState {
-                                entity?.schoolName = it.targetInputValue
+                                entity?.schoolName = it
                             }
-                        }){
-                        css(defaultFullWidth)
-                    }
+                        })
 
 
-                    mTextField(label = "${descLabel.text}",
+                    umTextField(label = "${descLabel.text}",
                         value = entity?.schoolDesc,
                         error = descLabel.error,
                         disabled = !fieldsEnabled,
                         helperText = descLabel.errorText,
-                        variant = MFormControlVariant.outlined,
+                        variant = FormControlVariant.outlined,
                         onChange = {
-                            it.persist()
+                            
                             setState {
-                                entity?.schoolDesc = it.targetInputValue
+                                entity?.schoolDesc = it
                             }
-                        }){
-                        css(defaultFullWidth)
-                    }
+                        })
 
-                    umGridContainer(MGridSpacing.spacing4) {
-                        umItem(MGridSize.cells12, MGridSize.cells6 ) {
-                            mTextField(label = "${timeZoneLabel.text}",
+                    umGridContainer(GridSpacing.spacing4) {
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
+                            umTextField(label = "${timeZoneLabel.text}",
                                 value = entity?.schoolTimeZone,
                                 error = timeZoneLabel.error,
                                 disabled = !fieldsEnabled,
                                 helperText = timeZoneLabel.errorText,
-                                variant = MFormControlVariant.outlined,
+                                variant = FormControlVariant.outlined,
                                 onChange = {
-                                    it.persist()
+                                    
                                     setState {
-                                        entity?.schoolTimeZone = it.targetInputValue
+                                        entity?.schoolTimeZone = it
                                     }
                                 }){
                                 attrs.asDynamic().onClick = {
                                     mPresenter?.handleTimeZoneClicked()
                                 }
-                                css(defaultFullWidth)
                             }
                         }
 
-                        umItem(MGridSize.cells12, MGridSize.cells6 ) {
-                            mTextField(label = "${holidayCalenderLabel.text}",
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
+                            umTextField(label = "${holidayCalenderLabel.text}",
                                 value = entity?.holidayCalendar?.umCalendarName,
                                 error = holidayCalenderLabel.error,
                                 disabled = !fieldsEnabled,
                                 helperText = holidayCalenderLabel.errorText,
-                                variant = MFormControlVariant.outlined){
+                                variant = FormControlVariant.outlined){
                                 attrs.asDynamic().onClick = {
                                     mPresenter?.handleHolidayCalendarClicked()
                                 }
-                                css(defaultFullWidth)
                             }
                         }
                     }
 
-                    mTextField(label = "${addressLabel.text}",
+                    umTextField(label = "${addressLabel.text}",
                         helperText = addressLabel.errorText,
                         value = entity?.schoolAddress,
                         error = nameLabel.error,
                         disabled = !fieldsEnabled,
-                        variant = MFormControlVariant.outlined,
+                        variant = FormControlVariant.outlined,
                         onChange = {
-                            it.persist()
+                            
                             setState {
-                                entity?.schoolAddress = it.targetInputValue
+                                entity?.schoolAddress = it
                             }
-                        }){
-                        css(defaultFullWidth)
-                    }
+                        })
 
-                    umGridContainer(MGridSpacing.spacing4) {
-                        umItem(MGridSize.cells12, MGridSize.cells6 ) {
-                            mTextField(label = "${emailLabel.text}",
+                    umGridContainer(GridSpacing.spacing4) {
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
+                            umTextField(label = "${emailLabel.text}",
                                 helperText = emailLabel.errorText,
                                 value = entity?.schoolEmailAddress,
                                 error = emailLabel.error,
                                 type = InputType.email,
                                 disabled = !fieldsEnabled,
-                                variant = MFormControlVariant.outlined,
+                                variant = FormControlVariant.outlined,
                                 onChange = {
-                                    it.persist()
+                                    
                                     setState {
-                                        entity?.schoolEmailAddress = it.targetInputValue
+                                        entity?.schoolEmailAddress = it
                                     }
-                                }){
-                                css(defaultFullWidth)
-                            }
+                                })
                         }
 
-                        umItem(MGridSize.cells12, MGridSize.cells6 ) {
-                            mTextField(label = "${phoneLabel.text}",
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
+                            umTextField(label = "${phoneLabel.text}",
                                 helperText = phoneLabel.errorText,
                                 value = entity?.schoolPhoneNumber,
                                 error = phoneLabel.error,
                                 disabled = !fieldsEnabled,
-                                variant = MFormControlVariant.outlined,
+                                variant = FormControlVariant.outlined,
                                 onChange = {
-                                    it.persist()
                                     setState {
-                                        entity?.schoolPhoneNumber = it.targetInputValue
+                                        entity?.schoolPhoneNumber = it
                                     }
-                                }){
-                                css(defaultFullWidth)
-                            }
+                                })
                         }
                     }
 
-                    mSpacer()
+                    umSpacer()
 
                     createListSectionTitle(getString(MessageID.permissions))
 
@@ -235,7 +233,7 @@ class SchoolEditComponent (mProps: UmProps): UstadEditComponent<SchoolWithHolida
                 }
 
             }
-        }*/
+        }
     }
 
     override fun onDestroyView() {

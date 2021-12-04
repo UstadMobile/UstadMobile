@@ -24,6 +24,7 @@ fun RBuilder.umIconButton(
     onClick: ((Event) -> Unit)? = null,
     size: IconButtonSize = IconButtonSize.medium,
     iconColor: IconColor? = null,
+    id: String? = null,
     edge: IconEdge? = null,
     className: String? = null,
     handler: StyledHandler<IconButtonProps>? = null
@@ -37,8 +38,12 @@ fun RBuilder.umIconButton(
         onClick?.invoke(it.nativeEvent)
     }
 
+    id?.let {
+        attrs.id = id
+    }
+
     var colorToApply = iconColor
-    // If the iconColor is null, we shall map to the button color if we can
+
     if (colorToApply == null) {
         colorToApply = when (color) {
             UMColor.inherit -> IconColor.inherit

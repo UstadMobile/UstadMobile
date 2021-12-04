@@ -2,9 +2,9 @@ package com.ustadmobile.navigation
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.*
+import com.ustadmobile.util.UmProps
 import com.ustadmobile.view.*
 import react.Component
-import com.ustadmobile.util.*
 import kotlin.reflect.KClass
 
 /**
@@ -58,6 +58,7 @@ object RouteManager {
         UstadDestination(view = LanguageListView.VIEW_NAME, component = LanguageListComponent::class, showSearch = true),
         UstadDestination(view = LanguageEditView.VIEW_NAME, component = LanguageEditComponent::class),
         UstadDestination(view = ContentEntryImportLinkView.VIEW_NAME, component = ContentEntryImportLinkComponent::class),
+        UstadDestination(view = InviteViaLinkView.VIEW_NAME, component = InviteViaLinkComponent::class),
         UstadDestination(labelId= MessageID.accounts, view = AccountListView.VIEW_NAME, component = PlaceHolderComponent::class)
     )
 
@@ -66,6 +67,10 @@ object RouteManager {
      */
     val defaultDestination: UstadDestination = destinationList.first {
         it.view == RedirectView.VIEW_NAME
+    }
+
+    val firstDestination: UstadDestination = destinationList.first {
+        it.view == ContentEntryListTabsView.VIEW_NAME
     }
 
     /**

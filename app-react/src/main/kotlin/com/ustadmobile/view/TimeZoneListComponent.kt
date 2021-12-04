@@ -12,8 +12,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.w3c.dom.events.Event
 import react.RBuilder
+import react.dom.onClick
 import react.setState
+import styled.styledDiv
 
 class TimeZoneListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps) , TimeZoneListView,
     OnSearchSubmitted {
@@ -66,14 +69,20 @@ class TimeZoneListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmStat
 
 class ZonesListComponent(mProps: ListProps<TimeZone>):
     UstadSimpleList<ListProps<TimeZone>>(mProps){
-
-    override fun RBuilder.renderListItem(item: TimeZone) {
-        createItemWithIconTitleAndDescription("query_builder",item.name, item.timeName)
+    override fun RBuilder.renderListItem(item: TimeZone, onClick: (Event) -> Unit) {
+        styledDiv {
+            attrs.onClick = {
+                onClick.invoke(it.nativeEvent)
+            }
+            createItemWithIconTitleAndDescription("query_builder",item.name, item.timeName)
+        }
     }
 }
 
-fun RBuilder.renderZoneList(zones: List<TimeZone>,
-                           onEntryClicked: ((TimeZone) -> Unit)? = null) = child(ZonesListComponent::class) {
+fun RBuilder.renderZoneList(
+    zones: List<TimeZone>,
+    onEntryClicked: ((TimeZone) -> Unit)? = null
+) = child(ZonesListComponent::class) {
     attrs.entries = zones
     attrs.onEntryClicked = onEntryClicked
     attrs.mainList = true

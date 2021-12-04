@@ -21,7 +21,7 @@ class ContentEntryListTabsComponent(mProps: UmProps) : UstadBaseComponent<UmProp
     override val viewName: String
         get() = ContentEntryListTabsView.VIEW_NAME
 
-    private var tabsToRender: List<UstadTab>? = null
+    private var tabsToRender: List<UmTab>? = null
 
     override fun onCreateView() {
         super.onCreateView()
@@ -33,10 +33,10 @@ class ContentEntryListTabsComponent(mProps: UmProps) : UstadBaseComponent<UmProp
 
         setState {
             tabsToRender = listOf(
-                UstadTab(0, ContentEntryList2View.VIEW_NAME,
+                UmTab(0, ContentEntryList2View.VIEW_NAME,
                     "$defArgs${ARG_DISPLAY_CONTENT_BY_PARENT}".toArgumentsMap(),
                     getString(MessageID.libraries)),
-                UstadTab(1,ContentEntryList2View.VIEW_NAME,
+                UmTab(1,ContentEntryList2View.VIEW_NAME,
                     "$defArgs${ARG_DISPLAY_CONTENT_BY_DOWNLOADED}".toArgumentsMap(),
                     getString(MessageID.downloaded))
             )

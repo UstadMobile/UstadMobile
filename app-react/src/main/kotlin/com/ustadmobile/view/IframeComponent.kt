@@ -8,8 +8,10 @@ import com.ustadmobile.util.UmState
 import kotlinx.browser.document
 import kotlinx.html.id
 import kotlinx.html.js.onLoadFunction
-import react.*
+import react.RBuilder
+import react.RComponent
 import react.dom.attrs
+import react.setState
 import styled.css
 import styled.styledDiv
 import styled.styledIframe
@@ -75,7 +77,10 @@ class  IframeComponent(mProps: IframeProps): RComponent<IframeProps, UmState>(mP
 
 }
 
-fun RBuilder.renderIframe(urls: List<String>?, pageSize: Int = 10) = child(IframeComponent::class) {
+fun RBuilder.renderIframe(
+    urls: List<String>?,
+    pageSize: Int = 10
+) = child(IframeComponent::class) {
     attrs.pageSize = pageSize
     attrs.sources = urls
 }

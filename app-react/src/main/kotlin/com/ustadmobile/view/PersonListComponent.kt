@@ -42,8 +42,9 @@ class PersonListComponent(mProps: UmProps): UstadListComponent<Person, PersonWit
         super.onCreateView()
         fabManager?.text = getString(MessageID.person)
         if(arguments.containsKey(UstadView.ARG_CODE_TABLE)){
-            //handle invite with link
+            inviteNewText = getString(MessageID.invite_with_link)
         }
+        createNewText = getString(MessageID.add_a_new_person)
         title = getString(MessageID.people)
         mPresenter = PersonListPresenter(this, arguments, this,di,this)
         mPresenter?.onCreate(mapOf())
@@ -68,7 +69,9 @@ class PersonListComponent(mProps: UmProps): UstadListComponent<Person, PersonWit
                 }
 
                 umItem(GridSize.cells12){
-                    umTypography("", variant = TypographyVariant.body1, paragraph = true){
+                    umTypography(if(item.username.isNullOrEmpty()) "" else "@${item.username}",
+                        variant = TypographyVariant.body1,
+                        paragraph = true){
                         css(alignTextToStart)
                     }
                 }
@@ -78,6 +81,10 @@ class PersonListComponent(mProps: UmProps): UstadListComponent<Person, PersonWit
 
     override fun handleClickEntry(entry: PersonWithDisplayDetails) {
         mPresenter?.handleClickEntry(entry)
+    }
+
+    override fun handleInviteClicked() {
+        mPresenter?.handleClickInviteWithLink()
     }
 
     override fun onDestroyView() {

@@ -360,12 +360,28 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         marginRight = 1.spacingUnits
         height = LinearDimension("100vh")
         overflow = Overflow.scroll
+        paddingLeft = 2.spacingUnits
+        paddingRight = 2.spacingUnits
         paddingBottom = 16.spacingUnits
         width = LinearDimension("95.5%")
         media(theme.breakpoints.up(tabletAndHighEnd)){
             width = LinearDimension("96.5%")
             marginLeft = 3.spacingUnits
             marginRight = 3.spacingUnits
+        }
+    }
+
+    val startIcon by css{
+        marginRight = 6.spacingUnits
+        media(theme.breakpoints.up(tabletAndHighEnd)){
+            marginRight = 2.spacingUnits
+        }
+    }
+
+    val endIcon by css{
+        marginLeft = 4.spacingUnits
+        media(theme.breakpoints.up(tabletAndHighEnd)){
+            marginLeft = 2.spacingUnits
         }
     }
 
@@ -500,13 +516,6 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     val contentEntryDetailOverviewComponentOpenBtn by css {
         margin = "2% 1.5% 0% 1.5%"
         width = LinearDimension("98%")
-    }
-
-    val contentEntryDetailOverviewExtraInfo by css {
-        width = LinearDimension("100%")
-        flexDirection = FlexDirection.column
-        margin = "0 2% 0 2%"
-        paddingBottom = 10.spacingUnits
     }
 
     val detailIconClass by css {

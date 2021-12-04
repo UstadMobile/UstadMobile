@@ -1,17 +1,21 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.core.controller.SchoolMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.SchoolMemberListView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.util.ext.observeResult
-import react.RBuilder
 import com.ustadmobile.util.*
+import com.ustadmobile.util.ext.observeResult
+import com.ustadmobile.view.ext.createListItemWithPersonAttendanceAndPendingRequests
+import com.ustadmobile.view.ext.createListSectionTitle
+import org.w3c.dom.events.Event
+import react.RBuilder
 import react.setState
 
 class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMember, SchoolMemberWithPerson>(mProps),
@@ -49,10 +53,10 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
         mPresenter?.handleAddMemberClicked(args, addPersonKeyName)
     }
 
-    private var pendingStudents: List<SchoolMemberWithPerson>? = null
+    private var pendingStudents: List<SchoolMemberWithPerson> = listOf()
 
     private val observer = ObserverFnWrapper<List<SchoolMemberWithPerson>>{
-        console.log(it)
+        if(it.isNullOrEmpty()) return@ObserverFnWrapper
         setState {
             pendingStudents = it
         }
@@ -69,7 +73,6 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
     override fun onCreateView() {
         super.onCreateView()
         addPersonKeyName = "Person_${arguments[UstadView.ARG_FILTER_BY_ROLE]}"
-        console.log(addPersonKeyName)
         filterByRole = arguments[UstadView.ARG_FILTER_BY_ROLE]?.toInt() ?: 0
         filterBySchoolUid = arguments[UstadView.ARG_FILTER_BY_SCHOOLUID]?.toLong() ?: 0
         roleStudent = filterByRole != Role.ROLE_SCHOOL_STAFF_UID
@@ -90,10 +93,10 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
             Person.serializer(), addPersonKeyName) {
             val memberAdded = it.firstOrNull() ?: return@observeResult
-            console.log(memberAdded)
             mPresenter?.handleEnrolMember(filterBySchoolUid, memberAdded.personUid,
                 arguments[UstadView.ARG_FILTER_BY_ROLE]?.toInt() ?: 0)
         }
+        console.log(arguments.toQueryString())
 
         mPresenter = SchoolMemberListPresenter(this, arguments, this, di, this)
         mPresenter?.onCreate(mapOf())
@@ -101,8 +104,9 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
 
 
     override fun RBuilder.renderListItem(item: SchoolMemberWithPerson) {
-        /*createListItemWithPersonAttendanceAndPendingRequests(item.person?.personUid ?: 0,
-            item.person?.fullName() ?: "", student = roleStudent)*/
+        createListItemWithPersonAttendanceAndPendingRequests(item.person?.personUid ?: 0,
+            item.person?.fullName() ?: "",
+            student = roleStudent)
     }
 
     override fun handleClickEntry(entry: SchoolMemberWithPerson) {
@@ -111,20 +115,20 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
 
     override fun RBuilder.renderFooterView() {
         if(roleStudent){
-            pendingStudents?.let { students ->
 
-                //createListSectionTitle(getString(MessageID.pending_requests))
+            if(pendingStudents.isNotEmpty()){
+                createListSectionTitle(getString(MessageID.pending_requests))
+            }
 
-                child(MembersListComponent::class){
-                    attrs.entries = students
-                    attrs.onEntryClicked = { student ->
-                        mPresenter?.handleClickEntry(student)
-                    }
-                    mPresenter?.let {
-                        attrs.presenter = it
-                    }
-                    attrs.createNewItem = CreateNewItem()
+            child(MembersListComponent::class){
+                attrs.entries = pendingStudents
+                attrs.onEntryClicked = { student ->
+                    mPresenter?.handleClickEntry(student)
                 }
+                mPresenter?.let {
+                    attrs.presenter = it
+                }
+                attrs.createNewItem = CreateNewItem()
             }
         }
     }
@@ -133,22 +137,21 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
         super.onDestroyView()
         mPresenter?.onDestroy()
         mPresenter = null
-        pendingStudents = null
     }
 
     class MembersListComponent(mProps: ListProps<SchoolMemberWithPerson>):
         UstadSimpleList<ListProps<SchoolMemberWithPerson>>(mProps){
 
-        override fun RBuilder.renderListItem(item: SchoolMemberWithPerson) {
+        override fun RBuilder.renderListItem(item: SchoolMemberWithPerson, onClick: (Event) -> Unit) {
             val presenter = props.presenter as SchoolMemberListPresenter
-           /* createListItemWithPersonAttendanceAndPendingRequests(item.person?.personUid ?: 0,
+            createListItemWithPersonAttendanceAndPendingRequests(item.person?.personUid ?: 0,
                 item.person?.fullName() ?: "",true,
                 onClickAccept = {
                     presenter.handleClickPendingRequest(item, true)
                 },
                 onClickDecline = {
                     presenter.handleClickPendingRequest(item, false)
-                })*/
+                })
         }
     }
 }

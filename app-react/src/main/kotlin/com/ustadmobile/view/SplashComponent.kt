@@ -5,15 +5,18 @@ import com.ustadmobile.mui.components.LinearProgressColor
 import com.ustadmobile.mui.components.themeContext
 import com.ustadmobile.mui.components.umCssBaseline
 import com.ustadmobile.mui.components.umLinearProgress
-import kotlinx.browser.document
-import kotlinx.coroutines.Runnable
-import react.*
-import com.ustadmobile.util.*
 import com.ustadmobile.util.StyleManager.splashComponentContainer
 import com.ustadmobile.util.StyleManager.splashComponentLoadingImage
 import com.ustadmobile.util.StyleManager.splashComponentPreloadContainer
 import com.ustadmobile.util.StyleManager.splashComponentPreloadProgressBar
 import com.ustadmobile.util.ThemeManager.isDarkModeActive
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
+import kotlinx.browser.document
+import kotlinx.coroutines.Runnable
+import react.RBuilder
+import react.RComponent
+import react.setState
 import styled.css
 import styled.styledDiv
 import styled.styledImg
@@ -52,7 +55,7 @@ class SplashComponent (props: UmProps): RComponent<UmProps, UmState>(props), Spl
             styledDiv {
                 css (splashComponentContainer)
                 if (!loading) {
-                    mainComponent()
+                    renderMainComponent()
                 } else {
                     styledDiv {
                         css(splashComponentPreloadContainer)
@@ -80,4 +83,4 @@ class SplashComponent (props: UmProps): RComponent<UmProps, UmState>(props), Spl
         mPresenter = null
     }
 }
-fun RBuilder.splashComponent() = child(SplashComponent::class) {}
+fun RBuilder.renderSplashComponent() = child(SplashComponent::class) {}

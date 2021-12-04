@@ -6,9 +6,26 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.SchoolListView
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.alignTextToStart
+import com.ustadmobile.util.StyleManager.displayProperty
+import com.ustadmobile.util.StyleManager.gridListSecondaryItemDesc
+import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
 import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.ext.breakToWork
+import com.ustadmobile.util.ext.format
+import com.ustadmobile.view.ext.umEntityAvatar
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
+import kotlinx.css.Position
+import kotlinx.css.display
+import kotlinx.css.padding
+import kotlinx.css.position
 import react.RBuilder
 import react.setState
+import styled.css
+import styled.styledDiv
 import kotlin.js.Date
 
 class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWithMemberCountAndLocation>(mProps),
@@ -47,7 +64,7 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
 
     override fun RBuilder.renderListItem(item: SchoolWithMemberCountAndLocation) {
 
-       /* styledDiv {
+        styledDiv {
             css{
                 position = Position.relative
             }
@@ -63,16 +80,13 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
                 padding(2.spacingUnits)
             }
 
-            mTypography(item.schoolName,
-                variant = MTypographyVariant.h6,
-                color = MTypographyColor.textPrimary){
+            umTypography(item.schoolName,
+                variant = TypographyVariant.h6){
                 css(alignTextToStart)
             }
 
-            mTypography(item.schoolDesc?.breakToWork(),
-                variant = MTypographyVariant.body1,
-                color = MTypographyColor.textPrimary
-            ){
+            umTypography(item.schoolDesc?.breakToWork(),
+                variant = TypographyVariant.body1){
                 css{
                     display = displayProperty(item.schoolDesc != null, true)
                     +alignTextToStart
@@ -80,16 +94,14 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
             }
 
             umGridContainer{
-                umItem(MGridSize.cells1){
-                    mIcon("place", color = MIconColor.inherit){
+                umItem(GridSize.cells1){
+                    umIcon("place", color = IconColor.inherit){
                         css(gridListSecondaryItemIcons)
                     }
                 }
 
-                umItem(MGridSize.cells11){
-                    mTypography(item.schoolAddress,
-                        color = MTypographyColor.textPrimary
-                    ){
+                umItem(GridSize.cells11){
+                    umTypography(item.schoolAddress){
                         css{
                             +alignTextToStart
                             +gridListSecondaryItemDesc
@@ -98,18 +110,16 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
 
                 }
 
-                umItem(MGridSize.cells1){
-                    mIcon("people", color = MIconColor.inherit){
+                umItem(GridSize.cells1){
+                    umIcon("people", color = IconColor.inherit){
                         css(gridListSecondaryItemIcons)
                     }
                 }
 
-                umItem(MGridSize.cells11){
+                umItem(GridSize.cells11){
                     val numOfStudentTeachers = getString(MessageID.x_teachers_y_students)
                         .format(item.numTeachers, item.numStudents)
-                    mTypography(numOfStudentTeachers,
-                        color = MTypographyColor.textPrimary
-                    ){
+                    umTypography(numOfStudentTeachers){
                         css{
                             +alignTextToStart
                             +gridListSecondaryItemDesc
@@ -118,7 +128,7 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
 
                 }
             }
-        }*/
+        }
     }
 
     override fun onFabClicked() {
@@ -127,18 +137,18 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
         }
     }
 
-    override fun RBuilder.renderAddEntryOptionsDialog() {
+    override fun RBuilder.renderAddContentOptionsDialog() {
         if(showAddEntryOptions){
             val options = mutableListOf(
-                PopUpOptionItem("add", MessageID.add_a_new_school) {
+                UmDialogOptionItem("add", MessageID.add_a_new_school) {
                     mPresenter?.handleClickCreateNewFab()
                 },
-                PopUpOptionItem("login",MessageID.join_existing_school) {
+                UmDialogOptionItem("login",MessageID.join_existing_school) {
                     mPresenter?.handleClickJoinSchool()
                 }
             )
 
-            renderChoices(systemImpl,options, Date().getTime().toLong()){
+            renderDialogOptions(systemImpl,options, Date().getTime().toLong()){
                 setState {
                     showAddEntryOptions = false
                 }

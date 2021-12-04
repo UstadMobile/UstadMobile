@@ -24,6 +24,7 @@ import kotlinx.css.Cursor
 import kotlinx.css.cursor
 import kotlinx.css.marginTop
 import kotlinx.html.js.onClickFunction
+import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
 import styled.css
@@ -136,91 +137,91 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
 
     class AccountListComponent(mProps: AccountPros): UstadSimpleList<AccountPros>(mProps){
 
-        override fun RBuilder.renderListItem(item: UserSessionWithPersonAndEndpoint) {
+        override fun RBuilder.renderListItem(item: UserSessionWithPersonAndEndpoint, onClick: (Event) -> Unit) {
             val presenter = props.presenter as AccountListPresenter
 
             umGridContainer {
                 css(defaultPaddingTopBottom)
-               umItem(GridSize.cells3, GridSize.cells2){
-                   umProfileAvatar(item.person.personUid, "person")
-               }
+                umItem(GridSize.cells3, GridSize.cells2){
+                    umProfileAvatar(item.person.personUid, "person")
+                }
 
-               umItem(if(!props.activeAccount) GridSize.cells7 else GridSize.cells9,
-                   if(!props.activeAccount) GridSize.cells8 else GridSize.cells10){
+                umItem(if(!props.activeAccount) GridSize.cells7 else GridSize.cells9,
+                    if(!props.activeAccount) GridSize.cells8 else GridSize.cells10){
 
-                   umItem(GridSize.cells12){
-                       umTypography(item.person.fullName(),
-                           variant = TypographyVariant.body1){
-                           css(StyleManager.alignTextToStart)
-                       }
-                   }
+                    umItem(GridSize.cells12){
+                        umTypography(item.person.fullName(),
+                            variant = TypographyVariant.body1){
+                            css(StyleManager.alignTextToStart)
+                        }
+                    }
 
-                   umItem(GridSize.cells12){
+                    umItem(GridSize.cells12){
 
-                       umGridContainer {
-                           umItem(GridSize.cells2,GridSize.cells1){
-                               umIcon("person")
-                           }
+                        umGridContainer {
+                            umItem(GridSize.cells2,GridSize.cells1){
+                                umIcon("person")
+                            }
 
-                           umItem(GridSize.cells10, GridSize.cells3){
-                               umTypography(item.person.username,
-                                   variant = TypographyVariant.body2){
-                                   css(StyleManager.alignTextToStart)
-                               }
-                           }
+                            umItem(GridSize.cells10, GridSize.cells3){
+                                umTypography(item.person.username,
+                                    variant = TypographyVariant.body2){
+                                    css(StyleManager.alignTextToStart)
+                                }
+                            }
 
-                           umItem(GridSize.cells2,GridSize.cells1){
-                               umIcon("link")
-                           }
+                            umItem(GridSize.cells2,GridSize.cells1){
+                                umIcon("link")
+                            }
 
-                           umItem(GridSize.cells10, GridSize.cells7){
-                               umTypography(item.endpoint.url,
-                                   variant = TypographyVariant.body2){
-                                   css(StyleManager.alignTextToStart)
-                               }
-                           }
-                       }
-                   }
+                            umItem(GridSize.cells10, GridSize.cells7){
+                                umTypography(item.endpoint.url,
+                                    variant = TypographyVariant.body2){
+                                    css(StyleManager.alignTextToStart)
+                                }
+                            }
+                        }
+                    }
 
-                   umItem(GridSize.cells12){
-                       css(defaultMarginTop)
-                       umGridContainer(GridSpacing.spacing2) {
-                           umItem(GridSize.cells7,GridSize.cells4){
-                               umButton(getString(MessageID.my).format(getString(MessageID.profile)),
-                                   size = ButtonSize.large,
-                                   variant = ButtonVariant.outlined,
-                                   color = UMColor.secondary,
-                                   onClick = {
-                                       it.stopPropagation()
-                                       presenter.handleClickProfile(item.person.personUid)
-                                   })
-                           }
+                    umItem(GridSize.cells12){
+                        css(defaultMarginTop)
+                        umGridContainer(GridSpacing.spacing2) {
+                            umItem(GridSize.cells7,GridSize.cells4){
+                                umButton(getString(MessageID.my).format(getString(MessageID.profile)),
+                                    size = ButtonSize.large,
+                                    variant = ButtonVariant.outlined,
+                                    color = UMColor.secondary,
+                                    onClick = {
+                                        it.stopPropagation()
+                                        presenter.handleClickProfile(item.person.personUid)
+                                    })
+                            }
 
-                           if(props.activeAccount){
-                               umItem(GridSize.cells5,GridSize.cells4){
-                                   umButton(getString(MessageID.logout),
-                                       size = ButtonSize.large,
-                                       variant = ButtonVariant.outlined,
-                                       color = UMColor.secondary,
-                                       onClick = {
-                                           it.stopPropagation()
-                                           presenter.handleClickLogout(item)
-                                       })
-                               }
-                           }
-                       }
-                   }
+                            if(props.activeAccount){
+                                umItem(GridSize.cells5,GridSize.cells4){
+                                    umButton(getString(MessageID.logout),
+                                        size = ButtonSize.large,
+                                        variant = ButtonVariant.outlined,
+                                        color = UMColor.secondary,
+                                        onClick = {
+                                            it.stopPropagation()
+                                            presenter.handleClickLogout(item)
+                                        })
+                                }
+                            }
+                        }
+                    }
 
-               }
+                }
 
-               if(!props.activeAccount){
-                   umItem(GridSize.cells2){
-                       umIconButton("delete", onClick = {
-                           presenter.handleClickDeleteSession(item)
-                       })
-                   }
-               }
-           }
+                if(!props.activeAccount){
+                    umItem(GridSize.cells2){
+                        umIconButton("delete", onClick = {
+                            presenter.handleClickDeleteSession(item)
+                        })
+                    }
+                }
+            }
         }
 
     }
