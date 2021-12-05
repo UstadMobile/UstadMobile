@@ -49,7 +49,10 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.kodein.di.*
+import org.kodein.di.DIAware
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 
 class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
@@ -251,7 +254,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     }
 
     companion object {
-        val BOTTOM_NAV_DEST = listOf(R.id.home_content_dest, R.id.home_clazzlist_dest,
+        val BOTTOM_NAV_DEST = listOf(R.id.content_entry_list_dest, R.id.home_clazzlist_dest,
                 R.id.home_personlist_dest, R.id.home_schoollist_dest, R.id.report_list_dest)
 
     }

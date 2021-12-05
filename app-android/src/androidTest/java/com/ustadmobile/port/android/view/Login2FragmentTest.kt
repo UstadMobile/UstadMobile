@@ -226,7 +226,7 @@ class Login2FragmentTest : TestCase(){
                 }
                 flakySafely {
                     assertEquals("It navigated to account creation screen",
-                            R.id.home_content_dest, systemImplNavRule.navController.currentDestination?.id)
+                            R.id.content_entry_list_dest, systemImplNavRule.navController.currentDestination?.id)
                 }
             }
         }
@@ -260,7 +260,7 @@ class Login2FragmentTest : TestCase(){
 
             flakySafely {
                 assertEquals("It navigated to the default screen",
-                        R.id.home_content_dest, systemImplNavRule.navController.currentDestination?.id)
+                        R.id.content_entry_list_dest, systemImplNavRule.navController.currentDestination?.id)
             }
 
         }

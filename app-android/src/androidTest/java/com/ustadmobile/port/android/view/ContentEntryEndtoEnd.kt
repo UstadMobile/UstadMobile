@@ -63,7 +63,7 @@ class ContentEntryEndtoEnd : TestCase() {
             MainScreen {
 
                 bottomNav {
-                    setSelectedItem(R.id.home_content_dest)
+                    setSelectedItem(R.id.content_entry_list_dest)
                 }
             }
 
