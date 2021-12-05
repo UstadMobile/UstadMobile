@@ -1,8 +1,8 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
@@ -117,8 +117,6 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                WHERE cjiContentEntryUid = :contentEntryUid
                 AND cjiRecursiveStatus >= ${JobStatus.RUNNING_MIN}
                 AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX} LIMIT 1),0) AS Status
-        FROM ContentEntry
-       WHERE contentEntryUid = :contentEntryUid
     """)
     abstract suspend fun isMeteredAllowedForEntry(contentEntryUid: Long): Boolean
 
