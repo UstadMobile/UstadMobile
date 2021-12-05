@@ -39,7 +39,6 @@ class ViewNameToDestMap: DestinationProvider {
             ClazzAssignmentDetailStudentProgressView.VIEW_NAME to UstadDestination(R.id.clazz_assignment_detail_student_progress),
             ContentEntryEdit2View.VIEW_NAME to UstadDestination(R.id.content_entry_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
-            ContentEntryListTabsView.VIEW_NAME to UstadDestination(R.id.home_content_dest),
             ContentEntryList2View.VIEW_NAME to UstadDestination(R.id.content_entry_list_dest),
             ContentEntryList2View.FOLDER_VIEW_NAME to UstadDestination(R.id.content_entry_list_select_folder),
             ContentEntryDetailOverviewView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_overview_dest),

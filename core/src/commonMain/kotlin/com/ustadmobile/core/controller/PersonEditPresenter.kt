@@ -74,8 +74,8 @@ class PersonEditPresenter(
         }
 
         nextDestination = arguments[UstadView.ARG_NEXT] ?: impl.getAppConfigString(
-            AppConfig.KEY_FIRST_DEST, ContentEntryListTabsView.VIEW_NAME, context)
-                ?: ContentEntryListTabsView.VIEW_NAME
+            AppConfig.KEY_FIRST_DEST, ContentEntryList2View.VIEW_NAME, context)
+                ?: ContentEntryList2View.VIEW_NAME
 
         view.registrationMode = registrationModeFlags
 

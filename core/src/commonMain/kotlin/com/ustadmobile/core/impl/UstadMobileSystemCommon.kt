@@ -89,7 +89,7 @@ abstract class UstadMobileSystemCommon {
      * selecting to continue as a guest.
      */
     fun getAppConfigDefaultFirstDest(context: Any): String {
-        return getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context) ?: ContentEntryListTabsView.VIEW_NAME
+        return getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context) ?: ContentEntryList2View.VIEW_NAME
     }
 
     fun goToDeepLink(deepLink: String, accountManager: UstadAccountManager, context: Any) {
