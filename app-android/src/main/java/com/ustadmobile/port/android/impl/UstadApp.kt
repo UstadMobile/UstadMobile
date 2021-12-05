@@ -1,8 +1,6 @@
 package com.ustadmobile.port.android.impl
 
 import android.content.Context
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.squareup.picasso.OkHttp3Downloader
@@ -21,18 +19,35 @@ import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
+import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
+import com.ustadmobile.core.db.ext.addSyncCallback
+import com.ustadmobile.core.impl.*
+import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_ITERATIONS
+import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_KEYLENGTH
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
+import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
+import com.ustadmobile.core.impl.di.commonJvmDiModule
+import com.ustadmobile.core.io.ext.siteDataSubDir
+import com.ustadmobile.core.networkmanager.*
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
+import com.ustadmobile.core.torrent.*
 import com.ustadmobile.core.util.ContentEntryOpener
+import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.view.ContainerMounter
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.NanoHttpdCall
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.android.generated.MessageIDMap
+import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
 import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
@@ -40,33 +55,18 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndp
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.*
-import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
-import com.ustadmobile.core.db.ext.addSyncCallback
-import com.ustadmobile.core.impl.*
-import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_ITERATIONS
-import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_KEYLENGTH
-import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
-import com.ustadmobile.core.io.ext.siteDataSubDir
-import com.ustadmobile.core.networkmanager.*
-import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
+import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
-import com.ustadmobile.core.impl.di.commonJvmDiModule
-import com.ustadmobile.core.torrent.*
-import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
-import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.DoorTag
-import kotlinx.coroutines.*
 import java.net.URI
 import java.util.concurrent.Executors
 
@@ -181,18 +181,37 @@ open class UstadApp : BaseUstadApp(), DIAware {
             ContentEntryOpener(di, context)
         }
 
+
+        bind<EpubTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
+            EpubTypePluginCommonJvm(applicationContext, context, di)
+        }
+
+        bind<XapiTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
+            XapiTypePluginCommonJvm(applicationContext, context, di)
+        }
+
+        bind<H5PTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
+            H5PTypePluginCommonJvm(applicationContext, context, di)
+        }
+
+        bind<VideoTypePluginAndroid>() with scoped(EndpointScope.Default).singleton{
+            VideoTypePluginAndroid(applicationContext, context, di)
+        }
+        bind<ContainerTorrentDownloadJob>() with scoped(EndpointScope.Default).singleton{
+            ContainerTorrentDownloadJob(applicationContext, context, di)
+        }
+
         bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
             ContentPluginManager(listOf(
-                    EpubTypePluginCommonJvm(applicationContext, context, di),
-                    H5PTypePluginCommonJvm(applicationContext, context, di),
-                    XapiTypePluginCommonJvm(applicationContext, context, di),
-                    VideoTypePluginAndroid(applicationContext, context, di),
-                    ContainerTorrentDownloadJob(applicationContext, context, di),
+                    di.on(context).direct.instance<EpubTypePluginCommonJvm>(),
+                    di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
+                    di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
+                    di.on(context).direct.instance<VideoTypePluginAndroid>(),
+                    di.on(context).direct.instance<ContainerTorrentDownloadJob>(),
                     FolderIndexerPlugin(applicationContext, context, di),
-                    DeleteContentEntryPlugin(applicationContext, context, di)
-                )
-            )
+                    DeleteContentEntryPlugin(applicationContext, context, di)))
         }
+
         bind<ContentJobManager>() with singleton {
             ContentJobManagerAndroid(applicationContext)
         }

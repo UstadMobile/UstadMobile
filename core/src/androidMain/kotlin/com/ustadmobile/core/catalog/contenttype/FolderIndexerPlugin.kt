@@ -19,9 +19,9 @@ import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import java.lang.Exception
 
 class FolderIndexerPlugin(
         private var context: Any,
@@ -38,7 +38,11 @@ class FolderIndexerPlugin(
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    private val pluginManager: ContentPluginManager by di.on(endpoint).instance()
+    private val pluginManager = ContentPluginManager(listOf(
+            di.on(endpoint).direct.instance<EpubTypePluginCommonJvm>(),
+            di.on(endpoint).direct.instance<XapiTypePluginCommonJvm>(),
+            di.on(endpoint).direct.instance<H5PTypePluginCommonJvm>(),
+            di.on(endpoint).direct.instance<VideoTypePluginAndroid>()))
 
     override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
 
