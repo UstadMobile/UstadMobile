@@ -17,18 +17,13 @@ import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
-import com.ustadmobile.util.StyleManager.displayProperty
-import com.ustadmobile.util.StyleManager.personDetailComponentActionIcon
-import com.ustadmobile.util.StyleManager.personDetailComponentActions
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.*
 import kotlinx.css.LinearDimension
-import kotlinx.css.display
 import kotlinx.css.marginTop
 import kotlinx.css.padding
-import kotlinx.html.js.onClickFunction
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
@@ -104,23 +99,23 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
             umGridContainer {
                 umItem(GridSize.cells12){
                     umGridContainer(GridSpacing.spacing4) {
-                        createAction("call", MessageID.call, GridSize.cells4, GridSize.cells2,
+                        createAction("call", getString(MessageID.call), GridSize.cells4, GridSize.cells2,
                             entity?.phoneNum != null){
                             onClickCall(entity?.phoneNum)
                         }
-                        createAction("message",MessageID.text, GridSize.cells4, GridSize.cells2,
+                        createAction("message",getString(MessageID.text), GridSize.cells4, GridSize.cells2,
                             entity?.phoneNum != null){
                             onClickSMS(entity?.phoneNum)
                         }
-                        createAction("email",MessageID.email, GridSize.cells4, GridSize.cells2,
+                        createAction("email",getString(MessageID.email), GridSize.cells4, GridSize.cells2,
                             entity?.emailAddr != null){
                             onClickEmail(entity?.emailAddr)
                         }
-                        createAction("vpn_key",MessageID.change_password, GridSize.cells6, GridSize.cells3,
+                        createAction("vpn_key",getString(MessageID.change_password), GridSize.cells6, GridSize.cells3,
                             changePasswordVisible){
                             mPresenter?.handleChangePassword()
                         }
-                        createAction("person_add",MessageID.create_account, GridSize.cells6, GridSize.cells3,
+                        createAction("person_add",getString(MessageID.create_account), GridSize.cells6, GridSize.cells3,
                             showCreateAccountVisible){
                             mPresenter?.handleCreateAccount()
                         }
@@ -218,37 +213,6 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
     }
 
 
-    private fun RBuilder.createAction(icon: String, messageId: Int, xs: GridSize,
-                                      sm: GridSize? = null, visible: Boolean = false,
-                                      action:() -> Unit){
-        umItem(xs, sm){
-            css{
-                display = displayProperty(visible, true)
-            }
-            
-            umPaper(variant = PaperVariant.elevation) {
-                attrs.onClick = {
-                    action()
-                }
-                css {
-                    +personDetailComponentActions
-                }
-                
-                umIcon(icon){
-                    css{
-                        +personDetailComponentActionIcon
-                    }
-                }
-                
-                umTypography(getString(messageId), 
-                    variant = TypographyVariant.body1, 
-                    gutterBottom = true){
-                    css(alignTextToStart)
-                }
-            }
-        }
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         mPresenter?.onDestroy()
@@ -259,9 +223,9 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
         UstadSimpleList<ListProps<ClazzEnrolmentWithClazzAndAttendance>>(mProps){
 
         override fun RBuilder.renderListItem(item: ClazzEnrolmentWithClazzAndAttendance, onClick: (Event) -> Unit) {
-            styledDiv {
-                attrs.onClickFunction = {
-                    onClick.invoke(it)
+            umGridContainer {
+                attrs.onClick = {
+                    onClick.invoke(it.nativeEvent)
                 }
                 val title = "${item.clazz?.clazzName} (${item.roleToString(this, systemImpl)}) " +
                         "- ${item.outcomeToString(this,  systemImpl)}"

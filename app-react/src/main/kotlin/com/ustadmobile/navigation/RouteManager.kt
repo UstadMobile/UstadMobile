@@ -59,6 +59,9 @@ object RouteManager {
         UstadDestination(view = LanguageEditView.VIEW_NAME, component = LanguageEditComponent::class),
         UstadDestination(view = ContentEntryImportLinkView.VIEW_NAME, component = ContentEntryImportLinkComponent::class),
         UstadDestination(view = InviteViaLinkView.VIEW_NAME, component = InviteViaLinkComponent::class),
+        UstadDestination(view = ClazzEnrolmentListView.VIEW_NAME, component = ClazzEnrolmentListComponent::class),
+        UstadDestination(view = LeavingReasonListView.VIEW_NAME, component = LeavingReasonListComponent::class),
+        UstadDestination(view = LeavingReasonEditView.VIEW_NAME, component = LeavingReasonEditComponent::class),
         UstadDestination(labelId= MessageID.accounts, view = AccountListView.VIEW_NAME, component = PlaceHolderComponent::class)
     )
 
@@ -67,10 +70,6 @@ object RouteManager {
      */
     val defaultDestination: UstadDestination = destinationList.first {
         it.view == RedirectView.VIEW_NAME
-    }
-
-    val firstDestination: UstadDestination = destinationList.first {
-        it.view == ContentEntryListTabsView.VIEW_NAME
     }
 
     /**

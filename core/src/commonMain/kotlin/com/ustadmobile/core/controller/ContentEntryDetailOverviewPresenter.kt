@@ -179,7 +179,6 @@ class ContentEntryDetailOverviewPresenter(context: Any,
                         view.showSnackBar(message)
                     }
                 }
-                throw e
             }
         }
     }

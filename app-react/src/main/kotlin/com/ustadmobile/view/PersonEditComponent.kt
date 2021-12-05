@@ -303,6 +303,7 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
                                 onChange = {
                                     setState {
                                         entity?.gender = it.toInt()
+                                        genderFieldError = null
                                     }
                                 }
                             )

@@ -64,6 +64,14 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     protected var dbRepo: UmAppDatabase? = null
 
+    protected var showEmptyState = true
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
     protected var showCreateNewItem:Boolean = false
         get() = field
         set(value) {
@@ -210,23 +218,25 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
 
     private fun RBuilder.renderEmptyList(){
-       umGridContainer {
-            css (centerContainer)
-            styledDiv {
-                css{
-                    +centerItem
-                    width = LinearDimension("200px")
-                }
-                umIcon(emptyList.icon ?: "crop_free", className = "${StyleManager.name}-emptyListIcon")
-                umTypography(emptyList.text ?: getString(MessageID.nothing_here),
-                    variant = TypographyVariant.h6,
-                    align = TypographyAlign.center){
-                    css {
-                        marginTop = LinearDimension("20px")
-                    }
-                }
-            }
-        }
+      if(showEmptyState){
+          umGridContainer {
+              css (centerContainer)
+              styledDiv {
+                  css{
+                      +centerItem
+                      width = LinearDimension("200px")
+                  }
+                  umIcon(emptyList.icon ?: "crop_free", className = "${StyleManager.name}-emptyListIcon")
+                  umTypography(emptyList.text ?: getString(MessageID.nothing_here),
+                      variant = TypographyVariant.h6,
+                      align = TypographyAlign.center){
+                      css {
+                          marginTop = LinearDimension("20px")
+                      }
+                  }
+              }
+          }
+      }
     }
 
     private fun RBuilder.renderNewItem(multiColumn: Boolean = false){

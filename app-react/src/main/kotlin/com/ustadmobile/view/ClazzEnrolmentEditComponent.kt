@@ -71,7 +71,9 @@ class ClazzEnrolmentEditComponent (mProps: UmProps): UstadEditComponent<ClazzEnr
             }else{
                 value?.first
             }
-            startDateLabel = startDateLabel.copy(errorText = startDateValue)
+            setState {
+                startDateLabel = startDateLabel.copy(errorText = startDateValue)
+            }
         }
 
     override var endDateError: String? = null
@@ -107,6 +109,7 @@ class ClazzEnrolmentEditComponent (mProps: UmProps): UstadEditComponent<ClazzEnr
 
     override fun onCreateView() {
         super.onCreateView()
+        title = getString(MessageID.edit_enrolment)
         mPresenter = ClazzEnrolmentEditPresenter(this, arguments, this,
             this, di)
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
@@ -198,21 +201,25 @@ class ClazzEnrolmentEditComponent (mProps: UmProps): UstadEditComponent<ClazzEnr
                         }
                     }
 
+                    val disabled = !fieldsEnabled ||
+                            entity?.clazzEnrolmentOutcome == ClazzEnrolment.OUTCOME_IN_PROGRESS
+
                     umTextField(
                         label = "${leavingLabel.text}",
                         helperText = leavingLabel.errorText,
                         value = entity?.leavingReason?.leavingReasonTitle,
                         error = leavingLabel.error,
-                        disabled = !fieldsEnabled ||
-                                entity?.clazzEnrolmentOutcome == ClazzEnrolment.OUTCOME_IN_PROGRESS,
+                        disabled = disabled,
                         variant = FormControlVariant.outlined,
                         onChange = {
                             setState {
                                 entity?.leavingReason?.leavingReasonTitle = it
                             }
                         }){
-                        attrs.asDynamic().onClick = {
-                            mPresenter?.handleReasonLeavingClicked()
+                        attrs.onClick = {
+                           if(disabled){
+                               mPresenter?.handleReasonLeavingClicked()
+                           }
                         }
                         css(defaultFullWidth)
                     }

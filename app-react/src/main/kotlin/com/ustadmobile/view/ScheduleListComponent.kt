@@ -4,17 +4,12 @@ import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.OneToManyJoinEditListener
 import com.ustadmobile.lib.db.entities.Schedule
-import com.ustadmobile.mui.components.*
-import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.Util
 import com.ustadmobile.util.ext.formattedInHoursAndMinutes
+import com.ustadmobile.view.ext.createListItemWithTitleDescriptionAndRightAction
 import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import kotlinx.css.LinearDimension
-import kotlinx.css.display
-import kotlinx.css.paddingTop
 import org.w3c.dom.events.Event
 import react.RBuilder
-import styled.css
 import kotlin.js.Date
 
 interface ScheduleListProps: ListProps<Schedule>{
@@ -25,6 +20,11 @@ class ScheduleListComponent(mProps: ScheduleListProps): UstadSimpleList<Schedule
 
     override fun RBuilder.renderListItem(item: Schedule, onClick: (Event) -> Unit) {
         umGridContainer {
+            attrs.onClick = {
+                onClick.invoke(it.nativeEvent)
+                Util.stopEventPropagation(it.nativeEvent)
+            }
+
             val frequencyMessageId = ScheduleEditPresenter.FrequencyOption.values()
                 .firstOrNull { it.optionVal == item.scheduleFrequency }?.messageId ?: MessageID.None
             val dayMessageId = ScheduleEditPresenter.DayOptions.values()
@@ -35,30 +35,10 @@ class ScheduleListComponent(mProps: ScheduleListProps): UstadSimpleList<Schedule
             val startEndTime = "${Date(item.sceduleStartTime).formattedInHoursAndMinutes()} " +
                     "- ${Date(item.scheduleEndTime).formattedInHoursAndMinutes()}"
 
-            umItem(if(props.withDelete) GridSize.cells10 else GridSize.cells12, if(props.withDelete) GridSize.cells11 else GridSize.cells12){
-                attrs.onClick = {
-                    onClick.invoke(it.nativeEvent)
-                }
-                css{
-                    paddingTop = LinearDimension("8px")
-                }
-                umTypography("$scheduleDays $startEndTime",
-                    variant = TypographyVariant.body2,
-                    gutterBottom = true){
-                    css(StyleManager.alignTextToStart)
-                }
-            }
-
-            umItem(GridSize.cells2, GridSize.cells1){
-                css{
-                    display = StyleManager.displayProperty(props.withDelete)
-                }
-                umIconButton("delete",
-                    size = IconButtonSize.small,
-                    onClick = {
-                        it.stopPropagation()
-                        props.listener?.onClickDelete(item)
-                    })
+            createListItemWithTitleDescriptionAndRightAction(
+                "$scheduleDays $startEndTime",
+                "delete", props.withDelete){
+                props.listener?.onClickDelete(item)
             }
         }
     }

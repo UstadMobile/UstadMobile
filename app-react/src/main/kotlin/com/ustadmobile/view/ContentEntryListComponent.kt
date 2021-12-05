@@ -16,6 +16,7 @@ import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util
+import com.ustadmobile.util.ext.wordBreakLimit
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
@@ -69,7 +70,7 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
         val showSelectBtn = arguments.determineListMode().toString() == ListViewMode.PICKER.toString() &&
                 (arguments[ARG_SELECT_FOLDER_VISIBLE]?.toBoolean() == true || item.leaf)
 
-        umGridContainer(GridSpacing.spacing7) {
+        umGridContainer(columnSpacing = GridSpacing.spacing4) {
             umItem(GridSize.cells3){
                 umEntityAvatar(item.thumbnailUrl,
                     if(item.leaf) Util.ASSET_BOOK else Util.ASSET_FOLDER,
@@ -78,55 +79,57 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
             }
 
             umItem(GridSize.cells9){
-                umItem(GridSize.cells12){
-                    umTypography(item.title,
-                        variant = TypographyVariant.h6){
-                        css {
-                            +alignTextToStart
-                            marginBottom = LinearDimension("10px")
-                        }
-                    }
-                }
-
-                umItem(GridSize.cells12){
-                    umTypography(item.description,
-                        variant = TypographyVariant.body1,
-                        paragraph = true){
-                        css(alignTextToStart)
-                    }
-                }
-
-                umItem(GridSize.cells12){
-                    umGridContainer(spacing= GridSpacing.spacing1){
-                        css{
-                            display = displayProperty(item.leaf, true)
-                        }
-                        val messageId = CONTENT_ENTRY_TYPE_LABEL_MAP[item.contentTypeFlag] ?: MessageID.untitled
-                        val icon = CONTENT_ENTRY_TYPE_ICON_MAP[item.contentTypeFlag] ?: ""
-                        umItem(GridSize.cells2, GridSize.cells1) {
-                            umAvatar(className = "${StyleManager.name}-contentEntryListContentAvatarClass") {
-                                umIcon(icon, className= "${StyleManager.name}-contentEntryListContentTyeIconClass"){
-                                    css{marginTop = 4.px}
-                                }
+                umGridContainer {
+                    umItem(GridSize.cells12){
+                        umTypography(item.title,
+                            variant = TypographyVariant.h6){
+                            css {
+                                +alignTextToStart
+                                marginBottom = LinearDimension("10px")
                             }
                         }
+                    }
 
-                        umItem(GridSize.cells8, GridSize.cells9) {
-                            umTypography(getString(messageId),
-                                variant = TypographyVariant.body2,
-                                gutterBottom = true)
+                    umItem(GridSize.cells12){
+                        umTypography(item.description?.wordBreakLimit(if(Util.isMobile()) 8 else 50),
+                            variant = TypographyVariant.body1,
+                            paragraph = true){
+                            css(alignTextToStart)
                         }
+                    }
 
-                        umItem(GridSize.cells2){
-                            umButton(getString(MessageID.select_item).format(""),
-                                variant = ButtonVariant.outlined,
-                                color = UMColor.secondary,
-                                onClick = {
-                                    it.stopPropagation()
-                                    mPresenter?.onClickSelectContentEntry(item)
-                                }){
-                                css {
-                                    display = displayProperty(showSelectBtn)
+                    umItem(GridSize.cells12){
+                        umGridContainer(columnSpacing = GridSpacing.spacing1){
+                            css{
+                                display = displayProperty(item.leaf, true)
+                            }
+                            val messageId = CONTENT_ENTRY_TYPE_LABEL_MAP[item.contentTypeFlag] ?: MessageID.untitled
+                            val icon = CONTENT_ENTRY_TYPE_ICON_MAP[item.contentTypeFlag] ?: ""
+                            umItem(GridSize.cells2, GridSize.cells1) {
+                                umAvatar(className = "${StyleManager.name}-contentEntryListContentAvatarClass") {
+                                    umIcon(icon, className= "${StyleManager.name}-contentEntryListContentTyeIconClass"){
+                                        css{marginTop = 4.px}
+                                    }
+                                }
+                            }
+
+                            umItem(GridSize.cells8, GridSize.cells9) {
+                                umTypography(getString(messageId),
+                                    variant = TypographyVariant.body2,
+                                    gutterBottom = true)
+                            }
+
+                            umItem(GridSize.cells2){
+                                umButton(getString(MessageID.select_item).format(""),
+                                    variant = ButtonVariant.outlined,
+                                    color = UMColor.secondary,
+                                    onClick = {
+                                        it.stopPropagation()
+                                        mPresenter?.onClickSelectContentEntry(item)
+                                    }){
+                                    css {
+                                        display = displayProperty(showSelectBtn)
+                                    }
                                 }
                             }
                         }

@@ -12,16 +12,19 @@ import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
-import com.ustadmobile.util.StyleManager.defaultMarginTop
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.GridSpacing
+import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.view.ext.createListItemWithPersonAttendanceAndPendingRequests
 import com.ustadmobile.view.ext.createListSectionTitle
-import kotlinx.html.js.onClickFunction
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
 import styled.css
-import styled.styledDiv
 
 class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithClazzEnrolmentDetails, PersonWithClazzEnrolmentDetails>(mProps),
     ClazzMemberListView{
@@ -37,7 +40,7 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
     override val viewName: String
         get() = ClazzMemberListView.VIEW_NAME
 
-    private lateinit var students: List<PersonWithClazzEnrolmentDetails>
+    private var students: List<PersonWithClazzEnrolmentDetails> = listOf()
 
     private val studentListObserver = ObserverFnWrapper<List<PersonWithClazzEnrolmentDetails>>{
         setState {
@@ -53,7 +56,7 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
             liveData?.observe(this, studentListObserver)
         }
 
-    private lateinit var pendingStudents: List<PersonWithClazzEnrolmentDetails>
+    private var pendingStudents: List<PersonWithClazzEnrolmentDetails> = listOf()
 
     private val pendingStudentObserver = ObserverFnWrapper<List<PersonWithClazzEnrolmentDetails>>{
         setState {
@@ -88,6 +91,7 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
     override fun onCreateView() {
         super.onCreateView()
         createNewText = getString(MessageID.add_a_teacher)
+        showEmptyState = false
         filterByClazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
         mPresenter = ClazzMemberListPresenter(this, arguments, this, di, this)
         mPresenter?.onCreate(mapOf())
@@ -107,15 +111,14 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
     }
 
     override fun RBuilder.renderFooterView() {
-        if(::students.isInitialized && students.isNotEmpty()){
-           createMemberList(students, getString(MessageID.students),
-               ClazzEnrolment.ROLE_STUDENT, MessageID.add_a_student)
-        }
+        umGridContainer(rowSpacing = GridSpacing.spacing2) {
+            createMemberList(students, getString(MessageID.students),
+                ClazzEnrolment.ROLE_STUDENT, MessageID.add_a_student)
 
-
-        if(::pendingStudents.isInitialized && pendingStudents.isNotEmpty()){
-            createMemberList(pendingStudents, getString(MessageID.pending_requests),
-                ClazzEnrolment.ROLE_STUDENT_PENDING, pending = true)
+            if(pendingStudents.isNotEmpty()){
+                createMemberList(pendingStudents, getString(MessageID.pending_requests),
+                    ClazzEnrolment.ROLE_STUDENT_PENDING, pending = true)
+            }
         }
     }
 
@@ -131,19 +134,22 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
                                           sectionTitle: String, role: Int,
                                           createNewLabel: Int = 0,
                                           pending: Boolean = false){
-        styledDiv {
-            css(defaultMarginTop)
-            createListSectionTitle(sectionTitle)
-        }
 
-        styledDiv {
-            val createNewItem = CreateNewItem(createNewLabel != 0, createNewLabel){
-                navigateToPickNewMember(role)
+        umGridContainer(rowSpacing = GridSpacing.spacing1) {
+            css(StyleManager.defaultDoubleMarginTop)
+            umItem(GridSize.cells12){
+                createListSectionTitle(sectionTitle)
             }
-            mPresenter?.let { presenter ->
-                renderMembers(presenter,members, createNewItem, pending){ entry ->
-                    if(createNewLabel != 0){
-                        handleClickEntry(entry)
+
+            umItem(GridSize.cells12){
+                val createNewItem = CreateNewItem(createNewLabel != 0, createNewLabel){
+                    navigateToPickNewMember(role)
+                }
+                mPresenter?.let { presenter ->
+                    renderMembers(presenter,members, createNewItem, pending){ entry ->
+                        if(createNewLabel != 0){
+                            handleClickEntry(entry)
+                        }
                     }
                 }
             }
@@ -183,10 +189,12 @@ class MembersListComponent(mProps: MemberListProps):
     UstadSimpleList<MemberListProps>(mProps){
 
     override fun RBuilder.renderListItem(item: PersonWithClazzEnrolmentDetails, onClick: (Event) -> Unit) {
-        styledDiv {
-            attrs.onClickFunction = {
-                onClick.invoke(it)
+        umGridContainer {
+            attrs.onClick = {
+                onClick.invoke(it.nativeEvent)
+                stopEventPropagation(it.nativeEvent)
             }
+
             val presenter = props.presenter as ClazzMemberListPresenter
             createListItemWithPersonAttendanceAndPendingRequests(
                 item.personUid, item.fullName(),

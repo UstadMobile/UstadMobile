@@ -165,6 +165,14 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         }
     }
 
+
+    val detailPaddingBottom by css {
+        padding(bottom = 3.spacingUnits)
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            padding(bottom = 2.spacingUnits)
+        }
+    }
+
     val switchMargin by css {
         paddingRight = 5.spacingUnits
         media(theme.breakpoints.up(tabletAndHighEnd)) {
@@ -478,10 +486,11 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     val entityThumbnailClass by css {
         textAlign = TextAlign.center
         position = Position.relative
-        width = LinearDimension("98%")
-        height = LinearDimension("120px")
+        width = LinearDimension("100%")
+        height = LinearDimension("80px")
         media(theme.breakpoints.up(tabletAndHighEnd)){
             width = LinearDimension("70%")
+            height = LinearDimension("120px")
         }
     }
 

@@ -14,8 +14,8 @@ import com.ustadmobile.util.StyleManager.clazzListRoleChip
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemDesc
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.util.ext.breakToWork
 import com.ustadmobile.util.ext.format
+import com.ustadmobile.util.ext.wordBreakLimit
 import com.ustadmobile.view.ext.circleIndicator
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
@@ -84,7 +84,7 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
                 css(alignTextToStart)
             }
 
-            umTypography(item.clazzDesc?.breakToWork(),TypographyVariant.body1){
+            umTypography(item.clazzDesc?.wordBreakLimit(),TypographyVariant.body1){
                 css(alignTextToStart)
             }
 

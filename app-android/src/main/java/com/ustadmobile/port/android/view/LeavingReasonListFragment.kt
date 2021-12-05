@@ -9,7 +9,6 @@ import com.toughra.ustadmobile.databinding.ItemLeavingReasonListBinding
 import com.ustadmobile.core.controller.LeavingReasonListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.LeavingReasonListView
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity

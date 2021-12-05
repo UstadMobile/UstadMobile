@@ -16,6 +16,7 @@ import com.ustadmobile.util.StyleManager.defaultMarginBottom
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.entryItemImageContainer
+import com.ustadmobile.util.StyleManager.gridListSecondaryItemDesc
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
 import com.ustadmobile.util.StyleManager.listItemCreateNewDiv
 import com.ustadmobile.util.StyleManager.mainComponentErrorPaper
@@ -24,6 +25,7 @@ import com.ustadmobile.util.StyleManager.mainComponentSearchIcon
 import com.ustadmobile.util.StyleManager.personListItemAvatar
 import com.ustadmobile.util.StyleManager.toolbarTitle
 import com.ustadmobile.util.Util.ASSET_ACCOUNT
+import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.util.ext.format
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
@@ -90,9 +92,11 @@ fun RBuilder.umGridContainer(
     alignContent: GridAlignContent = GridAlignContent.stretch,
     alignItems: GridAlignItems = GridAlignItems.stretch,
     justify: GridJustify = GridJustify.flexStart,
+    columnSpacing: GridSpacing = GridSpacing.spacing0,
+    rowSpacing: GridSpacing = GridSpacing.spacing0,
     wrap: GridWrap = GridWrap.wrap, className: String? = null,
     handler: StyledHandler<GridProps>? = null) {
-    gridContainer(spacing,alignContent,alignItems,justify, wrap,
+    gridContainer(spacing,alignContent,alignItems,justify, wrap, columnSpacing, rowSpacing,
         handler = handler, className = className)
 }
 
@@ -119,31 +123,29 @@ fun RBuilder.umEntityAvatar (
     listItem: Boolean = false,
     className: String? = "${StyleManager.name}-entityImageClass",
     iconClassName: String? = "${StyleManager.name}-entityImageIconClass",
-    clickEvent:((Event) -> Unit)? = null)
-{
-
-    styledDiv {
-        css{
-            +entryItemImageContainer
-            if(!listItem){
-                margin = "1.5%"
-            }
+    clickEvent:((Event) -> Unit)? = null
+) = styledDiv {
+    css{
+        +entryItemImageContainer
+        if(!listItem){
+            margin = "1.5%"
         }
-        umAvatar(src = if(src.isNullOrEmpty()) fallbackSrc else src,
-            variant = variant, imgProps = imgProps, className = className) {
-            styledSpan{
-                css{
-                    position = Position.absolute
-                    cursor = Cursor.pointer
-                    //padding = "20px"
-                }
-                if(clickEvent != null){
-                    attrs.onClickFunction = clickEvent
-                }
+    }
 
-                if(showIcon){
-                    umIcon(iconName, className = iconClassName)
-                }
+    umAvatar(src = if(src.isNullOrEmpty()) fallbackSrc else src,
+        variant = variant, imgProps = imgProps, className = className) {
+        styledSpan{
+            css{
+                position = Position.absolute
+                cursor = Cursor.pointer
+                //padding = "20px"
+            }
+            if(clickEvent != null){
+                attrs.onClickFunction = clickEvent
+            }
+
+            if(showIcon){
+                umIcon(iconName, className = iconClassName)
             }
         }
     }
@@ -171,15 +173,13 @@ fun RBuilder.onClickSMS(phoneNumber: String?){
 
 }
 
-fun RBuilder.createListSectionTitle(titleText: String){
+fun RBuilder.createListSectionTitle(titleText: String, variant: TypographyVariant? = null){
     styledDiv {
         css{
             +defaultMarginBottom
             +defaultMarginTop
         }
-        umTypography(titleText,
-            variant = TypographyVariant.body2,
-            ){
+        umTypography(titleText, variant = variant ?: TypographyVariant.body2){
             css (alignTextToStart)
         }
     }
@@ -348,74 +348,109 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
     student: Boolean = true,
     onClickDecline: (() -> Unit)? = null,
     onClickAccept: (() -> Unit)? = null){
-    umGridContainer(GridSpacing.spacing5) {
-        css{
-            paddingTop = 4.px
-            paddingBottom = 4.px
-            width = LinearDimension("100%")
-        }
-
+    umGridContainer {
         umItem(GridSize.cells3, GridSize.cells2){
             umProfileAvatar(personUid, "person")
         }
 
-        umItem(GridSize.cells9, GridSize.cells10){
-            umItem(GridSize.cells12){
-                umTypography(fullName,
-                    variant = TypographyVariant.h6,
-                    ){
-                    css (alignTextToStart)
+        umItem(GridSize.cells9,GridSize.cells10){
+            umGridContainer {
+                umItem(GridSize.cells12){
+                    umTypography(fullName,variant = TypographyVariant.h6){
+                        css (alignTextToStart)
+                    }
+                }
+
+                if(student){
+                    umGridContainer{
+
+                        if(attendance >= 0){
+                            umItem(GridSize.cells1){
+                                circleIndicator(attendance)
+                            }
+
+                            umItem(GridSize.cells8){
+                                umTypography(attendanceLabel?.format(attendance * 100)){
+                                    css{
+                                        +alignTextToStart
+                                        +gridListSecondaryItemDesc
+                                    }
+                                }
+
+                            }
+                        }
+
+                        if(pending){
+                            umItem(GridSize.cells3){
+
+                                umGridContainer(columnSpacing = GridSpacing.spacing2) {
+                                    umItem(GridSize.cells4){
+                                        umIconButton("check",
+                                            onClick = {
+                                                onClickAccept?.invoke()
+                                                stopEventPropagation(it)
+                                            },
+                                            className = "${StyleManager.name}-successClass",
+                                            size = IconButtonSize.small)
+                                    }
+
+                                    umItem(GridSize.cells4){
+                                        umIconButton("close",
+                                            onClick = {
+                                                onClickDecline?.invoke()
+                                                stopEventPropagation(it)
+                                            },
+                                            className = "${StyleManager.name}-errorClass",
+                                            size = IconButtonSize.small)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fun RBuilder.createListItemWithTitleDescriptionAndRightAction(
+    title: String,
+    iconName: String,
+    withAction: Boolean = false,
+    description: String? = null,
+    onActionClick: ((Event) -> Unit)? = null){
+    umGridContainer {
+        umItem(if(withAction) GridSize.cells10 else GridSize.cells12, if(withAction) GridSize.cells11 else GridSize.cells12){
+            css{
+                paddingTop = LinearDimension("8px")
+            }
+            umItem(GridSize.cells12) {
+                umTypography(title,
+                    variant = TypographyVariant.body1,
+                    gutterBottom = true){
+                    css(alignTextToStart)
                 }
             }
 
-            umGridContainer{
-                css{
-                    display = displayProperty(student, true)
-                }
-
-                if(attendance >= 0f){
-                    umItem(GridSize.cells1){
-                        circleIndicator(attendance)
+            if(description != null){
+                umItem(GridSize.cells12) {
+                    umTypography(description,
+                        variant = TypographyVariant.body2,
+                        gutterBottom = true){
+                        css(alignTextToStart)
                     }
                 }
+            }
+        }
 
-                umItem(GridSize.cells8){
-                    umTypography(attendanceLabel?.format(attendance * 100)
-                        
-                    ){
-                        css{
-                            +alignTextToStart
-                            +StyleManager.gridListSecondaryItemDesc
-                        }
-                    }
-
-                }
-
-                umItem(GridSize.cells3){
-                    css{
-                        display = displayProperty(pending, true)
-                        paddingLeft = 5.spacingUnits
-                    }
-                    umGridContainer(GridSpacing.spacing4) {
-                        umItem(GridSize.cells4){
-                            umIconButton("check",
-                                onClick = {
-                                    onClickAccept?.invoke()
-                                },
-                                className = "${StyleManager.name}-successClass",
-                                size = IconButtonSize.small)
-                        }
-
-                        umItem(GridSize.cells4){
-                            umIconButton("close",
-                                onClick = {
-                                    onClickDecline?.invoke()
-                                },
-                                className = "${StyleManager.name}-errorClass",
-                                size = IconButtonSize.small)
-                        }
-                    }
-                }
+        if(withAction){
+            gridItem(GridSize.cells2, GridSize.cells1, alignItems = GridAlignItems.center){
+                umIconButton(iconName,
+                    size = IconButtonSize.medium,
+                    onClick = {
+                        onActionClick?.invoke(it)
+                        stopEventPropagation(it)
+                    })
             }
         }
     }
@@ -426,26 +461,28 @@ fun RBuilder.createListItemWithAttendance(
     subTitle: String, attendance: kotlin.Float = -1f,
     attendanceLabel: String){
     umGridContainer {
-        umItem(GridSize.cells3, GridSize.cells3){
+        umItem(GridSize.cells3, GridSize.cells2){
             umProfileAvatar(-1, iconName)
         }
 
-        umItem(GridSize.cells9, GridSize.cells9){
-            umItem(GridSize.cells12){
+        umItem(GridSize.cells9,GridSize.cells10){
+            umItem(GridSize.cells12, GridSize.cells12){
                 umTypography(title,
                     variant = TypographyVariant.body1){
                     css(alignTextToStart)
                 }
             }
 
-            umItem(GridSize.cells12){
-                umTypography(subTitle,
-                    variant = TypographyVariant.body2){
-                    css(alignTextToStart)
+            if(subTitle.isNotEmpty()){
+                umItem(GridSize.cells12, GridSize.cells12){
+                    umTypography(subTitle,
+                        variant = TypographyVariant.body2){
+                        css(alignTextToStart)
+                    }
                 }
             }
 
-            umItem(GridSize.cells12){
+            umItem(GridSize.cells12, GridSize.cells12){
                 umGridContainer{
                     umItem(GridSize.cells1){
                         circleIndicator(attendance)
@@ -467,7 +504,7 @@ fun RBuilder.createListItemWithAttendance(
 }
 
 
-fun RBuilder.createItemWithIconAndTitle(
+fun RBuilder.createListItemWithIconAndTitle(
     iconName: String, title: String, onClick: (() -> Unit)? = null){
     umGridContainer(GridSpacing.spacing1) {
         attrs.onClick = {
@@ -588,6 +625,37 @@ fun RBuilder.umTopBar(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+fun RBuilder.createAction(icon: String, title: String, xs: GridSize,
+                          sm: GridSize? = null, visible: Boolean = false,
+                          action:() -> Unit){
+    umItem(xs, sm){
+        css{
+            display = displayProperty(visible, true)
+        }
+
+        umPaper(variant = PaperVariant.elevation) {
+            attrs.onClick = {
+                action()
+            }
+            css {
+                +StyleManager.personDetailComponentActions
+            }
+
+            umIcon(icon){
+                css{
+                    +StyleManager.personDetailComponentActionIcon
+                }
+            }
+
+            umTypography(title,
+                variant = TypographyVariant.body1,
+                gutterBottom = true){
+                css(alignTextToStart)
             }
         }
     }

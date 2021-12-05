@@ -13,7 +13,7 @@ import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemDesc
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.util.ext.breakToWork
+import com.ustadmobile.util.ext.wordBreakLimit
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
@@ -85,7 +85,7 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
                 css(alignTextToStart)
             }
 
-            umTypography(item.schoolDesc?.breakToWork(),
+            umTypography(item.schoolDesc?.wordBreakLimit(),
                 variant = TypographyVariant.body1){
                 css{
                     display = displayProperty(item.schoolDesc != null, true)

@@ -20,6 +20,7 @@ import com.ustadmobile.util.StyleManager.chipSetFilter
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.contentEntryDetailOverviewComponentOpenBtn
 import com.ustadmobile.util.StyleManager.defaultMarginTop
+import com.ustadmobile.util.StyleManager.detailPaddingBottom
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util.ASSET_BOOK
@@ -111,7 +112,7 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
                 +defaultMarginTop
                 +contentContainer
             }
-            umGridContainer(GridSpacing.spacing6) {
+            umGridContainer(columnSpacing = GridSpacing.spacing4) {
                 umItem(GridSize.cells12, GridSize.cells4){
                     css{
                         flexDirection = FlexDirection.column
@@ -142,8 +143,10 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
                 }
 
                 umItem(GridSize.cells12, GridSize.cells8){
+                    css(detailPaddingBottom)
 
                     umGridContainer {
+
                         umItem(GridSize.cells12){
                             umTypography(entity?.title,
                                 variant = TypographyVariant.h4,

@@ -3,7 +3,6 @@ package com.ustadmobile.view
 import com.ustadmobile.core.controller.SchoolMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.SchoolMemberListView
 import com.ustadmobile.core.view.UstadView
@@ -83,7 +82,7 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
             MessageID.student
         }
 
-        showCreateNewItem = true
+        showEmptyState = false
         createNewText = "${getString(MessageID.add_new)} $addNewStringId"
 
         fabManager?.visible = true
@@ -96,7 +95,6 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
             mPresenter?.handleEnrolMember(filterBySchoolUid, memberAdded.personUid,
                 arguments[UstadView.ARG_FILTER_BY_ROLE]?.toInt() ?: 0)
         }
-        console.log(arguments.toQueryString())
 
         mPresenter = SchoolMemberListPresenter(this, arguments, this, di, this)
         mPresenter?.onCreate(mapOf())

@@ -38,12 +38,12 @@ fun String.clean(): String{
 /**
  * Breaks content into words
  */
-fun String.breakToWork(size: Int = 10): String{
+fun String.wordBreakLimit(numOfWords: Int = 10): String{
     val words = this.split("\\s+".toRegex()).map { word ->
         word.replace("""^[,\.]|[,\.]$""".toRegex(), "")
     }
-    return words.take(if(words.size < size) words.size else size)
-        .joinToString(" ") + if(words.size > size) "..." else ""
+    return words.take(if(words.size < numOfWords) words.size else numOfWords)
+        .joinToString(" ") + if(words.size > numOfWords) "..." else ""
 }
 
 /**

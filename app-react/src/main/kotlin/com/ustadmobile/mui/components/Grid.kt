@@ -102,6 +102,8 @@ fun RBuilder.gridContainer(
     alignItems: GridAlignItems = GridAlignItems.stretch,
     justify: GridJustify = GridJustify.flexStart,
     wrap: GridWrap = GridWrap.wrap,
+    columnSpacing: GridSpacing? = null,
+    rowSpacing: GridSpacing? = null,
     className: String? = null,
     handler: StyledHandler<GridProps>? = null
 ) = createStyledComponent(Grid, className, handler) {
@@ -110,6 +112,12 @@ fun RBuilder.gridContainer(
     attrs.container = true
     attrs.asDynamic().justify = justify
     attrs.spacing = spacing.size.asDynamic()
+    columnSpacing?.let{
+        attrs.columnSpacing = it.size.asDynamic()
+    }
+    rowSpacing?.let{
+        attrs.rowSpacing = it.size.asDynamic()
+    }
     attrs.wrap = wrap
 }
 

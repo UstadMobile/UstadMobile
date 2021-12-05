@@ -10,22 +10,21 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.processEnrolmentIntoClass
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.view.ClazzEnrolmentEditView
-import com.ustadmobile.door.DoorLifecycleOwner
-
-import kotlinx.coroutines.*
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import org.kodein.di.DI
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
+import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.core.view.LeavingReasonListView
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
+import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.ListSerializer
+import org.kodein.di.DI
 
 
 class ClazzEnrolmentEditPresenter(context: Any,
@@ -155,7 +154,6 @@ class ClazzEnrolmentEditPresenter(context: Any,
 
     override fun handleClickSave(entity: ClazzEnrolmentWithLeavingReason) {
         presenterScope.launch {
-
             // must be filled
             if(entity.clazzEnrolmentRole == 0){
                 view.roleSelectionError = systemImpl.getString(MessageID.field_required_prompt, context)
@@ -198,7 +196,10 @@ class ClazzEnrolmentEditPresenter(context: Any,
                 repo.clazzEnrolmentDao.updateAsync(entity)
             }
 
-            finishWithResult(safeStringify(di, ListSerializer(ClazzEnrolmentWithLeavingReason.serializer()) , listOf(entity)))
+            finishWithResult(
+                safeStringify(di, ListSerializer(ClazzEnrolmentWithLeavingReason.serializer()) ,
+                    listOf(entity))
+            )
         }
     }
 

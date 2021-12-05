@@ -3,17 +3,18 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.LeavingReasonEditView
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.LeavingReason
-
-import kotlinx.coroutines.*
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import org.kodein.di.DI
-import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.lib.db.entities.LeavingReason
+import kotlinx.coroutines.*
+import kotlinx.serialization.builtins.ListSerializer
+import org.kodein.di.DI
 
 
 class LeavingReasonEditPresenter(context: Any,
@@ -66,7 +67,8 @@ class LeavingReasonEditPresenter(context: Any,
                 repo.leavingReasonDao.updateAsync(entity)
             }
 
-            view.finishWithResult(listOf(entity))
+            finishWithResult(safeStringify(di,
+                ListSerializer(LeavingReason.serializer()), listOf(entity)))
         }
     }
 
