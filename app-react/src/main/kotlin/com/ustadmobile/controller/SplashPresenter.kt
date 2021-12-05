@@ -74,7 +74,7 @@ class SplashPresenter(private val view: SplashView): DIAware {
         val appConfigs = loadFileContentAsMap<HashMap<String, String>>("appconfig.json")
         appConfigs.forEach {
             val value = when(it.key){
-                KEY_API_URL -> "http://localhost:8090"
+                KEY_API_URL -> apiUrl
                 else -> it.value
             }
             impl.setAppPref(it.key, value, this)

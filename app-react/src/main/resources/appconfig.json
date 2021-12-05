@@ -12,8 +12,8 @@
     "app.ui_default_language": "en",
     "first_dest": "ContentEntryListTabsView",
     "app.guest_allowed": "true",
-    "apiUrl": "http://192.168.43.59:8090/",
+    "apiUrl": "http://localhost:8090/",
     "pbkdf2.iterations": "10000",
-    "doordb.endpoint.url": "http://localhost:8087/",
+    "doordb.endpoint.url": "http://localhost:8090/",
     "app.register_before_open": "true"
 }

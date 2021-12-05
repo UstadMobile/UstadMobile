@@ -65,6 +65,9 @@ dependencies {
 
 task distro {
     def destDir = rootProject.file("app-ktor-server/src/main/resources/umapp/")
+    if(destDir.exists()){
+        destDir.delete()
+    }
     destDir.mkdirs()
     doLast{
         copy {
@@ -75,4 +78,3 @@ task distro {
 }
 
 distro.dependsOn("browserDistribution")
-distro.finalizedBy(":app-ktor-server:shadowJar")
