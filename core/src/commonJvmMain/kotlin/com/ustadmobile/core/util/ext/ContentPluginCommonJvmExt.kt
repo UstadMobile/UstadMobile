@@ -2,7 +2,6 @@ package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.door.DoorUri
@@ -21,10 +20,7 @@ actual suspend fun deleteFilesForContentEntry(
         endpoint: Endpoint
 ): Int {
 
-    val torrentDirFile: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
     val db:UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
-    val torrentManager: UstadTorrentManager by di.on(endpoint).instance()
-
 
     var numberOfFailedDeletion = 0
     withContext(Dispatchers.IO) {
@@ -47,15 +43,6 @@ actual suspend fun deleteFilesForContentEntry(
             } while (zombieEntryFilesList.isNotEmpty())
         }
 
-        val containers = db.containerDao.findContainersForContentEntryUid(contentEntryUid)
-
-        containers.forEach {
-            torrentManager.removeTorrent(it.containerUid)
-            val torrentFile = File(torrentDirFile, "${it.containerUid}.torrent")
-            if(torrentFile.exists()){
-                torrentFile.delete()
-            }
-        }
     }
 
     return numberOfFailedDeletion

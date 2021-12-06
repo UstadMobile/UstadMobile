@@ -10,7 +10,6 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.io.ext.*
-import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.DoorUri
@@ -56,10 +55,6 @@ class XapiTypePluginCommonJvm(
 
     private val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
-    private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
-
-    private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
-
     override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
         val mimeType = uri.guessMimeType(context, di)
         if (mimeType != null && !supportedMimeTypes.contains(mimeType)) {
@@ -102,8 +97,6 @@ class XapiTypePluginCommonJvm(
 
                 val doorUri = DoorUri.parse(uri)
                 val localUri = process.getLocalOrCachedUri()
-                val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
-                        ?: throw IllegalArgumentException("missing tracker url")
                 val contentNeedUpload = !doorUri.isRemote()
                 val progressSize = if (contentNeedUpload) 2 else 1
                 val xapiIsProcessed = contentJobItem.cjiContainerUid != 0L
@@ -126,14 +119,9 @@ class XapiTypePluginCommonJvm(
                             localUri,
                             ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
-                    repo.writeContainerTorrentFile(
-                            container.containerUid,
-                            DoorUri.parse(torrentDir.toURI().toString()),
-                            trackerUrl, containerFolderUri)
 
                     val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
                     containerUidFolder.mkdirs()
-                    ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
 
                     contentJobItem.cjiContainerUid = container.containerUid
                     db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
@@ -151,11 +139,9 @@ class XapiTypePluginCommonJvm(
                 contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
                 progress.onProgress(contentJobItem)
 
-                val torrentFileBytes = File(torrentDir, "${contentJobItem.cjiContainerUid}.torrent").readBytes()
                 if(contentNeedUpload) {
                     uploader.upload(
-                            contentJobItem, progress, httpClient, torrentFileBytes,
-                            endpoint)
+                            contentJobItem, progress, httpClient, endpoint)
                 }
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)

@@ -3,11 +3,11 @@ package com.ustadmobile.core.db
 import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.*
-import com.ustadmobile.door.migration.*
 import com.ustadmobile.door.annotation.MinSyncVersion
 import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
+import com.ustadmobile.door.migration.*
 import com.ustadmobile.door.util.DoorSqlGenerator
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -63,7 +63,7 @@ import kotlin.jvm.JvmField
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 87)
+], version = 88)
 @MinSyncVersion(60)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -5227,39 +5227,52 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     "DROP TABLE IF EXISTS ContentEntryStatus")
         }
 
-
-        fun migrationList(nodeId: Int) = listOf<DoorMigration>(
-            MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
-            MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
-            MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
-            MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
-            MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
-            MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
-            MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
-            MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
-            MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67, migrate67to68(nodeId),
-            MIGRATION_68_69, MIGRATION_69_70, MIGRATION_70_71, MIGRATION_71_72,
-            MIGRATION_72_73, MIGRATION_73_74, MIGRATION_74_75, MIGRATION_75_76,
-            MIGRATION_76_77, MIGRATION_77_78, MIGRATION_78_79, MIGRATION_78_79,
-            MIGRATION_79_80, MIGRATION_80_81, MIGRATION_81_82, MIGRATION_82_83,
-                MIGRATION_84_85, MIGRATION_85_86, MIGRATION_86_87
-        )
-
-        internal fun migrate67to68(nodeId: Int)= DoorMigrationSync(67, 68) { database ->
+        val MIGRATION_87_88 = DoorMigrationStatementList(87, 88) { database ->
             if (database.dbType() == DoorDbType.SQLITE) {
-                database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                listOf("ALTER TABLE Site RENAME to Site_OLD",
+                        "CREATE TABLE IF NOT EXISTS Site (  sitePcsn  INTEGER  NOT NULL , siteLcsn  INTEGER  NOT NULL , siteLcb  INTEGER  NOT NULL , siteLct  INTEGER  NOT NULL , siteName  TEXT , guestLogin  INTEGER  NOT NULL , registrationAllowed  INTEGER  NOT NULL , authSalt  TEXT , siteUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )",
+                        "INSERT INTO Site (siteUid, sitePcsn, siteLcsn, siteLcb, siteLct, siteName, guestLogin, registrationAllowed, authSalt) SELECT siteUid, sitePcsn, siteLcsn, siteLcb, siteLct, siteName, guestLogin, registrationAllowed, authSalt FROM Site_OLD",
+                        "DROP TABLE Site_OLD"
+                )
             } else {
-                database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  SERIAL  PRIMARY KEY  NOT NULL )")
+                listOf("ALTER TABLE Site DROP COLUMN IF EXISTS torrentAnnounceUrl")
             }
 
-            database.execSQL(
-                """
-                UPDATE SyncNode
-                   SET nodeClientId = $nodeId
-            """.trimIndent()
-            )
-        }
+}
+
+
+fun migrationList(nodeId: Int) = listOf<DoorMigration>(
+    MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
+    MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
+    MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
+    MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
+    MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
+    MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
+    MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
+    MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
+    MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67, migrate67to68(nodeId),
+    MIGRATION_68_69, MIGRATION_69_70, MIGRATION_70_71, MIGRATION_71_72,
+    MIGRATION_72_73, MIGRATION_73_74, MIGRATION_74_75, MIGRATION_75_76,
+    MIGRATION_76_77, MIGRATION_77_78, MIGRATION_78_79, MIGRATION_78_79,
+    MIGRATION_79_80, MIGRATION_80_81, MIGRATION_81_82, MIGRATION_82_83,
+    MIGRATION_84_85, MIGRATION_85_86, MIGRATION_86_87, MIGRATION_87_88
+)
+
+internal fun migrate67to68(nodeId: Int)= DoorMigrationSync(67, 68) { database ->
+    if (database.dbType() == DoorDbType.SQLITE) {
+        database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+    } else {
+        database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  SERIAL  PRIMARY KEY  NOT NULL )")
     }
+
+    database.execSQL(
+        """
+        UPDATE SyncNode
+           SET nodeClientId = $nodeId
+    """.trimIndent()
+    )
+}
+}
 
 
 }

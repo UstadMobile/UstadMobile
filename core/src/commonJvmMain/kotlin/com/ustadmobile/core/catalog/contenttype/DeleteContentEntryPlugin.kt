@@ -5,8 +5,6 @@ import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ContentPluginIds.DELETE_CONTENT_ENTRY_PLUGIN
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.torrent.UstadTorrentManager
-import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag

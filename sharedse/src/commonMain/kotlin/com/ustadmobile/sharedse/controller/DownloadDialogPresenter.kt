@@ -213,6 +213,7 @@ class DownloadDialogPresenter(
         }
         currentJobId = job.cjUid
 
+        // TODO new plugin for download
         ContentJobItem().apply {
             cjiJobUid = job.cjUid
             sourceUri = "" // TODO entry ?

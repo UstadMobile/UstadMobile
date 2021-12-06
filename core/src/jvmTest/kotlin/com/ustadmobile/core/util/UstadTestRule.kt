@@ -109,8 +109,6 @@ class UstadTestRule: TestWatcher() {
         }
 
 
-        val trackerUrl = URL("http://127.0.0.1:6677/announce")
-
         diModule = DI.Module("UstadTestRule") {
             bind<UstadMobileSystemImpl>() with singleton { systemImplSpy }
             bind<UstadAccountManager>() with singleton {
@@ -145,7 +143,6 @@ class UstadTestRule: TestWatcher() {
                     it.siteDao.insert(Site().apply {
                         siteName = "Test"
                         authSalt = randomString(16)
-                        torrentAnnounceUrl = trackerUrl.toURI().toString()
                     })
                 }
             }
@@ -172,11 +169,6 @@ class UstadTestRule: TestWatcher() {
 
             bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
                 xppFactory
-            }
-            bind<File>(tag = DiTag.TAG_TORRENT_DIR) with scoped(endpointScope).singleton {
-                val torrentFolder = File(tempFolder, "torrentDir")
-                torrentFolder.mkdirs()
-                torrentFolder
             }
             bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(endpointScope).singleton {
                 val containerFolder = File(tempFolder, "containerDir")

@@ -8,7 +8,6 @@ import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.*
-import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.alternative
 import com.ustadmobile.core.view.EpubContentView
@@ -52,13 +51,9 @@ class EpubTypePluginCommonJvm(
 
     private val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
-    private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
-
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
-
-    private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
     override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
             val mimeType = uri.guessMimeType(context, di)
@@ -127,8 +122,6 @@ class EpubTypePluginCommonJvm(
                     val contentNeedUpload = !uri.isRemote()
                     val progressSize = if (contentNeedUpload) 2 else 1
                     val localUri = process.getLocalOrCachedUri()
-                    val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
-                            ?: throw IllegalArgumentException("missing tracker url")
                     val epubIsProcessed = contentJobItem.cjiContainerUid != 0L
 
                     if(!epubIsProcessed) {
@@ -150,15 +143,8 @@ class EpubTypePluginCommonJvm(
                                 localUri,
                                 ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
-                        repo.writeContainerTorrentFile(
-                                container.containerUid,
-                                DoorUri.parse(torrentDir.toURI().toString()),
-                                trackerUrl, containerFolderUri
-                        )
-
                         val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
                         containerUidFolder.mkdirs()
-                        ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
 
                         contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
                         progress.onProgress(contentJobItem)
@@ -176,12 +162,10 @@ class EpubTypePluginCommonJvm(
                         }
                     }
 
-
-                    val torrentFileBytes = File(torrentDir, "${contentJobItem.cjiContainerUid}.torrent").readBytes()
+                    // TODO upload
                     if(contentNeedUpload) {
                         uploader.upload(
-                            contentJobItem, progress, httpClient, torrentFileBytes,
-                            endpoint)
+                                contentJobItem, progress, httpClient, endpoint)
                     }
 
                     return@withContext ProcessResult(JobStatus.COMPLETE)

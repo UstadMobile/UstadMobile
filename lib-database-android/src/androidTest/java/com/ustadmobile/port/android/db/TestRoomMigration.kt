@@ -571,6 +571,16 @@ class TestRoomMigration {
                 UmAppDatabase.MIGRATION_86_87.asRoomMigration())
     }
 
+    @Test
+    fun migrate87to88(){
+        helper.createDatabase(TEST_DB, 87).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 88, true,
+                UmAppDatabase.MIGRATION_87_88.asRoomMigration())
+    }
+
     companion object {
         const val TEST_DB = "migration-test"
     }

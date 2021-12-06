@@ -32,7 +32,6 @@ import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.networkmanager.*
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
-import com.ustadmobile.core.torrent.*
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
@@ -119,14 +118,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
             }).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
                 it.setupAssignmentSyncListener(context, di)
-                // start seeding
-                di.on(context).direct.instance<UstadTorrentManager>()
             }
-        }
-        bind<File>(tag = DiTag.TAG_TORRENT_DIR) with scoped(EndpointScope.Default).singleton{
-            val torrentDir = File(applicationContext.filesDir.siteDataSubDir(context), "torrent")
-            torrentDir.mkdirs()
-            torrentDir
         }
 
         bind<ContainerStorageManager> () with scoped(EndpointScope.Default).singleton{
@@ -197,9 +189,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<VideoTypePluginAndroid>() with scoped(EndpointScope.Default).singleton{
             VideoTypePluginAndroid(applicationContext, context, di)
         }
-        bind<ContainerTorrentDownloadJob>() with scoped(EndpointScope.Default).singleton{
-            ContainerTorrentDownloadJob(applicationContext, context, di)
-        }
 
         bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
             ContentPluginManager(listOf(
@@ -207,7 +196,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
                     di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
                     di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
                     di.on(context).direct.instance<VideoTypePluginAndroid>(),
-                    di.on(context).direct.instance<ContainerTorrentDownloadJob>(),
                     FolderIndexerPlugin(applicationContext, context, di),
                     DeleteContentEntryPlugin(applicationContext, context, di)))
         }
@@ -257,23 +245,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<XmlPullParserFactory>().newSerializer()
         }
 
-        bind<CommunicationWorkers>() with singleton {
-            CommunicationWorkers()
-        }
-
         bind<DestinationProvider>() with singleton {
             ViewNameToDestMap()
         }
 
-        bind<UstadTorrentManager>() with scoped(EndpointScope.Default).singleton {
-            UstadTorrentManagerImpl(endpoint = context, di = di).also{
-                instance<ConnectionManager>().addCommunicationManagerListener(it)
-            }
-        }
-
-        bind<UstadCommunicationManager>() with provider {
-            instance<ConnectionManager>().requireCommunicationManager()
-        }
 
         bind<Pbkdf2Params>() with singleton {
             val systemImpl: UstadMobileSystemImpl = instance()

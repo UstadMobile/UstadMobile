@@ -1,23 +1,16 @@
 package com.ustadmobile.core.catalog.contenttype
 
 
-import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
-import com.ustadmobile.core.torrent.CommunicationWorkers
-import com.ustadmobile.core.torrent.UstadCommunicationManager
-import com.ustadmobile.core.torrent.UstadTorrentManager
-import com.ustadmobile.core.torrent.UstadTorrentManagerImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
@@ -28,8 +21,6 @@ import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
-import java.net.InetAddress
-import java.net.URL
 import java.util.zip.GZIPInputStream
 import java.util.zip.ZipFile
 
@@ -64,21 +55,6 @@ class H5PTypePluginTest {
         endpointScope = EndpointScope()
         di = DI {
             import(ustadTestRule.diModule)
-            val trackerUrl = URL("http://127.0.0.1:6677/announce")
-            bind<UstadTorrentManager>() with scoped(endpointScope).singleton {
-                UstadTorrentManagerImpl(endpoint = context, di = di)
-            }
-            bind<UstadCommunicationManager>() with singleton {
-                UstadCommunicationManager(CommunicationWorkers())
-            }
-            onReady {
-                instance<UstadCommunicationManager>().start(InetAddress.getByName(trackerUrl.host))
-                GlobalScope.launch {
-                    val ustadTorrentManager: UstadTorrentManager = di.on(Endpoint("localhost")).direct.instance()
-                    ustadTorrentManager.startSeeding()
-
-                }
-            }
         }
 
 

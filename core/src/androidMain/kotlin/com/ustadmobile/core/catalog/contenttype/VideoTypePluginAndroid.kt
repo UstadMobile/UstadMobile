@@ -15,7 +15,6 @@ import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.*
-import com.ustadmobile.core.torrent.UstadTorrentManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.ext.toDoorUri
@@ -55,11 +54,7 @@ class VideoTypePluginAndroid(
 
     private val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
-    private val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
-
     private val httpClient: HttpClient = di.direct.instance()
-
-    private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
     override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
         return getEntry(uri, process)
@@ -74,8 +69,6 @@ class VideoTypePluginAndroid(
             val videoUri = DoorUri.parse(uri)
             val contentNeedUpload = !videoUri.isRemote()
             val localUri = process.getLocalOrCachedUri()
-            val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
-                    ?: throw IllegalArgumentException("missing tracker url")
 
             val progressSize = if(contentNeedUpload) 2 else 1
 
@@ -206,16 +199,6 @@ class VideoTypePluginAndroid(
                     }
                     videoTempDir.delete()
 
-                    repo.writeContainerTorrentFile(
-                            container.containerUid,
-                            DoorUri.parse(torrentDir.toURI().toString()),
-                            trackerUrl, containerFolderUri
-                    )
-
-                    val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
-                    containerUidFolder.mkdirs()
-                    ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
-
                     contentJobItem.cjiContainerUid = container.containerUid
                     db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
 
@@ -230,11 +213,10 @@ class VideoTypePluginAndroid(
 
                 }
 
-                val torrentFileBytes = File(torrentDir, "${contentJobItem.cjiContainerUid}.torrent").readBytes()
+                // TODO upload
                 if(contentNeedUpload) {
                     uploader.upload(
-                            contentJobItem, jobProgress, httpClient, torrentFileBytes,
-                            endpoint)
+                            contentJobItem, jobProgress, httpClient, endpoint)
                 }
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)
@@ -279,12 +261,6 @@ class VideoTypePluginAndroid(
             }
             MetadataResult(entry, pluginId)
         }
-    }
-
-    companion object {
-
-        val MEDIA_TYPE_TORRENT = "application/x-bittorrent"
-
     }
 
 }

@@ -1,6 +1,5 @@
 package com.ustadmobile.core.io.ext
 
-import com.turn.ttorrent.common.creation.MetadataBuilder
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.encodeBase64
@@ -25,7 +24,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.coroutines.NonCancellable
 import com.ustadmobile.core.contentformats.har.HarEntry
 import com.ustadmobile.core.contentjob.ConnectivityCancellationException
-import com.ustadmobile.core.torrent.ContainerTorrentDownloadJob.Companion.MANIFEST_FILE_NAME
 import com.ustadmobile.core.util.createSymLink
 import com.ustadmobile.lib.db.entities.ContainerManifest
 import java.util.Base64
@@ -68,61 +66,6 @@ actual suspend fun UmAppDatabase.addFileToContainer(containerUid: Long, fileUri:
     addFileResult.addFiles(db)
 
     containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
-}
-
-actual suspend fun UmAppDatabase.writeContainerTorrentFile(
-        containerUid: Long,
-        torrentDirUri: com.ustadmobile.door.DoorUri,
-        trackerUrl: String,
-        containerFolderUri: com.ustadmobile.door.DoorUri){
-
-    val repo = this as? DoorDatabaseRepository
-            ?: throw IllegalStateException("Must use repo for addTorrentFileFromContainer")
-    val db = repo.db as UmAppDatabase
-    val torrentServerFolder = torrentDirUri.toFile()
-
-    val torrentFile = File(torrentServerFolder, "$containerUid.torrent")
-
-    val container = containerDao.findByUid(containerUid)
-
-    val fileList = db.containerEntryDao.findByContainer(containerUid)
-
-    val containerFolder = containerFolderUri.toFile()
-    val containerUidFolder = File(containerFolder, containerUid.toString())
-    containerUidFolder.mkdirs()
-    val manifestFile = File(containerUidFolder, MANIFEST_FILE_NAME)
-
-    val entryFileMap = mutableMapOf<String, MutableList<String>>()
-    fileList.forEach {
-        val md5 = it.containerEntryFile?.cefMd5 ?: return@forEach
-        val listOfPaths = entryFileMap[md5] ?: mutableListOf()
-        it.cePath?.let { path -> listOfPaths.add(path) }
-        entryFileMap[md5] = listOfPaths
-    }
-
-    val sortedList = fileList
-            .distinctBy { it.containerEntryFile?.cefMd5 }
-            .sortedBy { it.containerEntryFile?.cefMd5 }
-
-    val torrentBuilder = MetadataBuilder()
-            .addTracker(trackerUrl)
-            .setDirectoryName("container$containerUid")
-            .setCreatedBy("UstadMobile")
-
-    sortedList.forEach {
-        val path = it.containerEntryFile?.cefPath ?: return@forEach
-        torrentBuilder.addFile(File(path))
-    }
-
-    val containerManifest = ContainerManifest(container, entryFileMap)
-    val manifestJson: String =  Json.encodeToString(
-            ContainerManifest.serializer(), containerManifest)
-    manifestFile.writeText(manifestJson)
-
-    torrentBuilder.addFile(manifestFile)
-
-    torrentFile.writeBytes(torrentBuilder.buildBinary())
-
 }
 
 

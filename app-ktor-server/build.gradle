@@ -46,7 +46,6 @@ dependencies {
     implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
     implementation "io.github.bonigarcia:webdrivermanager:$version_chrome_manager"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
-    implementation "com.github.SamihMustafa:ttorrent:$version_ttorrent"
 
     implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
     implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"

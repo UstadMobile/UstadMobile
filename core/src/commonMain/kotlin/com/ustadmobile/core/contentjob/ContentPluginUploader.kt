@@ -11,10 +11,9 @@ import io.ktor.client.*
 fun interface ContentPluginUploader {
 
     suspend fun upload(
-        contentJobItem: ContentJobItem,
-        progress: ContentJobProgressListener,
-        httpClient: HttpClient,
-        torrentFileBytes: ByteArray,
-        endpoint: Endpoint
+            contentJobItem: ContentJobItem,
+            progress: ContentJobProgressListener,
+            httpClient: HttpClient,
+            endpoint: Endpoint
     )
 }
