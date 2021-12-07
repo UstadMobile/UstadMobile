@@ -57,7 +57,9 @@ import kotlin.jvm.JvmField
     UpdateNotification::class,
     ChangeLog::class,
     ZombieAttachmentData::class,
-    DoorNode::class
+    DoorNode::class,
+
+    UserSessionTrkr::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES

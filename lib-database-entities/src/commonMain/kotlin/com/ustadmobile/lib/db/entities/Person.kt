@@ -95,6 +95,9 @@ open class Person() {
 
     var personCountry: String? = null
 
+    var personType: Int = 0
+
+
     fun fullName():String{
         var f = ""
         var l = ""
@@ -183,6 +186,9 @@ open class Person() {
 
         const val GENDER_OTHER = 4
 
+        const val TYPE_NORMAL_PERSON = 0
+
+        const val TYPE_SYSTEM = 1
 
         const val JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1 = """
             JOIN ScopedGrant

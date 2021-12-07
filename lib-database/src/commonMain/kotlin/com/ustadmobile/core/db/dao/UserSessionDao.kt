@@ -1,16 +1,50 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
+import androidx.room.Entity
 import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.lib.db.entities.UserSessionAndPerson
 
 @Dao
 @Repository
 abstract class UserSessionDao {
+
+    @Query("""
+        REPLACE INTO UserSessionTrkr(usForeignKey, usVersionId, usDestination)
+         SELECT UserSessionSubject.usUid AS usForeignKey,
+                UserSessionSubject.usLct AS usVersionId,
+                /*UserSession.usClientNodeId AS usDestination */
+                DoorNode.nodeId AS usDestination
+           FROM ChangeLog
+                JOIN UserSession UserSessionSubject
+                     ON ChangeLog.chTableId = ${UserSession.TABLE_ID}
+                        AND ChangeLog.chEntityPk = UserSessionSubject.usUid
+                JOIN DoorNode
+                     ON (:newNodeId = 0 OR DoorNode.nodeId = :newNodeId)
+                /*        
+                JOIN Person 
+                     ON UserSessionSubject.usPersonUid = Person.personUid
+                ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_SELECT}) > 0
+                JOIN UserSession 
+                     ON UserSession.usPersonUid = Person.personUid 
+                        AND (:newNodeId = 0 OR UserSession.usClientNodeId = :newNodeId)
+                */        
+          WHERE UserSessionSubject.usLct != COALESCE(
+                (SELECT usVersionId
+                   FROM UserSessionTrkr
+                  WHERE UserSessionTrkr.usForeignKey = UserSessionSubject.usUid
+                    AND UserSessionTrkr.usDestination = DoorNode.nodeId/*UserSession.usClientNodeId*/), 0)
+    """)
+    @ReplicationRunOnChange(value = [UserSession::class])
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([UserSession::class])
+    abstract suspend fun updateReplicationTrackers(@NewNodeIdParam newNodeId: Long)
 
     @Insert
     abstract suspend fun insertSession(session: UserSession): Long

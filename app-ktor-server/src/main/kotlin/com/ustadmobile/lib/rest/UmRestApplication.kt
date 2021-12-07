@@ -354,7 +354,9 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         ContainerDownload()
         personAuthRegisterRoute()
         ContainerMountRoute()
-        UmAppDatabase_KtorRoute(true)
+        route("UmAppDatabase") {
+            UmAppDatabase_KtorRoute(true)
+        }
         SiteRoute()
         ContentEntryLinkImporter()
         TorrentFileRoute()

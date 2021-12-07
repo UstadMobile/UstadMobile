@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.impl
 
+import android.app.Application
 import android.content.Context
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
@@ -17,8 +18,7 @@ import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobManagerAndroid
 import com.ustadmobile.core.contentjob.ContentPluginManager
-import com.ustadmobile.core.db.ContentJobItemTriggersCallback
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
@@ -29,7 +29,7 @@ import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.NanoHttpdCall
-import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.android.generated.MessageIDMap
@@ -40,7 +40,6 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndp
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.*
-import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_ITERATIONS
@@ -66,15 +65,15 @@ import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.doorDatabaseMetadata
+import com.ustadmobile.door.replication.ReplicationNotificationDispatcher
+import com.ustadmobile.door.replication.ReplicationSubscriptionManager
 import kotlinx.coroutines.*
+import kotlinx.serialization.json.Json
 import java.net.URI
 import java.util.concurrent.Executors
 
-/**
- * Note: BaseUstadApp extends MultidexApplication on the multidex variant, but extends the
- * normal android.app.Application on non-multidex variants.
- */
-open class UstadApp : BaseUstadApp(), DIAware {
+open class UstadApp : Application(), DIAware {
 
     val diModule = DI.Module("UstadApp-Android") {
         import(commonJvmDiModule)
@@ -97,7 +96,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
             val dbName = sanitizeDbNameFromUrl(context.url)
             val nodeIdAndAuth: NodeIdAndAuth = instance()
             DatabaseBuilder.databaseBuilder(applicationContext, UmAppDatabase::class, dbName)
-                .addSyncCallback(nodeIdAndAuth, false)
+                .addSyncCallback(nodeIdAndAuth)
                     .addCallback(ContentJobItemTriggersCallback())
                 .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                 .build()
@@ -107,10 +106,24 @@ open class UstadApp : BaseUstadApp(), DIAware {
                 }
         }
 
+        bind<ReplicationNotificationDispatcher>() with scoped(EndpointScope.Default).singleton {
+            val db = instance<UmAppDatabase>(tag = TAG_DB)
+            ReplicationNotificationDispatcher(db, UmAppDatabase_ReplicationRunOnChangeRunner(db),
+                GlobalScope)
+        }
+
+        bind<Json>() with singleton {
+            Json {
+                encodeDefaults = true
+            }
+        }
+
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
             val nodeIdAndAuth: NodeIdAndAuth = instance()
-            instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(applicationContext,
-                context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, instance(), instance()
+            val db = instance<UmAppDatabase>(tag = TAG_DB)
+            db.asRepository(repositoryConfig(applicationContext,
+                "${context.url}UmAppDatabase/", nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
+                    instance(), instance()
             ) {
                 attachmentsDir = File(applicationContext.filesDir.siteDataSubDir(this@singleton.context),
                     UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME).absolutePath
@@ -118,7 +131,16 @@ open class UstadApp : BaseUstadApp(), DIAware {
                 attachmentFilters += ImageResizeAttachmentFilter("PersonPicture", 1280, 1280)
             }).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
-                it.setupAssignmentSyncListener(context, di)
+
+                val repSubscriptionListener = RepSubscriptionInitListener()
+                //Start replication subscription
+                //TODO: Change this to use a constant defined in the file
+                ReplicationSubscriptionManager(88, instance(), instance(),
+                    it as DoorDatabaseRepository,
+                    GlobalScope, UmAppDatabase::class.doorDatabaseMetadata(), UmAppDatabase::class,
+                    onSubscriptionInitialized = repSubscriptionListener)
+
+                //it.setupAssignmentSyncListener(context, di)
                 // start seeding
                 di.on(context).direct.instance<UstadTorrentManager>()
             }

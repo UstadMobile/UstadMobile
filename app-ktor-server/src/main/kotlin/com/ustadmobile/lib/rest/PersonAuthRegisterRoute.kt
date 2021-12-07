@@ -42,7 +42,7 @@ fun Route.personAuthRegisterRoute() {
             val password = call.request.queryParameters["password"]
             val maxDateOfBirth = call.request.queryParameters["maxDateOfBirth"]?.toLong() ?: 0L
 
-            val deviceId = call.request.header("X-nid")?.toInt()
+            val deviceId = call.request.header("X-nid")?.toLong()
             if(username == null || password == null || deviceId == null){
                 call.respond(HttpStatusCode.BadRequest, "No username/password provided, or no device id")
                 return@post

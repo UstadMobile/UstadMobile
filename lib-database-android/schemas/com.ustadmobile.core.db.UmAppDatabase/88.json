@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 88,
-    "identityHash": "c262d97d96db8019c99c399ac2c8261f",
+    "identityHash": "8f938b029df5a40c0b48dbda3da0c224",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -995,7 +995,7 @@
       },
       {
         "tableName": "Person",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personOrgId` TEXT, `personGroupUid` INTEGER NOT NULL, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL, `personLct` INTEGER NOT NULL, `personCountry` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personOrgId` TEXT, `personGroupUid` INTEGER NOT NULL, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL, `personLct` INTEGER NOT NULL, `personCountry` TEXT, `personType` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "personUid",
@@ -1134,6 +1134,12 @@
             "columnName": "personCountry",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "personType",
+            "columnName": "personType",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -6059,7 +6065,7 @@
       },
       {
         "tableName": "DoorNode",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`nodeId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `auth` TEXT, `endpoint` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`nodeId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `auth` TEXT, `rel` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "nodeId",
@@ -6074,10 +6080,10 @@
             "notNull": false
           },
           {
-            "fieldPath": "endpoint",
-            "columnName": "endpoint",
-            "affinity": "TEXT",
-            "notNull": false
+            "fieldPath": "rel",
+            "columnName": "rel",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -6088,12 +6094,52 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "UserSessionTrkr",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`usForeignKey` INTEGER NOT NULL, `usVersionId` INTEGER NOT NULL, `usDestination` INTEGER NOT NULL, `usTrkrProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`usForeignKey`, `usVersionId`))",
+        "fields": [
+          {
+            "fieldPath": "usForeignKey",
+            "columnName": "usForeignKey",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "usVersionId",
+            "columnName": "usVersionId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "usDestination",
+            "columnName": "usDestination",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "usTrkrProcessed",
+            "columnName": "usTrkrProcessed",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "usForeignKey",
+            "usVersionId"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c262d97d96db8019c99c399ac2c8261f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8f938b029df5a40c0b48dbda3da0c224')"
     ]
   }
 }
