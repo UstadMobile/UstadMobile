@@ -19,7 +19,6 @@ import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.css.padding
-import kotlinx.html.js.onClickFunction
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
@@ -38,12 +37,14 @@ class HolidayCalendarEditComponent(mProps: UmProps): UstadEditComponent<HolidayC
     override val viewName: String
         get() = HolidayCalendarEditView.VIEW_NAME
 
-    private var holidays: List<Holiday>? = null
+    private var holidays: List<Holiday> = listOf()
 
-    private val holidayObserver = ObserverFnWrapper<List<Holiday>?> {
-        setState {
-            holidays = it
-        }
+    private val holidayObserver = ObserverFnWrapper<List<Holiday>> {
+        if(!it.isNullOrEmpty())
+            console.log(it.map { x -> x.holUid.toString()})
+            setState {
+                holidays = it
+            }
     }
 
     override var holidayList: DoorLiveData<List<Holiday>>? = null
@@ -111,10 +112,8 @@ class HolidayCalendarEditComponent(mProps: UmProps): UstadEditComponent<HolidayC
                 mPresenter?.holidayToManyJoinListener?.onClickEdit(Holiday())
             }
 
-            holidays?.let { holidays ->
-                renderHolidays(holidays, newItem){ holiday ->
-                    mPresenter?.holidayToManyJoinListener?.onClickEdit(holiday)
-                }
+            renderHolidays(holidays, newItem){ holiday ->
+                mPresenter?.holidayToManyJoinListener?.onClickEdit(holiday)
             }
         }
     }
@@ -130,9 +129,9 @@ class HolidayCalendarEditComponent(mProps: UmProps): UstadEditComponent<HolidayC
 
 class HolidayListComponent(mProps: ListProps<Holiday>): UstadSimpleList<ListProps<Holiday>>(mProps){
     override fun RBuilder.renderListItem(item: Holiday, onClick: (Event) -> Unit) {
-        styledDiv {
-            attrs.onClickFunction = {
-                onClick.invoke(it)
+        umGridContainer {
+            attrs.onClick = {
+                onClick.invoke(it.nativeEvent)
             }
 
             createItemWithIconTitleAndDescription("date_range",item.holName,

@@ -75,7 +75,7 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
         filterByRole = arguments[UstadView.ARG_FILTER_BY_ROLE]?.toInt() ?: 0
         filterBySchoolUid = arguments[UstadView.ARG_FILTER_BY_SCHOOLUID]?.toLong() ?: 0
         roleStudent = filterByRole != Role.ROLE_SCHOOL_STAFF_UID
-
+        showEmptyState = true
         addNewStringId = if (filterByRole == Role.ROLE_SCHOOL_STAFF_UID) {
             MessageID.teacher
         } else {

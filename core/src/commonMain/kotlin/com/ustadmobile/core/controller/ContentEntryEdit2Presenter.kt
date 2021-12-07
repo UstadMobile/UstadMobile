@@ -253,7 +253,6 @@ class ContentEntryEdit2Presenter(context: Any,
                         systemImpl.popBack(popUpTo, popUpInclusive = true, context)
                         return@launch
 
-
                     } else {
 
                         var client: HttpResponse? = null

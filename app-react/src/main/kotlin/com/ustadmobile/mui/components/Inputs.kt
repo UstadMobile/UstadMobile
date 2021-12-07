@@ -1,12 +1,14 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.mui.ext.createStyledComponent
+import kotlinx.css.color
 import mui.material.Input
 import mui.material.InputProps
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.dom.html.InputType
 import styled.StyledHandler
+import styled.css
 
 fun RBuilder.umInput(
     value: Any? = null,
@@ -24,6 +26,7 @@ fun RBuilder.umInput(
     name: String? = null,
     multiline: Boolean = false,
     rows: Int? = null,
+    textColor: kotlinx.css.Color,
     rowsMax: Int? = null,
     onChange: ((Event) -> Unit)? = null,
     className: String? = null,
@@ -48,5 +51,9 @@ fun RBuilder.umInput(
     rows?.let { attrs.rows = it }
     rowsMax?.let { attrs.maxRows = it }
     attrs.type = type.toString()
+    attrs.color = "#fff"
     value?.let { attrs.value = it }
+    css {
+        color = textColor
+    }
 }

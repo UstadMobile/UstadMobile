@@ -28,6 +28,7 @@ import com.ustadmobile.util.StyleManager.listComponentContainer
 import com.ustadmobile.util.StyleManager.listCreateNewContainer
 import com.ustadmobile.util.StyleManager.selectionContainer
 import com.ustadmobile.util.StyleManager.theme
+import com.ustadmobile.util.ThemeManager.isDarkModeActive
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.util.ext.format
@@ -186,7 +187,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
         window.setTimeout({
             searchManager?.searchListener = listPresenter
-        }, 100)
+        }, UI_LISTENER_TIMEOUT)
     }
 
     override fun RBuilder.render() {
@@ -236,6 +237,10 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                   }
               }
           }
+
+          window.setTimeout({
+              loading = false
+          }, UI_LISTENER_TIMEOUT)
       }
     }
 
@@ -407,7 +412,8 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                 +chipSetFilter
             }
             listFilterOptionChips?.forEach { chip ->
-                val mColor = if(chip == checkedFilterOptionChip) ChipColor.primary
+                val mColor = if(chip == checkedFilterOptionChip)
+                    if(isDarkModeActive()) ChipColor.secondary else ChipColor.primary
                 else ChipColor.default
                 umChip(chip.description,
                     color = mColor) {
@@ -527,5 +533,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                 SelectionOption.MOVE to "drive_file_move",
                 SelectionOption.HIDE to "visibility",
                 SelectionOption.UNHIDE to "visibility_of")
+
+        val UI_LISTENER_TIMEOUT = 100
     }
 }

@@ -34,7 +34,6 @@ object RouteManager {
         UstadDestination(view = XapiPackageContentView.VIEW_NAME, component = XapiPackageContentComponent::class),
         UstadDestination(view = VideoContentView.VIEW_NAME, component = VideoContentComponent::class),
         UstadDestination(view = TimeZoneListView.VIEW_NAME, component = TimeZoneListComponent::class, showSearch = true),
-        UstadDestination(view = SiteEnterLinkView.VIEW_NAME, component = SiteEnterLinkComponent::class),
         UstadDestination(view = HolidayCalendarListView.VIEW_NAME, component = HolidayCalendarListComponent::class, showSearch = true),
         UstadDestination(view = HolidayCalendarEditView.VIEW_NAME, component = HolidayCalendarEditComponent::class),
         UstadDestination(view = HolidayEditView.VIEW_NAME, component = HolidayEditComponent::class),
@@ -70,6 +69,11 @@ object RouteManager {
      */
     val defaultDestination: UstadDestination = destinationList.first {
         it.view == RedirectView.VIEW_NAME
+    }
+
+
+    val firstDestination: UstadDestination = destinationList.first {
+        it.view == ContentEntryListTabsView.VIEW_NAME
     }
 
     /**

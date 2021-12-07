@@ -1,7 +1,6 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -38,9 +37,6 @@ import com.ustadmobile.view.ext.renderRoutes
 import com.ustadmobile.view.ext.umTopBar
 import kotlinext.js.jsObject
 import kotlinx.browser.window
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.css.Display
 import kotlinx.css.display
 import kotlinx.css.padding
@@ -68,20 +64,9 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
         }
     }
 
-    private val activeAccountObserver:(UmAccount?) -> Unit = {
-        GlobalScope.launch(Dispatchers.Main) {
-            setState {
-                activeAccount = it
-            }
-        }
-    }
-
     override fun componentWillMount() {
         super.componentWillMount()
         subscribe(appStateChangeListener)
-
-        accountManager.activeAccountLive.observeWithLifecycleOwner(this,
-            activeAccountObserver)
 
         window.addEventListener("hashchange", {
             onDestinationChanged()
@@ -105,6 +90,7 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
 
         setState {
             currentDestination = destination
+            activeAccount = accountManager.activeAccount
         }
     }
 

@@ -20,6 +20,7 @@ import com.ustadmobile.util.StyleManager.gridListSecondaryItemDesc
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
 import com.ustadmobile.util.StyleManager.listItemCreateNewDiv
 import com.ustadmobile.util.StyleManager.mainComponentErrorPaper
+import com.ustadmobile.util.StyleManager.mainComponentProfileInnerAvatar
 import com.ustadmobile.util.StyleManager.mainComponentSearch
 import com.ustadmobile.util.StyleManager.mainComponentSearchIcon
 import com.ustadmobile.util.StyleManager.personListItemAvatar
@@ -252,7 +253,7 @@ fun RBuilder.createItemWithIconTitleAndDescription(
     description: String? = null,
     scaleOnLargeSmall: Boolean = false){
 
-    umGridContainer(GridSpacing.spacing4) {
+    umGridContainer(columnSpacing = GridSpacing.spacing2) {
         umItem(GridSize.cells2, if(scaleOnLargeSmall) GridSize.cells2 else GridSize.cells1){
             umProfileAvatar(-1,iconName)
         }
@@ -600,6 +601,7 @@ fun RBuilder.umTopBar(
                 }
 
                 umInput(placeholder = searchLabel,
+                    textColor = Color.white,
                     disableUnderline = true) {
                     attrs.asDynamic().inputProps = object: Props {
                         val className = "${StyleManager.name}-mainComponentInputSearchClass"
@@ -616,7 +618,7 @@ fun RBuilder.umTopBar(
                 attrs.onClick = { onClick?.invoke() }
 
                 umAvatar{
-                    css (StyleManager.mainComponentProfileInnerAvatar)
+                    css (mainComponentProfileInnerAvatar)
                     umTypography("${name?.first()}",
                         align = TypographyAlign.center,
                         variant = TypographyVariant.h5){

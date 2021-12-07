@@ -8,10 +8,9 @@ import com.ustadmobile.lib.db.entities.ScopedGrantAndName
 import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
 import com.ustadmobile.view.ext.createItemWithIconTitleDescriptionAndIconBtn
 import com.ustadmobile.view.ext.permissionListText
-import kotlinx.html.js.onClickFunction
+import com.ustadmobile.view.ext.umGridContainer
 import org.w3c.dom.events.Event
 import react.RBuilder
-import styled.styledDiv
 
 
 class ScopeGrantListComponent(mProps: ListProps<ScopedGrantAndName>): UstadSimpleList<ListProps<ScopedGrantAndName>>(mProps){
@@ -30,9 +29,9 @@ class ScopeGrantListComponent(mProps: ListProps<ScopedGrantAndName>): UstadSimpl
                 }
             }
         }else{
-            styledDiv {
-                attrs.onClickFunction = {
-                    onClick.invoke(it)
+            umGridContainer {
+                attrs.onClick = {
+                    onClick.invoke(it.nativeEvent)
                 }
                 createItemWithIconTitleAndDescription("admin_panel_settings",
                     item.name, permissionList)

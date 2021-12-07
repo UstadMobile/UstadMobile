@@ -16,14 +16,9 @@ import com.ustadmobile.util.StyleManager.defaultPaddingTopBottom
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.view.ext.createCreateNewItem
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import com.ustadmobile.view.ext.umProfileAvatar
-import kotlinx.css.Cursor
-import kotlinx.css.cursor
-import kotlinx.css.marginTop
-import kotlinx.html.js.onClickFunction
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
@@ -89,25 +84,11 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
             }
 
             mActiveAccount?.let { accounts ->
-                renderList(listOf(accounts), true)
+                renderAccountList(listOf(accounts), true)
             }
 
             mCurrentStoredAccounts?.let { accounts ->
-                renderList(accounts)
-            }
-
-            styledDiv {
-                css {
-                    marginTop = 3.spacingUnits
-                    cursor = Cursor.pointer
-                }
-
-                attrs.onClickFunction = {
-                    mPresenter?.handleClickAddAccount()
-                }
-
-                createCreateNewItem(getString(MessageID.add_another)
-                    .format(getString(MessageID.account)))
+                renderAccountList(accounts)
             }
         }
     }
@@ -118,7 +99,7 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
         mActiveAccount = null
     }
 
-    private fun RBuilder.renderList(accounts: List<UserSessionWithPersonAndEndpoint>, active: Boolean = false){
+    private fun RBuilder.renderAccountList(accounts: List<UserSessionWithPersonAndEndpoint>, active: Boolean = false){
         child(AccountListComponent::class){
             attrs.entries = accounts
             attrs.activeAccount = active

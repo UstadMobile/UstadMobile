@@ -29,6 +29,10 @@ class ScheduleEditComponent (mProps: UmProps): UstadEditComponent<Schedule>(mPro
     override val viewName: String
         get() = ScheduleEditView.VIEW_NAME
 
+    val okText = getString(MessageID.ok)
+
+    val cancelText = getString(MessageID.cancel)
+
     private var fromTimeLabel = FieldLabel(text = getString(MessageID.from))
 
     private var toTimeLabel = FieldLabel(text = getString(MessageID.to))
@@ -111,6 +115,8 @@ class ScheduleEditComponent (mProps: UmProps): UstadEditComponent<Schedule>(mPro
                             umTimePicker(
                                 label = "${fromTimeLabel.text}",
                                 error = fromTimeLabel.error,
+                                okText = okText,
+                                cancelText = cancelText,
                                 helperText = fromTimeLabel.errorText,
                                 value = entity?.sceduleStartTime.toDate(),
                                 inputVariant = FormControlVariant.outlined,
@@ -126,6 +132,8 @@ class ScheduleEditComponent (mProps: UmProps): UstadEditComponent<Schedule>(mPro
                             umTimePicker(
                                 label = "${toTimeLabel.text}",
                                 error = toTimeLabel.error,
+                                okText = okText,
+                                cancelText = cancelText,
                                 helperText = toTimeLabel.errorText,
                                 value = entity?.scheduleEndTime.toDate(),
                                 inputVariant = FormControlVariant.outlined,

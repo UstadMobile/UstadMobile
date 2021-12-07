@@ -2,21 +2,21 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.controller.OnSearchSubmitted
 import com.ustadmobile.core.controller.TimeZoneListPresenter
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.TimeZoneListView
 import com.ustadmobile.util.TimeZone
 import com.ustadmobile.util.TimeZonesUtil
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
+import com.ustadmobile.view.ext.umGridContainer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.w3c.dom.events.Event
 import react.RBuilder
-import react.dom.onClick
 import react.setState
-import styled.styledDiv
 
 class TimeZoneListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps) , TimeZoneListView,
     OnSearchSubmitted {
@@ -30,6 +30,7 @@ class TimeZoneListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmStat
 
     override fun onCreateView() {
         super.onCreateView()
+        title = getString(MessageID.timezone)
         mPresenter = TimeZoneListPresenter(this, arguments,
             this, di)
         mPresenter?.onCreate(mapOf())
@@ -70,7 +71,7 @@ class TimeZoneListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmStat
 class ZonesListComponent(mProps: ListProps<TimeZone>):
     UstadSimpleList<ListProps<TimeZone>>(mProps){
     override fun RBuilder.renderListItem(item: TimeZone, onClick: (Event) -> Unit) {
-        styledDiv {
+        umGridContainer {
             attrs.onClick = {
                 onClick.invoke(it.nativeEvent)
             }

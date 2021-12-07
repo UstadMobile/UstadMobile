@@ -44,7 +44,6 @@ class HolidayCalendarEditPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-
         view.holidayList = holidayOneToManyJoinEditHelper.liveList
     }
 
@@ -67,10 +66,10 @@ class HolidayCalendarEditPresenter(context: Any,
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: HolidayCalendar? = null
-        if(entityJsonStr != null) {
-            editEntity = safeParse(di, HolidayCalendar.serializer(), entityJsonStr)
+        editEntity = if(entityJsonStr != null) {
+            safeParse(di, HolidayCalendar.serializer(), entityJsonStr)
         }else {
-            editEntity = HolidayCalendar()
+            HolidayCalendar()
         }
 
         return editEntity
@@ -95,7 +94,9 @@ class HolidayCalendarEditPresenter(context: Any,
                 it.holHolidayCalendarUid = entity.umCalendarUid
             }
 
-            finishWithResult(safeStringify(di, ListSerializer(HolidayCalendar.serializer()), listOf(entity)))
+            finishWithResult(safeStringify(di, ListSerializer(HolidayCalendar.serializer()),
+                listOf(entity))
+            )
         }
     }
 

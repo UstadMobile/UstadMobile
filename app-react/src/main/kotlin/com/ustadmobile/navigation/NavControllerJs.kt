@@ -4,9 +4,11 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.UstadBackStackEntry
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.navigation.RouteManager.firstDestination
 import com.ustadmobile.redux.ReduxAppStateManager
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxNavStackState
+import com.ustadmobile.util.getViewNameFromUrl
 import kotlinx.browser.window
 
 class NavControllerJs: UstadNavController {
@@ -32,10 +34,10 @@ class NavControllerJs: UstadNavController {
         if(inclusive)
             splitIndex--
 
-        if(splitIndex < 0) return
-
-        navStack.removeAll(navStack.subList(splitIndex, navStack.size))
-        dispatch(ReduxNavStackState(navStack))
+        if(splitIndex >= 0) {
+            navStack.removeAll(navStack.subList(splitIndex, navStack.size))
+            dispatch(ReduxNavStackState(navStack))
+        }
 
         currentBackStackEntry?.arguments?.let { args ->
             navigate(viewName, args, false)
@@ -45,7 +47,6 @@ class NavControllerJs: UstadNavController {
     override fun navigate(viewName: String,
                           args: Map<String, String>,
                           goOptions: UstadMobileSystemCommon.UstadGoOptions) {
-
         if(viewName.isEmpty()){
             navigateUp()
             return
@@ -76,12 +77,13 @@ class NavControllerJs: UstadNavController {
 
     fun navigateUp(): Boolean {
         val destinationToPopTo = when (navStack.size) {
-            1 -> currentBackStackEntry
-            else -> navStack[navStack.lastIndex - 1]
+            in 0..1 -> UstadBackStackEntryJs(viewName = firstDestination.view, mapOf())
+            else -> navStack.lastOrNull { it.viewName != getViewNameFromUrl() }
         }
 
         if(destinationToPopTo != null){
-            popBackStack(destinationToPopTo.viewName, true)
+            navigate(destinationToPopTo.viewName, destinationToPopTo.arguments,
+                UstadMobileSystemCommon.UstadGoOptions())
         }
         return true
     }

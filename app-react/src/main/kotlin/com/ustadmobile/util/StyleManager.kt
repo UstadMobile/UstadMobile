@@ -430,6 +430,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
     val listCreateNewContainer by css {
         padding = "10px"
+        marginBottom = 2.spacingUnits
     }
 
     val contentEntryListContentAvatarClass by css {

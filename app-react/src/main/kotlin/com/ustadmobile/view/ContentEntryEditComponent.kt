@@ -91,6 +91,9 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
         set(value) {
             setState {
                 field = value
+                if(value){
+                    titleLabel = titleLabel.copy(errorText = getString(MessageID.field_required_prompt))
+                }
             }
         }
 

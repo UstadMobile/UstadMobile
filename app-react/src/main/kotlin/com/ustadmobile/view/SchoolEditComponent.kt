@@ -115,7 +115,6 @@ class SchoolEditComponent (mProps: UmProps): UstadEditComponent<SchoolWithHolida
                         disabled = !fieldsEnabled,
                         variant = FormControlVariant.outlined,
                         onChange = {
-                            
                             setState {
                                 entity?.schoolName = it
                             }
