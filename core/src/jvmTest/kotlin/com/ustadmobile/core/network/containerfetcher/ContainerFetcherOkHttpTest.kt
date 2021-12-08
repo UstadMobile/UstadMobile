@@ -193,16 +193,12 @@ class ContainerFetcherOkHttpTest {
                 results.add(result)
             }catch(e: Exception) {
                 e.printStackTrace()
-                throw e
             }
 
         }
 
         serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
-        Assert.assertEquals("First result returned paused",
-                0, results[0])
-        Assert.assertEquals("Second result completed",
-                JobStatus.COMPLETE, results[1])
+        Assert.assertEquals("Result is completed", JobStatus.COMPLETE, results[0])
 
         val mockRequest1 = mockWebServer.takeRequest()
         val mockRequest2 = mockWebServer.takeRequest()

@@ -46,13 +46,6 @@ class ContainerFetcherOkHttp(
         "ContainerDownloaderJobOkHttp @${this.doorIdentityHashCode}"
     }
 
-    suspend fun progressUpdater() = coroutineScope {
-        while(isActive) {
-            listener?.onProgress(request, bytesSoFar.get(), totalDownloadSize.get())
-            delay(500L)
-        }
-    }
-
     suspend fun download(): Int = coroutineScope {
         val progressUpdaterJob = launch {
             while(isActive) {
@@ -133,6 +126,7 @@ class ContainerFetcherOkHttp(
                 " in ${System.currentTimeMillis() - startTime}ms")
         }catch(e: Exception) {
             Napier.e("$logPrefix exception downloading", e)
+            throw e
         }finally {
             progressUpdaterJob.cancel()
             httpResponse?.closeQuietly()

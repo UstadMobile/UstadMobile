@@ -13,6 +13,7 @@ import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import com.ustadmobile.core.io.ext.toContainerEntryWithMd5
 import com.ustadmobile.core.io.ext.toKmpUriString
+import com.ustadmobile.core.util.ConcatenatedResponse2Dispatcher
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.door.DatabaseBuilder
@@ -48,34 +49,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 
 class TestContainerDownloadJob {
-
-    class ConcatenatedResponse2Dispatcher(
-            private val db: UmAppDatabase,
-            val di: DI, val containerUid: Long) : Dispatcher() {
-
-        var numTimesToFail = AtomicInteger(0)
-
-        override fun dispatch(request: RecordedRequest): MockResponse {
-            return if (request.requestUrl?.toUri().toString()
-                            .contains("ContainerEntryList/findByContainerWithMd5")) {
-
-                val list = db.containerEntryDao.findByContainer(containerUid)
-                        .map { it.toContainerEntryWithMd5() }
-                MockResponse()
-                        .setResponseCode(200)
-                        .setHeader("Content-Type", "application/json")
-                        .setBody(Buffer().write(safeStringify(di, ListSerializer(ContainerEntryWithMd5.serializer()), list).toByteArray()))
-
-            } else {
-                db.mockResponseForConcatenatedFiles2Request(request).apply {
-                    if (numTimesToFail.getAndDecrement() > 0) {
-                        socketPolicy = SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY
-                    }
-                }
-            }
-        }
-    }
-
 
     private lateinit var mockWebServer: MockWebServer
 
@@ -181,8 +154,9 @@ class TestContainerDownloadJob {
             }
         }
 
-        val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(), temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
-                clientDi)
+        val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
+            temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
+            clientDi)
 
 
         val downloadJob = ContainerDownloadContentJob(Any(), Endpoint(siteUrl), clientDi)
@@ -195,7 +169,7 @@ class TestContainerDownloadJob {
         serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
     }
 
-    //@Test
+    @Test
     fun givenDownloadIsInterrupted_whenNewRequestMade_thenDownloadShouldResume() {
         dispatcher.numTimesToFail.set(1)
 
@@ -211,51 +185,53 @@ class TestContainerDownloadJob {
         val results = mutableListOf<Int>()
         val clientDb: UmAppDatabase = clientDi.on(Endpoint(siteUrl)).direct.instance(tag = DoorTag.TAG_DB)
 
+        val job = runBlocking {
+            ContentJobItemAndContentJob().apply {
+                contentJob = ContentJob().apply {
+                    this.toUri = downloadDestDir.toKmpUriString()
+                    this.cjIsMeteredAllowed = true
+                    this.cjUid = clientDb.contentJobDao.insertAsync(this)
+                }
+                contentJobItem = ContentJobItem().apply {
+                    this.cjiContainerUid = container.containerUid
+                    this.cjiJobUid = contentJob!!.cjUid
+                    this.cjiItemTotal = container.fileSize
+                    this.cjiUid = clientDb.contentJobItemDao.insertJobItem(this)
+                }
+            }
+        }
+
+
+        val exceptions = mutableListOf<Exception>()
         for(i in 0..1) {
             Napier.d("============ ATTEMPT $i ============")
             try {
-
-                val job = runBlocking {
-                    ContentJobItemAndContentJob().apply {
-                        contentJob = ContentJob().apply {
-                            this.toUri = downloadDestDir.toKmpUriString()
-                            this.cjIsMeteredAllowed = true
-                            this.cjUid = clientDb.contentJobDao.insertAsync(this)
-                        }
-                        contentJobItem = ContentJobItem().apply {
-                            this.cjiContainerUid = container.containerUid
-                            this.cjiJobUid = contentJob!!.cjUid
-                            this.cjiItemTotal = container.fileSize
-                            this.cjiUid = clientDb.contentJobItemDao.insertJobItem(this)
-                        }
-                    }
-                }
-
                 val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(), temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
                         clientDi)
-
 
                 val downloadJob = ContainerDownloadContentJob(Any(), Endpoint(siteUrl), clientDi)
                 val result = runBlocking {  downloadJob.processJob(job, processContext, mockListener) }
 
                 results.add(result.status)
             }catch(e: Exception) {
+                exceptions += e
                 e.printStackTrace()
-                throw e
             }
 
         }
 
         serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
-        Assert.assertEquals("First result returned paused",
-                JobStatus.FAILED, results[0])
-        Assert.assertEquals("Second result completed",
-                JobStatus.COMPLETE, results[1])
 
-        val mockRequest1 = mockWebServer.takeRequest()
-        val mockRequest2 = mockWebServer.takeRequest()
+        Assert.assertTrue("Exception was thrown first time", exceptions.isNotEmpty())
+        Assert.assertEquals("Got one result", 1, results.size)
+        Assert.assertEquals("Result return is completed", JobStatus.COMPLETE, results[0])
+
+        mockWebServer.takeRequest()//first get list of entries request
+        mockWebServer.takeRequest()//first download attempt
+        mockWebServer.takeRequest() //second get list of entries request
+        val mockRequest4 = mockWebServer.takeRequest()//actual second download attempt
         Assert.assertNotNull("Second request included partial response request",
-                mockRequest2.getHeader("range"))
+                mockRequest4.getHeader("range"))
     }
 
 }
