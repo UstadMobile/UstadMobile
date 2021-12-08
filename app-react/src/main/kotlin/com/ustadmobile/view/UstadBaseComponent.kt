@@ -1,6 +1,7 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.view.UstadView
@@ -152,6 +153,10 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
 
     open fun getString(messageId: Int): String {
         return if(messageId == 0) "" else systemImpl.getString(messageId, this)
+    }
+
+    open fun optional(messageId: Int): String {
+        return getString(messageId)+" (${getString(MessageID.optional)})"
     }
 
     override fun componentWillUnmount() {

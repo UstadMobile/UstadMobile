@@ -14,10 +14,6 @@ import styled.StyledHandler
 import styled.StyledProps
 import styled.css
 
-@Suppress("EnumEntryName")
-enum class TextFieldColor {
-    primary, secondary
-}
 
 enum class FormControlVariant {
     standard, outlined, filled
@@ -31,7 +27,6 @@ fun RBuilder.umTextField(
     label: String,
     value: String? = null,
     helperText: String? = null,
-    defaultValue: String? = null,
     placeholder: String? = null,
     variant: FormControlVariant = FormControlVariant.outlined,
     onChange: ((value: String) -> Unit)? = null,
@@ -49,7 +44,7 @@ fun RBuilder.umTextField(
     handler: StyledHandler<UMTextFieldProps>? = null
 ) = createStyledComponent(TextField, className, handler) {
     css(defaultFullWidth)
-    setProps(this, autoComplete, autoFocus, defaultValue, disabled, error, fullWidth, helperText,
+    setProps(this, autoComplete, autoFocus, disabled, error, fullWidth, helperText,
         id, label, margin,false, name, onChange,placeholder, required, null, null,
         false, type, value, variant)
 }
@@ -58,7 +53,6 @@ fun RBuilder.umTextFieldMultiLine(
     label: String,
     value: String? = null,
     helperText: String? = null,
-    defaultValue: String? = null,
     placeholder: String? = null,
     variant: FormControlVariant = FormControlVariant.standard,
     onChange: ((value: String) -> Unit)? = null,
@@ -76,7 +70,7 @@ fun RBuilder.umTextFieldMultiLine(
     handler: StyledHandler<UMTextFieldProps>? = null
 ) = createStyledComponent(TextField, className, handler) {
     css(defaultFullWidth)
-    setProps(this, null, autoFocus, defaultValue, disabled, error, fullWidth, helperText, id, label, margin,
+    setProps(this, null, autoFocus, disabled, error, fullWidth, helperText, id, label, margin,
         true, name, onChange, placeholder, required, rows, rowsMax, false, InputType.text, value, variant)
 }
 
@@ -86,7 +80,6 @@ fun RBuilder.umTextFieldSelect(
     label: String,
     value: String? = null,
     helperText: String? = null,
-    defaultValue: String? = null,
     placeholder: String? = null,
     values: List<Pair<String, String>>? = listOf(),
     variant: FormControlVariant = FormControlVariant.outlined,
@@ -103,7 +96,7 @@ fun RBuilder.umTextFieldSelect(
     className: String? = null,
     handler: StyledHandler<UMTextFieldProps>? = null
 ) = createStyledComponent(TextField, className, handler) {
-    setProps(this, autoComplete, autoFocus, defaultValue, disabled, error, fullWidth, helperText, id, label, margin,
+    setProps(this, autoComplete, autoFocus, disabled, error, fullWidth, helperText, id, label, margin,
         false, name, onChange, placeholder, required, null, null, true, InputType.text, value, variant)
     css{
         +defaultFullWidth
@@ -123,7 +116,6 @@ private fun setProps(
     textField: StyledElementBuilder<UMTextFieldProps>,
     autoComplete: String?,
     autoFocus: Boolean,
-    defaultValue: String?,
     disabled: Boolean,
     error: Boolean,
     fullWidth: Boolean,
@@ -145,7 +137,6 @@ private fun setProps(
 ) {
     autoComplete?.let { textField.attrs.autoComplete = it }
     textField.attrs.autoFocus = autoFocus
-    defaultValue?.let { textField.attrs.defaultValue = it }
     textField.attrs.disabled = disabled
     textField.attrs.error = error
     textField.attrs.fullWidth = fullWidth
@@ -167,7 +158,10 @@ private fun setProps(
     rowsMax?.let { textField.attrs.maxRows = it }
     textField.attrs.select = select
     textField.attrs.type = type
-    value?.let { textField.attrs.value = it }
+    value?.let {
+        textField.attrs.value = it
+        textField.attrs.defaultValue = it
+    }
     textField.attrs.variant = variant.toString()
 }
 

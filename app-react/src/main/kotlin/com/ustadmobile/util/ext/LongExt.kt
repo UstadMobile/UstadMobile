@@ -1,11 +1,16 @@
 package com.ustadmobile.util.ext
 
-import com.ustadmobile.lib.util.getSystemTimeInMillis
+import com.ustadmobile.door.util.systemTimeInMillis
 import kotlin.js.Date
 
 /**
  * Convert milliseconds to date
  */
 fun Long?.toDate(): Date {
-    return Date(if(this != null && this != 0L) this else getSystemTimeInMillis())
+    val mills = when {
+        this ?: 0L == 0L -> systemTimeInMillis()
+        this == Long.MAX_VALUE -> 8640000000000000
+        else -> this
+    }
+    return Date(mills!!)
 }

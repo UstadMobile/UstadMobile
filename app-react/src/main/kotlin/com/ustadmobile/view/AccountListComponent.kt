@@ -16,9 +16,14 @@ import com.ustadmobile.util.StyleManager.defaultPaddingTopBottom
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.util.ext.format
+import com.ustadmobile.view.ext.createCreateNewItem
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import com.ustadmobile.view.ext.umProfileAvatar
+import kotlinx.css.Cursor
+import kotlinx.css.cursor
+import kotlinx.css.marginTop
+import kotlinx.html.js.onClickFunction
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
@@ -89,6 +94,20 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
 
             mCurrentStoredAccounts?.let { accounts ->
                 renderAccountList(accounts)
+            }
+
+            styledDiv {
+                css {
+                    marginTop = 3.spacingUnits
+                    cursor = Cursor.pointer
+                }
+
+                attrs.onClickFunction = {
+                    mPresenter?.handleClickAddAccount()
+                }
+
+                createCreateNewItem(getString(MessageID.add_another)
+                    .format(getString(MessageID.account)))
             }
         }
     }
@@ -171,7 +190,7 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
                                 umButton(getString(MessageID.my).format(getString(MessageID.profile)),
                                     size = ButtonSize.large,
                                     variant = ButtonVariant.outlined,
-                                    color = UMColor.secondary,
+                                    color = UMColor.primary,
                                     onClick = {
                                         it.stopPropagation()
                                         presenter.handleClickProfile(item.person.personUid)
@@ -183,7 +202,7 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
                                     umButton(getString(MessageID.logout),
                                         size = ButtonSize.large,
                                         variant = ButtonVariant.outlined,
-                                        color = UMColor.secondary,
+                                        color = UMColor.primary,
                                         onClick = {
                                             it.stopPropagation()
                                             presenter.handleClickLogout(item)

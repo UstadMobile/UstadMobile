@@ -6,6 +6,7 @@ import com.ustadmobile.core.controller.ScopedGrantEditPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.ext.toolbarJsCssToPartialCss
+import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.navigation.RouteManager.defaultRoute
 import com.ustadmobile.navigation.RouteManager.destinationList
 import com.ustadmobile.navigation.UstadDestination
@@ -659,6 +660,37 @@ fun RBuilder.createAction(icon: String, title: String, xs: GridSize,
                 gutterBottom = true){
                 css(alignTextToStart)
             }
+        }
+    }
+}
+
+fun RBuilder.createListItemWithTitleAndSwitch(title: String, enabled: Boolean, onClick: (Event) -> Unit){
+    umGridContainer {
+        attrs.onClick = {
+            onClick.invoke(it.nativeEvent)
+        }
+        umItem(GridSize.cells10, GridSize.cells11){
+            umTypography(title,
+                variant = TypographyVariant.body1,
+                gutterBottom = true){
+                css{
+                    +alignTextToStart
+                    marginTop = LinearDimension("3px")
+                }
+            }
+        }
+
+        umItem(GridSize.cells2, GridSize.cells1){
+            css{
+                +StyleManager.switchMargin
+            }
+            umSwitch(enabled, color = UMColor.secondary)
+        }
+
+        css{
+            marginLeft = LinearDimension("20px")
+            marginTop = LinearDimension("16px")
+            marginBottom = LinearDimension("16px")
         }
     }
 }

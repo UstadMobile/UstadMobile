@@ -8,19 +8,13 @@ import com.ustadmobile.core.view.ScopedGrantEditView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ScopedGrant
-import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.theme.UMColor
-import com.ustadmobile.util.StyleManager
+import com.ustadmobile.mui.components.GridSpacing
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.view.ext.createListItemWithTitleAndSwitch
 import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import kotlinx.css.LinearDimension
-import kotlinx.css.marginBottom
-import kotlinx.css.marginLeft
-import kotlinx.css.marginTop
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
@@ -115,34 +109,8 @@ class ScopedGrantEditComponent (mProps: UmProps): UstadEditComponent<ScopedGrant
     class ScopedGrantComponent(mProps: ListProps<BitmaskFlag>): UstadSimpleList<ListProps<BitmaskFlag>>(mProps){
 
         override fun RBuilder.renderListItem(item: dynamic, onClick: (Event) -> Unit) {
-            umGridContainer {
-                attrs.onClick = {
-                    onClick.invoke(it.nativeEvent)
-                }
-                umItem(GridSize.cells10, GridSize.cells11){
-                    umTypography(getString(item.messageId),
-                        variant = TypographyVariant.body1,
-                        gutterBottom = true){
-                        css{
-                            +StyleManager.alignTextToStart
-                            marginTop = LinearDimension("3px")
-                        }
-                    }
-                }
 
-                umItem(GridSize.cells2, GridSize.cells1){
-                    css{
-                        +StyleManager.switchMargin
-                    }
-                    umSwitch(item.enabled, color = UMColor.secondary)
-                }
-
-                css{
-                    marginLeft = LinearDimension("20px")
-                    marginTop = LinearDimension("16px")
-                    marginBottom = LinearDimension("16px")
-                }
-            }
+            createListItemWithTitleAndSwitch(getString(item.messageId as Int), item.enabled as Boolean, onClick)
         }
 
     }

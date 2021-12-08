@@ -39,7 +39,9 @@ private fun RBuilder.renderTextField(
     helperText: String? = null,
     ruleSet: RuleSet ? = StyleManager.defaultFullWidth
 ): ReactElement {
-    return umTextField(label, if(format == null) value.standardFormat() else value.formatDate(format.uppercase()),
+    return umTextField(
+        label = label,
+        value = if(format == null) value.standardFormat() else value.formatDate(format.uppercase()),
         helperText = helperText,
         error = error){
         attrs.onClick = {
@@ -127,8 +129,10 @@ private fun RBuilder.setProps(
     ampm: Boolean = true,
     ampmInClock: Boolean = false
 ){
-    field.attrs.asDynamic().value = value
+    var changedValue = value
+    field.attrs.asDynamic().value = changedValue
     field.attrs.onChange = {
+        changedValue = it
         onChange.invoke(it)
     }
     field.attrs.asDynamic().views  = views
@@ -156,8 +160,6 @@ private fun RBuilder.setProps(
         min?.let { field.attrs.asDynamic().minDate = it}
         max?.let { field.attrs.asDynamic().maxDate = it}
     }
-
-    console.log("Hello",field.attrs.asDynamic().okText)
 }
 
 fun RBuilder.umDatePicker(

@@ -94,7 +94,7 @@ class SchoolDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<Schoo
                 }
 
                 createInformation("login", entity?.schoolCode ?: "",
-                    getString(MessageID.class_code)){
+                    getString(MessageID.school_code)){
                     Util.copyToClipboard(entity?.schoolCode ?: "") {
                         showSnackBar(getString(MessageID.copied_to_clipboard))
                     }

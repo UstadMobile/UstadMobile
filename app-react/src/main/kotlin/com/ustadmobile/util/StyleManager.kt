@@ -357,7 +357,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         height = LinearDimension("100vh")
         overflow = Overflow.scroll
         paddingBottom = 16.spacingUnits
-        width = LinearDimension("96.5%")
+        width = LinearDimension("99.5%")
         media(theme.breakpoints.up(tabletAndHighEnd)){
             width = LinearDimension("99.5%")
         }
