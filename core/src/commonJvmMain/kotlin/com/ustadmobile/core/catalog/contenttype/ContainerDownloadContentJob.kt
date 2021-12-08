@@ -10,8 +10,8 @@ import com.ustadmobile.core.db.dao.ContainerEntryFileDao
 import com.ustadmobile.core.io.ConcatenatedEntry
 import com.ustadmobile.core.io.ConcatenatedInputStream2
 import com.ustadmobile.core.io.ext.readAndSaveToDir
-import com.ustadmobile.core.network.containerfetcher.ContainerFetcherJobOkHttp.SUFFIX_HEADER
-import com.ustadmobile.core.network.containerfetcher.ContainerFetcherJobOkHttp.SUFFIX_PART
+import com.ustadmobile.core.network.containerfetcher.ContainerFetcherOkHttp.Companion.SUFFIX_HEADER
+import com.ustadmobile.core.network.containerfetcher.ContainerFetcherOkHttp.Companion.SUFFIX_PART
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.base64EncodedToHexString

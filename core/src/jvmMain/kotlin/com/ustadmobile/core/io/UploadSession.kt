@@ -4,7 +4,7 @@ import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.readAndSaveToDir
-import com.ustadmobile.core.network.containerfetcher.ContainerFetcherJobOkHttp
+import com.ustadmobile.core.network.containerfetcher.ContainerFetcherOkHttp
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.base64EncodedToHexString
 import com.ustadmobile.core.util.ext.distinctMds5sSorted
@@ -95,9 +95,9 @@ class UploadSession(val sessionUuid: String,
         md5sExpected = entriesRequired.distinctMds5sSorted()
 
         firstFile = File(uploadWorkDir,
-                "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherJobOkHttp.SUFFIX_PART}")
+                "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherOkHttp.SUFFIX_PART}")
         firstFileHeader = File(uploadWorkDir,
-                "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherJobOkHttp.SUFFIX_HEADER}")
+                "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherOkHttp.SUFFIX_HEADER}")
 
         startFromByte = if(firstFile.exists() && firstFileHeader.exists())
             firstFile.length() + firstFileHeader.length()
