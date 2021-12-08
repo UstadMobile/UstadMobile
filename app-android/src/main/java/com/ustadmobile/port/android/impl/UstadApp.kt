@@ -196,6 +196,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
                     di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
                     di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
                     di.on(context).direct.instance<VideoTypePluginAndroid>(),
+                    ContainerDownloadContentJob(applicationContext, context, di),
                     FolderIndexerPlugin(applicationContext, context, di),
                     DeleteContentEntryPlugin(applicationContext, context, di)))
         }

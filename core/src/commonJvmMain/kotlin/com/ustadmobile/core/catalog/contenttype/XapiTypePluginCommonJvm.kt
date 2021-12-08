@@ -119,10 +119,6 @@ class XapiTypePluginCommonJvm(
                             localUri,
                             ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
-
-                    val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
-                    containerUidFolder.mkdirs()
-
                     contentJobItem.cjiContainerUid = container.containerUid
                     db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
 

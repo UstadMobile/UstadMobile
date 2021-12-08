@@ -2,7 +2,7 @@ package com.ustadmobile.sharedse.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentjob.ContentJobManager
-import com.ustadmobile.core.contentjob.ContentPluginIds.CONTAINER_TORRENT_DOWNLOAD_PLUGIN
+import com.ustadmobile.core.contentjob.ContentPluginIds.CONTAINER_DOWNLOAD_PLUGIN
 import com.ustadmobile.core.contentjob.ContentPluginIds.DELETE_CONTENT_ENTRY_PLUGIN
 import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.db.JobStatus
@@ -218,7 +218,7 @@ class DownloadDialogPresenter(
             cjiJobUid = job.cjUid
             sourceUri = "" // TODO entry ?
             cjiItemTotal = container?.fileSize ?: 0
-            cjiPluginId = CONTAINER_TORRENT_DOWNLOAD_PLUGIN
+            cjiPluginId = CONTAINER_DOWNLOAD_PLUGIN
             cjiContentEntryUid = contentEntryUid
             cjiContainerUid = container?.containerUid ?: 0
             cjiIsLeaf = entry?.leaf ?: false

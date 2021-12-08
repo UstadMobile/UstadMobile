@@ -105,9 +105,6 @@ class VideoTypePluginJvm(
                             di,
                             ContainerAddOptions(containerFolderUri))
 
-                    val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
-                    containerUidFolder.mkdirs()
-
                     // after container has files and torrent added, update contentJob
                     contentJobItem.cjiContainerUid = container.containerUid
                     db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
