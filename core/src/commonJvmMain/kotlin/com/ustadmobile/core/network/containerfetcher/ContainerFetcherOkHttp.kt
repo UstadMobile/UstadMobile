@@ -53,10 +53,14 @@ class ContainerFetcherOkHttp(
         }
     }
 
-    suspend fun download(): Int {
-        val progressUpdaterJob = GlobalScope.async(Dispatchers.Default) {
-            progressUpdater()
+    suspend fun download(): Int = coroutineScope {
+        val progressUpdaterJob = launch {
+            while(isActive) {
+                listener?.onProgress(request, bytesSoFar.get(), totalDownloadSize.get())
+                delay(500L)
+            }
         }
+
 
         startTime = System.currentTimeMillis()
         var downloadStatus = 0
@@ -136,7 +140,7 @@ class ContainerFetcherOkHttp(
             listener?.onProgress(request, bytesSoFar.get(), totalDownloadSize.get())
         }
 
-        return downloadStatus
+        downloadStatus
     }
 
     companion object {
