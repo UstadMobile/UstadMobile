@@ -200,9 +200,6 @@ class H5PTypePluginCommonJvm(
                             "index.html", context, di, containerAddOptions)
                     tmpIndexHtmlFile.delete()
 
-                    val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
-                    containerUidFolder.mkdirs()
-
                     contentJobItem.cjiContainerUid = container.containerUid
                     db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
 

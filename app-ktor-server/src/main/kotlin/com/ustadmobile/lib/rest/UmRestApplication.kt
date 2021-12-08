@@ -24,6 +24,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.core.catalog.contenttype.ApacheIndexerPlugin
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.impl.*
+import com.ustadmobile.core.io.UploadSessionManager
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.PersonAuth2
 import com.ustadmobile.lib.rest.ext.*
@@ -270,6 +271,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             AuthManager(context, di)
         }
 
+        bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {
+            UploadSessionManager(context, di)
+        }
+
         bind<ContentJobManager>() with singleton {
             ContentJobManagerJvm(di)
         }
@@ -324,6 +329,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         ContainerDownload()
         personAuthRegisterRoute()
         ContainerMountRoute()
+        ContainerUploadRoute2()
         UmAppDatabase_KtorRoute(true)
         SiteRoute()
         ContentEntryLinkImporter()

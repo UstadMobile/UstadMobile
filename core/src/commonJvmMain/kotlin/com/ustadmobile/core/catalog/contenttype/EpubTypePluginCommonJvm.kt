@@ -143,9 +143,6 @@ class EpubTypePluginCommonJvm(
                                 localUri,
                                 ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
-                        val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
-                        containerUidFolder.mkdirs()
-
                         contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
                         progress.onProgress(contentJobItem)
 
