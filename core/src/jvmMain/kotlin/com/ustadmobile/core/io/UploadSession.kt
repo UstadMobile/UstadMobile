@@ -109,9 +109,10 @@ class UploadSession(val sessionUuid: String,
         readJob = GlobalScope.launch(Dispatchers.IO) {
             var concatIn: ConcatenatedInputStream2? = null
             try {
+                //TODO: this call to readAndSaveToDir must be updated as it no longer links entries etc.
                 concatIn = ConcatenatedInputStream2(pipeIn)
                 concatIn.readAndSaveToDir(containerDir, uploadWorkDir, db, AtomicLong(0L),
-                        containerEntryPaths, md5sExpected.toMutableList(), "UploadSession")
+                    md5sExpected.toMutableList(), "UploadSession")
             }catch(e: Exception) {
                 Napier.e("UploadSession;Exception reading, closing pipeOut to ")
                 pipeOut.close()
@@ -148,6 +149,8 @@ class UploadSession(val sessionUuid: String,
         pipeOut.close()
         runBlocking {
             readJob.join()
+            db.linkExistingContainerEntries(containerEntryPaths.first().ceContainerUid,
+                entriesRequired)
         }
 
         uploadWorkDir.takeIf { it.listFiles().isEmpty() }?.delete()

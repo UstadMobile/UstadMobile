@@ -11,6 +11,7 @@ import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import com.ustadmobile.core.io.ext.toContainerEntryWithMd5
 import com.ustadmobile.core.io.ext.toKmpUriString
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.ext.linkExistingContainerEntries
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -40,7 +41,6 @@ import com.ustadmobile.door.ext.clearAllTablesAndResetSync
 
 
 class ContainerFetcherOkHttpTest {
-
 
     class ConcatenatedResponse2Dispatcher(private val db: UmAppDatabase) : Dispatcher(){
 
@@ -146,10 +146,16 @@ class ContainerFetcherOkHttpTest {
             downloadDestDir.toKmpUriString())
 
         val mockListener = mock<ContainerFetcherListener2> { }
-        val downloaderJob = ContainerFetcherOkHttp(request,
-            mockListener, clientDi)
+        val downloaderJob = ContainerFetcherOkHttp(request, mockListener, clientDi)
 
-        val result = runBlocking { downloaderJob.download() }
+        val result = runBlocking {
+            downloaderJob.download().also {
+                val clientDb: UmAppDatabase = clientDi.on(Endpoint(request.siteUrl)).direct
+                    .instance(tag = DoorTag.TAG_DB)
+                clientDb.linkExistingContainerEntries(container.containerUid,
+                    containerEntriesToDownload)
+            }
+        }
 
         Assert.assertEquals("Result is reported as successful", JobStatus.COMPLETE,
             result)
@@ -189,12 +195,19 @@ class ContainerFetcherOkHttpTest {
                         downloadDestDir.toKmpUriString())
                 val downloaderJob = ContainerFetcherOkHttp(request,
                         mockListener, clientDi)
-                val result = runBlocking { downloaderJob.download() }
+                val result = runBlocking {
+                    downloaderJob.download()
+                }
                 results.add(result)
             }catch(e: Exception) {
                 e.printStackTrace()
             }
 
+        }
+
+        runBlocking {
+            clientDb.linkExistingContainerEntries(container.containerUid,
+                allContainerEntryFilesToDownload)
         }
 
         serverDb.assertContainerEqualToOther(container.containerUid, clientDb)

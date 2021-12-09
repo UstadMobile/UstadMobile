@@ -4,11 +4,13 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ContentPluginIds.CONTAINER_DOWNLOAD_PLUGIN
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.network.containerfetcher.ContainerFetcherListener2
 import com.ustadmobile.core.network.containerfetcher.ContainerFetcherOkHttp
 import com.ustadmobile.core.network.containerfetcher.ContainerFetcherRequest2
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.linkExistingContainerEntries
+import com.ustadmobile.core.util.ext.partitionContainerEntriesWithMd5
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
@@ -16,6 +18,7 @@ import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.util.sumByLong
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -67,24 +70,48 @@ class ContainerDownloadContentJob(
     }
 
 
-
     override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
         return null
     }
 
-    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
+    private class ContainerFetcherProgressListenerAdapter(
+        private val contentJobProgressListener: ContentJobProgressListener,
+        private val jobItem: ContentJobItem
+    ): ContainerFetcherListener2 {
+        override fun onStart(request: ContainerFetcherRequest2) {
+
+        }
+
+        override fun onProgress(
+            request: ContainerFetcherRequest2,
+            bytesDownloaded: Long,
+            contentLength: Long
+        ) {
+            jobItem.cjiItemProgress = bytesDownloaded
+            jobItem.cjiItemTotal = contentLength
+            contentJobProgressListener.onProgress(jobItem)
+        }
+
+        override fun onDone(request: ContainerFetcherRequest2, status: Int) {
+
+        }
+    }
+
+    override suspend fun processJob(
+        jobItem: ContentJobItemAndContentJob,
+        process: ContentJobProcessContext,
+        progress: ContentJobProgressListener
+    ): ProcessResult {
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
+        val containerSize = db.containerDao.findSizeByUid(contentJobItem.cjiContainerUid)
 
         return withContext(Dispatchers.Default){
-
-            val progressUpdaterJob = async(Dispatchers.Default) {
-                progressUpdater(progress, contentJobItem)
-            }
-
             val downloadFolderUri: String = jobItem.contentJob?.toUri
                     ?: containerDir.toURI().toString()
             val containerFolderDoorUri = DoorUri.parse(downloadFolderUri)
             val containerFolderFile = containerFolderDoorUri.toFile()
+
+            val progressAdapter = ContainerFetcherProgressListenerAdapter(progress, contentJobItem)
 
             try {
                 val containerEntryListUrl = UMFileUtil.joinPaths(endpoint.url,
@@ -94,19 +121,29 @@ class ContainerDownloadContentJob(
                 val containerEntriesList = mutableListOf<ContainerEntryWithMd5>()
                 containerEntriesList.addAll(containerEntryListVal)
 
-                val containerEntriesPartition = db.linkExistingContainerEntries(
-                    contentJobItem.cjiContainerUid, containerEntryListVal)
 
+                val containerEntriesPartition = db.partitionContainerEntriesWithMd5(
+                    containerEntryListVal)
+
+                contentJobItem.cjiItemProgress = containerEntriesPartition.existingFiles.sumByLong {
+                    it.ceCompressedSize
+                }
+                contentJobItem.cjiItemTotal = containerSize
+                progress.onProgress(contentJobItem)
 
                 //We always download in md5sum (hex) alphabetical order, such that a partial download will
                 //be resumed as expected.
                 val containerFetchRequest = ContainerFetcherRequest2(
                     containerEntriesPartition.entriesWithoutMatchingFile, endpoint.url, endpoint.url,
                     downloadFolderUri)
-                val status = ContainerFetcherOkHttp(containerFetchRequest, null, di).download()
+                val status = ContainerFetcherOkHttp(containerFetchRequest, progressAdapter,
+                    di).download()
+
+                //now everything is downloaded, link it
+                db.linkExistingContainerEntries(
+                    contentJobItem.cjiContainerUid, containerEntryListVal)
                 ProcessResult(status)
             }finally {
-                progressUpdaterJob.cancel()
                 contentJobItem.cjiItemTotal = totalDownloadSize.get()
                 contentJobItem.cjiItemProgress = bytesSoFar.get()
                 progress.onProgress(contentJobItem)

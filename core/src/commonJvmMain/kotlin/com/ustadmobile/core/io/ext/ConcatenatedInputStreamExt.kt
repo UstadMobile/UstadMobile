@@ -14,7 +14,6 @@ import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import io.github.aakira.napier.Napier
 import com.ustadmobile.door.ext.toHexString
 import java.io.*
-import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.core.util.ext.base64EncodedToHexString
 
 data class ConcatenatedReadAndSaveResult(val totalBytesRead: Long)
@@ -39,13 +38,14 @@ data class ConcatenatedReadAndSaveResult(val totalBytesRead: Long)
  * This is a list of Base64 encoded strings.
  * @param logPrefix prefix to use when logging using Napier
  */
-suspend fun ConcatenatedInputStream2.readAndSaveToDir(destDirFile: File,
-                                                      tmpDirFile: File,
-                                                      db: UmAppDatabase,
-                                                      progressAtomicLong: AtomicLong,
-                                                      entriesToLink: List<ContainerEntryWithMd5>,
-                                                      md5ExpectedList: MutableList<String>,
-                                                      logPrefix: String) : ConcatenatedReadAndSaveResult {
+suspend fun ConcatenatedInputStream2.readAndSaveToDir(
+    destDirFile: File,
+    tmpDirFile: File,
+    db: UmAppDatabase,
+    progressAtomicLong: AtomicLong,
+    md5ExpectedList: MutableList<String>,
+    logPrefix: String
+) : ConcatenatedReadAndSaveResult {
     lateinit var concatenatedEntry: ConcatenatedEntry
     val buf = ByteArray(8192)
     var bytesRead = 0
@@ -110,20 +110,10 @@ suspend fun ConcatenatedInputStream2.readAndSaveToDir(destDirFile: File,
             throw IOException("Could not rename ${destFileOut} to ${finalDestFile}")
         headerFile.delete()
 
-        val containerEntryFile = concatenatedEntry.toContainerEntryFile().apply {
+        concatenatedEntry.toContainerEntryFile().apply {
             cefPath = finalDestFile.absolutePath
             cefUid = db.containerEntryFileDao.insertAsync(this)
         }
-
-        val md5Base64 = concatenatedEntry.md5.encodeBase64()
-        val entryFiles = entriesToLink.filter { it.cefMd5 == md5Base64 }
-        entryFiles.forEach {
-            it.ceUid = 0L
-            it.ceCefUid = containerEntryFile.cefUid
-        }
-        db.containerEntryDao.insertListAsync(entryFiles)
-
-
     }
 
     return ConcatenatedReadAndSaveResult(totalBytesRead)

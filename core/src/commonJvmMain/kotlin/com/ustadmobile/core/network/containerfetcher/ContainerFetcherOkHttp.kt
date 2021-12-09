@@ -12,7 +12,6 @@ import com.ustadmobile.door.ext.doorIdentityHashCode
 import kotlinx.coroutines.*
 import org.kodein.di.*
 import java.io.*
-import java.net.URL
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 import com.ustadmobile.core.io.ext.parseKmpUriStringToFile
@@ -113,7 +112,7 @@ class ContainerFetcherOkHttp(
             totalDownloadSize.set((firstFile.length() + firstFileHeader.length()) + httpResponse.headersContentLength())
 
             val readAndSaveResult = inStream.readAndSaveToDir(destDirFile, destDirFile, db,
-                bytesSoFar, request.entriesToDownload, md5ExpectedList, logPrefix)
+                bytesSoFar, md5ExpectedList, logPrefix)
             val totalBytesRead= readAndSaveResult.totalBytesRead
             val payloadExpected = (totalDownloadSize.get() - (md5sToDownload.size * ConcatenatedEntry.SIZE))
 
