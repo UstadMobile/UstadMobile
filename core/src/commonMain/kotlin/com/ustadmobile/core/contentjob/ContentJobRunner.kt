@@ -159,8 +159,10 @@ class ContentJobRunner(
 
                 val plugin = contentPluginManager.getPluginById(pluginId)
 
-                val jobResult = async {
-                     plugin.processJob(item, processContext, this@ContentJobRunner)
+                // this is used to catch the exception of processJob
+                val scope = CoroutineScope(SupervisorJob())
+                val jobResult = scope.async {
+                    plugin.processJob(item, processContext, this@ContentJobRunner)
                 }
 
                 mediatorObserver = DoorObserver {
@@ -179,7 +181,11 @@ class ContentJobRunner(
                     mediatorLiveData.observeForever(mediatorObserver)
                 }
 
-                processResult = jobResult.await()
+                try{
+                    processResult = jobResult.await()
+                }catch (e: Exception){
+                    throw e
+                }
 
                 db.contentJobItemDao.updateItemStatus(item.contentJobItem?.cjiUid ?: 0, processResult.status)
                 db.contentJobItemDao.updateFinishTimeForJob(item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
