@@ -62,6 +62,7 @@ class H5PTypePluginCommonJvm(
     override val supportedFileExtensions: List<String>
     get() = SupportedContent.H5P_EXTENSIONS
 
+    private val MAX_SIZE_LIMIT: Long = 100 * 1024 * 1024
 
     private val httpClient: HttpClient = di.direct.instance()
 
@@ -75,6 +76,10 @@ class H5PTypePluginCommonJvm(
         get() = PLUGIN_ID
 
     override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
+        val size = uri.getSize(context, di)
+        if(size > MAX_SIZE_LIMIT){
+            return null
+        }
         val mimeType = uri.guessMimeType(context, di)
         if(mimeType != null && !supportedMimeTypes.contains(mimeType)){
             return null

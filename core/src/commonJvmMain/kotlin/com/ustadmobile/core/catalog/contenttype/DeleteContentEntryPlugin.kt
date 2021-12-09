@@ -35,20 +35,7 @@ class DeleteContentEntryPlugin(
         get() = listOf()
 
     override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
-        val containerUid = uri.uri.toString().substringAfterLast("/").toLongOrNull() ?: return null
-
-        val containerWithFiles = db.containerEntryDao.findByContainer(containerUid)
-
-        if(containerWithFiles.isEmpty()){
-            return null
-        }
-
-        val container = repo.containerDao.findByUid(containerUid) ?: return null
-
-        val contentEntry = repo.contentEntryDao.findByUid(container.containerUid)
-                ?: throw IllegalArgumentException("no entry found from container")
-
-        return MetadataResult(contentEntry as ContentEntryWithLanguage, DELETE_CONTENT_ENTRY_PLUGIN)
+        return null
     }
 
     override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {

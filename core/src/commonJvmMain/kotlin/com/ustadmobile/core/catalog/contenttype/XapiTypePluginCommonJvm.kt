@@ -46,6 +46,7 @@ class XapiTypePluginCommonJvm(
     override val pluginId: Int
         get() = PLUGIN_ID
 
+    private val MAX_SIZE_LIMIT: Long = 100 * 1024 * 1024
 
     private val httpClient: HttpClient = di.direct.instance()
 
@@ -56,6 +57,10 @@ class XapiTypePluginCommonJvm(
     private val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
     override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
+        val size = uri.getSize(context, di)
+        if(size > MAX_SIZE_LIMIT){
+            return null
+        }
         val mimeType = uri.guessMimeType(context, di)
         if (mimeType != null && !supportedMimeTypes.contains(mimeType)) {
             return null
