@@ -160,6 +160,7 @@ class ContentJobRunner(
                 val plugin = contentPluginManager.getPluginById(pluginId)
 
                 // this is used to catch the exception of processJob
+                // as per https://kotlinlang.org/docs/exception-handling.html#supervision
                 val scope = CoroutineScope(SupervisorJob())
                 val jobResult = scope.async {
                     plugin.processJob(item, processContext, this@ContentJobRunner)
