@@ -13,6 +13,7 @@ import kotlinx.coroutines.withContext
 import org.apache.http.HttpStatus
 import org.kodein.di.direct
 import org.kodein.di.instance
+import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
 import org.kodein.di.on
 import java.util.*
@@ -21,7 +22,7 @@ fun Route.ContainerUploadRoute2() {
 
     route("ContainerUpload2") {
         post("{uploadId}/init") {
-            val sessionManager: UploadSessionManager = di().on(call).direct.instance()
+            val sessionManager: UploadSessionManager = closestDI().on(call).direct.instance()
             try {
                 val containerEntryListStr = call.receive<String>()
                 val gson: Gson = di().direct.instance()
@@ -36,7 +37,7 @@ fun Route.ContainerUploadRoute2() {
         }
 
         put("{uploadId}/data") {
-            val sessionManager: UploadSessionManager = di().on(call).direct.instance()
+            val sessionManager: UploadSessionManager = closestDI().on(call).direct.instance()
             val uploadUuid = call.parameters["uploadId"]
             if(uploadUuid == null) {
                 call.respond(HttpStatusCode.BadRequest, "no uploaduuid")
@@ -55,7 +56,7 @@ fun Route.ContainerUploadRoute2() {
         }
 
         get("{uploadId}/close") {
-            val sessionManager: UploadSessionManager = di().on(call).direct.instance()
+            val sessionManager: UploadSessionManager = closestDI().on(call).direct.instance()
             try {
                 val sessionUuid = UUID.fromString(call.parameters["uploadId"])
                 sessionManager.closeSession(sessionUuid)
