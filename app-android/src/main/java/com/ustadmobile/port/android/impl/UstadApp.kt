@@ -190,15 +190,25 @@ open class UstadApp : BaseUstadApp(), DIAware {
             VideoTypePluginAndroid(applicationContext, context, di)
         }
 
+        bind<ContainerDownloadContentJob>() with scoped(EndpointScope.Default).singleton{
+            ContainerDownloadContentJob(applicationContext, context, di)
+        }
+
+        bind<DeleteContentEntryPlugin>() with scoped(EndpointScope.Default).singleton{
+            DeleteContentEntryPlugin(applicationContext, context, di)
+        }
+
+        bind<FolderIndexerPlugin>() with scoped(EndpointScope.Default).singleton{
+            FolderIndexerPlugin(applicationContext, context, di)
+        }
+
         bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
             ContentPluginManager(listOf(
                     di.on(context).direct.instance<EpubTypePluginCommonJvm>(),
                     di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
                     di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
                     di.on(context).direct.instance<VideoTypePluginAndroid>(),
-                    ContainerDownloadContentJob(applicationContext, context, di),
-                    FolderIndexerPlugin(applicationContext, context, di),
-                    DeleteContentEntryPlugin(applicationContext, context, di)))
+                    di.on(context).direct.instance<FolderIndexerPlugin>()))
         }
 
         bind<ContentJobManager>() with singleton {
