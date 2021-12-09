@@ -208,7 +208,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
                     di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
                     di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
                     di.on(context).direct.instance<VideoTypePluginAndroid>(),
-                    di.on(context).direct.instance<FolderIndexerPlugin>()))
+                    di.on(context).direct.instance<FolderIndexerPlugin>(),
+                    ContainerDownloadContentJob(applicationContext, context, di)))
         }
 
         bind<ContentJobManager>() with singleton {
