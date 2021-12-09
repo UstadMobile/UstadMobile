@@ -8,7 +8,6 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.AppConfig.KEY_API_URL
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DatabaseBuilderOptions
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -48,9 +47,9 @@ class SplashPresenter(private val view: SplashView): DIAware {
      * Initialize all resources needed for the app to run
      */
     private fun setUpResources() = GlobalScope.launch {
-        var url = window.location.href
-        url = url.substringBefore(if(url.indexOf("umapp/") != -1) "umapp/" else "#/")
-        val apiUrl = urlSearchParamsToMap()[KEY_API_URL] ?: UMFileUtil.joinPaths(url, "umapp/")
+        val url = window.location.href
+        val apiUrl = urlSearchParamsToMap()[KEY_API_URL] ?:
+        url.substringBefore(if(url.indexOf("umapp/") != -1) "umapp/" else "#/")
         val dbName = sanitizeDbNameFromUrl(window.location.origin)
 
         val builderOptions = DatabaseBuilderOptions(
