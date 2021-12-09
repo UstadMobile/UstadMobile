@@ -69,7 +69,7 @@ class ContainerDownloadContentJob(
 
 
     override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
-        TODO("Not yet implemented")
+        return null
     }
 
     override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
