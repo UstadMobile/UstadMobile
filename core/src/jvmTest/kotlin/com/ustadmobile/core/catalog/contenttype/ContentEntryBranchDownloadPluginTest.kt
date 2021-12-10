@@ -1,6 +1,7 @@
 package com.ustadmobile.core.catalog.contenttype
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.catalog.contenttype.ContentEntryBranchDownloadPlugin.Companion.CONTENT_ENTRY_BRANCH_DOWNLOAD_PLUGIN_ID
 import com.ustadmobile.core.contentjob.ContentPluginIds
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
@@ -110,6 +111,13 @@ class ContentEntryBranchDownloadPluginTest {
             ContentPluginIds.CONTAINER_DOWNLOAD_PLUGIN, childLeafJob.contentJobItem?.cjiPluginId ?: 0)
         Assert.assertEquals("Job created for child leaf has correct sourceUri",
             childLeaf.toDeepLink(endpoint), childLeafJob.contentJobItem?.sourceUri)
+
+        val childBranchJob = jobItemsCreated.first {
+            it.contentJobItem?.cjiContentEntryUid == childBranch.contentEntryUid
+        }
+        Assert.assertEquals("Job created for child branch has correct plugin",
+            CONTENT_ENTRY_BRANCH_DOWNLOAD_PLUGIN_ID, childBranchJob.contentJobItem?.cjiPluginId)
+
     }
 
 }

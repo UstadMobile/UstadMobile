@@ -58,7 +58,11 @@ class ContainerDownloadPluginTest {
 
     private lateinit var container: Container
 
+    private lateinit var contentEntry: ContentEntry
+
     private lateinit var clientDi: DI
+
+    private lateinit var siteEndpoint: Endpoint
 
     @JvmField
     @Rule
@@ -89,7 +93,13 @@ class ContainerDownloadPluginTest {
         serverRepo = serverDb.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
                 serverNodeIdAndAuth.nodeId, serverNodeIdAndAuth.auth, serverHttpClient, serverOkHttpClient))
 
+        contentEntry = ContentEntry().apply {
+            title = "Test Epub"
+            contentEntryUid = serverRepo.contentEntryDao.insert(this)
+        }
+
         container = Container().apply {
+            containerContentEntryUid = contentEntry.contentEntryUid
             containerUid = serverRepo.containerDao.insert(this)
         }
 
@@ -113,7 +123,11 @@ class ContainerDownloadPluginTest {
         mockWebServer.dispatcher = dispatcher
         mockWebServer.start()
 
+        siteEndpoint = Endpoint(mockWebServer.url("/").toString())
 
+        val clientRepo: UmAppDatabase by clientDi.on(siteEndpoint).instance(tag = DoorTag.TAG_REPO)
+        clientRepo.contentEntryDao.insert(contentEntry)
+        clientRepo.containerDao.insert(container)
     }
 
     @After
@@ -249,6 +263,54 @@ class ContainerDownloadPluginTest {
 
         Assert.assertEquals("Content title matches", contentEntry.title,
             metaDataExtracted?.entry?.title)
+    }
+
+    //Test to make sure that if the ContentJobItem has only the sourceUri that everything works as
+    //expected
+    @Test
+    fun givenValidSourceUri_whenProcessJobCalled_thenShouldSetContentEntryUidAndContainerUid() {
+        val downloadDestDir = temporaryFolder.newFolder()
+
+        val siteUrl = mockWebServer.url("/").toString()
+
+        val clientDb: UmAppDatabase = clientDi.on(Endpoint(siteUrl)).direct.instance(tag = DoorTag.TAG_DB)
+
+        val mockListener = mock<ContentJobProgressListener> { }
+
+        val job = runBlocking {
+            ContentJobItemAndContentJob().apply {
+                contentJob = ContentJob().apply {
+                    this.toUri = downloadDestDir.toKmpUriString()
+                    this.cjIsMeteredAllowed = true
+                    this.cjUid = clientDb.contentJobDao.insertAsync(this)
+                }
+                contentJobItem = ContentJobItem().apply {
+                    this.sourceUri = contentEntry.toDeepLink(siteEndpoint)
+                    this.cjiJobUid = contentJob!!.cjUid
+                    this.cjiUid = clientDb.contentJobItemDao.insertJobItem(this)
+                }
+            }
+        }
+
+        val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
+            temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
+            clientDi)
+
+
+        val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
+        val result = runBlocking {  downloadJob.processJob(job, processContext, mockListener) }
+
+
+        Assert.assertEquals("Result is reported as successful", JobStatus.COMPLETE,
+            result.status)
+
+        serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
+
+        val contentJobItemInDb = clientDb.contentJobItemDao.findByJobId(job.contentJobItem?.cjiUid ?: 0L)
+        Assert.assertEquals("ContentEntryUid was set from sourceUri", contentEntry.contentEntryUid,
+            contentJobItemInDb?.cjiContentEntryUid)
+        Assert.assertEquals("ContainerUid was set to most recent container after looking up content entry",
+            container.containerUid, contentJobItemInDb?.cjiContainerUid)
     }
 
 }

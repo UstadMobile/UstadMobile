@@ -93,6 +93,15 @@ class ContainerDownloadPlugin(
         progress: ContentJobProgressListener
     ): ProcessResult {
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
+
+        updateContentEntryUidsFromSourceUrlIfNeeded(contentJobItem)
+        if(contentJobItem.cjiContainerUid == 0L) {
+            contentJobItem.cjiContainerUid = db.containerDao
+                .getMostRecentContainerUidForContentEntryAsync(contentJobItem.cjiContentEntryUid)
+            db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                contentJobItem.cjiContainerUid)
+        }
+
         val containerSize = db.containerDao.findSizeByUid(contentJobItem.cjiContainerUid)
 
         return withContext(Dispatchers.Default){
