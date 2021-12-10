@@ -30,7 +30,7 @@ class XapiTypePluginCommonJvm(
         private var context: Any,
         private val endpoint: Endpoint,
         override val di: DI,
-        private val uploader: ContentPluginUploader = DefaultContentPluginUploader()
+        private val uploader: ContentPluginUploader = DefaultContentPluginUploader(di)
 ) : ContentPlugin {
 
     val viewName: String

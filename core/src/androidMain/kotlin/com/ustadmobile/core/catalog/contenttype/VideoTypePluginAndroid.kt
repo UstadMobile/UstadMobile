@@ -43,7 +43,7 @@ class VideoTypePluginAndroid(
         private var context: Any,
         private val endpoint: Endpoint,
         override val di: DI,
-        private val uploader: ContentPluginUploader = DefaultContentPluginUploader()
+        private val uploader: ContentPluginUploader = DefaultContentPluginUploader(di)
 ) : VideoTypePlugin() {
 
     private val VIDEO_ANDROID = "VideoPluginAndroid"

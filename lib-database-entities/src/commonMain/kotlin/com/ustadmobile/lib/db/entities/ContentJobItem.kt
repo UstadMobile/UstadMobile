@@ -111,7 +111,12 @@ data class ContentJobItem(
         /**
      * time when the job runner finished the job item
      */
-    var cjiFinishTime: Long = 0
+    var cjiFinishTime: Long = 0,
+
+    /**
+     * If this ContentJobItem is running an upload, this is the session uuid for the upload
+     */
+    var cjiUploadSessionUid: String? = null
 
 ) {
     companion object {

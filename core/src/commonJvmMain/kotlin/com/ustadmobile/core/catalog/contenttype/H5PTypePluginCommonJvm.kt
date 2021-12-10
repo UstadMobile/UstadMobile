@@ -50,7 +50,7 @@ class H5PTypePluginCommonJvm(
         private var context: Any,
         val endpoint: Endpoint,
         override val di: DI,
-        private val uploader: ContentPluginUploader = DefaultContentPluginUploader()
+        private val uploader: ContentPluginUploader = DefaultContentPluginUploader(di)
 ): ContentPlugin {
 
         val viewName: String

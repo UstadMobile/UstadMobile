@@ -26,9 +26,9 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.internal.closeQuietly
 
 
-class ContainerUploader2(
+actual class ContainerUploader2 actual constructor(
     val request: ContainerUploaderRequest2,
-    val chunkSize: Int = DEFAULT_CHUNK_SIZE,
+    val chunkSize: Int,
     val endpoint: Endpoint,
     override val di: DI
 ) : DIAware{
@@ -37,7 +37,7 @@ class ContainerUploader2(
 
     private val okHttpClient: OkHttpClient by di.instance()
 
-    suspend fun upload(): Int = withContext(Dispatchers.IO){
+    actual suspend fun upload(): Int = withContext(Dispatchers.IO){
         lateinit var uploadSessionParams: UploadSessionParams
         var pipeIn: PipedInputStream? = null
         var pipeOut: PipedOutputStream? = null

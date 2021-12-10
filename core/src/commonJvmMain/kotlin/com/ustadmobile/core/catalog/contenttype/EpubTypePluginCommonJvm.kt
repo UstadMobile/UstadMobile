@@ -8,6 +8,7 @@ import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.*
+import com.ustadmobile.core.network.containeruploader.ContainerUploader2
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.alternative
 import com.ustadmobile.core.view.EpubContentView
@@ -32,7 +33,7 @@ class EpubTypePluginCommonJvm(
         private var context: Any,
         private val endpoint: Endpoint,
         override val di: DI,
-        private val uploader: ContentPluginUploader = DefaultContentPluginUploader()
+        private val uploader: ContentPluginUploader = DefaultContentPluginUploader(di)
 ) : ContentPlugin {
 
     val viewName: String
@@ -116,7 +117,6 @@ class EpubTypePluginCommonJvm(
             return withContext(Dispatchers.Default) {
 
                 try {
-
                     val uri = DoorUri.parse(jobUri)
 
                     val contentNeedUpload = !uri.isRemote()
@@ -161,8 +161,7 @@ class EpubTypePluginCommonJvm(
 
                     // TODO upload
                     if(contentNeedUpload) {
-                        uploader.upload(
-                                contentJobItem, progress, httpClient, endpoint)
+                        uploader.upload(contentJobItem, progress, httpClient, endpoint)
                     }
 
                     return@withContext ProcessResult(JobStatus.COMPLETE)
