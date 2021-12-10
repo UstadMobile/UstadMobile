@@ -210,7 +210,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
                     di.on(context).direct.instance<VideoTypePluginAndroid>(),
                     di.on(context).direct.instance<FolderIndexerPlugin>(),
                     di.on(context).direct.instance<ContainerDownloadPlugin>(),
-                    di.on(context).direct.instance<DeleteContentEntryPlugin>()))
+                    di.on(context).direct.instance<DeleteContentEntryPlugin>(),
+                    ContentEntryBranchDownloadPlugin(applicationContext, context, di)))
         }
 
         bind<ContentJobManager>() with singleton {

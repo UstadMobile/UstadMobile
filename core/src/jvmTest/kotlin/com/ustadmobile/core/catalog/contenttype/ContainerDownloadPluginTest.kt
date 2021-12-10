@@ -154,6 +154,7 @@ class ContainerDownloadPluginTest {
                     this.cjUid = clientDb.contentJobDao.insertAsync(this)
                 }
                 contentJobItem = ContentJobItem().apply {
+                    this.cjiContentEntryUid = contentEntry.contentEntryUid
                     this.cjiContainerUid = container.containerUid
                     this.cjiJobUid = contentJob!!.cjUid
                     this.cjiItemTotal = container.fileSize
@@ -199,6 +200,7 @@ class ContainerDownloadPluginTest {
                 }
                 contentJobItem = ContentJobItem().apply {
                     this.cjiContainerUid = container.containerUid
+                    this.cjiContentEntryUid = contentEntry.contentEntryUid
                     this.cjiJobUid = contentJob!!.cjUid
                     this.cjiItemTotal = container.fileSize
                     this.cjiUid = clientDb.contentJobItemDao.insertJobItem(this)

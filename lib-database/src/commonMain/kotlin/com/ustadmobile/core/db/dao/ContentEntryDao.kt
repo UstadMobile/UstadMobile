@@ -49,6 +49,31 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     """)
     abstract suspend fun getChildrenByParentAsync(parentUid: Long): List<ContentEntry>
 
+    @Query("""
+        SELECT ContentEntry.contentEntryUid AS contentEntryUid, ContentEntry.leaf AS leaf, 
+               COALESCE(Container.containerUid, 0) AS mostRecentContainerUid,
+               COALESCE(Container.fileSize, 0) AS mostRecentContainerSize
+          FROM ContentEntryParentChildJoin
+               JOIN ContentEntry 
+                    ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid
+               LEFT JOIN Container
+                    ON containerUid = 
+                        (SELECT COALESCE((
+                                SELECT Container.containerUid 
+                                  FROM Container
+                                 WHERE Container.containerContentEntryUid = ContentEntry.contentEntryUid
+                              ORDER BY Container.cntLastModified DESC
+                                 LIMIT 1),0))
+         WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid
+         LIMIT :limit
+        OFFSET :offset 
+    """)
+    abstract suspend fun getContentJobItemParamsByParentUid(
+        parentUid: Long,
+        limit: Int,
+        offset: Int
+    ): List<ContentEntryContentJobItemParams>
+
     @Query("SELECT COUNT(*) FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")

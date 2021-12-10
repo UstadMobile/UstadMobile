@@ -4,7 +4,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ContentPluginIds.CONTAINER_DOWNLOAD_PLUGIN
 import com.ustadmobile.core.db.JobStatus
-import com.ustadmobile.core.util.ext.toDeepLink
+import com.ustadmobile.core.util.ext.makeContentEntryDeepLink
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.ContentJobItem
@@ -43,30 +43,36 @@ class ContentEntryBranchDownloadPlugin(
         progress: ContentJobProgressListener
     ): ProcessResult {
         //find all children, then make jobs for them
-
-
         val job = jobItem.contentJob ?: throw IllegalArgumentException("no job!")
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("No job item!")
 
         val contentEntryUid = contentJobItem.cjiContentEntryUid
         val jobUid = job.cjUid
 
-        //TODO: dont get the whole contententry object, do this in batches to deal with very large dirs
-        val childItems = repo.contentEntryDao.getChildrenByParentAsync(contentEntryUid)
-        val jobItems = childItems.map {
-            ContentJobItem().apply {
-                cjiJobUid = jobUid
-                cjiContentEntryUid = it.contentEntryUid
-                sourceUri = it.toDeepLink(endpoint)
-                cjiPluginId = if(it.leaf) CONTAINER_DOWNLOAD_PLUGIN else CONTENT_ENTRY_BRANCH_DOWNLOAD_PLUGIN_ID
-                cjiStatus = JobStatus.QUEUED
-                cjiIsLeaf = it.leaf
-                cjiConnectivityNeeded = true
-                cjiParentCjiUid = contentJobItem.cjiUid
-            }
-        }
+        var offset = 0
+        val batchSize = 500
+        do {
+            val childItemParams = repo.contentEntryDao.getContentJobItemParamsByParentUid(
+                contentEntryUid, batchSize, offset)
 
-        db.contentJobItemDao.insertJobItems(jobItems)
+            val jobItems = childItemParams.map {
+                ContentJobItem().apply {
+                    cjiItemTotal = it.mostRecentContainerSize
+                    cjiJobUid = jobUid
+                    cjiContentEntryUid = it.contentEntryUid
+                    sourceUri = makeContentEntryDeepLink(it.contentEntryUid, it.leaf, endpoint)
+                    cjiPluginId = if(it.leaf) CONTAINER_DOWNLOAD_PLUGIN else CONTENT_ENTRY_BRANCH_DOWNLOAD_PLUGIN_ID
+                    cjiStatus = JobStatus.QUEUED
+                    cjiIsLeaf = it.leaf
+                    cjiConnectivityNeeded = true
+                    cjiParentCjiUid = contentJobItem.cjiUid
+                    cjiParentContentEntryUid = contentJobItem.cjiContentEntryUid
+                }
+            }
+            db.contentJobItemDao.insertJobItems(jobItems)
+
+            offset += childItemParams.size
+        }while(childItemParams.size == batchSize)
 
         return ProcessResult(JobStatus.COMPLETE)
     }
