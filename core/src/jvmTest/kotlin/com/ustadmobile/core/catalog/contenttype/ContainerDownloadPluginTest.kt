@@ -42,7 +42,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import kotlin.random.Random
 
-class ContainerDownloadJobTest {
+class ContainerDownloadPluginTest {
 
     private lateinit var mockWebServer: MockWebServer
 
@@ -153,7 +153,7 @@ class ContainerDownloadJobTest {
             clientDi)
 
 
-        val downloadJob = ContainerDownloadContentJob(Any(), Endpoint(siteUrl), clientDi)
+        val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
         val result = runBlocking {  downloadJob.processJob(job, processContext, mockListener) }
 
 
@@ -200,7 +200,7 @@ class ContainerDownloadJobTest {
                 val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(), temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
                         clientDi)
 
-                val downloadJob = ContainerDownloadContentJob(Any(), Endpoint(siteUrl), clientDi)
+                val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
                 val result = runBlocking {  downloadJob.processJob(job, processContext, mockListener) }
 
                 results.add(result.status)
@@ -232,11 +232,12 @@ class ContainerDownloadJobTest {
             .instance(tag = DoorTag.TAG_REPO)
         val contentEntry = ContentEntry().apply {
             title = "Hello World"
+            leaf = true
             contentEntryUid = clientRepo.contentEntryDao.insert(this)
         }
 
 
-        val containerDownloadContentJob = ContainerDownloadContentJob(Any(),
+        val containerDownloadContentJob = ContainerDownloadPlugin(Any(),
             Endpoint(endpointUrl), clientDi)
 
         val contentEntryDeepLink = contentEntry.toDeepLink(Endpoint(endpointUrl))

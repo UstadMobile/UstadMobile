@@ -1,6 +1,7 @@
 package com.ustadmobile.sharedse.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.catalog.contenttype.ContentEntryBranchDownloadPlugin.Companion.CONTENT_ENTRY_BRANCH_DOWNLOAD_PLUGIN_ID
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentPluginIds.CONTAINER_DOWNLOAD_PLUGIN
 import com.ustadmobile.core.contentjob.ContentPluginIds.DELETE_CONTENT_ENTRY_PLUGIN
@@ -218,7 +219,11 @@ class DownloadDialogPresenter(
             cjiJobUid = job.cjUid
             sourceUri = entry?.toDeepLink(accountManager.activeEndpoint)
             cjiItemTotal = container?.fileSize ?: 0
-            cjiPluginId = CONTAINER_DOWNLOAD_PLUGIN
+            cjiPluginId = if(entry?.leaf == true) {
+                CONTAINER_DOWNLOAD_PLUGIN
+            } else {
+                CONTENT_ENTRY_BRANCH_DOWNLOAD_PLUGIN_ID
+            }
             cjiContentEntryUid = contentEntryUid
             cjiContainerUid = container?.containerUid ?: 0
             cjiIsLeaf = entry?.leaf ?: false

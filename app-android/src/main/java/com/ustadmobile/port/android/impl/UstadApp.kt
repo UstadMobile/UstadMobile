@@ -190,8 +190,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
             VideoTypePluginAndroid(applicationContext, context, di)
         }
 
-        bind<ContainerDownloadContentJob>() with scoped(EndpointScope.Default).singleton{
-            ContainerDownloadContentJob(applicationContext, context, di)
+        bind<ContainerDownloadPlugin>() with scoped(EndpointScope.Default).singleton{
+            ContainerDownloadPlugin(applicationContext, context, di)
         }
 
         bind<DeleteContentEntryPlugin>() with scoped(EndpointScope.Default).singleton{
@@ -209,7 +209,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
                     di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
                     di.on(context).direct.instance<VideoTypePluginAndroid>(),
                     di.on(context).direct.instance<FolderIndexerPlugin>(),
-                    di.on(context).direct.instance<ContainerDownloadContentJob>(),
+                    di.on(context).direct.instance<ContainerDownloadPlugin>(),
                     di.on(context).direct.instance<DeleteContentEntryPlugin>()))
         }
 

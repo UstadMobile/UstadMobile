@@ -10,7 +10,11 @@ import com.ustadmobile.lib.db.entities.ContentEntry
  * Create a deep link for the given ContentEntry. This will use the ContentEntryDetailView for
  * an item that is a leaf, or ContentEntryListView if the item is a branch
  */
-fun ContentEntry.toDeepLink(endpoint: Endpoint): String {
+fun ContentEntry.toDeepLink(endpoint: Endpoint) : String {
+    return makeContentEntryDeepLink(contentEntryUid, leaf, endpoint)
+}
+
+fun makeContentEntryDeepLink(contentEntryUid: Long, leaf: Boolean, endpoint: Endpoint): String {
     val viewName = if(leaf) {
         ContentEntryDetailView.VIEW_NAME
     }else {

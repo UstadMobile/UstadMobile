@@ -40,10 +40,13 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("getChildrenByParentUid")
     abstract fun getChildrenByParentUid(parentUid: Long): DoorDataSourceFactory<Int, ContentEntry>
 
-    @Query("SELECT ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
-            "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
-            "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
-    @JsName("getChildrenByParentAsync")
+    @Query("""
+        SELECT ContentEntry.*
+          FROM ContentEntryParentChildJoin
+               JOIN ContentEntry 
+                    ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid
+         WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid
+    """)
     abstract suspend fun getChildrenByParentAsync(parentUid: Long): List<ContentEntry>
 
     @Query("SELECT COUNT(*) FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +

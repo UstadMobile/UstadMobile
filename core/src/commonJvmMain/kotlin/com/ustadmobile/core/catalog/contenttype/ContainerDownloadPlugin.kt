@@ -35,11 +35,11 @@ import java.io.File
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 
-class ContainerDownloadContentJob(
-        private var context: Any,
-        private val endpoint: Endpoint,
-        override val di: DI
-) : ContentPlugin {
+class ContainerDownloadPlugin(
+    context: Any,
+    endpoint: Endpoint,
+    di: DI
+) : AbstractContentEntryPlugin(context, endpoint, di) {
 
     override val pluginId: Int
         get() = CONTAINER_DOWNLOAD_PLUGIN
@@ -56,37 +56,12 @@ class ContainerDownloadContentJob(
         "ContainerDownloaderJobOkHttp @${this.doorIdentityHashCode}"
     }
 
-    private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
-
-    private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
-
     private val containerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
     private val httpClient: HttpClient = di.direct.instance()
 
-    suspend fun progressUpdater(
-            listener: ContentJobProgressListener,
-            contentJobItem: ContentJobItem
-    ) = coroutineScope {
-        while(isActive) {
-            contentJobItem.cjiItemTotal = totalDownloadSize.get()
-            contentJobItem.cjiItemProgress = bytesSoFar.get()
-            listener.onProgress(contentJobItem)
-            delay(500L)
-        }
-    }
-
-
     override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
-        val uriStr: String = uri.toString()
-        if(uriStr.contains(UstadMobileSystemCommon.LINK_ENDPOINT_VIEWNAME_DIVIDER + ContentEntryDetailView.VIEW_NAME) ||
-                uriStr.contains(UstadMobileSystemCommon.LINK_ENDPOINT_VIEWNAME_DIVIDER + ContentEntryList2View.VIEW_NAME)) {
-            val entityUid = UMFileUtil.parseURLQueryString(uriStr)[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
-            val contentEntry = repo.contentEntryDao.findByUidWithLanguageAsync(entityUid) ?: return null
-            return MetadataResult(contentEntry, pluginId)
-        }else {
-            return null
-        }
+        return extractMetadata(ContentEntryDetailView.VIEW_NAME, uri)
     }
 
     private class ContainerFetcherProgressListenerAdapter(
