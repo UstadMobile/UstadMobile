@@ -14,6 +14,7 @@ import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.toDeepLink
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.*
 import com.ustadmobile.lib.db.entities.*
@@ -213,10 +214,9 @@ class DownloadDialogPresenter(
         }
         currentJobId = job.cjUid
 
-        // TODO new plugin for download
         ContentJobItem().apply {
             cjiJobUid = job.cjUid
-            sourceUri = "" // TODO entry ?
+            sourceUri = entry?.toDeepLink(accountManager.activeEndpoint)
             cjiItemTotal = container?.fileSize ?: 0
             cjiPluginId = CONTAINER_DOWNLOAD_PLUGIN
             cjiContentEntryUid = contentEntryUid

@@ -6,17 +6,16 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.contentjob.ContentJobProgressListener
-import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
-import com.ustadmobile.core.io.ext.toContainerEntryWithMd5
 import com.ustadmobile.core.io.ext.toKmpUriString
 import com.ustadmobile.core.util.ConcatenatedResponse2Dispatcher
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.util.safeStringify
+import com.ustadmobile.core.util.ext.toDeepLink
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -27,28 +26,23 @@ import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
-import com.ustadmobile.util.commontest.ext.mockResponseForConcatenatedFiles2Request
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.*
-import okio.Buffer
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 
-class TestContainerDownloadJob {
+class ContainerDownloadJobTest {
 
     private lateinit var mockWebServer: MockWebServer
 
@@ -100,7 +94,7 @@ class TestContainerDownloadJob {
         }
 
         val epubFile = temporaryFolder.newFile()
-        this::class.java.getResourceAsStream("/com/ustadmobile/core/contentformats/epub/test.epub")
+        this::class.java.getResourceAsStream("/com/ustadmobile/core/contentformats/epub/test.epub")!!
                 .writeToFile(epubFile)
         val containerTmpFolder = temporaryFolder.newFolder()
         runBlocking {
@@ -173,9 +167,6 @@ class TestContainerDownloadJob {
     fun givenDownloadIsInterrupted_whenNewRequestMade_thenDownloadShouldResume() {
         dispatcher.numTimesToFail.set(1)
 
-        val allContainerEntryFilesToDownload = serverDb.containerEntryDao.findByContainer(container.containerUid)
-                .map { it.toContainerEntryWithMd5() }
-
         val downloadDestDir = temporaryFolder.newFolder()
 
         val siteUrl = mockWebServer.url("/").toString()
@@ -232,6 +223,31 @@ class TestContainerDownloadJob {
         val mockRequest4 = mockWebServer.takeRequest()//actual second download attempt
         Assert.assertNotNull("Second request included partial response request",
                 mockRequest4.getHeader("range"))
+    }
+
+    @Test
+    fun givenValidSourceUri_whenExtractMetadataCalled_thenShouldReturnContentEntry() {
+        val endpointUrl = mockWebServer.url("/").toString()
+        val clientRepo: UmAppDatabase = clientDi.on(Endpoint(endpointUrl)).direct
+            .instance(tag = DoorTag.TAG_REPO)
+        val contentEntry = ContentEntry().apply {
+            title = "Hello World"
+            contentEntryUid = clientRepo.contentEntryDao.insert(this)
+        }
+
+
+        val containerDownloadContentJob = ContainerDownloadContentJob(Any(),
+            Endpoint(endpointUrl), clientDi)
+
+        val contentEntryDeepLink = contentEntry.toDeepLink(Endpoint(endpointUrl))
+
+        val metaDataExtracted = runBlocking {
+            containerDownloadContentJob.extractMetadata(
+                DoorUri.parse(contentEntryDeepLink), mock {  })
+        }
+
+        Assert.assertEquals("Content title matches", contentEntry.title,
+            metaDataExtracted?.entry?.title)
     }
 
 }

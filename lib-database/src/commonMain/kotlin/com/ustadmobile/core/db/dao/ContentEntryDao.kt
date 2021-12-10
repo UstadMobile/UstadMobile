@@ -96,8 +96,16 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
 
     @Query("SELECT * FROM ContentEntry WHERE contentEntryUid = :entryUid")
-    @JsName("findByUidAsync")
     abstract suspend fun findByUidAsync(entryUid: Long): ContentEntry?
+
+    @Query("""
+        SELECT ContentEntry.*, Language.*
+          FROM ContentEntry
+               LEFT JOIN Language 
+                      ON Language.langUid = ContentEntry.primaryLanguageUid 
+         WHERE ContentEntry.contentEntryUid = :uid              
+    """)
+    abstract suspend fun findByUidWithLanguageAsync(uid: Long): ContentEntryWithLanguage?
 
 
     @Query("SELECT * FROM ContentEntry WHERE contentEntryUid = :entryUid")

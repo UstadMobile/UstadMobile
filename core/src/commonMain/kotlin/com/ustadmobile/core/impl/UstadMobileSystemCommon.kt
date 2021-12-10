@@ -424,9 +424,9 @@ abstract class UstadMobileSystemCommon {
         /**
          * The web version of the application will always live under a folder called /umapp/. The
          * viewname will start with a # (as it uses the REACT hash router). Therefor this string is
-         * used as a divider between the endpoint URL and the view name / view arguments
+         * used as a divider between the endpoint URL and the view name and its view arguments
          */
-        const val LINK_ENDPOINT_VIEWNAME_DIVIDER = "/umapp/#"
+        const val LINK_ENDPOINT_VIEWNAME_DIVIDER = "/umapp/index.html#"
 
         const val SUBDIR_SITEDATA_NAME = "sitedata"
 

@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ContentPluginIds.CONTAINER_DOWNLOAD_PLUGIN
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.network.containerfetcher.ContainerFetcherListener2
 import com.ustadmobile.core.network.containerfetcher.ContainerFetcherOkHttp
 import com.ustadmobile.core.network.containerfetcher.ContainerFetcherRequest2
@@ -11,12 +12,16 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.linkExistingContainerEntries
 import com.ustadmobile.core.util.ext.partitionContainerEntriesWithMd5
+import com.ustadmobile.core.view.ContentEntryDetailView
+import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
+import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.util.sumByLong
 import org.kodein.di.DI
@@ -53,6 +58,8 @@ class ContainerDownloadContentJob(
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
+    private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
+
     private val containerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
     private val httpClient: HttpClient = di.direct.instance()
@@ -71,7 +78,15 @@ class ContainerDownloadContentJob(
 
 
     override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
-        return null
+        val uriStr: String = uri.toString()
+        if(uriStr.contains(UstadMobileSystemCommon.LINK_ENDPOINT_VIEWNAME_DIVIDER + ContentEntryDetailView.VIEW_NAME) ||
+                uriStr.contains(UstadMobileSystemCommon.LINK_ENDPOINT_VIEWNAME_DIVIDER + ContentEntryList2View.VIEW_NAME)) {
+            val entityUid = UMFileUtil.parseURLQueryString(uriStr)[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
+            val contentEntry = repo.contentEntryDao.findByUidWithLanguageAsync(entityUid) ?: return null
+            return MetadataResult(contentEntry, pluginId)
+        }else {
+            return null
+        }
     }
 
     private class ContainerFetcherProgressListenerAdapter(
