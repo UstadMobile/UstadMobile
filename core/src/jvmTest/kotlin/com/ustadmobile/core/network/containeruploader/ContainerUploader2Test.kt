@@ -13,6 +13,7 @@ import com.ustadmobile.core.io.UploadSessionParams
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.io.ext.generateConcatenatedFilesResponse2
 import com.ustadmobile.core.io.ext.toContainerEntryWithMd5
+import com.ustadmobile.core.network.NetworkProgressListener
 import com.ustadmobile.core.network.containeruploader.ContainerUploaderRequest2
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.distinctMds5sSorted
@@ -35,6 +36,7 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import org.mockito.kotlin.*
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.SequenceInputStream
@@ -174,7 +176,8 @@ class ContainerUploader2Test {
         val uploadRequest = ContainerUploaderRequest2(UUID.randomUUID().toString(),
                 entriesToUpload, mockWebServer.url("/").toString())
 
-        val uploader = ContainerUploader2(uploadRequest, 200 * 1024, siteEndpoint, di)
+        val uploader = ContainerUploader2(uploadRequest, 200 * 1024, siteEndpoint,
+            null, di)
         val result = runBlocking { uploader.upload() }
 
         //now read the stream
@@ -203,7 +206,9 @@ class ContainerUploader2Test {
         val uploadRequest = ContainerUploaderRequest2(UUID.randomUUID().toString(),
                 entriesToUpload, mockWebServer.url("/").toString())
 
-        val uploader = ContainerUploader2(uploadRequest, 200 * 1024, siteEndpoint, di)
+        val mockProgressListener: NetworkProgressListener = mock { }
+        val uploader = ContainerUploader2(uploadRequest, 200 * 1024, siteEndpoint,
+            mockProgressListener, di)
         val result = runBlocking { uploader.upload() }
 
         //now read the stream
@@ -230,5 +235,6 @@ class ContainerUploader2Test {
         }
 
         Assert.assertEquals("Result is JobStatus.COMPLETE", JobStatus.COMPLETE, result)
+        verify(mockProgressListener, atLeastOnce()).onProgress(any(), any())
     }
 }

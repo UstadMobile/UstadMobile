@@ -20,6 +20,7 @@ import java.io.PipedInputStream
 import java.io.PipedOutputStream
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.io.ext.readFully
+import com.ustadmobile.core.network.NetworkProgressListener
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -30,6 +31,7 @@ actual class ContainerUploader2 actual constructor(
     val request: ContainerUploaderRequest2,
     val chunkSize: Int,
     val endpoint: Endpoint,
+    private val progressListener: NetworkProgressListener?,
     override val di: DI
 ) : DIAware{
 
@@ -63,6 +65,7 @@ actual class ContainerUploader2 actual constructor(
                         mapOf("range" to listOf("bytes=${uploadSessionParams.startFrom}-")), db)
 
                 bytesToUpload = concatResponse.actualContentLength
+                progressListener?.onProgress(uploadSessionParams.startFrom, bytesToUpload)
 
                 val buffer = ByteArray(chunkSize)
                 var bytesRead = 0
@@ -94,6 +97,8 @@ actual class ContainerUploader2 actual constructor(
                     response.closeQuietly()
 
                     bytesUploaded += bytesRead
+                    progressListener?.onProgress(
+                        uploadSessionParams.startFrom + bytesUploaded, bytesToUpload)
                 }
             }
         }catch(e: Exception) {
@@ -113,6 +118,7 @@ actual class ContainerUploader2 actual constructor(
             }
         }
 
+        progressListener?.onProgress(bytesUploaded, bytesToUpload)
         return@withContext if(bytesUploaded == bytesToUpload) {
             JobStatus.COMPLETE
         }else if(exception != null){

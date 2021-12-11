@@ -20,7 +20,10 @@ import com.ustadmobile.core.container.PrefixContainerFileNamer
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.io.ext.*
+import com.ustadmobile.core.network.NetworkProgressListenerAdapter
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.updateTotalFromContainerSize
+import com.ustadmobile.core.util.ext.updateTotalFromLocalUriIfNeeded
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.lib.db.entities.*
 import io.ktor.client.*
@@ -137,6 +140,9 @@ class H5PTypePluginCommonJvm(
                 val progressSize = if(contentNeedUpload) 2 else 1
                 val h5pIsProcessed = contentJobItem.cjiContainerUid != 0L
 
+                contentJobItem.updateTotalFromLocalUriIfNeeded(localUri, contentNeedUpload,
+                    progress, context, di)
+
                 if(!h5pIsProcessed) {
 
                     val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
@@ -206,7 +212,11 @@ class H5PTypePluginCommonJvm(
                     tmpIndexHtmlFile.delete()
 
                     contentJobItem.cjiContainerUid = container.containerUid
-                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
+                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                        container.containerUid)
+
+                    contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
+                        progress)
 
                     contentJobItem.cjiConnectivityNeeded = true
                     db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
@@ -223,8 +233,9 @@ class H5PTypePluginCommonJvm(
 
 
                 if(contentNeedUpload) {
-                    uploader.upload(
-                            contentJobItem, progress, httpClient, endpoint)
+                    uploader.upload(contentJobItem,
+                        NetworkProgressListenerAdapter(progress, contentJobItem),
+                        httpClient, endpoint)
                 }
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)

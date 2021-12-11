@@ -10,7 +10,10 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.io.ext.*
+import com.ustadmobile.core.network.NetworkProgressListenerAdapter
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.updateTotalFromContainerSize
+import com.ustadmobile.core.util.ext.updateTotalFromLocalUriIfNeeded
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.openInputStream
@@ -103,8 +106,9 @@ class XapiTypePluginCommonJvm(
                 val doorUri = DoorUri.parse(uri)
                 val localUri = process.getLocalOrCachedUri()
                 val contentNeedUpload = !doorUri.isRemote()
-                val progressSize = if (contentNeedUpload) 2 else 1
                 val xapiIsProcessed = contentJobItem.cjiContainerUid != 0L
+                contentJobItem.updateTotalFromLocalUriIfNeeded(localUri, contentNeedUpload,
+                    progress, context, di)
 
                 if(!xapiIsProcessed) {
 
@@ -125,7 +129,11 @@ class XapiTypePluginCommonJvm(
                             ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
                     contentJobItem.cjiContainerUid = container.containerUid
-                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
+                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                        container.containerUid)
+
+                    contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
+                        progress)
 
                     contentJobItem.cjiConnectivityNeeded = true
                     db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
@@ -137,12 +145,10 @@ class XapiTypePluginCommonJvm(
                     }
                 }
 
-                contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
-                progress.onProgress(contentJobItem)
-
                 if(contentNeedUpload) {
-                    uploader.upload(
-                            contentJobItem, progress, httpClient, endpoint)
+                    val progressListenerAdapter = NetworkProgressListenerAdapter(progress,
+                        contentJobItem)
+                    uploader.upload(contentJobItem, progressListenerAdapter, httpClient, endpoint)
                 }
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)

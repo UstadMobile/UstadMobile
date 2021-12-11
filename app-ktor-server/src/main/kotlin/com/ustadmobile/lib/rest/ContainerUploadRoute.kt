@@ -25,7 +25,7 @@ fun Route.ContainerUploadRoute2() {
             val sessionManager: UploadSessionManager = closestDI().on(call).direct.instance()
             try {
                 val containerEntryListStr = call.receive<String>()
-                val gson: Gson = di().direct.instance()
+                val gson: Gson = closestDI().direct.instance()
                 val containerEntryList : List<ContainerEntryWithMd5> = gson.fromJson(containerEntryListStr,
                         object: com.google.gson.reflect.TypeToken<List<ContainerEntryWithMd5>>() { }.type)
                 val uploadSession = sessionManager.initSession(UUID.fromString(call.parameters["uploadId"]),

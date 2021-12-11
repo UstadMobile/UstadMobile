@@ -15,6 +15,7 @@ import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.*
+import com.ustadmobile.core.network.NetworkProgressListenerAdapter
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.ext.toDoorUri
@@ -69,8 +70,8 @@ class VideoTypePluginAndroid(
             val videoUri = DoorUri.parse(uri)
             val contentNeedUpload = !videoUri.isRemote()
             val localUri = process.getLocalOrCachedUri()
-
-            val progressSize = if(contentNeedUpload) 2 else 1
+            contentJobItem.updateTotalFromLocalUriIfNeeded(localUri, contentNeedUpload,
+                jobProgress, context, di)
 
             val videoTempDir = makeTempDir(prefix = "tmp")
             val newVideo = File(videoTempDir,
@@ -134,13 +135,21 @@ class VideoTypePluginAndroid(
 
                                 override fun onProgress(id: String, progress: Float) {
                                     Napier.d(tag = VIDEO_ANDROID, message = "progress at value ${progress * 100}")
-                                    contentJobItem.cjiItemProgress = ((progress * contentJobItem.cjiItemTotal) / progressSize).toLong()
+                                    var cjiProgress = (progress * contentJobItem.cjiItemTotal)
+                                    if(contentNeedUpload)
+                                        cjiProgress /= 2.toFloat()
+
+                                    contentJobItem.cjiItemProgress = cjiProgress.toLong()
                                     jobProgress.onProgress(contentJobItem)
                                 }
 
                                 override fun onCompleted(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
                                     Napier.d(tag = VIDEO_ANDROID, message = "completed transform")
-                                    contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
+                                    var cjiProgress = contentJobItem.cjiItemTotal
+                                    if(contentNeedUpload)
+                                        cjiProgress /= 2
+
+                                    contentJobItem.cjiItemProgress = cjiProgress
                                     jobProgress.onProgress(contentJobItem)
                                     videoCompleted.complete(true)
                                 }
@@ -193,14 +202,14 @@ class VideoTypePluginAndroid(
                         repo.addContainerFromUri(container.containerUid, localUri, context, di,
                                 localUri.getFileName(context),
                                 ContainerAddOptions(containerFolderUri))
-
-                        contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
-                        jobProgress.onProgress(contentJobItem)
                     }
                     videoTempDir.delete()
 
                     contentJobItem.cjiContainerUid = container.containerUid
-                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
+                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                        container.containerUid)
+                    contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
+                        jobProgress)
 
                     contentJobItem.cjiConnectivityNeeded = true
                     db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
@@ -213,10 +222,10 @@ class VideoTypePluginAndroid(
 
                 }
 
-                // TODO upload
                 if(contentNeedUpload) {
-                    uploader.upload(
-                            contentJobItem, jobProgress, httpClient, endpoint)
+                    uploader.upload(contentJobItem,
+                        NetworkProgressListenerAdapter(jobProgress, contentJobItem),
+                        httpClient, endpoint)
                 }
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)

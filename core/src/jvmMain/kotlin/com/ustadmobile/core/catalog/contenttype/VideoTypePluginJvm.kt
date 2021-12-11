@@ -7,9 +7,12 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.io.ext.isRemote
+import com.ustadmobile.core.network.NetworkProgressListenerAdapter
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ShrinkUtils
 import com.ustadmobile.core.util.ext.fitWithin
+import com.ustadmobile.core.util.ext.updateTotalFromContainerSize
+import com.ustadmobile.core.util.ext.updateTotalFromLocalUriIfNeeded
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
@@ -66,10 +69,13 @@ class VideoTypePluginJvm(
 
             val uri = contentJobItem.sourceUri ?: throw IllegalStateException("missing uri")
             val videoUri = DoorUri.parse(uri)
-            val videoFile = process.getLocalOrCachedUri().toFile()
+            val localVideoUri = process.getLocalOrCachedUri()
+            val videoFile = localVideoUri.toFile()
             var newVideo = File(videoFile.parentFile, "new${videoFile.nameWithoutExtension}.mp4")
             val videoIsProcessed = contentJobItem.cjiContainerUid != 0L
             val contentNeedUpload = !videoUri.isRemote()
+            contentJobItem.updateTotalFromLocalUriIfNeeded(localVideoUri, contentNeedUpload,
+                progress, context, di)
 
             try {
 
@@ -107,7 +113,10 @@ class VideoTypePluginJvm(
 
                     // after container has files and torrent added, update contentJob
                     contentJobItem.cjiContainerUid = container.containerUid
-                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
+                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                        container.containerUid)
+                    contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
+                        progress)
 
                     contentJobItem.cjiConnectivityNeeded = true
                     db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
@@ -121,8 +130,9 @@ class VideoTypePluginJvm(
 
 
                 if(contentNeedUpload) {
-                    uploader.upload(
-                            contentJobItem, progress, httpClient, endpoint)
+                    uploader.upload(contentJobItem,
+                        NetworkProgressListenerAdapter(progress, contentJobItem), httpClient,
+                        endpoint)
                 }
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)

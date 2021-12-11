@@ -8,14 +8,15 @@ import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.*
-import com.ustadmobile.core.network.containeruploader.ContainerUploader2
+import com.ustadmobile.core.network.NetworkProgressListenerAdapter
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.alternative
+import com.ustadmobile.core.util.ext.updateTotalFromContainerSize
+import com.ustadmobile.core.util.ext.updateTotalFromLocalUriIfNeeded
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.openInputStream
-import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -120,9 +121,11 @@ class EpubTypePluginCommonJvm(
                     val uri = DoorUri.parse(jobUri)
 
                     val contentNeedUpload = !uri.isRemote()
-                    val progressSize = if (contentNeedUpload) 2 else 1
                     val localUri = process.getLocalOrCachedUri()
                     val epubIsProcessed = contentJobItem.cjiContainerUid != 0L
+
+                    contentJobItem.updateTotalFromLocalUriIfNeeded(localUri, contentNeedUpload,
+                        progress, context, di)
 
                     if(!epubIsProcessed) {
 
@@ -143,25 +146,28 @@ class EpubTypePluginCommonJvm(
                                 localUri,
                                 ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
-                        contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
-                        progress.onProgress(contentJobItem)
 
                         contentJobItem.cjiContainerUid = container.containerUid
-                        db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
+                        db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                            container.containerUid)
+                        contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
+                            progress)
 
                         contentJobItem.cjiConnectivityNeeded = true
                         db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
 
-                        val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid
-                                ?: 0)
+                        val haveConnectivityToContinueJob = db.contentJobDao
+                            .isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid ?: 0)
+
                         if (!haveConnectivityToContinueJob) {
                             return@withContext ProcessResult(JobStatus.QUEUED)
                         }
                     }
 
-                    // TODO upload
                     if(contentNeedUpload) {
-                        uploader.upload(contentJobItem, progress, httpClient, endpoint)
+                        val progressListenerAdapter = NetworkProgressListenerAdapter(progress,
+                            contentJobItem)
+                        uploader.upload(contentJobItem, progressListenerAdapter, httpClient, endpoint)
                     }
 
                     return@withContext ProcessResult(JobStatus.COMPLETE)

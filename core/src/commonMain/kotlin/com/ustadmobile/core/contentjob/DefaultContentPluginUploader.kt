@@ -3,6 +3,7 @@ package com.ustadmobile.core.contentjob
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.toContainerEntryWithMd5
+import com.ustadmobile.core.network.NetworkProgressListener
 import com.ustadmobile.core.network.containeruploader.ContainerUploader2
 import com.ustadmobile.core.network.containeruploader.ContainerUploaderRequest2
 import com.ustadmobile.door.ext.DoorTag
@@ -24,7 +25,7 @@ class DefaultContentPluginUploader(
 
     override suspend fun upload(
         contentJobItem: ContentJobItem,
-        progress: ContentJobProgressListener,
+        progress: NetworkProgressListener?,
         httpClient: HttpClient,
         endpoint: Endpoint
     ) {
@@ -45,7 +46,8 @@ class DefaultContentPluginUploader(
 
                 val uploadRequest = ContainerUploaderRequest2(uploadSessionUuid,
                     containerEntries.map { it.toContainerEntryWithMd5() }, endpoint.url)
-                ContainerUploader2(uploadRequest, endpoint = endpoint, di = di).upload()
+                ContainerUploader2(uploadRequest, endpoint = endpoint, di = di,
+                    progressListener = progress).upload()
             } catch (c: CancellationException) {
                 withContext(NonCancellable){
                     // TODO delete progress if cancelled
