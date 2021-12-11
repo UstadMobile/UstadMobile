@@ -13,13 +13,21 @@ interface ContentEntryDetailOverviewView: UstadDetailView<ContentEntryWithMostRe
      */
     fun showDownloadDialog(args: Map<String, String>)
 
-    var downloadJobItem: DownloadJobItem?
-
     var scoreProgress: ContentEntryStatementScoreProgress?
 
     var locallyAvailable: Boolean
 
     var markCompleteVisible: Boolean
+
+    var canDownload: Boolean
+
+    var canUpdate: Boolean
+
+    var hasContentToOpenOrDelete: Boolean
+
+    var contentJobItemStatus: Int
+
+    var contentJobItemProgress: ContentJobItemProgress?
 
     companion object {
 

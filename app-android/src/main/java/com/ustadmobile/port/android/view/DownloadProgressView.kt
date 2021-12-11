@@ -23,12 +23,12 @@ class DownloadProgressView : LinearLayout, View.OnClickListener {
 
     private var downloadStopListener: OnStopDownloadListener? = null
 
-    var progress: Float
-        get() = progressBar!!.progress.toFloat() / 100f
+    var progress: Float = 0f
         set(progress) {
             val progressPercentage = (progress * 100).roundToInt()
-            progressBar!!.progress = progressPercentage
-            downloadPercentageTextView!!.text = "$progressPercentage%"
+            field = progressPercentage.toFloat()
+            progressBar?.progress = progressPercentage
+            downloadPercentageTextView?.text = "$progressPercentage%"
         }
 
     var statusText: String

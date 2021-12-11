@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -49,7 +50,6 @@ class SelectFileFragment(private val registry: ActivityResultRegistry? = null) :
                             args, requireContext())
                 }
             }
-
         }
 
     }
@@ -57,6 +57,7 @@ class SelectFileFragment(private val registry: ActivityResultRegistry? = null) :
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val mimeTypeList = arguments?.get(ARG_SELECTION_MODE)?.toString()?.split(";")?.toTypedArray()
         activityResultLauncher?.launch(mimeTypeList)
+
         return null
     }
 

@@ -14,19 +14,19 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.ContainerStorageDir
+import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
-import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.STACKED_BUTTON_CANCEL
-import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.STACKED_BUTTON_CONTINUE
-import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.STACKED_BUTTON_PAUSE
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.instance
+import org.kodein.di.on
 import java.util.*
 
 //It would be nice to move this to proguard-rules.pro and allow obfuscation of the contents of the class
@@ -55,9 +55,9 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
     private var savedInstanceState : Bundle? = null
 
-    private lateinit var storageDirs: List<UMStorageDir>
+    private lateinit var storageDirs: List<ContainerStorageDir>
 
-    //internal var viewIdMap = HashMap<Int, Int>()
+    internal var viewIdMap = HashMap<Int, Int>()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val inflater = requireContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -84,14 +84,13 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
         //mapping presenter constants to view ids
 //        viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_PAUSE] = R.id.action_btn_pause_download
-//        viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CANCEL] = R.id.action_btn_cancel_download
+        viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CANCEL] = R.id.action_btn_cancel_download
 //        viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CONTINUE] = R.id.action_btn_continue_download
 
 
         mPresenter = DownloadDialogPresenter(context as Context, bundleToMap(arguments),
                 this@DownloadDialogFragment, di, this).also {
             it.onCreate(null)
-
             GlobalScope.launch(Dispatchers.Main) {
                 showStorageOptions()
             }
@@ -103,8 +102,8 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
     private suspend fun showStorageOptions() {
         val impl: UstadMobileSystemImpl by di.instance()
         val accountManager: UstadAccountManager by di.instance()
-        val storageOptions = impl.getStorageDirsAsync(requireContext(),
-                Endpoint(accountManager.activeAccount.endpointUrl))
+        val containerStorageManager: ContainerStorageManager by on(accountManager.activeAccount).instance()
+        val storageOptions = containerStorageManager.storageList
         this.storageDirs = storageOptions
         val optionLabels = storageOptions.map { umStorageDir ->
             String.format(impl.getString(
@@ -201,7 +200,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
     }
 
     override fun setBottomPositiveButtonEnabled(enabled: Boolean) {
-        mDialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = enabled
+        mDialog.getButton(AlertDialog.BUTTON_POSITIVE)?.isEnabled = enabled
     }
 
     override fun setWarningText(text: String) {
@@ -241,9 +240,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
     companion object {
         val STACKED_BUTTON_ANDROID_ID_TO_PRESENTER_ID_MAP = mapOf(
-            R.id.action_btn_pause_download to STACKED_BUTTON_PAUSE,
-            R.id.action_btn_cancel_download to STACKED_BUTTON_CANCEL,
-            R.id.action_btn_continue_download to STACKED_BUTTON_CONTINUE
+            R.id.action_btn_cancel_download to STACKED_BUTTON_CANCEL
         )
     }
 }

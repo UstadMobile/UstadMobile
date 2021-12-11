@@ -7,6 +7,7 @@ import com.ustadmobile.lib.db.entities.ContainerImportJob
 /**
  * Manager that handles importing content
  */
+@Deprecated("use ContentJobPlugin to process imports")
 interface ContentImportManager {
 
     /**

@@ -6,7 +6,7 @@
     <data>
         <import type="android.view.View"/>
         <import type="android.text.InputType" />
-        <import type="com.ustadmobile.core.impl.UMStorageDir" />
+        <import type="com.ustadmobile.core.impl.ContainerStorageDir" />
         <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="com.ustadmobile.core.controller.ContentEntryEdit2Presenter.StorageOptions"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView"/>
@@ -17,8 +17,8 @@
             type="com.ustadmobile.lib.db.entities.ContentEntryWithLanguage" />
 
         <variable
-            name="importedMetadata"
-            type="com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData"/>
+            name="metadataResult"
+            type="com.ustadmobile.core.contentjob.MetadataResult" />
 
         <variable
             name="loading"
@@ -84,7 +84,7 @@
 
         <variable
             name="storageOptions"
-            type="java.util.List&lt;UMStorageDir&gt;"/>
+            type="java.util.List&lt;ContainerStorageDir&gt;"/>
 
         <variable
             name="completionCriteriaListener"
@@ -395,7 +395,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/dimen_20dp"
                 android:enabled="@{fieldsEnabled}"
-                android:visibility="@{importedMetadata != null ? View.VISIBLE : View.GONE}"
+                android:visibility="@{metadataResult != null ? View.VISIBLE : View.GONE}"
                 android:text="@string/compress"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:checked="@={compressionEnabled}"

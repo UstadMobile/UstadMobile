@@ -10,4 +10,6 @@ interface ContentEntryAddOptionsListener {
 
     fun onClickImportGallery()
 
+    fun onClickAddFolder()
+
 }

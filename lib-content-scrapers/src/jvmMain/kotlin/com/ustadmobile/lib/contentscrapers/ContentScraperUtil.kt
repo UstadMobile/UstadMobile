@@ -886,6 +886,7 @@ object ContentScraperUtil {
     }
 
 
+
     /**
      * @param contentEntry    entry that is joined to file
      * @param mobileOptimized isMobileOptimized
@@ -897,6 +898,8 @@ object ContentScraperUtil {
      * @returns the entry file
      */
     @Throws(IOException::class)
+    // TODO scrapers need di to support
+    @Deprecated("not updated since scrapers")
     fun insertContainer(containerDao: ContainerDao, contentEntry: ContentEntry,
                         mobileOptimized: Boolean, fileType: String,
                         lastModified: Long, tmpDir: File, db: UmAppDatabase,
@@ -912,8 +915,8 @@ object ContentScraperUtil {
         val containerAddOptions = ContainerAddOptions(storageDirUri = containerDir.toDoorUri())
         runBlocking {
             if (tmpDir.isDirectory) {
-                repository.addDirToContainer(container.containerUid, tmpDir.toDoorUri(),
-                        true, containerAddOptions)
+               /* repository.addDirToContainer(container.containerUid, tmpDir.toDoorUri(),
+                        true, containerAddOptions, di)*/
             } else if(fileType == ScraperConstants.MIMETYPE_ZIP ||
                     fileType == ScraperConstants.MIMETYPE_EPUB ||
                     fileType == ScraperConstants.MIMETYPE_TINCAN){
@@ -922,8 +925,8 @@ object ContentScraperUtil {
                         tmpDir.toDoorUri(), containerAddOptions, Any()
                 )
             }else{
-                repository.addFileToContainer(container.containerUid, tmpDir.toDoorUri(),
-                        tmpDir.name, containerAddOptions)
+             /*   repository.addFileToContainer(container.containerUid, tmpDir.toDoorUri(),
+                        tmpDir.name, containerAddOptions, di)*/
             }
         }
 

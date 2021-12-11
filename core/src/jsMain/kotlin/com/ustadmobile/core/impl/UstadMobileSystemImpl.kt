@@ -187,10 +187,4 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 //        val content = client.get<String>( "${localStorage.getItem("doordb.endpoint.url")}H5PResources/$path")
 //        return content.toByteArray(Charsets.UTF_8)
     }
-
-
-    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
 }

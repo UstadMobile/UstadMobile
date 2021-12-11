@@ -145,18 +145,10 @@
         android:name="com.ustadmobile.port.android.view.ClazzAssignmentDetailStudentProgressFragment"/>
 
     <fragment
-        android:id="@+id/home_content_dest"
-        android:name="com.ustadmobile.port.android.view.ContentEntryListTabsFragment"
-        android:label="@string/content">
-        <argument
-            android:name="parentUid"
-            android:defaultValue="-4103245208651563007L"
-            app:argType="long" />
-    </fragment>
-
-    <fragment
         android:id="@+id/content_entry_list_dest"
-        android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment" />
+        android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment"
+        android:label="@string/content">
+    </fragment>
 
     <fragment
         android:id="@+id/content_entry_list_select_folder"
@@ -275,6 +267,10 @@
         android:id="@+id/select_file_view"
         android:name="com.ustadmobile.port.android.view.SelectFileFragment"
         />
+
+    <fragment
+        android:id="@+id/select_folder_view"
+        android:name="com.ustadmobile.port.android.view.SelectFolderFragment"/>
 
 
     <fragment

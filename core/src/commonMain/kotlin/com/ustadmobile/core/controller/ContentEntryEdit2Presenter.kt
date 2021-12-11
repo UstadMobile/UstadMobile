@@ -1,13 +1,20 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.contentformats.ContentImportManager
-import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import SelectFolderView
+import com.ustadmobile.core.contentjob.ContentJobManager
+import com.ustadmobile.core.contentjob.ContentJobProcessContext
+import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.KEY_SELECTED_ITEMS
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.impl.NavigateForResultOptions
+import com.ustadmobile.core.io.ext.getSize
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.core.util.ext.logErrorReport
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
@@ -23,9 +30,11 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
+import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -38,21 +47,25 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
-import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 
 
-class ContentEntryEdit2Presenter(context: Any,
-                                 arguments: Map<String, String>, view: ContentEntryEdit2View,
-                                 lifecycleOwner: DoorLifecycleOwner,
-                                 di: DI)
-    : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view, di, lifecycleOwner),
-        ContentEntryAddOptionsListener {
+class ContentEntryEdit2Presenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: ContentEntryEdit2View,
+    lifecycleOwner: DoorLifecycleOwner,
+    di: DI
+) : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view,
+        di, lifecycleOwner), ContentEntryAddOptionsListener {
 
-    private val contentImportManager: ContentImportManager?
-            by on(accountManager.activeAccount).instanceOrNull()
+    private val pluginManager: ContentPluginManager by on(accountManager.activeAccount).instance()
+
+    private val contentJobManager: ContentJobManager by di.instance()
 
     private val httpClient: HttpClient by di.instance()
+
+    private val containerStorageManager: ContainerStorageManager by on(accountManager.activeAccount).instance()
 
     enum class LicenceOptions(val optionVal: Int, val messageId: Int) {
         LICENSE_TYPE_CC_BY(ContentEntry.LICENSE_TYPE_CC_BY, MessageID.licence_type_cc_by),
@@ -83,6 +96,8 @@ class ContentEntryEdit2Presenter(context: Any,
 
     private var parentEntryUid: Long = 0
 
+    private var fromUri: String? = null
+
 
     open class StorageOptions(context: Any, val storage: UmStorageOptions) : MessageIdOption(storage.messageId, context) {
         override fun toString(): String {
@@ -102,7 +117,7 @@ class ContentEntryEdit2Presenter(context: Any,
         view.completionCriteriaOptions = CompletionCriteriaOptions.values().map { CompletionCriteriaMessageIdOption(it, context) }
         parentEntryUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0
         GlobalScope.launch(doorMainDispatcher()) {
-            view.storageOptions = systemImpl.getStorageDirsAsync(context)
+            view.storageOptions = containerStorageManager.storageList
         }
     }
 
@@ -117,9 +132,10 @@ class ContentEntryEdit2Presenter(context: Any,
                 return handleFileSelection(uri)
             }
             if (metaData != null) {
-                val importedMetadata = safeParse(di, ImportedContentEntryMetaData.serializer(), metaData)
-                view.entryMetaData = importedMetadata
-                return importedMetadata.contentEntry
+                val metadataResult = safeParse(di, MetadataResult.serializer(), metaData)
+                view.metadataResult = metadataResult
+                fromUri = metadataResult.entry.sourceUrl
+                return metadataResult.entry
             }
         }
         return withTimeoutOrNull(2000) {
@@ -134,7 +150,7 @@ class ContentEntryEdit2Presenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         val metaDataStr = bundle[ARG_IMPORTED_METADATA]
         if (metaDataStr != null) {
-            view.entryMetaData = safeParse(di, ImportedContentEntryMetaData.serializer(), metaDataStr)
+            view.metadataResult = safeParse(di, MetadataResult.serializer(), metaDataStr)
         }
         var editEntity: ContentEntryWithLanguage? = null
         editEntity = if (entityJsonStr != null) {
@@ -151,25 +167,25 @@ class ContentEntryEdit2Presenter(context: Any,
         observeSavedStateResult(SAVED_STATE_KEY_URI, ListSerializer(String.serializer()),
                 String::class) {
             val uri = it.firstOrNull() ?: return@observeSavedStateResult
-            GlobalScope.launch(doorMainDispatcher()){
+            presenterScope.launch(doorMainDispatcher()){
                 view.entity = handleFileSelection(uri)
             }
             requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
         }
 
-        observeSavedStateResult(SAVED_STATE_KEY_METADATA, ListSerializer(ImportedContentEntryMetaData.serializer()),
-                ImportedContentEntryMetaData::class) {
+        observeSavedStateResult(SAVED_STATE_KEY_METADATA, ListSerializer(MetadataResult.serializer()),
+                MetadataResult::class) {
             val metadata = it.firstOrNull() ?: return@observeSavedStateResult
             view.loading = true
             // back from navigate import
-            view.entryMetaData = metadata
-            val entry = view.entryMetaData?.contentEntry
-            val entryUid = arguments[ARG_ENTITY_UID]
-            if (entry != null) {
-                if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
-                view.fileImportErrorVisible = false
+            view.metadataResult = metadata
+            fromUri = metadata.entry.sourceUrl
+            arguments[ARG_ENTITY_UID]?.let { uid ->
+                val entry = metadata.entry
+                entry.contentEntryUid = uid.toLong()
                 entity = entry
             }
+            view.fileImportErrorVisible = false
             view.loading = false
 
             requireSavedStateHandle()[SAVED_STATE_KEY_METADATA] = null
@@ -182,7 +198,7 @@ class ContentEntryEdit2Presenter(context: Any,
         super.onSaveInstanceState(savedState)
         val entityVal = view.entity
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
-        savedState.putEntityAsJson(ARG_IMPORTED_METADATA, ImportedContentEntryMetaData.serializer(), view.entryMetaData)
+        savedState.putEntityAsJson(ARG_IMPORTED_METADATA, MetadataResult.serializer(), view.metadataResult)
     }
 
 
@@ -191,7 +207,8 @@ class ContentEntryEdit2Presenter(context: Any,
         view.fieldsEnabled = false
         view.titleErrorEnabled = false
         view.fileImportErrorVisible = false
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch(doorMainDispatcher()) {
+
             val canCreate = isImportValid(entity)
 
             if (canCreate) {
@@ -218,22 +235,41 @@ class ContentEntryEdit2Presenter(context: Any,
                     repo.languageDao.insertAsync(language)
                 }
 
-                val metaData = view.entryMetaData
-                val uri = metaData?.uri
+                val metaData = view.metadataResult
                 val videoDimensions = view.videoDimensions
                 val conversionParams = mapOf("compress" to view.compressionEnabled.toString(),
                         "dimensions" to "${videoDimensions.first}x${videoDimensions.second}")
 
                 val popUpTo = arguments[ARG_POPUPTO_ON_FINISH] ?: CURRENT_DEST
 
-                if (metaData != null && uri != null) {
+                if (metaData != null && fromUri != null) {
 
-                    if (uri.startsWith("content://")) {
+                    if (fromUri?.startsWith("content://") == true) {
 
-                        metaData.contentEntry = entity
-                        contentImportManager?.queueImportContentFromFile(uri, metaData,
-                                view.storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(),
-                                ContainerImportJob.CLIENT_IMPORT_MODE, conversionParams)
+                        val job = ContentJob().apply {
+                            toUri = view.storageOptions?.get(view.selectedStorageIndex)?.dirUri
+                            params = Json.encodeToString(
+                                    MapSerializer(String.serializer(), String.serializer()),
+                                        conversionParams)
+                            cjIsMeteredAllowed = false
+                            cjNotificationTitle = systemImpl.getString(MessageID.importing, context)
+                                    .replace("%1\$s",entity.title ?: "")
+                            cjUid = db.contentJobDao.insertAsync(this)
+                        }
+                        ContentJobItem().apply {
+                            cjiJobUid = job.cjUid
+                            sourceUri = fromUri
+                            cjiItemTotal = sourceUri?.let { DoorUri.parse(it).getSize(context, di)  } ?: 0L
+                            cjiPluginId = metaData.pluginId
+                            cjiContentEntryUid = entity.contentEntryUid
+                            cjiIsLeaf = entity.leaf
+                            cjiParentContentEntryUid = parentEntryUid
+                            cjiConnectivityNeeded = false
+                            cjiStatus = JobStatus.QUEUED
+                            cjiUid = db.contentJobItemDao.insertJobItem(this)
+                        }
+
+                        contentJobManager.enqueueContentJob(accountManager.activeEndpoint, job.cjUid)
 
                         view.loading = false
                         view.fieldsEnabled = true
@@ -243,15 +279,15 @@ class ContentEntryEdit2Presenter(context: Any,
 
                     } else {
 
-                        var client: HttpResponse? = null
+                        var client: HttpResponse?
                         try {
 
                             client = httpClient.post<HttpStatement>() {
                                 url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
                                         "/import/downloadLink"))
                                 parameter("parentUid", parentEntryUid)
-                                parameter("scraperType", view.entryMetaData?.scraperType)
-                                parameter("url", view.entryMetaData?.uri)
+                                parameter("pluginId", view.metadataResult?.pluginId)
+                                parameter("url", fromUri)
                                 parameter("conversionParams",
                                         Json.encodeToString(MapSerializer(String.serializer(),
                                                 String.serializer()),
@@ -309,7 +345,7 @@ class ContentEntryEdit2Presenter(context: Any,
 
     fun isImportValid(entity: ContentEntryWithLanguage): Boolean {
         return entity.title != null && (!entity.leaf || entity.contentEntryUid != 0L ||
-                (entity.contentEntryUid == 0L && view.entryMetaData?.uri != null))
+                (entity.contentEntryUid == 0L && fromUri != null))
     }
 
     suspend fun handleFileSelection(uri: String): ContentEntryWithLanguage? {
@@ -318,26 +354,28 @@ class ContentEntryEdit2Presenter(context: Any,
 
         var entry: ContentEntryWithLanguage? = null
         try {
-            val metadata = contentImportManager?.extractMetadata(uri)
-            view.entryMetaData = metadata
-            when (metadata) {
-                null -> {
-                    view.showSnackBar(systemImpl.getString(MessageID.import_link_content_not_supported, context))
+            val doorUri = DoorUri.parse(uri)
+            ContentJobProcessContext(doorUri, createTemporaryDir("content"),
+                    mutableMapOf(), di).use { processContext ->
+                val metadata = pluginManager.extractMetadata(DoorUri.parse(uri), processContext)
+                    ?: throw IllegalArgumentException("no metadata found")
+                view.metadataResult = metadata
+                val plugin = pluginManager.getPluginById(metadata.pluginId)
+                entry = metadata.entry
+                arguments[ARG_ENTITY_UID]?.also {
+                    entry?.contentEntryUid = it.toLong()
                 }
-            }
-
-            entry = metadata?.contentEntry
-            val entryUid = arguments[ARG_ENTITY_UID]
-            if (entry != null) {
-                if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
                 view.fileImportErrorVisible = false
-                if (metadata?.mimeType?.startsWith("video/") == true &&
-                        !metadata.uri.lowercase().startsWith("https://drive.google.com")) {
+                fromUri = uri
+                if (plugin.supportedMimeTypes.firstOrNull()?.startsWith("video/") == true &&
+                    !uri.lowercase().startsWith("https://drive.google.com")) {
                     view.videoUri = uri
                 }
             }
+
         }catch (e: Exception){
             view.showSnackBar(systemImpl.getString(MessageID.import_link_content_not_supported, context))
+            Napier.e("Error extracting metadata", e)
             repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, e, this)
         }finally {
             view.loading = false
@@ -372,8 +410,8 @@ class ContentEntryEdit2Presenter(context: Any,
         navigateForResult(
                 NavigateForResultOptions(this,
                         null, ContentEntryImportLinkView.VIEW_NAME,
-                        ImportedContentEntryMetaData::class,
-                        ImportedContentEntryMetaData.serializer(), SAVED_STATE_KEY_METADATA,
+                        MetadataResult::class,
+                        MetadataResult.serializer(), SAVED_STATE_KEY_METADATA,
                         arguments = args)
         )
     }
@@ -387,6 +425,18 @@ class ContentEntryEdit2Presenter(context: Any,
         navigateForResult(
                 NavigateForResultOptions(this,
                         null, SelectFileView.VIEW_NAME, String::class,
+                        String.serializer(), SAVED_STATE_KEY_URI,
+                        arguments = args)
+        )
+    }
+
+    override fun onClickAddFolder() {
+        val args = mutableMapOf(ARG_LEAF to true.toString())
+        args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
+
+        navigateForResult(
+                NavigateForResultOptions(this,
+                        null, SelectFolderView.VIEW_NAME, String::class,
                         String.serializer(), SAVED_STATE_KEY_URI,
                         arguments = args)
         )

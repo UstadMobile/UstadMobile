@@ -103,7 +103,7 @@ class AccountListPresenterTest {
 
         mockView = mock { }
         impl = mock{
-            on { getAppConfigDefaultFirstDest(any()) }.thenReturn(ContentEntryListTabsView.VIEW_NAME)
+            on { getAppConfigDefaultFirstDest(any()) }.thenReturn(ContentEntryList2View.VIEW_NAME)
             on { getString(any(), any()) }.thenAnswer {
                 val messageId = it.getArgument<Int>(0)
                 if(messageId == MessageID.logged_in_as) {
@@ -343,7 +343,7 @@ class AccountListPresenterTest {
         }
 
         verify(impl).goToViewLink(argWhere {
-            it.startsWith(ContentEntryListTabsView.VIEW_NAME)
+            it.startsWith(ContentEntryList2View.VIEW_NAME)
         }, any(), argWhere {
             it.popUpToViewName == UstadView.ROOT_DEST && !it.popUpToInclusive
         })
