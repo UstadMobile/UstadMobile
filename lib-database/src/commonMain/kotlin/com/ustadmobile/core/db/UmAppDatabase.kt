@@ -63,7 +63,7 @@ import kotlin.jvm.JvmField
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 88)
+], version = 89)
 @MinSyncVersion(60)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -5237,8 +5237,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             } else {
                 listOf("ALTER TABLE Site DROP COLUMN IF EXISTS torrentAnnounceUrl")
             }
+        }
 
-}
+        val MIGRATION_88_89 = DoorMigrationStatementList(88, 89) { database ->
+            listOf("ALTER TABLE ContentJobItem ADD COLUMN cjiUploadSessionUid TEXT")
+        }
+
 
 
 fun migrationList(nodeId: Int) = listOf<DoorMigration>(
