@@ -5,6 +5,7 @@ import com.ustadmobile.mui.components.LinearProgressColor
 import com.ustadmobile.mui.components.themeContext
 import com.ustadmobile.mui.components.umCssBaseline
 import com.ustadmobile.mui.components.umLinearProgress
+import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.splashComponentContainer
 import com.ustadmobile.util.StyleManager.splashComponentLoadingImage
 import com.ustadmobile.util.StyleManager.splashComponentPreloadContainer
@@ -12,6 +13,7 @@ import com.ustadmobile.util.StyleManager.splashComponentPreloadProgressBar
 import com.ustadmobile.util.ThemeManager.isDarkModeActive
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
+import com.ustadmobile.view.ext.umGridContainer
 import kotlinx.browser.document
 import kotlinx.coroutines.Runnable
 import react.RBuilder
@@ -72,6 +74,11 @@ class SplashComponent (props: UmProps): RComponent<UmProps, UmState>(props), Spl
                         umLinearProgress(color = color) {
                             css(splashComponentPreloadProgressBar)
                         }
+                    }
+
+                    styledDiv {
+                        css(StyleManager.partnersList)
+                        umGridContainer {}
                     }
 
                 }
