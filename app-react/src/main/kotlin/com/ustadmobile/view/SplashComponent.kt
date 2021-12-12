@@ -1,21 +1,20 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.controller.SplashPresenter
-import com.ustadmobile.mui.components.LinearProgressColor
-import com.ustadmobile.mui.components.themeContext
-import com.ustadmobile.mui.components.umCssBaseline
-import com.ustadmobile.mui.components.umLinearProgress
-import com.ustadmobile.util.StyleManager
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.StyleManager.centerItem
+import com.ustadmobile.util.StyleManager.partnersList
 import com.ustadmobile.util.StyleManager.splashComponentContainer
-import com.ustadmobile.util.StyleManager.splashComponentLoadingImage
 import com.ustadmobile.util.StyleManager.splashComponentPreloadContainer
-import com.ustadmobile.util.StyleManager.splashComponentPreloadProgressBar
-import com.ustadmobile.util.ThemeManager.isDarkModeActive
+import com.ustadmobile.util.ThemeManager
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
 import kotlinx.browser.document
 import kotlinx.coroutines.Runnable
+import kotlinx.css.LinearDimension
+import kotlinx.css.width
 import react.RBuilder
 import react.RComponent
 import react.setState
@@ -61,26 +60,38 @@ class SplashComponent (props: UmProps): RComponent<UmProps, UmState>(props), Spl
                 } else {
                     styledDiv {
                         css(splashComponentPreloadContainer)
-                        styledImg {
-                            css (splashComponentLoadingImage)
-                            attrs.src = "assets/logo.png"
-                        }
+                        umGridContainer {
+                            css(centerItem)
+                            umItem(GridSize.cells12) {
+                                css(centerItem)
+                                styledImg {
+                                    css{
+                                        width = LinearDimension("90%")
+                                    }
+                                    attrs.src = "assets/logo.png"
+                                }
+                            }
 
-                        val color = when {
-                            isDarkModeActive() -> LinearProgressColor.secondary
-                            else -> LinearProgressColor.primary
-                        }
+                            umItem(GridSize.cells12) {
+                                css(centerItem)
+                                val color = when {
+                                    ThemeManager.isDarkModeActive() -> LinearProgressColor.secondary
+                                    else -> LinearProgressColor.primary
+                                }
 
-                        umLinearProgress(color = color) {
-                            css(splashComponentPreloadProgressBar)
+                                umLinearProgress(color = color) {
+                                    css {
+                                        width = LinearDimension("100%")
+                                    }
+                                }
+                            }
                         }
                     }
+                }
 
-                    styledDiv {
-                        css(StyleManager.partnersList)
-                        umGridContainer {}
-                    }
-
+                styledDiv {
+                    css(partnersList)
+                    umGridContainer {}
                 }
             }
         }
