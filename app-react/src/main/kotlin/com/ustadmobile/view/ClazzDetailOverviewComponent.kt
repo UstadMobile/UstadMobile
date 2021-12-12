@@ -10,19 +10,18 @@ import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.GridSpacing
 import com.ustadmobile.mui.components.TypographyVariant
 import com.ustadmobile.mui.components.umTypography
-import com.ustadmobile.util.StyleManager.alignTextToStart
+import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.util.Util.copyToClipboard
+import com.ustadmobile.util.Util
+import com.ustadmobile.util.Util.ASSET_ENTRY
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.standardFormat
-import com.ustadmobile.view.ext.createInformation
-import com.ustadmobile.view.ext.createListSectionTitle
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.view.ext.*
 import react.RBuilder
 import react.setState
 import styled.css
@@ -88,46 +87,54 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
                 +contentContainer
             }
 
-            umGridContainer {
-
-                umItem(GridSize.cells12){
-                    umTypography(entity?.clazzDesc,
-                        variant = TypographyVariant.body1,
-                        gutterBottom = true){
-                        css(alignTextToStart)
-                    }
-
+            umGridContainer(columnSpacing = GridSpacing.spacing6) {
+                umItem(GridSize.cells12, GridSize.cells4){
+                    umEntityAvatar(listItem = true, fallbackSrc = ASSET_ENTRY)
                 }
 
-                val numOfStudentTeachers = getString(MessageID.x_teachers_y_students)
-                    .format(entity?.numTeachers ?: 0, entity?.numStudents ?: 0)
+                umItem(GridSize.cells12, GridSize.cells8){
+                    umGridContainer {
 
-                createInformation("people", numOfStudentTeachers, getString(MessageID.members))
+                        umItem(GridSize.cells12){
+                            umTypography(entity?.clazzDesc,
+                                variant = TypographyVariant.body1,
+                                gutterBottom = true){
+                                css(StyleManager.alignTextToStart)
+                            }
 
-                createInformation("login", entity?.clazzCode ?: "", getString(MessageID.class_code)){
-                    copyToClipboard(entity?.clazzCode ?: ""){
-                        showSnackBar(getString(MessageID.copied_to_clipboard))
+                        }
+
+                        val numOfStudentTeachers = getString(MessageID.x_teachers_y_students)
+                            .format(entity?.numTeachers ?: 0, entity?.numStudents ?: 0)
+
+                        createInformation("people", numOfStudentTeachers, getString(MessageID.members))
+
+                        createInformation("login", entity?.clazzCode ?: "", getString(MessageID.class_code)){
+                            Util.copyToClipboard(entity?.clazzCode ?: "") {
+                                showSnackBar(getString(MessageID.copied_to_clipboard))
+                            }
+                        }
+
+                        createInformation("school", entity?.clazzSchool?.schoolName)
+
+                        val dateTxt = Date(entity?.clazzStartTime ?: 0).standardFormat() +
+                                " - ${Date(entity?.clazzEndTime ?: 0).standardFormat()}"
+
+                        createInformation("event", dateTxt)
+
+                        createInformation("event", entity?.clazzHolidayCalendar?.umCalendarName)
+
+
+                        if(!schedules.isNullOrEmpty()){
+                            umItem(GridSize.cells12){
+                                createListSectionTitle(getString(MessageID.schedule))
+                            }
+
+                            renderSchedules(schedules = schedules, withDelete = false)
+                        }
+
                     }
                 }
-
-                createInformation("school", entity?.clazzSchool?.schoolName)
-
-                val dateTxt = Date(entity?.clazzStartTime ?: 0).standardFormat() +
-                        " - ${Date(entity?.clazzEndTime ?: 0).standardFormat()}"
-
-                createInformation("event", dateTxt)
-
-                createInformation("event", entity?.clazzHolidayCalendar?.umCalendarName)
-
-
-                if(!schedules.isNullOrEmpty()){
-                    umItem(GridSize.cells12){
-                        createListSectionTitle(getString(MessageID.schedule))
-                    }
-
-                    renderSchedules(schedules = schedules, withDelete = false)
-                }
-
             }
         }
     }

@@ -82,56 +82,67 @@ class SchoolDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<Schoo
                 +contentContainer
             }
 
-            umGridContainer {
-
-                umItem(GridSize.cells12){
-                    umTypography(entity?.schoolDesc,
-                        variant = TypographyVariant.body1,
-                        gutterBottom = true){
-                        css(alignTextToStart)
-                    }
-
+            umGridContainer(columnSpacing = GridSpacing.spacing6) {
+                umItem(GridSize.cells12, GridSize.cells4){
+                    umEntityAvatar(listItem = true,
+                        fallbackSrc = Util.ASSET_ENTRY,
+                        iconName = "people",
+                        showIcon = true)
                 }
 
-                createInformation("login", entity?.schoolCode ?: "",
-                    getString(MessageID.school_code)){
-                    Util.copyToClipboard(entity?.schoolCode ?: "") {
-                        showSnackBar(getString(MessageID.copied_to_clipboard))
-                    }
-                }
+                umItem(GridSize.cells12, GridSize.cells8){
+                    umGridContainer {
 
-                createInformation("place", entity?.schoolAddress,
-                    getString(MessageID.address))
+                        umItem(GridSize.cells12){
+                            umTypography(entity?.schoolDesc,
+                                variant = TypographyVariant.body1,
+                                gutterBottom = true){
+                                css(alignTextToStart)
+                            }
 
-                createInformation("call", entity?.schoolPhoneNumber,
-                    getString(MessageID.phone_number))
+                        }
 
-                createInformation("perm_contact_calendar", entity?.holidayCalendar?.umCalendarName,
-                    getString(MessageID.holiday_calendar))
-
-                createInformation("email", entity?.schoolEmailAddress,
-                    getString(MessageID.email)){
-                    onClickEmail(entity?.schoolEmailAddress)
-                }
-
-                createInformation("language", entity?.schoolTimeZone,
-                    getString(MessageID.timezone))
-
-                if(!schoolClazzList.isNullOrEmpty()){
-                    umItem(GridSize.cells12){
-                        createListSectionTitle(getString(MessageID.classes))
-                    }
-
-                    schoolClazzList?.let { classes ->
-                        child(SchoolClazzesComponent::class) {
-                            attrs.entries = classes
-                            attrs.onEntryClicked = { clazz->
-                                mPresenter?.handleClickClazz(clazz)
+                        createInformation("login", entity?.schoolCode ?: "",
+                            getString(MessageID.school_code)){
+                            Util.copyToClipboard(entity?.schoolCode ?: "") {
+                                showSnackBar(getString(MessageID.copied_to_clipboard))
                             }
                         }
+
+                        createInformation("place", entity?.schoolAddress,
+                            getString(MessageID.address))
+
+                        createInformation("call", entity?.schoolPhoneNumber,
+                            getString(MessageID.phone_number))
+
+                        createInformation("perm_contact_calendar", entity?.holidayCalendar?.umCalendarName,
+                            getString(MessageID.holiday_calendar))
+
+                        createInformation("email", entity?.schoolEmailAddress,
+                            getString(MessageID.email)){
+                            onClickEmail(entity?.schoolEmailAddress)
+                        }
+
+                        createInformation("language", entity?.schoolTimeZone,
+                            getString(MessageID.timezone))
+
+                        if(!schoolClazzList.isNullOrEmpty()){
+                            umItem(GridSize.cells12){
+                                createListSectionTitle(getString(MessageID.classes))
+                            }
+
+                            schoolClazzList?.let { classes ->
+                                child(SchoolClazzesComponent::class) {
+                                    attrs.entries = classes
+                                    attrs.onEntryClicked = { clazz->
+                                        mPresenter?.handleClickClazz(clazz)
+                                    }
+                                }
+                            }
+                        }
+
                     }
                 }
-
             }
         }
     }
