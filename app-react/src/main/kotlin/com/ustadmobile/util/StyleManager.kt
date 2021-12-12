@@ -109,18 +109,6 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         width = 200.px
     }
 
-    val splashComponentLoadingImage by css{
-        width = 180.px
-        marginLeft = 10.px
-        position = Position.absolute
-    }
-
-    val splashComponentPreloadProgressBar by css {
-        width = 200.px
-        marginTop = 140.px
-        position = Position.absolute
-    }
-
     val mainComponentErrorPaper by css{
         padding(2.spacingUnits)
         marginBottom = 2.spacingUnits
@@ -404,6 +392,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
     val centerItem by css {
         alignItems = Align.center
+        textAlign = TextAlign.center
         flexShrink = 0.0
     }
 
