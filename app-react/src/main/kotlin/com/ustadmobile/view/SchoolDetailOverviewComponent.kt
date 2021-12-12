@@ -86,7 +86,7 @@ class SchoolDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<Schoo
                 umItem(GridSize.cells12, GridSize.cells4){
                     umEntityAvatar(listItem = true,
                         fallbackSrc = Util.ASSET_ENTRY,
-                        iconName = "people",
+                        iconName = "school",
                         showIcon = true)
                 }
 

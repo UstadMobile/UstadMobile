@@ -1,13 +1,15 @@
 package com.ustadmobile.view.ext
 
 
+import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_SESSION_PREFKEY
 import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.ScopedGrantEditPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.ext.toolbarJsCssToPartialCss
 import com.ustadmobile.mui.theme.UMColor
-import com.ustadmobile.navigation.RouteManager.defaultRoute
+import com.ustadmobile.navigation.RouteManager.defaultDestination
 import com.ustadmobile.navigation.RouteManager.destinationList
 import com.ustadmobile.navigation.UstadDestination
 import com.ustadmobile.redux.ReduxAppState
@@ -26,18 +28,19 @@ import com.ustadmobile.util.StyleManager.mainComponentSearch
 import com.ustadmobile.util.StyleManager.mainComponentSearchIcon
 import com.ustadmobile.util.StyleManager.personListItemAvatar
 import com.ustadmobile.util.StyleManager.toolbarTitle
+import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util.ASSET_ACCOUNT
 import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.util.ext.format
+import com.ustadmobile.util.getViewNameFromUrl
+import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
 import mui.material.GridProps
 import mui.material.GridWrap
 import org.w3c.dom.HTMLImageElement
 import org.w3c.dom.events.Event
-import react.Props
-import react.RBuilder
-import react.createElement
+import react.*
 import react.dom.html.ImgHTMLAttributes
 import react.router.Route
 import react.router.Routes
@@ -46,6 +49,7 @@ import styled.StyledHandler
 import styled.css
 import styled.styledDiv
 import styled.styledSpan
+import kotlin.reflect.KClass
 
 fun RBuilder.appBarSpacer() {
     themeContext.Consumer { theme ->
@@ -65,21 +69,34 @@ fun RBuilder.errorFallBack(text: String) {
     }
 }
 
-fun RBuilder.renderRoutes() {
+/**
+ * Prevent unauthorized access
+ */
+private fun guardRoute(
+    component: KClass<out Component<UmProps, *>>,
+    systemImpl: UstadMobileSystemImpl
+): ReactElement?  = createElement {
+    val viewName = getViewNameFromUrl()
+    val activeSession = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
+    if(activeSession == null && viewName != null && viewName != Login2View.VIEW_NAME){
+        window.setTimeout({
+            window.location.href = "./"
+        }, 0)
+    }
+    child(component){}
+}
+
+fun RBuilder.renderRoutes(systemImpl: UstadMobileSystemImpl) {
     HashRouter{
         Routes{
             Route{
                 attrs.path = "/"
-                attrs.element = createElement {
-                    child(defaultRoute){}
-                }
+                attrs.element = guardRoute(defaultDestination.component, systemImpl)
             }
             destinationList.forEach {
                 Route{
                     attrs.path = "/${it.view}"
-                    attrs.element = createElement {
-                        child(it.component){}
-                    }
+                    attrs.element = guardRoute(it.component, systemImpl)
                 }
             }
         }

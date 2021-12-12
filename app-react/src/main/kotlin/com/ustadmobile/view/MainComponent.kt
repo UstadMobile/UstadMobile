@@ -130,7 +130,7 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                         appBarSpacer()
                         styledDiv {
                             attrs.asDynamic().id = "main-content"
-                            renderRoutes()
+                            renderRoutes(systemImpl)
                         }
                     }
 

@@ -2,17 +2,12 @@ package com.ustadmobile.navigation
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.*
-import com.ustadmobile.util.UmProps
 import com.ustadmobile.view.*
-import react.Component
-import kotlin.reflect.KClass
 
 /**
  * Manages all route functionalities like defining the routes and find destinations
  */
 object RouteManager {
-
-    val defaultRoute: KClass<out Component<UmProps, *>> = RedirectComponent::class
 
     val destinationList = listOf(
         UstadDestination("library_books", MessageID.content, ContentEntryListTabsView.VIEW_NAME,
@@ -71,6 +66,8 @@ object RouteManager {
      */
     val defaultDestination: UstadDestination = destinationList.first {
         it.view == RedirectView.VIEW_NAME
+    }.apply {
+        component =  RedirectComponent::class
     }
 
 
