@@ -611,6 +611,22 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         }
     }
 
+
+    val partnerItem by css {
+        width = LinearDimension("50px")
+        paddingLeft = 2.spacingUnits
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            width = LinearDimension("80px")
+            paddingLeft = 3.spacingUnits
+        }
+    }
+
+    val partnersList by css {
+        position = Position.fixed
+        right = 15.px
+        bottom = 15.px
+    }
+
     override val di: DI
         get() = ReduxAppStateManager.getCurrentState().di.instance
 

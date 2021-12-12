@@ -45,10 +45,7 @@ import react.dom.html.ImgHTMLAttributes
 import react.router.Route
 import react.router.Routes
 import react.router.dom.HashRouter
-import styled.StyledHandler
-import styled.css
-import styled.styledDiv
-import styled.styledSpan
+import styled.*
 import kotlin.reflect.KClass
 
 fun RBuilder.appBarSpacer() {
@@ -708,6 +705,15 @@ fun RBuilder.createListItemWithTitleAndSwitch(title: String, enabled: Boolean, o
             marginLeft = LinearDimension("20px")
             marginTop = LinearDimension("16px")
             marginBottom = LinearDimension("16px")
+        }
+    }
+}
+
+fun RBuilder.umPartner(logo: String){
+    umItem(GridSize.cells3) {
+        styledImg {
+            css(StyleManager.partnerItem)
+            attrs.src = "assets/$logo"
         }
     }
 }
