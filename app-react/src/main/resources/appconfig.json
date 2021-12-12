@@ -6,7 +6,7 @@
     "pbkdf2.keylength": "512",
     "app.contentonlymode": "false",
     "appBaseName": "UstadMobile",
-    "app.ui_languages": "en,fa,ps,ar,tg,bn,ne,my",
+    "app.ui_languages": "en,tg,ru",
     "app.no_iframe_domans": "KhanAcademy",
     "app.register_allowed": "true",
     "app.ui_default_language": "en",

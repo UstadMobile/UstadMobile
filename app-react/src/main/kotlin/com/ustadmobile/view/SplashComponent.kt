@@ -14,6 +14,7 @@ import com.ustadmobile.util.ThemeManager.isDarkModeActive
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umPartner
 import kotlinx.browser.document
 import kotlinx.coroutines.Runnable
 import react.RBuilder
@@ -63,7 +64,7 @@ class SplashComponent (props: UmProps): RComponent<UmProps, UmState>(props), Spl
                         css(splashComponentPreloadContainer)
                         styledImg {
                             css (splashComponentLoadingImage)
-                            attrs.src = "assets/logo.png"
+                            attrs.src = "assets/logo_blue.png"
                         }
 
                         val color = when {
@@ -78,7 +79,11 @@ class SplashComponent (props: UmProps): RComponent<UmProps, UmState>(props), Spl
 
                     styledDiv {
                         css(StyleManager.partnersList)
-                        umGridContainer {}
+                        umGridContainer {
+                            umPartner("tajik_emblem.webp")
+                            umPartner("unicef_tj.webp")
+                            umPartner("Eu_logo_tg.webp")
+                        }
                     }
 
                 }
