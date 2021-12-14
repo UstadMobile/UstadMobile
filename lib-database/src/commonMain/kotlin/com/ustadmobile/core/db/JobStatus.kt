@@ -68,6 +68,8 @@ object JobStatus {
 
     const val COMPLETE_MAX = 30
 
+    const val PARTIAL_FAILED = 23
+
     const val COMPLETE = 24
 
     const val FAILED = 25
@@ -76,6 +78,7 @@ object JobStatus {
 
     const val CANCELED = 28
 
+    @Deprecated("Status should be completed after deleting job")
     const val DELETED = 29
 
     fun statusToString(status: Int): String {

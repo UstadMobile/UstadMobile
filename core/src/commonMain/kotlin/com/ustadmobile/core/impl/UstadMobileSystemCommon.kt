@@ -95,7 +95,7 @@ abstract class UstadMobileSystemCommon {
      * selecting to continue as a guest.
      */
     fun getAppConfigDefaultFirstDest(context: Any): String {
-        return getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context) ?: ContentEntryListTabsView.VIEW_NAME
+        return getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context) ?: ContentEntryList2View.VIEW_NAME
     }
 
     fun goToDeepLink(deepLink: String, accountManager: UstadAccountManager, context: Any) {
@@ -297,9 +297,6 @@ abstract class UstadMobileSystemCommon {
                 availableLangs.map { it to (LANGUAGE_NAMES[it] ?: it) }
     }
 
-    @JsName("getStorageDirAsync")
-    abstract suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?>
-
     /**
      * Return the mime type for the given extension
      *
@@ -443,9 +440,9 @@ abstract class UstadMobileSystemCommon {
         /**
          * The web version of the application will always live under a folder called /umapp/. The
          * viewname will start with a # (as it uses the REACT hash router). Therefor this string is
-         * used as a divider between the endpoint URL and the view name / view arguments
+         * used as a divider between the endpoint URL and the view name and its view arguments
          */
-        const val LINK_ENDPOINT_VIEWNAME_DIVIDER = "/umapp/#"
+        const val LINK_ENDPOINT_VIEWNAME_DIVIDER = "/umapp/index.html#"
 
         const val SUBDIR_SITEDATA_NAME = "sitedata"
 

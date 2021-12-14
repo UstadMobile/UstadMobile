@@ -7,13 +7,10 @@ import android.view.ViewDebug
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
-
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.util.ext.isStatusCompleted
-import com.ustadmobile.core.util.ext.isStatusCompletedSuccessfully
 import com.ustadmobile.core.util.ext.isStatusPaused
-import com.ustadmobile.core.util.ext.isStatusQueuedOrDownloading
-import com.ustadmobile.lib.db.entities.DownloadJobItem
+import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.db.entities.ContentJobItemProgress
 
 /**
  * A button that shows the download status of an item. It consists of an icon (a download icon or
@@ -26,19 +23,32 @@ class DownloadStatusButton : RelativeLayout {
 
     private var currentDownloadStatus: Int = -1
 
-    var downloadJobItem: DownloadJobItem? = null
+    var contentJobItemProgress: ContentJobItemProgress? = null
+        set(value){
+            field = value
+            val downloadLength = value?.total ?: 0
+            val downloadedSoFar = value?.progress ?: 0
+            progress = if(downloadLength > 0) {
+                ((downloadedSoFar.toFloat() / downloadLength) * 100).toInt()
+            }else {
+                0
+            }
+        }
+
+    var contentJobItemStatus: Int? = null
         set(value) {
             field = value
 
-            val statusChanged = currentDownloadStatus != value?.djiStatus ?: -1
+            val statusChanged = currentDownloadStatus != value ?: -1
+            currentDownloadStatus = value ?: -1
 
             when {
-                statusChanged && value.isStatusPaused() -> {
+                statusChanged && currentDownloadStatus.isStatusPaused() -> {
                     setImageResource(R.drawable.ic_baseline_pause_24)
                     contentDescription = context.getString(R.string.download_entry_state_paused)
                 }
 
-                statusChanged && value.isStatusCompletedSuccessfully() -> {
+                statusChanged && currentDownloadStatus == ContentJobItem.STATUS_COMPLETE -> {
                     setImageResource(R.drawable.ic_baseline_offline_pin_24)
                     contentDescription = context.getString(R.string.downloaded)
                 }
@@ -49,19 +59,12 @@ class DownloadStatusButton : RelativeLayout {
                 }
             }
 
-            takeIf { statusChanged }?.progressVisibility = if(!value.isStatusCompleted()) {
+            takeIf { statusChanged }?.progressVisibility = if(currentDownloadStatus != ContentJobItem.STATUS_COMPLETE) {
                 View.VISIBLE
             }else {
                 View.INVISIBLE
             }
 
-            val downloadLength = value?.downloadLength ?: 0
-            val downloadedSoFar = value?.downloadedSoFar ?: 0
-            progress = if(downloadLength > 0) {
-                (downloadedSoFar * 100 / downloadLength).toInt()
-            }else {
-                0
-            }
         }
 
 

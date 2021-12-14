@@ -53,7 +53,7 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware 
                           goToContentEntryDetailViewIfNotDownloaded: Boolean, noIframe: Boolean, learnerGroupUid: Long = 0, clazzUid: Long = 0) {
 
         val containerToOpen = if (downloadRequired) {
-            umAppDatabase.downloadJobItemDao.findMostRecentContainerDownloaded(contentEntryUid)
+            umAppDatabase.containerDao.findContainerWithMimeTypeWithFilesByContentEntryUid(contentEntryUid)
         } else {
             umAppDatabase.containerDao.getMostRecentContaineUidAndMimeType(contentEntryUid)
         }

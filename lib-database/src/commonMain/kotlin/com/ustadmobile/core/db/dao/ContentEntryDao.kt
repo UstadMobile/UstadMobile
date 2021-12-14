@@ -1,8 +1,8 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
@@ -15,58 +15,6 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("insertListAsync")
     @Insert
     abstract suspend fun insertListAsync(entityList: List<ContentEntry>)
-
-    @Query("""
-        SELECT DISTINCT ContentEntry.*, Container.*, 
-               0 AS cepcjUid, 0 as cepcjChildContentEntryUid, 0 AS cepcjParentContentEntryUid, 
-               0 as childIndex, 0 AS cepcjLocalChangeSeqNum, 0 AS cepcjMasterChangeSeqNum, 
-               0 AS cepcjLastChangedBy, 0 as cepcjLct, 
-               COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
-               COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
-               COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
-               COALESCE(StatementEntity.extensionProgress,0) AS progress,  
-               COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
-               COALESCE(StatementEntity.resultSuccess, 0) AS success,
-               COALESCE((CASE WHEN StatementEntity.resultCompletion 
-                THEN 1 ELSE 0 END),0) AS totalCompletedContent,
-                
-                1 as totalContent, 
-               
-               
-               0 as penalty
-          FROM DownloadJob 
-                    LEFT JOIN ContentEntry 
-                    ON DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid 
-                    
-                    LEFT JOIN StatementEntity
-							ON StatementEntity.statementUid = 
-                                (SELECT statementUid 
-							       FROM StatementEntity 
-                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
-							        AND StatementEntity.statementPersonUid = :personUid
-							        AND contentEntryRoot 
-                               ORDER BY resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC LIMIT 1)
-                    
-                    LEFT JOIN ContentEntryStatus 
-                    ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid 
-                    
-                    LEFT JOIN Container 
-                    ON Container.containerUid = 
-                        (SELECT containerUid 
-                           FROM Container 
-                          WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
-                       ORDER BY cntLastModified DESC LIMIT 1) 
-        WHERE DownloadJob.djStatus < ${JobStatus.CANCELED} 
-     ORDER BY CASE(:sortOrder)
-                        WHEN $SORT_TITLE_ASC THEN ContentEntry.title
-                        ELSE ''
-                        END ASC,
-                        CASE(:sortOrder)
-                        WHEN $SORT_TITLE_DESC THEN ContentEntry.title
-                        ELSE ''
-                        END DESC""")
-    @JsName("downloadedRootItemsAsc")
-    abstract fun downloadedRootItems(personUid: Long, sortOrder: Int): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
     @Query("SELECT ContentEntry.*, Language.* FROM ContentEntry LEFT JOIN Language ON Language.langUid = ContentEntry.primaryLanguageUid " +
             "WHERE ContentEntry.contentEntryUid=:entryUuid"
@@ -92,11 +40,39 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("getChildrenByParentUid")
     abstract fun getChildrenByParentUid(parentUid: Long): DoorDataSourceFactory<Int, ContentEntry>
 
-    @Query("SELECT ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
-            "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
-            "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
-    @JsName("getChildrenByParentAsync")
+    @Query("""
+        SELECT ContentEntry.*
+          FROM ContentEntryParentChildJoin
+               JOIN ContentEntry 
+                    ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid
+         WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid
+    """)
     abstract suspend fun getChildrenByParentAsync(parentUid: Long): List<ContentEntry>
+
+    @Query("""
+        SELECT ContentEntry.contentEntryUid AS contentEntryUid, ContentEntry.leaf AS leaf, 
+               COALESCE(Container.containerUid, 0) AS mostRecentContainerUid,
+               COALESCE(Container.fileSize, 0) AS mostRecentContainerSize
+          FROM ContentEntryParentChildJoin
+               JOIN ContentEntry 
+                    ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid
+               LEFT JOIN Container
+                    ON containerUid = 
+                        (SELECT COALESCE((
+                                SELECT Container.containerUid 
+                                  FROM Container
+                                 WHERE Container.containerContentEntryUid = ContentEntry.contentEntryUid
+                              ORDER BY Container.cntLastModified DESC
+                                 LIMIT 1),0))
+         WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid
+         LIMIT :limit
+        OFFSET :offset 
+    """)
+    abstract suspend fun getContentJobItemParamsByParentUid(
+        parentUid: Long,
+        limit: Int,
+        offset: Int
+    ): List<ContentEntryContentJobItemParams>
 
     @Query("SELECT COUNT(*) FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
@@ -148,8 +124,16 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
 
     @Query("SELECT * FROM ContentEntry WHERE contentEntryUid = :entryUid")
-    @JsName("findByUidAsync")
     abstract suspend fun findByUidAsync(entryUid: Long): ContentEntry?
+
+    @Query("""
+        SELECT ContentEntry.*, Language.*
+          FROM ContentEntry
+               LEFT JOIN Language 
+                      ON Language.langUid = ContentEntry.primaryLanguageUid 
+         WHERE ContentEntry.contentEntryUid = :uid              
+    """)
+    abstract suspend fun findByUidWithLanguageAsync(uid: Long): ContentEntryWithLanguage?
 
 
     @Query("SELECT * FROM ContentEntry WHERE contentEntryUid = :entryUid")
@@ -160,6 +144,17 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Query("SELECT * FROM ContentEntry WHERE title = :title")
     @JsName("findByTitle")
     abstract fun findByTitle(title: String): DoorLiveData<ContentEntry?>
+
+    @Query("""
+       SELECT COALESCE((SELECT cjIsMeteredAllowed 
+                FROM ContentJobItem 
+                JOIN ContentJob
+                    ON ContentJobItem.cjiJobUid = ContentJob.cjUid
+               WHERE cjiContentEntryUid = :contentEntryUid
+                AND cjiRecursiveStatus >= ${JobStatus.RUNNING_MIN}
+                AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX} LIMIT 1),0) AS Status
+    """)
+    abstract suspend fun isMeteredAllowedForEntry(contentEntryUid: Long): Boolean
 
 
     @Query("SELECT ContentEntry.* FROM ContentEntry " +
@@ -231,7 +226,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
 
     @Query("""
-               SELECT ContentEntry.*,ContentEntryStatus.*, ContentEntryParentChildJoin.*, 
+               SELECT ContentEntry.*, ContentEntryParentChildJoin.*, 
                            Container.*,      
                       COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
                       COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
@@ -261,16 +256,13 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 							        AND contentEntryRoot 
                                ORDER BY resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC LIMIT 1)
                           
-                          LEFT JOIN ContentEntryStatus 
-                          ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid
-                          
                           LEFT JOIN Container 
                           ON Container.containerUid = (SELECT containerUid 
                                                          FROM Container 
                                                         WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
                                                      ORDER BY cntLastModified DESC LIMIT 1)
                  WHERE ccjClazzUid = :clazzUid 
-                   AND ccjActive                                      
+                  AND (ccjActive OR NOT ccjActive = :showHidden)
               ORDER BY CASE(:sortOrder)
                         WHEN $SORT_TITLE_ASC THEN ContentEntry.title
                         ELSE ''
@@ -280,7 +272,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                         ELSE ''
                         END DESC
     """)
-    abstract fun getClazzContent(clazzUid: Long,  personUid: Long, sortOrder: Int): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+    abstract fun getClazzContent(clazzUid: Long,  personUid: Long, showHidden: Boolean, sortOrder: Int): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
     @Update

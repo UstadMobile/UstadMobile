@@ -3,7 +3,6 @@ package com.ustadmobile.core.impl
 import com.ustadmobile.core.generated.locale.MessageIdMap
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.ktor.client.request.*
@@ -158,11 +157,6 @@ actual open class UstadMobileSystemImpl(private val xppFactory: XmlPullParserFac
         actual var instance: UstadMobileSystemImpl =  UstadMobileSystemImpl(XmlPullParserFactory.newInstance())
     }
 
-
-    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> {
-        return listOf()
-    }
-
     /**
      * The main method used to go to a new view. This is implemented at the platform level. On
      * Android this involves starting a new activity with the arguments being turned into an
@@ -189,5 +183,4 @@ actual open class UstadMobileSystemImpl(private val xppFactory: XmlPullParserFac
     actual fun openLinkInBrowser(url: String, context: Any) {
         window.open(url, "_blank")
     }
-
 }

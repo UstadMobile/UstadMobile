@@ -16,20 +16,21 @@ import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_STUDENT_GROUP
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_TEACHER_GROUP
 import com.ustadmobile.lib.util.randomString
 import kotlin.js.JsName
+import kotlin.jvm.JvmField
 
-@Database(entities = [NetworkNode::class, DownloadJobItemHistory::class,
+@Database(entities = [NetworkNode::class,
     ClazzLog::class, ClazzLogAttendanceRecord::class,
     Schedule::class, DateRange::class, HolidayCalendar::class, Holiday::class,
     ScheduledCheck::class,
     AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
-    Person::class, DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class,
+    Person::class,
     Clazz::class, ClazzEnrolment::class, LeavingReason::class, PersonCustomFieldValue::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
     ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
     Language::class, LanguageVariant::class, AccessToken::class, PersonAuth::class, Role::class,
     EntityRole::class, PersonGroup::class, PersonGroupMember::class,
     PersonPicture::class,
-    ScrapeQueueItem::class, ScrapeRun::class, ContentEntryStatus::class, ConnectivityStatus::class,
+    ScrapeQueueItem::class, ScrapeRun::class, ConnectivityStatus::class,
     Container::class, ContainerEntry::class, ContainerEntryFile::class,
     VerbEntity::class, XObjectEntity::class, StatementEntity::class,
     ContextXObjectStatementJoin::class, AgentEntity::class,
@@ -49,6 +50,7 @@ import kotlin.js.JsName
     ClazzAssignmentRollUp::class,
     PersonAuth2::class,
     UserSession::class,
+    ContentJob::class, ContentJobItem::class,
 
     //Door Helper entities
     SqliteChangeSeqNums::class,
@@ -61,7 +63,7 @@ import kotlin.js.JsName
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 80)
+], version = 89)
 @MinSyncVersion(60)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -101,18 +103,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("networkNodeDao")
     abstract val networkNodeDao: NetworkNodeDao
-
-    @JsName("downloadJobDao")
-    abstract val downloadJobDao: DownloadJobDao
-
-    @JsName("downloadJobItemDao")
-    abstract val downloadJobItemDao: DownloadJobItemDao
-
-    @JsName("downloadJobItemParentChildJoinDao")
-    abstract val downloadJobItemParentChildJoinDao: DownloadJobItemParentChildJoinDao
-
-    @JsName("downloadJobItemHistoryDao")
-    abstract val downloadJobItemHistoryDao: DownloadJobItemHistoryDao
 
     @JsName("personDao")
     abstract val personDao: PersonDao
@@ -182,9 +172,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("scrapeRunDao")
     abstract val scrapeRunDao: ScrapeRunDao
-
-    @JsName("contentEntryStatusDao")
-    abstract val contentEntryStatusDao: ContentEntryStatusDao
 
     @JsName("connectivityStatusDao")
     abstract val connectivityStatusDao: ConnectivityStatusDao
@@ -289,6 +276,10 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val personAuth2Dao: PersonAuth2Dao
 
     abstract val userSessionDao: UserSessionDao
+
+    abstract val contentJobItemDao: ContentJobItemDao
+
+    abstract val contentJobDao: ContentJobDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO
@@ -5164,36 +5155,128 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
-        fun migrationList(nodeId: Int) = listOf<DoorMigration>(
-            MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
-            MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
-            MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
-            MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
-            MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
-            MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
-            MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
-            MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
-            MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67, migrate67to68(nodeId),
-            MIGRATION_68_69, MIGRATION_69_70, MIGRATION_70_71, MIGRATION_71_72,
-            MIGRATION_72_73, MIGRATION_73_74, MIGRATION_74_75, MIGRATION_75_76,
-            MIGRATION_76_77, MIGRATION_77_78, MIGRATION_78_79, MIGRATION_78_79
-        )
+        @JvmField
+        val fooVar = 2
 
-        internal fun migrate67to68(nodeId: Int)= DoorMigrationSync(67, 68) { database ->
-            if (database.dbType() == DoorDbType.SQLITE) {
-                database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
-            } else {
-                database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  SERIAL  PRIMARY KEY  NOT NULL )")
+        val MIGRATION_80_81 = DoorMigrationStatementList(80, 81) { database ->
+            if(database.dbType() == DoorDbType.SQLITE) {
+                listOf(
+                    "CREATE TABLE IF NOT EXISTS ContentJob (  toUri  TEXT , cjProgress  INTEGER  NOT NULL , cjTotal  INTEGER  NOT NULL , params  TEXT , cjUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )",
+                    "CREATE TABLE IF NOT EXISTS ContentJobItem (  cjiJobUid  INTEGER  NOT NULL , sourceUri  TEXT , cjiIsLeaf  INTEGER  NOT NULL , cjiContentEntryUid  INTEGER  NOT NULL , cjiParentContentEntryUid  INTEGER  NOT NULL , cjiContainerUid  INTEGER  NOT NULL , cjiProgress  INTEGER  NOT NULL , cjiTotal  INTEGER  NOT NULL , cjiStatus  INTEGER  NOT NULL , cjiConnectivityAcceptable  INTEGER  NOT NULL , cjiPluginId  INTEGER  NOT NULL , cjiUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )",
+                    "ALTER TABLE Site ADD COLUMN torrentAnnounceUrl TEXT"
+                )
+            }else {
+                listOf(
+                    "CREATE TABLE IF NOT EXISTS ContentJob (  toUri  TEXT , cjProgress  BIGINT  NOT NULL , cjTotal  BIGINT  NOT NULL , params  TEXT , cjUid  BIGSERIAL  PRIMARY KEY  NOT NULL )",
+                    "CREATE TABLE IF NOT EXISTS ContentJobItem (  cjiJobUid  BIGINT  NOT NULL , sourceUri  TEXT , cjiIsLeaf  BOOL  NOT NULL , cjiContentEntryUid  BIGINT  NOT NULL , cjiParentContentEntryUid  BIGINT  NOT NULL , cjiContainerUid  BIGINT  NOT NULL , cjiProgress  BIGINT  NOT NULL , cjiTotal  BIGINT  NOT NULL , cjiStatus  INTEGER  NOT NULL , cjiConnectivityAcceptable  INTEGER  NOT NULL , cjiPluginId  INTEGER  NOT NULL , cjiUid  BIGSERIAL  PRIMARY KEY  NOT NULL )",
+                    "ALTER TABLE Site ADD COLUMN torrentAnnounceUrl TEXT"
+                )
             }
-
-            database.execSQL(
-                """
-                UPDATE SyncNode
-                   SET nodeClientId = $nodeId
-            """.trimIndent()
-            )
         }
+
+        val MIGRATION_81_82 = DoorMigrationStatementList(81, 82) { database ->
+            listOf("ALTER TABLE ContentJobItem ADD COLUMN cjiAttemptCount INTEGER NOT NULL DEFAULT 0")
+        }
+
+        val MIGRATION_82_83 = DoorMigrationStatementList(82, 83) { database ->
+            listOf("DROP TABLE ContentJobItem") + if(database.dbType() == DoorDbType.SQLITE) {
+                listOf("CREATE TABLE IF NOT EXISTS ContentJobItem (  cjiJobUid  INTEGER  NOT NULL , sourceUri  TEXT , cjiIsLeaf  INTEGER  NOT NULL , cjiContentEntryUid  INTEGER  NOT NULL , cjiParentContentEntryUid  INTEGER  NOT NULL , cjiContainerUid  INTEGER  NOT NULL , cjiItemProgress  INTEGER  NOT NULL , cjiItemTotal  INTEGER  NOT NULL , cjiRecursiveProgress  INTEGER  NOT NULL , cjiRecursiveTotal  INTEGER  NOT NULL , cjiStatus  INTEGER  NOT NULL , cjiConnectivityAcceptable  INTEGER  NOT NULL , cjiPluginId  INTEGER  NOT NULL , cjiAttemptCount  INTEGER  NOT NULL , cjiParentCjiUid  INTEGER  NOT NULL , cjiUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            }else {
+                listOf("CREATE TABLE IF NOT EXISTS ContentJobItem (  cjiJobUid  BIGINT  NOT NULL , sourceUri  TEXT , cjiIsLeaf  BOOL  NOT NULL , cjiContentEntryUid  BIGINT  NOT NULL , cjiParentContentEntryUid  BIGINT  NOT NULL , cjiContainerUid  BIGINT  NOT NULL , cjiItemProgress  BIGINT  NOT NULL , cjiItemTotal  BIGINT  NOT NULL , cjiRecursiveProgress  BIGINT  NOT NULL , cjiRecursiveTotal  BIGINT  NOT NULL , cjiStatus  INTEGER  NOT NULL , cjiConnectivityAcceptable  INTEGER  NOT NULL , cjiPluginId  INTEGER  NOT NULL , cjiAttemptCount  INTEGER  NOT NULL , cjiParentCjiUid  BIGINT  NOT NULL , cjiUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            }
+        }
+
+        val MIGRATION_84_85 = DoorMigrationStatementList(84, 85){ database ->
+            listOf("ALTER TABLE ContentJob ADD COLUMN cjNotificationTitle TEXT",
+                    "ALTER TABLE ContentJobItem ADD COLUMN cjiRecursiveStatus INTEGER NOT NULL DEFAULT 0") +
+                    if(database.dbType() == DoorDbType.SQLITE){
+               listOf("ALTER TABLE ContentJobItem ADD COLUMN cjiServerJobId INTEGER NOT NULL DEFAULT 0")
+            }else{
+                listOf("ALTER TABLE ContentJobItem ADD COLUMN cjiServerJobId BIGINT NOT NULL DEFAULT 0")
+            }
+        }
+
+        val MIGRATION_85_86 = DoorMigrationStatementList(85, 86){ database ->
+                    if(database.dbType() == DoorDbType.SQLITE){
+                        listOf("ALTER TABLE ContentJobItem ADD COLUMN cjiStartTime INTEGER NOT NULL DEFAULT 0",
+                                "ALTER TABLE ContentJobItem ADD COLUMN cjiFinishTime INTEGER NOT NULL DEFAULT 0",
+                                "ALTER TABLE ContentJobItem ADD COLUMN cjiConnectivityNeeded INTEGER NOT NULL DEFAULT 1",
+                                "ALTER TABLE ContentJobItem RENAME to ContentJobItem_OLD",
+                                "CREATE TABLE IF NOT EXISTS ContentJobItem (`cjiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cjiJobUid` INTEGER NOT NULL, `sourceUri` TEXT, `cjiIsLeaf` INTEGER NOT NULL, `cjiContentEntryUid` INTEGER NOT NULL, `cjiParentContentEntryUid` INTEGER NOT NULL, `cjiContainerUid` INTEGER NOT NULL, `cjiItemProgress` INTEGER NOT NULL, `cjiItemTotal` INTEGER NOT NULL, `cjiRecursiveProgress` INTEGER NOT NULL, `cjiRecursiveTotal` INTEGER NOT NULL, `cjiStatus` INTEGER NOT NULL, `cjiRecursiveStatus` INTEGER NOT NULL, `cjiConnectivityNeeded` INTEGER NOT NULL, `cjiPluginId` INTEGER NOT NULL, `cjiAttemptCount` INTEGER NOT NULL, `cjiParentCjiUid` INTEGER NOT NULL, `cjiServerJobId` INTEGER NOT NULL, `cjiStartTime` INTEGER NOT NULL, `cjiFinishTime` INTEGER NOT NULL)",
+                                "INSERT INTO ContentJobItem (cjiUid, cjiJobUid, sourceUri, cjiIsLeaf, cjiContentEntryUid, cjiParentContentEntryUid, cjiContainerUid, cjiItemProgress, cjiItemTotal, cjiRecursiveProgress, cjiRecursiveTotal, cjiStatus, cjiRecursiveStatus, cjiConnectivityNeeded, cjiPluginId, cjiAttemptCount, cjiParentCjiUid, cjiServerJobId, cjiStartTime, cjiFinishTime) SELECT cjiUid, cjiJobUid, sourceUri, cjiIsLeaf, cjiContentEntryUid, cjiParentContentEntryUid, cjiContainerUid, cjiItemProgress, cjiItemTotal, cjiRecursiveProgress, cjiRecursiveTotal, cjiStatus, cjiRecursiveStatus, cjiConnectivityNeeded, cjiPluginId, cjiAttemptCount, cjiParentCjiUid, cjiServerJobId, cjiStartTime, cjiFinishTime FROM ContentJobItem_OLD",
+                                "DROP TABLE ContentJobItem_OLD",
+                                "ALTER TABLE ContentJob ADD COLUMN cjIsMeteredAllowed INTEGER NOT NULL DEFAULT 0",
+                                "CREATE INDEX IF NOT EXISTS `index_ContentJobItem_cjiContentEntryUid_cjiFinishTime` ON ContentJobItem (`cjiContentEntryUid`, `cjiFinishTime`)"
+                        )
+                    }else{
+                        listOf("ALTER TABLE ContentJobItem ADD COLUMN cjiStartTime BIGINT NOT NULL DEFAULT 0",
+                                "ALTER TABLE ContentJobItem ADD COLUMN cjiFinishTime INTEGER NOT NULL DEFAULT 0",
+                                "ALTER TABLE ContentJob ADD COLUMN cjIsMeteredAllowed BOOL NOT NULL DEFAULT 0",
+                                "ALTER TABLE ContentJobItem ADD COLUMN cjiConnectivityNeeded BOOL NOT NULL DEFAULT 1",
+                                "ALTER TABLE ContentJobItem DROP COLUMN cjiConnectivityAcceptable",
+                                "CREATE INDEX index_ContentJobItem_cjiContentEntryUid_cjiFinishTime ON ContentJobItem (cjiContentEntryUid, cjiFinishTime)"
+                        )
+                    }
+        }
+
+        val MIGRATION_86_87 = DoorMigrationStatementList(86, 87) { database ->
+            listOf("DROP TABLE IF EXISTS DownloadJob",
+                    "DROP TABLE IF EXISTS DownloadJobItem",
+                    "DROP TABLE IF EXISTS DownloadJobItemHistory",
+                    "DROP TABLE IF EXISTS DownloadJobItemParentChildJoin",
+                    "DROP TABLE IF EXISTS ContentEntryStatus")
+        }
+
+        val MIGRATION_87_88 = DoorMigrationStatementList(87, 88) { database ->
+            if (database.dbType() == DoorDbType.SQLITE) {
+                listOf("ALTER TABLE Site RENAME to Site_OLD",
+                        "CREATE TABLE IF NOT EXISTS Site (  sitePcsn  INTEGER  NOT NULL , siteLcsn  INTEGER  NOT NULL , siteLcb  INTEGER  NOT NULL , siteLct  INTEGER  NOT NULL , siteName  TEXT , guestLogin  INTEGER  NOT NULL , registrationAllowed  INTEGER  NOT NULL , authSalt  TEXT , siteUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )",
+                        "INSERT INTO Site (siteUid, sitePcsn, siteLcsn, siteLcb, siteLct, siteName, guestLogin, registrationAllowed, authSalt) SELECT siteUid, sitePcsn, siteLcsn, siteLcb, siteLct, siteName, guestLogin, registrationAllowed, authSalt FROM Site_OLD",
+                        "DROP TABLE Site_OLD"
+                )
+            } else {
+                listOf("ALTER TABLE Site DROP COLUMN IF EXISTS torrentAnnounceUrl")
+            }
+        }
+
+        val MIGRATION_88_89 = DoorMigrationStatementList(88, 89) { database ->
+            listOf("ALTER TABLE ContentJobItem ADD COLUMN cjiUploadSessionUid TEXT")
+        }
+
+
+
+fun migrationList(nodeId: Int) = listOf<DoorMigration>(
+    MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
+    MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
+    MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
+    MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
+    MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
+    MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
+    MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
+    MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
+    MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67, migrate67to68(nodeId),
+    MIGRATION_68_69, MIGRATION_69_70, MIGRATION_70_71, MIGRATION_71_72,
+    MIGRATION_72_73, MIGRATION_73_74, MIGRATION_74_75, MIGRATION_75_76,
+    MIGRATION_76_77, MIGRATION_77_78, MIGRATION_78_79, MIGRATION_78_79,
+    MIGRATION_79_80, MIGRATION_80_81, MIGRATION_81_82, MIGRATION_82_83,
+    MIGRATION_84_85, MIGRATION_85_86, MIGRATION_86_87, MIGRATION_87_88
+)
+
+internal fun migrate67to68(nodeId: Int)= DoorMigrationSync(67, 68) { database ->
+    if (database.dbType() == DoorDbType.SQLITE) {
+        database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+    } else {
+        database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  SERIAL  PRIMARY KEY  NOT NULL )")
     }
+
+    database.execSQL(
+        """
+        UPDATE SyncNode
+           SET nodeClientId = $nodeId
+    """.trimIndent()
+    )
+}
+}
 
 
 }

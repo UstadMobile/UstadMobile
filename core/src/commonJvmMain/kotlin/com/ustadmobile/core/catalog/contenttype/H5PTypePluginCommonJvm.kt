@@ -1,26 +1,36 @@
 package com.ustadmobile.core.catalog.contenttype
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import com.ustadmobile.core.util.getAssetFromResource
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import org.xmlpull.v1.XmlPullParserException
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.direct
+import org.kodein.di.on
 import java.io.File
-import java.io.IOException
-import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
-import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.door.ext.openInputStream
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.core.container.PrefixContainerFileNamer
+import com.ustadmobile.core.contentjob.*
+import com.ustadmobile.core.db.JobStatus
+import com.ustadmobile.core.io.ext.*
+import com.ustadmobile.core.network.NetworkProgressListenerAdapter
+import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.updateTotalFromContainerSize
+import com.ustadmobile.core.util.ext.updateTotalFromLocalUriIfNeeded
+import com.ustadmobile.core.view.XapiPackageContentView
+import com.ustadmobile.lib.db.entities.*
+import io.ktor.client.*
 import kotlinx.serialization.json.*
+import java.util.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
 
 
 val licenseMap = mapOf(
@@ -39,134 +49,207 @@ val licenseMap = mapOf(
         "U" to ContentEntry.LICENSE_TYPE_OTHER
 )
 
-class H5PTypePluginCommonJvm(): H5PTypePlugin() {
+class H5PTypePluginCommonJvm(
+        private var context: Any,
+        val endpoint: Endpoint,
+        override val di: DI,
+        private val uploader: ContentPluginUploader = DefaultContentPluginUploader(di)
+): ContentPlugin {
 
-    override suspend fun extractMetadata(uri: String, context: Any): ContentEntryWithLanguage? {
-        return withContext(Dispatchers.Default){
-            var contentEntry: ContentEntryWithLanguage? = null
-            try {
-                val doorUri = DoorUri.parse(uri)
-                val inputStream = doorUri.openInputStream(context)
+        val viewName: String
+    get() = XapiPackageContentView.VIEW_NAME
 
-                ZipInputStream(inputStream).use {
-                    var zipEntry: ZipEntry? = null
-                    while ({ zipEntry = it.nextEntry; zipEntry }() != null) {
+    override val supportedMimeTypes: List<String>
+    get() = SupportedContent.H5P_MIME_TYPES
 
-                        val fileName = zipEntry?.name
-                        if (fileName?.toLowerCase() == "h5p.json") {
+    override val supportedFileExtensions: List<String>
+    get() = SupportedContent.H5P_EXTENSIONS
 
-                            val data = String(it.readBytes())
+    private val MAX_SIZE_LIMIT: Long = 100 * 1024 * 1024
 
-                            val json = Json.parseToJsonElement(data) as JsonObject
+    private val httpClient: HttpClient = di.direct.instance()
 
-                            // take the name from the role Author otherwise take last one
-                            var author: String? = ""
-                            var name: String? = ""
-                            json["authors"]?.jsonArray?.forEach {
-                                name = it.jsonObject["name"]?.jsonPrimitive?.content ?: ""
-                                val role = it.jsonObject["role"]?.jsonPrimitive?.content ?: ""
-                                if (role == "Author") {
-                                    author = name
-                                }
-                            }
-                            if (author.isNullOrEmpty()) {
-                                author = name
-                            }
+    private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
-                            contentEntry = ContentEntryWithLanguage().apply {
-                                contentFlags = ContentEntry.FLAG_IMPORTED
-                                contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
-                                licenseType = licenseMap[json.jsonObject["license"] ?: ""]
-                                        ?: ContentEntry.LICENSE_TYPE_OTHER
-                                title = if(json.jsonObject["title"]?.jsonPrimitive?.content.isNullOrEmpty())
-                                    doorUri.getFileName(context) else json.jsonObject["title"]?.jsonPrimitive?.content
-                                this.author = author
-                                leaf = true
-                            }
-                            break
-                        }
+    private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
+    private val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+
+    override val pluginId: Int
+        get() = PLUGIN_ID
+
+    override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
+        val size = uri.getSize(context, di)
+        if(size > MAX_SIZE_LIMIT){
+            return null
+        }
+        val mimeType = uri.guessMimeType(context, di)
+        if(mimeType != null && !supportedMimeTypes.contains(mimeType)){
+            return null
+        }
+        return withContext(Dispatchers.Default) {
+            val localUri = process.getLocalOrCachedUri()
+            val inputStream = localUri.openInputStream(context)
+            return@withContext ZipInputStream(inputStream).use {
+                it.skipToEntry { it.name == H5P_PATH } ?: return@withContext null
+
+                val data = String(it.readBytes())
+
+                val json = Json.parseToJsonElement(data).jsonObject
+
+                // take the name from the role Author otherwise take last one
+                var author: String? = ""
+                var name: String? = ""
+                json["authors"]?.jsonArray?.forEach {
+                    name = it.jsonObject["name"]?.jsonPrimitive?.content ?: ""
+                    val role = it.jsonObject["role"]?.jsonPrimitive?.content ?: ""
+                    if (role == "Author") {
+                        author = name
                     }
                 }
-            } catch (e: IOException) {
-                e.printStackTrace()
-            } catch (e: XmlPullParserException) {
-                e.printStackTrace()
-            }
+                if (author.isNullOrEmpty()) {
+                    author = name
+                }
 
-            contentEntry
+                val entry = ContentEntryWithLanguage().apply {
+                    contentFlags = ContentEntry.FLAG_IMPORTED
+                    contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
+                    licenseType = licenseMap[json.jsonObject["license"] ?: ""]
+                            ?: ContentEntry.LICENSE_TYPE_OTHER
+                    sourceUrl = uri.uri.toString()
+                    title = if(json.jsonObject["title"]?.jsonPrimitive?.content.isNullOrEmpty())
+                        uri.getFileName(context) else json.jsonObject["title"]?.jsonPrimitive?.content
+                    this.author = author
+                    leaf = true
+                }
+                MetadataResult(entry, PLUGIN_ID)
+            }
         }
     }
 
-    override suspend fun importToContainer(uri: String, conversionParams: Map<String, String>,
-                                           contentEntryUid: Long, mimeType: String, containerBaseDir: String,
-                                           context: Any,
-                                           db: UmAppDatabase, repo: UmAppDatabase,
-                                           progressListener: (Int) -> Unit): Container {
-        val doorUri = DoorUri.parse(uri)
-        val container = Container().apply {
-            containerContentEntryUid = contentEntryUid
-            cntLastModified = System.currentTimeMillis()
-            this.mimeType = mimeType
-            containerUid = repo.containerDao.insert(this)
+    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
+        val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
+        val jobUri = contentJobItem.sourceUri ?: return ProcessResult(JobStatus.FAILED)
+        return withContext(Dispatchers.Default) {
+
+            try{
+
+                val doorUri = DoorUri.parse(jobUri)
+                val localUri = process.getLocalOrCachedUri()
+                val contentNeedUpload = !doorUri.isRemote()
+                val progressSize = if(contentNeedUpload) 2 else 1
+                val h5pIsProcessed = contentJobItem.cjiContainerUid != 0L
+
+                contentJobItem.updateTotalFromLocalUriIfNeeded(localUri, contentNeedUpload,
+                    progress, context, di)
+
+                if(!h5pIsProcessed) {
+
+                    val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
+                            ?: Container().apply {
+                                containerContentEntryUid = contentJobItem.cjiContentEntryUid
+                                cntLastModified = System.currentTimeMillis()
+                                mimeType = supportedMimeTypes.first()
+                                containerUid = repo.containerDao.insertAsync(this)
+                            }
+
+                    val containerFolder = jobItem.contentJob?.toUri
+                            ?: defaultContainerDir.toURI().toString()
+                    val containerFolderUri = DoorUri.parse(containerFolder)
+                    val entry = db.contentEntryDao.findByUid(contentJobItem.cjiContentEntryUid)
+
+                    val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolderUri)
+                    repo.addEntriesToContainerFromZip(container.containerUid, localUri,
+                            ContainerAddOptions(storageDirUri = containerFolderUri,
+                                    fileNamer = PrefixContainerFileNamer("workspace/")), context)
+
+                    val h5pDistTmpFile = File.createTempFile("h5p-dist", "zip")
+                    val h5pDistIn = getAssetFromResource("/com/ustadmobile/core/h5p/dist.zip", context, this::class)
+                            ?: throw IllegalStateException("Could not find h5p dist file")
+                    h5pDistIn.writeToFile(h5pDistTmpFile)
+                    repo.addEntriesToContainerFromZip(container.containerUid, h5pDistTmpFile.toDoorUri(),
+                            containerAddOptions, context)
+                    h5pDistTmpFile.delete()
+
+
+                    // generate tincan.xml
+                    val tinCan = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <tincan xmlns="http://projecttincan.com/tincan.xsd">
+                    <activities>
+                        <activity id="${entry?.entryId ?: ""}" type="http://adlnet.gov/expapi/activities/module">
+                            <name>${entry?.title ?: ""}</name>
+                            <description lang="en-US">${entry?.description ?: ""}</description>
+                            <launch lang="en-us">index.html</launch>
+                        </activity>
+                    </activities>
+                </tincan>
+            """.trimIndent()
+
+                    val tmpTinCanFile = File.createTempFile("h5p-tincan", "xml")
+                    tmpTinCanFile.writeText(tinCan)
+                    repo.addFileToContainer(container.containerUid, tmpTinCanFile.toDoorUri(),
+                            "tincan.xml", context, di, containerAddOptions)
+                    tmpTinCanFile.delete()
+
+
+                    // generate index.html
+                    val index = """
+                <html>
+                <head>
+                    <meta charset="utf-8" />
+                    <script type="text/javascript" src="dist/main.bundle.js"></script>
+                </head>
+                <body>
+                <div id="h5p-container" data-workspace="workspace"></div>
+                </body>
+                </html>
+            """.trimIndent()
+                    val tmpIndexHtmlFile = File.createTempFile("h5p-index", "html")
+                    tmpIndexHtmlFile.writeText(index)
+                    repo.addFileToContainer(container.containerUid, tmpIndexHtmlFile.toDoorUri(),
+                            "index.html", context, di, containerAddOptions)
+                    tmpIndexHtmlFile.delete()
+
+                    contentJobItem.cjiContainerUid = container.containerUid
+                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                        container.containerUid)
+
+                    contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
+                        progress)
+
+                    contentJobItem.cjiConnectivityNeeded = true
+                    db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
+
+                    val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid
+                            ?: 0)
+                    if (!haveConnectivityToContinueJob) {
+                        return@withContext ProcessResult(JobStatus.QUEUED)
+                    }
+                }
+
+                contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
+                progress.onProgress(contentJobItem)
+
+
+                if(contentNeedUpload) {
+                    uploader.upload(contentJobItem,
+                        NetworkProgressListenerAdapter(progress, contentJobItem),
+                        httpClient, endpoint)
+                }
+
+                return@withContext ProcessResult(JobStatus.COMPLETE)
+
+            }catch (c: CancellationException){
+                throw c
+            }
         }
+    }
 
-        val entry = db.contentEntryDao.findByUid(contentEntryUid)
+    companion object {
 
-        val containerAddOptions = ContainerAddOptions(storageDirUri = File(containerBaseDir).toDoorUri())
-        repo.addEntriesToContainerFromZip(container.containerUid, doorUri,
-                ContainerAddOptions(storageDirUri = File(containerBaseDir).toDoorUri(),
-                        fileNamer = PrefixContainerFileNamer("workspace/")), context)
+        private const val H5P_PATH = "h5p.json"
 
-        val h5pDistTmpFile = File.createTempFile("h5p-dist", "zip")
-        val h5pDistIn = getAssetFromResource("/com/ustadmobile/core/h5p/dist.zip", context, this::class)
-                ?: throw IllegalStateException("Could not find h5p dist file")
-        h5pDistIn.writeToFile(h5pDistTmpFile)
-        repo.addEntriesToContainerFromZip(container.containerUid, h5pDistTmpFile.toDoorUri(),
-                containerAddOptions, context)
-        h5pDistTmpFile.delete()
-
-
-        // generate tincan.xml
-        val tinCan = """
-            <?xml version="1.0" encoding="UTF-8"?>
-            <tincan xmlns="http://projecttincan.com/tincan.xsd">
-                <activities>
-                    <activity id="${entry?.entryId ?: ""}" type="http://adlnet.gov/expapi/activities/module">
-                        <name>${entry?.title ?: ""}</name>
-                        <description lang="en-US">${entry?.description ?: ""}</description>
-                        <launch lang="en-us">index.html</launch>
-                    </activity>
-                </activities>
-            </tincan>
-        """.trimIndent()
-
-        val tmpTinCanFile = File.createTempFile("h5p-tincan", "xml")
-        tmpTinCanFile.writeText(tinCan)
-        repo.addFileToContainer(container.containerUid, tmpTinCanFile.toDoorUri(),
-                "tincan.xml", containerAddOptions)
-        tmpTinCanFile.delete()
-
-
-        // generate index.html
-        val index = """
-            <html>
-            <head>
-                <meta charset="utf-8" />
-                <script type="text/javascript" src="dist/main.bundle.js"></script>
-            </head>
-            <body>
-            <div id="h5p-container" data-workspace="workspace"></div>
-            </body>
-            </html>
-        """.trimIndent()
-        val tmpIndexHtmlFile = File.createTempFile("h5p-index", "html")
-        tmpIndexHtmlFile.writeText(index)
-        repo.addFileToContainer(container.containerUid, tmpIndexHtmlFile.toDoorUri(),
-                "index.html", containerAddOptions)
-        tmpIndexHtmlFile.delete()
-
-        return repo.containerDao.findByUid(container.containerUid) ?: container
-
+        const val PLUGIN_ID = 3
     }
 }

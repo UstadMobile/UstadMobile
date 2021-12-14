@@ -26,8 +26,6 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
 
         const val ARG_DISPLAY_CONTENT_BY_PARENT = "displayContentByParent"
 
-        const val ARG_DISPLAY_CONTENT_BY_DOWNLOADED = "displayContentByDownloaded"
-
         const val ARG_CLAZZ_ASSIGNMENT_FILTER = "clazzAssignmentFilter"
 
         const val VIEW_NAME = "ContentEntryListView"

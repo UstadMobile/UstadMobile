@@ -8,7 +8,6 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.android.library'
     id 'maven-publish'
-    id 'com.github.eerohele.saxon-gradle'
 }
 
 
@@ -142,6 +141,7 @@ kotlin {
             resources.srcDirs += ["locale/main", "src/main/assets"]
 
             dependencies {
+                implementation "org.jsoup:jsoup:$version_jsoup"
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"
@@ -198,6 +198,7 @@ kotlin {
                 implementation "androidx.room:room-runtime:$version_android_room"
                 implementation "androidx.paging:paging-runtime:$version_androidx_paging"
                 implementation "androidx.work:work-runtime:$version_android_workmanager"
+                implementation "androidx.work:work-runtime-ktx:$version_android_workmanager"
                 implementation project(":lib-database-android")
                 implementation "org.jsoup:jsoup:$version_jsoup"
                 //Image loading library
