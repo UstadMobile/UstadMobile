@@ -174,7 +174,9 @@ class PersonAccountEditComponent(mProps: UmProps) : UstadEditComponent<PersonWit
 
                         umItem(GridSize.cells12, GridSize.cells6){
                             umFormControl(variant = FormControlVariant.outlined) {
-                                umInputLabel("${currentPasswordLabel.text}",
+                                umInputLabel(
+                                    "${currentPasswordLabel.text}",
+                                    id = currentPasswordLabel.id,
                                     error = currentPasswordLabel.error,
                                     variant = FormControlVariant.outlined,
                                     htmlFor = currentPasswordLabel.id)
@@ -218,6 +220,7 @@ class PersonAccountEditComponent(mProps: UmProps) : UstadEditComponent<PersonWit
                             umFormControl(variant = FormControlVariant.outlined) {
                                 css(StyleManager.defaultFullWidth)
                                 umInputLabel("${newPasswordLabel.text}",
+                                    id = newPasswordLabel.id,
                                     error = newPasswordLabel.error,
                                     variant = FormControlVariant.outlined,
                                     htmlFor = newPasswordLabel.id)
@@ -261,6 +264,7 @@ class PersonAccountEditComponent(mProps: UmProps) : UstadEditComponent<PersonWit
                             umFormControl(variant = FormControlVariant.outlined) {
                                 umInputLabel("${confirmPasswordLabel.text}",
                                     error = confirmPasswordLabel.error,
+                                    id = confirmPasswordLabel.id,
                                     variant = FormControlVariant.outlined,
                                     htmlFor = confirmPasswordLabel.id)
                                 umOutlinedInput(

@@ -160,7 +160,8 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
                         css(hideOnMobile)
                     }
                     umItem(GridSize.cells12, gridSizeOnCenterOnMdDown, gridSizeOnCenterLgUp) {
-                        umTextField(label = "${usernameLabel.text}",
+                        umTextField(
+                            label = "${usernameLabel.text}",
                             helperText = usernameLabel.errorText,
                             value = username,
                             error = usernameLabel.error,
