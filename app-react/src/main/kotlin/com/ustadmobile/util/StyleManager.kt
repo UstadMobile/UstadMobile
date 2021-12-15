@@ -317,7 +317,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
     val languageComponentLanguageSelectorFormControl by css {
         margin(1.spacingUnits)
-        minWidth = 120.px
+        minWidth = (drawerWidth * 0.9).px
         width = LinearDimension.auto
         display = Display.flex
         position = Position.fixed

@@ -175,7 +175,7 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
 
     override fun onCreateView() {
         super.onCreateView()
-        title = getString(MessageID.content)
+        ustadComponentTitle = getString(MessageID.content)
         mPresenter = ContentEntryEdit2Presenter(this, arguments, this,
             this, di)
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())

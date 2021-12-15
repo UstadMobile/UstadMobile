@@ -45,7 +45,7 @@ class PersonListComponent(mProps: UmProps): UstadListComponent<Person, PersonWit
             inviteNewText = getString(MessageID.invite_with_link)
         }
         createNewText = getString(MessageID.add_a_new_person)
-        title = getString(MessageID.people)
+        ustadComponentTitle = getString(MessageID.people)
         mPresenter = PersonListPresenter(this, arguments, this,di,this)
         mPresenter?.onCreate(mapOf())
     }

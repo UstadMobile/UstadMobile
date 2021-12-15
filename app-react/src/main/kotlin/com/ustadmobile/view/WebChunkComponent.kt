@@ -15,7 +15,7 @@ class WebChunkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(m
         get() = field
         set(value) {
             field = value
-            title = value?.title
+            ustadComponentTitle = value?.title
         }
 
     override var viewName: String? = null

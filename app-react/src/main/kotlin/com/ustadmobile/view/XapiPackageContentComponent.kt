@@ -14,7 +14,7 @@ class XapiPackageContentComponent(mProps: UmProps): UstadBaseComponent<UmProps, 
         get() = field
         set(value) {
             field = value
-            title = value
+            ustadComponentTitle = value
         }
 
     override var viewName: String? = null

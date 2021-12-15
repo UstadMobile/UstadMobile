@@ -47,7 +47,7 @@ class ClazzEnrolmentListComponent (props: UmProps): UstadListComponent<ClazzEnro
         get() = field
         set(value) {
             field = value
-            title = value?.personFullName()
+            ustadComponentTitle = value?.personFullName()
         }
 
     override var clazz: Clazz? = null

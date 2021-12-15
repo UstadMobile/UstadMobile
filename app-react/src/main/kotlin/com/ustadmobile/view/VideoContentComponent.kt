@@ -24,7 +24,7 @@ class VideoContentComponent(mProps: UmProps):UstadBaseComponent<UmProps, UmState
         get() = field
         set(value) {
             field = value
-            title = value?.title
+            ustadComponentTitle = value?.title
             mPresenter?.onResume()
         }
 

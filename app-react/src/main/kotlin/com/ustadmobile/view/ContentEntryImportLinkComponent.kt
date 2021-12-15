@@ -69,7 +69,7 @@ class ContentEntryImportLinkComponent(mProps: UmProps): UstadEditComponent<Strin
 
     override fun onCreateView() {
         super.onCreateView()
-        title = getString(MessageID.enter_url)
+        ustadComponentTitle = getString(MessageID.enter_url)
         mPresenter = ContentEntryImportLinkPresenter(this, arguments, this, this, di)
         mPresenter?.onCreate(mapOf())
     }

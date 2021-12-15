@@ -78,7 +78,7 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
     override var entity: PersonWithPersonParentJoin? = null
         get() = field
         set(value) {
-            title = value?.firstNames +" "+ value?.lastName
+            ustadComponentTitle = value?.firstNames +" "+ value?.lastName
             setState {
                 field = value
             }

@@ -28,7 +28,7 @@ class LeavingReasonListComponent(props: UmProps): UstadListComponent<LeavingReas
         createNewText = getString(MessageID.add_leaving_reason)
         showCreateNewItem = true
         fabManager?.text = getString(MessageID.leaving_reason)
-        title = getString(MessageID.select_leaving_reason)
+        ustadComponentTitle = getString(MessageID.select_leaving_reason)
         mPresenter = LeavingReasonListPresenter(this, arguments, this,di,this)
         mPresenter?.onCreate(mapOf())
     }

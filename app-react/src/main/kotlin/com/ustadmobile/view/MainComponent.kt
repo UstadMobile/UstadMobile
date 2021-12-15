@@ -85,7 +85,7 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
         val destination = lookupDestinationName(getViewNameFromUrl()) ?: defaultDestination
 
         destination.takeIf { it.labelId != 0 && it.labelId != MessageID.content}?.apply {
-            title = getString(labelId)
+            ustadComponentTitle = getString(labelId)
         }
 
         setState {

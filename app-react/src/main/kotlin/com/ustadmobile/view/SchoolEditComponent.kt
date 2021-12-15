@@ -78,7 +78,7 @@ class SchoolEditComponent (mProps: UmProps): UstadEditComponent<SchoolWithHolida
         get() = field
         set(value) {
             if(value?.schoolName != null){
-                title = value.schoolName
+                ustadComponentTitle = value.schoolName
             }
             setState{
                 field = value

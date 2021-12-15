@@ -57,11 +57,11 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
         }
     }
 
-    var title: String? = null
+    var ustadComponentTitle: String? = null
         set(value) {
             field = value
             window.setTimeout({
-               dispatch(ReduxToolbarState(title = title))
+               dispatch(ReduxToolbarState(title = ustadComponentTitle))
             }, STATE_CHANGE_DELAY)
         }
 

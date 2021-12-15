@@ -116,7 +116,7 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
 
     override fun onCreateView() {
         super.onCreateView()
-        title = getString(MessageID.login)
+        ustadComponentTitle = getString(MessageID.login)
         mPresenter = Login2Presenter(this, arguments,this, di)
         mPresenter?.onCreate(mapOf())
     }

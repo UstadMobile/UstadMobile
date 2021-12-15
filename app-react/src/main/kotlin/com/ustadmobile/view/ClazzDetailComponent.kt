@@ -39,7 +39,7 @@ class ClazzDetailComponent(mProps: UmProps): UstadDetailComponent<Clazz>(mProps)
     override var entity: Clazz? = null
         get() = field
         set(value) {
-            title = entity?.clazzName
+            ustadComponentTitle = entity?.clazzName
             setState {
                 field = value
             }

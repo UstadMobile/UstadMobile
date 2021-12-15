@@ -109,7 +109,7 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
         get() = field
         set(value) {
             if(value?.clazzName != null){
-                title = value.clazzName
+                ustadComponentTitle = value.clazzName
             }
 
             setState{

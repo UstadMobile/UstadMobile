@@ -54,7 +54,7 @@ class InviteViaLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmSta
 
     override fun onCreateView() {
         super.onCreateView()
-        title = getString(MessageID.invite_with_link)
+        ustadComponentTitle = getString(MessageID.invite_with_link)
         mPresenter = InviteViaLinkPresenter(this, arguments, this, di)
         mPresenter?.onCreate(mapOf())
     }

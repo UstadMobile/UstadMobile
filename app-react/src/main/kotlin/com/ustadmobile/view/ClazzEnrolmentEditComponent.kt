@@ -109,7 +109,7 @@ class ClazzEnrolmentEditComponent (mProps: UmProps): UstadEditComponent<ClazzEnr
 
     override fun onCreateView() {
         super.onCreateView()
-        title = getString(MessageID.edit_enrolment)
+        ustadComponentTitle = getString(MessageID.edit_enrolment)
         mPresenter = ClazzEnrolmentEditPresenter(this, arguments, this,
             this, di)
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())

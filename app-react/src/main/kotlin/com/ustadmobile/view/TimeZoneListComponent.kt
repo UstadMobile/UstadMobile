@@ -30,7 +30,7 @@ class TimeZoneListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmStat
 
     override fun onCreateView() {
         super.onCreateView()
-        title = getString(MessageID.timezone)
+        ustadComponentTitle = getString(MessageID.timezone)
         mPresenter = TimeZoneListPresenter(this, arguments,
             this, di)
         mPresenter?.onCreate(mapOf())

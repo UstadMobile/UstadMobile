@@ -74,6 +74,12 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
             field = value
         }
 
+    override var title: String? = null
+        set(value) {
+            ustadComponentTitle = value
+            field = value
+        }
+
     override fun onCreateView() {
         super.onCreateView()
         mPresenter = AccountListPresenter(this,arguments,this, di,
