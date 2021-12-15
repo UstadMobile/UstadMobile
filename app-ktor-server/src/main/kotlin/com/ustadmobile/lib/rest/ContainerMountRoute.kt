@@ -4,6 +4,7 @@ import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.port.sharedse.impl.http.*
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
@@ -154,7 +155,7 @@ suspend fun Route.serve(call: ApplicationCall, isHeadRequest: Boolean){
             if(fileIsGzipped && acceptsGzip){
                 inputStream = GZIPInputStream(inputStream)
             }
-            inputStream = EpubFilesFilter(di()).filterResponse(inputStream, mimeType)
+            inputStream = EpubContainerFilter(di()).filterResponse(inputStream, mimeType)
             call.respond(object : OutgoingContent.WriteChannelContent() {
                 override val contentType = contentType
                 override val status = if(isRangeRequest)
