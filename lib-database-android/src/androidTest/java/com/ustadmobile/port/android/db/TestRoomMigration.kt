@@ -543,6 +543,17 @@ class TestRoomMigration {
     }
 
     @Test
+    fun migrate83to84() {
+        helper.createDatabase(TEST_DB, 83).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 84, true,
+            UmAppDatabase.MIGRATION_83_84.asRoomMigration())
+    }
+
+
+    @Test
     fun migrate84to85() {
         helper.createDatabase(TEST_DB, 84).apply {
             close()
