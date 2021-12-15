@@ -1,3 +1,4 @@
+package com.ustadmobile.core.network.p2p
 
 interface P2pManager {
 
@@ -10,5 +11,7 @@ interface P2pManager {
      * in the database and accessed as LiveData or RateLimitedLiveData
      */
     fun addToWatchList(contianerUids: List<Long>)
+
+    fun registerService(port: Int)
 
 }

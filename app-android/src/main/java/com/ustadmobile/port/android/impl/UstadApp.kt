@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.impl
 
+import com.ustadmobile.core.network.p2p.P2pManager
 import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -46,6 +47,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.android.generated.MessageIDMap
+import com.ustadmobile.port.android.impl.p2p.P2pManagerAndroid
 import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
 import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
@@ -278,6 +280,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
             AuthManager(context, di)
         }
 
+        bind<P2pManager>() with singleton {
+            P2pManagerAndroid(applicationContext)
+        }
+
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
 
         registerContextTranslator { call: NanoHttpdCall -> Endpoint(call.urlParams["endpoint"] ?: "notfound")}
@@ -287,6 +293,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<NetworkManagerBle>()
             instance<EmbeddedHTTPD>()
             instance<ConnectionManager>().start()
+            instance<P2pManager>().registerService(4242) //todo: change to port via di
 
             Picasso.setSingletonInstance(Picasso.Builder(applicationContext)
                     .downloader(OkHttp3Downloader(instance<OkHttpClient>()))
