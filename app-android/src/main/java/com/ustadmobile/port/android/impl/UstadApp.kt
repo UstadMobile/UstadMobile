@@ -315,6 +315,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
     override fun onTerminate() {
         super.onTerminate()
         di.direct.instance<ConnectionManager>().stop()
+        di.direct.instance<P2pManager>().stop()
     }
 
     override fun attachBaseContext(base: Context) {

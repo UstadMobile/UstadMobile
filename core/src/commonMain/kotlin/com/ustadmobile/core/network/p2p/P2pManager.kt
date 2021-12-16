@@ -14,4 +14,6 @@ interface P2pManager {
 
     fun registerService(port: Int)
 
+    fun stop()
+
 }
