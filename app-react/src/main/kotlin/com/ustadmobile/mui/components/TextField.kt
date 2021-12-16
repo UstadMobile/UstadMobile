@@ -158,10 +158,8 @@ private fun setProps(
     rowsMax?.let { textField.attrs.maxRows = it }
     textField.attrs.select = select
     textField.attrs.type = type
-    value?.let {
-        textField.attrs.value = it
-        textField.attrs.defaultValue = it
-    }
+    textField.attrs.value = value ?: ""
+    //textField.attrs.defaultValue = it
     textField.attrs.variant = variant.toString()
 }
 

@@ -191,6 +191,9 @@ interface UstadView {
          */
         const val ARG_NAV_CHILD = "navChild"
 
+        /**
+         * Indicates currently active tab index (Start at 0 as first tab)
+         */
         const val ARG_ACTIVE_TAB_INDEX = "activeTabIndex"
 
         /**

@@ -9,7 +9,11 @@ class UstadSavedStateHandleJs: UstadSavedStateHandle {
     internal val mLiveData: MutableMap<String, DoorMutableLiveData<*>> = concurrentSafeMapOf()
 
     override fun <T> set(key: String, value: T?) {
-        mLiveData[key] = DoorMutableLiveData(value)
+        if(value == null){
+            mLiveData.remove(key)
+        }else {
+            mLiveData[key] = DoorMutableLiveData(value)
+        }
     }
 
     override fun <T> get(key: String): T? {

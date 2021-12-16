@@ -5,14 +5,18 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.toQueryLikeParam
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ClazzAssignmentEditView
+import com.ustadmobile.core.view.ClazzAssignmentListView
+import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
+import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -58,9 +62,6 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
     }
 
     private fun updateListOnView() {
-
-
-
         view.list = repo.clazzAssignmentDao.getAllAssignments(clazzUid, systemTimeInMillis(),
                 mLoggedInPersonUid, selectedSortOption?.flag ?: 0,
                 searchText.toQueryLikeParam(), Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)

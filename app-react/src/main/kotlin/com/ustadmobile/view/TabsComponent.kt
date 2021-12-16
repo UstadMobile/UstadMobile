@@ -32,6 +32,7 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,UmState>(m
 
     private val tabChangeListener:(Any)-> Unit = {
         setState {
+            updateUrl(it.toString())
             selectedTabTitle = it.toString()
         }
     }
@@ -39,13 +40,18 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,UmState>(m
     private fun updateUrl(selected: String){
         val index = props.tabs.indexOfFirst { it.title == selected }
         val params = urlSearchParamsToMap().toMutableMap()
+        if(params[ARG_ACTIVE_TAB_INDEX] ?:0 == index) return
         params[ARG_ACTIVE_TAB_INDEX] = index.toString()
-        console.log(params.size)
         systemImpl.go("${getViewNameFromUrl()}",params, this)
     }
 
     override fun UmState.init(props: TabsProps) {
         selectedTabTitle = props.tabs[props.activeTabIndex].title
+    }
+
+    override fun onCreateView() {
+        super.onCreateView()
+        updateUrl(selectedTabTitle)
     }
 
     override fun RBuilder.render() {

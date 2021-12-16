@@ -1,11 +1,16 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.mui.ext.createStyledComponent
+import kotlinx.css.Display
+import kotlinx.css.FlexDirection
+import kotlinx.css.display
+import kotlinx.css.flexDirection
 import mui.material.Grid
 import mui.material.GridProps
 import mui.material.GridWrap
 import react.RBuilder
 import styled.StyledHandler
+import styled.css
 
 fun String.toHyphenCase(): String {
 var text = ""
@@ -130,6 +135,8 @@ fun RBuilder.gridItem(
     alignItems: GridAlignItems? = GridAlignItems.flexStart,
     zeroMinWidth: Boolean? = null,
     className: String? = null,
+    display: Display = Display.flex,
+    flexDirection: FlexDirection = FlexDirection.column,
     handler: StyledHandler<GridProps>? = null
 ) = createStyledComponent(Grid, className, handler) {
     attrs.item = true
@@ -140,4 +147,8 @@ fun RBuilder.gridItem(
     lg?.let { attrs.lg = it.sizeVal }
     attrs.asDynamic().textAlign = alignItems.toString()
     zeroMinWidth?.let { attrs.zeroMinWidth = it }
+    css{
+        this.display = display
+        this.flexDirection = flexDirection
+    }
 }

@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -56,6 +57,9 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
             onCreateView()
         }
     }
+
+    val  savedStateHandle: UstadSavedStateHandle?
+        get() = navController.currentBackStackEntry?.savedStateHandle
 
     var ustadComponentTitle: String? = null
         set(value) {
