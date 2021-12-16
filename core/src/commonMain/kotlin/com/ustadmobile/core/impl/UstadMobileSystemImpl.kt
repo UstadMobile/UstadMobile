@@ -63,14 +63,6 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
      */
     override fun getString(messageCode: Int, context: Any): String
 
-
-    /**
-     * Get storage directories
-     *
-     * @param context Platform specific context
-     */
-    override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir>
-
     /**
      * Must provide the system's default locale (e.g. en_US.UTF-8)
      *

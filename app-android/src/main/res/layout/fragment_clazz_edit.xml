@@ -196,7 +196,7 @@
                 android:layout_marginBottom="@dimen/dimen_8dp"
                 android:text="@string/schedule"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_end_date_edittext" />
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_start_date_edittext" />
 
 
             <include layout="@layout/item_createnew"

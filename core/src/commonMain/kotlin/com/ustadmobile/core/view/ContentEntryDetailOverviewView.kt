@@ -1,25 +1,33 @@
 package com.ustadmobile.core.view
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 
 
 interface ContentEntryDetailOverviewView: UstadDetailView<ContentEntryWithMostRecentContainer> {
 
-    var availableTranslationsList: DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage>?
+    var availableTranslationsList: DoorDataSourceFactory<Int, ContentEntryRelatedEntryJoinWithLanguage>?
 
     /**
      * Show the download dialog. The platform should request permission before if required.
      */
     fun showDownloadDialog(args: Map<String, String>)
 
-    var downloadJobItem: DownloadJobItem?
-
     var scoreProgress: ContentEntryStatementScoreProgress?
 
     var locallyAvailable: Boolean
 
     var markCompleteVisible: Boolean
+
+    var canDownload: Boolean
+
+    var canUpdate: Boolean
+
+    var hasContentToOpenOrDelete: Boolean
+
+    var contentJobItemStatus: Int
+
+    var contentJobItemProgress: ContentJobItemProgress?
 
     companion object {
 

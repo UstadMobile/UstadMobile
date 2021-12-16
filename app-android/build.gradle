@@ -131,8 +131,6 @@ android {
 
         multiDexEnabled true //required for all variants to use java library desugaring
         vectorDrawables.useSupportLibrary = true
-        versionCode rootProject.ext.ustadVersionCode
-        versionName rootProject.version
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments clearPackageData: 'true'
         buildConfigField "String", "TEST_HOST", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver"] + "\""
@@ -266,8 +264,12 @@ tasks.whenTaskAdded { task ->
         //TODO: Fix lib-content-editor to track up to date correctly, then add ":lib-content-editor:build" dependency
         task.dependsOn(generateCoreStringToAndroidResMap)
     }
-}
 
+    // TODO remove after merge with replication
+    if (task.name.equals("lint")) {
+        task.enabled = false
+    }
+}
 
 configurations.all {
     resolutionStrategy {
@@ -296,6 +298,7 @@ dependencies {
     implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy_support"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
+    implementation "commons-io:commons-io:$version_commons_io"
 
     //ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"

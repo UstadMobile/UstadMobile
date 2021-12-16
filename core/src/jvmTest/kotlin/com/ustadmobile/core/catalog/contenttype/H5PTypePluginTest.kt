@@ -1,14 +1,18 @@
 package com.ustadmobile.core.catalog.contenttype
 
+
+import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentformats.ContentImportManager
-import com.ustadmobile.core.contentformats.ContentImportManagerImpl
+import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import kotlinx.coroutines.runBlocking
+import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -22,6 +26,8 @@ import java.util.zip.ZipFile
 
 class H5PTypePluginTest {
 
+    private lateinit var h5pPlugin: H5PTypePluginCommonJvm
+
     @JvmField
     @Rule
     val tmpFolder = TemporaryFolder()
@@ -34,88 +40,101 @@ class H5PTypePluginTest {
 
     private lateinit var di: DI
 
-    private lateinit var contentImportManager: ContentImportManager
-
     private lateinit var db: UmAppDatabase
 
     private lateinit var repo: UmAppDatabase
 
+
+    private lateinit var endpointScope: EndpointScope
+
+    private lateinit var mockWebServer: MockWebServer
+
     @Before
     fun setup(){
 
+        endpointScope = EndpointScope()
         di = DI {
             import(ustadTestRule.diModule)
-            bind<ContentImportManager>() with scoped(ustadTestRule.endpointScope!!).singleton {
-                ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm(), H5PTypePluginCommonJvm()),
-                        context, this.context, di)
-            }
         }
-        val accountManager: UstadAccountManager by di.instance()
-        contentImportManager =  di.on(accountManager.activeAccount).direct.instance()
-        db = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_DB)
-        repo = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
 
+
+
+        mockWebServer = MockWebServer()
+        mockWebServer.dispatcher = ContentDispatcher()
+        mockWebServer.start()
+        val accountManager: UstadAccountManager by di.instance()
+
+        val umAppDatabase: UmAppDatabase = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
+        val connectivityStatus = ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED, true, "NetworkSSID")
+        umAppDatabase.connectivityStatusDao.insert(connectivityStatus)
+
+        h5pPlugin = H5PTypePluginCommonJvm(Any(), accountManager.activeEndpoint, di)
     }
 
     @Test
     fun givenValidH5PFile_whenExtractEntryMetaDataFromFile_thenDataShouldMatch() {
-        val tempFolder = tmpFolder.newFolder()
         val inputStream = this::class.java.getResourceAsStream(
                 "/com/ustadmobile/core/contenttype/dialog-cards-620.h5p")
-        val tempH5pFile = File(tempFolder, "dialog-cards-620.h5p")
-        tempH5pFile.copyInputStreamToFile(inputStream)
+        val tempH5pFile = tmpFolder.newFile()
+       tempH5pFile.copyInputStreamToFile(inputStream!!)
 
-        val h5pPlugin = H5PTypePluginCommonJvm()
-        val contentEntry = runBlocking {
-            h5pPlugin.extractMetadata(tempH5pFile.toURI().toString(), Any())
-        }
-//        Assert.assertEquals("Got ContentEntry with expected entryId",
-//                "dialog-cards-620.h5p",
-//                contentEntry?.entryId)
+        val tempFolder = tmpFolder.newFolder("newFolder")
+        val tempUri = DoorUri.parse(tempFolder.toURI().toString())
+
+        val metadata = runBlocking {
+            val h5pUri = DoorUri.parse(tempH5pFile.toURI().toString())
+            val processContext = ContentJobProcessContext(h5pUri, tempUri, mutableMapOf(), di)
+            h5pPlugin.extractMetadata(h5pUri,processContext)
+        }!!
+
         Assert.assertEquals("Got ContentEntry with expected title",
                 "Dialog Cards",
-                contentEntry?.title)
+                metadata.entry.title)
         Assert.assertEquals("Got ContentEntry with expected title",
                 "Samih",
-                contentEntry?.author)
+                metadata.entry.author)
         Assert.assertEquals("Got Entry with expected license",
-                ContentEntry.LICENSE_TYPE_OTHER, contentEntry?.licenseType)
+                ContentEntry.LICENSE_TYPE_OTHER, metadata.entry.licenseType)
     }
 
     @Test
-    fun givenValidH5PFile_whenImportContentEntryFromFile_thenContentEntryAndContainerShouldExist() {
-        val tempFolder = tmpFolder.newFolder()
-        val inputStream = this::class.java.getResourceAsStream(
-                "/com/ustadmobile/core/contenttype/dialog-cards-620.h5p")
-        val tempH5pFile = File(tempFolder, "dialog-cards-620.h5p")
-        tempH5pFile.copyInputStreamToFile(inputStream)
+    fun givenValidH5PLink_whenImportContentEntryFromFile_thenContentEntryAndContainerShouldExist() {
 
         val containerTmpDir = tmpFolder.newFolder("containerTmpDir")
+        val tempFolder = tmpFolder.newFolder("newFolder")
+        val tempUri = DoorUri.parse(tempFolder.toURI().toString())
+        val accountManager: UstadAccountManager by di.instance()
+        repo = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
+        db = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_DB)
 
+        val inputStream = this::class.java.getResourceAsStream(
+                "/com/ustadmobile/core/contenttype/dialog-cards-620.h5p")
+        val tempH5pFile = tmpFolder.newFile()
+        tempH5pFile.copyInputStreamToFile(inputStream!!)
         runBlocking {
-            val metadata = contentImportManager.extractMetadata(tempH5pFile.toURI().toString())!!
-            val contentEntry = metadata.contentEntry
-            val uid = repo.contentEntryDao.insertAsync(metadata.contentEntry)
-            val container = contentImportManager.importFileToContainer(tempH5pFile.toURI().toString(),
-                    metadata.mimeType, uid, containerTmpDir.absolutePath, mapOf()){
 
-            }!!
-            Assert.assertNotNull(contentEntry)
+            val doorUri = DoorUri.parse(mockWebServer.url("/com/ustadmobile/core/contenttype/dialog-cards-620.h5p").toString())
+            val processContext = ContentJobProcessContext(doorUri, tempUri, params = mutableMapOf(),
+                    di)
 
-            // Assert Entry
-            //Temporarily disabled
-//            Assert.assertEquals("Got ContentEntry with expected entryId",
-//                    "dialog-cards-620.h5p",
-//                    contentEntry.entryId)
-            Assert.assertEquals("Got ContentEntry with expected title",
-                    "Dialog Cards",
-                    contentEntry.title)
-            Assert.assertEquals("Got ContentEntry with expected title",
-                    "Samih",
-                    contentEntry.author)
-            Assert.assertEquals("Got Entry with expected license",
-                    ContentEntry.LICENSE_TYPE_OTHER, contentEntry.licenseType)
+            val uid = repo.contentEntryDao.insert(ContentEntry().apply{
+                title = "hello"
+            })
 
+            val jobItem = ContentJobItem(sourceUri = doorUri.uri.toString(),
+                    cjiParentContentEntryUid = uid, cjiContentEntryUid = 42)
+            val job = ContentJob(toUri = containerTmpDir.toURI().toString())
+            val jobAndItem = ContentJobItemAndContentJob().apply{
+                this.contentJob = job
+                this.contentJobItem = jobItem
+            }
+
+            h5pPlugin.processJob(jobAndItem, processContext) {
+
+            }
+
+
+            val container = repo.containerDao.findContainersForContentEntryUid(42).first()
 
             Assert.assertNotNull(container)
 
@@ -141,11 +160,6 @@ class H5PTypePluginTest {
                     .forEach {
                         Assert.assertNotNull("File exists: $it", db.containerEntryDao.findByPathInContainer(container.containerUid, "workspace/${it.name}"))
                     }
-
-
-
-
-
         }
     }
 

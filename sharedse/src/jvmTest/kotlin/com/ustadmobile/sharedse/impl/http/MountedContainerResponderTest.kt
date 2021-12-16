@@ -1,13 +1,17 @@
 package com.ustadmobile.sharedse.impl.http
 
+import com.ustadmobile.core.account.Endpoint
 import org.mockito.kotlin.mock
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.io.ext.openEntryInputStream
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.clearAllTablesAndResetSync
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.door.util.randomUuid
@@ -17,6 +21,9 @@ import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder
 import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder.Companion.PARAM_CONTAINERUID_INDEX
 import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder.Companion.PARAM_DB_INDEX
 import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder.Companion.PARAM_FILTERS_INDEX
+import com.ustadmobile.sharedse.util.UstadTestRule
+import com.ustadmobile.sharedse.util.directActiveDbInstance
+import com.ustadmobile.sharedse.util.directActiveRepoInstance
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.HttpClient
@@ -29,27 +36,24 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.junit.*
 import org.junit.rules.TemporaryFolder
+import org.kodein.di.*
 import java.io.File
 import java.io.IOException
 import kotlin.random.Random
 
 class MountedContainerResponderTest {
 
+    @JvmField
+    @Rule
+    var ustadTestRule = UstadTestRule()
+
     private lateinit var containerTmpDir: File
 
     private lateinit var db: UmAppDatabase
 
-    private lateinit var nodeIdAndAuth: NodeIdAndAuth
-
     private lateinit var repo: UmAppDatabase
 
     private lateinit var container: Container
-
-//    private lateinit var containerManager: ContainerManager
-
-    private lateinit var httpClient: HttpClient
-
-    private lateinit var okHttpClient: OkHttpClient
 
     @JvmField
     @Rule
@@ -59,22 +63,13 @@ class MountedContainerResponderTest {
     @Throws(IOException::class)
     fun setup() {
         containerTmpDir = temporaryFolder.newFolder("TestMountedContainerResponder-containerTmp")
-        nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
-            randomUuid().toString())
 
-        db = UmAppDatabase.getInstance(Any(), nodeIdAndAuth)
-        okHttpClient = OkHttpClient()
-        httpClient = HttpClient(OkHttp) {
-            install(JsonFeature)
-            install(HttpTimeout)
-            engine {
-                preconfigured = okHttpClient
-            }
+        val clientDi = DI {
+            import(ustadTestRule.diModule)
         }
 
-        repo = db.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
-            nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))
-        db.clearAllTables()
+        db = clientDi.directActiveDbInstance()
+        repo = clientDi.directActiveRepoInstance()
 
         container = Container()
         container.containerUid = repo.containerDao.insert(container)
@@ -89,18 +84,13 @@ class MountedContainerResponderTest {
         runBlocking {
             val containerAddOptions = ContainerAddOptions(containerTmpDir.toDoorUri())
             repo.addFileToContainer(container.containerUid, tmpFiles[0].toDoorUri(),
-                    "subfolder/testfile1.png", containerAddOptions)
+                    "subfolder/testfile1.png", Any(), clientDi, containerAddOptions)
             repo.addFileToContainer(container.containerUid, tmpFiles[1].toDoorUri(),
-                    "subfolder/test file2.png", containerAddOptions)
+                    "subfolder/test file2.png", Any(), clientDi, containerAddOptions)
         }
     }
 
-    @After
-    fun tearDown() {
-        httpClient.close()
-    }
-
-    //Test handling of file names when url encoding is required
+    //Test handling of file names when url encoding is requiredDownloadDi
     @Test
     fun givenFileNameWithSpaces_whenGetCalled_thenContentsShouldMatch() {
         val routerHttpd = RouterNanoHTTPD(0)

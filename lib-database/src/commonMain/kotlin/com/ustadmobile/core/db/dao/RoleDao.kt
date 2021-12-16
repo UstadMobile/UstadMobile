@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
@@ -20,7 +20,7 @@ abstract class RoleDao : BaseDao<Role> {
     abstract fun findByNameSync(roleName: String): Role?
 
     @Query("SELECT * FROM Role WHERE CAST(roleActive AS INTEGER) = 1 ")
-    abstract fun findAllActiveRoles(): DataSource.Factory<Int, Role>
+    abstract fun findAllActiveRoles(): DoorDataSourceFactory<Int, Role>
 
     @Query("""SELECT * FROM Role 
         WHERE CAST(roleActive AS INTEGER) = 1
@@ -34,7 +34,7 @@ abstract class RoleDao : BaseDao<Role> {
                 ELSE ''
             END DESC
     """)
-    abstract fun findAllActiveRolesSorted(sortOrder: Int, searchText: String): DataSource.Factory<Int, Role>
+    abstract fun findAllActiveRolesSorted(sortOrder: Int, searchText: String): DoorDataSourceFactory<Int, Role>
 
     @Query("SELECT * FROM Role WHERE CAST(roleActive AS INTEGER) = 1 ")
     abstract fun findAllActiveRolesLive(): DoorLiveData<List<Role>>

@@ -4,16 +4,13 @@ import androidx.room.testing.MigrationTestHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.platform.app.InstrumentationRegistry
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.asRoomMigration
 import org.junit.Rule
 import org.junit.Test
 import kotlin.random.Random
 
 
 class TestRoomMigration {
-
-    private val TEST_DB = "migration-test"
-
-    private val TEST_FROM_VERSION = 32
 
     @Rule @JvmField
     var helper: MigrationTestHelper = MigrationTestHelper(InstrumentationRegistry.getInstrumentation(),
@@ -27,7 +24,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 33, true,
-                UmAppDatabase.MIGRATION_32_33)
+                UmAppDatabase.MIGRATION_32_33.asRoomMigration())
     }
 
 
@@ -38,7 +35,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 34, true,
-                UmAppDatabase.MIGRATION_33_34)
+                UmAppDatabase.MIGRATION_33_34.asRoomMigration())
     }
 
     @Test
@@ -48,7 +45,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 35, true,
-                UmAppDatabase.MIGRATION_34_35)
+                UmAppDatabase.MIGRATION_34_35.asRoomMigration())
     }
 
 
@@ -60,7 +57,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 36, true,
-                UmAppDatabase.MIGRATION_35_36)
+                UmAppDatabase.MIGRATION_35_36.asRoomMigration())
     }
 
     @Test
@@ -70,7 +67,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 37, true,
-            UmAppDatabase.MIGRATION_36_37)
+            UmAppDatabase.MIGRATION_36_37.asRoomMigration())
     }
 
     @Test
@@ -80,7 +77,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 38, true,
-                UmAppDatabase.MIGRATION_37_38)
+                UmAppDatabase.MIGRATION_37_38.asRoomMigration())
     }
 
     @Test
@@ -92,7 +89,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 39, true,
-                UmAppDatabase.MIGRATION_38_39)
+                UmAppDatabase.MIGRATION_38_39.asRoomMigration())
     }
 
     @Test
@@ -102,7 +99,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 40, true,
-                UmAppDatabase.MIGRATION_39_40)
+                UmAppDatabase.MIGRATION_39_40.asRoomMigration())
     }
 
     @Test
@@ -112,7 +109,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 41, true,
-                UmAppDatabase.MIGRATION_40_41)
+                UmAppDatabase.MIGRATION_40_41.asRoomMigration())
     }
 
 
@@ -123,7 +120,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 42, true,
-                UmAppDatabase.MIGRATION_41_42)
+                UmAppDatabase.MIGRATION_41_42.asRoomMigration())
     }
     @Test
     fun migrate42to43() {
@@ -132,7 +129,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 43, true,
-                UmAppDatabase.MIGRATION_42_43)
+                UmAppDatabase.MIGRATION_42_43.asRoomMigration())
     }
 
     @Test
@@ -142,7 +139,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 44, true,
-                UmAppDatabase.MIGRATION_43_44)
+                UmAppDatabase.MIGRATION_43_44.asRoomMigration())
     }
 
     @Test
@@ -152,7 +149,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 45, true,
-                UmAppDatabase.MIGRATION_44_45)
+                UmAppDatabase.MIGRATION_44_45.asRoomMigration())
     }
 
     @Test
@@ -162,7 +159,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 46, true,
-                UmAppDatabase.MIGRATION_45_46)
+                UmAppDatabase.MIGRATION_45_46.asRoomMigration())
     }
 
     @Test
@@ -172,7 +169,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 47, true,
-                UmAppDatabase.MIGRATION_46_47)
+                UmAppDatabase.MIGRATION_46_47.asRoomMigration())
     }
 
 
@@ -183,7 +180,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 47, true,
-                UmAppDatabase.MIGRATION_47_48)
+                UmAppDatabase.MIGRATION_47_48.asRoomMigration())
     }
 
     @Test
@@ -193,7 +190,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 49, true,
-                UmAppDatabase.MIGRATION_48_49)
+                UmAppDatabase.MIGRATION_48_49.asRoomMigration())
     }
 
 
@@ -204,7 +201,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 50, true,
-                UmAppDatabase.MIGRATION_49_50)
+                UmAppDatabase.MIGRATION_49_50.asRoomMigration())
     }
 
     @Test
@@ -214,7 +211,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 51, true,
-                UmAppDatabase.MIGRATION_50_51)
+                UmAppDatabase.MIGRATION_50_51.asRoomMigration())
     }
 
     @Test
@@ -224,7 +221,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 52, true,
-                UmAppDatabase.MIGRATION_51_52)
+                UmAppDatabase.MIGRATION_51_52.asRoomMigration())
     }
 
     @Test
@@ -234,7 +231,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 53, true,
-                UmAppDatabase.MIGRATION_52_53)
+                UmAppDatabase.MIGRATION_52_53.asRoomMigration())
     }
 
     @Test
@@ -244,7 +241,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 54, true,
-                UmAppDatabase.MIGRATION_53_54)
+                UmAppDatabase.MIGRATION_53_54.asRoomMigration())
     }
 
     @Test
@@ -254,7 +251,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 55, true,
-                UmAppDatabase.MIGRATION_54_55)
+                UmAppDatabase.MIGRATION_54_55.asRoomMigration())
     }
 
     @Test
@@ -264,7 +261,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 56, true,
-                UmAppDatabase.MIGRATION_55_56)
+                UmAppDatabase.MIGRATION_55_56.asRoomMigration())
     }
 
 
@@ -275,7 +272,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 57, true,
-                UmAppDatabase.MIGRATION_56_57)
+                UmAppDatabase.MIGRATION_56_57.asRoomMigration())
     }
 
 
@@ -288,7 +285,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 58, true,
-                UmAppDatabase.MIGRATION_57_58)
+                UmAppDatabase.MIGRATION_57_58.asRoomMigration())
     }
 
     @Test
@@ -298,7 +295,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 59, true,
-                UmAppDatabase.MIGRATION_58_59)
+                UmAppDatabase.MIGRATION_58_59.asRoomMigration())
     }
 
     @Test
@@ -308,7 +305,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 60, true,
-                UmAppDatabase.MIGRATION_59_60)
+                UmAppDatabase.MIGRATION_59_60.asRoomMigration())
     }
 
     @Test
@@ -318,7 +315,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 61, true,
-                UmAppDatabase.MIGRATION_60_61)
+                UmAppDatabase.MIGRATION_60_61.asRoomMigration())
     }
 
     @Test
@@ -328,7 +325,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 62, true,
-                UmAppDatabase.MIGRATION_61_62)
+                UmAppDatabase.MIGRATION_61_62.asRoomMigration())
     }
 
     @Test
@@ -338,7 +335,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 63, true,
-            UmAppDatabase.MIGRATION_62_63)
+            UmAppDatabase.MIGRATION_62_63.asRoomMigration())
     }
 
     @Test
@@ -348,7 +345,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 64, true,
-            UmAppDatabase.MIGRATION_63_64)
+            UmAppDatabase.MIGRATION_63_64.asRoomMigration())
     }
 
     @Test
@@ -358,7 +355,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 65, true,
-                UmAppDatabase.MIGRATION_64_65)
+                UmAppDatabase.MIGRATION_64_65.asRoomMigration())
     }
 
     @Test
@@ -368,7 +365,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 66, true,
-            UmAppDatabase.MIGRATION_65_66)
+            UmAppDatabase.MIGRATION_65_66.asRoomMigration())
     }
 
     @Test
@@ -378,7 +375,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 67, true,
-                UmAppDatabase.MIGRATION_66_67)
+                UmAppDatabase.MIGRATION_66_67.asRoomMigration())
     }
 
     @Test
@@ -388,7 +385,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 68, true,
-            com.ustadmobile.core.db.UmAppDatabase.Companion.Migrate67To68(42))
+            com.ustadmobile.core.db.UmAppDatabase.migrate67to68(42).asRoomMigration())
     }
 
     @Test
@@ -398,7 +395,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 69, true,
-                UmAppDatabase.MIGRATION_68_69)
+                UmAppDatabase.MIGRATION_68_69.asRoomMigration())
     }
 
     @Test
@@ -408,7 +405,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 70, true,
-            UmAppDatabase.MIGRATION_69_70)
+            UmAppDatabase.MIGRATION_69_70.asRoomMigration())
     }
 
     @Test
@@ -418,7 +415,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 71, true,
-            UmAppDatabase.MIGRATION_70_71)
+            UmAppDatabase.MIGRATION_70_71.asRoomMigration())
     }
 
     @Test
@@ -428,7 +425,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 72, true,
-            UmAppDatabase.MIGRATION_71_72)
+            UmAppDatabase.MIGRATION_71_72.asRoomMigration())
     }
 
 
@@ -439,7 +436,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 73, true,
-                UmAppDatabase.MIGRATION_72_73)
+                UmAppDatabase.MIGRATION_72_73.asRoomMigration())
     }
 
 
@@ -450,7 +447,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 74, true,
-                UmAppDatabase.MIGRATION_73_74)
+                UmAppDatabase.MIGRATION_73_74.asRoomMigration())
     }
 
     @Test
@@ -460,7 +457,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 75, true,
-                UmAppDatabase.MIGRATION_74_75)
+                UmAppDatabase.MIGRATION_74_75.asRoomMigration())
     }
 
     @Test
@@ -470,7 +467,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 76, true,
-                UmAppDatabase.MIGRATION_75_76)
+                UmAppDatabase.MIGRATION_75_76.asRoomMigration())
     }
 
     @Test
@@ -480,7 +477,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 77, true,
-            UmAppDatabase.MIGRATION_76_77)
+            UmAppDatabase.MIGRATION_76_77.asRoomMigration())
     }
 
     @Test
@@ -490,7 +487,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 78, true,
-            UmAppDatabase.MIGRATION_77_78)
+            UmAppDatabase.MIGRATION_77_78.asRoomMigration())
     }
 
     @Test
@@ -500,7 +497,112 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 79, true,
-            UmAppDatabase.MIGRATION_78_79)
+            UmAppDatabase.MIGRATION_78_79.asRoomMigration())
     }
 
+    // 7/August/2021
+    @Test
+    fun migrate79to80() {
+        helper.createDatabase(TEST_DB, 79).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 80, true,
+            UmAppDatabase.MIGRATION_79_80.asRoomMigration())
+    }
+
+    // 2/Sept/2021
+    @Test
+    fun migrate80to81() {
+        helper.createDatabase(TEST_DB, 80).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 81, true,
+            UmAppDatabase.MIGRATION_80_81.asRoomMigration())
+    }
+
+    @Test
+    fun migrate81to82() {
+        helper.createDatabase(TEST_DB, 81).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 82, true,
+            UmAppDatabase.MIGRATION_81_82.asRoomMigration())
+    }
+
+    @Test
+    fun migrate82to83() {
+        helper.createDatabase(TEST_DB, 82).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 83, true,
+            UmAppDatabase.MIGRATION_82_83.asRoomMigration())
+    }
+
+    @Test
+    fun migrate83to84() {
+        helper.createDatabase(TEST_DB, 83).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 84, true,
+            UmAppDatabase.MIGRATION_83_84.asRoomMigration())
+    }
+
+
+    @Test
+    fun migrate84to85() {
+        helper.createDatabase(TEST_DB, 84).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 85, true,
+                UmAppDatabase.MIGRATION_84_85.asRoomMigration())
+    }
+
+    @Test
+    fun migrate85to86() {
+        helper.createDatabase(TEST_DB, 85).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 86, true,
+                UmAppDatabase.MIGRATION_85_86.asRoomMigration())
+    }
+    @Test
+    fun migrate86to87() {
+        helper.createDatabase(TEST_DB, 86).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 87, true,
+                UmAppDatabase.MIGRATION_86_87.asRoomMigration())
+    }
+
+    @Test
+    fun migrate87to88(){
+        helper.createDatabase(TEST_DB, 87).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 88, true,
+                UmAppDatabase.MIGRATION_87_88.asRoomMigration())
+    }
+
+    @Test
+    fun migrate88to89(){
+        helper.createDatabase(TEST_DB, 88).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 89, true,
+            UmAppDatabase.MIGRATION_88_89.asRoomMigration())
+    }
+
+    companion object {
+        const val TEST_DB = "migration-test"
+    }
 }

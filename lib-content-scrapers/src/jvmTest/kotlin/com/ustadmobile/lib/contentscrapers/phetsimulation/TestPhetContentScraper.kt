@@ -1,6 +1,8 @@
 package com.ustadmobile.lib.contentscrapers.phetsimulation
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.ext.addSyncCallback
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.clearAllTablesAndResetSync
 import com.ustadmobile.door.util.randomUuid
@@ -247,7 +249,10 @@ class TestPhetContentScraper {
 
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
             randomUuid().toString())
-        val db = UmAppDatabase.getInstance(Any(), nodeIdAndAuth, true)
+        val db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+            .addSyncCallback(nodeIdAndAuth, true)
+            .build()
+            .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
         val repo = db //db.getRepository("https://localhost", "")
         db.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
 
@@ -303,7 +308,10 @@ class TestPhetContentScraper {
     fun givenDirectoryOfTranslationsIsCreated_findAllTranslationRelations() {
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
             randomUuid().toString())
-        val db = UmAppDatabase.getInstance(Any(), nodeIdAndAuth, true)
+        val db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+            .addSyncCallback(nodeIdAndAuth, true)
+            .build()
+            .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
         val repo = db//db.getRepository("https://localhost", "")
         db.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
 

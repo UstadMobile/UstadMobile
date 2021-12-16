@@ -33,6 +33,8 @@ class ContentEntryAddOptionsBottomSheetFragment(var listener: ContentEntryAddOpt
 
     private var addLinkOptionView: View? = null
 
+    private var addFolderOptionView: View? = null
+
     private var addGalleryOptionView: View? = null
 
     private var addFileOptionView: View? = null
@@ -48,11 +50,13 @@ class ContentEntryAddOptionsBottomSheetFragment(var listener: ContentEntryAddOpt
             addLinkOptionView = it.contentAddLink
             addGalleryOptionView = it.contentAddGallery
             addFileOptionView = it.contentAddFile
+            addFolderOptionView = it.contentAddFolder
             it.showFolder = showFolder
             createFolderOptionView?.setOnClickListener(this)
             addLinkOptionView?.setOnClickListener(this)
             addFileOptionView?.setOnClickListener(this)
             addGalleryOptionView?.setOnClickListener(this)
+            addFolderOptionView?.setOnClickListener(this)
         }.root
     }
 
@@ -67,6 +71,9 @@ class ContentEntryAddOptionsBottomSheetFragment(var listener: ContentEntryAddOpt
             }
             R.id.content_add_file ->{
                 listener?.onClickImportFile()
+            }
+            R.id.content_add_folder ->{
+                listener?.onClickAddFolder()
             }
             R.id.content_create_folder ->{
                 listener?.onClickNewFolder()
@@ -83,6 +90,7 @@ class ContentEntryAddOptionsBottomSheetFragment(var listener: ContentEntryAddOpt
         createFolderOptionView?.setOnClickListener(null)
         addGalleryOptionView?.setOnClickListener(null)
         addFileOptionView?.setOnClickListener(null)
+        addFolderOptionView?.setOnClickListener(null)
         addLinkOptionView = null
         createFolderOptionView = null
         addFileOptionView = null

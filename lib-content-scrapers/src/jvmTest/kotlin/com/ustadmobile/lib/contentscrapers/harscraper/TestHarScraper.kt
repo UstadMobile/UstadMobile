@@ -9,10 +9,12 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
+import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.io.ext.openInputStream
 import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.door.ext.clearAllTablesAndResetSync
@@ -36,7 +38,6 @@ import java.lang.IllegalArgumentException
 import java.nio.file.Files
 import javax.naming.InitialContext
 import kotlin.random.Random
-
 
 class TestHarScraper {
 
@@ -77,9 +78,11 @@ class TestHarScraper {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName, nodeIdAndAuth, true).also {
-                    it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
-                })
+                spy(
+                    DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+                    .addSyncCallback(nodeIdAndAuth, true)
+                    .build()
+                    .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true))
             }
             bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
                 containerFolder

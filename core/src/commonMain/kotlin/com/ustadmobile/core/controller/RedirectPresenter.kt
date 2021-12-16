@@ -2,7 +2,8 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.RedirectView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_DEEPLINK
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import kotlinx.coroutines.launch
@@ -32,7 +33,7 @@ class RedirectPresenter(context: Any, arguments: Map<String, String>, view: Redi
             }
 
             accountManager.activeSession != null -> {
-                systemImpl.goToViewLink(ContentEntryListTabsView.VIEW_NAME, context)
+                systemImpl.goToViewLink(ContentEntryList2View.VIEW_NAME, context)
             }
 
             else -> {

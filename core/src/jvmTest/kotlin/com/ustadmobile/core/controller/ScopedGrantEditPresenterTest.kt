@@ -108,9 +108,9 @@ class ScopedGrantEditPresenterTest {
         }
 
         //add some permission
-        val bitmaskList = bitmaskFlagLiveData.value.get().toMutableList()
-        bitmaskList.firstOrNull { it.flagVal == Role.PERMISSION_ASSIGNMENT_SELECT }?.enabled = true
-        bitmaskList.firstOrNull { it.flagVal == Role.PERMISSION_CLAZZ_ADD_STUDENT }?.enabled = true
+        val bitmaskList = bitmaskFlagLiveData.getValue()?.toMutableList()
+        bitmaskList?.firstOrNull { it.flagVal == Role.PERMISSION_ASSIGNMENT_SELECT }?.enabled = true
+        bitmaskList?.firstOrNull { it.flagVal == Role.PERMISSION_CLAZZ_ADD_STUDENT }?.enabled = true
 
         presenter.handleClickSave(initialEntity)
 
@@ -154,11 +154,11 @@ class ScopedGrantEditPresenterTest {
 
         //Serialize to string so we can 'freeze' what we got at the start
         val initialBitmaskFlagJson: String = Json.encodeToString(
-            ListSerializer(BitmaskFlag.serializer()), bitmaskFlagLiveData.value.get())
+            ListSerializer(BitmaskFlag.serializer()), bitmaskFlagLiveData.getValue()!!)
 
-        val bitmaskList = bitmaskFlagLiveData.value.get().toMutableList()
-        bitmaskList.firstOrNull { it.flagVal == Role.PERMISSION_ASSIGNMENT_SELECT }?.enabled = false
-        bitmaskList.firstOrNull { it.flagVal == Role.PERMISSION_CLAZZ_ADD_TEACHER }?.enabled = true
+        val bitmaskList = bitmaskFlagLiveData.getValue()?.toMutableList()
+        bitmaskList?.firstOrNull { it.flagVal == Role.PERMISSION_ASSIGNMENT_SELECT }?.enabled = false
+        bitmaskList?.firstOrNull { it.flagVal == Role.PERMISSION_CLAZZ_ADD_TEACHER }?.enabled = true
 
         presenter.handleClickSave(initialEntity)
 

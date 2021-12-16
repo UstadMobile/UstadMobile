@@ -1,0 +1,19 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+ <head>
+  <title>Index of /devsvrstatic/jobs/UstadMobile-app-branded-maktab-tajikistan</title>
+ </head>
+ <body>
+<h1>Index of /devsvrstatic/jobs/UstadMobile-app-branded-maktab-tajikistan</h1>
+  <table>
+   <tr><th valign="top"><img src="/icons/blank.gif" alt="[ICO]"></th><th><a href="?C=N;O=D">Name</a></th><th><a href="?C=M;O=A">Last modified</a></th><th><a href="?C=S;O=A">Size</a></th><th><a href="?C=D;O=A">Description</a></th></tr>
+   <tr><th colspan="5"><hr></th></tr>
+<tr><td valign="top"><img src="/icons/back.gif" alt="[PARENTDIR]"></td><td><a href="/devsvrstatic/jobs/">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="/content/com/ustadmobile/core/contenttype/childrens-literature.epub">children-literature.epub</a></td><td align="right">2020-09-07 19:07  </td><td align="right">4.8K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="github-polling.log">github-polling.log</a></td><td align="right">2020-09-14 13:47  </td><td align="right">706 </td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="nextBuildNumber">nextBuildNumber</a></td><td align="right">2020-09-10 22:44  </td><td align="right">  3 </td><td>&nbsp;</td></tr>
+   <tr><th colspan="5"><hr></th></tr>
+</table>
+<address>Apache/2.4.41 (Ubuntu) Server at devserver3.ustadmobile.com Port 443</address>
+</body></html>

@@ -1,6 +1,5 @@
 package com.ustadmobile.port.sharedse.view
 
-import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.view.UstadView
 
 interface DownloadDialogView : UstadView {
