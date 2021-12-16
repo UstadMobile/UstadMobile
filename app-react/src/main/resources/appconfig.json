@@ -10,7 +10,7 @@
     "app.no_iframe_domans": "KhanAcademy",
     "app.register_allowed": "true",
     "app.ui_default_language": "en",
-    "first_dest": "ContentEntryListView",
+    "first_dest": "ContentEntryListHome",
     "app.guest_allowed": "true",
     "apiUrl": "http://localhost:8087/",
     "pbkdf2.iterations": "10000",
