@@ -48,7 +48,7 @@ class LeavingReasonListPresenter(context: Any, arguments: Map<String, String>, v
         when(mListMode) {
             ListViewMode.PICKER -> finishWithResult(safeStringify(di,
                 ListSerializer(LeavingReason.serializer()), listOf(leavingReason)))
-            ListViewMode.BROWSER ->navigateForResult(
+            ListViewMode.BROWSER -> navigateForResult(
                 NavigateForResultOptions(this,
                     leavingReason, LeavingReasonEditView.VIEW_NAME,
                     LeavingReason::class,

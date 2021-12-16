@@ -101,7 +101,7 @@ class AuthManager(
     }
 
     suspend fun setAuth(personUid: Long, password: String) {
-        repo.insertPersonAuthCredentials2(di,personUid, password, pbkdf2Params, getSite())
+        repo.insertPersonAuthCredentials2(personUid, password, pbkdf2Params, getSite())
     }
 
 

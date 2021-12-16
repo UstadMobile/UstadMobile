@@ -8,6 +8,7 @@ import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzAssignmentDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.util.*
 import com.ustadmobile.door.DoorLifecycleObserver
@@ -17,8 +18,7 @@ import org.junit.Assert
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.lib.db.entities.ClazzAssignment
-import org.kodein.di.DI
-import org.kodein.di.instance
+import org.kodein.di.*
 import org.mockito.kotlin.*
 
 /**
@@ -43,9 +43,12 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
     private lateinit var di: DI
 
+    private lateinit var mockNavController: UstadNavController
+
     @Before
     fun setup() {
         mockView = mock { }
+        mockNavController = mock()
         mockLifecycleOwner = mock {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
@@ -53,6 +56,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
         di = DI {
             import(ustadTestRule.diModule)
+            bind<UstadNavController>(overrides = true) with singleton { mockNavController }
         }
 
         val repo: UmAppDatabase by di.activeRepoInstance()
@@ -106,9 +110,12 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         mockView.captureLastEntityValue()
 
         presenter.handleClickEdit()
-        val systemImpl: UstadMobileSystemImpl by di.instance()
-        verify(systemImpl, timeout(5000)).go(eq(ClazzAssignmentEditView.VIEW_NAME),
-            eq(mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())), any())
+
+        verify(mockNavController,timeout(5000)).navigate(
+            eq(ClazzAssignmentEditView.VIEW_NAME),
+            eq(mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())),
+            any()
+        )
     }
 
 }

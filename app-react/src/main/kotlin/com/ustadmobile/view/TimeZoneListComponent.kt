@@ -33,6 +33,7 @@ class TimeZoneListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmStat
         ustadComponentTitle = getString(MessageID.timezone)
         mPresenter = TimeZoneListPresenter(this, arguments,
             this, di)
+        searchManager?.searchListener = this
         mPresenter?.onCreate(mapOf())
     }
 
