@@ -27,6 +27,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import kotlin.jvm.Volatile
 import kotlin.math.min
+import com.ustadmobile.door.ext.dbType
 
 /**
  * Runs a given ContentJob.
@@ -122,7 +123,7 @@ class ContentJobRunner(
             var mediatorObserver: DoorObserver<Pair<Int, Boolean>>?= null
             val mediatorLiveData = JobConnectivityLiveData(connectivityLiveData,
                     db.contentJobDao.findMeteredAllowedLiveData(
-                            item.contentJob?.cjUid ?: 0))
+                            item.contentJob?.cjUid ?: 0, db.dbType()))
 
             try {
 
