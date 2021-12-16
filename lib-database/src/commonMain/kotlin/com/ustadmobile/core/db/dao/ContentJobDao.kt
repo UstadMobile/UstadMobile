@@ -46,7 +46,7 @@ abstract class ContentJobDao {
         SELECT COALESCE((SELECT ContentJob.cjIsMeteredAllowed
           FROM ContentJob
          WHERE cjUid = :contentJobId
-         LIMIT 1),0)
+         LIMIT 1), FALSE)
     """)
     abstract fun findMeteredAllowedLiveData(contentJobId: Long): DoorLiveData<Boolean>
 
