@@ -29,14 +29,17 @@ This is a deployable bundle, it is standalone bundle which include everything ne
 ## Production
 For production purpose, below are the equivalent commands
 * Running the app locally in production mode
+
 	```
 	./gradlew app-react:browserProductionRun
 	```
 * Building and running continuously
+
 	```
 	./gradlew app-react:browserProductionRun --continuous
 	```
 * Generating webpack bundle
+
 	```
 	./gradlew app-react:browserProductionWebpack
 	```
