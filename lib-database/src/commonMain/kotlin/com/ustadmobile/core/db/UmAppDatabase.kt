@@ -64,7 +64,7 @@ import kotlin.jvm.JvmField
     //#DOORDB_TRACKER_ENTITIES
 
 ], version = 89)
-@MinSyncVersion(60)
+@MinSyncVersion(88)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     /*
