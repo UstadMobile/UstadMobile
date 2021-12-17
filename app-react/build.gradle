@@ -63,18 +63,20 @@ dependencies {
     implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
 }
 
-task distro {
-    def destDir = rootProject.file("app-ktor-server/src/main/resources/umapp/")
-    if(destDir.exists()){
-        destDir.delete()
+task distro(dependsOn: ['browserDistribution']){
+    def umAppDir = rootProject.file("app-ktor-server/src/main/resources/umapp/")
+
+    doFirst{
+        delete{
+            delete umAppDir.path
+        }
+        umAppDir.mkdirs()
     }
-    destDir.mkdirs()
-    doLast{
+
+    doLast {
         copy {
             from project.file("build/distributions").path
-            into destDir.path
+            into umAppDir.path
         }
     }
 }
-
-distro.dependsOn("browserDistribution")
