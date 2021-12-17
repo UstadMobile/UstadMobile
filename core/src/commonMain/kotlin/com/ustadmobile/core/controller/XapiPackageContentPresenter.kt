@@ -16,6 +16,7 @@ import com.ustadmobile.core.util.ext.toXapiGroupJsonObject
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.XapiPackageContentView
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
@@ -148,7 +149,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
 
     override fun onDestroy() {
         super.onDestroy()
-        GlobalScope.launch (Dispatchers.Main){
+        GlobalScope.launch (doorMainDispatcher()){
             if(mountedPath.isNotEmpty()){
                 mounter.unMountContainer(mountedEndpoint, mountedPath)
             }

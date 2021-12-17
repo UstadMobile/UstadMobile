@@ -98,7 +98,8 @@ class ConcatenatedInputStreamExtTest {
         val concatIn = ConcatenatedInputStream2(ByteArrayInputStream(entryOut.toByteArray()))
         runBlocking {
             concatIn.readAndSaveToDir(temporaryFolder.newFolder(), temporaryFolder.newFolder(),
-                    destDb, AtomicLong(), entriesToWrite, md5s.toMutableList(), "concattest")
+                    destDb, AtomicLong(), md5s.toMutableList(), "concattest")
+            destDb.linkExistingContainerEntries(container.containerUid, entriesToWrite)
         }
 
         sourceDb.assertContainerEqualToOther(container.containerUid, destDb)
@@ -132,7 +133,8 @@ class ConcatenatedInputStreamExtTest {
             try {
                 runBlocking {
                     concatIn.readAndSaveToDir(temporaryFolder.newFolder(), temporaryFolder.newFolder(),
-                            destDb, AtomicLong(), entriesToWrite, md5s.toMutableList(), "concattest")
+                            destDb, AtomicLong(), md5s.toMutableList(), "concattest")
+                    destDb.linkExistingContainerEntries(container.containerUid, entriesToWrite)
                 }
             }catch(e: Exception) {
                 e.printStackTrace()

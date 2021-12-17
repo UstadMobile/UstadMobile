@@ -21,13 +21,7 @@ class ClazzLogListAttendanceComponent(mProps: UmProps) : UstadBaseComponent<UmPr
         styledDiv {
             css(attendance)
             umGridContainer(GridSpacing.spacing4) {
-
-                umItem(GridSize.cells12, GridSize.cells7){
-
-                    //chart goes here
-                }
-
-                umItem(GridSize.cells12, GridSize.cells5){
+                umItem(GridSize.cells12){
                     renderClazzLogList{
                         console.log(it)
                     }

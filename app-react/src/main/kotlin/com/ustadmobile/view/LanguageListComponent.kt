@@ -25,7 +25,7 @@ class LanguageListComponent(mProps: UmProps): UstadListComponent<Language, Langu
 
     override fun onCreateView() {
         super.onCreateView()
-        title = getString(MessageID.languages)
+        ustadComponentTitle = getString(MessageID.languages)
         showCreateNewItem = true
         createNewText = getString(MessageID.add_a_new_language)
         fabManager?.text = getString(MessageID.language)

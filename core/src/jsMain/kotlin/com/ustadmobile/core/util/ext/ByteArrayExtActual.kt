@@ -1,4 +1,8 @@
 package com.ustadmobile.core.util.ext
 
-//Taken from https://kotlinlang.org/docs/tutorials/mpp/multiplatform-library.html
-actual fun ByteArray.encodeBase64(): String  = TODO("Not implemented on JS yet")
+//buffer used on js code
+@Suppress("UNUSED_VARIABLE")
+actual fun ByteArray.encodeBase64(): String  {
+    val buffer = this
+    return js("Buffer.from(buffer).toString('base64')").toString()
+}

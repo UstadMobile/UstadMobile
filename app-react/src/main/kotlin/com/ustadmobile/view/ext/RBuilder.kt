@@ -6,6 +6,7 @@ import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.ScopedGrantEditPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.ext.toolbarJsCssToPartialCss
 import com.ustadmobile.mui.theme.UMColor
@@ -125,8 +126,12 @@ fun RBuilder.umItem(
     lg: GridSize? = null,
     className: String? = null,
     alignItems: GridAlignItems? = null,
+    display: Display = Display.flex,
+    flexDirection: FlexDirection = FlexDirection.column,
     handler: StyledHandler<GridProps>? = null) {
-    gridItem(xs = xs,sm = sm, lg = lg, alignItems = alignItems , className = className, handler = handler)
+    gridItem(xs = xs,sm = sm, lg = lg,
+        alignItems = alignItems , className = className,
+        handler = handler, display = display, flexDirection = flexDirection)
 }
 
 fun RBuilder.umEntityAvatar (
@@ -365,11 +370,11 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
     onClickDecline: (() -> Unit)? = null,
     onClickAccept: (() -> Unit)? = null){
     umGridContainer {
-        umItem(GridSize.cells3, GridSize.cells2){
+        umItem(GridSize.cells3, GridSize.cells1){
             umProfileAvatar(personUid, "person")
         }
 
-        umItem(GridSize.cells9,GridSize.cells10){
+        umItem(GridSize.cells9,GridSize.cells11){
             umGridContainer {
                 umItem(GridSize.cells12){
                     umTypography(fullName,variant = TypographyVariant.h6){
@@ -381,11 +386,14 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
                     umGridContainer{
 
                         if(attendance >= 0){
-                            umItem(GridSize.cells1){
-                                circleIndicator(attendance)
-                            }
 
-                            umItem(GridSize.cells8){
+                            umItem(GridSize.cells8, flexDirection = FlexDirection.row){
+                                styledSpan {
+                                    css{
+                                        padding(right = 2.spacingUnits)
+                                    }
+                                    circleIndicator(attendance)
+                                }
                                 umTypography(attendanceLabel?.format(attendance * 100)){
                                     css{
                                         +alignTextToStart
@@ -429,6 +437,36 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
     }
 }
 
+fun RBuilder.createPersonListItemWithNameAndUserName(item: Person){
+    umGridContainer(GridSpacing.spacing5) {
+        val padding = LinearDimension("4px")
+        css{
+            padding(top = padding, bottom = padding)
+        }
+
+        umItem(GridSize.cells3, GridSize.cells1){
+            umProfileAvatar(item.personUid, "person")
+        }
+
+        umItem(GridSize.cells9, GridSize.cells11){
+            umItem(GridSize.cells12){
+                umTypography(item.fullName(),
+                    variant = TypographyVariant.h6){
+                    css (alignTextToStart)
+                }
+            }
+
+            umItem(GridSize.cells12){
+                umTypography(if(item.username.isNullOrEmpty()) "" else "@${item.username}",
+                    variant = TypographyVariant.body1,
+                    paragraph = true){
+                    css(alignTextToStart)
+                }
+            }
+        }
+    }
+}
+
 fun RBuilder.createListItemWithTitleDescriptionAndRightAction(
     title: String,
     iconName: String,
@@ -462,7 +500,6 @@ fun RBuilder.createListItemWithTitleDescriptionAndRightAction(
         if(withAction){
             gridItem(GridSize.cells2, GridSize.cells1, alignItems = GridAlignItems.center){
                 umIconButton(iconName,
-                    size = IconButtonSize.medium,
                     onClick = {
                         onActionClick?.invoke(it)
                         stopEventPropagation(it)

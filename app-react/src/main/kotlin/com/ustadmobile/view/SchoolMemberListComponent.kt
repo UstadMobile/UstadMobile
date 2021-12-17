@@ -36,8 +36,6 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
 
     private var filterBySchoolUid: Long = 0
 
-    private var filterByRole: Int = 0
-
     override val viewName: String
         get() = SchoolMemberListView.VIEW_NAME
 
@@ -71,8 +69,8 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
 
     override fun onCreateView() {
         super.onCreateView()
-        addPersonKeyName = "Person_${arguments[UstadView.ARG_FILTER_BY_ROLE]}"
-        filterByRole = arguments[UstadView.ARG_FILTER_BY_ROLE]?.toInt() ?: 0
+        val filterByRole = arguments[UstadView.ARG_FILTER_BY_ROLE]?.toInt() ?: 0
+        addPersonKeyName = "Person_$filterByRole"
         filterBySchoolUid = arguments[UstadView.ARG_FILTER_BY_SCHOOLUID]?.toLong() ?: 0
         roleStudent = filterByRole != Role.ROLE_SCHOOL_STAFF_UID
         showEmptyState = true
@@ -81,19 +79,16 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
         } else {
             MessageID.student
         }
-
-        showEmptyState = false
         createNewText = "${getString(MessageID.add_new)} $addNewStringId"
 
         fabManager?.visible = true
         fabManager?.icon = "add"
         fabManager?.text = getString(addNewStringId)
 
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+        savedStateHandle?.observeResult(this,
             Person.serializer(), addPersonKeyName) {
             val memberAdded = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleEnrolMember(filterBySchoolUid, memberAdded.personUid,
-                arguments[UstadView.ARG_FILTER_BY_ROLE]?.toInt() ?: 0)
+            mPresenter?.handleEnrolMember(filterBySchoolUid, memberAdded.personUid, filterByRole)
         }
 
         mPresenter = SchoolMemberListPresenter(this, arguments, this, di, this)

@@ -72,7 +72,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                         args.putEntityAsJson(
                             ARG_IMPORTED_METADATA,
                             ImportedContentEntryMetaData.serializer(), data)
-                        args[ARG_POPUPTO_ON_FINISH] = ContentEntryListTabsView.VIEW_NAME
+                        args[ARG_POPUPTO_ON_FINISH] = ContentEntryImportLinkView.VIEW_NAME
                         args.putFromOtherMapIfPresent(arguments, ARG_LEAF)
                         args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
                         systemImpl.go(ContentEntryEdit2View.VIEW_NAME,

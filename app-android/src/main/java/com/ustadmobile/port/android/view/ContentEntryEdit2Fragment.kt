@@ -21,9 +21,10 @@ import com.google.android.exoplayer2.util.Util
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntryEdit2Binding
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.UMStorageDir
+import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ContentEntryEdit2View
@@ -77,7 +78,13 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
         set(value) {
             mBinding?.fileImportInfoVisibility = if (value?.uri != null)
                 View.VISIBLE else View.GONE
-            mBinding?.importedMetadata = value
+            field = value
+        }
+
+    override var metadataResult: MetadataResult? = null
+        set(value) {
+            // TODO need to remove fileSelectedInfo if metadata came from scraper
+            mBinding?.metadataResult = value
             field = value
         }
 
@@ -181,7 +188,7 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
             field = value
         }
 
-    override var storageOptions: List<UMStorageDir>? = null
+    override var storageOptions: List<ContainerStorageDir>? = null
         set(value) {
             mBinding?.storageOptions = value
             field = value
@@ -247,6 +254,14 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
         mPresenter = ContentEntryEdit2Presenter(requireContext(), arguments.toStringMap(), this,
                 viewLifecycleOwner, di).withViewLifecycle()
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
+                Language::class.java) {
+            val language = it.firstOrNull() ?: return@observeResult
+            entity?.language = language
+            entity?.primaryLanguageUid = language.langUid
+        }
+
         viewLifecycleOwner.lifecycle.addObserver(viewLifecycleObserver)
 
     }
@@ -313,7 +328,7 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
         mBinding = null
         mPresenter = null
         entity = null
-        entryMetaData = null
+        metadataResult = null
         playerView = null
         webView = null
         player = null

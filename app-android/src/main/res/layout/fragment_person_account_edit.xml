@@ -17,6 +17,10 @@
             type="Integer" />
 
         <variable
+            name="usernameVisibility"
+            type="Integer" />
+
+        <variable
             name="usernameError"
             type="String"
             />
@@ -54,7 +58,7 @@
                 android:id="@+id/username_textinputlayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="@{person.username == null ? View.VISIBLE: View.GONE}"
+                android:visibility="@{usernameVisibility}"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"

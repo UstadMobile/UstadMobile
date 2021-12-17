@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import SelectFolderView
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
@@ -9,7 +10,6 @@ import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_CLAZZ
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_OPTION
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_DOWNLOADED
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_PARENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_SHOW_ONLY_FOLDER_FILTER
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
@@ -18,7 +18,10 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -62,9 +65,9 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         contentEntryListItemListener.mListMode = mListMode
         contentEntryListItemListener.presenter = this
         selectedSortOption = SORT_OPTIONS[0]
-        contentFilter = arguments[ARG_DISPLAY_CONTENT_BY_OPTION].toString()
+        contentFilter = arguments[ARG_DISPLAY_CONTENT_BY_OPTION] ?: ARG_DISPLAY_CONTENT_BY_PARENT
         onlyFolderFilter = arguments[ARG_SHOW_ONLY_FOLDER_FILTER]?.toBoolean() ?: false
-        parentEntryUidStack += arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0L
+        parentEntryUidStack += arguments[ARG_PARENT_ENTRY_UID]?.toLongOrNull() ?: MASTER_SERVER_ROOT_ENTRY_UID
         selectedClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
         loggedPersonUid = accountManager.activeAccount.personUid
         showHiddenEntries = false
@@ -101,12 +104,8 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                         parentEntryUid, 0, 0, loggedPersonUid, showHiddenEntries, onlyFolderFilter,
                         selectedSortOption?.flag ?: ContentEntryDao.SORT_TITLE_ASC)
             }
-            ARG_DISPLAY_CONTENT_BY_DOWNLOADED -> {
-                db.contentEntryDao.downloadedRootItems(loggedPersonUid,
-                        selectedSortOption?.flag ?: ContentEntryDao.SORT_TITLE_ASC)
-            }
             ARG_DISPLAY_CONTENT_BY_CLAZZ -> {
-                repo.contentEntryDao.getClazzContent(selectedClazzUid, loggedPersonUid,
+                repo.contentEntryDao.getClazzContent(selectedClazzUid, loggedPersonUid, showHiddenEntries,
                         selectedSortOption?.flag ?: ContentEntryDao.SORT_TITLE_ASC)
             }
             else -> null
@@ -317,6 +316,14 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         navController.navigate(SelectFileView.VIEW_NAME, args)
     }
 
+    override fun onClickAddFolder() {
+        val args = mutableMapOf(
+                ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
+                ARG_LEAF to true.toString())
+        args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
+
+        navController.navigate(SelectFolderView.VIEW_NAME, args)
+    }
 
     fun handleMoveWithSelectedEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
 

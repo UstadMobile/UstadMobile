@@ -2,9 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.R.attr
 import android.os.Bundle
-import android.text.Editable
 import android.text.InputFilter
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -73,6 +71,11 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
         set(value) {
             field = value
             mBinding?.currentPasswordVisibility = if(value) View.VISIBLE else View.GONE
+        }
+    override var usernameVisible: Boolean = false
+        set(value) {
+            field = value
+            mBinding?.usernameVisibility = if(value) View.VISIBLE else View.GONE
         }
 
 

@@ -67,7 +67,7 @@ class ScopedGrantEditComponent (mProps: UmProps): UstadEditComponent<ScopedGrant
 
     override fun onCreateView() {
         super.onCreateView()
-        title = getString(MessageID.people)
+        ustadComponentTitle = getString(MessageID.people)
         mPresenter = ScopedGrantEditPresenter(this, arguments, this,
             this, di)
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())

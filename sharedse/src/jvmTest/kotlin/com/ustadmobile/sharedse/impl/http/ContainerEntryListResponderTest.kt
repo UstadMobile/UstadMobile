@@ -52,7 +52,7 @@ class ContainerEntryListResponderTest {
         val activeRepo: UmAppDatabase by di.activeRepoInstance()
         container = runBlocking {
             insertContainerFromResources(activeDb, activeRepo, testFileRule.newFolder(),
-                    testFileRule.newFolder(),
+                    testFileRule.newFolder(), di,
                     *RES_FILENAMES.map { "$RES_FOLDER$it" }.toTypedArray())
         }
     }

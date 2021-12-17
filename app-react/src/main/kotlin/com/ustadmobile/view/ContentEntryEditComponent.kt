@@ -2,10 +2,11 @@ package com.ustadmobile.view
 
 import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UMStorageDir
+import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.mui.components.*
@@ -105,7 +106,7 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
             }
         }
 
-    override var storageOptions: List<UMStorageDir>? = null
+    override var storageOptions: List<ContainerStorageDir>? = null
         get() = field
         set(value) {
             setState {
@@ -114,6 +115,13 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
         }
 
     override var entryMetaData: ImportedContentEntryMetaData? = null
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var metadataResult: MetadataResult? = null
         get() = field
         set(value) {
             setState {
@@ -167,7 +175,7 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
 
     override fun onCreateView() {
         super.onCreateView()
-        title = getString(MessageID.content)
+        ustadComponentTitle = getString(MessageID.content)
         mPresenter = ContentEntryEdit2Presenter(this, arguments, this,
             this, di)
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
@@ -363,7 +371,7 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
 
                     umGridContainer(GridSpacing.spacing4) {
 
-                       if(entryMetaData != null){
+                       if(entryMetaData != null || metadataResult != null){
                            umItem(GridSize.cells12) {
                                createSwitchItem(getString(MessageID.compress), compressionEnabled){
                                    setState {

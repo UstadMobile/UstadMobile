@@ -43,7 +43,7 @@ typealias ScrapeFilterFn = (harEntry: HarEntry) -> HarEntry
 
 typealias WaitConditionFn = (waitCondition: WebDriverWait) -> Unit
 
-abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : Scraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
+abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, open val di: DI) : Scraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
     protected var chromeDriver: ChromeDriver
     var proxy: BrowserMobProxyServer = BrowserMobProxyServer()
@@ -201,7 +201,7 @@ abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                 contentInputStream.writeToFile(harContentfile)
                 val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolder.toDoorUri())
                 repo.addFileToContainer(container.containerUid, harContentfile.toDoorUri(),
-                        harContentfile.name, containerAddOptions)
+                        harContentfile.name, Any(), di, containerAddOptions)
                 harContentfile.delete()
             }
         }

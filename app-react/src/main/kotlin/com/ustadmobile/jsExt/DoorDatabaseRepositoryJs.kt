@@ -6,14 +6,14 @@ import kotlin.reflect.KClass
 class DoorDatabaseRepositoryJs(override val db: DoorDatabase, override val config: RepositoryConfig): DoorDatabaseRepository {
 
     override var connectivityStatus: Int
-        get() = TODO("DoorDatabaseRepositoryJs: Not yet implemented")
+        get() = 0
         set(value) {}
 
     override val dbPath: String
-        get() = TODO("DoorDatabaseRepositoryJs: Not yet implemented")
+        get() = db::class.js.name
 
     override val tableIdMap: Map<String, Int>
-        get() = TODO("Not yet implemented")
+        get() = mapOf()
 
     override suspend fun activeMirrors(): List<MirrorEndpoint> {
         return listOf()

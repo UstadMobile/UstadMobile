@@ -8,10 +8,7 @@ import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
-import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
-import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
-import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
-import com.ustadmobile.lib.db.entities.DownloadJobItem
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
@@ -45,6 +42,16 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
     override val viewName: String
         get() = ContentEntryDetailOverviewView.VIEW_NAME
 
+    private var currentDownloadJobItemStatus: Int = -1
+
+    private var showEntryDownloadOpenBtn = true
+
+    private var showEntryDetailProgress = true
+
+    private var downloadProgress: kotlin.Float = 0f
+
+    private var downloadStatusText = ""
+
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
@@ -64,12 +71,6 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
             liveData?.observe(this, observer)
         }
 
-    override var downloadJobItem: DownloadJobItem? = null
-        get() = field
-        set(value) {
-            //handle download job
-            field = value
-        }
 
     override var scoreProgress: ContentEntryStatementScoreProgress? = null
         get() = field
@@ -88,6 +89,86 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
         get() = field
         set(value) {
             setState {
+                field = value
+            }
+        }
+    override var canDownload: Boolean = false
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
+    override var canUpdate: Boolean = false
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
+    override var hasContentToOpenOrDelete: Boolean = false
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
+    override var contentJobItemStatus: Int = 0
+        get() = field
+        set(value) {
+            if(currentDownloadJobItemStatus != value) {
+                when {
+                    value == ContentJobItem.STATUS_COMPLETE -> {
+                        setState {
+                            showEntryDetailProgress = false
+                            showEntryDownloadOpenBtn = true
+                        }
+                    }
+
+                    value == ContentJobItem.STATUS_RUNNING -> {
+                        setState {
+                            showEntryDetailProgress = true
+                            showEntryDownloadOpenBtn = false
+                        }
+                    }
+
+                    else -> {
+                        setState {
+                            showEntryDetailProgress = true
+                            showEntryDownloadOpenBtn = false
+                        }
+                    }
+                }
+
+                currentDownloadJobItemStatus = value
+            }
+            setState {
+                field = value
+            }
+        }
+
+    override var contentJobItemProgress: ContentJobItemProgress? = null
+        get() = field
+        set(value) {
+
+            setState {
+                if(value != null) {
+
+                    if(value.progressTitle != null){
+                        downloadStatusText = value.progressTitle.toString()
+                    }
+
+                    downloadProgress = if (value.total > 0) {
+                        (value.progress.toFloat()) / (value.total.toFloat())
+                    } else {
+                        0f
+                    }
+                }else{
+                    downloadProgress = 0f
+                }
                 field = value
             }
         }
@@ -131,15 +212,17 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
                         }
                     }
 
-                    umButton(getString(MessageID.open),
-                        size = ButtonSize.large,
-                        color = UMColor.secondary,
-                        variant = ButtonVariant.contained,
-                        onClick = {
-                            mPresenter?.handleOnClickOpenDownloadButton()
-                        }){
-                        css (contentEntryDetailOverviewComponentOpenBtn)
-                    }
+                   if((canDownload || hasContentToOpenOrDelete) && showEntryDownloadOpenBtn){
+                       umButton(getString(MessageID.open),
+                           size = ButtonSize.large,
+                           color = UMColor.secondary,
+                           variant = ButtonVariant.contained,
+                           onClick = {
+                               mPresenter?.handleOnClickOpenDownloadButton()
+                           }){
+                           css (contentEntryDetailOverviewComponentOpenBtn)
+                       }
+                   }
                 }
 
                 umItem(GridSize.cells12, GridSize.cells8){

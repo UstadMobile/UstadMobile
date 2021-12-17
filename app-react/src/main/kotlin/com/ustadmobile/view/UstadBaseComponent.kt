@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -57,11 +58,14 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
         }
     }
 
-    var title: String? = null
+    val  savedStateHandle: UstadSavedStateHandle?
+        get() = navController.currentBackStackEntry?.savedStateHandle
+
+    var ustadComponentTitle: String? = null
         set(value) {
             field = value
             window.setTimeout({
-               dispatch(ReduxToolbarState(title = title))
+               dispatch(ReduxToolbarState(title = ustadComponentTitle))
             }, STATE_CHANGE_DELAY)
         }
 

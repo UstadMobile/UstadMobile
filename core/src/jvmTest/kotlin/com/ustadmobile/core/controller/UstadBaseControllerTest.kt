@@ -5,10 +5,7 @@ import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.AccountListView
-import com.ustadmobile.core.view.ContentEntryListTabsView
-import com.ustadmobile.core.view.SiteEnterLinkView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Person
@@ -69,7 +66,7 @@ class UstadBaseControllerTest {
     @Before
     fun setup() {
         systemImpl = mock {
-            on { getAppConfigDefaultFirstDest(any()) }.thenReturn(ContentEntryListTabsView.VIEW_NAME)
+            on { getAppConfigDefaultFirstDest(any()) }.thenReturn(ContentEntryList2View.VIEW_NAME)
 
             on{ getAppConfigBoolean(eq(AppConfig.KEY_ALLOW_SERVER_SELECTION), any()) }.thenReturn(true)
         }

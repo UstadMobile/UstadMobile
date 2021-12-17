@@ -5,7 +5,10 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.schedule.age
-import com.ustadmobile.core.util.ext.*
+import com.ustadmobile.core.util.ext.base64StringToByteArray
+import com.ustadmobile.core.util.ext.doublePbkdf2Hash
+import com.ustadmobile.core.util.ext.encodeBase64
+import com.ustadmobile.core.util.ext.insertPersonAuthCredentials2
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.PersonAuth2
 import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.STATUS_APPROVED

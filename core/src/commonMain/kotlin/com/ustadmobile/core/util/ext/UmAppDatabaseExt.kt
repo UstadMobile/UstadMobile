@@ -1,6 +1,5 @@
 package com.ustadmobile.core.util.ext
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.controller.ReportFilterEditPresenter.Companion.genderMap
@@ -11,8 +10,11 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.localEndOfDay
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
-import com.ustadmobile.core.util.graph.*
-import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.core.util.graph.LabelValueFormatter
+import com.ustadmobile.core.util.graph.MessageIdFormatter
+import com.ustadmobile.core.util.graph.TimeFormatter
+import com.ustadmobile.core.util.graph.UidAndLabelFormatter
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.ext.dbType
@@ -491,6 +493,30 @@ internal val UmAppDatabase.maxQueryParamListSize: Int
 
 data class ContainerEntryWithMd5Partition(val entriesWithMatchingFile: List<ContainerEntryWithContainerEntryFile>,
                                           val entriesWithoutMatchingFile: List<ContainerEntryWithMd5>)
+
+data class ContainerEntryPartition(
+    val entriesWithMatchingFile: List<ContainerEntryWithMd5>,
+    val entriesWithoutMatchingFile: List<ContainerEntryWithMd5>,
+    val existingFiles: List<ContainerEntryFile>
+)
+
+/**
+ * Partition a list of containerentrywithmd5 into a list of those md5s that we already have
+ * and those that we don't have yet.
+ */
+suspend fun UmAppDatabase.partitionContainerEntriesWithMd5(
+    containerEntryFiles: List<ContainerEntryWithMd5>
+): ContainerEntryPartition {
+    val existingFiles = containerEntryFileDao.findEntriesByMd5SumsSafeAsync(containerEntryFiles
+        .mapNotNull { it.cefMd5 }, maxQueryParamListSize)
+    val existingMd5s = existingFiles.mapNotNull { it.cefMd5 }.toSet()
+
+    val (entriesWithFile, entriesNeedDownloaded) = containerEntryFiles
+        .partition { it.cefMd5 in existingMd5s }
+
+    return ContainerEntryPartition(entriesWithFile, entriesNeedDownloaded, existingFiles)
+}
+
 /**
  * Given a list of ContainerEntryWithMd5 (e.g. the container entries that are required for a
  * container and the md5 sum of the contents that each should be linked with), link each
@@ -503,15 +529,13 @@ data class ContainerEntryWithMd5Partition(val entriesWithMatchingFile: List<Cont
  *
  * @return a pair of
  */
-suspend fun UmAppDatabase.linkExistingContainerEntries(containerUid: Long,
-                                                       containerEntryFiles: List<ContainerEntryWithMd5>): ContainerEntryWithMd5Partition {
+suspend fun UmAppDatabase.linkExistingContainerEntries(
+    containerUid: Long,
+    containerEntryFiles: List<ContainerEntryWithMd5>
+): ContainerEntryWithMd5Partition {
 
-    val existingFiles = containerEntryFileDao.findEntriesByMd5SumsSafeAsync(containerEntryFiles
-            .mapNotNull { it.cefMd5 }, maxQueryParamListSize)
-    val existingMd5s = existingFiles.mapNotNull { it.cefMd5 }.toSet()
-
-    val (entriesWithFile, entriesNeedDownloaded) = containerEntryFiles
-            .partition { it.cefMd5 in existingMd5s }
+    val (entriesWithFile, entriesNeedDownloaded, existingFiles) = partitionContainerEntriesWithMd5(
+            containerEntryFiles)
 
     val alreadyLinkedEntries = containerEntryDao.findByContainerAsync(containerUid)
     val entriesToLink = entriesWithFile
@@ -560,13 +584,14 @@ suspend fun UmAppDatabase.grantScopedPermission(toPerson: Person, permissions: L
  * Insert authentication credentials for the given person uid with the given password. This is fine
  * to use in tests etc, but for performance it is better to use AuthManager.setAuth
  */
-suspend fun UmAppDatabase.insertPersonAuthCredentials2(personUid: Long,
-                                            password: String,
-                                            pbkdf2Params: Pbkdf2Params,
-                                            site: Site? = null
+suspend fun UmAppDatabase.insertPersonAuthCredentials2(
+    personUid: Long,
+    password: String,
+    pbkdf2Params: Pbkdf2Params,
+    site: Site? = null
 ) {
-    val db = (this as DoorDatabaseRepository).db as UmAppDatabase
-    val effectiveSite = site ?: db.siteDao.getSite()
+    //TODO(Cast to DoorDatabaseRepository when repo sync is in place)
+    val effectiveSite = site ?: this.siteDao.getSite()
     val authSalt = effectiveSite?.authSalt ?: throw IllegalStateException("insertAuthCredentials: No auth salt!")
 
     personAuth2Dao.insertAsync(PersonAuth2().apply {

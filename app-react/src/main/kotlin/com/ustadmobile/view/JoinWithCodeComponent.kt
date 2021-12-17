@@ -84,7 +84,7 @@ class JoinWithCodeComponent (mProps: UmProps): UstadBaseComponent<UmProps, UmSta
         mPresenter = JoinWithCodePresenter(this, arguments, this,
             di)
         val tableId = arguments[UstadView.ARG_CODE_TABLE].toString().toInt()
-        title = when (tableId) {
+        ustadComponentTitle = when (tableId) {
             Clazz.TABLE_ID -> {
                 setState { entityType = getString(MessageID.clazz) }
                 getString(MessageID.join_existing_class)

@@ -1,6 +1,7 @@
 package com.ustadmobile.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_JdbcKt
 import com.ustadmobile.core.generated.locale.MessageID
@@ -63,7 +64,8 @@ class SplashPresenter(private val view: SplashView): DIAware {
 
         val accountManager: UstadAccountManager by instance()
         val nodeIdAndAuth:NodeIdAndAuth by di.on(accountManager.activeAccount).instance()
-        dbBuilder.addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
+        dbBuilder.addCallback(ContentJobItemTriggersCallback())
+            .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
 
         umAppDatabase.initJsRepo(impl.getAppPref(TAG_LOADED, this).toBoolean())
 

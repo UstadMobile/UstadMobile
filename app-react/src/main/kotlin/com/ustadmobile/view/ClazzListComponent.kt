@@ -44,7 +44,7 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
     override fun onCreateView() {
         super.onCreateView()
         fabManager?.text = getString(MessageID.clazz)
-        title = getString(MessageID.classes)
+        ustadComponentTitle = getString(MessageID.classes)
         linearLayout = false
         mPresenter = ClazzListPresenter(this, arguments, this,di,this)
         mPresenter?.onCreate(mapOf())

@@ -14,3 +14,7 @@ fun Long?.toDate(): Date {
     }
     return Date(mills!!)
 }
+
+fun Long?.isSetDate(): Boolean {
+    return this != null && this != 0L && this != 8640000000000000
+}

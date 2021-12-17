@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.grantScopedPermission
@@ -18,9 +19,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.runBlocking
 import org.junit.*
-import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.singleton
+import org.kodein.di.*
 import org.mockito.kotlin.*
 
 
@@ -54,13 +53,17 @@ class PersonAccountEditPresenterTest  {
 
     private lateinit var mockAuthManager: AuthManager
 
+    private lateinit var mockNavController: UstadNavController
+
     @Before
     fun setUp() {
         context = Any()
         mockLifecycleOwner = mock { }
+        mockNavController = mock()
 
         mockView = mock{}
         impl = mock()
+
 
         serverUrl = "https://dummysite.ustadmobile.app/"
 
@@ -77,6 +80,7 @@ class PersonAccountEditPresenterTest  {
             import(ustadTestRule.diModule)
             bind<UstadAccountManager>(overrides = true) with singleton { accountManager }
             bind<UstadMobileSystemImpl>(overrides = true) with singleton { impl }
+            bind<UstadNavController>(overrides = true) with singleton { mockNavController }
             bind<AuthManager>() with singleton { mockAuthManager }
         }
 
@@ -199,6 +203,8 @@ class PersonAccountEditPresenterTest  {
         }
 
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString(),
+            UstadView.ARG_RESULT_DEST_VIEWNAME   to "",
+            UstadView.ARG_RESULT_DEST_KEY to "",
                 UstadView.ARG_SERVER_URL to serverUrl)
         val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
@@ -215,7 +221,7 @@ class PersonAccountEditPresenterTest  {
             setAuth(eq(person.personUid), eq(person.newPassword!!))
         }
 
-        verify(mockView, timeout(defaultTimeOut)).finishWithResult(any())
+        verify(mockNavController, timeout(defaultTimeOut).times(1)).popBackStack(any(), any())
     }
 
 

@@ -12,7 +12,8 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 class PersonDetailPresenter(context: Any,
@@ -60,27 +61,22 @@ class PersonDetailPresenter(context: Any,
         )
     }
 
-    override fun handleClickEdit() {
+    override fun handleClickEdit() = navigateToEditScreen(PersonEditView.VIEW_NAME)
+
+    fun handleChangePassword() = navigateToEditScreen()
+
+    fun handleCreateAccount() = navigateToEditScreen()
+
+    private fun navigateToEditScreen(destination: String = PersonAccountEditView.VIEW_NAME){
         val personUid = view.entity?.personUid ?: return
         navigateForResult(
             NavigateForResultOptions(this,
-                null, PersonEditView.VIEW_NAME, PersonWithAccount::class,
+                null, destination,
+                PersonWithAccount::class,
                 PersonWithAccount.serializer(), SAVEDSTATE_KEY_PERSON,
                 arguments = mutableMapOf(ARG_ENTITY_UID to personUid.toString())
             )
         )
-    }
-
-    fun handleChangePassword(){
-        val personUid = view.entity?.personUid ?: return
-        systemImpl.go(PersonAccountEditView.VIEW_NAME,
-                mapOf(ARG_ENTITY_UID to personUid.toString()), context)
-    }
-
-    fun handleCreateAccount(){
-        val personUid = view.entity?.personUid ?: return
-        systemImpl.go(PersonAccountEditView.VIEW_NAME,
-                mapOf(ARG_ENTITY_UID to personUid.toString()), context)
     }
 
     fun handleClickManageParentalConsent() {

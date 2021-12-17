@@ -10,14 +10,13 @@ import com.ustadmobile.view.*
 object RouteManager {
 
     val destinationList = listOf(
-        UstadDestination("library_books", MessageID.content, ContentEntryListTabsView.VIEW_NAME,
-            ContentEntryListTabsComponent::class, true),
+        UstadDestination("library_books", MessageID.content, ContentEntryList2View.VIEW_NAME,
+            ContentEntryListComponent::class, true),
         UstadDestination("school", MessageID.schools,SchoolListView.VIEW_NAME, SchoolListComponent::class, showSearch = true),
         UstadDestination("people", MessageID.classes,ClazzList2View.VIEW_NAME, ClazzListComponent::class, showSearch = true),
         UstadDestination("person", MessageID.people, PersonListView.VIEW_NAME, PersonListComponent::class, showSearch = true),
         UstadDestination("pie_chart", MessageID.reports, ReportListView.VIEW_NAME, ReportListComponent::class, divider = true),
         UstadDestination("settings", MessageID.settings, SettingsView.VIEW_NAME, PlaceHolderComponent::class),
-        UstadDestination(view = ContentEntryList2View.VIEW_NAME, component = ContentEntryListComponent::class),
         UstadDestination(view = AccountListView.VIEW_NAME, component = AccountListComponent::class),
         UstadDestination(view = Login2View.VIEW_NAME, labelId = MessageID.login, component = LoginComponent::class, showNavigation = false),
         UstadDestination(view = ContentEntryDetailView.VIEW_NAME, component = ContentEntryDetailComponent::class),
@@ -56,7 +55,7 @@ object RouteManager {
         UstadDestination(view = ClazzEnrolmentListView.VIEW_NAME, component = ClazzEnrolmentListComponent::class),
         UstadDestination(view = LeavingReasonListView.VIEW_NAME, component = LeavingReasonListComponent::class),
         UstadDestination(view = LeavingReasonEditView.VIEW_NAME, component = LeavingReasonEditComponent::class),
-        UstadDestination(view = ClazzAssignmentListView.VIEW_NAME, component = AssignmentListComponent::class),
+        UstadDestination(view = ClazzAssignmentListView.VIEW_NAME, component = ClazzAssignmentListComponent::class),
         UstadDestination(view = ClazzAssignmentEditView.VIEW_NAME, component = ClazzAssignmentEditComponent::class),
         UstadDestination(labelId= MessageID.accounts, view = AccountListView.VIEW_NAME, component = PlaceHolderComponent::class)
     )
@@ -72,7 +71,7 @@ object RouteManager {
 
 
     val firstDestination: UstadDestination = destinationList.first {
-        it.view == ContentEntryListTabsView.VIEW_NAME
+        it.view == ContentEntryList2View.VIEW_NAME
     }
 
     /**

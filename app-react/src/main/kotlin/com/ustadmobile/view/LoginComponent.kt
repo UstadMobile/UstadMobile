@@ -116,7 +116,7 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
 
     override fun onCreateView() {
         super.onCreateView()
-        title = getString(MessageID.login)
+        ustadComponentTitle = getString(MessageID.login)
         mPresenter = Login2Presenter(this, arguments,this, di)
         mPresenter?.onCreate(mapOf())
     }
@@ -160,7 +160,8 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
                         css(hideOnMobile)
                     }
                     umItem(GridSize.cells12, gridSizeOnCenterOnMdDown, gridSizeOnCenterLgUp) {
-                        umTextField(label = "${usernameLabel.text}",
+                        umTextField(
+                            label = "${usernameLabel.text}",
                             helperText = usernameLabel.errorText,
                             value = username,
                             error = usernameLabel.error,

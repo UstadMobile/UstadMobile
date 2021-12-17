@@ -4,6 +4,11 @@ import com.google.gson.Gson
 import com.ustadmobile.core.account.*
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.Pbkdf2Params
+import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
@@ -33,16 +38,15 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExecutorCoroutineDispatcher
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
+import java.net.InetAddress
+import java.net.URL
 import java.nio.file.Files
 import java.util.concurrent.Executors
 import javax.naming.InitialContext
@@ -108,6 +112,7 @@ class UstadTestRule: TestWatcher() {
             }
         }
 
+
         diModule = DI.Module("UstadTestRule") {
             bind<UstadMobileSystemImpl>() with singleton { systemImplSpy }
             bind<UstadAccountManager>() with singleton {
@@ -123,7 +128,9 @@ class UstadTestRule: TestWatcher() {
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
+                    .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                     .addSyncCallback(nodeIdAndAuth, primary = false)
+                        .addCallback(ContentJobItemTriggersCallback())
                     .build()
                     .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, isPrimary = false))
             }
@@ -180,7 +187,11 @@ class UstadTestRule: TestWatcher() {
             bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
                 xppFactory
             }
-
+            bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(endpointScope).singleton {
+                val containerFolder = File(tempFolder, "containerDir")
+                containerFolder.mkdirs()
+                containerFolder
+            }
             bind<XmlPullParserFactory>(tag = DiTag.XPP_FACTORY_NSUNAWARE) with singleton {
                 XmlPullParserFactory.newInstance()
             }

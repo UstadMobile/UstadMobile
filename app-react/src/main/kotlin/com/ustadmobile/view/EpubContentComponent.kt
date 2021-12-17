@@ -13,7 +13,7 @@ class EpubContentComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
     override var containerTitle: String? = null
         get() = field
         set(value) {
-            title = value
+            ustadComponentTitle = value
             field = value
         }
 

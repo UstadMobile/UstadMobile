@@ -11,10 +11,7 @@ import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.waitUntil
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.userAtServer
-import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.door.DoorDatabaseSyncRepository
-import com.ustadmobile.door.RepositoryConfig
-import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.*
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
@@ -116,6 +113,11 @@ class UstadAccountManagerTest {
                         instance(), instance()
                     )
                 ))
+            }
+
+            bind<DoorDatabaseRepository>(tag = UmAppDatabase.TAG_REPO) with scoped(EndpointScope.Default).singleton {
+                val repo: UmAppDatabase by di.on(Endpoint(context.url)).instance(tag = UmAppDatabase.TAG_REPO)
+                repo as DoorDatabaseRepository
             }
 
             bind<ClientId>(tag = UstadMobileSystemCommon.TAG_CLIENT_ID) with scoped(endpointScope).singleton {

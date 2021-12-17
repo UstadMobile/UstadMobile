@@ -221,7 +221,7 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
         loading = false
         if(registrationMode.hasFlag(PersonEditView.REGISTER_MODE_ENABLED)) {
             setState {
-                title = getString(MessageID.register)
+                ustadComponentTitle = getString(MessageID.register)
             }
         }else {
             setEditTitle(MessageID.add_a_new_person, MessageID.edit_person)

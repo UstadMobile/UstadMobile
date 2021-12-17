@@ -41,7 +41,7 @@ abstract class UstadEditComponent<T: Any>(mProps: UmProps): UstadBaseComponent<U
         window.setTimeout({
             val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
             val entityJsonStr = arguments[ARG_ENTITY_JSON]
-            title = if(entityUid != 0L || entityJsonStr != null){
+            ustadComponentTitle = if(entityUid != 0L || entityJsonStr != null){
                 getString(editStringId)
             }else {
                 getString(newTitleId)

@@ -19,10 +19,12 @@ fun <T> UstadSavedStateHandle.observeResult(lifecycleOwner: DoorLifecycleOwner,
                                             serializer: KSerializer<T>,
                                             resultKey: String,
                                             block: (List<T>) -> Unit) {
-    getLiveData<String>(resultKey).observe(lifecycleOwner) {
-        val entity = if(it.isNullOrBlank()) listOf() else Json.decodeFromString(ListSerializer(serializer), it)
-        block(entity)
-        set(resultKey, null)
+    getLiveData<String?>(resultKey).observe(lifecycleOwner) {
+        if(!it.isNullOrBlank()){
+            val entity = Json.decodeFromString(ListSerializer(serializer), it)
+            set(resultKey, null)
+            block(entity)
+        }
     }
 }
 

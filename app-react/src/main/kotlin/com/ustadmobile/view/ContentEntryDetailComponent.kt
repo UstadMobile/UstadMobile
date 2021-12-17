@@ -42,7 +42,7 @@ class ContentEntryDetailComponent(mProps: UmProps): UstadDetailComponent<Content
         get() = field
         set(value) {
             field = value
-            title = value?.title
+            ustadComponentTitle = value?.title
         }
 
 

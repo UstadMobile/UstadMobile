@@ -1,3 +1,4 @@
+
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.AppConfig
@@ -86,16 +87,16 @@ private val diModule = DI.Module("UstadApp-React"){
     }
 
     bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(EndpointScope.Default).singleton {
-        val db: UmAppDatabase by di.on(Endpoint(context.url)).instance(tag = UmAppDatabase.TAG_DB)
-        db
+        val repo: UmAppDatabase by di.on(Endpoint(context.url)).instance(tag = UmAppDatabase.TAG_DB)
+        repo
     }
 
     bind<DoorDatabaseRepository>(tag = UmAppDatabase.TAG_REPO) with scoped(EndpointScope.Default).singleton {
         val nodeIdAndAuth: NodeIdAndAuth = instance()
-        val db: UmAppDatabase by di.on(Endpoint(context.url)).instance(tag = UmAppDatabase.TAG_DB)
-        DoorDatabaseRepositoryJs(db, RepositoryConfig.repositoryConfig(
+        val config =  RepositoryConfig.repositoryConfig(
             this,context.url,  nodeIdAndAuth.auth, nodeIdAndAuth.nodeId, instance())
-        )
+        val db: UmAppDatabase by di.on(Endpoint(context.url)).instance(tag = UmAppDatabase.TAG_DB)
+        DoorDatabaseRepositoryJs(db, config)
     }
 
     constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with false

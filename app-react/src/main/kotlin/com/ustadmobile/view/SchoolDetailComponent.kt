@@ -30,7 +30,13 @@ class SchoolDetailComponent(mProps:UmProps): UstadDetailComponent<School>(mProps
     override var entity: School? = null
         set(value) {
             field = value
-            title = value?.schoolName
+            ustadComponentTitle = value?.schoolName
+        }
+
+    override var title: String? = null
+        set(value) {
+            ustadComponentTitle = value
+            field = value
         }
 
     private var tabsToRender: List<UmTab>? = null

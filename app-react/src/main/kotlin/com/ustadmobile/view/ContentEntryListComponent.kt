@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.ext.determineListMode
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_SELECT_FOLDER_VISIBLE
 import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.mui.components.*
@@ -16,8 +17,8 @@ import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util
-import com.ustadmobile.util.ext.wordBreakLimit
 import com.ustadmobile.util.ext.format
+import com.ustadmobile.util.ext.wordBreakLimit
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
@@ -58,11 +59,17 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
             }
         }
 
+    override var title: String? = null
+        set(value) {
+            ustadComponentTitle = value
+            field = value
+        }
 
     override fun onCreateView() {
         super.onCreateView()
+        ustadComponentTitle = arguments[UstadView.ARG_PARENT_ENTRY_TITLE] ?: getString(MessageID.content)
         fabManager?.text = getString(MessageID.content)
-        mPresenter = ContentEntryList2Presenter(this, arguments, this,di,this)
+        mPresenter = ContentEntryList2Presenter(this, arguments, this, di, this)
         mPresenter?.onCreate(mapOf())
     }
 

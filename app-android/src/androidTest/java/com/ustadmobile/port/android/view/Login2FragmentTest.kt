@@ -11,7 +11,7 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.toBundle
-import com.ustadmobile.core.view.ContentEntryListTabsView
+import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.Site
@@ -81,7 +81,7 @@ class Login2FragmentTest : TestCase(){
 
         val args = mutableMapOf(
             UstadView.ARG_SITE to Json.encodeToString(Site.serializer(), workspace),
-            UstadView.ARG_NEXT to ContentEntryListTabsView.VIEW_NAME)
+            UstadView.ARG_NEXT to ContentEntryList2View.VIEW_NAME)
 
         args[UstadView.ARG_SERVER_URL] = serverUrl
 
@@ -226,7 +226,7 @@ class Login2FragmentTest : TestCase(){
                 }
                 flakySafely {
                     assertEquals("It navigated to account creation screen",
-                            R.id.home_content_dest, systemImplNavRule.navController.currentDestination?.id)
+                            R.id.content_entry_list_dest, systemImplNavRule.navController.currentDestination?.id)
                 }
             }
         }
@@ -260,7 +260,7 @@ class Login2FragmentTest : TestCase(){
 
             flakySafely {
                 assertEquals("It navigated to the default screen",
-                        R.id.home_content_dest, systemImplNavRule.navController.currentDestination?.id)
+                        R.id.content_entry_list_dest, systemImplNavRule.navController.currentDestination?.id)
             }
 
         }

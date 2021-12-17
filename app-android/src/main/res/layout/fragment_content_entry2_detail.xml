@@ -7,10 +7,9 @@
 
         <import type="android.view.View" />
 
-        <import type="com.ustadmobile.core.util.ext.DownloadJobExtKt" />
-
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
 
+        <import  type="com.ustadmobile.lib.db.entities.ContentJobItem" />
         <variable
             name="contentEntry"
             type="com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer" />
@@ -44,11 +43,23 @@
             type="com.ustadmobile.port.android.view.ContentEntryDetailFragmentEventHandler" />
 
         <variable
-            name="downloadJobItem"
-            type="com.ustadmobile.lib.db.entities.DownloadJobItem" />
+            name="contentJobItemStatus"
+            type="Integer" />
 
         <variable
             name="locallyAvailable"
+            type="boolean" />
+
+        <variable
+            name="canDownload"
+            type="boolean" />
+
+        <variable
+            name="hasContentToOpenOrDelete"
+            type="boolean" />
+
+        <variable
+            name="canUpdate"
             type="boolean" />
 
     </data>
@@ -235,9 +246,10 @@
                     android:id="@+id/entryDownloadOpenBtn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:enabled="@{canDownload || hasContentToOpenOrDelete}"
                     android:onClick="@{()-> fragmentEventHandler.handleOnClickOpenDownloadButton()}"
                     android:padding="@dimen/dimen_16dp"
-                    android:text="@{DownloadJobExtKt.isStatusCompletedSuccessfully(downloadJobItem) ?  @string/open : @string/download}"
+                    android:text="@{hasContentToOpenOrDelete ? @string/open : @string/download}"
                     android:textStyle="bold" />
 
                 <com.ustadmobile.port.android.view.DownloadProgressView
@@ -314,7 +326,7 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/entry_detail_delete_button"
-                    android:visibility="@{DownloadJobExtKt.isStatusCompletedSuccessfully(downloadJobItem) ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{hasContentToOpenOrDelete ? View.VISIBLE : View.GONE}"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -338,7 +350,7 @@
                     android:layout_weight="1"
                     android:maxWidth="128dp"
                     android:onClick="@{()-> fragmentEventHandler.handleOnClickManageDownloadButton()}"
-                    android:visibility="@{DownloadJobExtKt.isStatusQueuedOrDownloading(downloadJobItem) ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{contentJobItemStatus == ContentJobItem.STATUS_RUNNING ? View.VISIBLE : View.GONE}"
                     android:text="@string/manage_download"/>
 
             </androidx.appcompat.widget.LinearLayoutCompat>

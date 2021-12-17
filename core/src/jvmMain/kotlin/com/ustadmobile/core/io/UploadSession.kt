@@ -4,7 +4,7 @@ import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.readAndSaveToDir
-import com.ustadmobile.core.network.containerfetcher.ContainerFetcherJobOkHttp
+import com.ustadmobile.core.network.containerfetcher.ContainerFetcherOkHttp
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.base64EncodedToHexString
 import com.ustadmobile.core.util.ext.distinctMds5sSorted
@@ -95,9 +95,9 @@ class UploadSession(val sessionUuid: String,
         md5sExpected = entriesRequired.distinctMds5sSorted()
 
         firstFile = File(uploadWorkDir,
-                "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherJobOkHttp.SUFFIX_PART}")
+                "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherOkHttp.SUFFIX_PART}")
         firstFileHeader = File(uploadWorkDir,
-                "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherJobOkHttp.SUFFIX_HEADER}")
+                "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherOkHttp.SUFFIX_HEADER}")
 
         startFromByte = if(firstFile.exists() && firstFileHeader.exists())
             firstFile.length() + firstFileHeader.length()
@@ -109,9 +109,10 @@ class UploadSession(val sessionUuid: String,
         readJob = GlobalScope.launch(Dispatchers.IO) {
             var concatIn: ConcatenatedInputStream2? = null
             try {
+                //TODO: this call to readAndSaveToDir must be updated as it no longer links entries etc.
                 concatIn = ConcatenatedInputStream2(pipeIn)
                 concatIn.readAndSaveToDir(containerDir, uploadWorkDir, db, AtomicLong(0L),
-                        containerEntryPaths, md5sExpected.toMutableList(), "UploadSession")
+                    md5sExpected.toMutableList(), "UploadSession")
             }catch(e: Exception) {
                 Napier.e("UploadSession;Exception reading, closing pipeOut to ")
                 pipeOut.close()
@@ -148,6 +149,8 @@ class UploadSession(val sessionUuid: String,
         pipeOut.close()
         runBlocking {
             readJob.join()
+            db.linkExistingContainerEntries(containerEntryPaths.first().ceContainerUid,
+                entriesRequired)
         }
 
         uploadWorkDir.takeIf { it.listFiles().isEmpty() }?.delete()

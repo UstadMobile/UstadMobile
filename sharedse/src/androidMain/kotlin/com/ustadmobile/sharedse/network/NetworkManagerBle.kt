@@ -23,9 +23,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.net.ConnectivityManagerCompat
 import com.ustadmobile.core.impl.UMAndroidUtil.normalizeAndroidWifiSsid
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.networkmanager.DownloadNotificationService
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
-import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.AsyncServiceManager
@@ -507,21 +505,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
         super.onCreate()
     }
 
-    override fun onDownloadJobItemStarted(downloadJobItem: DownloadJobItem) {
-        super.onDownloadJobItemStarted(downloadJobItem)
-
-        val prepareJobIntent = Intent(mContext, DownloadNotificationService::class.java)
-        prepareJobIntent.action = DownloadNotificationService.ACTION_DOWNLOADJOBITEM_STARTED
-        prepareJobIntent.putExtra(DownloadNotificationService.EXTRA_DOWNLOADJOBITEMUID,
-                downloadJobItem.djiUid)
-        prepareJobIntent.putExtra(DownloadNotificationService.EXTRA_DOWNLOADJOBUID,
-                downloadJobItem.djiDjUid)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            mContext.startForegroundService(prepareJobIntent)
-        } else {
-            mContext.startService(prepareJobIntent)
-        }
-    }
 
     override fun responseStarted(session: NanoHTTPD.IHTTPSession, response: NanoHTTPD.Response) {
         if (session.remoteIpAddress != null && session.remoteIpAddress.startsWith("192.168.49")) {

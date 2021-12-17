@@ -6,7 +6,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
-import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
@@ -50,8 +49,6 @@ class ContentEntryDetailOverviewPresenterTest {
 
     private val defaultTimeout = 3000L
 
-    private lateinit var containerManager: ContainerDownloadManager
-
     private var presenterArgs: Map<String, String>? = null
 
     private lateinit var localAvailabilityManager: LocalAvailabilityManager
@@ -61,7 +58,6 @@ class ContentEntryDetailOverviewPresenterTest {
     @Before
     fun setup() {
         mockView = mock { }
-        containerManager = spy{}
         mockLifecycleOwner = mock {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }

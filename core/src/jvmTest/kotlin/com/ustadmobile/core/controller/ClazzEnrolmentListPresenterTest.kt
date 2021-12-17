@@ -5,6 +5,7 @@ import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
@@ -18,8 +19,7 @@ import com.ustadmobile.lib.db.entities.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.kodein.di.DI
-import org.kodein.di.instance
+import org.kodein.di.*
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -46,6 +46,8 @@ class ClazzEnrolmentListPresenterTest {
 
     private lateinit var di: DI
 
+    private lateinit var mockNavController: UstadNavController
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -53,8 +55,11 @@ class ClazzEnrolmentListPresenterTest {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
 
+        mockNavController = mock()
+
         di = DI {
             import(ustadTestRule.diModule)
+            bind<UstadNavController>(overrides = true) with singleton { mockNavController }
         }
         val repo: UmAppDatabase by di.activeRepoInstance()
         context = Any()
@@ -100,7 +105,6 @@ class ClazzEnrolmentListPresenterTest {
     fun givenPresenterCreatedInBrowseMode_whenOnClickEntryCalled_thenShouldGoToEditView() {
 
         val repo: UmAppDatabase by di.activeRepoInstance()
-        val systemImpl: UstadMobileSystemImpl by di.instance()
         val testEntity = ClazzEnrolmentWithLeavingReason().apply {
             //set variables here
             clazzEnrolmentUid = repo.clazzEnrolmentDao.insert(this)
@@ -116,8 +120,10 @@ class ClazzEnrolmentListPresenterTest {
 
         presenter.handleClickClazzEnrolment(testEntity)
 
-        verify(systemImpl, timeout(5000)).go(eq(ClazzEnrolmentEditView.VIEW_NAME),
-              any(), any())
+        verify(mockNavController, timeout(5000)).navigate(
+            eq(ClazzEnrolmentEditView.VIEW_NAME),
+            any(), any()
+        )
 
     }
 
