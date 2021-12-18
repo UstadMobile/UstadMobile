@@ -107,7 +107,7 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
                         ContentJobItem().apply {
                             cjiJobUid = contentJobItem.cjiJobUid
                             sourceUri = hrefUrl.toURI().toString()
-                            cjiItemTotal = sourceUri?.let { DoorUri.parse(it).getSize(context, di)  } ?: 0L
+                            cjiItemTotal = 0
                             cjiPluginId = PLUGIN_ID
                             cjiContentEntryUid = 0
                             cjiIsLeaf = false

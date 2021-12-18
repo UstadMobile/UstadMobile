@@ -19,8 +19,6 @@ object DiTag {
 
     const val TAG_PRESENTER_COROUTINE_SCOPE = 14
 
-    const val TAG_TORRENT_DIR = 15
-
     const val XPP_FACTORY_NSAWARE = 1
 
     const val XPP_FACTORY_NSUNAWARE = 0

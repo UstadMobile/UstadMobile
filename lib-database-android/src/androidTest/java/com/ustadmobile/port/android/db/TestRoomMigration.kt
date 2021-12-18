@@ -543,6 +543,17 @@ class TestRoomMigration {
     }
 
     @Test
+    fun migrate83to84() {
+        helper.createDatabase(TEST_DB, 83).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 84, true,
+            UmAppDatabase.MIGRATION_83_84.asRoomMigration())
+    }
+
+
+    @Test
     fun migrate84to85() {
         helper.createDatabase(TEST_DB, 84).apply {
             close()
@@ -569,6 +580,26 @@ class TestRoomMigration {
 
         helper.runMigrationsAndValidate(TEST_DB, 87, true,
                 UmAppDatabase.MIGRATION_86_87.asRoomMigration())
+    }
+
+    @Test
+    fun migrate87to88(){
+        helper.createDatabase(TEST_DB, 87).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 88, true,
+                UmAppDatabase.MIGRATION_87_88.asRoomMigration())
+    }
+
+    @Test
+    fun migrate88to89(){
+        helper.createDatabase(TEST_DB, 88).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 89, true,
+            UmAppDatabase.MIGRATION_88_89.asRoomMigration())
     }
 
     companion object {

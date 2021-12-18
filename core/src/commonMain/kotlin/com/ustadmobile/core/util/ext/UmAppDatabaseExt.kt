@@ -489,6 +489,30 @@ internal val UmAppDatabase.maxQueryParamListSize: Int
 
 data class ContainerEntryWithMd5Partition(val entriesWithMatchingFile: List<ContainerEntryWithContainerEntryFile>,
                                           val entriesWithoutMatchingFile: List<ContainerEntryWithMd5>)
+
+data class ContainerEntryPartition(
+    val entriesWithMatchingFile: List<ContainerEntryWithMd5>,
+    val entriesWithoutMatchingFile: List<ContainerEntryWithMd5>,
+    val existingFiles: List<ContainerEntryFile>
+)
+
+/**
+ * Partition a list of containerentrywithmd5 into a list of those md5s that we already have
+ * and those that we don't have yet.
+ */
+suspend fun UmAppDatabase.partitionContainerEntriesWithMd5(
+    containerEntryFiles: List<ContainerEntryWithMd5>
+): ContainerEntryPartition {
+    val existingFiles = containerEntryFileDao.findEntriesByMd5SumsSafeAsync(containerEntryFiles
+        .mapNotNull { it.cefMd5 }, maxQueryParamListSize)
+    val existingMd5s = existingFiles.mapNotNull { it.cefMd5 }.toSet()
+
+    val (entriesWithFile, entriesNeedDownloaded) = containerEntryFiles
+        .partition { it.cefMd5 in existingMd5s }
+
+    return ContainerEntryPartition(entriesWithFile, entriesNeedDownloaded, existingFiles)
+}
+
 /**
  * Given a list of ContainerEntryWithMd5 (e.g. the container entries that are required for a
  * container and the md5 sum of the contents that each should be linked with), link each
@@ -501,15 +525,13 @@ data class ContainerEntryWithMd5Partition(val entriesWithMatchingFile: List<Cont
  *
  * @return a pair of
  */
-suspend fun UmAppDatabase.linkExistingContainerEntries(containerUid: Long,
-                                                       containerEntryFiles: List<ContainerEntryWithMd5>): ContainerEntryWithMd5Partition {
+suspend fun UmAppDatabase.linkExistingContainerEntries(
+    containerUid: Long,
+    containerEntryFiles: List<ContainerEntryWithMd5>
+): ContainerEntryWithMd5Partition {
 
-    val existingFiles = containerEntryFileDao.findEntriesByMd5SumsSafeAsync(containerEntryFiles
-            .mapNotNull { it.cefMd5 }, maxQueryParamListSize)
-    val existingMd5s = existingFiles.mapNotNull { it.cefMd5 }.toSet()
-
-    val (entriesWithFile, entriesNeedDownloaded) = containerEntryFiles
-            .partition { it.cefMd5 in existingMd5s }
+    val (entriesWithFile, entriesNeedDownloaded, existingFiles) = partitionContainerEntriesWithMd5(
+            containerEntryFiles)
 
     val alreadyLinkedEntries = containerEntryDao.findByContainerAsync(containerUid)
     val entriesToLink = entriesWithFile

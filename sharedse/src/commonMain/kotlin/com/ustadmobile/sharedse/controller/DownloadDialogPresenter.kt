@@ -1,8 +1,10 @@
 package com.ustadmobile.sharedse.controller
 
-import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.catalog.contenttype.ContentEntryBranchDownloadPlugin.Companion.CONTENT_ENTRY_BRANCH_DOWNLOAD_PLUGIN_ID
 import com.ustadmobile.core.contentjob.ContentJobManager
+import com.ustadmobile.core.contentjob.ContentPluginIds.CONTAINER_DOWNLOAD_PLUGIN
+import com.ustadmobile.core.contentjob.ContentPluginIds.DELETE_CONTENT_ENTRY_PLUGIN
 import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
@@ -13,10 +15,12 @@ import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.toDeepLink
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.door.*
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.sharedse.view.DownloadDialogView
+import io.github.aakira.napier.Napier
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import org.kodein.di.DI
@@ -213,9 +217,13 @@ class DownloadDialogPresenter(
 
         ContentJobItem().apply {
             cjiJobUid = job.cjUid
-            sourceUri = "" // TODO entry ?
+            sourceUri = entry?.toDeepLink(accountManager.activeEndpoint)
             cjiItemTotal = container?.fileSize ?: 0
-            cjiPluginId = 10 // TODO containerTorrentDownload plugin ref in core commonMain
+            cjiPluginId = if(entry?.leaf == true) {
+                CONTAINER_DOWNLOAD_PLUGIN
+            } else {
+                CONTENT_ENTRY_BRANCH_DOWNLOAD_PLUGIN_ID
+            }
             cjiContentEntryUid = contentEntryUid
             cjiContainerUid = container?.containerUid ?: 0
             cjiIsLeaf = entry?.leaf ?: false
@@ -255,7 +263,7 @@ class DownloadDialogPresenter(
         ContentJobItem().apply {
             cjiJobUid = job.cjUid
             sourceUri = "" // TODO entry
-            cjiPluginId = 14 // points to deleteContainerPlugin
+            cjiPluginId = DELETE_CONTENT_ENTRY_PLUGIN
             cjiContentEntryUid = entry?.contentEntryUid ?: 0
             cjiIsLeaf = true
             cjiItemTotal = 100

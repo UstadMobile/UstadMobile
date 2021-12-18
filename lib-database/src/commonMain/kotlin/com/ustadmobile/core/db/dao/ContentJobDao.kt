@@ -42,14 +42,29 @@ abstract class ContentJobDao {
     """)
     abstract suspend fun updateDestinationDir(cjUid: Long, toUri: String)
 
+
+    fun findMeteredAllowedLiveData(contentJobId: Long, dbType: Int): DoorLiveData<Boolean> {
+        return when {
+            dbType == 1 -> findMeteredAllowedLiveDataSqlite(contentJobId) //SQLite
+            else -> findMeteredAllowedLiveDataPostgres(contentJobId)
+        }
+    }
+
     @Query("""
         SELECT COALESCE((SELECT ContentJob.cjIsMeteredAllowed
           FROM ContentJob
          WHERE cjUid = :contentJobId
-         LIMIT 1),0)
+         LIMIT 1), 0)
     """)
-    abstract fun findMeteredAllowedLiveData(contentJobId: Long): DoorLiveData<Boolean>
+    abstract fun findMeteredAllowedLiveDataSqlite(contentJobId: Long): DoorLiveData<Boolean>
 
+    @Query("""
+        SELECT COALESCE((SELECT ContentJob.cjIsMeteredAllowed
+          FROM ContentJob
+         WHERE cjUid = :contentJobId
+         LIMIT 1), FALSE)   /* nothing */
+    """)
+    abstract fun findMeteredAllowedLiveDataPostgres(contentJobId: Long): DoorLiveData<Boolean>
 
     @Query("""
         UPDATE ContentJob 

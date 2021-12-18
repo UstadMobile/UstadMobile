@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 88,
-    "identityHash": "8f938b029df5a40c0b48dbda3da0c224",
+    "identityHash": "df85663d33c84aae8f4cfa8fb5669f39",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -995,7 +995,7 @@
       },
       {
         "tableName": "Person",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personOrgId` TEXT, `personGroupUid` INTEGER NOT NULL, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL, `personLct` INTEGER NOT NULL, `personCountry` TEXT, `personType` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personOrgId` TEXT, `personGroupUid` INTEGER NOT NULL, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL, `personLct` INTEGER NOT NULL, `personCountry` TEXT)",
         "fields": [
           {
             "fieldPath": "personUid",
@@ -1134,12 +1134,6 @@
             "columnName": "personCountry",
             "affinity": "TEXT",
             "notNull": false
-          },
-          {
-            "fieldPath": "personType",
-            "columnName": "personType",
-            "affinity": "INTEGER",
-            "notNull": true
           }
         ],
         "primaryKey": {
@@ -3923,6 +3917,74 @@
         "foreignKeys": []
       },
       {
+        "tableName": "SyncResult",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`srUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tableId` INTEGER NOT NULL, `status` INTEGER NOT NULL, `localCsn` INTEGER NOT NULL, `remoteCsn` INTEGER NOT NULL, `syncType` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `sent` INTEGER NOT NULL, `received` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "srUid",
+            "columnName": "srUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tableId",
+            "columnName": "tableId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "localCsn",
+            "columnName": "localCsn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remoteCsn",
+            "columnName": "remoteCsn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncType",
+            "columnName": "syncType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sent",
+            "columnName": "sent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "received",
+            "columnName": "received",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "srUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "School",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolName` TEXT, `schoolDesc` TEXT, `schoolAddress` TEXT, `schoolActive` INTEGER NOT NULL, `schoolPhoneNumber` TEXT, `schoolGender` INTEGER NOT NULL, `schoolHolidayCalendarUid` INTEGER NOT NULL, `schoolFeatures` INTEGER NOT NULL, `schoolLocationLong` REAL NOT NULL, `schoolLocationLatt` REAL NOT NULL, `schoolEmailAddress` TEXT, `schoolTeachersPersonGroupUid` INTEGER NOT NULL, `schoolStudentsPersonGroupUid` INTEGER NOT NULL, `schoolPendingStudentsPersonGroupUid` INTEGER NOT NULL, `schoolCode` TEXT, `schoolMasterChangeSeqNum` INTEGER NOT NULL, `schoolLocalChangeSeqNum` INTEGER NOT NULL, `schoolLastChangedBy` INTEGER NOT NULL, `schoolLct` INTEGER NOT NULL, `schoolTimeZone` TEXT)",
         "fields": [
@@ -4439,7 +4501,7 @@
       },
       {
         "tableName": "Site",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`siteUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sitePcsn` INTEGER NOT NULL, `siteLcsn` INTEGER NOT NULL, `siteLcb` INTEGER NOT NULL, `siteLct` INTEGER NOT NULL, `siteName` TEXT, `guestLogin` INTEGER NOT NULL, `registrationAllowed` INTEGER NOT NULL, `authSalt` TEXT, `torrentAnnounceUrl` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`siteUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sitePcsn` INTEGER NOT NULL, `siteLcsn` INTEGER NOT NULL, `siteLcb` INTEGER NOT NULL, `siteLct` INTEGER NOT NULL, `siteName` TEXT, `guestLogin` INTEGER NOT NULL, `registrationAllowed` INTEGER NOT NULL, `authSalt` TEXT)",
         "fields": [
           {
             "fieldPath": "siteUid",
@@ -4492,12 +4554,6 @@
           {
             "fieldPath": "authSalt",
             "columnName": "authSalt",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "torrentAnnounceUrl",
-            "columnName": "torrentAnnounceUrl",
             "affinity": "TEXT",
             "notNull": false
           }
@@ -5993,9 +6049,47 @@
         "foreignKeys": []
       },
       {
-        "tableName": "ChangeLog",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`chTableId` INTEGER NOT NULL, `chEntityPk` INTEGER NOT NULL, `chType` INTEGER NOT NULL, PRIMARY KEY(`chTableId`, `chEntityPk`))",
+        "tableName": "TableSyncStatus",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`tsTableId` INTEGER NOT NULL, `tsLastChanged` INTEGER NOT NULL, `tsLastSynced` INTEGER NOT NULL, PRIMARY KEY(`tsTableId`))",
         "fields": [
+          {
+            "fieldPath": "tsTableId",
+            "columnName": "tsTableId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tsLastChanged",
+            "columnName": "tsLastChanged",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tsLastSynced",
+            "columnName": "tsLastSynced",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "tsTableId"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ChangeLog",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`changeLogUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `chTableId` INTEGER NOT NULL, `chEntityPk` INTEGER NOT NULL, `dispatched` INTEGER NOT NULL, `chTime` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "changeLogUid",
+            "columnName": "changeLogUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
           {
             "fieldPath": "chTableId",
             "columnName": "chTableId",
@@ -6009,18 +6103,23 @@
             "notNull": true
           },
           {
-            "fieldPath": "chType",
-            "columnName": "chType",
+            "fieldPath": "dispatched",
+            "columnName": "dispatched",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chTime",
+            "columnName": "chTime",
             "affinity": "INTEGER",
             "notNull": true
           }
         ],
         "primaryKey": {
           "columnNames": [
-            "chTableId",
-            "chEntityPk"
+            "changeLogUid"
           ],
-          "autoGenerate": false
+          "autoGenerate": true
         },
         "indices": [],
         "foreignKeys": []
@@ -6065,7 +6164,7 @@
       },
       {
         "tableName": "DoorNode",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`nodeId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `auth` TEXT, `rel` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`nodeId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `auth` TEXT)",
         "fields": [
           {
             "fieldPath": "nodeId",
@@ -6078,12 +6177,6 @@
             "columnName": "auth",
             "affinity": "TEXT",
             "notNull": false
-          },
-          {
-            "fieldPath": "rel",
-            "columnName": "rel",
-            "affinity": "INTEGER",
-            "notNull": true
           }
         ],
         "primaryKey": {
@@ -6096,50 +6189,4190 @@
         "foreignKeys": []
       },
       {
-        "tableName": "UserSessionTrkr",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`usForeignKey` INTEGER NOT NULL, `usVersionId` INTEGER NOT NULL, `usDestination` INTEGER NOT NULL, `usTrkrProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`usForeignKey`, `usVersionId`))",
+        "tableName": "ClazzLog_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
         "fields": [
           {
-            "fieldPath": "usForeignKey",
-            "columnName": "usForeignKey",
+            "fieldPath": "pk",
+            "columnName": "pk",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "usVersionId",
-            "columnName": "usVersionId",
+            "fieldPath": "epk",
+            "columnName": "epk",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "usDestination",
-            "columnName": "usDestination",
+            "fieldPath": "clientId",
+            "columnName": "clientId",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "usTrkrProcessed",
-            "columnName": "usTrkrProcessed",
+            "fieldPath": "csn",
+            "columnName": "csn",
             "affinity": "INTEGER",
-            "notNull": true,
-            "defaultValue": "0"
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
           "columnNames": [
-            "usForeignKey",
-            "usVersionId"
+            "pk"
           ],
-          "autoGenerate": false
+          "autoGenerate": true
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_ClazzLog_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzLog_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ClazzLog_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzLog_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ClazzLogAttendanceRecord_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ClazzLogAttendanceRecord_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzLogAttendanceRecord_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ClazzLogAttendanceRecord_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzLogAttendanceRecord_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Schedule_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_Schedule_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Schedule_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_Schedule_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Schedule_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "DateRange_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_DateRange_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_DateRange_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_DateRange_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_DateRange_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "HolidayCalendar_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_HolidayCalendar_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_HolidayCalendar_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_HolidayCalendar_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_HolidayCalendar_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Holiday_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_Holiday_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Holiday_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_Holiday_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Holiday_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ScheduledCheck_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ScheduledCheck_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ScheduledCheck_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ScheduledCheck_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ScheduledCheck_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "AuditLog_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_AuditLog_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_AuditLog_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_AuditLog_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_AuditLog_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "CustomField_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_CustomField_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CustomField_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_CustomField_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_CustomField_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "CustomFieldValue_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_CustomFieldValue_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CustomFieldValue_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_CustomFieldValue_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_CustomFieldValue_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "CustomFieldValueOption_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_CustomFieldValueOption_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CustomFieldValueOption_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_CustomFieldValueOption_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_CustomFieldValueOption_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Person_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_Person_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Person_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_Person_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Person_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Clazz_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_Clazz_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Clazz_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_Clazz_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Clazz_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ClazzEnrolment_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ClazzEnrolment_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzEnrolment_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ClazzEnrolment_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzEnrolment_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "LeavingReason_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_LeavingReason_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_LeavingReason_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_LeavingReason_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_LeavingReason_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "PersonCustomFieldValue_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_PersonCustomFieldValue_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonCustomFieldValue_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_PersonCustomFieldValue_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_PersonCustomFieldValue_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ContentEntry_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ContentEntry_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntry_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ContentEntry_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ContentEntry_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ContentEntryContentCategoryJoin_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ContentEntryContentCategoryJoin_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryContentCategoryJoin_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ContentEntryContentCategoryJoin_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ContentEntryContentCategoryJoin_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ContentEntryParentChildJoin_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ContentEntryParentChildJoin_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryParentChildJoin_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ContentEntryParentChildJoin_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ContentEntryParentChildJoin_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ContentEntryRelatedEntryJoin_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ContentEntryRelatedEntryJoin_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryRelatedEntryJoin_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ContentEntryRelatedEntryJoin_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ContentEntryRelatedEntryJoin_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ContentCategorySchema_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ContentCategorySchema_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentCategorySchema_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ContentCategorySchema_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ContentCategorySchema_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ContentCategory_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ContentCategory_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentCategory_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ContentCategory_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ContentCategory_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Language_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_Language_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Language_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_Language_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Language_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "LanguageVariant_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_LanguageVariant_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_LanguageVariant_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_LanguageVariant_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_LanguageVariant_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Role_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_Role_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Role_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_Role_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Role_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "EntityRole_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_EntityRole_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_EntityRole_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_EntityRole_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_EntityRole_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "PersonGroup_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_PersonGroup_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonGroup_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_PersonGroup_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_PersonGroup_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "PersonGroupMember_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_PersonGroupMember_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonGroupMember_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_PersonGroupMember_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_PersonGroupMember_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "PersonPicture_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_PersonPicture_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonPicture_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_PersonPicture_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_PersonPicture_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Container_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_Container_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Container_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_Container_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Container_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "VerbEntity_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_VerbEntity_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_VerbEntity_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_VerbEntity_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_VerbEntity_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "XObjectEntity_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_XObjectEntity_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_XObjectEntity_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_XObjectEntity_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_XObjectEntity_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "StatementEntity_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_StatementEntity_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_StatementEntity_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_StatementEntity_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_StatementEntity_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ContextXObjectStatementJoin_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ContextXObjectStatementJoin_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContextXObjectStatementJoin_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ContextXObjectStatementJoin_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ContextXObjectStatementJoin_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "AgentEntity_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_AgentEntity_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_AgentEntity_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_AgentEntity_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_AgentEntity_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "StateEntity_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_StateEntity_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_StateEntity_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_StateEntity_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_StateEntity_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "StateContentEntity_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_StateContentEntity_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_StateContentEntity_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_StateContentEntity_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_StateContentEntity_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "XLangMapEntry_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_XLangMapEntry_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_XLangMapEntry_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_XLangMapEntry_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_XLangMapEntry_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "School_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_School_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_School_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_School_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_School_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "SchoolMember_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_SchoolMember_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_SchoolMember_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_SchoolMember_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_SchoolMember_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Comments_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_Comments_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Comments_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_Comments_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Comments_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Report_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_Report_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Report_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_Report_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Report_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Site_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_Site_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Site_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_Site_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Site_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "LearnerGroup_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_LearnerGroup_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_LearnerGroup_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_LearnerGroup_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_LearnerGroup_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "LearnerGroupMember_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_LearnerGroupMember_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_LearnerGroupMember_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_LearnerGroupMember_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_LearnerGroupMember_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "GroupLearningSession_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_GroupLearningSession_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_GroupLearningSession_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_GroupLearningSession_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_GroupLearningSession_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "SiteTerms_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_SiteTerms_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_SiteTerms_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_SiteTerms_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_SiteTerms_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ClazzContentJoin_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ClazzContentJoin_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzContentJoin_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ClazzContentJoin_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzContentJoin_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "PersonParentJoin_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_PersonParentJoin_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonParentJoin_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_PersonParentJoin_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_PersonParentJoin_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ScopedGrant_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ScopedGrant_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ScopedGrant_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ScopedGrant_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ScopedGrant_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ErrorReport_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ErrorReport_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ErrorReport_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ErrorReport_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ErrorReport_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ClazzAssignment_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ClazzAssignment_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzAssignment_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ClazzAssignment_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzAssignment_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ClazzAssignmentContentJoin_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ClazzAssignmentContentJoin_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzAssignmentContentJoin_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ClazzAssignmentContentJoin_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzAssignmentContentJoin_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "PersonAuth2_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_PersonAuth2_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonAuth2_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_PersonAuth2_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_PersonAuth2_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "UserSession_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_UserSession_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_UserSession_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_UserSession_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_UserSession_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
         "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8f938b029df5a40c0b48dbda3da0c224')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'df85663d33c84aae8f4cfa8fb5669f39')"
     ]
   }
 }

@@ -16,6 +16,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.rest.ext.dbModeToEndpoint
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.*
@@ -76,7 +77,7 @@ fun Route.ContentEntryLinkImporter() {
                 val repo: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_REPO)
                 val containerFolder: File by closestDI().on(call).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
                 val entryFromDb = db.contentEntryDao.findByUid(contentEntry.contentEntryUid)
-                val endpoint = Endpoint(call.request.header("Host") ?: "localhost")
+                val endpoint = call.application.environment.config.dbModeToEndpoint(call = call)
                 if (entryFromDb == null) {
                     Napier.i("not synced so using contentEntry from db")
                     repo.contentEntryDao.insertWithReplace(contentEntry)

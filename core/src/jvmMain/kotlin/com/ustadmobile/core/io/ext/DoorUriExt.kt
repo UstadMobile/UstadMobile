@@ -57,6 +57,10 @@ actual suspend fun DoorUri.getSize(context: Any, di: DI): Long {
             }
         }
     }else{
-        toFile().length()
+        try {
+            toFile().length()
+        }catch (e: Exception){
+            -1
+        }
     }
 }

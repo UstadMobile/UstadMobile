@@ -2,7 +2,7 @@ package com.ustadmobile.core.contentjob
 
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.lib.db.entities.ContainerUidAndMimeType
+import kotlinx.coroutines.CancellationException
 
 class ContentPluginManager(val pluginList: List<ContentPlugin>) {
 
@@ -32,6 +32,9 @@ class ContentPluginManager(val pluginList: List<ContentPlugin>) {
             try {
                 return it.extractMetadata(uri, processContext) ?: return@forEach
             }catch (e: Exception){
+                if(e is CancellationException){
+                    throw e
+                }
                 e.printStackTrace()
             }
         }

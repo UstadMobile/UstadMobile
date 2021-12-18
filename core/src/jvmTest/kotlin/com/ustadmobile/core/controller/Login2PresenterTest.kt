@@ -66,7 +66,7 @@ class Login2PresenterTest {
         }
 
         impl = mock {
-            on {getAppConfigDefaultFirstDest(any())}.thenReturn(ContentEntryListTabsView.VIEW_NAME)
+            on {getAppConfigDefaultFirstDest(any())}.thenReturn(ContentEntryList2View.VIEW_NAME)
         }
 
         accountManager = mock{
@@ -178,7 +178,7 @@ class Login2PresenterTest {
         val presenter = Login2Presenter(context, createParams(guestConnection = true), view, di)
         presenter.onCreate(mapOf())
         presenter.handleConnectAsGuest()
-        verify(impl).go(eq(ContentEntryListTabsView.VIEW_NAME), any(), any(), any())
+        verify(impl).go(eq(ContentEntryList2View.VIEW_NAME), any(), any(), any())
     }
 
     @Test

@@ -6,39 +6,39 @@ import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
-import com.ustadmobile.core.io.ext.writeContainerTorrentFile
 import com.ustadmobile.core.io.ext.isRemote
-import com.ustadmobile.core.torrent.UstadTorrentManager
+import com.ustadmobile.core.network.NetworkProgressListenerAdapter
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ShrinkUtils
 import com.ustadmobile.core.util.ext.fitWithin
+import com.ustadmobile.core.util.ext.updateTotalFromContainerSize
+import com.ustadmobile.core.util.ext.updateTotalFromLocalUriIfNeeded
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.*
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import org.kodein.di.DI
-import org.kodein.di.instance
-import org.kodein.di.on
-import java.io.File
-import java.lang.IllegalArgumentException
-import com.ustadmobile.door.ext.toDoorUri
 import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
+import org.kodein.di.DI
 import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
+import java.io.File
 
 class VideoTypePluginJvm(
         private var context: Any,
         private val endpoint: Endpoint,
         override val di: DI,
-        private val uploader: ContentPluginUploader = DefaultContentPluginUploader()
+        private val uploader: ContentPluginUploader = DefaultContentPluginUploader(di)
 ): VideoTypePlugin() {
 
     private val VIDEO_JVM = "VideoPluginJVM"
@@ -50,10 +50,6 @@ class VideoTypePluginJvm(
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
     val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
-
-    val torrentDir: File by di.on(endpoint).instance(tag = DiTag.TAG_TORRENT_DIR)
-
-    private val ustadTorrentManager: UstadTorrentManager by di.on(endpoint).instance()
 
     override suspend fun extractMetadata(
         uri: DoorUri,
@@ -73,18 +69,17 @@ class VideoTypePluginJvm(
 
             val uri = contentJobItem.sourceUri ?: throw IllegalStateException("missing uri")
             val videoUri = DoorUri.parse(uri)
-            val videoFile = process.getLocalOrCachedUri().toFile()
+            val localVideoUri = process.getLocalOrCachedUri()
+            val videoFile = localVideoUri.toFile()
             var newVideo = File(videoFile.parentFile, "new${videoFile.nameWithoutExtension}.mp4")
             val videoIsProcessed = contentJobItem.cjiContainerUid != 0L
             val contentNeedUpload = !videoUri.isRemote()
+            contentJobItem.updateTotalFromLocalUriIfNeeded(localVideoUri, contentNeedUpload,
+                progress, context, di)
 
             try {
 
                 if(!videoIsProcessed) {
-
-                    val trackerUrl = db.siteDao.getSiteAsync()?.torrentAnnounceUrl
-                            ?: throw IllegalArgumentException("missing tracker url")
-
 
                     val compressVideo: Boolean = process.params["compress"]?.toBoolean() ?: false
 
@@ -116,19 +111,12 @@ class VideoTypePluginJvm(
                             di,
                             ContainerAddOptions(containerFolderUri))
 
-                    repo.writeContainerTorrentFile(
-                            container.containerUid,
-                            DoorUri.parse(torrentDir.toURI().toString()),
-                            trackerUrl, containerFolderUri
-                    )
-
-                    val containerUidFolder = File(containerFolderUri.toFile(), container.containerUid.toString())
-                    containerUidFolder.mkdirs()
-                    ustadTorrentManager.addTorrent(container.containerUid, containerUidFolder.path)
-
                     // after container has files and torrent added, update contentJob
                     contentJobItem.cjiContainerUid = container.containerUid
-                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid, container.containerUid)
+                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                        container.containerUid)
+                    contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
+                        progress)
 
                     contentJobItem.cjiConnectivityNeeded = true
                     db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
@@ -140,11 +128,11 @@ class VideoTypePluginJvm(
                     }
                 }
 
-                val torrentFileBytes = File(torrentDir, "${contentJobItem.cjiContainerUid}.torrent").readBytes()
+
                 if(contentNeedUpload) {
-                    uploader.upload(
-                            contentJobItem, progress, httpClient, torrentFileBytes,
-                            endpoint)
+                    uploader.upload(contentJobItem,
+                        NetworkProgressListenerAdapter(progress, contentJobItem), httpClient,
+                        endpoint)
                 }
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)

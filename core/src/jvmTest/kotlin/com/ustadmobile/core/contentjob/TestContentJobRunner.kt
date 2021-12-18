@@ -22,6 +22,8 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.junit.Assert
 import org.mockito.kotlin.stub
+import java.io.IOException
+import java.lang.IllegalStateException
 
 class TestContentJobRunner {
 
@@ -171,25 +173,92 @@ class TestContentJobRunner {
     fun givenJobCreated_whenJobItemFails_thenShouldRetry() {
         val pluginManager: ContentPluginManager by di.onActiveAccount().instance()
         numTimesToFail = 1
-
-
+        val mockPlugin = mock<ContentPlugin> {
+            onBlocking { processJob(any(), any(), any()) }.thenAnswer {
+                throw RuntimeException("Fail!")
+            }
+        }
+        pluginManager.stub {
+            on { getPluginById(any()) }.thenReturn(mockPlugin)
+        }
 
 
     }
 
     @Test
     fun givenJobCreated_whenJobItemFailsAndExceedsAllowableAttempts_thenShouldFail() {
-        val pluginManager: ContentPluginManager by di.onActiveAccount().instance()
-        val mockPlugin = mock<ContentPlugin> {
-            onBlocking { processJob(any(), any(), any()) }.thenAnswer {
-                throw RuntimeException("Fail!")
+        runBlocking {
+            val maxAttempts = 3
+            db.contentJobDao.insertAsync(ContentJob(cjUid = 2))
+            val jobItems = listOf(ContentJobItem().apply {
+                cjiJobUid = 2
+                cjiConnectivityNeeded = false
+                cjiStatus = JobStatus.QUEUED
+                cjiPluginId = TEST_PLUGIN_ID
+                sourceUri = "dummy:///test_0"
+            })
+            db.contentJobItemDao.insertJobItems(jobItems)
+            val pluginManager: ContentPluginManager by di.onActiveAccount().instance()
+            val mockPlugin = mock<ContentPlugin> {
+                onBlocking { processJob(any(), any(), any()) }.thenAnswer {
+                    throw IOException("Fail!")
+                }
+            }
+
+            pluginManager.stub {
+                on { getPluginById(any()) }.thenReturn(mockPlugin)
+            }
+
+            val runner = ContentJobRunner(2, endpoint, di, maxItemAttempts = maxAttempts)
+            runner.runJob()
+
+
+            val allJobItems = runBlocking { db.contentJobItemDao.findAll() }
+            allJobItems.forEach {
+                Assert.assertEquals("job attempted match count", maxAttempts + 1, it.cjiAttemptCount)
+                Assert.assertEquals("job failed", JobStatus.FAILED, it.cjiRecursiveStatus)
             }
         }
+    }
 
-        pluginManager.stub {
-            on { getPluginById(any()) }.thenReturn(mockPlugin)
+    @Test
+    fun givenJobCreated_whenJobItemFailsWhenExtractMetadataAndExceedsAllowableAttempts_thenShouldFail() {
+        runBlocking {
+            val maxAttempts = 3
+            db.contentJobDao.insertAsync(ContentJob(cjUid = 2))
+            val jobItems = (0 .. 2).map {
+                ContentJobItem().apply {
+                    cjiJobUid = 2
+                    cjiConnectivityNeeded = false
+                    cjiStatus = JobStatus.QUEUED
+                    cjiPluginId = TEST_PLUGIN_ID
+                    sourceUri = "dummy:///test_$it"
+                }
+            }
+            db.contentJobItemDao.insertJobItems(jobItems)
+            val pluginManager: ContentPluginManager by di.onActiveAccount().instance()
+            val mockPlugin = mock<ContentPlugin> {
+                onBlocking {
+                    extractMetadata(any(), any()) }.thenAnswer{
+                    throw IllegalStateException("unexpected error while extracting")
+                }
+            }
+
+            pluginManager.stub {
+                on { getPluginById(any()) }.thenReturn(mockPlugin)
+            }
+
+            val runner = ContentJobRunner(2, endpoint, di, maxItemAttempts = maxAttempts)
+            runner.runJob()
+
+
+
+            val allJobItems = runBlocking { db.contentJobItemDao.findAll() }
+            allJobItems.forEach {
+                Assert.assertEquals("job attempted match count", maxAttempts + 1, it.cjiAttemptCount)
+                Assert.assertEquals("job failed", JobStatus.FAILED, it.cjiRecursiveStatus)
+            }
         }
-
     }
 
     //TODO: test calling extract metadata when needed, getting plugin type when needed

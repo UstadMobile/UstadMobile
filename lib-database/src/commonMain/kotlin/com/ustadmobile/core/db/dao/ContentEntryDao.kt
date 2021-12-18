@@ -1,8 +1,8 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.RepoHttpAccessible
 import com.ustadmobile.door.annotation.Repository
@@ -41,11 +41,39 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("getChildrenByParentUid")
     abstract fun getChildrenByParentUid(parentUid: Long): DoorDataSourceFactory<Int, ContentEntry>
 
-    @Query("SELECT ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
-            "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
-            "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
-    @JsName("getChildrenByParentAsync")
+    @Query("""
+        SELECT ContentEntry.*
+          FROM ContentEntryParentChildJoin
+               JOIN ContentEntry 
+                    ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid
+         WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid
+    """)
     abstract suspend fun getChildrenByParentAsync(parentUid: Long): List<ContentEntry>
+
+    @Query("""
+        SELECT ContentEntry.contentEntryUid AS contentEntryUid, ContentEntry.leaf AS leaf, 
+               COALESCE(Container.containerUid, 0) AS mostRecentContainerUid,
+               COALESCE(Container.fileSize, 0) AS mostRecentContainerSize
+          FROM ContentEntryParentChildJoin
+               JOIN ContentEntry 
+                    ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid
+               LEFT JOIN Container
+                    ON containerUid = 
+                        (SELECT COALESCE((
+                                SELECT Container.containerUid 
+                                  FROM Container
+                                 WHERE Container.containerContentEntryUid = ContentEntry.contentEntryUid
+                              ORDER BY Container.cntLastModified DESC
+                                 LIMIT 1),0))
+         WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid
+         LIMIT :limit
+        OFFSET :offset 
+    """)
+    abstract suspend fun getContentJobItemParamsByParentUid(
+        parentUid: Long,
+        limit: Int,
+        offset: Int
+    ): List<ContentEntryContentJobItemParams>
 
     @Query("SELECT COUNT(*) FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
@@ -100,8 +128,16 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
 
     @Query("SELECT * FROM ContentEntry WHERE contentEntryUid = :entryUid")
-    @JsName("findByUidAsync")
     abstract suspend fun findByUidAsync(entryUid: Long): ContentEntry?
+
+    @Query("""
+        SELECT ContentEntry.*, Language.*
+          FROM ContentEntry
+               LEFT JOIN Language 
+                      ON Language.langUid = ContentEntry.primaryLanguageUid 
+         WHERE ContentEntry.contentEntryUid = :uid              
+    """)
+    abstract suspend fun findByUidWithLanguageAsync(uid: Long): ContentEntryWithLanguage?
 
 
     @Query("SELECT * FROM ContentEntry WHERE contentEntryUid = :entryUid")
@@ -121,8 +157,6 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                WHERE cjiContentEntryUid = :contentEntryUid
                 AND cjiRecursiveStatus >= ${JobStatus.RUNNING_MIN}
                 AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX} LIMIT 1),0) AS Status
-        FROM ContentEntry
-       WHERE contentEntryUid = :contentEntryUid
     """)
     abstract suspend fun isMeteredAllowedForEntry(contentEntryUid: Long): Boolean
 

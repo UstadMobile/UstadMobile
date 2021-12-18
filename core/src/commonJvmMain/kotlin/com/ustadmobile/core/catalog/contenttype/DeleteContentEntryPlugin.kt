@@ -2,10 +2,9 @@ package com.ustadmobile.core.catalog.contenttype
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.*
+import com.ustadmobile.core.contentjob.ContentPluginIds.DELETE_CONTENT_ENTRY_PLUGIN
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.torrent.UstadTorrentManager
-import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
@@ -29,27 +28,14 @@ class DeleteContentEntryPlugin(
     val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
     override val pluginId: Int
-        get() = PLUGIN_ID
+        get() = DELETE_CONTENT_ENTRY_PLUGIN
     override val supportedMimeTypes: List<String>
         get() = listOf()
     override val supportedFileExtensions: List<String>
         get() = listOf()
 
     override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
-        val containerUid = uri.uri.toString().substringAfterLast("/").toLongOrNull() ?: return null
-
-        val containerWithFiles = db.containerEntryDao.findByContainer(containerUid)
-
-        if(containerWithFiles.isEmpty()){
-            return null
-        }
-
-        val container = repo.containerDao.findByUid(containerUid) ?: return null
-
-        val contentEntry = repo.contentEntryDao.findByUid(container.containerUid)
-                ?: throw IllegalArgumentException("no entry found from container")
-
-        return MetadataResult(contentEntry as ContentEntryWithLanguage, PLUGIN_ID)
+        return null
     }
 
     override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
@@ -71,10 +57,5 @@ class DeleteContentEntryPlugin(
         }else{
             ProcessResult(JobStatus.FAILED)
         }
-    }
-
-    companion object {
-
-        const val PLUGIN_ID = 14
     }
 }

@@ -64,7 +64,7 @@ class ContentJobProcessContext(
                 return downloadedTmpUriVal
 
             val downloadDestUri = DoorUri.parse(UMFileUtil.joinPaths(tempDirUri.toString(),
-                    srcUri.toString().substringAfterLast("/")))
+                    "tempFile"))
 
             srcUri.downloadUrlIfRemote(downloadDestUri, di)
             downloadedTmpUri = downloadDestUri

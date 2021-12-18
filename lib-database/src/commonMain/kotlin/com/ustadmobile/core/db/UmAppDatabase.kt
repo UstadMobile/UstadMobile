@@ -8,6 +8,7 @@ import com.ustadmobile.door.migration.*
 import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
+import com.ustadmobile.door.migration.*
 import com.ustadmobile.door.util.DoorSqlGenerator
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -64,7 +65,7 @@ import kotlin.jvm.JvmField
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 88)
+], version = 90)
 @MinReplicationVersion(60)
 abstract class UmAppDatabase : DoorDatabase() {
 
@@ -5181,6 +5182,11 @@ abstract class UmAppDatabase : DoorDatabase() {
             }
         }
 
+        val MIGRATION_83_84 = DoorMigrationStatementList(83, 84) { database ->
+            listOf()
+        }
+
+
         val MIGRATION_84_85 = DoorMigrationStatementList(84, 85){ database ->
             listOf("ALTER TABLE ContentJob ADD COLUMN cjNotificationTitle TEXT",
                     "ALTER TABLE ContentJobItem ADD COLUMN cjiRecursiveStatus INTEGER NOT NULL DEFAULT 0") +
@@ -5206,8 +5212,8 @@ abstract class UmAppDatabase : DoorDatabase() {
                     }else{
                         listOf("ALTER TABLE ContentJobItem ADD COLUMN cjiStartTime BIGINT NOT NULL DEFAULT 0",
                                 "ALTER TABLE ContentJobItem ADD COLUMN cjiFinishTime INTEGER NOT NULL DEFAULT 0",
-                                "ALTER TABLE ContentJob ADD COLUMN cjIsMeteredAllowed BOOL NOT NULL DEFAULT 0",
-                                "ALTER TABLE ContentJobItem ADD COLUMN cjiConnectivityNeeded BOOL NOT NULL DEFAULT 1",
+                                "ALTER TABLE ContentJob ADD COLUMN cjIsMeteredAllowed BOOL NOT NULL DEFAULT FALSE",
+                                "ALTER TABLE ContentJobItem ADD COLUMN cjiConnectivityNeeded BOOL NOT NULL DEFAULT FALSE",
                                 "ALTER TABLE ContentJobItem DROP COLUMN cjiConnectivityAcceptable",
                                 "CREATE INDEX index_ContentJobItem_cjiContentEntryUid_cjiFinishTime ON ContentJobItem (cjiContentEntryUid, cjiFinishTime)"
                         )
@@ -5222,23 +5228,41 @@ abstract class UmAppDatabase : DoorDatabase() {
                     "DROP TABLE IF EXISTS ContentEntryStatus")
         }
 
+        val MIGRATION_87_88 = DoorMigrationStatementList(87, 88) { database ->
+            if (database.dbType() == DoorDbType.SQLITE) {
+                listOf("ALTER TABLE Site RENAME to Site_OLD",
+                        "CREATE TABLE IF NOT EXISTS Site (  sitePcsn  INTEGER  NOT NULL , siteLcsn  INTEGER  NOT NULL , siteLcb  INTEGER  NOT NULL , siteLct  INTEGER  NOT NULL , siteName  TEXT , guestLogin  INTEGER  NOT NULL , registrationAllowed  INTEGER  NOT NULL , authSalt  TEXT , siteUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )",
+                        "INSERT INTO Site (siteUid, sitePcsn, siteLcsn, siteLcb, siteLct, siteName, guestLogin, registrationAllowed, authSalt) SELECT siteUid, sitePcsn, siteLcsn, siteLcb, siteLct, siteName, guestLogin, registrationAllowed, authSalt FROM Site_OLD",
+                        "DROP TABLE Site_OLD"
+                )
+            } else {
+                listOf("ALTER TABLE Site DROP COLUMN IF EXISTS torrentAnnounceUrl")
+            }
+        }
 
-        fun migrationList(nodeId: Long) = listOf<DoorMigration>(
-            MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
-            MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
-            MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
-            MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
-            MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
-            MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
-            MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
-            MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
-            MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67, migrate67to68(nodeId),
-            MIGRATION_68_69, MIGRATION_69_70, MIGRATION_70_71, MIGRATION_71_72,
-            MIGRATION_72_73, MIGRATION_73_74, MIGRATION_74_75, MIGRATION_75_76,
-            MIGRATION_76_77, MIGRATION_77_78, MIGRATION_78_79, MIGRATION_78_79,
-            MIGRATION_79_80, MIGRATION_80_81, MIGRATION_81_82, MIGRATION_82_83,
-                MIGRATION_84_85, MIGRATION_85_86, MIGRATION_86_87
-        )
+        val MIGRATION_88_89 = DoorMigrationStatementList(88, 89) { database ->
+            listOf("ALTER TABLE ContentJobItem ADD COLUMN cjiUploadSessionUid TEXT")
+        }
+
+
+
+fun migrationList(nodeId: Int) = listOf<DoorMigration>(
+    MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
+    MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
+    MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
+    MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
+    MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
+    MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
+    MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
+    MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
+    MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67, migrate67to68(nodeId),
+    MIGRATION_68_69, MIGRATION_69_70, MIGRATION_70_71, MIGRATION_71_72,
+    MIGRATION_72_73, MIGRATION_73_74, MIGRATION_74_75, MIGRATION_75_76,
+    MIGRATION_76_77, MIGRATION_77_78, MIGRATION_78_79, MIGRATION_78_79,
+    MIGRATION_79_80, MIGRATION_80_81, MIGRATION_81_82, MIGRATION_82_83, MIGRATION_83_84,
+    MIGRATION_84_85, MIGRATION_85_86, MIGRATION_86_87, MIGRATION_87_88,
+    MIGRATION_88_89
+)
 
         internal fun migrate67to68(nodeId: Long)= DoorMigrationSync(67, 68) { database ->
             if (database.dbType() == DoorDbType.SQLITE) {
@@ -5247,14 +5271,14 @@ abstract class UmAppDatabase : DoorDatabase() {
                 database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  SERIAL  PRIMARY KEY  NOT NULL )")
             }
 
-            database.execSQL(
-                """
-                UPDATE SyncNode
-                   SET nodeClientId = $nodeId
-            """.trimIndent()
-            )
-        }
-    }
+    database.execSQL(
+        """
+        UPDATE SyncNode
+           SET nodeClientId = $nodeId
+    """.trimIndent()
+    )
+}
+}
 
 
 }

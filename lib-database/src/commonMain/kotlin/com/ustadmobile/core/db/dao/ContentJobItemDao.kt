@@ -171,7 +171,7 @@ abstract class ContentJobItemDao {
     abstract suspend fun updateContentEntryUid(cjiUid: Long, contentEntryUid: Long)
 
     @Query("""
-        UPDATE ContentJobITem
+        UPDATE ContentJobItem
            SET cjiContainerUid = :containerUid
          WHERE cjiUid = :cjiUid  
     """)
@@ -199,4 +199,10 @@ abstract class ContentJobItemDao {
         """)
     abstract suspend fun getActiveContentJobItem(): ContentJobItem?
 
+    @Query("""
+        UPDATE ContentJobItem
+           SET cjiUploadSessionUid = :uploadSessionUuid
+         WHERE cjiUid = :cjiUid  
+    """)
+    abstract suspend fun updateUploadSessionUuid(cjiUid: Long, uploadSessionUuid: String)
 }

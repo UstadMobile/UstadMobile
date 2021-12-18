@@ -1,57 +1,58 @@
 package com.ustadmobile.core.contentjob
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.db.JobStatus
-import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.io.ext.toContainerEntryWithMd5
+import com.ustadmobile.core.network.NetworkProgressListener
+import com.ustadmobile.core.network.containeruploader.ContainerUploader2
+import com.ustadmobile.core.network.containeruploader.ContainerUploaderRequest2
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import io.ktor.client.*
-import io.ktor.client.features.*
-import io.ktor.client.request.*
-import io.ktor.client.request.forms.*
-import io.ktor.http.*
 import kotlinx.coroutines.*
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.instance
+import org.kodein.di.on
 
 /**
  * Default implementation of uploading a container to the server
  */
-class DefaultContentPluginUploader: ContentPluginUploader {
+class DefaultContentPluginUploader(
+    override val di: DI
+): ContentPluginUploader, DIAware {
 
     override suspend fun upload(
         contentJobItem: ContentJobItem,
-        progress: ContentJobProgressListener,
+        progress: NetworkProgressListener?,
         httpClient: HttpClient,
-        torrentFileBytes: ByteArray,
         endpoint: Endpoint
     ) {
         withContext(Dispatchers.Default) {
-            val containerUid = contentJobItem.cjiContainerUid
-            val contentEntryUid = contentJobItem.cjiContentEntryUid
-            val path = UMFileUtil.joinPaths(endpoint.url, "containers/${containerUid}/$contentEntryUid/upload")
-            val torrentFileName = "${containerUid}.torrent"
             try {
-                contentJobItem.cjiServerJobId = httpClient.post(path) {
-                    body = MultiPartFormDataContent(formData {
-                        append("torrentFile", torrentFileBytes,
-                                Headers.build {
-                                    append(HttpHeaders.ContentType, "application/x-bittorrent")
-                                    append(HttpHeaders.ContentDisposition, "filename=$torrentFileName")
-                                })
-                    })
+                val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
+
+                val containerEntries = db.containerEntryDao.findByContainer(
+                    contentJobItem.cjiContainerUid)
+
+                var uploadSessionUuid = contentJobItem.cjiUploadSessionUid
+                if(uploadSessionUuid == null) {
+                    uploadSessionUuid = randomUuid().toString()
+                    contentJobItem.cjiUploadSessionUid = uploadSessionUuid
+                    db.contentJobItemDao.updateUploadSessionUuid(contentJobItem.cjiUid,
+                        uploadSessionUuid)
                 }
-                val statusPath = UMFileUtil.joinPaths(endpoint.url, "containers/${contentJobItem.cjiServerJobId}/status")
-                do{
-                    delay(1000)
-                    val serverJobItem: ContentJobItem = httpClient.get(statusPath)
-                    contentJobItem.cjiItemProgress = (contentJobItem.cjiItemTotal / 2) +
-                            (((serverJobItem.cjiRecursiveProgress / serverJobItem.cjiRecursiveTotal)
-                                    * contentJobItem.cjiItemTotal) / 2)
-                    progress.onProgress(contentJobItem)
 
-                }while (serverJobItem.cjiRecursiveStatus <= JobStatus.COMPLETE_MIN)
-
-
+                val uploadRequest = ContainerUploaderRequest2(uploadSessionUuid,
+                    containerEntries.map { it.toContainerEntryWithMd5() }, endpoint.url)
+                ContainerUploader2(uploadRequest, endpoint = endpoint, di = di,
+                    progressListener = progress).upload()
             } catch (c: CancellationException) {
-                httpClient.cancel()
+                withContext(NonCancellable){
+                    // TODO delete progress if cancelled
+                }
+                throw c
             }
         }
     }

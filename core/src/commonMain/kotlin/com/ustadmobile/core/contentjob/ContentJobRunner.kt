@@ -3,10 +3,10 @@ package com.ustadmobile.core.contentjob
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.EventCollator
-import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.core.io.ext.emptyRecursively
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
+import com.ustadmobile.core.util.EventCollator
+import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.DoorUri
@@ -16,6 +16,7 @@ import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -26,6 +27,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import kotlin.jvm.Volatile
 import kotlin.math.min
+import com.ustadmobile.door.ext.dbType
 
 /**
  * Runs a given ContentJob.
@@ -64,24 +66,28 @@ class ContentJobRunner(
     private fun CoroutineScope.produceJobs() = produce<ContentJobItemAndContentJob> {
         var done : Boolean
         try {
+            Napier.d("connectivity observer forever")
             withContext(doorMainDispatcher()) {
                 connectivityLiveData.liveData.observeForever(this@ContentJobRunner)
             }
 
             do {
+                Napier.d("waiting for signal to check queue")
                 checkQueueSignalChannel.receive()
                 val numProcessorsAvailable = numProcessors - activeJobItemIds.size
-                if(numProcessorsAvailable > 0) {
+                Napier.d("num process available :$numProcessorsAvailable")
+                if (numProcessorsAvailable > 0) {
                     //Check queue and filter out any duplicates that are being actively processed
                     val queueItems = db.contentJobItemDao.findNextItemsInQueue(jobId, numProcessors * 2).filter {
                         (it.contentJobItem?.cjiUid ?: 0) !in activeJobItemIds
                     }
 
                     val numJobsToAdd = min(numProcessorsAvailable, queueItems.size)
+                    Napier.d("num of Jobs to add :$numJobsToAdd")
 
-                    for(i in 0 until numJobsToAdd) {
+                    for (i in 0 until numJobsToAdd) {
                         val contentJobItemUid = queueItems[i].contentJobItem?.cjiUid ?: 0L
-                        activeJobItemIds +=  contentJobItemUid
+                        activeJobItemIds += contentJobItemUid
                         db.contentJobItemDao.updateItemStatus(contentJobItemUid, JobStatus.RUNNING)
                         send(queueItems[i])
                     }
@@ -89,17 +95,22 @@ class ContentJobRunner(
 
 
                 done = db.contentJobItemDao.isJobDone(jobId)
-            }while(!done)
+                Napier.d("is job Done :$done")
+            } while (!done)
+        }catch(e: Exception) {
+            Napier.d(e.stackTraceToString(), e)
         }finally {
             withContext(NonCancellable + doorMainDispatcher()) {
                 connectivityLiveData.liveData.removeObserver(this@ContentJobRunner)
             }
+            Napier.d("close produce job")
             close()
         }
     }
 
     private fun CoroutineScope.launchProcessor(id: Int, channel: ReceiveChannel<ContentJobItemAndContentJob>) = launch {
         val tmpDir = createTemporaryDir("job-$id")
+        Napier.d("created tempDir job-$id")
 
         for(item in channel) {
             val itemUri = item.contentJobItem?.sourceUri?.let { DoorUri.parse(it) } ?: continue
@@ -112,7 +123,7 @@ class ContentJobRunner(
             var mediatorObserver: DoorObserver<Pair<Int, Boolean>>?= null
             val mediatorLiveData = JobConnectivityLiveData(connectivityLiveData,
                     db.contentJobDao.findMeteredAllowedLiveData(
-                            item.contentJob?.cjUid ?: 0))
+                            item.contentJob?.cjUid ?: 0, db.dbType()))
 
             try {
 
@@ -149,8 +160,11 @@ class ContentJobRunner(
 
                 val plugin = contentPluginManager.getPluginById(pluginId)
 
-                val jobResult = async {
-                     plugin.processJob(item, processContext, this@ContentJobRunner)
+                // this is used to catch the exception of processJob
+                // as per https://kotlinlang.org/docs/exception-handling.html#supervision
+                val scope = CoroutineScope(SupervisorJob())
+                val jobResult = scope.async {
+                    plugin.processJob(item, processContext, this@ContentJobRunner)
                 }
 
                 mediatorObserver = DoorObserver {
@@ -169,11 +183,16 @@ class ContentJobRunner(
                     mediatorLiveData.observeForever(mediatorObserver)
                 }
 
-                processResult = jobResult.await()
+                try{
+                    processResult = jobResult.await()
+                }catch (e: Exception){
+                    throw e
+                }
 
                 db.contentJobItemDao.updateItemStatus(item.contentJobItem?.cjiUid ?: 0, processResult.status)
                 db.contentJobItemDao.updateFinishTimeForJob(item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
                 println("Processor #$id completed job #${item.contentJobItem?.cjiUid}")
+                delay(1000)
             }catch(e: Exception) {
                 //something went wrong
                 processException = e
@@ -245,9 +264,11 @@ class ContentJobRunner(
             }
 
             repeat(numProcessors) {
+                Napier.d("launch processor $it")
                 launchProcessor(it, producerVal)
             }
 
+            Napier.d("run Job, send queue signal")
             checkQueueSignalChannel.send(true)
         }
 

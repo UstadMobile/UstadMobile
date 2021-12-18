@@ -1,9 +1,10 @@
 package com.ustadmobile.core.controller
 
+import SelectFolderView
 import com.ustadmobile.core.contentjob.ContentJobManager
+import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.contentjob.MetadataResult
-import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.KEY_SELECTED_ITEMS
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
@@ -166,7 +167,7 @@ class ContentEntryEdit2Presenter(
         observeSavedStateResult(SAVED_STATE_KEY_URI, ListSerializer(String.serializer()),
                 String::class) {
             val uri = it.firstOrNull() ?: return@observeSavedStateResult
-            GlobalScope.launch(doorMainDispatcher()){
+            presenterScope.launch(doorMainDispatcher()){
                 view.entity = handleFileSelection(uri)
             }
             requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
@@ -206,7 +207,7 @@ class ContentEntryEdit2Presenter(
         view.fieldsEnabled = false
         view.titleErrorEnabled = false
         view.fileImportErrorVisible = false
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch(doorMainDispatcher()) {
 
             val canCreate = isImportValid(entity)
 
