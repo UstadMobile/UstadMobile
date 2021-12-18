@@ -4,7 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
@@ -246,14 +246,14 @@ class TestPhetContentScraper {
     @Throws(IOException::class)
     fun givenServerOnline_whenUrlFound_findAllSimulations() {
 
-        val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
+        val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE),
             randomUuid().toString())
         val db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
             .addSyncCallback(nodeIdAndAuth)
             .build()
-            .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
+            .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
         val repo = db //db.getRepository("https://localhost", "")
-        db.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
+        db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
 
         val index = IndexPhetContentScraper()
         val mockWebServer = MockWebServer()
@@ -303,16 +303,15 @@ class TestPhetContentScraper {
 
 
     @Test
-    @Throws(IOException::class)
     fun givenDirectoryOfTranslationsIsCreated_findAllTranslationRelations() {
-        val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
+        val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE),
             randomUuid().toString())
         val db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
             .addSyncCallback(nodeIdAndAuth)
             .build()
-            .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
+            .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
         val repo = db//db.getRepository("https://localhost", "")
-        db.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
+        db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
 
         val tmpDir = Files.createTempDirectory("testphetcontentscraper").toFile()
         val containerDir = Files.createTempDirectory("container").toFile()

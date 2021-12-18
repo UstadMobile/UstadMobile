@@ -25,7 +25,6 @@ android {
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 31
-        missingDimensionStrategy 'api', 'api18'
     }
 
     packagingOptions {
