@@ -16,7 +16,7 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.*
-import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
@@ -37,7 +37,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
-import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 
 
 class ContainerFetcherOkHttpTest {
@@ -92,11 +92,11 @@ class ContainerFetcherOkHttpTest {
             }
         }
 
-        val serverNodeIdAndAuth = NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
+        val serverNodeIdAndAuth = NodeIdAndAuth(Random.nextLong(), randomUuid().toString())
         serverDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
-            .addSyncCallback(serverNodeIdAndAuth, true)
+            .addSyncCallback(serverNodeIdAndAuth)
             .build()
-            .clearAllTablesAndResetSync(serverNodeIdAndAuth.nodeId, true)
+            .clearAllTablesAndResetNodeId(serverNodeIdAndAuth.nodeId)
 
         serverRepo = serverDb.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
             serverNodeIdAndAuth.nodeId, serverNodeIdAndAuth.auth, serverHttpClient, serverOkHttpClient))

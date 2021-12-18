@@ -7,7 +7,6 @@ import com.google.gson.GsonBuilder
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import com.ustadmobile.core.account.*
-import com.ustadmobile.core.assignment.setupAssignmentSyncListener
 import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
@@ -19,7 +18,6 @@ import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
-import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_ITERATIONS
@@ -39,10 +37,13 @@ import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.NanoHttpdCall
-import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.asRepository
+import com.ustadmobile.door.ext.doorDatabaseMetadata
+import com.ustadmobile.door.replication.ReplicationNotificationDispatcher
+import com.ustadmobile.door.replication.ReplicationSubscriptionManager
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.android.generated.MessageIDMap
@@ -54,16 +55,6 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndp
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.*
-import com.ustadmobile.core.db.ext.addSyncCallback
-import com.ustadmobile.core.impl.*
-import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_ITERATIONS
-import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_KEYLENGTH
-import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
-import com.ustadmobile.core.io.ext.siteDataSubDir
-import com.ustadmobile.core.networkmanager.*
-import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import io.ktor.client.*
@@ -71,22 +62,12 @@ import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import kotlinx.coroutines.*
+import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
-import com.ustadmobile.core.impl.di.commonJvmDiModule
-import com.ustadmobile.core.torrent.*
-import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
-import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.doorDatabaseMetadata
-import com.ustadmobile.door.replication.ReplicationNotificationDispatcher
-import com.ustadmobile.door.replication.ReplicationSubscriptionManager
-import kotlinx.coroutines.*
-import kotlinx.serialization.json.Json
 import java.net.URI
 import java.util.concurrent.Executors
 
@@ -158,8 +139,6 @@ open class UstadApp : Application(), DIAware {
                     onSubscriptionInitialized = repSubscriptionListener)
 
                 //it.setupAssignmentSyncListener(context, di)
-                // start seeding
-                di.on(context).direct.instance<UstadTorrentManager>()
             }
         }
 
