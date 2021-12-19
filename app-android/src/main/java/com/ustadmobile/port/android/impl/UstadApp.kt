@@ -132,10 +132,11 @@ open class UstadApp : Application(), DIAware {
 
                 val repSubscriptionListener = RepSubscriptionInitListener()
                 //Start replication subscription
-                //TODO: Change this to use a constant defined in the file
-                ReplicationSubscriptionManager(88, instance(), instance(),
+                val metadata = UmAppDatabase::class.doorDatabaseMetadata()
+                ReplicationSubscriptionManager(metadata.version,
+                    instance(), instance(),
                     it as DoorDatabaseRepository,
-                    GlobalScope, UmAppDatabase::class.doorDatabaseMetadata(), UmAppDatabase::class,
+                    GlobalScope, metadata, UmAppDatabase::class,
                     onSubscriptionInitialized = repSubscriptionListener)
 
                 //it.setupAssignmentSyncListener(context, di)

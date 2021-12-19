@@ -7,22 +7,20 @@ import com.ustadmobile.door.annotation.ReplicationEntityForeignKey
 import com.ustadmobile.door.annotation.ReplicationTrackerProcessed
 import com.ustadmobile.door.annotation.ReplicationVersionId
 
-@Entity(primaryKeys = arrayOf("usForeignKey", "usDestination"))
-class UserSessionTrkr {
+@Entity(primaryKeys = arrayOf("siteFk", "siteDestination"))
+class SiteTrkr {
 
     @ReplicationEntityForeignKey
-    var usForeignKey: Long = 0
+    var siteFk: Long = 0
 
     @ReplicationVersionId
-    var usVersionId: Long = 0
+    var siteVersionId: Long = 0
 
     @ReplicationDestinationNodeId
-    var usDestination: Long = 0
+    var siteDestination: Long = 0
 
-    @ColumnInfo(defaultValue = "0")
     @ReplicationTrackerProcessed
-    var usTrkrProcessed: Boolean = false
-
-
+    @ColumnInfo(defaultValue = "0")
+    var siteTrkrProcessed: Boolean = false
 
 }

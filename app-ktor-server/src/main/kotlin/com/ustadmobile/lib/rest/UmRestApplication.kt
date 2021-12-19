@@ -11,6 +11,7 @@ import com.ustadmobile.core.contentjob.ContentJobManagerJvm
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.db.UmAppDatabase_ReplicationRunOnChangeRunner
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
@@ -54,8 +55,12 @@ import java.net.URL
 import java.nio.file.Files
 import javax.naming.InitialContext
 import com.ustadmobile.door.ext.asRepository
+import com.ustadmobile.door.replication.ReplicationNotificationDispatcher
 import com.ustadmobile.lib.rest.ext.initAdminUser
 import com.ustadmobile.lib.rest.ext.ktorInitRepo
+import com.ustadmobile.door.ext.doorDatabaseMetadata
+import kotlinx.coroutines.GlobalScope
+import com.ustadmobile.door.util.NodeIdAuthCache
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -134,6 +139,19 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             val systemImpl: UstadMobileSystemImpl = instance()
             val contextIdentifier: String = context.identifier(dbMode)
             systemImpl.getOrGenerateNodeIdAndAuth(contextIdentifier, Any())
+        }
+
+        bind<NodeIdAuthCache>() with scoped(EndpointScope.Default).singleton {
+            val notificationDispatcher = instance<ReplicationNotificationDispatcher>()
+            NodeIdAuthCache(instance<UmAppDatabase>(tag = DoorTag.TAG_DB)).also {
+                notificationDispatcher.setupWithNodeIdAndAuthCache(it)
+            }
+        }
+
+        bind<ReplicationNotificationDispatcher>() with scoped(EndpointScope.Default).singleton {
+            val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+            ReplicationNotificationDispatcher(db, UmAppDatabase_ReplicationRunOnChangeRunner(db),
+                GlobalScope, UmAppDatabase::class.doorDatabaseMetadata())
         }
 
         bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
@@ -334,7 +352,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         ContainerMountRoute()
         ContainerUploadRoute2()
         route("UmAppDatabase") {
-            UmAppDatabase_KtorRoute(true)
+            UmAppDatabase_KtorRoute()
         }
         SiteRoute()
         ContentEntryLinkImporter()

@@ -60,7 +60,11 @@ import kotlin.jvm.JvmField
     ZombieAttachmentData::class,
     DoorNode::class,
 
-    UserSessionTrkr::class
+    UserSessionTrkr::class,
+    SiteTrkr::class,
+    ScopedGrantTrkr::class,
+    AgentEntityTrkr::class,
+    ReplicationStatus::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES

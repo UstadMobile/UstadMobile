@@ -42,7 +42,6 @@ abstract class UserSessionDao {
                     AND UserSessionTrkr.usDestination = DoorNode.nodeId/*UserSession.usClientNodeId*/), 0)
     """)
     @ReplicationRunOnChange(value = [UserSession::class])
-    @ReplicationRunOnNewNode
     @ReplicationCheckPendingNotificationsFor([UserSession::class])
     abstract suspend fun updateReplicationTrackers(@NewNodeIdParam newNodeId: Long)
 
