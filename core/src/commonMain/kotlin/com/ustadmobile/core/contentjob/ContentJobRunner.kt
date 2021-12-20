@@ -13,6 +13,7 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -27,7 +28,6 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import kotlin.jvm.Volatile
 import kotlin.math.min
-import com.ustadmobile.door.ext.dbType
 
 /**
  * Runs a given ContentJob.
@@ -186,6 +186,9 @@ class ContentJobRunner(
                 try{
                     processResult = jobResult.await()
                 }catch (e: Exception){
+                    println("caught exception in jobResult await")
+                    // because of supervisor, this needs to be called to cancel the pluginJob, otherwise the plugin continues
+                    jobResult.cancelAndJoin()
                     throw e
                 }
 
@@ -233,7 +236,8 @@ class ContentJobRunner(
                 }
 
 
-                if(processException is CancellationException)
+                if(processException is CancellationException &&
+                        processException !is ConnectivityCancellationException)
                     throw processException
 
                 checkQueueSignalChannel.send(true)
