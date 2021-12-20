@@ -105,7 +105,7 @@ ext {
     version_npm_google_charts = "^3.0.15"
 
     version_door = "0.0.32u"
-    version_xmlpullparserkmp = '0.0.19'
+    version_xmlpullparserkmp = '0.0.20'
 
     ustadVersionCode = 220
 
