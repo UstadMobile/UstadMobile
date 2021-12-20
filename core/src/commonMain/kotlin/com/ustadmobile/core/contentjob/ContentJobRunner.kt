@@ -204,13 +204,16 @@ class ContentJobRunner(
             }finally {
                 withContext(NonCancellable) {
                     val finalStatus: Int = when {
-                        processResult != null -> processResult.status
+                        processException == null && processResult != null -> processResult.status
                         processException is FatalContentJobException -> JobStatus.FAILED
                         processException is ConnectivityCancellationException -> JobStatus.QUEUED
                         processException is CancellationException -> {
                             deleteFilesForContentEntry(
                                     item.contentJobItem?.cjiContentEntryUid ?: 0,
                                             di, endpoint)
+                            repo.contentEntryDao.updateContentEntryInActive(
+                                    item.contentJobItem?.cjiContentEntryUid ?: 0,
+                                    true)
                             JobStatus.CANCELED
                         }
                         (item.contentJobItem?.cjiAttemptCount ?: maxItemAttempts) >= maxItemAttempts -> JobStatus.FAILED
