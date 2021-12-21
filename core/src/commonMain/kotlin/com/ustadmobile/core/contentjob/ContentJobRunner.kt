@@ -186,7 +186,7 @@ class ContentJobRunner(
                 try{
                     processResult = jobResult.await()
                 }catch (e: Exception){
-                    println("caught exception in jobResult await")
+                    Napier.i("caught exception in jobResult await ${e.printStackTrace()}")
                     // because of supervisor, this needs to be called to cancel the pluginJob, otherwise the plugin continues
                     jobResult.cancelAndJoin()
                     throw e
@@ -210,10 +210,7 @@ class ContentJobRunner(
                         processException is CancellationException -> {
                             deleteFilesForContentEntry(
                                     item.contentJobItem?.cjiContentEntryUid ?: 0,
-                                            di, endpoint)
-                            repo.contentEntryDao.updateContentEntryInActive(
-                                    item.contentJobItem?.cjiContentEntryUid ?: 0,
-                                    true)
+                                    di, endpoint)
                             JobStatus.CANCELED
                         }
                         (item.contentJobItem?.cjiAttemptCount ?: maxItemAttempts) >= maxItemAttempts -> JobStatus.FAILED

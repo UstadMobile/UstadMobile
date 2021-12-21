@@ -365,8 +365,6 @@ class TestContentJobRunner {
             val allJobItems = runBlocking { db.contentJobItemDao.findAll() }
             allJobItems.forEach {
                 Assert.assertEquals("job is cancelled", JobStatus.CANCELED, it.cjiStatus)
-                val entry = db.contentEntryDao.findByUid(it.cjiContentEntryUid)
-                Assert.assertEquals("entry is inActive", true, entry!!.ceInactive)
             }
 
         }
