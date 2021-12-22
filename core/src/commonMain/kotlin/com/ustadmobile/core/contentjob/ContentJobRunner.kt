@@ -162,10 +162,12 @@ class ContentJobRunner(
 
                 // this is used to catch the exception of processJob
                 // as per https://kotlinlang.org/docs/exception-handling.html#supervision
-                val scope = CoroutineScope(SupervisorJob())
-                val jobResult = scope.async {
-                    plugin.processJob(item, processContext, this@ContentJobRunner)
-                }
+
+                val scope = CoroutineScope(Job())
+                val jobResult =
+                    scope.async {
+                        plugin.processJob(item, processContext, this@ContentJobRunner)
+                    }
 
                 mediatorObserver = DoorObserver {
                     val state = it.first
@@ -174,7 +176,7 @@ class ContentJobRunner(
                     if(item.contentJobItem?.cjiConnectivityNeeded == true
                             && (state == ConnectivityStatus.STATE_DISCONNECTED ||
                                     !isMeteredAllowed && state == ConnectivityStatus.STATE_METERED)){
-                        jobResult.cancel(ConnectivityCancellationException("connectivity not acceptable"))
+                        jobResult.cancelChildren(ConnectivityCancellationException("connectivity not acceptable"))
                     }
 
                 }
@@ -208,9 +210,6 @@ class ContentJobRunner(
                         processException is FatalContentJobException -> JobStatus.FAILED
                         processException is ConnectivityCancellationException -> JobStatus.QUEUED
                         processException is CancellationException -> {
-                            deleteFilesForContentEntry(
-                                    item.contentJobItem?.cjiContentEntryUid ?: 0,
-                                    di, endpoint)
                             JobStatus.CANCELED
                         }
                         (item.contentJobItem?.cjiAttemptCount ?: maxItemAttempts) >= maxItemAttempts -> JobStatus.FAILED
@@ -267,9 +266,28 @@ class ContentJobRunner(
                 jobItemProducer = it
             }
 
-            repeat(numProcessors) {
-                Napier.d("launch processor $it")
-                launchProcessor(it, producerVal)
+            val jobList = mutableListOf<Job>()
+            try {
+                // this is used to let child launch handle their own exception handling as seen by
+                    // https://www.lukaslechner.com/why-exception-handling-with-kotlin-coroutines-is-so-hard-and-how-to-successfully-master-it/
+                coroutineScope {
+                    repeat(numProcessors) {
+                        Napier.d("launch processor $it")
+                        jobList += launchProcessor(it, producerVal)
+                    }
+                    Napier.d("run Job, send queue signal")
+                    checkQueueSignalChannel.send(true)
+                }
+            }catch(e: CancellationException) {
+                withContext(NonCancellable) {
+                    producerVal.cancel()
+                    coroutineContext.cancelChildren()
+                    jobList.forEach {
+                        it.cancelAndJoin()
+                    }
+                    deleteFilesForContentEntry(jobId, di, endpoint)
+                    throw e
+                }
             }
 
             Napier.d("run Job, send queue signal")

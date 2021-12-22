@@ -353,6 +353,16 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                                                       permission: Long) : Boolean
 
 
+    @Query("""
+        UPDATE ContentEntry
+           SET ceInactive = :inactive
+         WHERE contentEntryUid IN (SELECT cjiContentEntryUid 
+                                     FROM ContentJobItem
+                                    WHERE cjiJobUid = :jobId)
+    """)
+    abstract fun invalidateContentEntryCreatedByJob(jobId: Long, inactive: Boolean)
+
+
     @Query("""UPDATE ContentEntry SET ceInactive = :toggleVisibility, 
                 contentEntryLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
                 WHERE contentEntryUid IN (:selectedItem)""")

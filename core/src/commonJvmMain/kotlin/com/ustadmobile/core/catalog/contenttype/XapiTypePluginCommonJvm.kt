@@ -106,11 +106,10 @@ class XapiTypePluginCommonJvm(
                 val doorUri = DoorUri.parse(uri)
                 val localUri = process.getLocalOrCachedUri()
                 val contentNeedUpload = !doorUri.isRemote()
-                val xapiIsProcessed = contentJobItem.cjiContainerUid != 0L
                 contentJobItem.updateTotalFromLocalUriIfNeeded(localUri, contentNeedUpload,
                     progress, context, di)
 
-                if(!xapiIsProcessed) {
+                if(!contentJobItem.cjiContainerStatus) {
 
                     val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
                             ?: Container().apply {
@@ -124,16 +123,18 @@ class XapiTypePluginCommonJvm(
                             ?: defaultContainerDir.toURI().toString()
                     val containerFolderUri = DoorUri.parse(containerFolder)
 
+                    contentJobItem.cjiContainerUid = container.containerUid
+                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                            container.containerUid)
+
                     repo.addEntriesToContainerFromZip(container.containerUid,
                             localUri,
                             ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
-                    contentJobItem.cjiContainerUid = container.containerUid
-                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
-                        container.containerUid)
-
                     contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
                         progress)
+
+                    db.contentJobItemDao.updateContainerStatus(contentJobItem.cjiUid, true)
 
                     contentJobItem.cjiConnectivityNeeded = true
                     db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)

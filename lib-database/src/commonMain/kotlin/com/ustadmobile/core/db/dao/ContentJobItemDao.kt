@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import com.ustadmobile.core.db.JobStatus
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 
 @Dao
@@ -131,6 +130,13 @@ abstract class ContentJobItemDao {
     """)
     abstract suspend fun updateConnectivityNeeded(contentJobItemId: Long, connectivityNeeded: Boolean)
 
+
+    @Query("""
+        UPDATE ContentJobItem
+           SET cjiContainerStatus = :containerStatus
+         WHERE cjiUid = :contentJobItemId   
+    """)
+    abstract suspend fun updateContainerStatus(contentJobItemId: Long, containerStatus: Boolean)
 
     @Transaction
     open suspend fun commitProgressUpdates(updates: List<ContentJobItemProgressUpdate>) {

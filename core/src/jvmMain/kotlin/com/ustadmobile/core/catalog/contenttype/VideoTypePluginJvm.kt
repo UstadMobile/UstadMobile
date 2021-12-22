@@ -72,14 +72,13 @@ class VideoTypePluginJvm(
             val localVideoUri = process.getLocalOrCachedUri()
             val videoFile = localVideoUri.toFile()
             var newVideo = File(videoFile.parentFile, "new${videoFile.nameWithoutExtension}.mp4")
-            val videoIsProcessed = contentJobItem.cjiContainerUid != 0L
             val contentNeedUpload = !videoUri.isRemote()
             contentJobItem.updateTotalFromLocalUriIfNeeded(localVideoUri, contentNeedUpload,
                 progress, context, di)
 
             try {
 
-                if(!videoIsProcessed) {
+                if(!contentJobItem.cjiContainerStatus) {
 
                     val compressVideo: Boolean = process.params["compress"]?.toBoolean() ?: false
 
@@ -102,6 +101,10 @@ class VideoTypePluginJvm(
 
                             }
 
+                    contentJobItem.cjiContainerUid = container.containerUid
+                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                            container.containerUid)
+
                     val containerFolder = jobItem.contentJob?.toUri
                             ?: defaultContainerDir.toURI().toString()
                     val containerFolderUri = DoorUri.parse(containerFolder)
@@ -112,11 +115,11 @@ class VideoTypePluginJvm(
                             ContainerAddOptions(containerFolderUri))
 
                     // after container has files and torrent added, update contentJob
-                    contentJobItem.cjiContainerUid = container.containerUid
-                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
-                        container.containerUid)
+
                     contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
                         progress)
+
+                    db.contentJobItemDao.updateContainerStatus(contentJobItem.cjiUid, true)
 
                     contentJobItem.cjiConnectivityNeeded = true
                     db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)

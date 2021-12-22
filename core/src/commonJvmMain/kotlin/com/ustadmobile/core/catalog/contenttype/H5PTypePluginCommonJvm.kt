@@ -138,12 +138,11 @@ class H5PTypePluginCommonJvm(
                 val localUri = process.getLocalOrCachedUri()
                 val contentNeedUpload = !doorUri.isRemote()
                 val progressSize = if(contentNeedUpload) 2 else 1
-                val h5pIsProcessed = contentJobItem.cjiContainerUid != 0L
 
                 contentJobItem.updateTotalFromLocalUriIfNeeded(localUri, contentNeedUpload,
                     progress, context, di)
 
-                if(!h5pIsProcessed) {
+                if(!contentJobItem.cjiContainerStatus) {
 
                     val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
                             ?: Container().apply {
@@ -157,6 +156,10 @@ class H5PTypePluginCommonJvm(
                             ?: defaultContainerDir.toURI().toString()
                     val containerFolderUri = DoorUri.parse(containerFolder)
                     val entry = db.contentEntryDao.findByUid(contentJobItem.cjiContentEntryUid)
+
+                    contentJobItem.cjiContainerUid = container.containerUid
+                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                            container.containerUid)
 
                     val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolderUri)
                     repo.addEntriesToContainerFromZip(container.containerUid, localUri,
@@ -211,12 +214,10 @@ class H5PTypePluginCommonJvm(
                             "index.html", context, di, containerAddOptions)
                     tmpIndexHtmlFile.delete()
 
-                    contentJobItem.cjiContainerUid = container.containerUid
-                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
-                        container.containerUid)
-
                     contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
                         progress)
+
+                    db.contentJobItemDao.updateContainerStatus(contentJobItem.cjiUid, true)
 
                     contentJobItem.cjiConnectivityNeeded = true
                     db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
