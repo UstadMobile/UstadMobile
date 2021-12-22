@@ -500,8 +500,21 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     }
 
     val fallBackAvatarClass by css {
-        fontSize = LinearDimension("1em")
+        fontSize = LinearDimension("2em")
         marginBottom = 4.px
+    }
+
+    val defaultThumbnailClass by css {
+        fontSize = LinearDimension("5em")
+    }
+
+    val mediumThumbnailClass by css {
+        fontSize = LinearDimension("1.8em")
+    }
+
+    val secondaryActionBtn by css{
+        width = LinearDimension("60px")
+        padding = "16px"
     }
 
     val personListItemAvatar by css {
@@ -614,6 +627,15 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         position = Position.fixed
         right = 15.px
         bottom = 15.px
+    }
+
+    val studentProgressBar by css{
+        width = LinearDimension("50%")
+        paddingRight = 2.spacingUnits
+        marginTop = 10.px
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            width = LinearDimension("80%")
+        }
     }
 
     override val di: DI

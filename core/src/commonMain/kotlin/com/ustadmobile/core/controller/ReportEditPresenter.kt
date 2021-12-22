@@ -18,7 +18,9 @@ import com.ustadmobile.lib.db.entities.Moment.Companion.MONTHS_REL_UNIT
 import com.ustadmobile.lib.db.entities.Moment.Companion.TYPE_FLAG_RELATIVE
 import com.ustadmobile.lib.db.entities.Moment.Companion.WEEKS_REL_UNIT
 import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import kotlin.math.max
@@ -401,7 +403,8 @@ class ReportEditPresenter(context: Any,
                 repo.reportDao.updateAsync(entity)
 
                 withContext(doorMainDispatcher()) {
-                    view.finishWithResult(listOf(entity))
+                    finishWithResult(safeStringify(di,
+                        ListSerializer(ReportWithSeriesWithFilters.serializer()), listOf(entity)))
                 }
 
             } else {

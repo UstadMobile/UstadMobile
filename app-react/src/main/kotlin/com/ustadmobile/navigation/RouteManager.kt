@@ -57,6 +57,12 @@ object RouteManager {
         UstadDestination(view = LeavingReasonEditView.VIEW_NAME, component = LeavingReasonEditComponent::class),
         UstadDestination(view = ClazzAssignmentListView.VIEW_NAME, component = ClazzAssignmentListComponent::class),
         UstadDestination(view = ClazzAssignmentEditView.VIEW_NAME, component = ClazzAssignmentEditComponent::class),
+        UstadDestination(view = ClazzAssignmentDetailView.VIEW_NAME, component = ClazzAssignmentDetailComponent::class),
+        UstadDestination(view = ClazzAssignmentDetailOverviewView.VIEW_NAME, component = ClazzAssignmentOverviewComponent::class),
+        UstadDestination(view = ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME, component = ClazzAssignmentDetailStudentProgressListOverviewComponent::class),
+        UstadDestination(view = ClazzAssignmentDetailStudentProgressView.VIEW_NAME, component = ClazzAssignmentDetailStudentProgressComponent::class),
+        UstadDestination(view = SessionListView.VIEW_NAME, component = SessionListComponent::class, showSearch = true),
+        UstadDestination(view = StatementListView.VIEW_NAME, component = StatementListComponent::class),
         UstadDestination(labelId= MessageID.accounts, view = AccountListView.VIEW_NAME, component = PlaceHolderComponent::class)
     )
 

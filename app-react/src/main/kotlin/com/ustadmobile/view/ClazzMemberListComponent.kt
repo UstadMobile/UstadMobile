@@ -130,10 +130,13 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
         navigateToPickNewMember(ClazzEnrolment.ROLE_TEACHER)
     }
 
-    private fun RBuilder.createMemberList(members: List<PersonWithClazzEnrolmentDetails>,
-                                          sectionTitle: String, role: Int,
-                                          createNewLabel: Int = 0,
-                                          pending: Boolean = false){
+    private fun RBuilder.createMemberList(
+        members: List<PersonWithClazzEnrolmentDetails>,
+        sectionTitle: String,
+        role: Int,
+        createNewLabel: Int = 0,
+        pending: Boolean = false
+    ){
 
         umGridContainer(rowSpacing = GridSpacing.spacing1) {
             css(StyleManager.defaultDoubleMarginTop)
@@ -191,8 +194,8 @@ class MembersListComponent(mProps: MemberListProps):
     override fun RBuilder.renderListItem(item: PersonWithClazzEnrolmentDetails, onClick: (Event) -> Unit) {
         umGridContainer {
             attrs.onClick = {
+                stopEventPropagation(it)
                 onClick.invoke(it.nativeEvent)
-                stopEventPropagation(it.nativeEvent)
             }
 
             val presenter = props.presenter as ClazzMemberListPresenter

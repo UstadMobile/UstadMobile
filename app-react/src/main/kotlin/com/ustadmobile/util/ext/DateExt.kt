@@ -8,6 +8,7 @@ fun Date.formatDate(format: String = "DD/MMMM/YYYY"): String {
     return moment(utc).local().format(format)
 }
 
+
 fun Date.standardFormat(): String = formatDate("DD/MM/YYYY")
 
 fun Date.formattedInHoursAndMinutes() : String = formatDate("HH:mm")

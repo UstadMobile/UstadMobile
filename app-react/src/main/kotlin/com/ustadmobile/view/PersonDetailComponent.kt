@@ -99,23 +99,23 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
             umGridContainer {
                 umItem(GridSize.cells12){
                     umGridContainer(GridSpacing.spacing4) {
-                        createAction("call", getString(MessageID.call), GridSize.cells4, GridSize.cells2,
+                        createProfileAction("call", getString(MessageID.call), GridSize.cells4, GridSize.cells2,
                             entity?.phoneNum != null){
                             onClickCall(entity?.phoneNum)
                         }
-                        createAction("message",getString(MessageID.text), GridSize.cells4, GridSize.cells2,
+                        createProfileAction("message",getString(MessageID.text), GridSize.cells4, GridSize.cells2,
                             entity?.phoneNum != null){
                             onClickSMS(entity?.phoneNum)
                         }
-                        createAction("email",getString(MessageID.email), GridSize.cells4, GridSize.cells2,
+                        createProfileAction("email",getString(MessageID.email), GridSize.cells4, GridSize.cells2,
                             entity?.emailAddr != null){
                             onClickEmail(entity?.emailAddr)
                         }
-                        createAction("vpn_key",getString(MessageID.change_password), GridSize.cells6, GridSize.cells3,
+                        createProfileAction("vpn_key",getString(MessageID.change_password), GridSize.cells6, GridSize.cells3,
                             changePasswordVisible){
                             mPresenter?.handleChangePassword()
                         }
-                        createAction("person_add",getString(MessageID.create_account), GridSize.cells6, GridSize.cells3,
+                        createProfileAction("person_add",getString(MessageID.create_account), GridSize.cells6, GridSize.cells3,
                             showCreateAccountVisible){
                             mPresenter?.handleCreateAccount()
                         }

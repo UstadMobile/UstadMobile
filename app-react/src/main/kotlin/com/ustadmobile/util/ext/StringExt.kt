@@ -6,11 +6,11 @@ import com.ustadmobile.util.urlSearchParamsToMap
  * Format string as equivalent to String.format in android
  */
 fun String.format(vararg args: Any): String{
-    var placeHolder = this
-    val isFloatInterpolation = this.contains("f")
+    var placeHolder = this.replace("%%"," ±")
+    val isFloatInterpolation = placeHolder.contains("f")
     val charVar = (if(isFloatInterpolation) "f" else "%").toCharArray().first()
-    this.filter { it == charVar}.forEachIndexed { index, _ ->
-        val replaceTo = if(args.isNotEmpty() && args.size >= index) args[index].toString() else null
+    placeHolder.filter { it == charVar}.forEachIndexed { index, _ ->
+        val replaceTo = if(args.isNotEmpty() && args.size >= index) "${args[index]}" else null
         val replaceFromPrefix = when(isFloatInterpolation){
             true -> "%${index + 1}.0"
             else -> """%${index + 1}${"$"}"""
@@ -24,7 +24,7 @@ fun String.format(vararg args: Any): String{
                 .replace("${replaceFromPrefix}f%",replaceTo)
         }
     }
-    return placeHolder
+    return placeHolder.replace(" ±","%")
 }
 
 fun String.joinString(vararg args: Any): String {

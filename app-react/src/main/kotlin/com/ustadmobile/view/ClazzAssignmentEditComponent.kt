@@ -6,17 +6,16 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.fieldsOnlyFormScreen
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.toDate
-import com.ustadmobile.view.ext.createListItemWithTitleAndSwitch
-import com.ustadmobile.view.ext.createListSectionTitle
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.view.ext.*
 import react.RBuilder
 import react.dom.html.InputType
 import react.setState
@@ -34,6 +33,8 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
     override val mEditPresenter: UstadEditPresenter<*, ClazzAssignment>?
         get() = mPresenter
 
+    private var contentList: List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> = listOf()
+
     private var titleLabel = FieldLabel(text = getString(MessageID.title))
 
     private var instructionLabel = FieldLabel(text = optional(MessageID.instructions_for_students))
@@ -50,8 +51,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
 
     private var lateSubLabel = FieldLabel(text = getString(MessageID.late_submission))
 
-    private var penaltyLabel = FieldLabel(text = getString(MessageID.late_submission_penalty)
-            + " ${getString(MessageID.percentage_score)}")
+    private var penaltyLabel = FieldLabel(text = getString(MessageID.late_submission_penalty), id = "penalty")
 
     private var endOfGraceLabel = FieldLabel(text = getString(MessageID.end_of_grace_period))
 
@@ -108,9 +108,20 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
             }
         }
 
-    override var clazzAssignmentContent: DoorMutableLiveData<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>?
-        get() = TODO("Not yet implemented")
-        set(value) {}
+    private val scheduleObserver = ObserverFnWrapper<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?> {
+        if(it == null) return@ObserverFnWrapper
+        setState {
+            contentList = it
+        }
+    }
+
+    override var clazzAssignmentContent: DoorMutableLiveData<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>? = null
+        get() = field
+        set(value) {
+            field?.removeObserver(scheduleObserver)
+            field = value
+            value?.observe(this, scheduleObserver)
+        }
 
     override var fieldsEnabled: Boolean = false
         get() = field
@@ -237,7 +248,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                     }
 
                     umItem {
-                        createListSectionTitle(timeZone ?: "")
+                        createListSectionTitle(timeZone ?: "", TypographyVariant.h6)
                     }
 
                     umTextFieldSelect(
@@ -255,23 +266,24 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                         }
                     )
 
-                    if(entity?.caLateSubmissionPenalty == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY ||
-                        entity?.caLateSubmissionPenalty == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_ACCEPT){
-                        umGridContainer(rowSpacing = GridSpacing.spacing4) {
-                            umItem(GridSize.cells12, GridSize.cells6 ) {
+                    if(entity?.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY ||
+                        entity?.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_ACCEPT){
 
-                                umDatePicker(
-                                    label = "${endOfGraceLabel.text}",
-                                    error = endOfGraceLabel.error,
-                                    helperText = endOfGraceLabel.errorText,
-                                    value = entity?.caGracePeriodDate.toDate(),
-                                    inputVariant = FormControlVariant.outlined,
-                                    onChange = {
-                                        setState {
-                                            entity?.caGracePeriodDate = it.getTime().toLong()
-                                            caGracePeriodError = null
-                                        }
-                                    })
+                            umGridContainer(spacing = GridSpacing.spacing4) {
+
+                                umItem(GridSize.cells12, GridSize.cells6 ) {
+                                    umDatePicker(
+                                        label = "${endOfGraceLabel.text}",
+                                        error = endOfGraceLabel.error,
+                                        helperText = endOfGraceLabel.errorText,
+                                        value = entity?.caGracePeriodDate.toDate(),
+                                        inputVariant = FormControlVariant.outlined,
+                                        onChange = {
+                                            setState {
+                                                entity?.caGracePeriodDate = it.getTime().toLong()
+                                                caGracePeriodError = null
+                                            }
+                                        })
 
                             }
 
@@ -292,19 +304,49 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                     }
 
 
-                    if(entity?.caLateSubmissionPenalty == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY){
-                        umTextField(label = "${penaltyLabel.text}",
-                            helperText = penaltyLabel.errorText,
+                    if(entity?.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY){
+                        umFormControl(variant = FormControlVariant.outlined) {
+                            css{
+                                +StyleManager.defaultMarginTop
+                            }
+                            umInputLabel("${penaltyLabel.text}",
+                                id = penaltyLabel.id,
+                                error = penaltyLabel.error,
+                                variant = FormControlVariant.outlined,
+                                htmlFor = penaltyLabel.id)
+
+                        umOutlinedInput(
+                            id = penaltyLabel.id,
+                            label = "${penaltyLabel.text}",
                             value = entity?.caLateSubmissionPenalty.toString(),
                             error = penaltyLabel.error,
                             type = InputType.number,
                             disabled = !fieldsEnabled,
-                            variant = FormControlVariant.outlined,
                             onChange = {
                                 setState {
                                     entity?.caLateSubmissionPenalty = it.toInt()
                                 }
-                            })
+                            }) {
+                            attrs.endAdornment = umTypography("%")
+                        }
+                        }
+                    }
+
+                    umSpacer()
+
+                    createListSectionTitle(getString(MessageID.content), TypographyVariant.h6)
+
+                    umSpacer()
+
+                    val createNewItem = CreateNewItem(true, MessageID.add_content){
+                        mPresenter?.contentOneToManyJoinListener?.onClickNew()
+                    }
+
+                    mPresenter?.let { presenter ->
+                        renderContentEntries(presenter.contentOneToManyJoinListener,
+                            contentList.toSet().toList(), createNewItem = createNewItem){
+                            mPresenter?.contentOneToManyJoinListener?.onClickEdit(it)
+                        }
                     }
 
                     umItem {
@@ -323,8 +365,6 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                             }
                         }
                     }
-
-                    createListSectionTitle(getString(MessageID.content), TypographyVariant.h6)
                 }
 
             }

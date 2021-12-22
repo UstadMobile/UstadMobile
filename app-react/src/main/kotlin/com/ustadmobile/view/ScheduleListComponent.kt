@@ -21,8 +21,8 @@ class ScheduleListComponent(mProps: ScheduleListProps): UstadSimpleList<Schedule
     override fun RBuilder.renderListItem(item: Schedule, onClick: (Event) -> Unit) {
         umGridContainer {
             attrs.onClick = {
+                Util.stopEventPropagation(it)
                 onClick.invoke(it.nativeEvent)
-                Util.stopEventPropagation(it.nativeEvent)
             }
 
             val frequencyMessageId = ScheduleEditPresenter.FrequencyOption.values()

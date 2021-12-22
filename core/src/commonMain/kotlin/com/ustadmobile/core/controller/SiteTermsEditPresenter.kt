@@ -3,14 +3,14 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.SiteTermsEditView
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -51,9 +51,9 @@ class SiteTermsEditPresenter(context: Any,
                 repo.onDbThenRepoWithTimeout(5000) { db, lastResult ->
                     val uiLanguage = db.languageDao.takeIf { lastResult == null }?.findByTwoCodeAsync(displayLocale)
                     if(uiLanguage != null) {
-                        editEntity?.stLanguage = uiLanguage
-                        editEntity?.sTermsLang = displayLocale
-                        editEntity?.sTermsLangUid = uiLanguage.langUid
+                        editEntity.stLanguage = uiLanguage
+                        editEntity.sTermsLang = displayLocale
+                        editEntity.sTermsLangUid = uiLanguage.langUid
                         view.entity = editEntity
                     }
                 }
@@ -83,7 +83,9 @@ class SiteTermsEditPresenter(context: Any,
         presenterScope.launch {
 
             //TODO: Call commitToDatabase on any onetomany join helpers
-            view.finishWithResult(listOf(entity))
+            val serializedResult = safeStringify(di, ListSerializer(SiteTermsWithLanguage.serializer()),
+                listOf(entity))
+            finishWithResult(serializedResult)
         }
     }
 

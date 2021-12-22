@@ -3,6 +3,7 @@ package com.ustadmobile.mui.components
 import com.ustadmobile.mui.ext.createStyledComponent
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.Util
 import mui.material.Button
 import mui.material.ButtonProps
 import org.w3c.dom.events.Event
@@ -30,14 +31,12 @@ fun RBuilder.umButton(
     size: ButtonSize = ButtonSize.medium,
     startIcon: String? = null,
     endIcon: String? = null,
+    id: String? = this::class.js.name,
     className: String? = null,
     handler: StyledHandler<ButtonProps>? = null
 ) = createStyledComponent(Button, className, handler) {
     attrs.color = color.toString()
     attrs.disabled = disabled
-    attrs.onClick = {
-        onClick?.invoke(it.nativeEvent)
-    }
     attrs.size = size.toString()
     startIcon?.let {
         umIcon(it){
@@ -52,4 +51,9 @@ fun RBuilder.umButton(
             css(StyleManager.endIcon)
         }
     }
+    attrs.onClick = {
+        Util.stopEventPropagation(it)
+        onClick?.invoke(it.nativeEvent)
+    }
+    id?.let{ attrs.id = it }
 }

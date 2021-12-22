@@ -4,6 +4,8 @@ actual object UmPlatform {
 
     actual var isWeb: Boolean = true
 
+    actual fun run(block:() -> Unit){}
+
     actual fun debug(){
         js("debugger;")
     }

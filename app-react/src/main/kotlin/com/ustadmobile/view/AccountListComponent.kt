@@ -210,7 +210,6 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
                                         variant = ButtonVariant.outlined,
                                         color = UMColor.primary,
                                         onClick = {
-                                            it.stopPropagation()
                                             presenter.handleClickLogout(item)
                                         })
                                 }
@@ -222,7 +221,7 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
 
                 if(!props.activeAccount){
                     umItem(GridSize.cells2){
-                        umIconButton("delete", onClick = {
+                        umIconButton("delete",id = "delete_account_btn", onClick = {
                             presenter.handleClickDeleteSession(item)
                         })
                     }

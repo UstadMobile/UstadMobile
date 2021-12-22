@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ScopedGrantOneToManyHelper
+import com.ustadmobile.core.util.UmPlatform
 import com.ustadmobile.core.util.ext.createNewSchoolAndGroups
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
@@ -12,7 +13,6 @@ import com.ustadmobile.core.view.SchoolEditView
 import com.ustadmobile.core.view.TimeZoneListView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
@@ -40,7 +40,6 @@ class SchoolEditPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-
         view.scopedGrants = scopedGrantOneToManyHelper.liveList
 
     }
@@ -55,8 +54,9 @@ class SchoolEditPresenter(context: Any,
             entity?.holidayCalendar = calendar
             entity?.schoolHolidayCalendarUid = calendar.umCalendarUid
             view.entity = entity
-
-            requireSavedStateHandle()[SAVEDSTATE_KEY_HOLIDAYCALENDAR] = null
+            UmPlatform.run {
+                requireSavedStateHandle()[SAVEDSTATE_KEY_HOLIDAYCALENDAR] = null
+            }
         }
 
         observeSavedStateResult(
@@ -65,8 +65,9 @@ class SchoolEditPresenter(context: Any,
             val timeZone = it.firstOrNull() ?: return@observeSavedStateResult
             entity?.schoolTimeZone = timeZone
             view.entity = entity
-
-            requireSavedStateHandle()[TimeZoneListPresenter.RESULT_TIMEZONE_KEY] = null
+            UmPlatform.run {
+                requireSavedStateHandle()[TimeZoneListPresenter.RESULT_TIMEZONE_KEY] = null
+            }
         }
     }
 
@@ -101,8 +102,6 @@ class SchoolEditPresenter(context: Any,
                 }
             })
         }
-
-
         return school
     }
 
@@ -110,13 +109,11 @@ class SchoolEditPresenter(context: Any,
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
-        var editEntity: SchoolWithHolidayCalendar? = null
-        if(entityJsonStr != null) {
-            editEntity = safeParse(di, SchoolWithHolidayCalendar.serializer(), entityJsonStr)
+        val editEntity = if(entityJsonStr != null) {
+            safeParse(di, SchoolWithHolidayCalendar.serializer(), entityJsonStr)
         }else {
-            editEntity = SchoolWithHolidayCalendar()
+            SchoolWithHolidayCalendar()
         }
-
         return editEntity
     }
 

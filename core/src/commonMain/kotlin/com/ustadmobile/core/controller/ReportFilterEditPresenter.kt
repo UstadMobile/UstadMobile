@@ -1,17 +1,16 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
-import com.ustadmobile.core.util.IdOption
-import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.OUTCOME_TO_MESSAGE_ID_MAP
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ReportFilterEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ReportFilter
+import com.ustadmobile.lib.db.entities.StatementEntity
+import com.ustadmobile.lib.db.entities.UidAndLabel
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -258,7 +257,10 @@ class ReportFilterEditPresenter(context: Any,
         } else {
             view.valuesErrorText = null
         }
-        view.finishWithResult(listOf(entity))
+
+        val serializedResult = safeStringify(di, ListSerializer(ReportFilter.serializer()),
+            listOf(entity))
+        finishWithResult(serializedResult)
     }
 
     companion object {

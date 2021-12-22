@@ -72,8 +72,9 @@ class ClazzEdit2Presenter(context: Any,
             entity?.school = school
             entity?.clazzSchoolUid = school.schoolUid
             view.entity = entity
-
-            requireSavedStateHandle()[SAVEDSTATE_KEY_SCHOOL] = null
+            UmPlatform.run{
+                requireSavedStateHandle()[SAVEDSTATE_KEY_SCHOOL] = null
+            }
         }
 
         observeSavedStateResult(SAVEDSTATE_KEY_HOLIDAYCALENDAR,
@@ -82,8 +83,9 @@ class ClazzEdit2Presenter(context: Any,
             entity?.holidayCalendar = calendar
             entity?.clazzHolidayUMCalendarUid = calendar.umCalendarUid
             view.entity = entity
-
-            requireSavedStateHandle()[SAVEDSTATE_KEY_HOLIDAYCALENDAR] = null
+            UmPlatform.run {
+                requireSavedStateHandle()[SAVEDSTATE_KEY_HOLIDAYCALENDAR] = null
+            }
         }
 
         observeSavedStateResult(
@@ -92,17 +94,19 @@ class ClazzEdit2Presenter(context: Any,
             val timeZone = it.firstOrNull() ?: return@observeSavedStateResult
             entity?.clazzTimeZone = timeZone
             view.entity = entity
-
-            requireSavedStateHandle()[RESULT_TIMEZONE_KEY] = null
+            UmPlatform.run {
+                requireSavedStateHandle()[RESULT_TIMEZONE_KEY] = null
+            }
         }
 
         observeSavedStateResult(SAVEDSTATE_KEY_FEATURES,
             ListSerializer(LongWrapper.serializer()), LongWrapper::class) {
             val wrapper = it.firstOrNull() ?: return@observeSavedStateResult
-
             entity?.clazzFeatures = wrapper.longValue
             view.entity = entity
-            requireSavedStateHandle()[SAVEDSTATE_KEY_FEATURES] = null
+            UmPlatform.run {
+                requireSavedStateHandle()[SAVEDSTATE_KEY_FEATURES] = null
+            }
         }
     }
 

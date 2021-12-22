@@ -12,13 +12,10 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.io.ext.getSize
-import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.createTemporaryDir
+import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.logErrorReport
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
-import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_IMPORTED_METADATA
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
@@ -172,7 +169,9 @@ class ContentEntryEdit2Presenter(
             presenterScope.launch(doorMainDispatcher()){
                 view.entity = handleFileSelection(uri)
             }
-            requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
+            UmPlatform.run {
+                requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
+            }
         }
 
         observeSavedStateResult(SAVED_STATE_KEY_METADATA, ListSerializer(MetadataResult.serializer()),
@@ -189,8 +188,9 @@ class ContentEntryEdit2Presenter(
             }
             view.fileImportErrorVisible = false
             view.loading = false
-
-            requireSavedStateHandle()[SAVED_STATE_KEY_METADATA] = null
+            UmPlatform.run {
+                requireSavedStateHandle()[SAVED_STATE_KEY_METADATA] = null
+            }
         }
 
         observeSavedStateResult(
@@ -200,7 +200,9 @@ class ContentEntryEdit2Presenter(
             entity?.language = language
             entity?.primaryLanguageUid = language.langUid
             view.entity = entity
-            requireSavedStateHandle()[SAVEDSTATE_KEY_LANGUAGE] = null
+            UmPlatform.run {
+                requireSavedStateHandle()[SAVEDSTATE_KEY_LANGUAGE] = null
+            }
         }
 
 
