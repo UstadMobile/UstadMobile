@@ -7,23 +7,21 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveDbInstance
+import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.onActiveAccount
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import org.junit.Rule
-import kotlin.test.Test
+import kotlinx.coroutines.*
+import org.junit.Assert
 import org.junit.Before
+import org.junit.Rule
 import org.kodein.di.*
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
-import org.junit.Assert
 import org.mockito.kotlin.stub
 import java.io.IOException
-import java.lang.IllegalStateException
+import kotlin.test.Test
 
 class TestContentJobRunner {
 
@@ -35,9 +33,16 @@ class TestContentJobRunner {
 
     private lateinit var db: UmAppDatabase
 
+    private lateinit var repo: UmAppDatabase
+
     private lateinit var endpoint: Endpoint
 
     var numTimesToFail = 0
+
+    var processJobCalled = false
+    var jobCompleted = false
+    var connectivityCancelledExceptionCalled = false
+    var cancellationExceptionCalled = false
 
     inner class DummyPlugin(override val di: DI, endpoint: Endpoint) : ContentPlugin{
         override val pluginId: Int
@@ -65,7 +70,25 @@ class TestContentJobRunner {
             process: ContentJobProcessContext,
             progress: ContentJobProgressListener
         ): ProcessResult {
-            delay(100)
+            processJobCalled = true
+            println("processJobCalled")
+            try {
+                println("start delay")
+                delay(100)
+            }catch (c: CancellationException){
+                println("caught cancellation")
+                withContext(NonCancellable) {
+                    if (c is ConnectivityCancellationException) {
+                        connectivityCancelledExceptionCalled = true
+                    } else {
+                        cancellationExceptionCalled = true
+                    }
+                }
+                throw c
+            }
+
+            println("job completed")
+            jobCompleted = true
 
             return ProcessResult(JobStatus.COMPLETE)
         }
@@ -73,6 +96,10 @@ class TestContentJobRunner {
 
     @Before
     fun setup() {
+        processJobCalled = false
+        connectivityCancelledExceptionCalled = false
+        cancellationExceptionCalled = false
+        jobCompleted = false
         di = DI {
             import(ustadTestRule.diModule)
             bind<ContentPluginManager>() with scoped(ustadTestRule.endpointScope).singleton {
@@ -98,6 +125,7 @@ class TestContentJobRunner {
         val accountManager: UstadAccountManager = di.direct.instance()
         endpoint = accountManager.activeEndpoint
         db = di.directActiveDbInstance()
+        repo = di.directActiveRepoInstance()
     }
 
     @Test
@@ -158,7 +186,8 @@ class TestContentJobRunner {
                 doneBeforeConnectivityChange = db.contentJobItemDao.isJobDone(2)
                 db.connectivityStatusDao.insert(
                     ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED,
-                        true, null))
+                        true,
+            null))
             }
             runner.runJob()
 
@@ -252,7 +281,6 @@ class TestContentJobRunner {
             runner.runJob()
 
 
-
             val allJobItems = runBlocking { db.contentJobItemDao.findAll() }
             allJobItems.forEach {
                 Assert.assertEquals("job attempted match count", maxAttempts + 1, it.cjiAttemptCount)
@@ -260,6 +288,97 @@ class TestContentJobRunner {
             }
         }
     }
+
+    @Test
+    fun givenJobCreated_whenJobConnectivityChangesToUnAcceptable_thenJobCancelledAndQueued(){
+        runBlocking {
+            db.contentJobDao.insertAsync(ContentJob(cjUid = 2))
+            db.contentJobItemDao.insertJobItem(ContentJobItem().apply {
+                this.cjiJobUid = 2
+                cjiConnectivityNeeded = true
+                cjiStatus = JobStatus.QUEUED
+                cjiPluginId = TEST_PLUGIN_ID
+                sourceUri = "dummy:///test"
+            })
+            db.connectivityStatusDao.insert(
+                    ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED,
+                            true, null))
+
+
+            val runner = ContentJobRunner(2, endpoint, di)
+            launch {
+                delay(100)
+                db.connectivityStatusDao.insert(
+                        ConnectivityStatus(ConnectivityStatus.STATE_METERED,
+                                true, null))
+            }
+            val result = launch {
+                runner.runJob()
+            }
+
+            delay(1000)
+
+            val job = db.contentJobItemDao.findByJobId(2)!!
+            Assert.assertTrue("connectivity exception called from plugin", connectivityCancelledExceptionCalled)
+            Assert.assertFalse("job not completed", jobCompleted)
+            Assert.assertTrue("content Entry got created from extract metadata", job.cjiContentEntryUid != 0L)
+            Assert.assertTrue("job finished 1st time but interrupted", job.cjiFinishTime != 0L)
+            Assert.assertEquals("Job back to queued", JobStatus.QUEUED, job.cjiRecursiveStatus)
+            // need to cancel, job waiting for connectivity to turn back on
+            result.cancel()
+        }
+    }
+
+    @Test
+    fun givenJobCreated_whenJobCancelled_thenContentEntryShouldBeInvalidAndContainerDeleted(){
+        runBlocking {
+            ContentEntry().apply {
+                contentEntryUid = 3
+                repo.contentEntryDao.insert(this)
+            }
+            db.contentJobDao.insertAsync(ContentJob(cjUid = 2))
+            db.contentJobItemDao.insertJobItem(ContentJobItem().apply {
+                this.cjiJobUid = 2
+                cjiContentEntryUid = 3
+                cjiContainerUid = 3
+                cjiConnectivityNeeded = false
+                cjiStatus = JobStatus.QUEUED
+                cjiPluginId = TEST_PLUGIN_ID
+                sourceUri = "dummy:///test"
+            })
+
+            val runner = ContentJobRunner(2, endpoint, di)
+
+            val result = launch {
+                runner.runJob()
+            }
+
+            do{
+                delay(10)
+            }while(!processJobCalled)
+
+            result.cancelAndJoin()
+            println("job cancelled")
+
+            Assert.assertTrue("cancellation exception called from plugin", cancellationExceptionCalled)
+            Assert.assertFalse("job not completed", jobCompleted)
+            val allJobItems = runBlocking { db.contentJobItemDao.findAll() }
+            allJobItems.forEach {
+                Assert.assertEquals("job is cancelled", JobStatus.CANCELED, it.cjiStatus)
+            }
+
+        }
+
+    }
+
+    /*@Test
+    fun givenJobWithMultipleJobItemAnd1Completed_whenJobGetsCancelled_thenDeleteAllEntries(){
+
+
+
+
+    }
+*/
 
     //TODO: test calling extract metadata when needed, getting plugin type when needed
 

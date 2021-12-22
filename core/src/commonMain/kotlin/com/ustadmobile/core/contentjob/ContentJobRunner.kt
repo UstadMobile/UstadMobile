@@ -13,6 +13,7 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -27,7 +28,6 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import kotlin.jvm.Volatile
 import kotlin.math.min
-import com.ustadmobile.door.ext.dbType
 
 /**
  * Runs a given ContentJob.
@@ -186,6 +186,9 @@ class ContentJobRunner(
                 try{
                     processResult = jobResult.await()
                 }catch (e: Exception){
+                    Napier.i("caught exception in jobResult await ${e.printStackTrace()}")
+                    // because of supervisor, this needs to be called to cancel the pluginJob, otherwise the plugin continues
+                    jobResult.cancelAndJoin()
                     throw e
                 }
 
@@ -201,13 +204,13 @@ class ContentJobRunner(
             }finally {
                 withContext(NonCancellable) {
                     val finalStatus: Int = when {
-                        processResult != null -> processResult.status
+                        processException == null && processResult != null -> processResult.status
                         processException is FatalContentJobException -> JobStatus.FAILED
                         processException is ConnectivityCancellationException -> JobStatus.QUEUED
                         processException is CancellationException -> {
                             deleteFilesForContentEntry(
                                     item.contentJobItem?.cjiContentEntryUid ?: 0,
-                                            di, endpoint)
+                                    di, endpoint)
                             JobStatus.CANCELED
                         }
                         (item.contentJobItem?.cjiAttemptCount ?: maxItemAttempts) >= maxItemAttempts -> JobStatus.FAILED
@@ -233,7 +236,8 @@ class ContentJobRunner(
                 }
 
 
-                if(processException is CancellationException)
+                if(processException is CancellationException &&
+                        processException !is ConnectivityCancellationException)
                     throw processException
 
                 checkQueueSignalChannel.send(true)
