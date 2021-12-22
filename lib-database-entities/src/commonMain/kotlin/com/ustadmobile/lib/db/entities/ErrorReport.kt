@@ -5,6 +5,7 @@ import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 
 @Entity
+@ReplicateEntity(tableId = 419, tracker = ErrorReportTracker::class)
 //@SyncableEntity(tableId = 419)
 class ErrorReport {
 
@@ -21,6 +22,7 @@ class ErrorReport {
     var errLcb: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var errLct: Long = 0
 
     var severity: Int = 0

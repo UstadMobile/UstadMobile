@@ -38,6 +38,7 @@ import kotlinx.serialization.Serializable
 //    """
 //)
 @Serializable
+@ReplicateEntity(tableId = School.TABLE_ID, tracker = SchoolTracker::class)
 open class School() {
 
     @PrimaryKey(autoGenerate = true)
@@ -87,6 +88,7 @@ open class School() {
     var schoolLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var schoolLct: Long = 0
 
 

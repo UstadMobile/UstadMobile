@@ -14,6 +14,7 @@ import kotlinx.serialization.Serializable
 //          FROM UserSession
 //    """])
 @Serializable
+@ReplicateEntity(tableId = TABLE_ID, tracker = LanguageTracker::class)
 class Language() {
 
     @PrimaryKey(autoGenerate = true)
@@ -45,6 +46,7 @@ class Language() {
     var langLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var langLct: Long = 0
 
     override fun toString(): String {

@@ -14,6 +14,7 @@ import kotlinx.serialization.Serializable
  */
 //shortcode cerej
 @Entity
+@ReplicateEntity(tableId = TABLE_ID, tracker = ContentEntryRelatedEntryJoinTracker::class)
 //@SyncableEntity(tableId = TABLE_ID,
 //    notifyOnUpdate = ["""
 //        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
@@ -47,6 +48,7 @@ open class ContentEntryRelatedEntryJoin() {
     var cerejMasterChangeSeqNum: Long = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var cerejLct: Long = 0
 
     override fun equals(other: Any?): Boolean {

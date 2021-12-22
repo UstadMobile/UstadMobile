@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
+@ReplicateEntity(tableId = TABLE_ID, tracker = PersonParentJoinTracker::class)
 //@SyncableEntity(tableId = TABLE_ID)
 open class PersonParentJoin {
 
@@ -24,6 +25,7 @@ open class PersonParentJoin {
     var ppjLcb: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var ppjLct: Long = 0
 
     /**

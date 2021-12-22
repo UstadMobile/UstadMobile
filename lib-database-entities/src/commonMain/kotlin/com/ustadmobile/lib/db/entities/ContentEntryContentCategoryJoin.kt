@@ -19,6 +19,7 @@ import kotlinx.serialization.Serializable
         FROM UserSession
     """])
  */
+@ReplicateEntity(tableId = TABLE_ID, tracker = ContentEntryContentCategoryJoinTracker::class)
 @Serializable
 class ContentEntryContentCategoryJoin() {
 
@@ -40,6 +41,7 @@ class ContentEntryContentCategoryJoin() {
     var ceccjLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var ceccjLct: Long = 0
 
     override fun equals(other: Any?): Boolean {

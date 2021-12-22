@@ -10,6 +10,7 @@ import kotlinx.serialization.Serializable
  * could also be related to behavior logs etc. in the future.
  */
 
+@ReplicateEntity(tableId =  ClazzLog.TABLE_ID, tracker = ClazzLogTracker::class)
 /*
 @SyncableEntity(tableId = ClazzLog.TABLE_ID,
     notifyOnUpdate = [
@@ -83,6 +84,7 @@ open class ClazzLog()  {
     var clazzLogLCB: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var clazzLogLastChangedTime: Long = 0
 
     constructor(clazzLogUid: Long, clazzUid: Long, logDate: Long, scheduleUid: Long): this() {

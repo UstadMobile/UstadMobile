@@ -17,6 +17,7 @@ import kotlinx.serialization.Serializable
 //    """])
 @Entity
 @Serializable
+@ReplicateEntity(tableId = HolidayCalendar.TABLE_ID, tracker = HolidayCalendarTracker::class)
 open class HolidayCalendar() {
 
     @PrimaryKey(autoGenerate = true)
@@ -41,6 +42,7 @@ open class HolidayCalendar() {
     var umCalendarLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var umCalendarLct: Long = 0
 
     constructor(name: String, category: Int): this() {

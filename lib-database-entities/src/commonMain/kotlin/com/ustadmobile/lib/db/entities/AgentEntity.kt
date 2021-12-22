@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSON_TO_USER
 import kotlinx.serialization.Serializable
 
 @Entity
-@ReplicateEntity(tableId = AgentEntity.TABLE_ID, tracker = AgentEntityTrkr::class)
+@ReplicateEntity(tableId = AgentEntity.TABLE_ID, tracker = AgentEntityTracker::class)
 /*
 @Triggers(arrayOf(
     Trigger(name = "agententity_remote_insert",

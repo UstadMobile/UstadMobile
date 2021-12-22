@@ -13,6 +13,7 @@ import kotlinx.serialization.Serializable
 ])
 //@SyncableEntity(tableId = Role.TABLE_ID)
 @Serializable
+@ReplicateEntity(tableId = Role.TABLE_ID, tracker = RoleTracker::class)
 open class Role() {
 
     @PrimaryKey(autoGenerate = true)
@@ -32,6 +33,7 @@ open class Role() {
     var roleLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var roleLct: Long = 0
 
     //bit flags made of up PERMISSION_ constants

@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
  */
 @Entity
 @Serializable
-@ReplicateEntity(tableId = 189, tracker = SiteTrkr::class)
+@ReplicateEntity(tableId = 189, tracker = SiteTracker::class)
 @Triggers(arrayOf(
     Trigger(name = "site_remote_insert",
         order = Trigger.Order.INSTEAD_OF,

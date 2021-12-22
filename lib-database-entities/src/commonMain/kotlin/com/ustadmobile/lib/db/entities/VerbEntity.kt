@@ -20,6 +20,7 @@ class VerbDisplay {
 //        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, ${VerbEntity.TABLE_ID} AS tableId
 //        FROM UserSession"""])
 @Serializable
+@ReplicateEntity(tableId = TABLE_ID, tracker = VerbEntityTracker::class)
 class VerbEntity() {
 
     constructor(uid: Long, url: String?) : this(){
@@ -44,6 +45,7 @@ class VerbEntity() {
     var verbLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var verbLct: Long = 0
 
     companion object {

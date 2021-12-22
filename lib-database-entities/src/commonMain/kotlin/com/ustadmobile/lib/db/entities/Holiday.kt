@@ -13,6 +13,7 @@ import kotlinx.serialization.Serializable
 //               $TABLE_ID AS tableId
 //          FROM UserSession
 //    """])
+@ReplicateEntity(tableId = TABLE_ID, tracker = HolidayTracker::class)
 @Serializable
 class Holiday() {
 
@@ -29,6 +30,7 @@ class Holiday() {
     var holLastModBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var holLct: Long = 0
 
     var holActive: Boolean = true

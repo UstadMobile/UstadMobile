@@ -7,6 +7,8 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.FROM_C
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.FROM_SCOPEDGRANT_TO_CLAZZLOGATTENDANCERECORD_JOIN_ON_CLAUSE
 import kotlinx.serialization.Serializable
 
+@ReplicateEntity(tableId = ClazzLogAttendanceRecord.TABLE_ID,
+    tracker = ClazzLogAttendanceRecordTracker::class)
 /*
 @SyncableEntity(tableId = ClazzLogAttendanceRecord.TABLE_ID,
     notifyOnUpdate = [
@@ -65,6 +67,7 @@ open class ClazzLogAttendanceRecord {
     var clazzLogAttendanceRecordLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var clazzLogAttendanceRecordLastChangedTime: Long = 0
 
 

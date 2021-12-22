@@ -15,6 +15,7 @@ import kotlinx.serialization.Serializable
 //    """])
 @Entity
 @Serializable
+@ReplicateEntity(tableId = TABLE_ID, tracker = LanguageVariantTracker::class)
 class LanguageVariant() {
 
 
@@ -37,6 +38,7 @@ class LanguageVariant() {
     var langVariantLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var langVariantLct: Long = 0
 
     override fun equals(other: Any?): Boolean {

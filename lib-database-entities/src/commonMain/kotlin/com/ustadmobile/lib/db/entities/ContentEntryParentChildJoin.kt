@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  */
 //short code = cepcj
 @Entity(indices = [Index(name = "parent_child", value = ["cepcjChildContentEntryUid", "cepcjParentContentEntryUid"])])
-
+@ReplicateEntity(tableId = TABLE_ID, tracker = ContentEntryParentChildJoinTracker::class)
 //@SyncableEntity(tableId = TABLE_ID,
 //        notifyOnUpdate = ["""
 //        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
@@ -44,6 +44,7 @@ class ContentEntryParentChildJoin(
     var cepcjLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var cepcjLct: Long = 0
 
     constructor(parentEntry: ContentEntry, childEntry: ContentEntry, index: Int) : this(){

@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Entity
 //@SyncableEntity(tableId = Comments.TABLE_ID)
+@ReplicateEntity(tableId = Comments.TABLE_ID, tracker = CommentsTracker::class)
 @Serializable
 open class Comments() {
 
@@ -46,6 +47,7 @@ open class Comments() {
     var commentsLCB: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var commentsLct: Long = 0
 
     constructor(table: Int, uid: Long, personUid: Long, now: Long, comment: String, isPublic: Boolean) : this() {

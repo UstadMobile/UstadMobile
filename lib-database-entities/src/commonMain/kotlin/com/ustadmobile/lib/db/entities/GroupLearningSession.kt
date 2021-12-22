@@ -8,6 +8,8 @@ import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEM
 import kotlinx.serialization.Serializable
 
 @Entity
+@ReplicateEntity(tableId = GroupLearningSession.TABLE_ID,
+    tracker = GroupLearningSessionTracker::class)
 //@SyncableEntity(tableId = GroupLearningSession.TABLE_ID,
 //    notifyOnUpdate = ["""
 //        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
@@ -62,6 +64,7 @@ class GroupLearningSession {
     var groupLearningSessionLCB: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var groupLearningSessionLct: Long = 0
 
 

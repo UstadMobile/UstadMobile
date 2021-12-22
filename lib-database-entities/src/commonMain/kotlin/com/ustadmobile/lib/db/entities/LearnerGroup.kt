@@ -38,6 +38,7 @@ import kotlinx.serialization.Serializable
 //              WHERE UserSession.usClientNodeId = :clientId
 //                AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
 //    """)
+@ReplicateEntity(tableId = LearnerGroup.TABLE_ID, tracker = LearnerGroupTracker::class)
 @Serializable
 class LearnerGroup {
 
@@ -60,6 +61,7 @@ class LearnerGroup {
     var learnerGroupLCB: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var learnerGroupLct: Long = 0
 
     companion object {

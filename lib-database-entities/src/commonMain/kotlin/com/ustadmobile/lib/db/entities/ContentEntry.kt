@@ -15,6 +15,7 @@ import kotlinx.serialization.Serializable
  * there should be the appropriate ContentEntryParentChildJoin entities present.
  */
 @Entity
+@ReplicateEntity(tableId = TABLE_ID, tracker = ContentEntryTracker::class)
 /*
 @SyncableEntity(tableId = TABLE_ID,
         notifyOnUpdate = ["""
@@ -129,6 +130,7 @@ open class ContentEntry() {
     var contentEntryLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var contentEntryLct: Long = 0
 
     constructor(title: String, description: String, leaf: Boolean, publik: Boolean) : this() {

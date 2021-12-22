@@ -11,6 +11,7 @@ import kotlinx.serialization.Serializable
 //               ${XObjectEntity.TABLE_ID} AS tableId
 //        FROM UserSession"""])
 @Serializable
+@ReplicateEntity(tableId =  XObjectEntity.TABLE_ID, tracker = XObjectEntityTracker::class)
 class XObjectEntity {
 
     @PrimaryKey(autoGenerate = true)
@@ -38,6 +39,7 @@ class XObjectEntity {
     var xObjectLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var xObjectLct: Long = 0
 
     constructor() {

@@ -8,6 +8,7 @@ import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.FROM_SCOPEDGRANT_TO_CLAZZENROLMENT_JOIN__ON_CLAUSE
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
+import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.TABLE_ID
 
 import kotlinx.serialization.Serializable
 
@@ -24,6 +25,7 @@ import kotlinx.serialization.Serializable
     //Index for streamlining ClazzList where the number of users is counted by role
     Index(value = ["clazzEnrolmentClazzUid", "clazzEnrolmentRole"])
 ])
+@ReplicateEntity(tableId = TABLE_ID, tracker = ClazzEnrolmentTracker::class)
 /*
 @SyncableEntity(tableId = ClazzEnrolment.TABLE_ID,
     /* If someone is newly added to a class this might mean that existing members of the class (e.g.
@@ -261,6 +263,7 @@ open class ClazzEnrolment()  {
     var clazzEnrolmentLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var clazzEnrolmentLct: Long = 0
 
     constructor(clazzUid: Long, personUid: Long) : this() {

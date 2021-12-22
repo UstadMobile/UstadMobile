@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 @Entity
 @Serializable
 //@SyncableEntity(tableId = SiteTerms.TABLE_ID)
+@ReplicateEntity(tableId = SiteTerms.TABLE_ID, tracker = SiteTermsTracker::class)
 open class SiteTerms {
 
     @PrimaryKey(autoGenerate = true)
@@ -33,6 +34,7 @@ open class SiteTerms {
     var sTermsLocalCsn: Long = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var sTermsLct: Long = 0
 
     companion object {

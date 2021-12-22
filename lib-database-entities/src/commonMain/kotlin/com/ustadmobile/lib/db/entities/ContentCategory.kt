@@ -13,6 +13,7 @@ import kotlinx.serialization.Serializable
  * * with a dropdown list for each different schema.
  */
 @Entity
+@ReplicateEntity(tableId = TABLE_ID, tracker = ContentCategoryTracker::class)
 /*
 @SyncableEntity(tableId = TABLE_ID,
         notifyOnUpdate = ["""
@@ -43,6 +44,7 @@ class ContentCategory() {
     var contentCategoryLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var contentCategoryLct: Long = 0
 
     override fun equals(other: Any?): Boolean {

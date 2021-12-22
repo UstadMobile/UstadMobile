@@ -35,6 +35,7 @@ import kotlinx.serialization.Serializable
 //)
 @Serializable
 @EntityWithAttachment
+@ReplicateEntity(tableId = PersonPicture.TABLE_ID, tracker = PersonPictureTracker::class)
 open class PersonPicture() {
 
     @PrimaryKey(autoGenerate = true)
@@ -52,6 +53,7 @@ open class PersonPicture() {
     var personPictureLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var personPictureLct: Long = 0
 
     @AttachmentUri

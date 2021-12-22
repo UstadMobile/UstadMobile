@@ -27,6 +27,7 @@ import kotlinx.serialization.Serializable
 //    """
 //)
 @Serializable
+@ReplicateEntity(tableId = Report.TABLE_ID, tracker = ReportTracker::class)
 open class Report {
 
     @PrimaryKey(autoGenerate = true)
@@ -80,6 +81,7 @@ open class Report {
     var reportLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var reportLct: Long = 0
 
     companion object {

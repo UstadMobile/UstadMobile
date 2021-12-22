@@ -38,6 +38,7 @@ import kotlinx.serialization.Serializable
 //           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
 //        """)
 @Serializable
+@ReplicateEntity(tableId = PersonGroup.TABLE_ID, tracker = PersonGroupTracker::class)
 open class PersonGroup() {
 
     @PrimaryKey(autoGenerate = true)
@@ -53,6 +54,7 @@ open class PersonGroup() {
     var groupLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var groupLct: Long = 0
 
     var groupName: String? = null

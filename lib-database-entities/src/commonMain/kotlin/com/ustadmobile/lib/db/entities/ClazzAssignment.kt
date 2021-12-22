@@ -8,6 +8,7 @@ import com.ustadmobile.lib.db.entities.ClazzAssignment.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
+@ReplicateEntity(tableId = TABLE_ID, tracker = ClazzAssignmentTracker::class)
 /*
 @SyncableEntity(tableId = TABLE_ID,
         notifyOnUpdate =  [
@@ -79,6 +80,7 @@ open class ClazzAssignment {
     var caLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var caLct: Long = 0
 
     companion object {

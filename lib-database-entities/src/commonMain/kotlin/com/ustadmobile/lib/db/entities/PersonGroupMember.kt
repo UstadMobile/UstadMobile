@@ -47,6 +47,7 @@ import kotlinx.serialization.Serializable
 //         WHERE UserSession.usClientNodeId = :clientId
 //               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}""")
 @Serializable
+@ReplicateEntity(tableId = PersonGroupMember.TABLE_ID, tracker = PersonGroupMemberTracker::class)
 class PersonGroupMember() {
 
 
@@ -72,6 +73,7 @@ class PersonGroupMember() {
     var groupMemberLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var groupMemberLct: Long = 0
 
     constructor(personUid:Long, groupUid:Long) : this(){

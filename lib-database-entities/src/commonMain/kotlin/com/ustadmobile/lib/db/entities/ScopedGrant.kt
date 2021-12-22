@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
     Index(value = ["sgTableId", "sgEntityUid", "sgPermissions", "sgGroupUid"], name = "idx_entity_to_group")]
 )
 
-@ReplicateEntity(tableId = TABLE_ID, tracker = ScopedGrantTrkr::class, priority = ReplicateEntity.HIGHEST_PRIORITY)
+@ReplicateEntity(tableId = TABLE_ID, tracker = ScopedGrantTracker::class, priority = ReplicateEntity.HIGHEST_PRIORITY)
 @Triggers(arrayOf(
     Trigger(name = "sg_remote_insert",
         order = Trigger.Order.INSTEAD_OF,

@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 
 @Entity(indices = arrayOf(Index(name = "cnt_uid_to_most_recent",
         value = ["containerContentEntryUid", "cntLastModified"])))
+@ReplicateEntity(tableId = Container.TABLE_ID, tracker = ContainerTracker::class)
 /*
 @SyncableEntity(tableId = Container.TABLE_ID,
     notifyOnUpdate = ["""
@@ -35,6 +36,7 @@ open class Container() {
     var cntLastModBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var cntLct: Long = 0
 
     var fileSize: Long = 0

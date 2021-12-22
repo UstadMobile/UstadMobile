@@ -9,6 +9,7 @@ import com.ustadmobile.door.annotation.*
  * and the mechanism.
  */
 @Entity
+@ReplicateEntity(tableId = PersonAuth2.TABLE_ID, tracker = PersonAuth2Tracker::class)
 //@SyncableEntity(tableId = PersonAuth2.TABLE_ID,
 //    syncFindAllQuery = """
 //        SELECT PersonAuth2.*
@@ -62,6 +63,7 @@ class PersonAuth2 {
     var pauthLcb: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var pauthLct: Long = 0
 
     companion object {

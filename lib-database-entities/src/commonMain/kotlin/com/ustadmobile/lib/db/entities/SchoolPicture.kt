@@ -32,6 +32,7 @@ import kotlinx.serialization.Serializable
 //         WHERE UserSession.usClientNodeId = :clientId
 //    """)
 @Serializable
+@ReplicateEntity(tableId = SchoolPicture.TABLE_ID, tracker = AgentEntityTrkr::class)
 open class SchoolPicture() {
 
     @PrimaryKey(autoGenerate = true)
@@ -51,6 +52,7 @@ open class SchoolPicture() {
     var schoolPictureLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var schoolPictureLct: Long = 0
 
     var schoolPictureFileSize : Long = 0

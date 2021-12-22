@@ -997,7 +997,7 @@
       },
       {
         "tableName": "Person",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personOrgId` TEXT, `personGroupUid` INTEGER NOT NULL, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL, `personLct` INTEGER NOT NULL, `personCountry` TEXT, `personType` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personOrgId` TEXT, `personGroupUid` INTEGER NOT NULL, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL, `personLct` INTEGER NOT NULL, `personCountry` TEXT, `personType` INTEGER NOT NULL DEFAULT 0)",
         "fields": [
           {
             "fieldPath": "personUid",
@@ -1141,7 +1141,8 @@
             "fieldPath": "personType",
             "columnName": "personType",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "0"
           }
         ],
         "primaryKey": {
@@ -6108,7 +6109,7 @@
       },
       {
         "tableName": "DoorNode",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`nodeId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `auth` TEXT, `rel` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`nodeId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `auth` TEXT, `rel` INTEGER NOT NULL DEFAULT 2)",
         "fields": [
           {
             "fieldPath": "nodeId",
@@ -6126,7 +6127,8 @@
             "fieldPath": "rel",
             "columnName": "rel",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": true,
+            "defaultValue" : "2"
           }
         ],
         "primaryKey": {

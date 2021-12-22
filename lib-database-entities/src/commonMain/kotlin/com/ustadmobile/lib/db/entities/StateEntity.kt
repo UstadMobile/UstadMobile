@@ -30,6 +30,7 @@ import kotlinx.serialization.Serializable
 //           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
 //    """)
 @Serializable
+@ReplicateEntity(tableId = StateEntity.TABLE_ID, tracker = StateEntityTracker::class)
 class StateEntity() {
 
     @PrimaryKey(autoGenerate = true)
@@ -57,6 +58,7 @@ class StateEntity() {
     var stateLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var stateLct: Long = 0
 
     constructor(activityId: String?, agentUid: Long, registration: String?, stateId: String?, isActive: Boolean, timestamp: Long) : this(){

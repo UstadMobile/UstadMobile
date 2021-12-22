@@ -34,6 +34,7 @@ import kotlinx.serialization.Serializable
 //)
 @Entity
 @Serializable
+@ReplicateEntity(tableId = Schedule.TABLE_ID, tracker = ScheduleTracker::class)
 class Schedule {
 
     @PrimaryKey(autoGenerate = true)
@@ -86,6 +87,7 @@ class Schedule {
     var scheduleLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var scheduleLastChangedTime: Long = 0
 
     //active or removed

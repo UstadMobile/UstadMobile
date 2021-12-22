@@ -25,7 +25,7 @@ import kotlin.jvm.JvmField
     ScheduledCheck::class,
     AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
     Person::class,
-    Clazz::class, ClazzEnrolment::class, LeavingReason::class, PersonCustomFieldValue::class,
+    Clazz::class, ClazzEnrolment::class, LeavingReason::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
     ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
     Language::class, LanguageVariant::class, AccessToken::class, PersonAuth::class, Role::class,
@@ -64,12 +64,60 @@ import kotlin.jvm.JvmField
     SiteTrkr::class,
     ScopedGrantTrkr::class,
     AgentEntityTrkr::class,
-    ReplicationStatus::class
+    ReplicationStatus::class,
+
+    ClazzLogTracker::class,
+    ClazzLogAttendanceRecordTracker::class,
+    ScheduleTracker::class,
+    HolidayCalendarTracker::class,
+    HolidayTracker::class,
+    PersonTracker::class,
+    ClazzTracker::class,
+    ClazzEnrolmentTracker::class,
+    LeavingReasonTracker::class,
+    ContentEntryTracker::class,
+    ContentEntryContentCategoryJoinTracker::class,
+    ContentEntryParentChildJoinTracker::class,
+    ContentEntryRelatedEntryJoinTracker::class,
+    ContentCategorySchemaTracker::class,
+    ContentCategoryTracker::class,
+    LanguageTracker::class,
+    LanguageVariantTracker::class,
+    RoleTracker::class,
+    PersonGroupTracker::class,
+    PersonGroupMemberTracker::class,
+    PersonPictureTracker::class,
+    ContainerTracker::class,
+    VerbEntityTracker::class,
+    XObjectEntityTracker::class,
+    StatementEntityTracker::class,
+    ContextXObjectStatementJoinTracker::class,
+    AgentEntityTracker::class,
+    StateEntityTracker::class,
+    StateContentEntityTracker::class,
+    XLangMapEntryTracker::class,
+    SchoolTracker::class,
+    SchoolMemberTracker::class,
+    CommentsTracker::class,
+    ReportTracker::class,
+    SiteTracker::class,
+    LearnerGroupTracker::class,
+    LearnerGroupMemberTracker::class,
+    GroupLearningSessionTracker::class,
+    SiteTermsTracker::class,
+    ClazzContentJoinTracker::class,
+    PersonParentJoinTracker::class,
+    ScopedGrantTracker::class,
+    ErrorReportTracker::class,
+    ClazzAssignmentTracker::class,
+    ClazzAssignmentContentJoinTracker::class,
+    PersonAuth2Tracker::class,
+    UserSessionTracker::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 90)
+], version = 91)
 @MinReplicationVersion(60)
 abstract class UmAppDatabase : DoorDatabase() {
 
@@ -5248,6 +5296,9 @@ abstract class UmAppDatabase : DoorDatabase() {
             listOf("ALTER TABLE ContentJobItem ADD COLUMN cjiUploadSessionUid TEXT")
         }
 
+        val MIGRATION_89_90 = DoorMigrationStatementList(89, 90) {
+            listOf("DROP TABLE IF EXISTS PersonCustomFieldValue")
+        }
 
 
 fun migrationList(nodeId: Long) = listOf<DoorMigration>(

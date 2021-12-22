@@ -14,6 +14,7 @@ import kotlinx.serialization.Serializable
  */
 
 @Entity
+@ReplicateEntity(tableId = TABLE_ID, tracker = PersonTracker::class)
 //@SyncableEntity(tableId = TABLE_ID,
 //
 //    notifyOnUpdate = ["""
@@ -92,6 +93,7 @@ open class Person() {
     var personLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var personLct: Long = 0
 
     var personCountry: String? = null

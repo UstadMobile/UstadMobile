@@ -43,6 +43,7 @@ import kotlinx.serialization.Serializable
 //               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}"""
 //)
 @Serializable
+@ReplicateEntity(tableId = StatementEntity.TABLE_ID, tracker = StatementEntityTracker::class)
 open class StatementEntity {
 
     @PrimaryKey(autoGenerate = true)
@@ -109,6 +110,7 @@ open class StatementEntity {
     var statementLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var statementLct: Long = 0
 
     var extensionProgress: Int = 0

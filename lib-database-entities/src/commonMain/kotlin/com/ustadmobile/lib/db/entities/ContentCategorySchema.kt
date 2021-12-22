@@ -19,6 +19,7 @@ import kotlinx.serialization.Serializable
           FROM UserSession
     """])
  */
+@ReplicateEntity(tableId = TABLE_ID, tracker = ContentCategorySchemaTracker::class)
 @Serializable
 class ContentCategorySchema() {
 
@@ -39,6 +40,7 @@ class ContentCategorySchema() {
     var contentCategorySchemaLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var contentCategorySchemaLct: Long = 0
 
     override fun equals(other: Any?): Boolean {

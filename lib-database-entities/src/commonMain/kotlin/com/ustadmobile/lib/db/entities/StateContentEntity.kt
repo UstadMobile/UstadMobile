@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 @Entity
 //@SyncableEntity(tableId = TABLE_ID)
 @Serializable
+@ReplicateEntity(tableId = StateContentEntity.TABLE_ID, tracker = StateContentEntityTracker::class)
 //TODO
 class StateContentEntity {
 
@@ -33,6 +34,7 @@ class StateContentEntity {
     var stateContentLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var stateContentLct: Long = 0
 
     constructor(key: String, stateUid: Long, valueOf: String, isActive: Boolean) {

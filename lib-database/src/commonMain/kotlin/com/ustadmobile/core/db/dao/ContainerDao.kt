@@ -17,9 +17,6 @@ abstract class ContainerDao : BaseDao<Container> {
     @Insert
     abstract suspend fun insertListAsync(containerList: List<Container>)
 
-    @Insert
-    abstract fun insertListAndReturnIds(containerList: List<Container>): Array<Long>
-
     @Query("Select Container.* FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntry " +
             "ORDER BY Container.cntLastModified DESC LIMIT 1")

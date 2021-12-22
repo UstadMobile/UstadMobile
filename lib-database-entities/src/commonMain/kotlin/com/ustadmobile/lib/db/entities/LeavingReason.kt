@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Entity
 //@SyncableEntity(tableId = LeavingReason.TABLE_ID)
+@ReplicateEntity(tableId = LeavingReason.TABLE_ID, tracker = LeavingReasonTracker::class)
 @Serializable
 class LeavingReason() {
 
@@ -30,6 +31,7 @@ class LeavingReason() {
     var leavingReasonLCB: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var leavingReasonLct: Long = 0
 
     companion object {

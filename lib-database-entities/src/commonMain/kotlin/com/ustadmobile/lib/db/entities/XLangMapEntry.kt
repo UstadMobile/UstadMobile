@@ -14,6 +14,7 @@ import kotlinx.serialization.Serializable
 //               ${XLangMapEntry.TABLE_ID} AS tableId
 //          FROM UserSession"""])
 @Serializable
+@ReplicateEntity(tableId = TABLE_ID, tracker = XLangMapEntryTracker::class)
 data class XLangMapEntry(
         @ColumnInfo(index = true)
         var verbLangMapUid: Long = 0L,
@@ -32,6 +33,7 @@ data class XLangMapEntry(
         var statementLangMapLcb: Int = 0,
 
         @LastChangedTime
+        @ReplicationVersionId
         var statementLangMapLct: Long = 0
 ) {
 

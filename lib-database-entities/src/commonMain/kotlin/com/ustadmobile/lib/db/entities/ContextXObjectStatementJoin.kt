@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 
 @Entity
 //@SyncableEntity(tableId = TABLE_ID)
+@ReplicateEntity(tableId = TABLE_ID, tracker = ContextXObjectStatementJoinTracker::class)
 @Serializable
 //TODO: check this
 class ContextXObjectStatementJoin {
@@ -31,6 +32,7 @@ class ContextXObjectStatementJoin {
     var verbLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var contextXObjectLct: Long = 0
 
     companion object {
