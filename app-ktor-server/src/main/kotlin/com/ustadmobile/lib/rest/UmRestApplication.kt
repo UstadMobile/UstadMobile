@@ -26,6 +26,7 @@ import com.ustadmobile.core.catalog.contenttype.ApacheIndexerPlugin
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.io.UploadSessionManager
+import com.ustadmobile.core.util.ext.addInvalidationListener
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.PersonAuth2
 import com.ustadmobile.lib.rest.ext.*
@@ -151,7 +152,9 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         bind<ReplicationNotificationDispatcher>() with scoped(EndpointScope.Default).singleton {
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
             ReplicationNotificationDispatcher(db, UmAppDatabase_ReplicationRunOnChangeRunner(db),
-                GlobalScope, UmAppDatabase::class.doorDatabaseMetadata())
+                GlobalScope, UmAppDatabase::class.doorDatabaseMetadata()).also {
+                    db.addInvalidationListener(ChangeListenerRequest(listOf(), it))
+            }
         }
 
         bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {

@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
@@ -95,7 +96,8 @@ open class Person() {
 
     var personCountry: String? = null
 
-    var personType: Int = 0
+    @ColumnInfo(defaultValue = "${TYPE_NORMAL_PERSON}")
+    var personType: Int = TYPE_NORMAL_PERSON
 
 
     fun fullName():String{

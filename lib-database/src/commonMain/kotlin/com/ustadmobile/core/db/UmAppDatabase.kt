@@ -5265,7 +5265,7 @@ fun migrationList(nodeId: Long) = listOf<DoorMigration>(
     MIGRATION_76_77, MIGRATION_77_78, MIGRATION_78_79, MIGRATION_78_79,
     MIGRATION_79_80, MIGRATION_80_81, MIGRATION_81_82, MIGRATION_82_83, MIGRATION_83_84,
     MIGRATION_84_85, MIGRATION_85_86, MIGRATION_86_87, MIGRATION_87_88,
-    MIGRATION_88_89
+    MIGRATION_88_89, UmAppDatabaseReplicationMigration89_90
 )
 
         internal fun migrate67to68(nodeId: Long)= DoorMigrationSync(67, 68) { database ->

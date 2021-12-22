@@ -15,6 +15,14 @@ import com.ustadmobile.lib.db.entities.UserSessionAndPerson
 @Repository
 abstract class UserSessionDao {
 
+    /*
+                JOIN Person
+                     ON UserSessionSubject.usPersonUid = Person.personUid
+                ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_SELECT}) > 0
+                JOIN UserSession
+                     ON UserSession.usPersonUid = Person.personUid
+                        AND (:newNodeId = 0 OR UserSession.usClientNodeId = :newNodeId)
+                */
     @Query("""
         REPLACE INTO UserSessionTrkr(usForeignKey, usVersionId, usDestination)
          SELECT UserSessionSubject.usUid AS usForeignKey,
@@ -27,14 +35,7 @@ abstract class UserSessionDao {
                         AND ChangeLog.chEntityPk = UserSessionSubject.usUid
                 JOIN DoorNode
                      ON (:newNodeId = 0 OR DoorNode.nodeId = :newNodeId)
-                /*        
-                JOIN Person 
-                     ON UserSessionSubject.usPersonUid = Person.personUid
-                ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_SELECT}) > 0
-                JOIN UserSession 
-                     ON UserSession.usPersonUid = Person.personUid 
-                        AND (:newNodeId = 0 OR UserSession.usClientNodeId = :newNodeId)
-                */        
+                        
           WHERE UserSessionSubject.usLct != COALESCE(
                 (SELECT usVersionId
                    FROM UserSessionTrkr

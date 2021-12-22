@@ -36,4 +36,25 @@ abstract class SiteDao: BaseDao<Site>{
     abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
 
 
+    @Query("""
+        REPLACE INTO SiteTrkr(siteFk, siteVersionId, siteDestination)
+         SELECT Site.siteUid AS siteFk,
+                Site.siteLct AS siteVersionId,
+                UserSession.usClientNodeId AS siteDestination
+           FROM ChangeLog
+                JOIN Site 
+                    ON ChangeLog.chTableId = 189 
+                       AND ChangeLog.chEntityPk = Site.siteUid
+                JOIN UserSession
+          WHERE Site.siteLct != COALESCE(
+                (SELECT siteVersionId
+                   FROM SiteTrkr
+                  WHERE siteFk = Site.siteUid
+                    AND siteDestination = UserSession.usClientNodeId), 0)     
+    """)
+    @ReplicationRunOnChange([Site::class])
+    @ReplicationCheckPendingNotificationsFor([Site::class])
+    abstract suspend fun replicateOnChange()
+
+
 }

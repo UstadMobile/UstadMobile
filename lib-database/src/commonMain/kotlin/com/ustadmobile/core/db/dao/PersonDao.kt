@@ -175,6 +175,14 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
     abstract fun findByUsername(username: String?): Person?
 
+    @Query("""
+        SELECT Person.*
+          FROM Person
+         WHERE Person.dateOfBirth = :nodeId
+           AND Person.personType = ${Person.TYPE_SYSTEM}
+    """)
+    abstract suspend fun findSystemAccount(nodeId: Long): Person?
+
     @JsName("findByUid")
     @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")
     abstract suspend fun findByUid(uid: Long): Person?

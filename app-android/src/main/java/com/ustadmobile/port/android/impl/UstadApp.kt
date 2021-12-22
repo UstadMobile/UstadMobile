@@ -32,8 +32,10 @@ import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.addInvalidationListener
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.view.ContainerMounter
+import com.ustadmobile.door.ChangeListenerRequest
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.NanoHttpdCall
@@ -106,8 +108,14 @@ open class UstadApp : Application(), DIAware {
 
         bind<ReplicationNotificationDispatcher>() with scoped(EndpointScope.Default).singleton {
             val db = instance<UmAppDatabase>(tag = TAG_DB)
-            ReplicationNotificationDispatcher(db, UmAppDatabase_ReplicationRunOnChangeRunner(db),
-                GlobalScope)
+            val tableNames = db::class.doorDatabaseMetadata().replicateEntities.values.map {
+                it.entityTableName
+            }
+            ReplicationNotificationDispatcher(db,
+                    UmAppDatabase_ReplicationRunOnChangeRunner(db),
+                    GlobalScope).also {
+                db.addInvalidationListener(ChangeListenerRequest(tableNames, it))
+            }
         }
 
         bind<Json>() with singleton {
@@ -133,8 +141,9 @@ open class UstadApp : Application(), DIAware {
                 val repSubscriptionListener = RepSubscriptionInitListener()
                 //Start replication subscription
                 val metadata = UmAppDatabase::class.doorDatabaseMetadata()
+                val repNotificationDispatcher = instance<ReplicationNotificationDispatcher>()
                 ReplicationSubscriptionManager(metadata.version,
-                    instance(), instance(),
+                    instance(), repNotificationDispatcher,
                     it as DoorDatabaseRepository,
                     GlobalScope, metadata, UmAppDatabase::class,
                     onSubscriptionInitialized = repSubscriptionListener)

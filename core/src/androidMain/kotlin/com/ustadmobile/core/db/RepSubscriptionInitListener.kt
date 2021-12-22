@@ -1,9 +1,16 @@
 package com.ustadmobile.core.db
 
+import com.ustadmobile.core.util.ext.grantScopedPermission
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.ext.withDoorTransaction
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.replication.ReplicationSubscriptionManager
+import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.ScopedGrant
+import com.ustadmobile.lib.db.entities.UserSession
 
 /**
  * When the client connects to a remote node (e.g. the primary server or an intermediary device) then
@@ -19,9 +26,26 @@ class RepSubscriptionInitListener : ReplicationSubscriptionManager.SubscriptionI
         repo: DoorDatabaseRepository,
         remoteNodeId: Long
     ) {
-        repo.db.withDoorTransactionAsync(UmAppDatabase::class) { transactDb ->
-            //check for the session
+        (repo as UmAppDatabase).withDoorTransactionAsync(UmAppDatabase::class) { transactDb ->
+            //create a virtual person and persongroup
+            if(transactDb.personDao.findSystemAccount(remoteNodeId) == null) {
+                val systemPerson = transactDb.insertPersonAndGroup(Person().apply {
+                    this.username = repo.config.endpoint
+                    this.personType = Person.TYPE_SYSTEM
+                    this.dateOfBirth = remoteNodeId
+                })
 
+                transactDb.grantScopedPermission(systemPerson, Role.ALL_PERMISSIONS,
+                    ScopedGrant.ALL_TABLES, 0L)
+
+                transactDb.userSessionDao.insertSession(UserSession().apply {
+                    this.usClientNodeId = remoteNodeId
+                    this.usPersonUid = systemPerson.personUid
+                    this.usEndTime = Long.MAX_VALUE
+                    this.usStartTime = systemTimeInMillis()
+                    usSessionType = UserSession.TYPE_UPSTREAM
+                })
+            }
         }
     }
 }
