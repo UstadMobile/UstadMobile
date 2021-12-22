@@ -59,7 +59,6 @@ class PersonAccountEditPresenterTest  {
     fun setUp() {
         context = Any()
         mockLifecycleOwner = mock { }
-        mockNavController = mock()
 
         mockView = mock{}
         impl = mock()
@@ -80,11 +79,11 @@ class PersonAccountEditPresenterTest  {
             import(ustadTestRule.diModule)
             bind<UstadAccountManager>(overrides = true) with singleton { accountManager }
             bind<UstadMobileSystemImpl>(overrides = true) with singleton { impl }
-            bind<UstadNavController>(overrides = true) with singleton { mockNavController }
             bind<AuthManager>() with singleton { mockAuthManager }
         }
 
         repo = di.directActiveRepoInstance()
+        mockNavController = di.direct.instance()
     }
 
     private fun createPerson(withUsername: Boolean = false, isAdmin: Boolean = false,
