@@ -91,7 +91,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotificatio
      * TODO: This should not be done on every onResume of every activity. It could go to HomeActivity
      */
     private fun checkForAppUpdate() {
-        appUpdateManager = AppUpdateManagerFactory.create(this);
+        appUpdateManager = AppUpdateManagerFactory.create(this)
         // Returns an intent object that you use to check for an update.
         val appUpdateInfoTask = appUpdateManager.appUpdateInfo
 
@@ -129,7 +129,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotificatio
     override fun onCreate(savedInstanceState: Bundle?) {
         //enable webview debugging
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            WebView.setWebContentsDebuggingEnabled(true);
+            WebView.setWebContentsDebuggingEnabled(true)
         }
         super.onCreate(savedInstanceState)
         localeOnCreate = systemImpl.getDisplayedLocale(this)
@@ -153,7 +153,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotificatio
         val editText = dialogView.findViewById<TextInputEditText>(R.id.feedback_edit_comment)
         builder.setView(dialogView)
         builder.setPositiveButton(R.string.send) { dialogInterface, whichButton ->
-            ACRA.getErrorReporter().handleSilentException(UserFeedbackException(editText.text.toString()))
+            ACRA.errorReporter.handleSilentException(UserFeedbackException(editText.text.toString()))
             Toast.makeText(this, R.string.feedback_thanks, Toast.LENGTH_LONG).show()
             dialogInterface.cancel()
         }

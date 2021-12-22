@@ -127,7 +127,7 @@ android {
         //When using variables the build analyzer reports that major tasks reran because of a
         // 'chnage' in the value of minSdkVersion, hence hardcoding them here.
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
 
         multiDexEnabled true //required for all variants to use java library desugaring
         vectorDrawables.useSupportLibrary = true
