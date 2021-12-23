@@ -211,7 +211,6 @@ class VideoTypePluginAndroid(
                                 localUri.getFileName(context),
                                 ContainerAddOptions(containerFolderUri))
                     }
-                    videoTempDir.deleteRecursively()
 
                     contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
                         jobProgress)
@@ -239,7 +238,6 @@ class VideoTypePluginAndroid(
             }catch(c: CancellationException){
 
                 withContext(NonCancellable){
-                    mediaTransformer.release()
                     newVideo.delete()
                     videoTempDir.deleteRecursively()
                     if(videoUri.isRemote()){
@@ -248,6 +246,9 @@ class VideoTypePluginAndroid(
                 }
 
                 throw c
+            }finally {
+                videoTempDir.deleteRecursively()
+                mediaTransformer.release()
             }
         }
     }
