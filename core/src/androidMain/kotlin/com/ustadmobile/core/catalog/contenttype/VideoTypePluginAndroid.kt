@@ -172,6 +172,10 @@ class VideoTypePluginAndroid(
 
                             videoCompleted.await()
                         } catch (e: Exception) {
+                            if(e is CancellationException){
+                                mediaTransformer.cancel(contentJobItem.cjiContentEntryUid.toString())
+                                throw e
+                            }
                             Napier.e(tag = VIDEO_ANDROID, throwable = e, message = e.message ?: "")
                             throw FatalContentJobException("ContentJobItem #${jobItem.contentJobItem?.cjiUid}: cannot compress video")
                         } finally {
@@ -189,6 +193,10 @@ class VideoTypePluginAndroid(
                                 containerUid = repo.containerDao.insertAsync(this)
                             }
 
+                    contentJobItem.cjiContainerUid = container.containerUid
+                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                            container.containerUid)
+
                     val containerFolder = jobItem.contentJob?.toUri
                             ?: defaultContainerDir.toURI().toString()
                     val containerFolderUri = DoorUri.parse(containerFolder)
@@ -203,13 +211,12 @@ class VideoTypePluginAndroid(
                                 localUri.getFileName(context),
                                 ContainerAddOptions(containerFolderUri))
                     }
-                    videoTempDir.delete()
+                    videoTempDir.deleteRecursively()
 
-                    contentJobItem.cjiContainerUid = container.containerUid
-                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
-                        container.containerUid)
                     contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
                         jobProgress)
+
+                    db.contentJobItemDao.updateContainerStatus(contentJobItem.cjiUid, true)
 
                     contentJobItem.cjiConnectivityNeeded = true
                     db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
