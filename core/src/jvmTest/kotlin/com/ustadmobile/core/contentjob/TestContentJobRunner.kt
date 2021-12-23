@@ -80,17 +80,11 @@ class TestContentJobRunner {
                 println("processJobCalled")
                 try {
                     println("start delay")
-                    repo.addEntryToContainerFromResource(
-                            jobItem.contentJobItem!!.cjiContainerUid, this::class.java,
-                            "/com/ustadmobile/core/controller/cat-pic0.jpg",
-                            "hello", di,
-                            ContainerAddOptions(containerFolder.toDoorUri()))
-
-                   // TODO cancellation doesnt work with this code
-                    /*repo.addEntriesToContainerFromZipResource(
+                    repo.addEntriesToContainerFromZipResource(
                             jobItem.contentJobItem!!.cjiContainerUid, this::class.java,
                             "/com/ustadmobile/core/contentformats/epub/test.epub",
-                            ContainerAddOptions(containerFolder.toDoorUri()))*/
+                            ContainerAddOptions(containerFolder.toDoorUri()))
+
                     delay(100)
                 } catch (c: CancellationException) {
                     println("caught cancellation")
@@ -148,7 +142,7 @@ class TestContentJobRunner {
 
     @Test
     fun givenJobs_whenStarted_thenShouldRunThem() {
-        val jobItems = (0 .. 100).map {
+        val jobItems = (0 .. 20).map {
             ContentJobItem().apply {
                 cjiJobUid = 2
                 cjiConnectivityNeeded = false
@@ -374,9 +368,11 @@ class TestContentJobRunner {
 
             val runner = ContentJobRunner(2, endpoint, di)
 
+
             val result = launch {
                 runner.runJob()
             }
+
 
             do{
                 delay(10)

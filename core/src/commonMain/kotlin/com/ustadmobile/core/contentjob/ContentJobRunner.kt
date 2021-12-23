@@ -18,6 +18,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.github.aakira.napier.Napier
+import io.ktor.utils.io.errors.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -160,14 +161,15 @@ class ContentJobRunner(
 
                 val plugin = contentPluginManager.getPluginById(pluginId)
 
-                // this is used to catch the exception of processJob
-                // as per https://kotlinlang.org/docs/exception-handling.html#supervision
-
-                val scope = CoroutineScope(Job())
-                val jobResult =
-                    scope.async {
+                val jobResult = async {
+                    try {
                         plugin.processJob(item, processContext, this@ContentJobRunner)
+                    }catch(e: Exception) {
+                        Napier.e("jobResult: caught exception", e)
+                        processException = e
+                        ProcessResult(JobStatus.FAILED)
                     }
+                }
 
                 mediatorObserver = DoorObserver {
                     val state = it.first
@@ -185,19 +187,13 @@ class ContentJobRunner(
                     mediatorLiveData.observeForever(mediatorObserver)
                 }
 
-                try{
-                    processResult = jobResult.await()
-                }catch (e: Exception){
-                    Napier.i("caught exception in jobResult await ${e.printStackTrace()}")
-                    // because of supervisor, this needs to be called to cancel the pluginJob, otherwise the plugin continues
-                    jobResult.cancelAndJoin()
-                    throw e
-                }
 
+                processResult = jobResult.await()
                 db.contentJobItemDao.updateItemStatus(item.contentJobItem?.cjiUid ?: 0, processResult.status)
                 db.contentJobItemDao.updateFinishTimeForJob(item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
                 println("Processor #$id completed job #${item.contentJobItem?.cjiUid}")
                 delay(1000)
+
             }catch(e: Exception) {
                 //something went wrong
                 processException = e
@@ -237,7 +233,7 @@ class ContentJobRunner(
 
                 if(processException is CancellationException &&
                         processException !is ConnectivityCancellationException)
-                    throw processException
+                    throw processException as CancellationException
 
                 checkQueueSignalChannel.send(true)
             }
@@ -268,8 +264,8 @@ class ContentJobRunner(
 
             val jobList = mutableListOf<Job>()
             try {
-                // this is used to let child launch handle their own exception handling as seen by
-                    // https://www.lukaslechner.com/why-exception-handling-with-kotlin-coroutines-is-so-hard-and-how-to-successfully-master-it/
+                /* this is used so we can catch the exception for launchProcessor as seen in key point 5 in below article.
+                   https://www.lukaslechner.com/why-exception-handling-with-kotlin-coroutines-is-so-hard-and-how-to-successfully-master-it*/
                 coroutineScope {
                     repeat(numProcessors) {
                         Napier.d("launch processor $it")
@@ -278,6 +274,7 @@ class ContentJobRunner(
                     Napier.d("run Job, send queue signal")
                     checkQueueSignalChannel.send(true)
                 }
+
             }catch(e: CancellationException) {
                 withContext(NonCancellable) {
                     producerVal.cancel()
