@@ -116,7 +116,7 @@ import kotlin.jvm.JvmField
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 92)
+], version = 91)
 @MinReplicationVersion(60)
 abstract class UmAppDatabase : DoorDatabase() {
 
@@ -5330,7 +5330,7 @@ fun migrationList(nodeId: Long) = listOf<DoorMigration>(
     MIGRATION_79_80, MIGRATION_80_81, MIGRATION_81_82, MIGRATION_82_83, MIGRATION_83_84,
     MIGRATION_84_85, MIGRATION_85_86, MIGRATION_86_87, MIGRATION_87_88,
     MIGRATION_88_89, MIGRATION_89_90,
-    UmAppDatabaseReplicationMigration90_91,
+    UmAppDatabaseReplicationMigration90_91, UmAppDatabaseReplicationMigration9192
 )
 
         internal fun migrate67to68(nodeId: Long)= DoorMigrationSync(67, 68) { database ->
