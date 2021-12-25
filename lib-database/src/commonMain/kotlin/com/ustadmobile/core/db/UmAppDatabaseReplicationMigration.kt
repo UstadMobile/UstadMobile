@@ -410,7 +410,7 @@ private fun DoorSqlDatabase.dropOldPostgresFunctions() {
 
 }
 
-val UmAppDatabaseReplicationMigration89_90  = DoorMigrationSync(89, 90){ db ->
+val UmAppDatabaseReplicationMigration90_91  = DoorMigrationSync(90, 91){ db ->
     db.execSQL("ALTER TABLE DoorNode ADD COLUMN rel INTEGER NOT NULL DEFAULT 2")
     db.execSQL("ALTER TABLE Person ADD COLUMN personType INTEGER NOT NULL DEFAULT 0")
     db.execSQL("DROP TABLE ChangeLog")

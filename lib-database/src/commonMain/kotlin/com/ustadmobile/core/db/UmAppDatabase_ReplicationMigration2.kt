@@ -5,7 +5,7 @@ import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.ext.execSqlBatch
 import com.ustadmobile.door.migration.DoorMigrationSync
 
-val UmAppDatabaseReplicationMigration9091: DoorMigrationSync = DoorMigrationSync(90,91) { db ->
+val UmAppDatabaseReplicationMigration9192: DoorMigrationSync = DoorMigrationSync(91,92) { db ->
     val _stmtList = mutableListOf<String>()
     _stmtList += "DROP TABLE IF EXISTS PersonCustomFieldValue"
     if(db.dbType() == DoorDbType.SQLITE) {
