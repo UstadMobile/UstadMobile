@@ -358,7 +358,8 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
            SET ceInactive = :inactive
          WHERE contentEntryUid IN (SELECT cjiContentEntryUid 
                                      FROM ContentJobItem
-                                    WHERE cjiJobUid = :jobId)
+                                    WHERE cjiJobUid = :jobId
+                                      AND CAST(ContentJobItem.cjiContentDeletedOnCancellation AS INTEGER) = 1)
     """)
     abstract fun invalidateContentEntryCreatedByJob(jobId: Long, inactive: Boolean)
 

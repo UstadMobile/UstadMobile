@@ -121,12 +121,12 @@ data class ContentJobItem(
         /**
          *  If contentJobItem is cancelled, then contentEntry needs to be deleted
           */
-      var cjiContentDeletedOnCancellation:  Boolean = false,
+    var cjiContentDeletedOnCancellation:  Boolean = false,
 
-        /**
-         * Is used to check the status that the  container has finished processing in the job
-         */
-        var cjiContainerStatus: Boolean = false
+    /**
+     * Is used to check the status that the  container has finished processing in the job
+     */
+    var cjiContainerProcessed: Boolean = false
 
 ) {
     companion object {

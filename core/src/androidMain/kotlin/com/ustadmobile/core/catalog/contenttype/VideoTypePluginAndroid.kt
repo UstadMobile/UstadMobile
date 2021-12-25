@@ -215,7 +215,7 @@ class VideoTypePluginAndroid(
                     contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
                         jobProgress)
 
-                    db.contentJobItemDao.updateContainerStatus(contentJobItem.cjiUid, true)
+                    db.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
 
                     contentJobItem.cjiConnectivityNeeded = true
                     db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)

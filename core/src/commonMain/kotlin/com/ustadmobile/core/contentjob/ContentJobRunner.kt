@@ -7,7 +7,7 @@ import com.ustadmobile.core.io.ext.emptyRecursively
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.EventCollator
 import com.ustadmobile.core.util.createTemporaryDir
-import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
+import com.ustadmobile.core.util.ext.deleteFilesForContentJob
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
@@ -178,7 +178,7 @@ class ContentJobRunner(
                     if(item.contentJobItem?.cjiConnectivityNeeded == true
                             && (state == ConnectivityStatus.STATE_DISCONNECTED ||
                                     !isMeteredAllowed && state == ConnectivityStatus.STATE_METERED)){
-                        jobResult.cancelChildren(ConnectivityCancellationException("connectivity not acceptable"))
+                        jobResult.cancel(ConnectivityCancellationException("connectivity not acceptable"))
                     }
 
                 }
@@ -282,7 +282,7 @@ class ContentJobRunner(
                     jobList.forEach {
                         it.cancelAndJoin()
                     }
-                    deleteFilesForContentEntry(jobId, di, endpoint)
+                    deleteFilesForContentJob(jobId, di, endpoint)
                     throw e
                 }
             }

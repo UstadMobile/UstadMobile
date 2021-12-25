@@ -11,7 +11,7 @@ import org.kodein.di.on
 import org.kodein.di.instance
 import com.ustadmobile.door.ext.DoorTag
 
-actual suspend fun deleteFilesForContentEntry(
+actual suspend fun deleteFilesForContentJob(
         jobId: Long,
         di: DI,
         endpoint: Endpoint

@@ -18,7 +18,6 @@ import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -109,7 +108,7 @@ class XapiTypePluginCommonJvm(
                 contentJobItem.updateTotalFromLocalUriIfNeeded(localUri, contentNeedUpload,
                     progress, context, di)
 
-                if(!contentJobItem.cjiContainerStatus) {
+                if(!contentJobItem.cjiContainerProcessed) {
 
                     val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
                             ?: Container().apply {
@@ -134,7 +133,7 @@ class XapiTypePluginCommonJvm(
                     contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
                         progress)
 
-                    db.contentJobItemDao.updateContainerStatus(contentJobItem.cjiUid, true)
+                    db.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
 
                     contentJobItem.cjiConnectivityNeeded = true
                     db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)

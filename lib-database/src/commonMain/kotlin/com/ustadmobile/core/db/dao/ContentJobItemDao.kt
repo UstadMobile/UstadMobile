@@ -133,10 +133,10 @@ abstract class ContentJobItemDao {
 
     @Query("""
         UPDATE ContentJobItem
-           SET cjiContainerStatus = :containerStatus
+           SET cjiContainerProcessed = :cjiContainerProcessed
          WHERE cjiUid = :contentJobItemId   
     """)
-    abstract suspend fun updateContainerStatus(contentJobItemId: Long, containerStatus: Boolean)
+    abstract suspend fun updateContainerProcessed(contentJobItemId: Long, cjiContainerProcessed: Boolean)
 
     @Transaction
     open suspend fun commitProgressUpdates(updates: List<ContentJobItemProgressUpdate>) {

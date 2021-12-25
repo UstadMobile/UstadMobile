@@ -15,7 +15,6 @@ import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.core.container.PrefixContainerFileNamer
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
@@ -142,7 +141,7 @@ class H5PTypePluginCommonJvm(
                 contentJobItem.updateTotalFromLocalUriIfNeeded(localUri, contentNeedUpload,
                     progress, context, di)
 
-                if(!contentJobItem.cjiContainerStatus) {
+                if(!contentJobItem.cjiContainerProcessed) {
 
                     val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
                             ?: Container().apply {
@@ -217,7 +216,7 @@ class H5PTypePluginCommonJvm(
                     contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
                         progress)
 
-                    db.contentJobItemDao.updateContainerStatus(contentJobItem.cjiUid, true)
+                    db.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
 
                     contentJobItem.cjiConnectivityNeeded = true
                     db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)

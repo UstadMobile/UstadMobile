@@ -126,7 +126,7 @@ class EpubTypePluginCommonJvm(
                     contentJobItem.updateTotalFromLocalUriIfNeeded(localUri, contentNeedUpload,
                         progress, context, di)
 
-                    if(!contentJobItem.cjiContainerStatus) {
+                    if(!contentJobItem.cjiContainerProcessed) {
 
                         val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
                                 ?: Container().apply {
@@ -152,7 +152,7 @@ class EpubTypePluginCommonJvm(
                         contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
                             progress)
 
-                        db.contentJobItemDao.updateContainerStatus(contentJobItem.cjiUid, true)
+                        db.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
 
                         db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
 

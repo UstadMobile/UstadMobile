@@ -78,7 +78,7 @@ class VideoTypePluginJvm(
 
             try {
 
-                if(!contentJobItem.cjiContainerStatus) {
+                if(!contentJobItem.cjiContainerProcessed) {
 
                     val compressVideo: Boolean = process.params["compress"]?.toBoolean() ?: false
 
@@ -119,7 +119,7 @@ class VideoTypePluginJvm(
                     contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
                         progress)
 
-                    db.contentJobItemDao.updateContainerStatus(contentJobItem.cjiUid, true)
+                    db.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
 
                     contentJobItem.cjiConnectivityNeeded = true
                     db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
