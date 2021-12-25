@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 90,
-    "identityHash": "ed70fcf0f6da18626bc153c854ffc75c",
+    "identityHash": "3931f06cfedb205ca2c4ae4e7b75e67f",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5838,7 +5838,7 @@
       },
       {
         "tableName": "ContentJobItem",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cjiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cjiJobUid` INTEGER NOT NULL, `sourceUri` TEXT, `cjiIsLeaf` INTEGER NOT NULL, `cjiContentEntryUid` INTEGER NOT NULL, `cjiParentContentEntryUid` INTEGER NOT NULL, `cjiContainerUid` INTEGER NOT NULL, `cjiItemProgress` INTEGER NOT NULL, `cjiItemTotal` INTEGER NOT NULL, `cjiRecursiveProgress` INTEGER NOT NULL, `cjiRecursiveTotal` INTEGER NOT NULL, `cjiStatus` INTEGER NOT NULL, `cjiRecursiveStatus` INTEGER NOT NULL, `cjiConnectivityNeeded` INTEGER NOT NULL, `cjiPluginId` INTEGER NOT NULL, `cjiAttemptCount` INTEGER NOT NULL, `cjiParentCjiUid` INTEGER NOT NULL, `cjiServerJobId` INTEGER NOT NULL, `cjiStartTime` INTEGER NOT NULL, `cjiFinishTime` INTEGER NOT NULL, `cjiUploadSessionUid` TEXT, `cjiContentDeletedOnCancellation` INTEGER NOT NULL, `cjiContainerStatus` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cjiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cjiJobUid` INTEGER NOT NULL, `sourceUri` TEXT, `cjiIsLeaf` INTEGER NOT NULL, `cjiContentEntryUid` INTEGER NOT NULL, `cjiParentContentEntryUid` INTEGER NOT NULL, `cjiContainerUid` INTEGER NOT NULL, `cjiItemProgress` INTEGER NOT NULL, `cjiItemTotal` INTEGER NOT NULL, `cjiRecursiveProgress` INTEGER NOT NULL, `cjiRecursiveTotal` INTEGER NOT NULL, `cjiStatus` INTEGER NOT NULL, `cjiRecursiveStatus` INTEGER NOT NULL, `cjiConnectivityNeeded` INTEGER NOT NULL, `cjiPluginId` INTEGER NOT NULL, `cjiAttemptCount` INTEGER NOT NULL, `cjiParentCjiUid` INTEGER NOT NULL, `cjiServerJobId` INTEGER NOT NULL, `cjiStartTime` INTEGER NOT NULL, `cjiFinishTime` INTEGER NOT NULL, `cjiUploadSessionUid` TEXT, `cjiContentDeletedOnCancellation` INTEGER NOT NULL, `cjiContainerProcessed` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "cjiUid",
@@ -5973,8 +5973,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "cjiContainerStatus",
-            "columnName": "cjiContainerStatus",
+            "fieldPath": "cjiContainerProcessed",
+            "columnName": "cjiContainerProcessed",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -10543,7 +10543,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ed70fcf0f6da18626bc153c854ffc75c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3931f06cfedb205ca2c4ae4e7b75e67f')"
     ]
   }
 }
