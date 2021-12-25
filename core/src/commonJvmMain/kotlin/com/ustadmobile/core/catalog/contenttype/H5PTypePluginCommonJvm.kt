@@ -15,7 +15,6 @@ import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.core.container.PrefixContainerFileNamer
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
@@ -138,12 +137,11 @@ class H5PTypePluginCommonJvm(
                 val localUri = process.getLocalOrCachedUri()
                 val contentNeedUpload = !doorUri.isRemote()
                 val progressSize = if(contentNeedUpload) 2 else 1
-                val h5pIsProcessed = contentJobItem.cjiContainerUid != 0L
 
                 contentJobItem.updateTotalFromLocalUriIfNeeded(localUri, contentNeedUpload,
                     progress, context, di)
 
-                if(!h5pIsProcessed) {
+                if(!contentJobItem.cjiContainerProcessed) {
 
                     val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
                             ?: Container().apply {
@@ -157,6 +155,10 @@ class H5PTypePluginCommonJvm(
                             ?: defaultContainerDir.toURI().toString()
                     val containerFolderUri = DoorUri.parse(containerFolder)
                     val entry = db.contentEntryDao.findByUid(contentJobItem.cjiContentEntryUid)
+
+                    contentJobItem.cjiContainerUid = container.containerUid
+                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                            container.containerUid)
 
                     val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolderUri)
                     repo.addEntriesToContainerFromZip(container.containerUid, localUri,
@@ -211,12 +213,10 @@ class H5PTypePluginCommonJvm(
                             "index.html", context, di, containerAddOptions)
                     tmpIndexHtmlFile.delete()
 
-                    contentJobItem.cjiContainerUid = container.containerUid
-                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
-                        container.containerUid)
-
                     contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
                         progress)
+
+                    db.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
 
                     contentJobItem.cjiConnectivityNeeded = true
                     db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)

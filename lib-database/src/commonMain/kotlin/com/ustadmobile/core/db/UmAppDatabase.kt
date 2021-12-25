@@ -5295,9 +5295,23 @@ abstract class UmAppDatabase : DoorDatabase() {
             listOf("ALTER TABLE ContentJobItem ADD COLUMN cjiUploadSessionUid TEXT")
         }
 
-        val MIGRATION_89_90 = DoorMigrationStatementList(89, 90) {
-            listOf("DROP TABLE IF EXISTS PersonCustomFieldValue")
+//        val MIGRATION_89_90 = DoorMigrationStatementList(89, 90) {
+//            listOf("DROP TABLE IF EXISTS PersonCustomFieldValue")
+//        }
+
+        val MIGRATION_89_90 = DoorMigrationStatementList(89, 90) { db ->
+            if(db.dbType() == DoorDbType.SQLITE) {
+                listOf(
+                    "ALTER TABLE ContentJobItem ADD COLUMN cjiContentDeletedOnCancellation INTEGER NOT NULL DEFAULT 0",
+                    "ALTER TABLE ContentJobItem ADD COLUMN cjiContainerProcessed INTEGER NOT NULL DEFAULT 0")
+            }else {
+                listOf(
+                    "ALTER TABLE ContentJobItem ADD COLUMN cjiContentDeletedOnCancellation BOOL NOT NULL DEFAULT false",
+                    "ALTER TABLE ContentJobItem ADD COLUMN cjiContainerProcessed BOOL NOT NULL DEFAULT false"
+                )
+            }
         }
+
 
 
 fun migrationList(nodeId: Long) = listOf<DoorMigration>(
@@ -5315,7 +5329,8 @@ fun migrationList(nodeId: Long) = listOf<DoorMigration>(
     MIGRATION_76_77, MIGRATION_77_78, MIGRATION_78_79, MIGRATION_78_79,
     MIGRATION_79_80, MIGRATION_80_81, MIGRATION_81_82, MIGRATION_82_83, MIGRATION_83_84,
     MIGRATION_84_85, MIGRATION_85_86, MIGRATION_86_87, MIGRATION_87_88,
-    MIGRATION_88_89, UmAppDatabaseReplicationMigration90_91,
+    MIGRATION_88_89, MIGRATION_89_90,
+    UmAppDatabaseReplicationMigration90_91,
 )
 
         internal fun migrate67to68(nodeId: Long)= DoorMigrationSync(67, 68) { database ->
