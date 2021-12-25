@@ -7,4 +7,4 @@ import org.kodein.di.DI
 
 expect suspend fun ContentPlugin.withWifiLock(context: Any, block: suspend () -> Unit)
 
-expect suspend fun deleteFilesForContentEntry(contentEntryUid: Long, di: DI, endpoint: Endpoint): Int
+expect suspend fun deleteFilesForContentJob(jobId: Long, di: DI, endpoint: Endpoint): Int

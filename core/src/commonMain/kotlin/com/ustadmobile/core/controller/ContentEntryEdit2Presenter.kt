@@ -213,6 +213,7 @@ class ContentEntryEdit2Presenter(
 
             if (canCreate) {
                 entity.licenseName = view.licenceOptions?.firstOrNull { it.code == entity.licenseType }.toString()
+                val isImport = entity.contentEntryUid == 0L
                 if (entity.contentEntryUid == 0L) {
                     entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
 
@@ -266,6 +267,7 @@ class ContentEntryEdit2Presenter(
                             cjiParentContentEntryUid = parentEntryUid
                             cjiConnectivityNeeded = false
                             cjiStatus = JobStatus.QUEUED
+                            cjiContentDeletedOnCancellation = isImport
                             cjiUid = db.contentJobItemDao.insertJobItem(this)
                         }
 

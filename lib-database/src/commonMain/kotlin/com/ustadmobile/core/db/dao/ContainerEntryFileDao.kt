@@ -1,10 +1,12 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Query
+import androidx.room.Transaction
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.ext.dbType
-import com.ustadmobile.lib.db.entities.ContainerEntry
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 
 @Dao
@@ -73,7 +75,12 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
     @Query("UPDATE ContainerEntryFile SET compression = :compression, ceCompressedSize = :ceCompressedSize WHERE cefUid = :cefUid")
     abstract fun updateCompressedFile(compression: Int, ceCompressedSize: Long, cefUid: Long)
 
-    @Query("SELECT ContainerEntryFile.* from ContainerEntryFile WHERE NOT EXISTS (SELECT ContainerEntry.ceCefUid FROM ContainerEntry WHERE ContainerEntryFile.cefUid = ContainerEntry.ceCefUid) LIMIT 100")
+    @Query("""SELECT ContainerEntryFile.* 
+                      FROM ContainerEntryFile 
+                     WHERE NOT EXISTS (SELECT ContainerEntry.ceCefUid 
+                                     FROM ContainerEntry 
+                                    WHERE ContainerEntryFile.cefUid = ContainerEntry.ceCefUid) 
+                     LIMIT 100""")
     abstract fun findZombieEntries(): List<ContainerEntryFile>
 
     @Delete
