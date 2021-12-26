@@ -211,4 +211,12 @@ abstract class ContentJobItemDao {
          WHERE cjiUid = :cjiUid  
     """)
     abstract suspend fun updateUploadSessionUuid(cjiUid: Long, uploadSessionUuid: String)
+
+
+    @Query("""
+        SELECT * 
+          FROM ContentJobItem
+         WHERE cjiJobUid = :jobId 
+    """)
+    abstract fun findAllByJobId(jobId: Long): List<ContentJobItem>
 }
