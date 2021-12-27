@@ -10,6 +10,14 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment
 @Repository
 abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
 
+    /**
+     * Find the best score and progress for each student for each assignment by
+     * checking for any new statements that have better scores than the cache result
+     *
+     * For each contentEntry, we check if any statement exists that knows the maxScore
+     * so that can be saved for each entry for all other students
+     *
+     */
     @Query(""" 
         REPLACE INTO ClazzAssignmentRollUp 
                 (cachePersonUid, cacheContentEntryUid, cacheClazzAssignmentUid, 
@@ -33,10 +41,13 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
                COALESCE(StatementEntity.extensionProgress,0) AS cacheProgress,
                COALESCE(StatementEntity.resultCompletion,'FALSE') AS cacheContentComplete, 
                COALESCE(StatementEntity.resultSuccess,0) AS cacheSuccess,
-               (CASE WHEN StatementEntity.timestamp > ClazzAssignment.caDeadlineDate 
+               
+                COALESCE((CASE WHEN StatementEntity.timestamp > ClazzAssignment.caDeadlineDate 
                      THEN ClazzAssignment.caLateSubmissionPenalty 
-                     ELSE 0 END) AS cachePenalty,
+                     ELSE 0 END),0) AS cachePenalty,
+                     
                COALESCE((SELECT MAX(statementLocalChangeSeqNum) FROM StatementEntity),0) AS lastCsnChecked
+               
           FROM ClazzAssignmentContentJoin
 	            LEFT JOIN ClazzAssignment 
                 ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid

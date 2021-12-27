@@ -4,6 +4,8 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.storeCompletedStatement
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.tincan.UmAccountActor
 import com.ustadmobile.core.tincan.UmAccountGroupActor
@@ -21,10 +23,7 @@ import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.ktor.client.*
 import io.ktor.client.request.get
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -49,6 +48,10 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
 
     private var tinCanXml: TinCanXML? = null
 
+    private var onCreateException: Exception? = null
+
+    private var isStarted: Boolean = false
+
     private var mountedPath: String = ""
 
     private val mounter: ContainerMounter by instance()
@@ -69,6 +72,8 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
 
     val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
 
+    private val systemImpl: UstadMobileSystemImpl by instance()
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         val containerUid = arguments[UstadView.ARG_CONTAINER_UID]?.toLongOrNull() ?: 0L
@@ -82,40 +87,60 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
         contextRegistration = randomUuid().toString()
 
         GlobalScope.launch {
-            mountedPath = mounter.mountContainer(activeEndpoint, containerUid)
-            val client: HttpClient = di.direct.instance()
-            val tincanContent = client.get<String>(UMFileUtil.joinPaths(mountedPath, "tincan.xml"))
 
-            val xppFactory : XmlPullParserFactory = di.direct.instance(tag = DiTag.XPP_FACTORY_NSAWARE)
-            val xpp = xppFactory.newPullParser()
-            xpp.setInputString(tincanContent)
-            tinCanXml = TinCanXML.loadFromXML(xpp)
-            val launchHref = tinCanXml?.launchActivity?.launchUrl
-            val actorJsonStr: String = if(learnerGroupUid == 0L){
-                Json.encodeToString(UmAccountActor.serializer(),
-                        accountManager.activeAccount.toXapiActorJsonObject(context))
-            }else{
-                val memberList = repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntryList(
-                        learnerGroupUid,contentEntryUid)
-                Json.encodeToString(UmAccountGroupActor.serializer(),
-                        accountManager.activeAccount.toXapiGroupJsonObject(memberList))
-            }
-            val launchMethodParams = mapOf(
-                    "actor" to actorJsonStr,
-                    "endpoint" to UMFileUtil.resolveLink(mountedPath,
-                            "/${UMURLEncoder.encodeUTF8(activeEndpoint)}/xapi/$contentEntryUid/$clazzUid/"),
-                    "auth" to "OjFjMGY4NTYxNzUwOGI4YWY0NjFkNzU5MWUxMzE1ZGQ1",
-                    "registration" to contextRegistration,
-                    "activity_id" to (tinCanXml?.launchActivity?.id ?: "xapi_id"))
-            if(launchHref != null) {
-                val launchUrl = UMFileUtil.joinPaths(mountedPath, launchHref) + "?"  +
-                        launchMethodParams.toQueryString()
-                view.runOnUiThread(Runnable {
-                    view.contentTitle = tinCanXml?.launchActivity?.name ?: ""
-                    view.url = launchUrl
-                })
+            try {
+                mountedPath = mounter.mountContainer(activeEndpoint, containerUid)
+                val client: HttpClient = di.direct.instance()
+                val tincanContent = client.get<String>(UMFileUtil.joinPaths(mountedPath, "tincan.xml"))
+
+                val xppFactory: XmlPullParserFactory = di.direct.instance(tag = DiTag.XPP_FACTORY_NSAWARE)
+                val xpp = xppFactory.newPullParser()
+                xpp.setInputString(tincanContent)
+                tinCanXml = TinCanXML.loadFromXML(xpp)
+                val launchHref = tinCanXml?.launchActivity?.launchUrl
+                val actorJsonStr: String = if (learnerGroupUid == 0L) {
+                    Json.encodeToString(UmAccountActor.serializer(),
+                            accountManager.activeAccount.toXapiActorJsonObject(context))
+                } else {
+                    val memberList = repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntryList(
+                            learnerGroupUid, contentEntryUid)
+                    Json.encodeToString(UmAccountGroupActor.serializer(),
+                            accountManager.activeAccount.toXapiGroupJsonObject(memberList))
+                }
+                val launchMethodParams = mapOf(
+                        "actor" to actorJsonStr,
+                        "endpoint" to UMFileUtil.resolveLink(mountedPath,
+                                "/${UMURLEncoder.encodeUTF8(activeEndpoint)}/xapi/$contentEntryUid/$clazzUid/"),
+                        "auth" to "OjFjMGY4NTYxNzUwOGI4YWY0NjFkNzU5MWUxMzE1ZGQ1",
+                        "registration" to contextRegistration,
+                        "activity_id" to (tinCanXml?.launchActivity?.id ?: "xapi_id"))
+                if (launchHref != null) {
+                    val launchUrl = UMFileUtil.joinPaths(mountedPath, launchHref) + "?" +
+                            launchMethodParams.toQueryString()
+                    view.runOnUiThread(Runnable {
+                        view.contentTitle = tinCanXml?.launchActivity?.name ?: ""
+                        view.url = launchUrl
+                    })
+                }
+            }catch (e: Exception){
+                if(e !is CancellationException){
+                    if(isStarted){
+                        navigateToErrorScreen(e)
+                    }else{
+                        onCreateException = e
+                    }
+                }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        isStarted = true
+        onCreateException?.also {
+            navigateToErrorScreen(it)
+        }
+        onCreateException = null
     }
 
     override fun onStop() {
