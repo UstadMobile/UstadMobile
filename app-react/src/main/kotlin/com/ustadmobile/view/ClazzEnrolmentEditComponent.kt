@@ -8,7 +8,6 @@ import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
-import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.defaultFullWidth
@@ -18,6 +17,7 @@ import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.mui.components.*
 import react.RBuilder
 import react.setState
 import styled.css

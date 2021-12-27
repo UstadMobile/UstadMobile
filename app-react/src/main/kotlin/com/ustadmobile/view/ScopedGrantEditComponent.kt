@@ -106,7 +106,7 @@ class ScopedGrantEditComponent (mProps: UmProps): UstadEditComponent<ScopedGrant
         entity = null
     }
 
-    class ScopedGrantComponent(mProps: ListProps<BitmaskFlag>): UstadSimpleList<ListProps<BitmaskFlag>>(mProps){
+    class ScopedGrantComponent(mProps: SimpleListProps<BitmaskFlag>): UstadSimpleList<SimpleListProps<BitmaskFlag>>(mProps){
 
         override fun RBuilder.renderListItem(item: dynamic, onClick: (Event) -> Unit) {
 

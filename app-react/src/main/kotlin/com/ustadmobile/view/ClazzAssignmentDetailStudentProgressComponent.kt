@@ -9,12 +9,12 @@ import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.horizontalList
 import com.ustadmobile.util.StyleManager.listComponentContainer
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.view.ext.*
+import com.ustadmobile.mui.components.*
 import kotlinx.css.*
 import react.RBuilder
 import react.setState

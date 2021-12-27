@@ -17,8 +17,8 @@ import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.horizontalList
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.util.ext.formatDate
 import com.ustadmobile.util.ext.formattedInHoursAndMinutes
+import com.ustadmobile.util.ext.fullDateFormat
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.*
 import kotlinx.css.*
@@ -161,7 +161,7 @@ class ClazzAssignmentOverviewComponent(mProps: UmProps): UstadDetailComponent<Cl
                         umIcon("event_available")
                     }
 
-                    umTypography("${entity?.caDeadlineDate.toDate().formatDate("MMMM DD, YYYY")} " +
+                    umTypography("${entity?.caDeadlineDate.toDate().fullDateFormat()} " +
                             "- ${entity?.caDeadlineDate.toDate().formattedInHoursAndMinutes()}"){
                         css{
                             marginTop = LinearDimension("2px")

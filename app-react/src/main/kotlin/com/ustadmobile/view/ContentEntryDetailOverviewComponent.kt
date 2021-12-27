@@ -9,7 +9,6 @@ import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
@@ -26,6 +25,7 @@ import com.ustadmobile.util.ext.joinString
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.mui.components.*
 import kotlinx.css.*
 import react.RBuilder
 import react.setState

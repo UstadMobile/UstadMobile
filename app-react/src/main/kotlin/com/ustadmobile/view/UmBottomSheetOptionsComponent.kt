@@ -3,10 +3,10 @@ package com.ustadmobile.view
 import Breakpoint
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
+import com.ustadmobile.mui.components.*
 import kotlinx.css.LinearDimension
 import kotlinx.css.width
 import react.RBuilder

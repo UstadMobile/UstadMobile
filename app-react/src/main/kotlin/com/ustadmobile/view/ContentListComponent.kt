@@ -8,7 +8,7 @@ import com.ustadmobile.view.ext.umGridContainer
 import org.w3c.dom.events.Event
 import react.RBuilder
 
-interface ContentListProps: ListProps<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>{
+interface ContentListProps: SimpleListProps<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>{
     var withDelete: Boolean
 }
 

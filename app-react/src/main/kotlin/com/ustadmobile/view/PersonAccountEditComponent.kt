@@ -6,7 +6,6 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.lib.db.entities.PersonWithAccount
-import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultDoubleMarginTop
@@ -16,6 +15,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.clean
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.mui.components.*
 import react.RBuilder
 import react.dom.html.InputType
 import react.setState
@@ -149,7 +149,7 @@ class PersonAccountEditComponent(mProps: UmProps) : UstadEditComponent<PersonWit
                     css(hideOnMobile)
                 }
 
-                umItem(GridSize.cells12,GridSize.cells6){
+                umItem(GridSize.cells12, GridSize.cells6){
                     css(defaultDoubleMarginTop)
                     umGridContainer(rowSpacing = GridSpacing.spacing2) {
 

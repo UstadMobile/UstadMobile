@@ -37,9 +37,12 @@ import com.ustadmobile.view.ext.renderRoutes
 import com.ustadmobile.view.ext.umTopBar
 import kotlinext.js.jsObject
 import kotlinx.browser.window
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.css.Display
 import kotlinx.css.display
 import kotlinx.css.padding
+import kotlinx.html.js.onClickFunction
 import mui.material.PaperProps
 import react.RBuilder
 import react.setState
@@ -80,7 +83,7 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
      * Similar to Android MainActivity NavController destination listener,
      * this trigger change on state to update visibility of frame items
      * i.e Side Nav, Bottom nav e.tc
-      */
+     */
     private fun onDestinationChanged() {
         val destination = lookupDestinationName(getViewNameFromUrl()) ?: defaultDestination
 
@@ -110,6 +113,11 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
 
                 styledDiv {
                     css(mainComponentContainer)
+                    attrs.onClickFunction = {
+                       GlobalScope.launch {
+                           //appDatabase.exportDatabase()
+                       }
+                    }
 
                     umTopBar(appState,
                         currentDestination,

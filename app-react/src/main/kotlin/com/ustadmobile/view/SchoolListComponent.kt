@@ -6,7 +6,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.SchoolListView
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
-import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.displayProperty
@@ -18,6 +17,7 @@ import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.mui.components.*
 import kotlinx.css.Position
 import kotlinx.css.display
 import kotlinx.css.padding

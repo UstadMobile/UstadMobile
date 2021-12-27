@@ -15,6 +15,7 @@ import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.view.ext.umItemThumbnail
 import kotlinx.css.FlexDirection
 import kotlinx.css.padding
 import react.RBuilder
@@ -62,9 +63,7 @@ class ClazzAssignmentListComponent(mProps: UmProps): UstadListComponent<ClazzAss
             }
 
             umItem(GridSize.cells3, GridSize.cells1) {
-                umAvatar(variant = AvatarVariant.circle) {
-                    umIcon("assignment")
-                }
+                umItemThumbnail("assignment", avatarVariant = AvatarVariant.circle, width = 60)
             }
 
             umItem(GridSize.cells9, GridSize.cells11) {

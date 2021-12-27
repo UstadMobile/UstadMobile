@@ -11,7 +11,6 @@ import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
-import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
@@ -21,6 +20,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.*
+import com.ustadmobile.mui.components.*
 import kotlinx.css.LinearDimension
 import kotlinx.css.marginTop
 import kotlinx.css.padding
@@ -219,8 +219,8 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
         mPresenter = null
     }
 
-    class ClazzEnrolmentWithClazzSimpleListComponent(mProps: ListProps<ClazzEnrolmentWithClazzAndAttendance>):
-        UstadSimpleList<ListProps<ClazzEnrolmentWithClazzAndAttendance>>(mProps){
+    class ClazzEnrolmentWithClazzSimpleListComponent(mProps: SimpleListProps<ClazzEnrolmentWithClazzAndAttendance>):
+        UstadSimpleList<SimpleListProps<ClazzEnrolmentWithClazzAndAttendance>>(mProps){
 
         override fun RBuilder.renderListItem(item: ClazzEnrolmentWithClazzAndAttendance, onClick: (Event) -> Unit) {
             umGridContainer {

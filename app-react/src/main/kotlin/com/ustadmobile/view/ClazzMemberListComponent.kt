@@ -184,7 +184,7 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
     }
 }
 
-interface MemberListProps: ListProps<PersonWithClazzEnrolmentDetails>{
+interface MemberListProps: SimpleListProps<PersonWithClazzEnrolmentDetails>{
     var pending: Boolean
 }
 

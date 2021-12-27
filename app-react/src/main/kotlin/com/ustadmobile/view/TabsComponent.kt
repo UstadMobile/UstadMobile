@@ -1,7 +1,6 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ACTIVE_TAB_INDEX
-import com.ustadmobile.mui.components.*
 import com.ustadmobile.navigation.RouteManager.lookupDestinationName
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.tabsContainer
@@ -9,6 +8,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.util.getViewNameFromUrl
 import com.ustadmobile.util.urlSearchParamsToMap
+import com.ustadmobile.mui.components.*
 import kotlinx.css.*
 import react.RBuilder
 import react.setState

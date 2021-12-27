@@ -67,7 +67,7 @@ class SplashPresenter(private val view: SplashView): DIAware {
         dbBuilder.addCallback(ContentJobItemTriggersCallback())
             .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
 
-        umAppDatabase.initJsRepo(impl.getAppPref(TAG_LOADED, this).toBoolean())
+        umAppDatabase.initJsRepo(impl)
 
         val localeCode = impl.getDisplayedLocale(this)
         val defaultLocale = impl.getAppPref(AppConfig.KEY_DEFAULT_LANGUAGE, this)
@@ -75,7 +75,7 @@ class SplashPresenter(private val view: SplashView): DIAware {
         val appConfigs = loadFileContentAsMap<HashMap<String, String>>("appconfig.json")
         appConfigs.forEach {
             val value = when(it.key){
-                KEY_API_URL -> apiUrl
+                KEY_API_URL -> "http://localhost:8087/"
                 else -> it.value
             }
             impl.setAppPref(it.key, value, this)
@@ -92,7 +92,6 @@ class SplashPresenter(private val view: SplashView): DIAware {
             impl.currentTranslations = Pair(currentAssetPath, currentStrings)
         }
         view.appName = impl.getString(MessageID.app_name,this)
-        impl.setAppPref(TAG_LOADED,"true", this)
         view.loading = false
     }
 

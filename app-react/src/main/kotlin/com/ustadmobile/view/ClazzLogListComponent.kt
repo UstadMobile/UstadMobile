@@ -7,16 +7,14 @@ import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzLog
-import com.ustadmobile.mui.components.GridSize
-import com.ustadmobile.mui.components.TypographyVariant
-import com.ustadmobile.mui.components.umTypography
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.formatDate
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
-import com.ustadmobile.view.ext.umProfileAvatar
+import com.ustadmobile.view.ext.umItemThumbnail
 import kotlinx.css.*
 import react.RBuilder
 import react.setState
@@ -37,6 +35,8 @@ class ClazzLogListComponent (mProps: UmProps) : UstadListComponent<ClazzLog, Cla
 
     override val viewName: String
         get() = ClazzLogListAttendanceView.VIEW_NAME
+
+    var selectedFilter = VIEW_ID_TO_NUMDAYS_MAP.entries.toList().first().key
 
     override var clazzTimeZone: String? = null
         get() = field
@@ -121,7 +121,30 @@ class ClazzLogListComponent (mProps: UmProps) : UstadListComponent<ClazzLog, Cla
     }
 
     override fun RBuilder.renderHeaderView() {
-        //Handle header view as per android
+        umGridContainer {
+            umItem(GridSize.cells12, flexDirection = FlexDirection.row) {
+                css {
+                    +StyleManager.centerItem
+                    padding(left = 2.spacingUnits, right = 2.spacingUnits)
+                }
+
+                for (entry in VIEW_ID_TO_NUMDAYS_MAP.entries) {
+
+                    umChip(getString(entry.key),
+                        color = if(entry.key == selectedFilter) ChipColor.primary else ChipColor.default,
+                        onClick = {
+                            setState {
+                                selectedFilter = entry.key
+                            }
+                            mPresenter?.handleClickGraphDuration(entry.value)
+                        }){
+                        css{
+                            margin(left = 1.spacingUnits, right = 1.spacingUnits)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override fun RBuilder.renderListItem(item: ClazzLog) {
@@ -130,7 +153,8 @@ class ClazzLogListComponent (mProps: UmProps) : UstadListComponent<ClazzLog, Cla
 
         umGridContainer {
             umItem(GridSize.cells3){
-                umProfileAvatar(-1, "calendar_today")
+                umItemThumbnail("calendar_today",
+                    avatarVariant = AvatarVariant.circle)
             }
 
             umItem(GridSize.cells9){
@@ -172,13 +196,19 @@ class ClazzLogListComponent (mProps: UmProps) : UstadListComponent<ClazzLog, Cla
     }
 
     override fun handleClickEntry(entry: ClazzLog) {
-
+        mPresenter?.handleClickEntry(entry)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         mPresenter?.onDestroy()
         mPresenter = null
+    }
+
+    companion object {
+        val VIEW_ID_TO_NUMDAYS_MAP = mapOf(MessageID.last_week to 7,
+            MessageID.last_month to 30,
+            MessageID.last_three_months to 90)
     }
 }
 

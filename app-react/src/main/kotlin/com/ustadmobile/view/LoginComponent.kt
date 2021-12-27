@@ -5,7 +5,6 @@ import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.controller.Login2Presenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextCenter
@@ -20,6 +19,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.mui.components.*
 import down
 import kotlinx.css.*
 import react.RBuilder

@@ -8,7 +8,7 @@ import com.ustadmobile.util.TimeZone
 import com.ustadmobile.util.TimeZonesUtil
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
-import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
+import com.ustadmobile.view.ext.createListItemWithLeftIconTitleAndDescription
 import com.ustadmobile.view.ext.umGridContainer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -69,14 +69,14 @@ class TimeZoneListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmStat
     }
 }
 
-class ZonesListComponent(mProps: ListProps<TimeZone>):
-    UstadSimpleList<ListProps<TimeZone>>(mProps){
+class ZonesListComponent(mProps: SimpleListProps<TimeZone>):
+    UstadSimpleList<SimpleListProps<TimeZone>>(mProps){
     override fun RBuilder.renderListItem(item: TimeZone, onClick: (Event) -> Unit) {
         umGridContainer {
             attrs.onClick = {
                 onClick.invoke(it.nativeEvent)
             }
-            createItemWithIconTitleAndDescription("query_builder",item.name, item.timeName)
+            createListItemWithLeftIconTitleAndDescription("query_builder",item.name, item.timeName)
         }
     }
 }

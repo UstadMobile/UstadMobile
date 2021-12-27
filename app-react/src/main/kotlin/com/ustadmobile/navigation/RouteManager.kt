@@ -10,7 +10,7 @@ import com.ustadmobile.view.*
 object RouteManager {
 
     val destinationList = listOf(
-        UstadDestination("library_books", MessageID.content, ContentEntryList2View.VIEW_NAME,
+        UstadDestination("library_books", MessageID.content, ContentEntryList2View.VIEW_NAME_HOME,
             ContentEntryListComponent::class, true),
         UstadDestination("school", MessageID.schools,SchoolListView.VIEW_NAME, SchoolListComponent::class, showSearch = true),
         UstadDestination("people", MessageID.classes,ClazzList2View.VIEW_NAME, ClazzListComponent::class, showSearch = true),
@@ -63,6 +63,9 @@ object RouteManager {
         UstadDestination(view = ClazzAssignmentDetailStudentProgressView.VIEW_NAME, component = ClazzAssignmentDetailStudentProgressComponent::class),
         UstadDestination(view = SessionListView.VIEW_NAME, component = SessionListComponent::class, showSearch = true),
         UstadDestination(view = StatementListView.VIEW_NAME, component = StatementListComponent::class),
+        UstadDestination(view = ReportTemplateListView.VIEW_NAME, component = ReportTemplateListComponent::class),
+        UstadDestination(view = ReportEditView.VIEW_NAME, component = ReportEditComponent::class),
+        UstadDestination(view = ReportFilterEditView.VIEW_NAME, component = ReportFilterEditComponent::class),
         UstadDestination(labelId= MessageID.accounts, view = AccountListView.VIEW_NAME, component = PlaceHolderComponent::class)
     )
 
@@ -77,7 +80,7 @@ object RouteManager {
 
 
     val firstDestination: UstadDestination = destinationList.first {
-        it.view == ContentEntryList2View.VIEW_NAME
+        it.view == ContentEntryList2View.VIEW_NAME_HOME
     }
 
     /**

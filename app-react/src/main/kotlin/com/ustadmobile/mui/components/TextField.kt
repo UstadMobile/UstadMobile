@@ -44,9 +44,11 @@ fun RBuilder.umTextField(
     handler: StyledHandler<UMTextFieldProps>? = null
 ) = createStyledComponent(TextField, className, handler) {
     css(defaultFullWidth)
-    setProps(this, autoComplete, autoFocus, disabled, error, fullWidth, helperText,
-        id, label, margin,false, name, onChange,placeholder, required, null, null,
-        false, type, value, variant)
+    com.ustadmobile.mui.components.setProps(
+        this, autoComplete, autoFocus, disabled, error, fullWidth, helperText,
+        id, label, margin, false, name, onChange, placeholder, required, null, null,
+        false, type, value, variant
+    )
 }
 
 fun RBuilder.umTextFieldMultiLine(
@@ -70,8 +72,29 @@ fun RBuilder.umTextFieldMultiLine(
     handler: StyledHandler<UMTextFieldProps>? = null
 ) = createStyledComponent(TextField, className, handler) {
     css(defaultFullWidth)
-    setProps(this, null, autoFocus, disabled, error, fullWidth, helperText, id, label, margin,
-        true, name, onChange, placeholder, required, rows, rowsMax, false, InputType.text, value, variant)
+    com.ustadmobile.mui.components.setProps(
+        this,
+        null,
+        autoFocus,
+        disabled,
+        error,
+        fullWidth,
+        helperText,
+        id,
+        label,
+        margin,
+        true,
+        name,
+        onChange,
+        placeholder,
+        required,
+        rows,
+        rowsMax,
+        false,
+        InputType.text,
+        value,
+        variant
+    )
 }
 
 external interface UMTextFieldProps: TextFieldProps, StyledProps, BaseTextFieldProps
@@ -96,8 +119,29 @@ fun RBuilder.umTextFieldSelect(
     className: String? = null,
     handler: StyledHandler<UMTextFieldProps>? = null
 ) = createStyledComponent(TextField, className, handler) {
-    setProps(this, autoComplete, autoFocus, disabled, error, fullWidth, helperText, id, label, margin,
-        false, name, onChange, placeholder, required, null, null, true, InputType.text, value, variant)
+    com.ustadmobile.mui.components.setProps(
+        this,
+        autoComplete,
+        autoFocus,
+        disabled,
+        error,
+        fullWidth,
+        helperText,
+        id,
+        label,
+        margin,
+        false,
+        name,
+        onChange,
+        placeholder,
+        required,
+        null,
+        null,
+        true,
+        InputType.text,
+        value,
+        variant
+    )
     css{
         +defaultFullWidth
         +alignTextToStart

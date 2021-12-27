@@ -15,7 +15,7 @@ fun RBuilder.umSwitch(
     checked: Boolean = false,
     disabled: Boolean = false,
     color: UMColor? = UMColor.secondary,
-    size:SwitchSize = SwitchSize.medium,
+    size: SwitchSize = SwitchSize.medium,
     className: String? = null,
     handler: StyledHandler<SwitchProps>? = null
 ) = createStyledComponent(Switch, className, handler) {

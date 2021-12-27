@@ -7,7 +7,6 @@ import com.ustadmobile.core.view.JoinWithCodeView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.School
-import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
@@ -15,6 +14,7 @@ import com.ustadmobile.util.UmState
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.mui.components.*
 import kotlinx.css.LinearDimension
 import kotlinx.css.marginTop
 import kotlinx.css.padding

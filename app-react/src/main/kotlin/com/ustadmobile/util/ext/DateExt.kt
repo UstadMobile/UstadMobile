@@ -11,6 +11,8 @@ fun Date.formatDate(format: String = "DD/MMMM/YYYY"): String {
 
 fun Date.standardFormat(): String = formatDate("DD/MM/YYYY")
 
+fun Date.fullDateFormat(format: String = "MMMM DD, YYYY"): String = formatDate(format)
+
 fun Date.formattedInHoursAndMinutes() : String = formatDate("HH:mm")
 
 fun Date.formattedWithFullMonth(): String = formatDate("DD/MMMM/YYYY")

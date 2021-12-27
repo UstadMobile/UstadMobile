@@ -17,7 +17,7 @@ fun RBuilder.umMenu(
     anchorElement: Element? = null,
     onClose: (() -> Unit)? = null,
     className: String? = null,
-    variant:MenuVariant = MenuVariant.menu,
+    variant: MenuVariant = MenuVariant.menu,
     handler: StyledHandler<MenuProps>? = null
 ) = createStyledComponent(Menu, className, handler){
     attrs.open = open

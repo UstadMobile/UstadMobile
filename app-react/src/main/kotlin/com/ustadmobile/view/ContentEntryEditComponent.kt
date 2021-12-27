@@ -9,7 +9,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -21,6 +20,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.mui.components.*
 import kotlinx.css.*
 import org.w3c.dom.events.MouseEvent
 import react.RBuilder

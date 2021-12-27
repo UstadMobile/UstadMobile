@@ -23,6 +23,7 @@ import com.ustadmobile.navigation.UstadDestination
 import com.ustadmobile.redux.ReduxAppState
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
+import com.ustadmobile.util.StyleManager.centerItem
 import com.ustadmobile.util.StyleManager.defaultMarginBottom
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.displayProperty
@@ -198,11 +199,12 @@ fun RBuilder.umItemThumbnail(
     iconName: String,
     src: String? = null,
     iconColor: Color = Color(StyleManager.theme.palette.background.paper),
-    avatarBackgroundColor: Color = Color(StyleManager.theme.palette.action.disabled) ,
-    width: Int = 60,
+    avatarBackgroundColor: Color = Color(StyleManager.theme.palette.action.disabled),
+    width: Int = 50,
     marginTop: LinearDimension = 1.spacingUnits,
     avatarVariant: AvatarVariant = AvatarVariant.square,
-    className: String? = "${StyleManager.name}-${if(width > 60) "defaultThumbnailClass" else "mediumThumbnailClass"}"
+    className: String? = "${StyleManager.name}-${if(width <= 50) "defaultThumbnailClass"  
+    else if(width in 51..69) "mediumThumbnailClass" else "maxThumbnailClass"}"
 ){
     umAvatar(src,variant = avatarVariant){
         css {
@@ -292,8 +294,7 @@ fun RBuilder.createCreateNewItem(createNewText: String, iconName: String = "add"
     styledDiv {
         css(listItemCreateNewDiv)
         umListItemIcon(iconName,"${StyleManager.name}-listCreateNewIconClass")
-        umTypography(createNewText,variant = TypographyVariant.button,
-            ) {
+        umTypography(createNewText,variant = TypographyVariant.button,) {
             css{
                 marginTop = 4.px
             }
@@ -306,20 +307,19 @@ fun RBuilder.setBitmaskListText(systemImpl: UstadMobileSystemImpl,textBitmaskVal
         .joinToString { systemImpl.getString(it.messageId, this) }
 }
 
-fun RBuilder.createItemWithIconTitleAndDescription(
+fun RBuilder.createListItemWithLeftIconTitleAndDescription(
     iconName: String, title: String? = null,
     description: String? = null,
-    scaleOnLargeSmall: Boolean = false){
+    avatarVariant: AvatarVariant = AvatarVariant.circle){
 
-    umGridContainer(columnSpacing = GridSpacing.spacing2) {
-        umItem(GridSize.cells2, if(scaleOnLargeSmall) GridSize.cells2 else GridSize.cells1){
-            umProfileAvatar(-1,iconName)
+    umGridContainer {
+        umItem(GridSize.cells3,  GridSize.cells1){
+            umItemThumbnail(iconName, avatarVariant = avatarVariant)
         }
 
-        umItem(GridSize.cells8, if(scaleOnLargeSmall) GridSize.cells8 else GridSize.cells10){
+        umItem(GridSize.cells9, GridSize.cells10){
             css{
                 marginTop = LinearDimension("5px")
-                marginLeft = 2.spacingUnits
             }
             if(title != null){
                 umItem(GridSize.cells11){
@@ -344,7 +344,7 @@ fun RBuilder.createItemWithIconTitleAndDescription(
     }
 }
 
-fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(
+fun RBuilder.createItemWithLeftIconTitleDescriptionAndIconBtnOnRight(
     leftIcon: String,
     iconName: String,
     title: String?,
@@ -381,18 +381,19 @@ fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(
         }
 
         umItem(GridSize.cells2, GridSize.cells1){
-            css{
-                alignContent = Align.center
-                alignItems = Align.center
-            }
-
-            umIconButton(iconName, size = IconButtonSize.medium,
-                onClick = {
-                    it.stopPropagation()
-                    onClick.invoke(true, it)
+            css(centerItem)
+            styledSpan {
+                css{
+                    width = 40.px
                 }
-            ){
-                css(defaultMarginTop)
+                umIconButton(iconName, size = IconButtonSize.medium,
+                    onClick = {
+                        it.stopPropagation()
+                        onClick.invoke(true, it)
+                    }
+                ){
+                    css(defaultMarginTop)
+                }
             }
         }
     }
@@ -412,7 +413,7 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
             umProfileAvatar(personUid, "person")
         }
 
-        umItem(GridSize.cells9,GridSize.cells11){
+        umItem(GridSize.cells9, GridSize.cells11){
             umGridContainer {
                 umItem(GridSize.cells12){
                     umTypography(fullName,variant = TypographyVariant.h6){
@@ -457,13 +458,18 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
                                     }
 
                                     umItem(GridSize.cells4){
-                                        umIconButton("close",
-                                            onClick = {
-                                                stopEventPropagation(it)
-                                                onClickDecline?.invoke()
-                                            },
-                                            className = "${StyleManager.name}-errorClass",
-                                            size = IconButtonSize.small)
+                                        styledSpan {
+                                            css{
+                                                width = 40.px
+                                            }
+                                            umIconButton("close",
+                                                onClick = {
+                                                    stopEventPropagation(it)
+                                                    onClickDecline?.invoke()
+                                                },
+                                                className = "${StyleManager.name}-errorClass",
+                                                size = IconButtonSize.small)
+                                        }
                                     }
                                 }
                             }
@@ -506,7 +512,7 @@ fun RBuilder.createPersonListItemWithNameAndUserName(item: Person){
 }
 
 
-fun RBuilder.createListItemWithTitleDescriptionAndAvatarOnLeft(
+fun RBuilder.createListItemWithPersonTitleDescriptionAndAvatarOnLeft(
     title: String,
     subTitle: String? = null,
     iconName: String,
@@ -575,11 +581,18 @@ fun RBuilder.createListItemWithTitleDescriptionAndRightAction(
         }
 
         if(withAction){
-            gridItem(GridSize.cells2, GridSize.cells1, alignItems = GridAlignItems.center){
-                umIconButton(iconName,
-                    onClick = {
-                        onActionClick?.invoke(it)
-                    })
+            umItem(GridSize.cells2, GridSize.cells1){
+                css(centerItem)
+               styledSpan {
+                   css{
+                       width = 40.px
+                   }
+
+                   umIconButton(iconName,
+                       onClick = {
+                           onActionClick?.invoke(it)
+                       })
+               }
             }
         }
     }
@@ -594,7 +607,7 @@ fun RBuilder.createListItemWithAttendance(
             umProfileAvatar(-1, iconName)
         }
 
-        umItem(GridSize.cells9,GridSize.cells10){
+        umItem(GridSize.cells9, GridSize.cells10){
             umItem(GridSize.cells12, GridSize.cells12){
                 umTypography(title,
                     variant = TypographyVariant.body1){
@@ -853,14 +866,13 @@ fun RBuilder.createContentEntryListItem(
             }
         }
 
-        umItem(GridSize.cells3){
-            umEntityAvatar(item.thumbnailUrl,
-                if(item.leaf) Util.ASSET_BOOK else Util.ASSET_FOLDER,
-                showIcon = false,
-                className = "${StyleManager.name}-entityThumbnailClass")
+        umItem(GridSize.cells4, GridSize.cells2){
+            umItemThumbnail( if(item.leaf) "class" else "folder", item.thumbnailUrl,width = 80,
+                iconColor = Color(StyleManager.theme.palette.action.disabled),
+                avatarBackgroundColor = Color.transparent)
         }
 
-        umItem(GridSize.cells9){
+        umItem(GridSize.cells8, GridSize.cells10){
             umGridContainer {
                 umItem(GridSize.cells12){
                     umTypography(item.title,
@@ -910,13 +922,18 @@ fun RBuilder.createContentEntryListItem(
                                 0
                             }
                             umItem(GridSize.cells2) {
-                                css(StyleManager.alignTextCenter)
-                                umIconButton(if(progress == 100) "check_circle" else "download",
-                                    size = IconButtonSize.medium, onClick = {
-                                    stopEventPropagation(it)
-                                    onSecondaryAction?.invoke()
-                                }){
-                                    css(secondaryActionBtn)
+                                css(centerItem)
+                                styledSpan{
+                                    css{
+                                        width = 45.px
+                                    }
+                                    umIconButton(if(progress == 100) "check_circle" else "download",
+                                        size = IconButtonSize.medium, onClick = {
+                                            stopEventPropagation(it)
+                                            onSecondaryAction?.invoke()
+                                        }){
+                                        css(secondaryActionBtn)
+                                    }
                                 }
                             }
                         }
@@ -1214,7 +1231,7 @@ fun RBuilder.createContentEntryListItemWithAttemptsAndProgress(
             }
         }
 
-        umItem(GridSize.cells8,GridSize.cells10){
+        umItem(GridSize.cells8, GridSize.cells10){
             umGridContainer {
 
                 umItem(GridSize.cells12){
@@ -1224,7 +1241,7 @@ fun RBuilder.createContentEntryListItemWithAttemptsAndProgress(
                     }
                 }
 
-                umItem(GridSize.cells12,GridSize.cells3, flexDirection = FlexDirection.row){
+                umItem(GridSize.cells12, GridSize.cells3, flexDirection = FlexDirection.row){
                     styledSpan {
                         css{
                             padding(right = 3.spacingUnits)

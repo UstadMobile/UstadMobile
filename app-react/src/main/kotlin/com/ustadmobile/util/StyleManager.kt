@@ -504,12 +504,16 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         marginBottom = 4.px
     }
 
-    val defaultThumbnailClass by css {
+    val maxThumbnailClass by css {
         fontSize = LinearDimension("5em")
     }
 
     val mediumThumbnailClass by css {
-        fontSize = LinearDimension("1.8em")
+        fontSize = LinearDimension("2em")
+    }
+
+    val defaultThumbnailClass by css {
+        fontSize = LinearDimension("1.2em")
     }
 
     val secondaryActionBtn by css{

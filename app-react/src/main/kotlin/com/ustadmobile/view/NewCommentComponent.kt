@@ -6,13 +6,13 @@ import com.ustadmobile.core.controller.DefaultNewCommentItemListener
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import com.ustadmobile.view.ext.umProfileAvatar
+import com.ustadmobile.mui.components.*
 import kotlinx.css.FlexDirection
 import kotlinx.css.LinearDimension
 import kotlinx.css.padding

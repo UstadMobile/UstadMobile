@@ -132,8 +132,8 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
         mPresenter = null
     }
 
-    class MembersListComponent(mProps: ListProps<SchoolMemberWithPerson>):
-        UstadSimpleList<ListProps<SchoolMemberWithPerson>>(mProps){
+    class MembersListComponent(mProps: SimpleListProps<SchoolMemberWithPerson>):
+        UstadSimpleList<SimpleListProps<SchoolMemberWithPerson>>(mProps){
 
         override fun RBuilder.renderListItem(item: SchoolMemberWithPerson, onClick: (Event) -> Unit) {
             val presenter = props.presenter as SchoolMemberListPresenter

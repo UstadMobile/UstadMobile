@@ -1,7 +1,6 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.controller.SplashPresenter
-import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager.centerItem
 import com.ustadmobile.util.StyleManager.partnersList
 import com.ustadmobile.util.StyleManager.splashComponentContainer
@@ -11,6 +10,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.mui.components.*
 import kotlinx.browser.document
 import kotlinx.coroutines.Runnable
 import kotlinx.css.LinearDimension

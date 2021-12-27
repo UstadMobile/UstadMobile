@@ -8,7 +8,6 @@ import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
-import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -17,6 +16,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.*
+import com.ustadmobile.mui.components.*
 import kotlinx.css.paddingBottom
 import kotlinx.css.paddingTop
 import kotlinx.css.px
@@ -156,8 +156,8 @@ class SchoolDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<Schoo
         entity = null
     }
 
-    class SchoolClazzesComponent(mProps: ListProps<ClazzWithListDisplayDetails>):
-        UstadSimpleList<ListProps<ClazzWithListDisplayDetails>>(mProps){
+    class SchoolClazzesComponent(mProps: SimpleListProps<ClazzWithListDisplayDetails>):
+        UstadSimpleList<SimpleListProps<ClazzWithListDisplayDetails>>(mProps){
 
         override fun RBuilder.renderListItem(item: dynamic, onClick: (Event) -> Unit) {
             umGridContainer(GridSpacing.spacing5) {

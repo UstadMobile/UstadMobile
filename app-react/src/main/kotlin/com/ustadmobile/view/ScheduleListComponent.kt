@@ -12,7 +12,7 @@ import org.w3c.dom.events.Event
 import react.RBuilder
 import kotlin.js.Date
 
-interface ScheduleListProps: ListProps<Schedule>{
+interface ScheduleListProps: SimpleListProps<Schedule>{
     var withDelete: Boolean
 }
 

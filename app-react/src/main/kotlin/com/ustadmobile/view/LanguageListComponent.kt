@@ -6,7 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.LanguageListView
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
+import com.ustadmobile.view.ext.createListItemWithLeftIconTitleAndDescription
 import react.RBuilder
 
 class LanguageListComponent(mProps: UmProps): UstadListComponent<Language, Language>(mProps) ,
@@ -35,7 +35,7 @@ class LanguageListComponent(mProps: UmProps): UstadListComponent<Language, Langu
     }
 
     override fun RBuilder.renderListItem(item: Language) {
-        createItemWithIconTitleAndDescription("language",
+        createListItemWithLeftIconTitleAndDescription("language",
             item.name,
             "${item.iso_639_2_standard}/${item.iso_639_3_standard}")
     }

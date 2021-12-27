@@ -5,11 +5,11 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.lib.db.entities.PersonWithSessionsDisplay
-import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.*
 import com.ustadmobile.view.ext.*
+import com.ustadmobile.mui.components.*
 import kotlinx.css.FlexDirection
 import kotlinx.css.LinearDimension
 import kotlinx.css.padding
