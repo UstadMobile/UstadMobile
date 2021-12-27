@@ -61,6 +61,7 @@ import com.ustadmobile.lib.rest.ext.initAdminUser
 import com.ustadmobile.lib.rest.ext.ktorInitRepo
 import com.ustadmobile.door.ext.doorDatabaseMetadata
 import kotlinx.coroutines.GlobalScope
+import com.ustadmobile.door.ext.nodeIdAuthCache
 import com.ustadmobile.door.util.NodeIdAuthCache
 
 const val TAG_UPLOAD_DIR = 10
@@ -143,18 +144,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         }
 
         bind<NodeIdAuthCache>() with scoped(EndpointScope.Default).singleton {
-            val notificationDispatcher = instance<ReplicationNotificationDispatcher>()
-            NodeIdAuthCache(instance<UmAppDatabase>(tag = DoorTag.TAG_DB)).also {
-                notificationDispatcher.setupWithNodeIdAndAuthCache(it)
-            }
-        }
-
-        bind<ReplicationNotificationDispatcher>() with scoped(EndpointScope.Default).singleton {
-            val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
-            ReplicationNotificationDispatcher(db, UmAppDatabase_ReplicationRunOnChangeRunner(db),
-                GlobalScope, UmAppDatabase::class.doorDatabaseMetadata()).also {
-                    db.addInvalidationListener(ChangeListenerRequest(listOf(), it))
-            }
+            instance<UmAppDatabase>(tag = DoorTag.TAG_DB).nodeIdAuthCache
         }
 
         bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
@@ -200,9 +190,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             db
         }
 
-        bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {
-            ServerUpdateNotificationManagerImpl()
-        }
 
         bind<EpubTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
             EpubTypePluginCommonJvm(Any(), context, di)
@@ -235,12 +222,11 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
             val doorNode = instance<NodeIdAndAuth>()
             val repo: UmAppDatabase = db.asRepository(repositoryConfig(Any(), "http://localhost/",
-                doorNode.nodeId, doorNode.auth, instance(), instance()) {
+                    doorNode.nodeId, doorNode.auth, instance(), instance()) {
+                useReplicationSubscription = false
                 attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT),
                     UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME).absolutePath
-                updateNotificationManager = instance()
             })
-            //ServerChangeLogMonitor(db, repo as DoorDatabaseRepository)
 
             //Add listener that will end sessions when authentication has been updated
             //repo.addSyncListener(PersonAuth2::class, EndSessionPersonAuth2SyncListener(repo))

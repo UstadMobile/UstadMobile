@@ -106,18 +106,6 @@ open class UstadApp : Application(), DIAware {
                 }
         }
 
-        bind<ReplicationNotificationDispatcher>() with scoped(EndpointScope.Default).singleton {
-            val db = instance<UmAppDatabase>(tag = TAG_DB)
-            val tableNames = db::class.doorDatabaseMetadata().replicateEntities.values.map {
-                it.entityTableName
-            }
-            ReplicationNotificationDispatcher(db,
-                    UmAppDatabase_ReplicationRunOnChangeRunner(db),
-                    GlobalScope).also {
-                db.addInvalidationListener(ChangeListenerRequest(tableNames, it))
-            }
-        }
-
         bind<Json>() with singleton {
             Json {
                 encodeDefaults = true
@@ -133,21 +121,11 @@ open class UstadApp : Application(), DIAware {
             ) {
                 attachmentsDir = File(applicationContext.filesDir.siteDataSubDir(this@singleton.context),
                     UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME).absolutePath
-                useClientSyncManager = true
+                useReplicationSubscription = true
                 attachmentFilters += ImageResizeAttachmentFilter("PersonPicture", 1280, 1280)
+                replicationSubscriptionInitListener = RepSubscriptionInitListener()
             }).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
-
-                val repSubscriptionListener = RepSubscriptionInitListener()
-                //Start replication subscription
-                val metadata = UmAppDatabase::class.doorDatabaseMetadata()
-                val repNotificationDispatcher = instance<ReplicationNotificationDispatcher>()
-                ReplicationSubscriptionManager(metadata.version,
-                    instance(), repNotificationDispatcher,
-                    it as DoorDatabaseRepository,
-                    GlobalScope, metadata, UmAppDatabase::class,
-                    onSubscriptionInitialized = repSubscriptionListener)
-
                 //it.setupAssignmentSyncListener(context, di)
             }
         }

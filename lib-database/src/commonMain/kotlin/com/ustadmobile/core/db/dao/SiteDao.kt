@@ -20,16 +20,19 @@ abstract class SiteDao: BaseDao<Site>{
     abstract suspend fun updateAsync(workspace: Site)
 
     @Query("""
-        REPLACE INTO SiteTrkr(siteFk, siteVersionId, siteDestination)
+        REPLACE INTO SiteTracker(siteFk, siteVersionId, siteDestination)
          SELECT Site.siteUid AS siteFk,
                 Site.siteLct AS siteVersionId,
                 :newNodeId AS siteDestination
            FROM Site
           WHERE Site.siteLct != COALESCE(
                 (SELECT siteVersionId
-                   FROM SiteTrkr
+                   FROM SiteTracker
                   WHERE siteFk = Site.siteUid
                     AND siteDestination = :newNodeId), 0) 
+         /*psql ON CONFLICT(siteFk, siteDestination) DO UPDATE
+                SET siteProcessed = false
+         */       
     """)
     @ReplicationRunOnNewNode
     @ReplicationCheckPendingNotificationsFor([Site::class])
@@ -37,7 +40,7 @@ abstract class SiteDao: BaseDao<Site>{
 
 
     @Query("""
-        REPLACE INTO SiteTrkr(siteFk, siteVersionId, siteDestination)
+        REPLACE INTO SiteTracker(siteFk, siteVersionId, siteDestination)
          SELECT Site.siteUid AS siteFk,
                 Site.siteLct AS siteVersionId,
                 UserSession.usClientNodeId AS siteDestination
@@ -46,11 +49,18 @@ abstract class SiteDao: BaseDao<Site>{
                     ON ChangeLog.chTableId = 189 
                        AND ChangeLog.chEntityPk = Site.siteUid
                 JOIN UserSession
-          WHERE Site.siteLct != COALESCE(
+          WHERE UserSession.usClientNodeId != (
+                SELECT nodeClientId 
+                  FROM SyncNode
+                 LIMIT 1)
+            AND Site.siteLct != COALESCE(
                 (SELECT siteVersionId
-                   FROM SiteTrkr
+                   FROM SiteTracker
                   WHERE siteFk = Site.siteUid
                     AND siteDestination = UserSession.usClientNodeId), 0)     
+        /*psql  ON CONFLICT(siteFk, siteDestination) DO UPDATE
+            SET siteProcessed = false
+         */               
     """)
     @ReplicationRunOnChange([Site::class])
     @ReplicationCheckPendingNotificationsFor([Site::class])

@@ -115,7 +115,9 @@ class UstadAccountManagerTest {
                     RepositoryConfig.repositoryConfig(
                         Any(), context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
                         instance(), instance()
-                    )
+                    ) {
+                        useReplicationSubscription = false
+                    }
                 ))
             }
 

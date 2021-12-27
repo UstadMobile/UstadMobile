@@ -66,7 +66,9 @@ fun DI.directActiveRepoInstance() = onActiveAccountDirect().instance<UmAppDataba
  *
  * Simply override the built in bindings if required for specific tests
  */
-class UstadTestRule: TestWatcher() {
+class UstadTestRule(
+    val repoReplicationSubscriptionEnabled: Boolean = false
+): TestWatcher() {
 
     lateinit var coroutineDispatcher: ExecutorCoroutineDispatcher
 
@@ -135,6 +137,7 @@ class UstadTestRule: TestWatcher() {
                     instance(), instance()
                 ) {
                     attachmentsDir = File(tempFolder, "attachments").absolutePath
+                    this.useReplicationSubscription = repoReplicationSubscriptionEnabled
                 })
                 ).also {
                     it.siteDao.insert(Site().apply {

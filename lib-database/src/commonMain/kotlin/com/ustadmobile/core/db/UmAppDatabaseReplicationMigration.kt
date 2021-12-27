@@ -1743,7 +1743,6 @@ val UmAppDatabaseReplicationMigration90_91  = DoorMigrationSync(90, 91){ db ->
 
         //trackers (temp)
         db.execSQL("CREATE TABLE IF NOT EXISTS UserSessionTrkr (  usForeignKey  INTEGER  NOT NULL , usVersionId  INTEGER  NOT NULL , usDestination  INTEGER  NOT NULL , usTrkrProcessed  INTEGER  NOT NULL  DEFAULT 0 , PRIMARY KEY (usForeignKey, usDestination) )")
-        db.execSQL("CREATE TABLE IF NOT EXISTS SiteTrkr (  siteFk  INTEGER  NOT NULL , siteVersionId  INTEGER  NOT NULL , siteDestination  INTEGER  NOT NULL , siteTrkrProcessed  INTEGER  NOT NULL  DEFAULT 0 , PRIMARY KEY (siteFk, siteDestination) )")
         db.execSQL("CREATE TABLE IF NOT EXISTS ScopedGrantTrkr (  sgForeignKey  INTEGER  NOT NULL , sgVersionId  INTEGER  NOT NULL , sgDestination  INTEGER  NOT NULL , sgProcessed  INTEGER  NOT NULL , PRIMARY KEY (sgForeignKey, sgVersionId) )")
         db.execSQL("CREATE INDEX index_ScopedGrantTrkr_sgDestination_sgProcessed_sgForeignKey ON ScopedGrantTrkr (sgDestination, sgProcessed, sgForeignKey)")
         db.execSQL("CREATE TABLE IF NOT EXISTS AgentEntityTrkr (  aeTrkrForeignKey  INTEGER  NOT NULL , aeTrkrLastModified  INTEGER  NOT NULL , aeTrkrDestination  INTEGER  NOT NULL , aeTrkrProcessed  INTEGER  NOT NULL  DEFAULT 0 , PRIMARY KEY (aeTrkrForeignKey, aeTrkrDestination) )")

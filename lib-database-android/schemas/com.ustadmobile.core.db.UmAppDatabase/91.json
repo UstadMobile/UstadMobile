@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 91,
-    "identityHash": "66b1daf248f5b329a5ab0d0017206583",
+    "identityHash": "171ad4172effc201c237deea57583622",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -6131,46 +6131,6 @@
         "foreignKeys": []
       },
       {
-        "tableName": "SiteTrkr",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`siteFk` INTEGER NOT NULL, `siteVersionId` INTEGER NOT NULL, `siteDestination` INTEGER NOT NULL, `siteTrkrProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`siteFk`, `siteDestination`))",
-        "fields": [
-          {
-            "fieldPath": "siteFk",
-            "columnName": "siteFk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "siteVersionId",
-            "columnName": "siteVersionId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "siteDestination",
-            "columnName": "siteDestination",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "siteTrkrProcessed",
-            "columnName": "siteTrkrProcessed",
-            "affinity": "INTEGER",
-            "notNull": true,
-            "defaultValue": "0"
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "siteFk",
-            "siteDestination"
-          ],
-          "autoGenerate": false
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
         "tableName": "ScopedGrantTrkr",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sgForeignKey` INTEGER NOT NULL, `sgVersionId` INTEGER NOT NULL, `sgDestination` INTEGER NOT NULL, `sgProcessed` INTEGER NOT NULL, PRIMARY KEY(`sgForeignKey`, `sgVersionId`))",
         "fields": [
@@ -8782,7 +8742,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '66b1daf248f5b329a5ab0d0017206583')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '171ad4172effc201c237deea57583622')"
     ]
   }
 }
