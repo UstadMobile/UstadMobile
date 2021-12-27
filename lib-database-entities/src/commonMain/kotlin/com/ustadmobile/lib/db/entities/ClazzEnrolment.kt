@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
     //Index for streamlining ClazzList where the number of users is counted by role
     Index(value = ["clazzEnrolmentClazzUid", "clazzEnrolmentRole"])
 ])
-@ReplicateEntity(tableId = TABLE_ID, tracker = ClazzEnrolmentTracker::class)
+@ReplicateEntity(tableId = TABLE_ID, tracker = ClazzEnrolmentReplicate::class)
 /*
 @SyncableEntity(tableId = ClazzEnrolment.TABLE_ID,
     /* If someone is newly added to a class this might mean that existing members of the class (e.g.

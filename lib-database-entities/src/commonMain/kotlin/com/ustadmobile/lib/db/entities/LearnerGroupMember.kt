@@ -33,7 +33,7 @@ import kotlinx.serialization.Serializable
 //         WHERE UserSession.usClientNodeId = :clientId
 //           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
 //    """)
-@ReplicateEntity(tableId = LearnerGroupMember.TABLE_ID, tracker = LearnerGroupMemberTracker::class)
+@ReplicateEntity(tableId = LearnerGroupMember.TABLE_ID, tracker = LearnerGroupMemberReplicate::class)
 @Serializable
 open class LearnerGroupMember {
 

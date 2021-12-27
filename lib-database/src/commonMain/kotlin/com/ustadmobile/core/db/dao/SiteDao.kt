@@ -20,17 +20,17 @@ abstract class SiteDao: BaseDao<Site>{
     abstract suspend fun updateAsync(workspace: Site)
 
     @Query("""
-        REPLACE INTO SiteTracker(siteFk, siteVersionId, siteDestination)
-         SELECT Site.siteUid AS siteFk,
+        REPLACE INTO SiteReplicate(sitePk, siteVersionId, siteDestination)
+         SELECT Site.siteUid AS sitePk,
                 Site.siteLct AS siteVersionId,
                 :newNodeId AS siteDestination
            FROM Site
           WHERE Site.siteLct != COALESCE(
                 (SELECT siteVersionId
-                   FROM SiteTracker
-                  WHERE siteFk = Site.siteUid
+                   FROM SiteReplicate
+                  WHERE sitePk = Site.siteUid
                     AND siteDestination = :newNodeId), 0) 
-         /*psql ON CONFLICT(siteFk, siteDestination) DO UPDATE
+         /*psql ON CONFLICT(sitePk, siteDestination) DO UPDATE
                 SET siteProcessed = false
          */       
     """)
@@ -40,8 +40,8 @@ abstract class SiteDao: BaseDao<Site>{
 
 
     @Query("""
-        REPLACE INTO SiteTracker(siteFk, siteVersionId, siteDestination)
-         SELECT Site.siteUid AS siteFk,
+        REPLACE INTO SiteReplicate(sitePk, siteVersionId, siteDestination)
+         SELECT Site.siteUid AS sitePk,
                 Site.siteLct AS siteVersionId,
                 UserSession.usClientNodeId AS siteDestination
            FROM ChangeLog
@@ -55,10 +55,10 @@ abstract class SiteDao: BaseDao<Site>{
                  LIMIT 1)
             AND Site.siteLct != COALESCE(
                 (SELECT siteVersionId
-                   FROM SiteTracker
-                  WHERE siteFk = Site.siteUid
+                   FROM SiteReplicate
+                  WHERE sitePk = Site.siteUid
                     AND siteDestination = UserSession.usClientNodeId), 0)     
-        /*psql  ON CONFLICT(siteFk, siteDestination) DO UPDATE
+        /*psql  ON CONFLICT(sitePk, siteDestination) DO UPDATE
             SET siteProcessed = false
          */               
     """)

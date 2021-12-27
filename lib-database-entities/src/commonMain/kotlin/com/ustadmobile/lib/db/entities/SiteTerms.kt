@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 @Entity
 @Serializable
 //@SyncableEntity(tableId = SiteTerms.TABLE_ID)
-@ReplicateEntity(tableId = SiteTerms.TABLE_ID, tracker = SiteTermsTracker::class)
+@ReplicateEntity(tableId = SiteTerms.TABLE_ID, tracker = SiteTermsReplicate::class)
 open class SiteTerms {
 
     @PrimaryKey(autoGenerate = true)

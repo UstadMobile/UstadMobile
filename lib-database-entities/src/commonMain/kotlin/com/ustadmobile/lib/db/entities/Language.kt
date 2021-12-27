@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
 //          FROM UserSession
 //    """])
 @Serializable
-@ReplicateEntity(tableId = TABLE_ID, tracker = LanguageTracker::class)
+@ReplicateEntity(tableId = TABLE_ID, tracker = LanguageReplicate::class)
 class Language() {
 
     @PrimaryKey(autoGenerate = true)

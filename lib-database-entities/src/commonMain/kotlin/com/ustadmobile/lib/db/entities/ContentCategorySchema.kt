@@ -19,7 +19,7 @@ import kotlinx.serialization.Serializable
           FROM UserSession
     """])
  */
-@ReplicateEntity(tableId = TABLE_ID, tracker = ContentCategorySchemaTracker::class)
+@ReplicateEntity(tableId = TABLE_ID, tracker = ContentCategorySchemaReplicate::class)
 @Serializable
 class ContentCategorySchema() {
 

@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-@ReplicateEntity(tableId = TABLE_ID, tracker = PersonParentJoinTracker::class)
+@ReplicateEntity(tableId = TABLE_ID, tracker = PersonParentJoinReplicate::class)
 //@SyncableEntity(tableId = TABLE_ID)
 open class PersonParentJoin {
 

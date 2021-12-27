@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  */
 //short code = cepcj
 @Entity(indices = [Index(name = "parent_child", value = ["cepcjChildContentEntryUid", "cepcjParentContentEntryUid"])])
-@ReplicateEntity(tableId = TABLE_ID, tracker = ContentEntryParentChildJoinTracker::class)
+@ReplicateEntity(tableId = TABLE_ID, tracker = ContentEntryParentChildJoinReplicate::class)
 //@SyncableEntity(tableId = TABLE_ID,
 //        notifyOnUpdate = ["""
 //        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,

@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 @Entity
 //@SyncableEntity(tableId = TABLE_ID)
 @Serializable
-@ReplicateEntity(tableId = StateContentEntity.TABLE_ID, tracker = StateContentEntityTracker::class)
+@ReplicateEntity(tableId = StateContentEntity.TABLE_ID, tracker = StateContentEntityReplicate::class)
 //TODO
 class StateContentEntity {
 

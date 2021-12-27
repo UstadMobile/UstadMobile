@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 
 @Entity(indices = arrayOf(Index(name = "cnt_uid_to_most_recent",
         value = ["containerContentEntryUid", "cntLastModified"])))
-@ReplicateEntity(tableId = Container.TABLE_ID, tracker = ContainerTracker::class)
+@ReplicateEntity(tableId = Container.TABLE_ID, tracker = ContainerReplicate::class)
 /*
 @SyncableEntity(tableId = Container.TABLE_ID,
     notifyOnUpdate = ["""

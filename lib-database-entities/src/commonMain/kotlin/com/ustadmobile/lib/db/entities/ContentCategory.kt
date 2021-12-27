@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
  * * with a dropdown list for each different schema.
  */
 @Entity
-@ReplicateEntity(tableId = TABLE_ID, tracker = ContentCategoryTracker::class)
+@ReplicateEntity(tableId = TABLE_ID, tracker = ContentCategoryReplicate::class)
 /*
 @SyncableEntity(tableId = TABLE_ID,
         notifyOnUpdate = ["""

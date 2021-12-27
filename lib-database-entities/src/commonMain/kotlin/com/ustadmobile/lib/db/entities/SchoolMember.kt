@@ -189,7 +189,7 @@ import kotlinx.serialization.Serializable
 //                   AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
 //    """)
 @Serializable
-@ReplicateEntity(tableId = SchoolMember.TABLE_ID, tracker = SchoolMemberTracker::class)
+@ReplicateEntity(tableId = SchoolMember.TABLE_ID, tracker = SchoolMemberReplicate::class)
 open class SchoolMember {
 
     @PrimaryKey(autoGenerate = true)

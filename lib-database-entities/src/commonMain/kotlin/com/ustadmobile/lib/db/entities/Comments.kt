@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Entity
 //@SyncableEntity(tableId = Comments.TABLE_ID)
-@ReplicateEntity(tableId = Comments.TABLE_ID, tracker = CommentsTracker::class)
+@ReplicateEntity(tableId = Comments.TABLE_ID, tracker = CommentsReplicate::class)
 @Serializable
 open class Comments() {
 

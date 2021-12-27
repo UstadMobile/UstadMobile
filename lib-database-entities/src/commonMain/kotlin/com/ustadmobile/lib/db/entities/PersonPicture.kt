@@ -35,7 +35,7 @@ import kotlinx.serialization.Serializable
 //)
 @Serializable
 @EntityWithAttachment
-@ReplicateEntity(tableId = PersonPicture.TABLE_ID, tracker = PersonPictureTracker::class)
+@ReplicateEntity(tableId = PersonPicture.TABLE_ID, tracker = PersonPictureReplicate::class)
 open class PersonPicture() {
 
     @PrimaryKey(autoGenerate = true)

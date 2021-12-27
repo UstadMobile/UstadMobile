@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  */
 //shortcode cerej
 @Entity
-@ReplicateEntity(tableId = TABLE_ID, tracker = ContentEntryRelatedEntryJoinTracker::class)
+@ReplicateEntity(tableId = TABLE_ID, tracker = ContentEntryRelatedEntryJoinReplicate::class)
 //@SyncableEntity(tableId = TABLE_ID,
 //    notifyOnUpdate = ["""
 //        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,

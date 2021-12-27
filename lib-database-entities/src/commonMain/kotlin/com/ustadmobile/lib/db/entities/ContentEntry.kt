@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
  * there should be the appropriate ContentEntryParentChildJoin entities present.
  */
 @Entity
-@ReplicateEntity(tableId = TABLE_ID, tracker = ContentEntryTracker::class)
+@ReplicateEntity(tableId = TABLE_ID, tracker = ContentEntryReplicate::class)
 /*
 @SyncableEntity(tableId = TABLE_ID,
         notifyOnUpdate = ["""

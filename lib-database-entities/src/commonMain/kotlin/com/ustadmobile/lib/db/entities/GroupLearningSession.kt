@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @ReplicateEntity(tableId = GroupLearningSession.TABLE_ID,
-    tracker = GroupLearningSessionTracker::class)
+    tracker = GroupLearningSessionReplicate::class)
 //@SyncableEntity(tableId = GroupLearningSession.TABLE_ID,
 //    notifyOnUpdate = ["""
 //        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,

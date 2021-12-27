@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.FROM_S
 import kotlinx.serialization.Serializable
 
 @ReplicateEntity(tableId = ClazzLogAttendanceRecord.TABLE_ID,
-    tracker = ClazzLogAttendanceRecordTracker::class)
+    tracker = ClazzLogAttendanceRecordReplicate::class)
 /*
 @SyncableEntity(tableId = ClazzLogAttendanceRecord.TABLE_ID,
     notifyOnUpdate = [

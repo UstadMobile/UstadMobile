@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
 //    """])
 @Entity
 @Serializable
-@ReplicateEntity(tableId = TABLE_ID, tracker = LanguageVariantTracker::class)
+@ReplicateEntity(tableId = TABLE_ID, tracker = LanguageVariantReplicate::class)
 class LanguageVariant() {
 
 

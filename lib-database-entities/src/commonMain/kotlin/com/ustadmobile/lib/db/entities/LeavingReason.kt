@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Entity
 //@SyncableEntity(tableId = LeavingReason.TABLE_ID)
-@ReplicateEntity(tableId = LeavingReason.TABLE_ID, tracker = LeavingReasonTracker::class)
+@ReplicateEntity(tableId = LeavingReason.TABLE_ID, tracker = LeavingReasonReplicate::class)
 @Serializable
 class LeavingReason() {
 

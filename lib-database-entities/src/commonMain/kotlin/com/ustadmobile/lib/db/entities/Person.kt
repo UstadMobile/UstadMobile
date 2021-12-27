@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  */
 
 @Entity
-@ReplicateEntity(tableId = TABLE_ID, tracker = PersonTracker::class)
+@ReplicateEntity(tableId = TABLE_ID, tracker = PersonReplicate::class)
 //@SyncableEntity(tableId = TABLE_ID,
 //
 //    notifyOnUpdate = ["""

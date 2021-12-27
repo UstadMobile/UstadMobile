@@ -417,12 +417,11 @@ private fun DoorSqlDatabase.addReplicationEntities() {
     _stmtList += "DROP TABLE IF EXISTS PersonCustomFieldValue"
 
     val db = this
-
     if(db.dbType() == DoorDbType.SQLITE) {
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ClazzLogTracker ( clFk INTEGER NOT NULL, clVersionId INTEGER NOT NULL, clDestination INTEGER NOT NULL, clProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (clFk, clDestination)) "
+            " CREATE TABLE IF NOT EXISTS ClazzLogReplicate ( clPk INTEGER NOT NULL, clVersionId INTEGER NOT NULL, clDestination INTEGER NOT NULL, clProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (clPk, clDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ClazzLogTracker_clDestination_clProcessed_clFk ON ClazzLogTracker (clDestination, clProcessed, clFk) "
+            " CREATE INDEX index_ClazzLogReplicate_clDestination_clProcessed_clPk ON ClazzLogReplicate (clDestination, clProcessed, clPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_14 AFTER INSERT ON ClazzLog BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (14, NEW.clazzLogUid, 1); END "
         _stmtList +=
@@ -432,9 +431,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ClazzLog_ReceiveView AS  SELECT ClazzLog.*, ClazzLogTracker.* FROM ClazzLog LEFT JOIN ClazzLogTracker ON ClazzLogTracker.clFk = ClazzLog.clazzLogUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecordTracker ( clarFk INTEGER NOT NULL, clarVersionId INTEGER NOT NULL, clarDestination INTEGER NOT NULL, clarProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (clarFk, clarDestination)) "
+            " CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecordReplicate ( clarPk INTEGER NOT NULL, clarVersionId INTEGER NOT NULL, clarDestination INTEGER NOT NULL, clarProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (clarPk, clarDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ClazzLogAttendanceRecordTracker_clarDestination_clarProcessed_clarFk ON ClazzLogAttendanceRecordTracker (clarDestination, clarProcessed, clarFk) "
+            " CREATE INDEX index_ClazzLogAttendanceRecordReplicate_clarDestination_clarProcessed_clarPk ON ClazzLogAttendanceRecordReplicate (clarDestination, clarProcessed, clarPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_15 AFTER INSERT ON ClazzLogAttendanceRecord BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (15, NEW.clazzLogAttendanceRecordUid, 1); END "
         _stmtList +=
@@ -444,9 +443,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ClazzLogAttendanceRecord_ReceiveView AS  SELECT ClazzLogAttendanceRecord.*, ClazzLogAttendanceRecordTracker.* FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLogAttendanceRecordTracker ON ClazzLogAttendanceRecordTracker.clarFk = ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ScheduleTracker ( scheduleFk INTEGER NOT NULL, scheduleVersionId INTEGER NOT NULL, scheduleDestination INTEGER NOT NULL, scheduleProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (scheduleFk, scheduleDestination)) "
+            " CREATE TABLE IF NOT EXISTS ScheduleReplicate ( schedulePk INTEGER NOT NULL, scheduleVersionId INTEGER NOT NULL, scheduleDestination INTEGER NOT NULL, scheduleProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (schedulePk, scheduleDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ScheduleTracker_scheduleDestination_scheduleProcessed_scheduleFk ON ScheduleTracker (scheduleDestination, scheduleProcessed, scheduleFk) "
+            " CREATE INDEX index_ScheduleReplicate_scheduleDestination_scheduleProcessed_schedulePk ON ScheduleReplicate (scheduleDestination, scheduleProcessed, schedulePk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_21 AFTER INSERT ON Schedule BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (21, NEW.scheduleUid, 1); END "
         _stmtList +=
@@ -456,9 +455,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Schedule_ReceiveView AS  SELECT Schedule.*, ScheduleTracker.* FROM Schedule LEFT JOIN ScheduleTracker ON ScheduleTracker.scheduleFk = Schedule.scheduleUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS HolidayCalendarTracker ( hcFk INTEGER NOT NULL, hcVersionId INTEGER NOT NULL, hcDestination INTEGER NOT NULL, hcProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (hcFk, hcDestination)) "
+            " CREATE TABLE IF NOT EXISTS HolidayCalendarReplicate ( hcPk INTEGER NOT NULL, hcVersionId INTEGER NOT NULL, hcDestination INTEGER NOT NULL, hcProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (hcPk, hcDestination)) "
         _stmtList +=
-            " CREATE INDEX index_HolidayCalendarTracker_hcDestination_hcProcessed_hcFk ON HolidayCalendarTracker (hcDestination, hcProcessed, hcFk) "
+            " CREATE INDEX index_HolidayCalendarReplicate_hcDestination_hcProcessed_hcPk ON HolidayCalendarReplicate (hcDestination, hcProcessed, hcPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_28 AFTER INSERT ON HolidayCalendar BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (28, NEW.umCalendarUid, 1); END "
         _stmtList +=
@@ -468,9 +467,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW HolidayCalendar_ReceiveView AS  SELECT HolidayCalendar.*, HolidayCalendarTracker.* FROM HolidayCalendar LEFT JOIN HolidayCalendarTracker ON HolidayCalendarTracker.hcFk = HolidayCalendar.umCalendarUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS HolidayTracker ( holidayFk INTEGER NOT NULL, holidayVersionId INTEGER NOT NULL, holidayDestination INTEGER NOT NULL, holidayProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (holidayFk, holidayDestination)) "
+            " CREATE TABLE IF NOT EXISTS HolidayReplicate ( holidayPk INTEGER NOT NULL, holidayVersionId INTEGER NOT NULL, holidayDestination INTEGER NOT NULL, holidayProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (holidayPk, holidayDestination)) "
         _stmtList +=
-            " CREATE INDEX index_HolidayTracker_holidayDestination_holidayProcessed_holidayFk ON HolidayTracker (holidayDestination, holidayProcessed, holidayFk) "
+            " CREATE INDEX index_HolidayReplicate_holidayDestination_holidayProcessed_holidayPk ON HolidayReplicate (holidayDestination, holidayProcessed, holidayPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_99 AFTER INSERT ON Holiday BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (99, NEW.holUid, 1); END "
         _stmtList +=
@@ -480,9 +479,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Holiday_ReceiveView AS  SELECT Holiday.*, HolidayTracker.* FROM Holiday LEFT JOIN HolidayTracker ON HolidayTracker.holidayFk = Holiday.holUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS PersonTracker ( personFk INTEGER NOT NULL, personVersionId INTEGER NOT NULL, personDestination INTEGER NOT NULL, personProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (personFk, personDestination)) "
+            " CREATE TABLE IF NOT EXISTS PersonReplicate ( personPk INTEGER NOT NULL, personVersionId INTEGER NOT NULL, personDestination INTEGER NOT NULL, personProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (personPk, personDestination)) "
         _stmtList +=
-            " CREATE INDEX index_PersonTracker_personDestination_personProcessed_personFk ON PersonTracker (personDestination, personProcessed, personFk) "
+            " CREATE INDEX index_PersonReplicate_personDestination_personProcessed_personPk ON PersonReplicate (personDestination, personProcessed, personPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_9 AFTER INSERT ON Person BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (9, NEW.personUid, 1); END "
         _stmtList +=
@@ -492,9 +491,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Person_ReceiveView AS  SELECT Person.*, PersonTracker.* FROM Person LEFT JOIN PersonTracker ON PersonTracker.personFk = Person.personUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ClazzTracker ( clazzFk INTEGER NOT NULL, clazzVersionId INTEGER NOT NULL, clazzDestination INTEGER NOT NULL, clazzProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (clazzFk, clazzDestination)) "
+            " CREATE TABLE IF NOT EXISTS ClazzReplicate ( clazzPk INTEGER NOT NULL, clazzVersionId INTEGER NOT NULL, clazzDestination INTEGER NOT NULL, clazzProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (clazzPk, clazzDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ClazzTracker_clazzDestination_clazzProcessed_clazzFk ON ClazzTracker (clazzDestination, clazzProcessed, clazzFk) "
+            " CREATE INDEX index_ClazzReplicate_clazzDestination_clazzProcessed_clazzPk ON ClazzReplicate (clazzDestination, clazzProcessed, clazzPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_6 AFTER INSERT ON Clazz BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (6, NEW.clazzUid, 1); END "
         _stmtList +=
@@ -504,9 +503,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Clazz_ReceiveView AS  SELECT Clazz.*, ClazzTracker.* FROM Clazz LEFT JOIN ClazzTracker ON ClazzTracker.clazzFk = Clazz.clazzUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ClazzEnrolmentTracker ( ceFk INTEGER NOT NULL, ceVersionId INTEGER NOT NULL, ceDestination INTEGER NOT NULL, ceProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (ceFk, ceDestination)) "
+            " CREATE TABLE IF NOT EXISTS ClazzEnrolmentReplicate ( cePk INTEGER NOT NULL, ceVersionId INTEGER NOT NULL, ceDestination INTEGER NOT NULL, ceProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (cePk, ceDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ClazzEnrolmentTracker_ceDestination_ceProcessed_ceFk ON ClazzEnrolmentTracker (ceDestination, ceProcessed, ceFk) "
+            " CREATE INDEX index_ClazzEnrolmentReplicate_ceDestination_ceProcessed_cePk ON ClazzEnrolmentReplicate (ceDestination, ceProcessed, cePk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_65 AFTER INSERT ON ClazzEnrolment BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (65, NEW.clazzEnrolmentUid, 1); END "
         _stmtList +=
@@ -516,9 +515,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ClazzEnrolment_ReceiveView AS  SELECT ClazzEnrolment.*, ClazzEnrolmentTracker.* FROM ClazzEnrolment LEFT JOIN ClazzEnrolmentTracker ON ClazzEnrolmentTracker.ceFk = ClazzEnrolment.clazzEnrolmentUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS LeavingReasonTracker ( lrFk INTEGER NOT NULL, lrVersionId INTEGER NOT NULL, lrDestination INTEGER NOT NULL, lrProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (lrFk, lrDestination)) "
+            " CREATE TABLE IF NOT EXISTS LeavingReasonReplicate ( lrPk INTEGER NOT NULL, lrVersionId INTEGER NOT NULL, lrDestination INTEGER NOT NULL, lrProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (lrPk, lrDestination)) "
         _stmtList +=
-            " CREATE INDEX index_LeavingReasonTracker_lrDestination_lrProcessed_lrFk ON LeavingReasonTracker (lrDestination, lrProcessed, lrFk) "
+            " CREATE INDEX index_LeavingReasonReplicate_lrDestination_lrProcessed_lrPk ON LeavingReasonReplicate (lrDestination, lrProcessed, lrPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_410 AFTER INSERT ON LeavingReason BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (410, NEW.leavingReasonUid, 1); END "
         _stmtList +=
@@ -528,9 +527,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW LeavingReason_ReceiveView AS  SELECT LeavingReason.*, LeavingReasonTracker.* FROM LeavingReason LEFT JOIN LeavingReasonTracker ON LeavingReasonTracker.lrFk = LeavingReason.leavingReasonUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ContentEntryTracker ( ceFk INTEGER NOT NULL, ceVersionId INTEGER NOT NULL, ceDestination INTEGER NOT NULL, ceProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (ceFk, ceDestination)) "
+            " CREATE TABLE IF NOT EXISTS ContentEntryReplicate ( cePk INTEGER NOT NULL, ceVersionId INTEGER NOT NULL, ceDestination INTEGER NOT NULL, ceProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (cePk, ceDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ContentEntryTracker_ceDestination_ceProcessed_ceFk ON ContentEntryTracker (ceDestination, ceProcessed, ceFk) "
+            " CREATE INDEX index_ContentEntryReplicate_ceDestination_ceProcessed_cePk ON ContentEntryReplicate (ceDestination, ceProcessed, cePk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_42 AFTER INSERT ON ContentEntry BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (42, NEW.contentEntryUid, 1); END "
         _stmtList +=
@@ -540,9 +539,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ContentEntry_ReceiveView AS  SELECT ContentEntry.*, ContentEntryTracker.* FROM ContentEntry LEFT JOIN ContentEntryTracker ON ContentEntryTracker.ceFk = ContentEntry.contentEntryUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ContentEntryContentCategoryJoinTracker ( ceccjFk INTEGER NOT NULL, ceccjVersionId INTEGER NOT NULL, ceccjDestination INTEGER NOT NULL, ceccjProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (ceccjFk, ceccjDestination)) "
+            " CREATE TABLE IF NOT EXISTS ContentEntryContentCategoryJoinReplicate ( ceccjPk INTEGER NOT NULL, ceccjVersionId INTEGER NOT NULL, ceccjDestination INTEGER NOT NULL, ceccjProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (ceccjPk, ceccjDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ContentEntryContentCategoryJoinTracker_ceccjDestination_ceccjProcessed_ceccjFk ON ContentEntryContentCategoryJoinTracker (ceccjDestination, ceccjProcessed, ceccjFk) "
+            " CREATE INDEX index_ContentEntryContentCategoryJoinReplicate_ceccjDestination_ceccjProcessed_ceccjPk ON ContentEntryContentCategoryJoinReplicate (ceccjDestination, ceccjProcessed, ceccjPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_3 AFTER INSERT ON ContentEntryContentCategoryJoin BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (3, NEW.ceccjUid, 1); END "
         _stmtList +=
@@ -552,9 +551,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ContentEntryContentCategoryJoin_ReceiveView AS  SELECT ContentEntryContentCategoryJoin.*, ContentEntryContentCategoryJoinTracker.* FROM ContentEntryContentCategoryJoin LEFT JOIN ContentEntryContentCategoryJoinTracker ON ContentEntryContentCategoryJoinTracker.ceccjFk = ContentEntryContentCategoryJoin.ceccjUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ContentEntryParentChildJoinTracker ( cepcjFk INTEGER NOT NULL, cepcjVersionId INTEGER NOT NULL, cepcjDestination INTEGER NOT NULL, cepcjProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (cepcjFk, cepcjDestination)) "
+            " CREATE TABLE IF NOT EXISTS ContentEntryParentChildJoinReplicate ( cepcjPk INTEGER NOT NULL, cepcjVersionId INTEGER NOT NULL, cepcjDestination INTEGER NOT NULL, cepcjProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (cepcjPk, cepcjDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ContentEntryParentChildJoinTracker_cepcjDestination_cepcjProcessed_cepcjFk ON ContentEntryParentChildJoinTracker (cepcjDestination, cepcjProcessed, cepcjFk) "
+            " CREATE INDEX index_ContentEntryParentChildJoinReplicate_cepcjDestination_cepcjProcessed_cepcjPk ON ContentEntryParentChildJoinReplicate (cepcjDestination, cepcjProcessed, cepcjPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_7 AFTER INSERT ON ContentEntryParentChildJoin BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (7, NEW.cepcjUid, 1); END "
         _stmtList +=
@@ -564,9 +563,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ContentEntryParentChildJoin_ReceiveView AS  SELECT ContentEntryParentChildJoin.*, ContentEntryParentChildJoinTracker.* FROM ContentEntryParentChildJoin LEFT JOIN ContentEntryParentChildJoinTracker ON ContentEntryParentChildJoinTracker.cepcjFk = ContentEntryParentChildJoin.cepcjUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ContentEntryRelatedEntryJoinTracker ( cerejFk INTEGER NOT NULL, cerejVersionId INTEGER NOT NULL, cerejDestination INTEGER NOT NULL, cerejProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (cerejFk, cerejDestination)) "
+            " CREATE TABLE IF NOT EXISTS ContentEntryRelatedEntryJoinReplicate ( cerejPk INTEGER NOT NULL, cerejVersionId INTEGER NOT NULL, cerejDestination INTEGER NOT NULL, cerejProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (cerejPk, cerejDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ContentEntryRelatedEntryJoinTracker_cerejDestination_cerejProcessed_cerejFk ON ContentEntryRelatedEntryJoinTracker (cerejDestination, cerejProcessed, cerejFk) "
+            " CREATE INDEX index_ContentEntryRelatedEntryJoinReplicate_cerejDestination_cerejProcessed_cerejPk ON ContentEntryRelatedEntryJoinReplicate (cerejDestination, cerejProcessed, cerejPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_8 AFTER INSERT ON ContentEntryRelatedEntryJoin BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (8, NEW.cerejUid, 1); END "
         _stmtList +=
@@ -576,9 +575,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ContentEntryRelatedEntryJoin_ReceiveView AS  SELECT ContentEntryRelatedEntryJoin.*, ContentEntryRelatedEntryJoinTracker.* FROM ContentEntryRelatedEntryJoin LEFT JOIN ContentEntryRelatedEntryJoinTracker ON ContentEntryRelatedEntryJoinTracker.cerejFk = ContentEntryRelatedEntryJoin.cerejUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ContentCategorySchemaTracker ( ccsFk INTEGER NOT NULL, ccsVersionId INTEGER NOT NULL, ccsDestination INTEGER NOT NULL, ccsProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (ccsFk, ccsDestination)) "
+            " CREATE TABLE IF NOT EXISTS ContentCategorySchemaReplicate ( ccsPk INTEGER NOT NULL, ccsVersionId INTEGER NOT NULL, ccsDestination INTEGER NOT NULL, ccsProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (ccsPk, ccsDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ContentCategorySchemaTracker_ccsDestination_ccsProcessed_ccsFk ON ContentCategorySchemaTracker (ccsDestination, ccsProcessed, ccsFk) "
+            " CREATE INDEX index_ContentCategorySchemaReplicate_ccsDestination_ccsProcessed_ccsPk ON ContentCategorySchemaReplicate (ccsDestination, ccsProcessed, ccsPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_2 AFTER INSERT ON ContentCategorySchema BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (2, NEW.contentCategorySchemaUid, 1); END "
         _stmtList +=
@@ -588,9 +587,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ContentCategorySchema_ReceiveView AS  SELECT ContentCategorySchema.*, ContentCategorySchemaTracker.* FROM ContentCategorySchema LEFT JOIN ContentCategorySchemaTracker ON ContentCategorySchemaTracker.ccsFk = ContentCategorySchema.contentCategorySchemaUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ContentCategoryTracker ( ccFk INTEGER NOT NULL, ccVersionId INTEGER NOT NULL, ccDestination INTEGER NOT NULL, ccProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (ccFk, ccDestination)) "
+            " CREATE TABLE IF NOT EXISTS ContentCategoryReplicate ( ccPk INTEGER NOT NULL, ccVersionId INTEGER NOT NULL, ccDestination INTEGER NOT NULL, ccProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (ccPk, ccDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ContentCategoryTracker_ccDestination_ccProcessed_ccFk ON ContentCategoryTracker (ccDestination, ccProcessed, ccFk) "
+            " CREATE INDEX index_ContentCategoryReplicate_ccDestination_ccProcessed_ccPk ON ContentCategoryReplicate (ccDestination, ccProcessed, ccPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_1 AFTER INSERT ON ContentCategory BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (1, NEW.contentCategoryUid, 1); END "
         _stmtList +=
@@ -600,9 +599,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ContentCategory_ReceiveView AS  SELECT ContentCategory.*, ContentCategoryTracker.* FROM ContentCategory LEFT JOIN ContentCategoryTracker ON ContentCategoryTracker.ccFk = ContentCategory.contentCategoryUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS LanguageTracker ( languageFk INTEGER NOT NULL, languageVersionId INTEGER NOT NULL, languageDestination INTEGER NOT NULL, languageProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (languageFk, languageDestination)) "
+            " CREATE TABLE IF NOT EXISTS LanguageReplicate ( languagePk INTEGER NOT NULL, languageVersionId INTEGER NOT NULL, languageDestination INTEGER NOT NULL, languageProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (languagePk, languageDestination)) "
         _stmtList +=
-            " CREATE INDEX index_LanguageTracker_languageDestination_languageProcessed_languageFk ON LanguageTracker (languageDestination, languageProcessed, languageFk) "
+            " CREATE INDEX index_LanguageReplicate_languageDestination_languageProcessed_languagePk ON LanguageReplicate (languageDestination, languageProcessed, languagePk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_13 AFTER INSERT ON Language BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (13, NEW.langUid, 1); END "
         _stmtList +=
@@ -612,9 +611,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Language_ReceiveView AS  SELECT Language.*, LanguageTracker.* FROM Language LEFT JOIN LanguageTracker ON LanguageTracker.languageFk = Language.langUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS LanguageVariantTracker ( lvFk INTEGER NOT NULL, lvVersionId INTEGER NOT NULL, lvDestination INTEGER NOT NULL, lvProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (lvFk, lvDestination)) "
+            " CREATE TABLE IF NOT EXISTS LanguageVariantReplicate ( lvPk INTEGER NOT NULL, lvVersionId INTEGER NOT NULL, lvDestination INTEGER NOT NULL, lvProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (lvPk, lvDestination)) "
         _stmtList +=
-            " CREATE INDEX index_LanguageVariantTracker_lvDestination_lvProcessed_lvFk ON LanguageVariantTracker (lvDestination, lvProcessed, lvFk) "
+            " CREATE INDEX index_LanguageVariantReplicate_lvDestination_lvProcessed_lvPk ON LanguageVariantReplicate (lvDestination, lvProcessed, lvPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_10 AFTER INSERT ON LanguageVariant BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (10, NEW.langVariantUid, 1); END "
         _stmtList +=
@@ -624,9 +623,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW LanguageVariant_ReceiveView AS  SELECT LanguageVariant.*, LanguageVariantTracker.* FROM LanguageVariant LEFT JOIN LanguageVariantTracker ON LanguageVariantTracker.lvFk = LanguageVariant.langVariantUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS RoleTracker ( roleFk INTEGER NOT NULL, roleVersionId INTEGER NOT NULL, roleDestination INTEGER NOT NULL, roleProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (roleFk, roleDestination)) "
+            " CREATE TABLE IF NOT EXISTS RoleReplicate ( rolePk INTEGER NOT NULL, roleVersionId INTEGER NOT NULL, roleDestination INTEGER NOT NULL, roleProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (rolePk, roleDestination)) "
         _stmtList +=
-            " CREATE INDEX index_RoleTracker_roleDestination_roleProcessed_roleFk ON RoleTracker (roleDestination, roleProcessed, roleFk) "
+            " CREATE INDEX index_RoleReplicate_roleDestination_roleProcessed_rolePk ON RoleReplicate (roleDestination, roleProcessed, rolePk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_45 AFTER INSERT ON Role BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (45, NEW.roleUid, 1); END "
         _stmtList +=
@@ -636,9 +635,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Role_ReceiveView AS  SELECT Role.*, RoleTracker.* FROM Role LEFT JOIN RoleTracker ON RoleTracker.roleFk = Role.roleUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS PersonGroupTracker ( pgFk INTEGER NOT NULL, pgVersionId INTEGER NOT NULL, pgDestination INTEGER NOT NULL, pgProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (pgFk, pgDestination)) "
+            " CREATE TABLE IF NOT EXISTS PersonGroupReplicate ( pgPk INTEGER NOT NULL, pgVersionId INTEGER NOT NULL, pgDestination INTEGER NOT NULL, pgProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (pgPk, pgDestination)) "
         _stmtList +=
-            " CREATE INDEX index_PersonGroupTracker_pgDestination_pgProcessed_pgFk ON PersonGroupTracker (pgDestination, pgProcessed, pgFk) "
+            " CREATE INDEX index_PersonGroupReplicate_pgDestination_pgProcessed_pgPk ON PersonGroupReplicate (pgDestination, pgProcessed, pgPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_43 AFTER INSERT ON PersonGroup BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (43, NEW.groupUid, 1); END "
         _stmtList +=
@@ -648,9 +647,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW PersonGroup_ReceiveView AS  SELECT PersonGroup.*, PersonGroupTracker.* FROM PersonGroup LEFT JOIN PersonGroupTracker ON PersonGroupTracker.pgFk = PersonGroup.groupUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS PersonGroupMemberTracker ( pgmFk INTEGER NOT NULL, pgmVersionId INTEGER NOT NULL, pgmDestination INTEGER NOT NULL, pgmProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (pgmFk, pgmDestination)) "
+            " CREATE TABLE IF NOT EXISTS PersonGroupMemberReplicate ( pgmPk INTEGER NOT NULL, pgmVersionId INTEGER NOT NULL, pgmDestination INTEGER NOT NULL, pgmProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (pgmPk, pgmDestination)) "
         _stmtList +=
-            " CREATE INDEX index_PersonGroupMemberTracker_pgmDestination_pgmProcessed_pgmFk ON PersonGroupMemberTracker (pgmDestination, pgmProcessed, pgmFk) "
+            " CREATE INDEX index_PersonGroupMemberReplicate_pgmDestination_pgmProcessed_pgmPk ON PersonGroupMemberReplicate (pgmDestination, pgmProcessed, pgmPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_44 AFTER INSERT ON PersonGroupMember BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (44, NEW.groupMemberUid, 1); END "
         _stmtList +=
@@ -660,9 +659,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW PersonGroupMember_ReceiveView AS  SELECT PersonGroupMember.*, PersonGroupMemberTracker.* FROM PersonGroupMember LEFT JOIN PersonGroupMemberTracker ON PersonGroupMemberTracker.pgmFk = PersonGroupMember.groupMemberUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS PersonPictureTracker ( ppFk INTEGER NOT NULL, ppVersionId INTEGER NOT NULL, ppDestination INTEGER NOT NULL, ppProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (ppFk, ppDestination)) "
+            " CREATE TABLE IF NOT EXISTS PersonPictureReplicate ( ppPk INTEGER NOT NULL, ppVersionId INTEGER NOT NULL, ppDestination INTEGER NOT NULL, ppProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (ppPk, ppDestination)) "
         _stmtList +=
-            " CREATE INDEX index_PersonPictureTracker_ppDestination_ppProcessed_ppFk ON PersonPictureTracker (ppDestination, ppProcessed, ppFk) "
+            " CREATE INDEX index_PersonPictureReplicate_ppDestination_ppProcessed_ppPk ON PersonPictureReplicate (ppDestination, ppProcessed, ppPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_50 AFTER INSERT ON PersonPicture BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (50, NEW.personPictureUid, 1); END "
         _stmtList +=
@@ -672,9 +671,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW PersonPicture_ReceiveView AS  SELECT PersonPicture.*, PersonPictureTracker.* FROM PersonPicture LEFT JOIN PersonPictureTracker ON PersonPictureTracker.ppFk = PersonPicture.personPictureUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ContainerTracker ( containerFk INTEGER NOT NULL, containerVersionId INTEGER NOT NULL, containerDestination INTEGER NOT NULL, containerProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (containerFk, containerDestination)) "
+            " CREATE TABLE IF NOT EXISTS ContainerReplicate ( containerPk INTEGER NOT NULL, containerVersionId INTEGER NOT NULL, containerDestination INTEGER NOT NULL, containerProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (containerPk, containerDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ContainerTracker_containerDestination_containerProcessed_containerFk ON ContainerTracker (containerDestination, containerProcessed, containerFk) "
+            " CREATE INDEX index_ContainerReplicate_containerDestination_containerProcessed_containerPk ON ContainerReplicate (containerDestination, containerProcessed, containerPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_51 AFTER INSERT ON Container BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (51, NEW.containerUid, 1); END "
         _stmtList +=
@@ -684,9 +683,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Container_ReceiveView AS  SELECT Container.*, ContainerTracker.* FROM Container LEFT JOIN ContainerTracker ON ContainerTracker.containerFk = Container.containerUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS VerbEntityTracker ( veFk INTEGER NOT NULL, veVersionId INTEGER NOT NULL, veDestination INTEGER NOT NULL, veProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (veFk, veDestination)) "
+            " CREATE TABLE IF NOT EXISTS VerbEntityReplicate ( vePk INTEGER NOT NULL, veVersionId INTEGER NOT NULL, veDestination INTEGER NOT NULL, veProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (vePk, veDestination)) "
         _stmtList +=
-            " CREATE INDEX index_VerbEntityTracker_veDestination_veProcessed_veFk ON VerbEntityTracker (veDestination, veProcessed, veFk) "
+            " CREATE INDEX index_VerbEntityReplicate_veDestination_veProcessed_vePk ON VerbEntityReplicate (veDestination, veProcessed, vePk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_62 AFTER INSERT ON VerbEntity BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (62, NEW.verbUid, 1); END "
         _stmtList +=
@@ -696,9 +695,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW VerbEntity_ReceiveView AS  SELECT VerbEntity.*, VerbEntityTracker.* FROM VerbEntity LEFT JOIN VerbEntityTracker ON VerbEntityTracker.veFk = VerbEntity.verbUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS XObjectEntityTracker ( xoeFk INTEGER NOT NULL, xoeVersionId INTEGER NOT NULL, xoeDestination INTEGER NOT NULL, xoeProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (xoeFk, xoeDestination)) "
+            " CREATE TABLE IF NOT EXISTS XObjectEntityReplicate ( xoePk INTEGER NOT NULL, xoeVersionId INTEGER NOT NULL, xoeDestination INTEGER NOT NULL, xoeProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (xoePk, xoeDestination)) "
         _stmtList +=
-            " CREATE INDEX index_XObjectEntityTracker_xoeDestination_xoeProcessed_xoeFk ON XObjectEntityTracker (xoeDestination, xoeProcessed, xoeFk) "
+            " CREATE INDEX index_XObjectEntityReplicate_xoeDestination_xoeProcessed_xoePk ON XObjectEntityReplicate (xoeDestination, xoeProcessed, xoePk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_64 AFTER INSERT ON XObjectEntity BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (64, NEW.xObjectUid, 1); END "
         _stmtList +=
@@ -708,9 +707,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW XObjectEntity_ReceiveView AS  SELECT XObjectEntity.*, XObjectEntityTracker.* FROM XObjectEntity LEFT JOIN XObjectEntityTracker ON XObjectEntityTracker.xoeFk = XObjectEntity.xObjectUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS StatementEntityTracker ( seFk INTEGER NOT NULL, seVersionId INTEGER NOT NULL, seDestination INTEGER NOT NULL, seProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (seFk, seDestination)) "
+            " CREATE TABLE IF NOT EXISTS StatementEntityReplicate ( sePk INTEGER NOT NULL, seVersionId INTEGER NOT NULL, seDestination INTEGER NOT NULL, seProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (sePk, seDestination)) "
         _stmtList +=
-            " CREATE INDEX index_StatementEntityTracker_seDestination_seProcessed_seFk ON StatementEntityTracker (seDestination, seProcessed, seFk) "
+            " CREATE INDEX index_StatementEntityReplicate_seDestination_seProcessed_sePk ON StatementEntityReplicate (seDestination, seProcessed, sePk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_60 AFTER INSERT ON StatementEntity BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (60, NEW.statementUid, 1); END "
         _stmtList +=
@@ -720,9 +719,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW StatementEntity_ReceiveView AS  SELECT StatementEntity.*, StatementEntityTracker.* FROM StatementEntity LEFT JOIN StatementEntityTracker ON StatementEntityTracker.seFk = StatementEntity.statementUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoinTracker ( cxosjFk INTEGER NOT NULL, cxosjVersionId INTEGER NOT NULL, cxosjDestination INTEGER NOT NULL, cxosjProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (cxosjFk, cxosjDestination)) "
+            " CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoinReplicate ( cxosjPk INTEGER NOT NULL, cxosjVersionId INTEGER NOT NULL, cxosjDestination INTEGER NOT NULL, cxosjProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (cxosjPk, cxosjDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ContextXObjectStatementJoinTracker_cxosjDestination_cxosjProcessed_cxosjFk ON ContextXObjectStatementJoinTracker (cxosjDestination, cxosjProcessed, cxosjFk) "
+            " CREATE INDEX index_ContextXObjectStatementJoinReplicate_cxosjDestination_cxosjProcessed_cxosjPk ON ContextXObjectStatementJoinReplicate (cxosjDestination, cxosjProcessed, cxosjPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_66 AFTER INSERT ON ContextXObjectStatementJoin BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (66, NEW.contextXObjectStatementJoinUid, 1); END "
         _stmtList +=
@@ -732,9 +731,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ContextXObjectStatementJoin_ReceiveView AS  SELECT ContextXObjectStatementJoin.*, ContextXObjectStatementJoinTracker.* FROM ContextXObjectStatementJoin LEFT JOIN ContextXObjectStatementJoinTracker ON ContextXObjectStatementJoinTracker.cxosjFk = ContextXObjectStatementJoin.contextXObjectStatementJoinUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS AgentEntityTracker ( aeFk INTEGER NOT NULL, aeVersionId INTEGER NOT NULL, aeDestination INTEGER NOT NULL, aeProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (aeFk, aeDestination)) "
+            " CREATE TABLE IF NOT EXISTS AgentEntityReplicate ( aePk INTEGER NOT NULL, aeVersionId INTEGER NOT NULL, aeDestination INTEGER NOT NULL, aeProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (aePk, aeDestination)) "
         _stmtList +=
-            " CREATE INDEX index_AgentEntityTracker_aeDestination_aeProcessed_aeFk ON AgentEntityTracker (aeDestination, aeProcessed, aeFk) "
+            " CREATE INDEX index_AgentEntityReplicate_aeDestination_aeProcessed_aePk ON AgentEntityReplicate (aeDestination, aeProcessed, aePk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_68 AFTER INSERT ON AgentEntity BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (68, NEW.agentUid, 1); END "
         _stmtList +=
@@ -744,9 +743,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW AgentEntity_ReceiveView AS  SELECT AgentEntity.*, AgentEntityTracker.* FROM AgentEntity LEFT JOIN AgentEntityTracker ON AgentEntityTracker.aeFk = AgentEntity.agentUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS StateEntityTracker ( seFk INTEGER NOT NULL, seVersionId INTEGER NOT NULL, seDestination INTEGER NOT NULL, seProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (seFk, seDestination)) "
+            " CREATE TABLE IF NOT EXISTS StateEntityReplicate ( sePk INTEGER NOT NULL, seVersionId INTEGER NOT NULL, seDestination INTEGER NOT NULL, seProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (sePk, seDestination)) "
         _stmtList +=
-            " CREATE INDEX index_StateEntityTracker_seDestination_seProcessed_seFk ON StateEntityTracker (seDestination, seProcessed, seFk) "
+            " CREATE INDEX index_StateEntityReplicate_seDestination_seProcessed_sePk ON StateEntityReplicate (seDestination, seProcessed, sePk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_70 AFTER INSERT ON StateEntity BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (70, NEW.stateUid, 1); END "
         _stmtList +=
@@ -756,9 +755,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW StateEntity_ReceiveView AS  SELECT StateEntity.*, StateEntityTracker.* FROM StateEntity LEFT JOIN StateEntityTracker ON StateEntityTracker.seFk = StateEntity.stateUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS StateContentEntityTracker ( sceFk INTEGER NOT NULL, sceVersionId INTEGER NOT NULL, sceDestination INTEGER NOT NULL, sceProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (sceFk, sceDestination)) "
+            " CREATE TABLE IF NOT EXISTS StateContentEntityReplicate ( scePk INTEGER NOT NULL, sceVersionId INTEGER NOT NULL, sceDestination INTEGER NOT NULL, sceProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (scePk, sceDestination)) "
         _stmtList +=
-            " CREATE INDEX index_StateContentEntityTracker_sceDestination_sceProcessed_sceFk ON StateContentEntityTracker (sceDestination, sceProcessed, sceFk) "
+            " CREATE INDEX index_StateContentEntityReplicate_sceDestination_sceProcessed_scePk ON StateContentEntityReplicate (sceDestination, sceProcessed, scePk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_72 AFTER INSERT ON StateContentEntity BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (72, NEW.stateContentUid, 1); END "
         _stmtList +=
@@ -768,9 +767,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW StateContentEntity_ReceiveView AS  SELECT StateContentEntity.*, StateContentEntityTracker.* FROM StateContentEntity LEFT JOIN StateContentEntityTracker ON StateContentEntityTracker.sceFk = StateContentEntity.stateContentUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS XLangMapEntryTracker ( xlmeFk INTEGER NOT NULL, xlmeVersionId INTEGER NOT NULL, xlmeDestination INTEGER NOT NULL, xlmeProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (xlmeFk, xlmeDestination)) "
+            " CREATE TABLE IF NOT EXISTS XLangMapEntryReplicate ( xlmePk INTEGER NOT NULL, xlmeVersionId INTEGER NOT NULL, xlmeDestination INTEGER NOT NULL, xlmeProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (xlmePk, xlmeDestination)) "
         _stmtList +=
-            " CREATE INDEX index_XLangMapEntryTracker_xlmeDestination_xlmeProcessed_xlmeFk ON XLangMapEntryTracker (xlmeDestination, xlmeProcessed, xlmeFk) "
+            " CREATE INDEX index_XLangMapEntryReplicate_xlmeDestination_xlmeProcessed_xlmePk ON XLangMapEntryReplicate (xlmeDestination, xlmeProcessed, xlmePk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_74 AFTER INSERT ON XLangMapEntry BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (74, NEW.statementLangMapUid, 1); END "
         _stmtList +=
@@ -780,9 +779,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW XLangMapEntry_ReceiveView AS  SELECT XLangMapEntry.*, XLangMapEntryTracker.* FROM XLangMapEntry LEFT JOIN XLangMapEntryTracker ON XLangMapEntryTracker.xlmeFk = XLangMapEntry.statementLangMapUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS SchoolTracker ( schoolFk INTEGER NOT NULL, schoolVersionId INTEGER NOT NULL, schoolDestination INTEGER NOT NULL, schoolProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (schoolFk, schoolDestination)) "
+            " CREATE TABLE IF NOT EXISTS SchoolReplicate ( schoolPk INTEGER NOT NULL, schoolVersionId INTEGER NOT NULL, schoolDestination INTEGER NOT NULL, schoolProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (schoolPk, schoolDestination)) "
         _stmtList +=
-            " CREATE INDEX index_SchoolTracker_schoolDestination_schoolProcessed_schoolFk ON SchoolTracker (schoolDestination, schoolProcessed, schoolFk) "
+            " CREATE INDEX index_SchoolReplicate_schoolDestination_schoolProcessed_schoolPk ON SchoolReplicate (schoolDestination, schoolProcessed, schoolPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_164 AFTER INSERT ON School BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (164, NEW.schoolUid, 1); END "
         _stmtList +=
@@ -792,9 +791,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW School_ReceiveView AS  SELECT School.*, SchoolTracker.* FROM School LEFT JOIN SchoolTracker ON SchoolTracker.schoolFk = School.schoolUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS SchoolMemberTracker ( smFk INTEGER NOT NULL, smVersionId INTEGER NOT NULL, smDestination INTEGER NOT NULL, smProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (smFk, smDestination)) "
+            " CREATE TABLE IF NOT EXISTS SchoolMemberReplicate ( smPk INTEGER NOT NULL, smVersionId INTEGER NOT NULL, smDestination INTEGER NOT NULL, smProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (smPk, smDestination)) "
         _stmtList +=
-            " CREATE INDEX index_SchoolMemberTracker_smDestination_smProcessed_smFk ON SchoolMemberTracker (smDestination, smProcessed, smFk) "
+            " CREATE INDEX index_SchoolMemberReplicate_smDestination_smProcessed_smPk ON SchoolMemberReplicate (smDestination, smProcessed, smPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_200 AFTER INSERT ON SchoolMember BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (200, NEW.schoolMemberUid, 1); END "
         _stmtList +=
@@ -804,9 +803,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW SchoolMember_ReceiveView AS  SELECT SchoolMember.*, SchoolMemberTracker.* FROM SchoolMember LEFT JOIN SchoolMemberTracker ON SchoolMemberTracker.smFk = SchoolMember.schoolMemberUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS CommentsTracker ( commentsFk INTEGER NOT NULL, commentsVersionId INTEGER NOT NULL, commentsDestination INTEGER NOT NULL, commentsProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (commentsFk, commentsDestination)) "
+            " CREATE TABLE IF NOT EXISTS CommentsReplicate ( commentsPk INTEGER NOT NULL, commentsVersionId INTEGER NOT NULL, commentsDestination INTEGER NOT NULL, commentsProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (commentsPk, commentsDestination)) "
         _stmtList +=
-            " CREATE INDEX index_CommentsTracker_commentsDestination_commentsProcessed_commentsFk ON CommentsTracker (commentsDestination, commentsProcessed, commentsFk) "
+            " CREATE INDEX index_CommentsReplicate_commentsDestination_commentsProcessed_commentsPk ON CommentsReplicate (commentsDestination, commentsProcessed, commentsPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_208 AFTER INSERT ON Comments BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (208, NEW.commentsUid, 1); END "
         _stmtList +=
@@ -816,9 +815,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Comments_ReceiveView AS  SELECT Comments.*, CommentsTracker.* FROM Comments LEFT JOIN CommentsTracker ON CommentsTracker.commentsFk = Comments.commentsUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ReportTracker ( reportFk INTEGER NOT NULL, reportVersionId INTEGER NOT NULL, reportDestination INTEGER NOT NULL, reportProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (reportFk, reportDestination)) "
+            " CREATE TABLE IF NOT EXISTS ReportReplicate ( reportPk INTEGER NOT NULL, reportVersionId INTEGER NOT NULL, reportDestination INTEGER NOT NULL, reportProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (reportPk, reportDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ReportTracker_reportDestination_reportProcessed_reportFk ON ReportTracker (reportDestination, reportProcessed, reportFk) "
+            " CREATE INDEX index_ReportReplicate_reportDestination_reportProcessed_reportPk ON ReportReplicate (reportDestination, reportProcessed, reportPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_101 AFTER INSERT ON Report BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (101, NEW.reportUid, 1); END "
         _stmtList +=
@@ -828,9 +827,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Report_ReceiveView AS  SELECT Report.*, ReportTracker.* FROM Report LEFT JOIN ReportTracker ON ReportTracker.reportFk = Report.reportUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS SiteTracker ( siteFk INTEGER NOT NULL, siteVersionId INTEGER NOT NULL, siteDestination INTEGER NOT NULL, siteProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (siteFk, siteDestination)) "
+            " CREATE TABLE IF NOT EXISTS SiteReplicate ( sitePk INTEGER NOT NULL, siteVersionId INTEGER NOT NULL, siteDestination INTEGER NOT NULL, siteProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (sitePk, siteDestination)) "
         _stmtList +=
-            " CREATE INDEX index_SiteTracker_siteDestination_siteProcessed_siteFk ON SiteTracker (siteDestination, siteProcessed, siteFk) "
+            " CREATE INDEX index_SiteReplicate_siteDestination_siteProcessed_sitePk ON SiteReplicate (siteDestination, siteProcessed, sitePk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_189 AFTER INSERT ON Site BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (189, NEW.siteUid, 1); END "
         _stmtList +=
@@ -842,9 +841,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE TRIGGER site_remote_insert_ins INSTEAD OF INSERT ON Site_ReceiveView FOR EACH ROW BEGIN REPLACE INTO Site(siteUid, sitePcsn, siteLcsn, siteLcb, siteLct, siteName, guestLogin, registrationAllowed, authSalt) VALUES (NEW.siteUid, NEW.sitePcsn, NEW.siteLcsn, NEW.siteLcb, NEW.siteLct, NEW.siteName, NEW.guestLogin, NEW.registrationAllowed, NEW.authSalt) ; END "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS LearnerGroupTracker ( lgFk INTEGER NOT NULL, lgVersionId INTEGER NOT NULL, lgDestination INTEGER NOT NULL, lgProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (lgFk, lgDestination)) "
+            " CREATE TABLE IF NOT EXISTS LearnerGroupReplicate ( lgPk INTEGER NOT NULL, lgVersionId INTEGER NOT NULL, lgDestination INTEGER NOT NULL, lgProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (lgPk, lgDestination)) "
         _stmtList +=
-            " CREATE INDEX index_LearnerGroupTracker_lgDestination_lgProcessed_lgFk ON LearnerGroupTracker (lgDestination, lgProcessed, lgFk) "
+            " CREATE INDEX index_LearnerGroupReplicate_lgDestination_lgProcessed_lgPk ON LearnerGroupReplicate (lgDestination, lgProcessed, lgPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_301 AFTER INSERT ON LearnerGroup BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (301, NEW.learnerGroupUid, 1); END "
         _stmtList +=
@@ -854,9 +853,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW LearnerGroup_ReceiveView AS  SELECT LearnerGroup.*, LearnerGroupTracker.* FROM LearnerGroup LEFT JOIN LearnerGroupTracker ON LearnerGroupTracker.lgFk = LearnerGroup.learnerGroupUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS LearnerGroupMemberTracker ( lgmFk INTEGER NOT NULL, lgmVersionId INTEGER NOT NULL, lgmDestination INTEGER NOT NULL, lgmProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (lgmFk, lgmDestination)) "
+            " CREATE TABLE IF NOT EXISTS LearnerGroupMemberReplicate ( lgmPk INTEGER NOT NULL, lgmVersionId INTEGER NOT NULL, lgmDestination INTEGER NOT NULL, lgmProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (lgmPk, lgmDestination)) "
         _stmtList +=
-            " CREATE INDEX index_LearnerGroupMemberTracker_lgmDestination_lgmProcessed_lgmFk ON LearnerGroupMemberTracker (lgmDestination, lgmProcessed, lgmFk) "
+            " CREATE INDEX index_LearnerGroupMemberReplicate_lgmDestination_lgmProcessed_lgmPk ON LearnerGroupMemberReplicate (lgmDestination, lgmProcessed, lgmPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_300 AFTER INSERT ON LearnerGroupMember BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (300, NEW.learnerGroupMemberUid, 1); END "
         _stmtList +=
@@ -866,9 +865,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW LearnerGroupMember_ReceiveView AS  SELECT LearnerGroupMember.*, LearnerGroupMemberTracker.* FROM LearnerGroupMember LEFT JOIN LearnerGroupMemberTracker ON LearnerGroupMemberTracker.lgmFk = LearnerGroupMember.learnerGroupMemberUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS GroupLearningSessionTracker ( glsFk INTEGER NOT NULL, glsVersionId INTEGER NOT NULL, glsDestination INTEGER NOT NULL, glsProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (glsFk, glsDestination)) "
+            " CREATE TABLE IF NOT EXISTS GroupLearningSessionReplicate ( glsPk INTEGER NOT NULL, glsVersionId INTEGER NOT NULL, glsDestination INTEGER NOT NULL, glsProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (glsPk, glsDestination)) "
         _stmtList +=
-            " CREATE INDEX index_GroupLearningSessionTracker_glsDestination_glsProcessed_glsFk ON GroupLearningSessionTracker (glsDestination, glsProcessed, glsFk) "
+            " CREATE INDEX index_GroupLearningSessionReplicate_glsDestination_glsProcessed_glsPk ON GroupLearningSessionReplicate (glsDestination, glsProcessed, glsPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_302 AFTER INSERT ON GroupLearningSession BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (302, NEW.groupLearningSessionUid, 1); END "
         _stmtList +=
@@ -878,9 +877,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW GroupLearningSession_ReceiveView AS  SELECT GroupLearningSession.*, GroupLearningSessionTracker.* FROM GroupLearningSession LEFT JOIN GroupLearningSessionTracker ON GroupLearningSessionTracker.glsFk = GroupLearningSession.groupLearningSessionUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS SiteTermsTracker ( stFk INTEGER NOT NULL, stVersionId INTEGER NOT NULL, stDestination INTEGER NOT NULL, stProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (stFk, stDestination)) "
+            " CREATE TABLE IF NOT EXISTS SiteTermsReplicate ( stPk INTEGER NOT NULL, stVersionId INTEGER NOT NULL, stDestination INTEGER NOT NULL, stProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (stPk, stDestination)) "
         _stmtList +=
-            " CREATE INDEX index_SiteTermsTracker_stDestination_stProcessed_stFk ON SiteTermsTracker (stDestination, stProcessed, stFk) "
+            " CREATE INDEX index_SiteTermsReplicate_stDestination_stProcessed_stPk ON SiteTermsReplicate (stDestination, stProcessed, stPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_272 AFTER INSERT ON SiteTerms BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (272, NEW.sTermsUid, 1); END "
         _stmtList +=
@@ -890,9 +889,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW SiteTerms_ReceiveView AS  SELECT SiteTerms.*, SiteTermsTracker.* FROM SiteTerms LEFT JOIN SiteTermsTracker ON SiteTermsTracker.stFk = SiteTerms.sTermsUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ClazzContentJoinTracker ( ccjFk INTEGER NOT NULL, ccjVersionId INTEGER NOT NULL, ccjDestination INTEGER NOT NULL, ccjProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (ccjFk, ccjDestination)) "
+            " CREATE TABLE IF NOT EXISTS ClazzContentJoinReplicate ( ccjPk INTEGER NOT NULL, ccjVersionId INTEGER NOT NULL, ccjDestination INTEGER NOT NULL, ccjProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (ccjPk, ccjDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ClazzContentJoinTracker_ccjDestination_ccjProcessed_ccjFk ON ClazzContentJoinTracker (ccjDestination, ccjProcessed, ccjFk) "
+            " CREATE INDEX index_ClazzContentJoinReplicate_ccjDestination_ccjProcessed_ccjPk ON ClazzContentJoinReplicate (ccjDestination, ccjProcessed, ccjPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_134 AFTER INSERT ON ClazzContentJoin BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (134, NEW.ccjUid, 1); END "
         _stmtList +=
@@ -902,9 +901,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ClazzContentJoin_ReceiveView AS  SELECT ClazzContentJoin.*, ClazzContentJoinTracker.* FROM ClazzContentJoin LEFT JOIN ClazzContentJoinTracker ON ClazzContentJoinTracker.ccjFk = ClazzContentJoin.ccjUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS PersonParentJoinTracker ( ppjFk INTEGER NOT NULL, ppjVersionId INTEGER NOT NULL, ppjDestination INTEGER NOT NULL, ppjProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (ppjFk, ppjDestination)) "
+            " CREATE TABLE IF NOT EXISTS PersonParentJoinReplicate ( ppjPk INTEGER NOT NULL, ppjVersionId INTEGER NOT NULL, ppjDestination INTEGER NOT NULL, ppjProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (ppjPk, ppjDestination)) "
         _stmtList +=
-            " CREATE INDEX index_PersonParentJoinTracker_ppjDestination_ppjProcessed_ppjFk ON PersonParentJoinTracker (ppjDestination, ppjProcessed, ppjFk) "
+            " CREATE INDEX index_PersonParentJoinReplicate_ppjDestination_ppjProcessed_ppjPk ON PersonParentJoinReplicate (ppjDestination, ppjProcessed, ppjPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_512 AFTER INSERT ON PersonParentJoin BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (512, NEW.ppjUid, 1); END "
         _stmtList +=
@@ -914,9 +913,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW PersonParentJoin_ReceiveView AS  SELECT PersonParentJoin.*, PersonParentJoinTracker.* FROM PersonParentJoin LEFT JOIN PersonParentJoinTracker ON PersonParentJoinTracker.ppjFk = PersonParentJoin.ppjUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ScopedGrantTracker ( sgFk INTEGER NOT NULL, sgVersionId INTEGER NOT NULL, sgDestination INTEGER NOT NULL, sgProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (sgFk, sgDestination)) "
+            " CREATE TABLE IF NOT EXISTS ScopedGrantReplicate ( sgPk INTEGER NOT NULL, sgVersionId INTEGER NOT NULL, sgDestination INTEGER NOT NULL, sgProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (sgPk, sgDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ScopedGrantTracker_sgDestination_sgProcessed_sgFk ON ScopedGrantTracker (sgDestination, sgProcessed, sgFk) "
+            " CREATE INDEX index_ScopedGrantReplicate_sgDestination_sgProcessed_sgPk ON ScopedGrantReplicate (sgDestination, sgProcessed, sgPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_48 AFTER INSERT ON ScopedGrant BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (48, NEW.sgUid, 1); END "
         _stmtList +=
@@ -928,9 +927,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE TRIGGER sg_remote_insert_ins INSTEAD OF INSERT ON ScopedGrant_ReceiveView FOR EACH ROW BEGIN REPLACE INTO ScopedGrant(sgUid, sgPcsn, sgLcsn, sgLcb, sgLct, sgTableId, sgEntityUid, sgPermissions, sgGroupUid, sgIndex, sgFlags) VALUES (NEW.sgUid, NEW.sgPcsn, NEW.sgLcsn, NEW.sgLcb, NEW.sgLct, NEW.sgTableId, NEW.sgEntityUid, NEW.sgPermissions, NEW.sgGroupUid, NEW.sgIndex, NEW.sgFlags) /*psql ON CONFLICT(sgUid) DO UPDATE SET sgLct = EXCLUDED.sgLct, sgPermissions = EXCLUDED.sgPermissions */ ; END "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ErrorReportTracker ( erFk INTEGER NOT NULL, erVersionId INTEGER NOT NULL, erDestination INTEGER NOT NULL, erProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (erFk, erDestination)) "
+            " CREATE TABLE IF NOT EXISTS ErrorReportReplicate ( erPk INTEGER NOT NULL, erVersionId INTEGER NOT NULL, erDestination INTEGER NOT NULL, erProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (erPk, erDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ErrorReportTracker_erDestination_erProcessed_erFk ON ErrorReportTracker (erDestination, erProcessed, erFk) "
+            " CREATE INDEX index_ErrorReportReplicate_erDestination_erProcessed_erPk ON ErrorReportReplicate (erDestination, erProcessed, erPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_419 AFTER INSERT ON ErrorReport BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (419, NEW.errUid, 1); END "
         _stmtList +=
@@ -940,9 +939,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ErrorReport_ReceiveView AS  SELECT ErrorReport.*, ErrorReportTracker.* FROM ErrorReport LEFT JOIN ErrorReportTracker ON ErrorReportTracker.erFk = ErrorReport.errUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ClazzAssignmentTracker ( caFk INTEGER NOT NULL, caVersionId INTEGER NOT NULL, caDestination INTEGER NOT NULL, caProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (caFk, caDestination)) "
+            " CREATE TABLE IF NOT EXISTS ClazzAssignmentReplicate ( caPk INTEGER NOT NULL, caVersionId INTEGER NOT NULL, caDestination INTEGER NOT NULL, caProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (caPk, caDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ClazzAssignmentTracker_caDestination_caProcessed_caFk ON ClazzAssignmentTracker (caDestination, caProcessed, caFk) "
+            " CREATE INDEX index_ClazzAssignmentReplicate_caDestination_caProcessed_caPk ON ClazzAssignmentReplicate (caDestination, caProcessed, caPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_520 AFTER INSERT ON ClazzAssignment BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (520, NEW.caUid, 1); END "
         _stmtList +=
@@ -952,9 +951,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ClazzAssignment_ReceiveView AS  SELECT ClazzAssignment.*, ClazzAssignmentTracker.* FROM ClazzAssignment LEFT JOIN ClazzAssignmentTracker ON ClazzAssignmentTracker.caFk = ClazzAssignment.caUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoinTracker ( cacjFk INTEGER NOT NULL, cacjVersionId INTEGER NOT NULL, cacjDestination INTEGER NOT NULL, cacjProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (cacjFk, cacjDestination)) "
+            " CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoinReplicate ( cacjPk INTEGER NOT NULL, cacjVersionId INTEGER NOT NULL, cacjDestination INTEGER NOT NULL, cacjProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (cacjPk, cacjDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ClazzAssignmentContentJoinTracker_cacjDestination_cacjProcessed_cacjFk ON ClazzAssignmentContentJoinTracker (cacjDestination, cacjProcessed, cacjFk) "
+            " CREATE INDEX index_ClazzAssignmentContentJoinReplicate_cacjDestination_cacjProcessed_cacjPk ON ClazzAssignmentContentJoinReplicate (cacjDestination, cacjProcessed, cacjPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_521 AFTER INSERT ON ClazzAssignmentContentJoin BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (521, NEW.cacjUid, 1); END "
         _stmtList +=
@@ -964,9 +963,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ClazzAssignmentContentJoin_ReceiveView AS  SELECT ClazzAssignmentContentJoin.*, ClazzAssignmentContentJoinTracker.* FROM ClazzAssignmentContentJoin LEFT JOIN ClazzAssignmentContentJoinTracker ON ClazzAssignmentContentJoinTracker.cacjFk = ClazzAssignmentContentJoin.cacjUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS PersonAuth2Tracker ( paFk INTEGER NOT NULL, paVersionId INTEGER NOT NULL, paDestination INTEGER NOT NULL, paProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (paFk, paDestination)) "
+            " CREATE TABLE IF NOT EXISTS PersonAuth2Replicate ( paPk INTEGER NOT NULL, paVersionId INTEGER NOT NULL, paDestination INTEGER NOT NULL, paProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (paPk, paDestination)) "
         _stmtList +=
-            " CREATE INDEX index_PersonAuth2Tracker_paDestination_paProcessed_paFk ON PersonAuth2Tracker (paDestination, paProcessed, paFk) "
+            " CREATE INDEX index_PersonAuth2Replicate_paDestination_paProcessed_paPk ON PersonAuth2Replicate (paDestination, paProcessed, paPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_678 AFTER INSERT ON PersonAuth2 BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (678, NEW.pauthUid, 1); END "
         _stmtList +=
@@ -976,9 +975,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW PersonAuth2_ReceiveView AS  SELECT PersonAuth2.*, PersonAuth2Tracker.* FROM PersonAuth2 LEFT JOIN PersonAuth2Tracker ON PersonAuth2Tracker.paFk = PersonAuth2.pauthUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS UserSessionTracker ( usFk INTEGER NOT NULL, usVersionId INTEGER NOT NULL, usDestination INTEGER NOT NULL, usProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (usFk, usDestination)) "
+            " CREATE TABLE IF NOT EXISTS UserSessionReplicate ( usPk INTEGER NOT NULL, usVersionId INTEGER NOT NULL, usDestination INTEGER NOT NULL, usProcessed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (usPk, usDestination)) "
         _stmtList +=
-            " CREATE INDEX index_UserSessionTracker_usDestination_usProcessed_usFk ON UserSessionTracker (usDestination, usProcessed, usFk) "
+            " CREATE INDEX index_UserSessionReplicate_usDestination_usProcessed_usPk ON UserSessionReplicate (usDestination, usProcessed, usPk) "
         _stmtList +=
             " CREATE TRIGGER ch_ins_679 AFTER INSERT ON UserSession BEGIN REPLACE INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (679, NEW.usUid, 1); END "
         _stmtList +=
@@ -991,9 +990,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
             " CREATE TRIGGER usersession_remote_ins_ins INSTEAD OF INSERT ON UserSession_ReceiveView FOR EACH ROW BEGIN REPLACE INTO UserSession(usUid, usPcsn, usLcsn, usLcb, usLct, usPersonUid, usClientNodeId, usStartTime, usEndTime, usStatus, usReason, usAuth, usSessionType) VALUES (NEW.usUid, NEW.usPcsn, NEW.usLcsn, NEW.usLcb, NEW.usLct, NEW.usPersonUid, NEW.usClientNodeId, NEW.usStartTime, NEW.usEndTime, NEW.usStatus, NEW.usReason, NEW.usAuth, NEW.usSessionType) /*postgres ON CONFLICT (usUid) DO UPDATE SET usStatus = EXCLUDED.usStatus, usEndTime = EXCLUDED.usEndTime, usReason = EXCLUDED.usReason */ ; END "
     } else {
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ClazzLogTracker ( clFk BIGINT NOT NULL, clVersionId BIGINT NOT NULL, clDestination BIGINT NOT NULL, clProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (clFk, clDestination)) "
+            " CREATE TABLE IF NOT EXISTS ClazzLogReplicate ( clPk BIGINT NOT NULL, clVersionId BIGINT NOT NULL, clDestination BIGINT NOT NULL, clProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (clPk, clDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ClazzLogTracker_clDestination_clProcessed_clFk ON ClazzLogTracker (clDestination, clProcessed, clFk) "
+            " CREATE INDEX index_ClazzLogReplicate_clDestination_clProcessed_clPk ON ClazzLogReplicate (clDestination, clProcessed, clPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_14_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (14, NEW.clazzLogUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1005,9 +1004,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ClazzLog_ReceiveView AS  SELECT ClazzLog.*, ClazzLogTracker.* FROM ClazzLog LEFT JOIN ClazzLogTracker ON ClazzLogTracker.clFk = ClazzLog.clazzLogUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecordTracker ( clarFk BIGINT NOT NULL, clarVersionId BIGINT NOT NULL, clarDestination BIGINT NOT NULL, clarProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (clarFk, clarDestination)) "
+            " CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecordReplicate ( clarPk BIGINT NOT NULL, clarVersionId BIGINT NOT NULL, clarDestination BIGINT NOT NULL, clarProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (clarPk, clarDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ClazzLogAttendanceRecordTracker_clarDestination_clarProcessed_clarFk ON ClazzLogAttendanceRecordTracker (clarDestination, clarProcessed, clarFk) "
+            " CREATE INDEX index_ClazzLogAttendanceRecordReplicate_clarDestination_clarProcessed_clarPk ON ClazzLogAttendanceRecordReplicate (clarDestination, clarProcessed, clarPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_15_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (15, NEW.clazzLogAttendanceRecordUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1019,9 +1018,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ClazzLogAttendanceRecord_ReceiveView AS  SELECT ClazzLogAttendanceRecord.*, ClazzLogAttendanceRecordTracker.* FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLogAttendanceRecordTracker ON ClazzLogAttendanceRecordTracker.clarFk = ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ScheduleTracker ( scheduleFk BIGINT NOT NULL, scheduleVersionId BIGINT NOT NULL, scheduleDestination BIGINT NOT NULL, scheduleProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (scheduleFk, scheduleDestination)) "
+            " CREATE TABLE IF NOT EXISTS ScheduleReplicate ( schedulePk BIGINT NOT NULL, scheduleVersionId BIGINT NOT NULL, scheduleDestination BIGINT NOT NULL, scheduleProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (schedulePk, scheduleDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ScheduleTracker_scheduleDestination_scheduleProcessed_scheduleFk ON ScheduleTracker (scheduleDestination, scheduleProcessed, scheduleFk) "
+            " CREATE INDEX index_ScheduleReplicate_scheduleDestination_scheduleProcessed_schedulePk ON ScheduleReplicate (scheduleDestination, scheduleProcessed, schedulePk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_21_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (21, NEW.scheduleUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1033,9 +1032,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Schedule_ReceiveView AS  SELECT Schedule.*, ScheduleTracker.* FROM Schedule LEFT JOIN ScheduleTracker ON ScheduleTracker.scheduleFk = Schedule.scheduleUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS HolidayCalendarTracker ( hcFk BIGINT NOT NULL, hcVersionId BIGINT NOT NULL, hcDestination BIGINT NOT NULL, hcProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (hcFk, hcDestination)) "
+            " CREATE TABLE IF NOT EXISTS HolidayCalendarReplicate ( hcPk BIGINT NOT NULL, hcVersionId BIGINT NOT NULL, hcDestination BIGINT NOT NULL, hcProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (hcPk, hcDestination)) "
         _stmtList +=
-            " CREATE INDEX index_HolidayCalendarTracker_hcDestination_hcProcessed_hcFk ON HolidayCalendarTracker (hcDestination, hcProcessed, hcFk) "
+            " CREATE INDEX index_HolidayCalendarReplicate_hcDestination_hcProcessed_hcPk ON HolidayCalendarReplicate (hcDestination, hcProcessed, hcPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_28_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (28, NEW.umCalendarUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1047,9 +1046,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW HolidayCalendar_ReceiveView AS  SELECT HolidayCalendar.*, HolidayCalendarTracker.* FROM HolidayCalendar LEFT JOIN HolidayCalendarTracker ON HolidayCalendarTracker.hcFk = HolidayCalendar.umCalendarUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS HolidayTracker ( holidayFk BIGINT NOT NULL, holidayVersionId BIGINT NOT NULL, holidayDestination BIGINT NOT NULL, holidayProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (holidayFk, holidayDestination)) "
+            " CREATE TABLE IF NOT EXISTS HolidayReplicate ( holidayPk BIGINT NOT NULL, holidayVersionId BIGINT NOT NULL, holidayDestination BIGINT NOT NULL, holidayProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (holidayPk, holidayDestination)) "
         _stmtList +=
-            " CREATE INDEX index_HolidayTracker_holidayDestination_holidayProcessed_holidayFk ON HolidayTracker (holidayDestination, holidayProcessed, holidayFk) "
+            " CREATE INDEX index_HolidayReplicate_holidayDestination_holidayProcessed_holidayPk ON HolidayReplicate (holidayDestination, holidayProcessed, holidayPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_99_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (99, NEW.holUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1061,9 +1060,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Holiday_ReceiveView AS  SELECT Holiday.*, HolidayTracker.* FROM Holiday LEFT JOIN HolidayTracker ON HolidayTracker.holidayFk = Holiday.holUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS PersonTracker ( personFk BIGINT NOT NULL, personVersionId BIGINT NOT NULL, personDestination BIGINT NOT NULL, personProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (personFk, personDestination)) "
+            " CREATE TABLE IF NOT EXISTS PersonReplicate ( personPk BIGINT NOT NULL, personVersionId BIGINT NOT NULL, personDestination BIGINT NOT NULL, personProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (personPk, personDestination)) "
         _stmtList +=
-            " CREATE INDEX index_PersonTracker_personDestination_personProcessed_personFk ON PersonTracker (personDestination, personProcessed, personFk) "
+            " CREATE INDEX index_PersonReplicate_personDestination_personProcessed_personPk ON PersonReplicate (personDestination, personProcessed, personPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_9_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (9, NEW.personUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1075,9 +1074,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Person_ReceiveView AS  SELECT Person.*, PersonTracker.* FROM Person LEFT JOIN PersonTracker ON PersonTracker.personFk = Person.personUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ClazzTracker ( clazzFk BIGINT NOT NULL, clazzVersionId BIGINT NOT NULL, clazzDestination BIGINT NOT NULL, clazzProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (clazzFk, clazzDestination)) "
+            " CREATE TABLE IF NOT EXISTS ClazzReplicate ( clazzPk BIGINT NOT NULL, clazzVersionId BIGINT NOT NULL, clazzDestination BIGINT NOT NULL, clazzProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (clazzPk, clazzDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ClazzTracker_clazzDestination_clazzProcessed_clazzFk ON ClazzTracker (clazzDestination, clazzProcessed, clazzFk) "
+            " CREATE INDEX index_ClazzReplicate_clazzDestination_clazzProcessed_clazzPk ON ClazzReplicate (clazzDestination, clazzProcessed, clazzPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_6_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (6, NEW.clazzUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1089,9 +1088,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Clazz_ReceiveView AS  SELECT Clazz.*, ClazzTracker.* FROM Clazz LEFT JOIN ClazzTracker ON ClazzTracker.clazzFk = Clazz.clazzUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ClazzEnrolmentTracker ( ceFk BIGINT NOT NULL, ceVersionId BIGINT NOT NULL, ceDestination BIGINT NOT NULL, ceProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (ceFk, ceDestination)) "
+            " CREATE TABLE IF NOT EXISTS ClazzEnrolmentReplicate ( cePk BIGINT NOT NULL, ceVersionId BIGINT NOT NULL, ceDestination BIGINT NOT NULL, ceProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (cePk, ceDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ClazzEnrolmentTracker_ceDestination_ceProcessed_ceFk ON ClazzEnrolmentTracker (ceDestination, ceProcessed, ceFk) "
+            " CREATE INDEX index_ClazzEnrolmentReplicate_ceDestination_ceProcessed_cePk ON ClazzEnrolmentReplicate (ceDestination, ceProcessed, cePk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_65_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (65, NEW.clazzEnrolmentUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1103,9 +1102,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ClazzEnrolment_ReceiveView AS  SELECT ClazzEnrolment.*, ClazzEnrolmentTracker.* FROM ClazzEnrolment LEFT JOIN ClazzEnrolmentTracker ON ClazzEnrolmentTracker.ceFk = ClazzEnrolment.clazzEnrolmentUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS LeavingReasonTracker ( lrFk BIGINT NOT NULL, lrVersionId BIGINT NOT NULL, lrDestination BIGINT NOT NULL, lrProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (lrFk, lrDestination)) "
+            " CREATE TABLE IF NOT EXISTS LeavingReasonReplicate ( lrPk BIGINT NOT NULL, lrVersionId BIGINT NOT NULL, lrDestination BIGINT NOT NULL, lrProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (lrPk, lrDestination)) "
         _stmtList +=
-            " CREATE INDEX index_LeavingReasonTracker_lrDestination_lrProcessed_lrFk ON LeavingReasonTracker (lrDestination, lrProcessed, lrFk) "
+            " CREATE INDEX index_LeavingReasonReplicate_lrDestination_lrProcessed_lrPk ON LeavingReasonReplicate (lrDestination, lrProcessed, lrPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_410_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (410, NEW.leavingReasonUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1117,9 +1116,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW LeavingReason_ReceiveView AS  SELECT LeavingReason.*, LeavingReasonTracker.* FROM LeavingReason LEFT JOIN LeavingReasonTracker ON LeavingReasonTracker.lrFk = LeavingReason.leavingReasonUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ContentEntryTracker ( ceFk BIGINT NOT NULL, ceVersionId BIGINT NOT NULL, ceDestination BIGINT NOT NULL, ceProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (ceFk, ceDestination)) "
+            " CREATE TABLE IF NOT EXISTS ContentEntryReplicate ( cePk BIGINT NOT NULL, ceVersionId BIGINT NOT NULL, ceDestination BIGINT NOT NULL, ceProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (cePk, ceDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ContentEntryTracker_ceDestination_ceProcessed_ceFk ON ContentEntryTracker (ceDestination, ceProcessed, ceFk) "
+            " CREATE INDEX index_ContentEntryReplicate_ceDestination_ceProcessed_cePk ON ContentEntryReplicate (ceDestination, ceProcessed, cePk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_42_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (42, NEW.contentEntryUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1131,9 +1130,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ContentEntry_ReceiveView AS  SELECT ContentEntry.*, ContentEntryTracker.* FROM ContentEntry LEFT JOIN ContentEntryTracker ON ContentEntryTracker.ceFk = ContentEntry.contentEntryUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ContentEntryContentCategoryJoinTracker ( ceccjFk BIGINT NOT NULL, ceccjVersionId BIGINT NOT NULL, ceccjDestination BIGINT NOT NULL, ceccjProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (ceccjFk, ceccjDestination)) "
+            " CREATE TABLE IF NOT EXISTS ContentEntryContentCategoryJoinReplicate ( ceccjPk BIGINT NOT NULL, ceccjVersionId BIGINT NOT NULL, ceccjDestination BIGINT NOT NULL, ceccjProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (ceccjPk, ceccjDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ContentEntryContentCategoryJoinTracker_ceccjDestination_ceccjProcessed_ceccjFk ON ContentEntryContentCategoryJoinTracker (ceccjDestination, ceccjProcessed, ceccjFk) "
+            " CREATE INDEX index_ContentEntryContentCategoryJoinReplicate_ceccjDestination_ceccjProcessed_ceccjPk ON ContentEntryContentCategoryJoinReplicate (ceccjDestination, ceccjProcessed, ceccjPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_3_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (3, NEW.ceccjUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1145,9 +1144,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ContentEntryContentCategoryJoin_ReceiveView AS  SELECT ContentEntryContentCategoryJoin.*, ContentEntryContentCategoryJoinTracker.* FROM ContentEntryContentCategoryJoin LEFT JOIN ContentEntryContentCategoryJoinTracker ON ContentEntryContentCategoryJoinTracker.ceccjFk = ContentEntryContentCategoryJoin.ceccjUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ContentEntryParentChildJoinTracker ( cepcjFk BIGINT NOT NULL, cepcjVersionId BIGINT NOT NULL, cepcjDestination BIGINT NOT NULL, cepcjProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (cepcjFk, cepcjDestination)) "
+            " CREATE TABLE IF NOT EXISTS ContentEntryParentChildJoinReplicate ( cepcjPk BIGINT NOT NULL, cepcjVersionId BIGINT NOT NULL, cepcjDestination BIGINT NOT NULL, cepcjProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (cepcjPk, cepcjDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ContentEntryParentChildJoinTracker_cepcjDestination_cepcjProcessed_cepcjFk ON ContentEntryParentChildJoinTracker (cepcjDestination, cepcjProcessed, cepcjFk) "
+            " CREATE INDEX index_ContentEntryParentChildJoinReplicate_cepcjDestination_cepcjProcessed_cepcjPk ON ContentEntryParentChildJoinReplicate (cepcjDestination, cepcjProcessed, cepcjPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_7_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (7, NEW.cepcjUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1159,9 +1158,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ContentEntryParentChildJoin_ReceiveView AS  SELECT ContentEntryParentChildJoin.*, ContentEntryParentChildJoinTracker.* FROM ContentEntryParentChildJoin LEFT JOIN ContentEntryParentChildJoinTracker ON ContentEntryParentChildJoinTracker.cepcjFk = ContentEntryParentChildJoin.cepcjUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ContentEntryRelatedEntryJoinTracker ( cerejFk BIGINT NOT NULL, cerejVersionId BIGINT NOT NULL, cerejDestination BIGINT NOT NULL, cerejProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (cerejFk, cerejDestination)) "
+            " CREATE TABLE IF NOT EXISTS ContentEntryRelatedEntryJoinReplicate ( cerejPk BIGINT NOT NULL, cerejVersionId BIGINT NOT NULL, cerejDestination BIGINT NOT NULL, cerejProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (cerejPk, cerejDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ContentEntryRelatedEntryJoinTracker_cerejDestination_cerejProcessed_cerejFk ON ContentEntryRelatedEntryJoinTracker (cerejDestination, cerejProcessed, cerejFk) "
+            " CREATE INDEX index_ContentEntryRelatedEntryJoinReplicate_cerejDestination_cerejProcessed_cerejPk ON ContentEntryRelatedEntryJoinReplicate (cerejDestination, cerejProcessed, cerejPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_8_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (8, NEW.cerejUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1173,9 +1172,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ContentEntryRelatedEntryJoin_ReceiveView AS  SELECT ContentEntryRelatedEntryJoin.*, ContentEntryRelatedEntryJoinTracker.* FROM ContentEntryRelatedEntryJoin LEFT JOIN ContentEntryRelatedEntryJoinTracker ON ContentEntryRelatedEntryJoinTracker.cerejFk = ContentEntryRelatedEntryJoin.cerejUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ContentCategorySchemaTracker ( ccsFk BIGINT NOT NULL, ccsVersionId BIGINT NOT NULL, ccsDestination BIGINT NOT NULL, ccsProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (ccsFk, ccsDestination)) "
+            " CREATE TABLE IF NOT EXISTS ContentCategorySchemaReplicate ( ccsPk BIGINT NOT NULL, ccsVersionId BIGINT NOT NULL, ccsDestination BIGINT NOT NULL, ccsProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (ccsPk, ccsDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ContentCategorySchemaTracker_ccsDestination_ccsProcessed_ccsFk ON ContentCategorySchemaTracker (ccsDestination, ccsProcessed, ccsFk) "
+            " CREATE INDEX index_ContentCategorySchemaReplicate_ccsDestination_ccsProcessed_ccsPk ON ContentCategorySchemaReplicate (ccsDestination, ccsProcessed, ccsPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_2_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (2, NEW.contentCategorySchemaUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1187,9 +1186,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ContentCategorySchema_ReceiveView AS  SELECT ContentCategorySchema.*, ContentCategorySchemaTracker.* FROM ContentCategorySchema LEFT JOIN ContentCategorySchemaTracker ON ContentCategorySchemaTracker.ccsFk = ContentCategorySchema.contentCategorySchemaUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ContentCategoryTracker ( ccFk BIGINT NOT NULL, ccVersionId BIGINT NOT NULL, ccDestination BIGINT NOT NULL, ccProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (ccFk, ccDestination)) "
+            " CREATE TABLE IF NOT EXISTS ContentCategoryReplicate ( ccPk BIGINT NOT NULL, ccVersionId BIGINT NOT NULL, ccDestination BIGINT NOT NULL, ccProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (ccPk, ccDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ContentCategoryTracker_ccDestination_ccProcessed_ccFk ON ContentCategoryTracker (ccDestination, ccProcessed, ccFk) "
+            " CREATE INDEX index_ContentCategoryReplicate_ccDestination_ccProcessed_ccPk ON ContentCategoryReplicate (ccDestination, ccProcessed, ccPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_1_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (1, NEW.contentCategoryUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1201,9 +1200,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ContentCategory_ReceiveView AS  SELECT ContentCategory.*, ContentCategoryTracker.* FROM ContentCategory LEFT JOIN ContentCategoryTracker ON ContentCategoryTracker.ccFk = ContentCategory.contentCategoryUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS LanguageTracker ( languageFk BIGINT NOT NULL, languageVersionId BIGINT NOT NULL, languageDestination BIGINT NOT NULL, languageProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (languageFk, languageDestination)) "
+            " CREATE TABLE IF NOT EXISTS LanguageReplicate ( languagePk BIGINT NOT NULL, languageVersionId BIGINT NOT NULL, languageDestination BIGINT NOT NULL, languageProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (languagePk, languageDestination)) "
         _stmtList +=
-            " CREATE INDEX index_LanguageTracker_languageDestination_languageProcessed_languageFk ON LanguageTracker (languageDestination, languageProcessed, languageFk) "
+            " CREATE INDEX index_LanguageReplicate_languageDestination_languageProcessed_languagePk ON LanguageReplicate (languageDestination, languageProcessed, languagePk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_13_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (13, NEW.langUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1215,9 +1214,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Language_ReceiveView AS  SELECT Language.*, LanguageTracker.* FROM Language LEFT JOIN LanguageTracker ON LanguageTracker.languageFk = Language.langUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS LanguageVariantTracker ( lvFk BIGINT NOT NULL, lvVersionId BIGINT NOT NULL, lvDestination BIGINT NOT NULL, lvProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (lvFk, lvDestination)) "
+            " CREATE TABLE IF NOT EXISTS LanguageVariantReplicate ( lvPk BIGINT NOT NULL, lvVersionId BIGINT NOT NULL, lvDestination BIGINT NOT NULL, lvProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (lvPk, lvDestination)) "
         _stmtList +=
-            " CREATE INDEX index_LanguageVariantTracker_lvDestination_lvProcessed_lvFk ON LanguageVariantTracker (lvDestination, lvProcessed, lvFk) "
+            " CREATE INDEX index_LanguageVariantReplicate_lvDestination_lvProcessed_lvPk ON LanguageVariantReplicate (lvDestination, lvProcessed, lvPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_10_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (10, NEW.langVariantUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1229,9 +1228,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW LanguageVariant_ReceiveView AS  SELECT LanguageVariant.*, LanguageVariantTracker.* FROM LanguageVariant LEFT JOIN LanguageVariantTracker ON LanguageVariantTracker.lvFk = LanguageVariant.langVariantUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS RoleTracker ( roleFk BIGINT NOT NULL, roleVersionId BIGINT NOT NULL, roleDestination BIGINT NOT NULL, roleProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (roleFk, roleDestination)) "
+            " CREATE TABLE IF NOT EXISTS RoleReplicate ( rolePk BIGINT NOT NULL, roleVersionId BIGINT NOT NULL, roleDestination BIGINT NOT NULL, roleProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (rolePk, roleDestination)) "
         _stmtList +=
-            " CREATE INDEX index_RoleTracker_roleDestination_roleProcessed_roleFk ON RoleTracker (roleDestination, roleProcessed, roleFk) "
+            " CREATE INDEX index_RoleReplicate_roleDestination_roleProcessed_rolePk ON RoleReplicate (roleDestination, roleProcessed, rolePk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_45_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (45, NEW.roleUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1243,9 +1242,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Role_ReceiveView AS  SELECT Role.*, RoleTracker.* FROM Role LEFT JOIN RoleTracker ON RoleTracker.roleFk = Role.roleUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS PersonGroupTracker ( pgFk BIGINT NOT NULL, pgVersionId BIGINT NOT NULL, pgDestination BIGINT NOT NULL, pgProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (pgFk, pgDestination)) "
+            " CREATE TABLE IF NOT EXISTS PersonGroupReplicate ( pgPk BIGINT NOT NULL, pgVersionId BIGINT NOT NULL, pgDestination BIGINT NOT NULL, pgProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (pgPk, pgDestination)) "
         _stmtList +=
-            " CREATE INDEX index_PersonGroupTracker_pgDestination_pgProcessed_pgFk ON PersonGroupTracker (pgDestination, pgProcessed, pgFk) "
+            " CREATE INDEX index_PersonGroupReplicate_pgDestination_pgProcessed_pgPk ON PersonGroupReplicate (pgDestination, pgProcessed, pgPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_43_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (43, NEW.groupUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1257,9 +1256,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW PersonGroup_ReceiveView AS  SELECT PersonGroup.*, PersonGroupTracker.* FROM PersonGroup LEFT JOIN PersonGroupTracker ON PersonGroupTracker.pgFk = PersonGroup.groupUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS PersonGroupMemberTracker ( pgmFk BIGINT NOT NULL, pgmVersionId BIGINT NOT NULL, pgmDestination BIGINT NOT NULL, pgmProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (pgmFk, pgmDestination)) "
+            " CREATE TABLE IF NOT EXISTS PersonGroupMemberReplicate ( pgmPk BIGINT NOT NULL, pgmVersionId BIGINT NOT NULL, pgmDestination BIGINT NOT NULL, pgmProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (pgmPk, pgmDestination)) "
         _stmtList +=
-            " CREATE INDEX index_PersonGroupMemberTracker_pgmDestination_pgmProcessed_pgmFk ON PersonGroupMemberTracker (pgmDestination, pgmProcessed, pgmFk) "
+            " CREATE INDEX index_PersonGroupMemberReplicate_pgmDestination_pgmProcessed_pgmPk ON PersonGroupMemberReplicate (pgmDestination, pgmProcessed, pgmPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_44_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (44, NEW.groupMemberUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1271,9 +1270,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW PersonGroupMember_ReceiveView AS  SELECT PersonGroupMember.*, PersonGroupMemberTracker.* FROM PersonGroupMember LEFT JOIN PersonGroupMemberTracker ON PersonGroupMemberTracker.pgmFk = PersonGroupMember.groupMemberUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS PersonPictureTracker ( ppFk BIGINT NOT NULL, ppVersionId BIGINT NOT NULL, ppDestination BIGINT NOT NULL, ppProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (ppFk, ppDestination)) "
+            " CREATE TABLE IF NOT EXISTS PersonPictureReplicate ( ppPk BIGINT NOT NULL, ppVersionId BIGINT NOT NULL, ppDestination BIGINT NOT NULL, ppProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (ppPk, ppDestination)) "
         _stmtList +=
-            " CREATE INDEX index_PersonPictureTracker_ppDestination_ppProcessed_ppFk ON PersonPictureTracker (ppDestination, ppProcessed, ppFk) "
+            " CREATE INDEX index_PersonPictureReplicate_ppDestination_ppProcessed_ppPk ON PersonPictureReplicate (ppDestination, ppProcessed, ppPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_50_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (50, NEW.personPictureUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1285,9 +1284,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW PersonPicture_ReceiveView AS  SELECT PersonPicture.*, PersonPictureTracker.* FROM PersonPicture LEFT JOIN PersonPictureTracker ON PersonPictureTracker.ppFk = PersonPicture.personPictureUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ContainerTracker ( containerFk BIGINT NOT NULL, containerVersionId BIGINT NOT NULL, containerDestination BIGINT NOT NULL, containerProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (containerFk, containerDestination)) "
+            " CREATE TABLE IF NOT EXISTS ContainerReplicate ( containerPk BIGINT NOT NULL, containerVersionId BIGINT NOT NULL, containerDestination BIGINT NOT NULL, containerProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (containerPk, containerDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ContainerTracker_containerDestination_containerProcessed_containerFk ON ContainerTracker (containerDestination, containerProcessed, containerFk) "
+            " CREATE INDEX index_ContainerReplicate_containerDestination_containerProcessed_containerPk ON ContainerReplicate (containerDestination, containerProcessed, containerPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_51_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (51, NEW.containerUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1299,9 +1298,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Container_ReceiveView AS  SELECT Container.*, ContainerTracker.* FROM Container LEFT JOIN ContainerTracker ON ContainerTracker.containerFk = Container.containerUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS VerbEntityTracker ( veFk BIGINT NOT NULL, veVersionId BIGINT NOT NULL, veDestination BIGINT NOT NULL, veProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (veFk, veDestination)) "
+            " CREATE TABLE IF NOT EXISTS VerbEntityReplicate ( vePk BIGINT NOT NULL, veVersionId BIGINT NOT NULL, veDestination BIGINT NOT NULL, veProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (vePk, veDestination)) "
         _stmtList +=
-            " CREATE INDEX index_VerbEntityTracker_veDestination_veProcessed_veFk ON VerbEntityTracker (veDestination, veProcessed, veFk) "
+            " CREATE INDEX index_VerbEntityReplicate_veDestination_veProcessed_vePk ON VerbEntityReplicate (veDestination, veProcessed, vePk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_62_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (62, NEW.verbUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1313,9 +1312,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW VerbEntity_ReceiveView AS  SELECT VerbEntity.*, VerbEntityTracker.* FROM VerbEntity LEFT JOIN VerbEntityTracker ON VerbEntityTracker.veFk = VerbEntity.verbUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS XObjectEntityTracker ( xoeFk BIGINT NOT NULL, xoeVersionId BIGINT NOT NULL, xoeDestination BIGINT NOT NULL, xoeProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (xoeFk, xoeDestination)) "
+            " CREATE TABLE IF NOT EXISTS XObjectEntityReplicate ( xoePk BIGINT NOT NULL, xoeVersionId BIGINT NOT NULL, xoeDestination BIGINT NOT NULL, xoeProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (xoePk, xoeDestination)) "
         _stmtList +=
-            " CREATE INDEX index_XObjectEntityTracker_xoeDestination_xoeProcessed_xoeFk ON XObjectEntityTracker (xoeDestination, xoeProcessed, xoeFk) "
+            " CREATE INDEX index_XObjectEntityReplicate_xoeDestination_xoeProcessed_xoePk ON XObjectEntityReplicate (xoeDestination, xoeProcessed, xoePk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_64_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (64, NEW.xObjectUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1327,9 +1326,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW XObjectEntity_ReceiveView AS  SELECT XObjectEntity.*, XObjectEntityTracker.* FROM XObjectEntity LEFT JOIN XObjectEntityTracker ON XObjectEntityTracker.xoeFk = XObjectEntity.xObjectUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS StatementEntityTracker ( seFk BIGINT NOT NULL, seVersionId BIGINT NOT NULL, seDestination BIGINT NOT NULL, seProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (seFk, seDestination)) "
+            " CREATE TABLE IF NOT EXISTS StatementEntityReplicate ( sePk BIGINT NOT NULL, seVersionId BIGINT NOT NULL, seDestination BIGINT NOT NULL, seProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (sePk, seDestination)) "
         _stmtList +=
-            " CREATE INDEX index_StatementEntityTracker_seDestination_seProcessed_seFk ON StatementEntityTracker (seDestination, seProcessed, seFk) "
+            " CREATE INDEX index_StatementEntityReplicate_seDestination_seProcessed_sePk ON StatementEntityReplicate (seDestination, seProcessed, sePk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_60_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (60, NEW.statementUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1341,9 +1340,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW StatementEntity_ReceiveView AS  SELECT StatementEntity.*, StatementEntityTracker.* FROM StatementEntity LEFT JOIN StatementEntityTracker ON StatementEntityTracker.seFk = StatementEntity.statementUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoinTracker ( cxosjFk BIGINT NOT NULL, cxosjVersionId BIGINT NOT NULL, cxosjDestination BIGINT NOT NULL, cxosjProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (cxosjFk, cxosjDestination)) "
+            " CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoinReplicate ( cxosjPk BIGINT NOT NULL, cxosjVersionId BIGINT NOT NULL, cxosjDestination BIGINT NOT NULL, cxosjProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (cxosjPk, cxosjDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ContextXObjectStatementJoinTracker_cxosjDestination_cxosjProcessed_cxosjFk ON ContextXObjectStatementJoinTracker (cxosjDestination, cxosjProcessed, cxosjFk) "
+            " CREATE INDEX index_ContextXObjectStatementJoinReplicate_cxosjDestination_cxosjProcessed_cxosjPk ON ContextXObjectStatementJoinReplicate (cxosjDestination, cxosjProcessed, cxosjPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_66_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (66, NEW.contextXObjectStatementJoinUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1355,9 +1354,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ContextXObjectStatementJoin_ReceiveView AS  SELECT ContextXObjectStatementJoin.*, ContextXObjectStatementJoinTracker.* FROM ContextXObjectStatementJoin LEFT JOIN ContextXObjectStatementJoinTracker ON ContextXObjectStatementJoinTracker.cxosjFk = ContextXObjectStatementJoin.contextXObjectStatementJoinUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS AgentEntityTracker ( aeFk BIGINT NOT NULL, aeVersionId BIGINT NOT NULL, aeDestination BIGINT NOT NULL, aeProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (aeFk, aeDestination)) "
+            " CREATE TABLE IF NOT EXISTS AgentEntityReplicate ( aePk BIGINT NOT NULL, aeVersionId BIGINT NOT NULL, aeDestination BIGINT NOT NULL, aeProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (aePk, aeDestination)) "
         _stmtList +=
-            " CREATE INDEX index_AgentEntityTracker_aeDestination_aeProcessed_aeFk ON AgentEntityTracker (aeDestination, aeProcessed, aeFk) "
+            " CREATE INDEX index_AgentEntityReplicate_aeDestination_aeProcessed_aePk ON AgentEntityReplicate (aeDestination, aeProcessed, aePk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_68_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (68, NEW.agentUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1369,9 +1368,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW AgentEntity_ReceiveView AS  SELECT AgentEntity.*, AgentEntityTracker.* FROM AgentEntity LEFT JOIN AgentEntityTracker ON AgentEntityTracker.aeFk = AgentEntity.agentUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS StateEntityTracker ( seFk BIGINT NOT NULL, seVersionId BIGINT NOT NULL, seDestination BIGINT NOT NULL, seProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (seFk, seDestination)) "
+            " CREATE TABLE IF NOT EXISTS StateEntityReplicate ( sePk BIGINT NOT NULL, seVersionId BIGINT NOT NULL, seDestination BIGINT NOT NULL, seProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (sePk, seDestination)) "
         _stmtList +=
-            " CREATE INDEX index_StateEntityTracker_seDestination_seProcessed_seFk ON StateEntityTracker (seDestination, seProcessed, seFk) "
+            " CREATE INDEX index_StateEntityReplicate_seDestination_seProcessed_sePk ON StateEntityReplicate (seDestination, seProcessed, sePk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_70_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (70, NEW.stateUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1383,9 +1382,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW StateEntity_ReceiveView AS  SELECT StateEntity.*, StateEntityTracker.* FROM StateEntity LEFT JOIN StateEntityTracker ON StateEntityTracker.seFk = StateEntity.stateUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS StateContentEntityTracker ( sceFk BIGINT NOT NULL, sceVersionId BIGINT NOT NULL, sceDestination BIGINT NOT NULL, sceProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (sceFk, sceDestination)) "
+            " CREATE TABLE IF NOT EXISTS StateContentEntityReplicate ( scePk BIGINT NOT NULL, sceVersionId BIGINT NOT NULL, sceDestination BIGINT NOT NULL, sceProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (scePk, sceDestination)) "
         _stmtList +=
-            " CREATE INDEX index_StateContentEntityTracker_sceDestination_sceProcessed_sceFk ON StateContentEntityTracker (sceDestination, sceProcessed, sceFk) "
+            " CREATE INDEX index_StateContentEntityReplicate_sceDestination_sceProcessed_scePk ON StateContentEntityReplicate (sceDestination, sceProcessed, scePk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_72_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (72, NEW.stateContentUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1397,9 +1396,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW StateContentEntity_ReceiveView AS  SELECT StateContentEntity.*, StateContentEntityTracker.* FROM StateContentEntity LEFT JOIN StateContentEntityTracker ON StateContentEntityTracker.sceFk = StateContentEntity.stateContentUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS XLangMapEntryTracker ( xlmeFk BIGINT NOT NULL, xlmeVersionId BIGINT NOT NULL, xlmeDestination BIGINT NOT NULL, xlmeProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (xlmeFk, xlmeDestination)) "
+            " CREATE TABLE IF NOT EXISTS XLangMapEntryReplicate ( xlmePk BIGINT NOT NULL, xlmeVersionId BIGINT NOT NULL, xlmeDestination BIGINT NOT NULL, xlmeProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (xlmePk, xlmeDestination)) "
         _stmtList +=
-            " CREATE INDEX index_XLangMapEntryTracker_xlmeDestination_xlmeProcessed_xlmeFk ON XLangMapEntryTracker (xlmeDestination, xlmeProcessed, xlmeFk) "
+            " CREATE INDEX index_XLangMapEntryReplicate_xlmeDestination_xlmeProcessed_xlmePk ON XLangMapEntryReplicate (xlmeDestination, xlmeProcessed, xlmePk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_74_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (74, NEW.statementLangMapUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1411,9 +1410,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW XLangMapEntry_ReceiveView AS  SELECT XLangMapEntry.*, XLangMapEntryTracker.* FROM XLangMapEntry LEFT JOIN XLangMapEntryTracker ON XLangMapEntryTracker.xlmeFk = XLangMapEntry.statementLangMapUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS SchoolTracker ( schoolFk BIGINT NOT NULL, schoolVersionId BIGINT NOT NULL, schoolDestination BIGINT NOT NULL, schoolProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (schoolFk, schoolDestination)) "
+            " CREATE TABLE IF NOT EXISTS SchoolReplicate ( schoolPk BIGINT NOT NULL, schoolVersionId BIGINT NOT NULL, schoolDestination BIGINT NOT NULL, schoolProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (schoolPk, schoolDestination)) "
         _stmtList +=
-            " CREATE INDEX index_SchoolTracker_schoolDestination_schoolProcessed_schoolFk ON SchoolTracker (schoolDestination, schoolProcessed, schoolFk) "
+            " CREATE INDEX index_SchoolReplicate_schoolDestination_schoolProcessed_schoolPk ON SchoolReplicate (schoolDestination, schoolProcessed, schoolPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_164_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (164, NEW.schoolUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1425,9 +1424,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW School_ReceiveView AS  SELECT School.*, SchoolTracker.* FROM School LEFT JOIN SchoolTracker ON SchoolTracker.schoolFk = School.schoolUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS SchoolMemberTracker ( smFk BIGINT NOT NULL, smVersionId BIGINT NOT NULL, smDestination BIGINT NOT NULL, smProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (smFk, smDestination)) "
+            " CREATE TABLE IF NOT EXISTS SchoolMemberReplicate ( smPk BIGINT NOT NULL, smVersionId BIGINT NOT NULL, smDestination BIGINT NOT NULL, smProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (smPk, smDestination)) "
         _stmtList +=
-            " CREATE INDEX index_SchoolMemberTracker_smDestination_smProcessed_smFk ON SchoolMemberTracker (smDestination, smProcessed, smFk) "
+            " CREATE INDEX index_SchoolMemberReplicate_smDestination_smProcessed_smPk ON SchoolMemberReplicate (smDestination, smProcessed, smPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_200_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (200, NEW.schoolMemberUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1439,9 +1438,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW SchoolMember_ReceiveView AS  SELECT SchoolMember.*, SchoolMemberTracker.* FROM SchoolMember LEFT JOIN SchoolMemberTracker ON SchoolMemberTracker.smFk = SchoolMember.schoolMemberUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS CommentsTracker ( commentsFk BIGINT NOT NULL, commentsVersionId BIGINT NOT NULL, commentsDestination BIGINT NOT NULL, commentsProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (commentsFk, commentsDestination)) "
+            " CREATE TABLE IF NOT EXISTS CommentsReplicate ( commentsPk BIGINT NOT NULL, commentsVersionId BIGINT NOT NULL, commentsDestination BIGINT NOT NULL, commentsProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (commentsPk, commentsDestination)) "
         _stmtList +=
-            " CREATE INDEX index_CommentsTracker_commentsDestination_commentsProcessed_commentsFk ON CommentsTracker (commentsDestination, commentsProcessed, commentsFk) "
+            " CREATE INDEX index_CommentsReplicate_commentsDestination_commentsProcessed_commentsPk ON CommentsReplicate (commentsDestination, commentsProcessed, commentsPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_208_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (208, NEW.commentsUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1453,9 +1452,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Comments_ReceiveView AS  SELECT Comments.*, CommentsTracker.* FROM Comments LEFT JOIN CommentsTracker ON CommentsTracker.commentsFk = Comments.commentsUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ReportTracker ( reportFk BIGINT NOT NULL, reportVersionId BIGINT NOT NULL, reportDestination BIGINT NOT NULL, reportProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (reportFk, reportDestination)) "
+            " CREATE TABLE IF NOT EXISTS ReportReplicate ( reportPk BIGINT NOT NULL, reportVersionId BIGINT NOT NULL, reportDestination BIGINT NOT NULL, reportProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (reportPk, reportDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ReportTracker_reportDestination_reportProcessed_reportFk ON ReportTracker (reportDestination, reportProcessed, reportFk) "
+            " CREATE INDEX index_ReportReplicate_reportDestination_reportProcessed_reportPk ON ReportReplicate (reportDestination, reportProcessed, reportPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_101_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (101, NEW.reportUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1467,9 +1466,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Report_ReceiveView AS  SELECT Report.*, ReportTracker.* FROM Report LEFT JOIN ReportTracker ON ReportTracker.reportFk = Report.reportUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS SiteTracker ( siteFk BIGINT NOT NULL, siteVersionId BIGINT NOT NULL, siteDestination BIGINT NOT NULL, siteProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (siteFk, siteDestination)) "
+            " CREATE TABLE IF NOT EXISTS SiteReplicate ( sitePk BIGINT NOT NULL, siteVersionId BIGINT NOT NULL, siteDestination BIGINT NOT NULL, siteProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (sitePk, siteDestination)) "
         _stmtList +=
-            " CREATE INDEX index_SiteTracker_siteDestination_siteProcessed_siteFk ON SiteTracker (siteDestination, siteProcessed, siteFk) "
+            " CREATE INDEX index_SiteReplicate_siteDestination_siteProcessed_sitePk ON SiteReplicate (siteDestination, siteProcessed, sitePk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_189_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (189, NEW.siteUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1485,9 +1484,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE TRIGGER site_remote_insert_trig INSTEAD OF INSERT ON Site_ReceiveView FOR EACH ROW EXECUTE PROCEDURE site_remote_insert_fn() "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS LearnerGroupTracker ( lgFk BIGINT NOT NULL, lgVersionId BIGINT NOT NULL, lgDestination BIGINT NOT NULL, lgProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (lgFk, lgDestination)) "
+            " CREATE TABLE IF NOT EXISTS LearnerGroupReplicate ( lgPk BIGINT NOT NULL, lgVersionId BIGINT NOT NULL, lgDestination BIGINT NOT NULL, lgProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (lgPk, lgDestination)) "
         _stmtList +=
-            " CREATE INDEX index_LearnerGroupTracker_lgDestination_lgProcessed_lgFk ON LearnerGroupTracker (lgDestination, lgProcessed, lgFk) "
+            " CREATE INDEX index_LearnerGroupReplicate_lgDestination_lgProcessed_lgPk ON LearnerGroupReplicate (lgDestination, lgProcessed, lgPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_301_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (301, NEW.learnerGroupUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1499,9 +1498,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW LearnerGroup_ReceiveView AS  SELECT LearnerGroup.*, LearnerGroupTracker.* FROM LearnerGroup LEFT JOIN LearnerGroupTracker ON LearnerGroupTracker.lgFk = LearnerGroup.learnerGroupUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS LearnerGroupMemberTracker ( lgmFk BIGINT NOT NULL, lgmVersionId BIGINT NOT NULL, lgmDestination BIGINT NOT NULL, lgmProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (lgmFk, lgmDestination)) "
+            " CREATE TABLE IF NOT EXISTS LearnerGroupMemberReplicate ( lgmPk BIGINT NOT NULL, lgmVersionId BIGINT NOT NULL, lgmDestination BIGINT NOT NULL, lgmProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (lgmPk, lgmDestination)) "
         _stmtList +=
-            " CREATE INDEX index_LearnerGroupMemberTracker_lgmDestination_lgmProcessed_lgmFk ON LearnerGroupMemberTracker (lgmDestination, lgmProcessed, lgmFk) "
+            " CREATE INDEX index_LearnerGroupMemberReplicate_lgmDestination_lgmProcessed_lgmPk ON LearnerGroupMemberReplicate (lgmDestination, lgmProcessed, lgmPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_300_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (300, NEW.learnerGroupMemberUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1513,9 +1512,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW LearnerGroupMember_ReceiveView AS  SELECT LearnerGroupMember.*, LearnerGroupMemberTracker.* FROM LearnerGroupMember LEFT JOIN LearnerGroupMemberTracker ON LearnerGroupMemberTracker.lgmFk = LearnerGroupMember.learnerGroupMemberUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS GroupLearningSessionTracker ( glsFk BIGINT NOT NULL, glsVersionId BIGINT NOT NULL, glsDestination BIGINT NOT NULL, glsProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (glsFk, glsDestination)) "
+            " CREATE TABLE IF NOT EXISTS GroupLearningSessionReplicate ( glsPk BIGINT NOT NULL, glsVersionId BIGINT NOT NULL, glsDestination BIGINT NOT NULL, glsProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (glsPk, glsDestination)) "
         _stmtList +=
-            " CREATE INDEX index_GroupLearningSessionTracker_glsDestination_glsProcessed_glsFk ON GroupLearningSessionTracker (glsDestination, glsProcessed, glsFk) "
+            " CREATE INDEX index_GroupLearningSessionReplicate_glsDestination_glsProcessed_glsPk ON GroupLearningSessionReplicate (glsDestination, glsProcessed, glsPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_302_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (302, NEW.groupLearningSessionUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1527,9 +1526,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW GroupLearningSession_ReceiveView AS  SELECT GroupLearningSession.*, GroupLearningSessionTracker.* FROM GroupLearningSession LEFT JOIN GroupLearningSessionTracker ON GroupLearningSessionTracker.glsFk = GroupLearningSession.groupLearningSessionUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS SiteTermsTracker ( stFk BIGINT NOT NULL, stVersionId BIGINT NOT NULL, stDestination BIGINT NOT NULL, stProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (stFk, stDestination)) "
+            " CREATE TABLE IF NOT EXISTS SiteTermsReplicate ( stPk BIGINT NOT NULL, stVersionId BIGINT NOT NULL, stDestination BIGINT NOT NULL, stProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (stPk, stDestination)) "
         _stmtList +=
-            " CREATE INDEX index_SiteTermsTracker_stDestination_stProcessed_stFk ON SiteTermsTracker (stDestination, stProcessed, stFk) "
+            " CREATE INDEX index_SiteTermsReplicate_stDestination_stProcessed_stPk ON SiteTermsReplicate (stDestination, stProcessed, stPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_272_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (272, NEW.sTermsUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1541,9 +1540,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW SiteTerms_ReceiveView AS  SELECT SiteTerms.*, SiteTermsTracker.* FROM SiteTerms LEFT JOIN SiteTermsTracker ON SiteTermsTracker.stFk = SiteTerms.sTermsUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ClazzContentJoinTracker ( ccjFk BIGINT NOT NULL, ccjVersionId BIGINT NOT NULL, ccjDestination BIGINT NOT NULL, ccjProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (ccjFk, ccjDestination)) "
+            " CREATE TABLE IF NOT EXISTS ClazzContentJoinReplicate ( ccjPk BIGINT NOT NULL, ccjVersionId BIGINT NOT NULL, ccjDestination BIGINT NOT NULL, ccjProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (ccjPk, ccjDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ClazzContentJoinTracker_ccjDestination_ccjProcessed_ccjFk ON ClazzContentJoinTracker (ccjDestination, ccjProcessed, ccjFk) "
+            " CREATE INDEX index_ClazzContentJoinReplicate_ccjDestination_ccjProcessed_ccjPk ON ClazzContentJoinReplicate (ccjDestination, ccjProcessed, ccjPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_134_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (134, NEW.ccjUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1555,9 +1554,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ClazzContentJoin_ReceiveView AS  SELECT ClazzContentJoin.*, ClazzContentJoinTracker.* FROM ClazzContentJoin LEFT JOIN ClazzContentJoinTracker ON ClazzContentJoinTracker.ccjFk = ClazzContentJoin.ccjUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS PersonParentJoinTracker ( ppjFk BIGINT NOT NULL, ppjVersionId BIGINT NOT NULL, ppjDestination BIGINT NOT NULL, ppjProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (ppjFk, ppjDestination)) "
+            " CREATE TABLE IF NOT EXISTS PersonParentJoinReplicate ( ppjPk BIGINT NOT NULL, ppjVersionId BIGINT NOT NULL, ppjDestination BIGINT NOT NULL, ppjProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (ppjPk, ppjDestination)) "
         _stmtList +=
-            " CREATE INDEX index_PersonParentJoinTracker_ppjDestination_ppjProcessed_ppjFk ON PersonParentJoinTracker (ppjDestination, ppjProcessed, ppjFk) "
+            " CREATE INDEX index_PersonParentJoinReplicate_ppjDestination_ppjProcessed_ppjPk ON PersonParentJoinReplicate (ppjDestination, ppjProcessed, ppjPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_512_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (512, NEW.ppjUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1569,9 +1568,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW PersonParentJoin_ReceiveView AS  SELECT PersonParentJoin.*, PersonParentJoinTracker.* FROM PersonParentJoin LEFT JOIN PersonParentJoinTracker ON PersonParentJoinTracker.ppjFk = PersonParentJoin.ppjUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ScopedGrantTracker ( sgFk BIGINT NOT NULL, sgVersionId BIGINT NOT NULL, sgDestination BIGINT NOT NULL, sgProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (sgFk, sgDestination)) "
+            " CREATE TABLE IF NOT EXISTS ScopedGrantReplicate ( sgPk BIGINT NOT NULL, sgVersionId BIGINT NOT NULL, sgDestination BIGINT NOT NULL, sgProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (sgPk, sgDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ScopedGrantTracker_sgDestination_sgProcessed_sgFk ON ScopedGrantTracker (sgDestination, sgProcessed, sgFk) "
+            " CREATE INDEX index_ScopedGrantReplicate_sgDestination_sgProcessed_sgPk ON ScopedGrantReplicate (sgDestination, sgProcessed, sgPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_48_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (48, NEW.sgUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1587,9 +1586,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE TRIGGER sg_remote_insert_trig INSTEAD OF INSERT ON ScopedGrant_ReceiveView FOR EACH ROW EXECUTE PROCEDURE sg_remote_insert_fn() "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ErrorReportTracker ( erFk BIGINT NOT NULL, erVersionId BIGINT NOT NULL, erDestination BIGINT NOT NULL, erProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (erFk, erDestination)) "
+            " CREATE TABLE IF NOT EXISTS ErrorReportReplicate ( erPk BIGINT NOT NULL, erVersionId BIGINT NOT NULL, erDestination BIGINT NOT NULL, erProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (erPk, erDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ErrorReportTracker_erDestination_erProcessed_erFk ON ErrorReportTracker (erDestination, erProcessed, erFk) "
+            " CREATE INDEX index_ErrorReportReplicate_erDestination_erProcessed_erPk ON ErrorReportReplicate (erDestination, erProcessed, erPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_419_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (419, NEW.errUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1601,9 +1600,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ErrorReport_ReceiveView AS  SELECT ErrorReport.*, ErrorReportTracker.* FROM ErrorReport LEFT JOIN ErrorReportTracker ON ErrorReportTracker.erFk = ErrorReport.errUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ClazzAssignmentTracker ( caFk BIGINT NOT NULL, caVersionId BIGINT NOT NULL, caDestination BIGINT NOT NULL, caProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (caFk, caDestination)) "
+            " CREATE TABLE IF NOT EXISTS ClazzAssignmentReplicate ( caPk BIGINT NOT NULL, caVersionId BIGINT NOT NULL, caDestination BIGINT NOT NULL, caProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (caPk, caDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ClazzAssignmentTracker_caDestination_caProcessed_caFk ON ClazzAssignmentTracker (caDestination, caProcessed, caFk) "
+            " CREATE INDEX index_ClazzAssignmentReplicate_caDestination_caProcessed_caPk ON ClazzAssignmentReplicate (caDestination, caProcessed, caPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_520_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (520, NEW.caUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1615,9 +1614,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ClazzAssignment_ReceiveView AS  SELECT ClazzAssignment.*, ClazzAssignmentTracker.* FROM ClazzAssignment LEFT JOIN ClazzAssignmentTracker ON ClazzAssignmentTracker.caFk = ClazzAssignment.caUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoinTracker ( cacjFk BIGINT NOT NULL, cacjVersionId BIGINT NOT NULL, cacjDestination BIGINT NOT NULL, cacjProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (cacjFk, cacjDestination)) "
+            " CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoinReplicate ( cacjPk BIGINT NOT NULL, cacjVersionId BIGINT NOT NULL, cacjDestination BIGINT NOT NULL, cacjProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (cacjPk, cacjDestination)) "
         _stmtList +=
-            " CREATE INDEX index_ClazzAssignmentContentJoinTracker_cacjDestination_cacjProcessed_cacjFk ON ClazzAssignmentContentJoinTracker (cacjDestination, cacjProcessed, cacjFk) "
+            " CREATE INDEX index_ClazzAssignmentContentJoinReplicate_cacjDestination_cacjProcessed_cacjPk ON ClazzAssignmentContentJoinReplicate (cacjDestination, cacjProcessed, cacjPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_521_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (521, NEW.cacjUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1629,9 +1628,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ClazzAssignmentContentJoin_ReceiveView AS  SELECT ClazzAssignmentContentJoin.*, ClazzAssignmentContentJoinTracker.* FROM ClazzAssignmentContentJoin LEFT JOIN ClazzAssignmentContentJoinTracker ON ClazzAssignmentContentJoinTracker.cacjFk = ClazzAssignmentContentJoin.cacjUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS PersonAuth2Tracker ( paFk BIGINT NOT NULL, paVersionId BIGINT NOT NULL, paDestination BIGINT NOT NULL, paProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (paFk, paDestination)) "
+            " CREATE TABLE IF NOT EXISTS PersonAuth2Replicate ( paPk BIGINT NOT NULL, paVersionId BIGINT NOT NULL, paDestination BIGINT NOT NULL, paProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (paPk, paDestination)) "
         _stmtList +=
-            " CREATE INDEX index_PersonAuth2Tracker_paDestination_paProcessed_paFk ON PersonAuth2Tracker (paDestination, paProcessed, paFk) "
+            " CREATE INDEX index_PersonAuth2Replicate_paDestination_paProcessed_paPk ON PersonAuth2Replicate (paDestination, paProcessed, paPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_678_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (678, NEW.pauthUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
@@ -1643,9 +1642,9 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW PersonAuth2_ReceiveView AS  SELECT PersonAuth2.*, PersonAuth2Tracker.* FROM PersonAuth2 LEFT JOIN PersonAuth2Tracker ON PersonAuth2Tracker.paFk = PersonAuth2.pauthUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS UserSessionTracker ( usFk BIGINT NOT NULL, usVersionId BIGINT NOT NULL, usDestination BIGINT NOT NULL, usProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (usFk, usDestination)) "
+            " CREATE TABLE IF NOT EXISTS UserSessionReplicate ( usPk BIGINT NOT NULL, usVersionId BIGINT NOT NULL, usDestination BIGINT NOT NULL, usProcessed BOOL NOT NULL DEFAULT false, PRIMARY KEY (usPk, usDestination)) "
         _stmtList +=
-            " CREATE INDEX index_UserSessionTracker_usDestination_usProcessed_usFk ON UserSessionTracker (usDestination, usProcessed, usFk) "
+            " CREATE INDEX index_UserSessionReplicate_usDestination_usProcessed_usPk ON UserSessionReplicate (usDestination, usProcessed, usPk) "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_679_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (679, NEW.usUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=

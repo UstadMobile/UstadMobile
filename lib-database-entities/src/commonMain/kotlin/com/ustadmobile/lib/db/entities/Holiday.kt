@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
 //               $TABLE_ID AS tableId
 //          FROM UserSession
 //    """])
-@ReplicateEntity(tableId = TABLE_ID, tracker = HolidayTracker::class)
+@ReplicateEntity(tableId = TABLE_ID, tracker = HolidayReplicate::class)
 @Serializable
 class Holiday() {
 

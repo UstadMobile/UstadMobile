@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
  * could also be related to behavior logs etc. in the future.
  */
 
-@ReplicateEntity(tableId =  ClazzLog.TABLE_ID, tracker = ClazzLogTracker::class)
+@ReplicateEntity(tableId =  ClazzLog.TABLE_ID, tracker = ClazzLogReplicate::class)
 /*
 @SyncableEntity(tableId = ClazzLog.TABLE_ID,
     notifyOnUpdate = [

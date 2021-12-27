@@ -34,7 +34,7 @@ import kotlinx.serialization.Serializable
 //)
 @Entity
 @Serializable
-@ReplicateEntity(tableId = Schedule.TABLE_ID, tracker = ScheduleTracker::class)
+@ReplicateEntity(tableId = Schedule.TABLE_ID, tracker = ScheduleReplicate::class)
 class Schedule {
 
     @PrimaryKey(autoGenerate = true)

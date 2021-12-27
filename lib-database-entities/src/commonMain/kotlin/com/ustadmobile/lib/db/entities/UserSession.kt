@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
 //
 //    """])
 @Serializable
-@ReplicateEntity(tableId = UserSession.TABLE_ID, tracker = UserSessionTracker::class)
+@ReplicateEntity(tableId = UserSession.TABLE_ID, tracker = UserSessionReplicate::class)
 @Triggers(arrayOf(
     Trigger(name="usersession_remote_ins",
         order = Trigger.Order.INSTEAD_OF,

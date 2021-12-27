@@ -38,7 +38,7 @@ import kotlinx.serialization.Serializable
 //    """
 //)
 @Serializable
-@ReplicateEntity(tableId = School.TABLE_ID, tracker = SchoolTracker::class)
+@ReplicateEntity(tableId = School.TABLE_ID, tracker = SchoolReplicate::class)
 open class School() {
 
     @PrimaryKey(autoGenerate = true)

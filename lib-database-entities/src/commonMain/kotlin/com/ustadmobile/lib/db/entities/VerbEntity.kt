@@ -20,7 +20,7 @@ class VerbDisplay {
 //        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, ${VerbEntity.TABLE_ID} AS tableId
 //        FROM UserSession"""])
 @Serializable
-@ReplicateEntity(tableId = TABLE_ID, tracker = VerbEntityTracker::class)
+@ReplicateEntity(tableId = TABLE_ID, tracker = VerbEntityReplicate::class)
 class VerbEntity() {
 
     constructor(uid: Long, url: String?) : this(){

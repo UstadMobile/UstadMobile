@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
 //               ${XObjectEntity.TABLE_ID} AS tableId
 //        FROM UserSession"""])
 @Serializable
-@ReplicateEntity(tableId =  XObjectEntity.TABLE_ID, tracker = XObjectEntityTracker::class)
+@ReplicateEntity(tableId =  XObjectEntity.TABLE_ID, tracker = XObjectEntityReplicate::class)
 class XObjectEntity {
 
     @PrimaryKey(autoGenerate = true)

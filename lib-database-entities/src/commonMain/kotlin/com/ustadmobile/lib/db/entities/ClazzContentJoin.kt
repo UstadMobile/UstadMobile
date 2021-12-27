@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.ClazzContentJoin.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@ReplicateEntity(tableId = TABLE_ID, tracker = ClazzContentJoinTracker::class)
+@ReplicateEntity(tableId = TABLE_ID, tracker = ClazzContentJoinReplicate::class)
 /*
 @SyncableEntity(tableId = TABLE_ID,
         notifyOnUpdate = [

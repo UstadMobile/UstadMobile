@@ -9,7 +9,7 @@ import com.ustadmobile.door.annotation.*
  * and the mechanism.
  */
 @Entity
-@ReplicateEntity(tableId = PersonAuth2.TABLE_ID, tracker = PersonAuth2Tracker::class)
+@ReplicateEntity(tableId = PersonAuth2.TABLE_ID, tracker = PersonAuth2Replicate::class)
 //@SyncableEntity(tableId = PersonAuth2.TABLE_ID,
 //    syncFindAllQuery = """
 //        SELECT PersonAuth2.*

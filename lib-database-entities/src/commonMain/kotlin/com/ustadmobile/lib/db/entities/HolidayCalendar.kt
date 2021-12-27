@@ -17,7 +17,7 @@ import kotlinx.serialization.Serializable
 //    """])
 @Entity
 @Serializable
-@ReplicateEntity(tableId = HolidayCalendar.TABLE_ID, tracker = HolidayCalendarTracker::class)
+@ReplicateEntity(tableId = HolidayCalendar.TABLE_ID, tracker = HolidayCalendarReplicate::class)
 open class HolidayCalendar() {
 
     @PrimaryKey(autoGenerate = true)

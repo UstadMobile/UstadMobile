@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
 ])
 //@SyncableEntity(tableId = Role.TABLE_ID)
 @Serializable
-@ReplicateEntity(tableId = Role.TABLE_ID, tracker = RoleTracker::class)
+@ReplicateEntity(tableId = Role.TABLE_ID, tracker = RoleReplicate::class)
 open class Role() {
 
     @PrimaryKey(autoGenerate = true)

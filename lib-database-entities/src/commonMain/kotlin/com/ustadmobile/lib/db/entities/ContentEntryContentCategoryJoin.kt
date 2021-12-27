@@ -19,7 +19,7 @@ import kotlinx.serialization.Serializable
         FROM UserSession
     """])
  */
-@ReplicateEntity(tableId = TABLE_ID, tracker = ContentEntryContentCategoryJoinTracker::class)
+@ReplicateEntity(tableId = TABLE_ID, tracker = ContentEntryContentCategoryJoinReplicate::class)
 @Serializable
 class ContentEntryContentCategoryJoin() {
 

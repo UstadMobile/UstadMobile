@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 91,
-    "identityHash": "171ad4172effc201c237deea57583622",
+    "identityHash": "9c98527cc617380ae2d73f2035fae952",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -6295,12 +6295,12 @@
         "foreignKeys": []
       },
       {
-        "tableName": "ClazzLogTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clFk` INTEGER NOT NULL, `clVersionId` INTEGER NOT NULL, `clDestination` INTEGER NOT NULL, `clProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`clFk`, `clDestination`))",
+        "tableName": "ClazzLogReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clPk` INTEGER NOT NULL, `clVersionId` INTEGER NOT NULL, `clDestination` INTEGER NOT NULL, `clProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`clPk`, `clDestination`))",
         "fields": [
           {
-            "fieldPath": "clFk",
-            "columnName": "clFk",
+            "fieldPath": "clPk",
+            "columnName": "clPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6326,33 +6326,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "clFk",
+            "clPk",
             "clDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_ClazzLogTracker_clDestination_clProcessed_clFk",
+            "name": "index_ClazzLogReplicate_clDestination_clProcessed_clPk",
             "unique": false,
             "columnNames": [
               "clDestination",
               "clProcessed",
-              "clFk"
+              "clPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzLogTracker_clDestination_clProcessed_clFk` ON `${TABLE_NAME}` (`clDestination`, `clProcessed`, `clFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzLogReplicate_clDestination_clProcessed_clPk` ON `${TABLE_NAME}` (`clDestination`, `clProcessed`, `clPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "ClazzLogAttendanceRecordTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clarFk` INTEGER NOT NULL, `clarVersionId` INTEGER NOT NULL, `clarDestination` INTEGER NOT NULL, `clarProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`clarFk`, `clarDestination`))",
+        "tableName": "ClazzLogAttendanceRecordReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clarPk` INTEGER NOT NULL, `clarVersionId` INTEGER NOT NULL, `clarDestination` INTEGER NOT NULL, `clarProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`clarPk`, `clarDestination`))",
         "fields": [
           {
-            "fieldPath": "clarFk",
-            "columnName": "clarFk",
+            "fieldPath": "clarPk",
+            "columnName": "clarPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6378,33 +6378,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "clarFk",
+            "clarPk",
             "clarDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_ClazzLogAttendanceRecordTracker_clarDestination_clarProcessed_clarFk",
+            "name": "index_ClazzLogAttendanceRecordReplicate_clarDestination_clarProcessed_clarPk",
             "unique": false,
             "columnNames": [
               "clarDestination",
               "clarProcessed",
-              "clarFk"
+              "clarPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzLogAttendanceRecordTracker_clarDestination_clarProcessed_clarFk` ON `${TABLE_NAME}` (`clarDestination`, `clarProcessed`, `clarFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzLogAttendanceRecordReplicate_clarDestination_clarProcessed_clarPk` ON `${TABLE_NAME}` (`clarDestination`, `clarProcessed`, `clarPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "ScheduleTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scheduleFk` INTEGER NOT NULL, `scheduleVersionId` INTEGER NOT NULL, `scheduleDestination` INTEGER NOT NULL, `scheduleProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`scheduleFk`, `scheduleDestination`))",
+        "tableName": "ScheduleReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schedulePk` INTEGER NOT NULL, `scheduleVersionId` INTEGER NOT NULL, `scheduleDestination` INTEGER NOT NULL, `scheduleProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`schedulePk`, `scheduleDestination`))",
         "fields": [
           {
-            "fieldPath": "scheduleFk",
-            "columnName": "scheduleFk",
+            "fieldPath": "schedulePk",
+            "columnName": "schedulePk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6430,33 +6430,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "scheduleFk",
+            "schedulePk",
             "scheduleDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_ScheduleTracker_scheduleDestination_scheduleProcessed_scheduleFk",
+            "name": "index_ScheduleReplicate_scheduleDestination_scheduleProcessed_schedulePk",
             "unique": false,
             "columnNames": [
               "scheduleDestination",
               "scheduleProcessed",
-              "scheduleFk"
+              "schedulePk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ScheduleTracker_scheduleDestination_scheduleProcessed_scheduleFk` ON `${TABLE_NAME}` (`scheduleDestination`, `scheduleProcessed`, `scheduleFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ScheduleReplicate_scheduleDestination_scheduleProcessed_schedulePk` ON `${TABLE_NAME}` (`scheduleDestination`, `scheduleProcessed`, `schedulePk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "HolidayCalendarTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`hcFk` INTEGER NOT NULL, `hcVersionId` INTEGER NOT NULL, `hcDestination` INTEGER NOT NULL, `hcProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`hcFk`, `hcDestination`))",
+        "tableName": "HolidayCalendarReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`hcPk` INTEGER NOT NULL, `hcVersionId` INTEGER NOT NULL, `hcDestination` INTEGER NOT NULL, `hcProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`hcPk`, `hcDestination`))",
         "fields": [
           {
-            "fieldPath": "hcFk",
-            "columnName": "hcFk",
+            "fieldPath": "hcPk",
+            "columnName": "hcPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6482,33 +6482,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "hcFk",
+            "hcPk",
             "hcDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_HolidayCalendarTracker_hcDestination_hcProcessed_hcFk",
+            "name": "index_HolidayCalendarReplicate_hcDestination_hcProcessed_hcPk",
             "unique": false,
             "columnNames": [
               "hcDestination",
               "hcProcessed",
-              "hcFk"
+              "hcPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_HolidayCalendarTracker_hcDestination_hcProcessed_hcFk` ON `${TABLE_NAME}` (`hcDestination`, `hcProcessed`, `hcFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_HolidayCalendarReplicate_hcDestination_hcProcessed_hcPk` ON `${TABLE_NAME}` (`hcDestination`, `hcProcessed`, `hcPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "HolidayTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`holidayFk` INTEGER NOT NULL, `holidayVersionId` INTEGER NOT NULL, `holidayDestination` INTEGER NOT NULL, `holidayProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`holidayFk`, `holidayDestination`))",
+        "tableName": "HolidayReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`holidayPk` INTEGER NOT NULL, `holidayVersionId` INTEGER NOT NULL, `holidayDestination` INTEGER NOT NULL, `holidayProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`holidayPk`, `holidayDestination`))",
         "fields": [
           {
-            "fieldPath": "holidayFk",
-            "columnName": "holidayFk",
+            "fieldPath": "holidayPk",
+            "columnName": "holidayPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6534,33 +6534,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "holidayFk",
+            "holidayPk",
             "holidayDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_HolidayTracker_holidayDestination_holidayProcessed_holidayFk",
+            "name": "index_HolidayReplicate_holidayDestination_holidayProcessed_holidayPk",
             "unique": false,
             "columnNames": [
               "holidayDestination",
               "holidayProcessed",
-              "holidayFk"
+              "holidayPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_HolidayTracker_holidayDestination_holidayProcessed_holidayFk` ON `${TABLE_NAME}` (`holidayDestination`, `holidayProcessed`, `holidayFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_HolidayReplicate_holidayDestination_holidayProcessed_holidayPk` ON `${TABLE_NAME}` (`holidayDestination`, `holidayProcessed`, `holidayPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "PersonTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personFk` INTEGER NOT NULL, `personVersionId` INTEGER NOT NULL, `personDestination` INTEGER NOT NULL, `personProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`personFk`, `personDestination`))",
+        "tableName": "PersonReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personPk` INTEGER NOT NULL, `personVersionId` INTEGER NOT NULL, `personDestination` INTEGER NOT NULL, `personProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`personPk`, `personDestination`))",
         "fields": [
           {
-            "fieldPath": "personFk",
-            "columnName": "personFk",
+            "fieldPath": "personPk",
+            "columnName": "personPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6586,33 +6586,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "personFk",
+            "personPk",
             "personDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_PersonTracker_personDestination_personProcessed_personFk",
+            "name": "index_PersonReplicate_personDestination_personProcessed_personPk",
             "unique": false,
             "columnNames": [
               "personDestination",
               "personProcessed",
-              "personFk"
+              "personPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonTracker_personDestination_personProcessed_personFk` ON `${TABLE_NAME}` (`personDestination`, `personProcessed`, `personFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonReplicate_personDestination_personProcessed_personPk` ON `${TABLE_NAME}` (`personDestination`, `personProcessed`, `personPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "ClazzTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzFk` INTEGER NOT NULL, `clazzVersionId` INTEGER NOT NULL, `clazzDestination` INTEGER NOT NULL, `clazzProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`clazzFk`, `clazzDestination`))",
+        "tableName": "ClazzReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzPk` INTEGER NOT NULL, `clazzVersionId` INTEGER NOT NULL, `clazzDestination` INTEGER NOT NULL, `clazzProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`clazzPk`, `clazzDestination`))",
         "fields": [
           {
-            "fieldPath": "clazzFk",
-            "columnName": "clazzFk",
+            "fieldPath": "clazzPk",
+            "columnName": "clazzPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6638,33 +6638,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "clazzFk",
+            "clazzPk",
             "clazzDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_ClazzTracker_clazzDestination_clazzProcessed_clazzFk",
+            "name": "index_ClazzReplicate_clazzDestination_clazzProcessed_clazzPk",
             "unique": false,
             "columnNames": [
               "clazzDestination",
               "clazzProcessed",
-              "clazzFk"
+              "clazzPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzTracker_clazzDestination_clazzProcessed_clazzFk` ON `${TABLE_NAME}` (`clazzDestination`, `clazzProcessed`, `clazzFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzReplicate_clazzDestination_clazzProcessed_clazzPk` ON `${TABLE_NAME}` (`clazzDestination`, `clazzProcessed`, `clazzPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "ClazzEnrolmentTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ceFk` INTEGER NOT NULL, `ceVersionId` INTEGER NOT NULL, `ceDestination` INTEGER NOT NULL, `ceProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`ceFk`, `ceDestination`))",
+        "tableName": "ClazzEnrolmentReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cePk` INTEGER NOT NULL, `ceVersionId` INTEGER NOT NULL, `ceDestination` INTEGER NOT NULL, `ceProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`cePk`, `ceDestination`))",
         "fields": [
           {
-            "fieldPath": "ceFk",
-            "columnName": "ceFk",
+            "fieldPath": "cePk",
+            "columnName": "cePk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6690,33 +6690,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "ceFk",
+            "cePk",
             "ceDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_ClazzEnrolmentTracker_ceDestination_ceProcessed_ceFk",
+            "name": "index_ClazzEnrolmentReplicate_ceDestination_ceProcessed_cePk",
             "unique": false,
             "columnNames": [
               "ceDestination",
               "ceProcessed",
-              "ceFk"
+              "cePk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzEnrolmentTracker_ceDestination_ceProcessed_ceFk` ON `${TABLE_NAME}` (`ceDestination`, `ceProcessed`, `ceFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzEnrolmentReplicate_ceDestination_ceProcessed_cePk` ON `${TABLE_NAME}` (`ceDestination`, `ceProcessed`, `cePk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "LeavingReasonTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`lrFk` INTEGER NOT NULL, `lrVersionId` INTEGER NOT NULL, `lrDestination` INTEGER NOT NULL, `lrProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`lrFk`, `lrDestination`))",
+        "tableName": "LeavingReasonReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`lrPk` INTEGER NOT NULL, `lrVersionId` INTEGER NOT NULL, `lrDestination` INTEGER NOT NULL, `lrProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`lrPk`, `lrDestination`))",
         "fields": [
           {
-            "fieldPath": "lrFk",
-            "columnName": "lrFk",
+            "fieldPath": "lrPk",
+            "columnName": "lrPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6742,33 +6742,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "lrFk",
+            "lrPk",
             "lrDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_LeavingReasonTracker_lrDestination_lrProcessed_lrFk",
+            "name": "index_LeavingReasonReplicate_lrDestination_lrProcessed_lrPk",
             "unique": false,
             "columnNames": [
               "lrDestination",
               "lrProcessed",
-              "lrFk"
+              "lrPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_LeavingReasonTracker_lrDestination_lrProcessed_lrFk` ON `${TABLE_NAME}` (`lrDestination`, `lrProcessed`, `lrFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_LeavingReasonReplicate_lrDestination_lrProcessed_lrPk` ON `${TABLE_NAME}` (`lrDestination`, `lrProcessed`, `lrPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "ContentEntryTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ceFk` INTEGER NOT NULL, `ceVersionId` INTEGER NOT NULL, `ceDestination` INTEGER NOT NULL, `ceProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`ceFk`, `ceDestination`))",
+        "tableName": "ContentEntryReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cePk` INTEGER NOT NULL, `ceVersionId` INTEGER NOT NULL, `ceDestination` INTEGER NOT NULL, `ceProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`cePk`, `ceDestination`))",
         "fields": [
           {
-            "fieldPath": "ceFk",
-            "columnName": "ceFk",
+            "fieldPath": "cePk",
+            "columnName": "cePk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6794,33 +6794,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "ceFk",
+            "cePk",
             "ceDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_ContentEntryTracker_ceDestination_ceProcessed_ceFk",
+            "name": "index_ContentEntryReplicate_ceDestination_ceProcessed_cePk",
             "unique": false,
             "columnNames": [
               "ceDestination",
               "ceProcessed",
-              "ceFk"
+              "cePk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryTracker_ceDestination_ceProcessed_ceFk` ON `${TABLE_NAME}` (`ceDestination`, `ceProcessed`, `ceFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryReplicate_ceDestination_ceProcessed_cePk` ON `${TABLE_NAME}` (`ceDestination`, `ceProcessed`, `cePk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "ContentEntryContentCategoryJoinTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ceccjFk` INTEGER NOT NULL, `ceccjVersionId` INTEGER NOT NULL, `ceccjDestination` INTEGER NOT NULL, `ceccjProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`ceccjFk`, `ceccjDestination`))",
+        "tableName": "ContentEntryContentCategoryJoinReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ceccjPk` INTEGER NOT NULL, `ceccjVersionId` INTEGER NOT NULL, `ceccjDestination` INTEGER NOT NULL, `ceccjProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`ceccjPk`, `ceccjDestination`))",
         "fields": [
           {
-            "fieldPath": "ceccjFk",
-            "columnName": "ceccjFk",
+            "fieldPath": "ceccjPk",
+            "columnName": "ceccjPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6846,33 +6846,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "ceccjFk",
+            "ceccjPk",
             "ceccjDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_ContentEntryContentCategoryJoinTracker_ceccjDestination_ceccjProcessed_ceccjFk",
+            "name": "index_ContentEntryContentCategoryJoinReplicate_ceccjDestination_ceccjProcessed_ceccjPk",
             "unique": false,
             "columnNames": [
               "ceccjDestination",
               "ceccjProcessed",
-              "ceccjFk"
+              "ceccjPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryContentCategoryJoinTracker_ceccjDestination_ceccjProcessed_ceccjFk` ON `${TABLE_NAME}` (`ceccjDestination`, `ceccjProcessed`, `ceccjFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryContentCategoryJoinReplicate_ceccjDestination_ceccjProcessed_ceccjPk` ON `${TABLE_NAME}` (`ceccjDestination`, `ceccjProcessed`, `ceccjPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "ContentEntryParentChildJoinTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cepcjFk` INTEGER NOT NULL, `cepcjVersionId` INTEGER NOT NULL, `cepcjDestination` INTEGER NOT NULL, `cepcjProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`cepcjFk`, `cepcjDestination`))",
+        "tableName": "ContentEntryParentChildJoinReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cepcjPk` INTEGER NOT NULL, `cepcjVersionId` INTEGER NOT NULL, `cepcjDestination` INTEGER NOT NULL, `cepcjProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`cepcjPk`, `cepcjDestination`))",
         "fields": [
           {
-            "fieldPath": "cepcjFk",
-            "columnName": "cepcjFk",
+            "fieldPath": "cepcjPk",
+            "columnName": "cepcjPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6898,33 +6898,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "cepcjFk",
+            "cepcjPk",
             "cepcjDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_ContentEntryParentChildJoinTracker_cepcjDestination_cepcjProcessed_cepcjFk",
+            "name": "index_ContentEntryParentChildJoinReplicate_cepcjDestination_cepcjProcessed_cepcjPk",
             "unique": false,
             "columnNames": [
               "cepcjDestination",
               "cepcjProcessed",
-              "cepcjFk"
+              "cepcjPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryParentChildJoinTracker_cepcjDestination_cepcjProcessed_cepcjFk` ON `${TABLE_NAME}` (`cepcjDestination`, `cepcjProcessed`, `cepcjFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryParentChildJoinReplicate_cepcjDestination_cepcjProcessed_cepcjPk` ON `${TABLE_NAME}` (`cepcjDestination`, `cepcjProcessed`, `cepcjPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "ContentEntryRelatedEntryJoinTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cerejFk` INTEGER NOT NULL, `cerejVersionId` INTEGER NOT NULL, `cerejDestination` INTEGER NOT NULL, `cerejProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`cerejFk`, `cerejDestination`))",
+        "tableName": "ContentEntryRelatedEntryJoinReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cerejPk` INTEGER NOT NULL, `cerejVersionId` INTEGER NOT NULL, `cerejDestination` INTEGER NOT NULL, `cerejProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`cerejPk`, `cerejDestination`))",
         "fields": [
           {
-            "fieldPath": "cerejFk",
-            "columnName": "cerejFk",
+            "fieldPath": "cerejPk",
+            "columnName": "cerejPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6950,33 +6950,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "cerejFk",
+            "cerejPk",
             "cerejDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_ContentEntryRelatedEntryJoinTracker_cerejDestination_cerejProcessed_cerejFk",
+            "name": "index_ContentEntryRelatedEntryJoinReplicate_cerejDestination_cerejProcessed_cerejPk",
             "unique": false,
             "columnNames": [
               "cerejDestination",
               "cerejProcessed",
-              "cerejFk"
+              "cerejPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryRelatedEntryJoinTracker_cerejDestination_cerejProcessed_cerejFk` ON `${TABLE_NAME}` (`cerejDestination`, `cerejProcessed`, `cerejFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryRelatedEntryJoinReplicate_cerejDestination_cerejProcessed_cerejPk` ON `${TABLE_NAME}` (`cerejDestination`, `cerejProcessed`, `cerejPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "ContentCategorySchemaTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ccsFk` INTEGER NOT NULL, `ccsVersionId` INTEGER NOT NULL, `ccsDestination` INTEGER NOT NULL, `ccsProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`ccsFk`, `ccsDestination`))",
+        "tableName": "ContentCategorySchemaReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ccsPk` INTEGER NOT NULL, `ccsVersionId` INTEGER NOT NULL, `ccsDestination` INTEGER NOT NULL, `ccsProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`ccsPk`, `ccsDestination`))",
         "fields": [
           {
-            "fieldPath": "ccsFk",
-            "columnName": "ccsFk",
+            "fieldPath": "ccsPk",
+            "columnName": "ccsPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7002,33 +7002,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "ccsFk",
+            "ccsPk",
             "ccsDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_ContentCategorySchemaTracker_ccsDestination_ccsProcessed_ccsFk",
+            "name": "index_ContentCategorySchemaReplicate_ccsDestination_ccsProcessed_ccsPk",
             "unique": false,
             "columnNames": [
               "ccsDestination",
               "ccsProcessed",
-              "ccsFk"
+              "ccsPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentCategorySchemaTracker_ccsDestination_ccsProcessed_ccsFk` ON `${TABLE_NAME}` (`ccsDestination`, `ccsProcessed`, `ccsFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentCategorySchemaReplicate_ccsDestination_ccsProcessed_ccsPk` ON `${TABLE_NAME}` (`ccsDestination`, `ccsProcessed`, `ccsPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "ContentCategoryTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ccFk` INTEGER NOT NULL, `ccVersionId` INTEGER NOT NULL, `ccDestination` INTEGER NOT NULL, `ccProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`ccFk`, `ccDestination`))",
+        "tableName": "ContentCategoryReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ccPk` INTEGER NOT NULL, `ccVersionId` INTEGER NOT NULL, `ccDestination` INTEGER NOT NULL, `ccProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`ccPk`, `ccDestination`))",
         "fields": [
           {
-            "fieldPath": "ccFk",
-            "columnName": "ccFk",
+            "fieldPath": "ccPk",
+            "columnName": "ccPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7054,33 +7054,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "ccFk",
+            "ccPk",
             "ccDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_ContentCategoryTracker_ccDestination_ccProcessed_ccFk",
+            "name": "index_ContentCategoryReplicate_ccDestination_ccProcessed_ccPk",
             "unique": false,
             "columnNames": [
               "ccDestination",
               "ccProcessed",
-              "ccFk"
+              "ccPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentCategoryTracker_ccDestination_ccProcessed_ccFk` ON `${TABLE_NAME}` (`ccDestination`, `ccProcessed`, `ccFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentCategoryReplicate_ccDestination_ccProcessed_ccPk` ON `${TABLE_NAME}` (`ccDestination`, `ccProcessed`, `ccPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "LanguageTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`languageFk` INTEGER NOT NULL, `languageVersionId` INTEGER NOT NULL, `languageDestination` INTEGER NOT NULL, `languageProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`languageFk`, `languageDestination`))",
+        "tableName": "LanguageReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`languagePk` INTEGER NOT NULL, `languageVersionId` INTEGER NOT NULL, `languageDestination` INTEGER NOT NULL, `languageProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`languagePk`, `languageDestination`))",
         "fields": [
           {
-            "fieldPath": "languageFk",
-            "columnName": "languageFk",
+            "fieldPath": "languagePk",
+            "columnName": "languagePk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7106,33 +7106,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "languageFk",
+            "languagePk",
             "languageDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_LanguageTracker_languageDestination_languageProcessed_languageFk",
+            "name": "index_LanguageReplicate_languageDestination_languageProcessed_languagePk",
             "unique": false,
             "columnNames": [
               "languageDestination",
               "languageProcessed",
-              "languageFk"
+              "languagePk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_LanguageTracker_languageDestination_languageProcessed_languageFk` ON `${TABLE_NAME}` (`languageDestination`, `languageProcessed`, `languageFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_LanguageReplicate_languageDestination_languageProcessed_languagePk` ON `${TABLE_NAME}` (`languageDestination`, `languageProcessed`, `languagePk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "LanguageVariantTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`lvFk` INTEGER NOT NULL, `lvVersionId` INTEGER NOT NULL, `lvDestination` INTEGER NOT NULL, `lvProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`lvFk`, `lvDestination`))",
+        "tableName": "LanguageVariantReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`lvPk` INTEGER NOT NULL, `lvVersionId` INTEGER NOT NULL, `lvDestination` INTEGER NOT NULL, `lvProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`lvPk`, `lvDestination`))",
         "fields": [
           {
-            "fieldPath": "lvFk",
-            "columnName": "lvFk",
+            "fieldPath": "lvPk",
+            "columnName": "lvPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7158,33 +7158,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "lvFk",
+            "lvPk",
             "lvDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_LanguageVariantTracker_lvDestination_lvProcessed_lvFk",
+            "name": "index_LanguageVariantReplicate_lvDestination_lvProcessed_lvPk",
             "unique": false,
             "columnNames": [
               "lvDestination",
               "lvProcessed",
-              "lvFk"
+              "lvPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_LanguageVariantTracker_lvDestination_lvProcessed_lvFk` ON `${TABLE_NAME}` (`lvDestination`, `lvProcessed`, `lvFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_LanguageVariantReplicate_lvDestination_lvProcessed_lvPk` ON `${TABLE_NAME}` (`lvDestination`, `lvProcessed`, `lvPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "RoleTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`roleFk` INTEGER NOT NULL, `roleVersionId` INTEGER NOT NULL, `roleDestination` INTEGER NOT NULL, `roleProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`roleFk`, `roleDestination`))",
+        "tableName": "RoleReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rolePk` INTEGER NOT NULL, `roleVersionId` INTEGER NOT NULL, `roleDestination` INTEGER NOT NULL, `roleProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`rolePk`, `roleDestination`))",
         "fields": [
           {
-            "fieldPath": "roleFk",
-            "columnName": "roleFk",
+            "fieldPath": "rolePk",
+            "columnName": "rolePk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7210,33 +7210,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "roleFk",
+            "rolePk",
             "roleDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_RoleTracker_roleDestination_roleProcessed_roleFk",
+            "name": "index_RoleReplicate_roleDestination_roleProcessed_rolePk",
             "unique": false,
             "columnNames": [
               "roleDestination",
               "roleProcessed",
-              "roleFk"
+              "rolePk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_RoleTracker_roleDestination_roleProcessed_roleFk` ON `${TABLE_NAME}` (`roleDestination`, `roleProcessed`, `roleFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_RoleReplicate_roleDestination_roleProcessed_rolePk` ON `${TABLE_NAME}` (`roleDestination`, `roleProcessed`, `rolePk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "PersonGroupTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pgFk` INTEGER NOT NULL, `pgVersionId` INTEGER NOT NULL, `pgDestination` INTEGER NOT NULL, `pgProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`pgFk`, `pgDestination`))",
+        "tableName": "PersonGroupReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pgPk` INTEGER NOT NULL, `pgVersionId` INTEGER NOT NULL, `pgDestination` INTEGER NOT NULL, `pgProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`pgPk`, `pgDestination`))",
         "fields": [
           {
-            "fieldPath": "pgFk",
-            "columnName": "pgFk",
+            "fieldPath": "pgPk",
+            "columnName": "pgPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7262,33 +7262,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "pgFk",
+            "pgPk",
             "pgDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_PersonGroupTracker_pgDestination_pgProcessed_pgFk",
+            "name": "index_PersonGroupReplicate_pgDestination_pgProcessed_pgPk",
             "unique": false,
             "columnNames": [
               "pgDestination",
               "pgProcessed",
-              "pgFk"
+              "pgPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonGroupTracker_pgDestination_pgProcessed_pgFk` ON `${TABLE_NAME}` (`pgDestination`, `pgProcessed`, `pgFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonGroupReplicate_pgDestination_pgProcessed_pgPk` ON `${TABLE_NAME}` (`pgDestination`, `pgProcessed`, `pgPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "PersonGroupMemberTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pgmFk` INTEGER NOT NULL, `pgmVersionId` INTEGER NOT NULL, `pgmDestination` INTEGER NOT NULL, `pgmProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`pgmFk`, `pgmDestination`))",
+        "tableName": "PersonGroupMemberReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pgmPk` INTEGER NOT NULL, `pgmVersionId` INTEGER NOT NULL, `pgmDestination` INTEGER NOT NULL, `pgmProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`pgmPk`, `pgmDestination`))",
         "fields": [
           {
-            "fieldPath": "pgmFk",
-            "columnName": "pgmFk",
+            "fieldPath": "pgmPk",
+            "columnName": "pgmPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7314,33 +7314,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "pgmFk",
+            "pgmPk",
             "pgmDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_PersonGroupMemberTracker_pgmDestination_pgmProcessed_pgmFk",
+            "name": "index_PersonGroupMemberReplicate_pgmDestination_pgmProcessed_pgmPk",
             "unique": false,
             "columnNames": [
               "pgmDestination",
               "pgmProcessed",
-              "pgmFk"
+              "pgmPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonGroupMemberTracker_pgmDestination_pgmProcessed_pgmFk` ON `${TABLE_NAME}` (`pgmDestination`, `pgmProcessed`, `pgmFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonGroupMemberReplicate_pgmDestination_pgmProcessed_pgmPk` ON `${TABLE_NAME}` (`pgmDestination`, `pgmProcessed`, `pgmPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "PersonPictureTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ppFk` INTEGER NOT NULL, `ppVersionId` INTEGER NOT NULL, `ppDestination` INTEGER NOT NULL, `ppProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`ppFk`, `ppDestination`))",
+        "tableName": "PersonPictureReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ppPk` INTEGER NOT NULL, `ppVersionId` INTEGER NOT NULL, `ppDestination` INTEGER NOT NULL, `ppProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`ppPk`, `ppDestination`))",
         "fields": [
           {
-            "fieldPath": "ppFk",
-            "columnName": "ppFk",
+            "fieldPath": "ppPk",
+            "columnName": "ppPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7366,33 +7366,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "ppFk",
+            "ppPk",
             "ppDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_PersonPictureTracker_ppDestination_ppProcessed_ppFk",
+            "name": "index_PersonPictureReplicate_ppDestination_ppProcessed_ppPk",
             "unique": false,
             "columnNames": [
               "ppDestination",
               "ppProcessed",
-              "ppFk"
+              "ppPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonPictureTracker_ppDestination_ppProcessed_ppFk` ON `${TABLE_NAME}` (`ppDestination`, `ppProcessed`, `ppFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonPictureReplicate_ppDestination_ppProcessed_ppPk` ON `${TABLE_NAME}` (`ppDestination`, `ppProcessed`, `ppPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "ContainerTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`containerFk` INTEGER NOT NULL, `containerVersionId` INTEGER NOT NULL, `containerDestination` INTEGER NOT NULL, `containerProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`containerFk`, `containerDestination`))",
+        "tableName": "ContainerReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`containerPk` INTEGER NOT NULL, `containerVersionId` INTEGER NOT NULL, `containerDestination` INTEGER NOT NULL, `containerProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`containerPk`, `containerDestination`))",
         "fields": [
           {
-            "fieldPath": "containerFk",
-            "columnName": "containerFk",
+            "fieldPath": "containerPk",
+            "columnName": "containerPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7418,33 +7418,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "containerFk",
+            "containerPk",
             "containerDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_ContainerTracker_containerDestination_containerProcessed_containerFk",
+            "name": "index_ContainerReplicate_containerDestination_containerProcessed_containerPk",
             "unique": false,
             "columnNames": [
               "containerDestination",
               "containerProcessed",
-              "containerFk"
+              "containerPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContainerTracker_containerDestination_containerProcessed_containerFk` ON `${TABLE_NAME}` (`containerDestination`, `containerProcessed`, `containerFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContainerReplicate_containerDestination_containerProcessed_containerPk` ON `${TABLE_NAME}` (`containerDestination`, `containerProcessed`, `containerPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "VerbEntityTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`veFk` INTEGER NOT NULL, `veVersionId` INTEGER NOT NULL, `veDestination` INTEGER NOT NULL, `veProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`veFk`, `veDestination`))",
+        "tableName": "VerbEntityReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`vePk` INTEGER NOT NULL, `veVersionId` INTEGER NOT NULL, `veDestination` INTEGER NOT NULL, `veProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`vePk`, `veDestination`))",
         "fields": [
           {
-            "fieldPath": "veFk",
-            "columnName": "veFk",
+            "fieldPath": "vePk",
+            "columnName": "vePk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7470,33 +7470,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "veFk",
+            "vePk",
             "veDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_VerbEntityTracker_veDestination_veProcessed_veFk",
+            "name": "index_VerbEntityReplicate_veDestination_veProcessed_vePk",
             "unique": false,
             "columnNames": [
               "veDestination",
               "veProcessed",
-              "veFk"
+              "vePk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_VerbEntityTracker_veDestination_veProcessed_veFk` ON `${TABLE_NAME}` (`veDestination`, `veProcessed`, `veFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_VerbEntityReplicate_veDestination_veProcessed_vePk` ON `${TABLE_NAME}` (`veDestination`, `veProcessed`, `vePk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "XObjectEntityTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`xoeFk` INTEGER NOT NULL, `xoeVersionId` INTEGER NOT NULL, `xoeDestination` INTEGER NOT NULL, `xoeProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`xoeFk`, `xoeDestination`))",
+        "tableName": "XObjectEntityReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`xoePk` INTEGER NOT NULL, `xoeVersionId` INTEGER NOT NULL, `xoeDestination` INTEGER NOT NULL, `xoeProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`xoePk`, `xoeDestination`))",
         "fields": [
           {
-            "fieldPath": "xoeFk",
-            "columnName": "xoeFk",
+            "fieldPath": "xoePk",
+            "columnName": "xoePk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7522,33 +7522,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "xoeFk",
+            "xoePk",
             "xoeDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_XObjectEntityTracker_xoeDestination_xoeProcessed_xoeFk",
+            "name": "index_XObjectEntityReplicate_xoeDestination_xoeProcessed_xoePk",
             "unique": false,
             "columnNames": [
               "xoeDestination",
               "xoeProcessed",
-              "xoeFk"
+              "xoePk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_XObjectEntityTracker_xoeDestination_xoeProcessed_xoeFk` ON `${TABLE_NAME}` (`xoeDestination`, `xoeProcessed`, `xoeFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_XObjectEntityReplicate_xoeDestination_xoeProcessed_xoePk` ON `${TABLE_NAME}` (`xoeDestination`, `xoeProcessed`, `xoePk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "StatementEntityTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`seFk` INTEGER NOT NULL, `seVersionId` INTEGER NOT NULL, `seDestination` INTEGER NOT NULL, `seProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`seFk`, `seDestination`))",
+        "tableName": "StatementEntityReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sePk` INTEGER NOT NULL, `seVersionId` INTEGER NOT NULL, `seDestination` INTEGER NOT NULL, `seProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`sePk`, `seDestination`))",
         "fields": [
           {
-            "fieldPath": "seFk",
-            "columnName": "seFk",
+            "fieldPath": "sePk",
+            "columnName": "sePk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7574,33 +7574,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "seFk",
+            "sePk",
             "seDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_StatementEntityTracker_seDestination_seProcessed_seFk",
+            "name": "index_StatementEntityReplicate_seDestination_seProcessed_sePk",
             "unique": false,
             "columnNames": [
               "seDestination",
               "seProcessed",
-              "seFk"
+              "sePk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_StatementEntityTracker_seDestination_seProcessed_seFk` ON `${TABLE_NAME}` (`seDestination`, `seProcessed`, `seFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_StatementEntityReplicate_seDestination_seProcessed_sePk` ON `${TABLE_NAME}` (`seDestination`, `seProcessed`, `sePk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "ContextXObjectStatementJoinTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cxosjFk` INTEGER NOT NULL, `cxosjVersionId` INTEGER NOT NULL, `cxosjDestination` INTEGER NOT NULL, `cxosjProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`cxosjFk`, `cxosjDestination`))",
+        "tableName": "ContextXObjectStatementJoinReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cxosjPk` INTEGER NOT NULL, `cxosjVersionId` INTEGER NOT NULL, `cxosjDestination` INTEGER NOT NULL, `cxosjProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`cxosjPk`, `cxosjDestination`))",
         "fields": [
           {
-            "fieldPath": "cxosjFk",
-            "columnName": "cxosjFk",
+            "fieldPath": "cxosjPk",
+            "columnName": "cxosjPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7626,33 +7626,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "cxosjFk",
+            "cxosjPk",
             "cxosjDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_ContextXObjectStatementJoinTracker_cxosjDestination_cxosjProcessed_cxosjFk",
+            "name": "index_ContextXObjectStatementJoinReplicate_cxosjDestination_cxosjProcessed_cxosjPk",
             "unique": false,
             "columnNames": [
               "cxosjDestination",
               "cxosjProcessed",
-              "cxosjFk"
+              "cxosjPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContextXObjectStatementJoinTracker_cxosjDestination_cxosjProcessed_cxosjFk` ON `${TABLE_NAME}` (`cxosjDestination`, `cxosjProcessed`, `cxosjFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContextXObjectStatementJoinReplicate_cxosjDestination_cxosjProcessed_cxosjPk` ON `${TABLE_NAME}` (`cxosjDestination`, `cxosjProcessed`, `cxosjPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "AgentEntityTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aeFk` INTEGER NOT NULL, `aeVersionId` INTEGER NOT NULL, `aeDestination` INTEGER NOT NULL, `aeProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`aeFk`, `aeDestination`))",
+        "tableName": "AgentEntityReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aePk` INTEGER NOT NULL, `aeVersionId` INTEGER NOT NULL, `aeDestination` INTEGER NOT NULL, `aeProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`aePk`, `aeDestination`))",
         "fields": [
           {
-            "fieldPath": "aeFk",
-            "columnName": "aeFk",
+            "fieldPath": "aePk",
+            "columnName": "aePk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7678,33 +7678,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "aeFk",
+            "aePk",
             "aeDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_AgentEntityTracker_aeDestination_aeProcessed_aeFk",
+            "name": "index_AgentEntityReplicate_aeDestination_aeProcessed_aePk",
             "unique": false,
             "columnNames": [
               "aeDestination",
               "aeProcessed",
-              "aeFk"
+              "aePk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_AgentEntityTracker_aeDestination_aeProcessed_aeFk` ON `${TABLE_NAME}` (`aeDestination`, `aeProcessed`, `aeFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_AgentEntityReplicate_aeDestination_aeProcessed_aePk` ON `${TABLE_NAME}` (`aeDestination`, `aeProcessed`, `aePk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "StateEntityTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`seFk` INTEGER NOT NULL, `seVersionId` INTEGER NOT NULL, `seDestination` INTEGER NOT NULL, `seProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`seFk`, `seDestination`))",
+        "tableName": "StateEntityReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sePk` INTEGER NOT NULL, `seVersionId` INTEGER NOT NULL, `seDestination` INTEGER NOT NULL, `seProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`sePk`, `seDestination`))",
         "fields": [
           {
-            "fieldPath": "seFk",
-            "columnName": "seFk",
+            "fieldPath": "sePk",
+            "columnName": "sePk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7730,33 +7730,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "seFk",
+            "sePk",
             "seDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_StateEntityTracker_seDestination_seProcessed_seFk",
+            "name": "index_StateEntityReplicate_seDestination_seProcessed_sePk",
             "unique": false,
             "columnNames": [
               "seDestination",
               "seProcessed",
-              "seFk"
+              "sePk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_StateEntityTracker_seDestination_seProcessed_seFk` ON `${TABLE_NAME}` (`seDestination`, `seProcessed`, `seFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_StateEntityReplicate_seDestination_seProcessed_sePk` ON `${TABLE_NAME}` (`seDestination`, `seProcessed`, `sePk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "StateContentEntityTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sceFk` INTEGER NOT NULL, `sceVersionId` INTEGER NOT NULL, `sceDestination` INTEGER NOT NULL, `sceProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`sceFk`, `sceDestination`))",
+        "tableName": "StateContentEntityReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scePk` INTEGER NOT NULL, `sceVersionId` INTEGER NOT NULL, `sceDestination` INTEGER NOT NULL, `sceProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`scePk`, `sceDestination`))",
         "fields": [
           {
-            "fieldPath": "sceFk",
-            "columnName": "sceFk",
+            "fieldPath": "scePk",
+            "columnName": "scePk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7782,33 +7782,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "sceFk",
+            "scePk",
             "sceDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_StateContentEntityTracker_sceDestination_sceProcessed_sceFk",
+            "name": "index_StateContentEntityReplicate_sceDestination_sceProcessed_scePk",
             "unique": false,
             "columnNames": [
               "sceDestination",
               "sceProcessed",
-              "sceFk"
+              "scePk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_StateContentEntityTracker_sceDestination_sceProcessed_sceFk` ON `${TABLE_NAME}` (`sceDestination`, `sceProcessed`, `sceFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_StateContentEntityReplicate_sceDestination_sceProcessed_scePk` ON `${TABLE_NAME}` (`sceDestination`, `sceProcessed`, `scePk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "XLangMapEntryTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`xlmeFk` INTEGER NOT NULL, `xlmeVersionId` INTEGER NOT NULL, `xlmeDestination` INTEGER NOT NULL, `xlmeProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`xlmeFk`, `xlmeDestination`))",
+        "tableName": "XLangMapEntryReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`xlmePk` INTEGER NOT NULL, `xlmeVersionId` INTEGER NOT NULL, `xlmeDestination` INTEGER NOT NULL, `xlmeProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`xlmePk`, `xlmeDestination`))",
         "fields": [
           {
-            "fieldPath": "xlmeFk",
-            "columnName": "xlmeFk",
+            "fieldPath": "xlmePk",
+            "columnName": "xlmePk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7834,33 +7834,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "xlmeFk",
+            "xlmePk",
             "xlmeDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_XLangMapEntryTracker_xlmeDestination_xlmeProcessed_xlmeFk",
+            "name": "index_XLangMapEntryReplicate_xlmeDestination_xlmeProcessed_xlmePk",
             "unique": false,
             "columnNames": [
               "xlmeDestination",
               "xlmeProcessed",
-              "xlmeFk"
+              "xlmePk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_XLangMapEntryTracker_xlmeDestination_xlmeProcessed_xlmeFk` ON `${TABLE_NAME}` (`xlmeDestination`, `xlmeProcessed`, `xlmeFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_XLangMapEntryReplicate_xlmeDestination_xlmeProcessed_xlmePk` ON `${TABLE_NAME}` (`xlmeDestination`, `xlmeProcessed`, `xlmePk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "SchoolTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolFk` INTEGER NOT NULL, `schoolVersionId` INTEGER NOT NULL, `schoolDestination` INTEGER NOT NULL, `schoolProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`schoolFk`, `schoolDestination`))",
+        "tableName": "SchoolReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolPk` INTEGER NOT NULL, `schoolVersionId` INTEGER NOT NULL, `schoolDestination` INTEGER NOT NULL, `schoolProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`schoolPk`, `schoolDestination`))",
         "fields": [
           {
-            "fieldPath": "schoolFk",
-            "columnName": "schoolFk",
+            "fieldPath": "schoolPk",
+            "columnName": "schoolPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7886,33 +7886,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "schoolFk",
+            "schoolPk",
             "schoolDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_SchoolTracker_schoolDestination_schoolProcessed_schoolFk",
+            "name": "index_SchoolReplicate_schoolDestination_schoolProcessed_schoolPk",
             "unique": false,
             "columnNames": [
               "schoolDestination",
               "schoolProcessed",
-              "schoolFk"
+              "schoolPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_SchoolTracker_schoolDestination_schoolProcessed_schoolFk` ON `${TABLE_NAME}` (`schoolDestination`, `schoolProcessed`, `schoolFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_SchoolReplicate_schoolDestination_schoolProcessed_schoolPk` ON `${TABLE_NAME}` (`schoolDestination`, `schoolProcessed`, `schoolPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "SchoolMemberTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`smFk` INTEGER NOT NULL, `smVersionId` INTEGER NOT NULL, `smDestination` INTEGER NOT NULL, `smProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`smFk`, `smDestination`))",
+        "tableName": "SchoolMemberReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`smPk` INTEGER NOT NULL, `smVersionId` INTEGER NOT NULL, `smDestination` INTEGER NOT NULL, `smProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`smPk`, `smDestination`))",
         "fields": [
           {
-            "fieldPath": "smFk",
-            "columnName": "smFk",
+            "fieldPath": "smPk",
+            "columnName": "smPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7938,33 +7938,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "smFk",
+            "smPk",
             "smDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_SchoolMemberTracker_smDestination_smProcessed_smFk",
+            "name": "index_SchoolMemberReplicate_smDestination_smProcessed_smPk",
             "unique": false,
             "columnNames": [
               "smDestination",
               "smProcessed",
-              "smFk"
+              "smPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_SchoolMemberTracker_smDestination_smProcessed_smFk` ON `${TABLE_NAME}` (`smDestination`, `smProcessed`, `smFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_SchoolMemberReplicate_smDestination_smProcessed_smPk` ON `${TABLE_NAME}` (`smDestination`, `smProcessed`, `smPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "CommentsTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`commentsFk` INTEGER NOT NULL, `commentsVersionId` INTEGER NOT NULL, `commentsDestination` INTEGER NOT NULL, `commentsProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`commentsFk`, `commentsDestination`))",
+        "tableName": "CommentsReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`commentsPk` INTEGER NOT NULL, `commentsVersionId` INTEGER NOT NULL, `commentsDestination` INTEGER NOT NULL, `commentsProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`commentsPk`, `commentsDestination`))",
         "fields": [
           {
-            "fieldPath": "commentsFk",
-            "columnName": "commentsFk",
+            "fieldPath": "commentsPk",
+            "columnName": "commentsPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7990,33 +7990,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "commentsFk",
+            "commentsPk",
             "commentsDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_CommentsTracker_commentsDestination_commentsProcessed_commentsFk",
+            "name": "index_CommentsReplicate_commentsDestination_commentsProcessed_commentsPk",
             "unique": false,
             "columnNames": [
               "commentsDestination",
               "commentsProcessed",
-              "commentsFk"
+              "commentsPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_CommentsTracker_commentsDestination_commentsProcessed_commentsFk` ON `${TABLE_NAME}` (`commentsDestination`, `commentsProcessed`, `commentsFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CommentsReplicate_commentsDestination_commentsProcessed_commentsPk` ON `${TABLE_NAME}` (`commentsDestination`, `commentsProcessed`, `commentsPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "ReportTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reportFk` INTEGER NOT NULL, `reportVersionId` INTEGER NOT NULL, `reportDestination` INTEGER NOT NULL, `reportProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`reportFk`, `reportDestination`))",
+        "tableName": "ReportReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reportPk` INTEGER NOT NULL, `reportVersionId` INTEGER NOT NULL, `reportDestination` INTEGER NOT NULL, `reportProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`reportPk`, `reportDestination`))",
         "fields": [
           {
-            "fieldPath": "reportFk",
-            "columnName": "reportFk",
+            "fieldPath": "reportPk",
+            "columnName": "reportPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -8042,33 +8042,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "reportFk",
+            "reportPk",
             "reportDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_ReportTracker_reportDestination_reportProcessed_reportFk",
+            "name": "index_ReportReplicate_reportDestination_reportProcessed_reportPk",
             "unique": false,
             "columnNames": [
               "reportDestination",
               "reportProcessed",
-              "reportFk"
+              "reportPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ReportTracker_reportDestination_reportProcessed_reportFk` ON `${TABLE_NAME}` (`reportDestination`, `reportProcessed`, `reportFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ReportReplicate_reportDestination_reportProcessed_reportPk` ON `${TABLE_NAME}` (`reportDestination`, `reportProcessed`, `reportPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "SiteTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`siteFk` INTEGER NOT NULL, `siteVersionId` INTEGER NOT NULL, `siteDestination` INTEGER NOT NULL, `siteProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`siteFk`, `siteDestination`))",
+        "tableName": "SiteReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sitePk` INTEGER NOT NULL, `siteVersionId` INTEGER NOT NULL, `siteDestination` INTEGER NOT NULL, `siteProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`sitePk`, `siteDestination`))",
         "fields": [
           {
-            "fieldPath": "siteFk",
-            "columnName": "siteFk",
+            "fieldPath": "sitePk",
+            "columnName": "sitePk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -8094,33 +8094,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "siteFk",
+            "sitePk",
             "siteDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_SiteTracker_siteDestination_siteProcessed_siteFk",
+            "name": "index_SiteReplicate_siteDestination_siteProcessed_sitePk",
             "unique": false,
             "columnNames": [
               "siteDestination",
               "siteProcessed",
-              "siteFk"
+              "sitePk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_SiteTracker_siteDestination_siteProcessed_siteFk` ON `${TABLE_NAME}` (`siteDestination`, `siteProcessed`, `siteFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_SiteReplicate_siteDestination_siteProcessed_sitePk` ON `${TABLE_NAME}` (`siteDestination`, `siteProcessed`, `sitePk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "LearnerGroupTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`lgFk` INTEGER NOT NULL, `lgVersionId` INTEGER NOT NULL, `lgDestination` INTEGER NOT NULL, `lgProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`lgFk`, `lgDestination`))",
+        "tableName": "LearnerGroupReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`lgPk` INTEGER NOT NULL, `lgVersionId` INTEGER NOT NULL, `lgDestination` INTEGER NOT NULL, `lgProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`lgPk`, `lgDestination`))",
         "fields": [
           {
-            "fieldPath": "lgFk",
-            "columnName": "lgFk",
+            "fieldPath": "lgPk",
+            "columnName": "lgPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -8146,33 +8146,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "lgFk",
+            "lgPk",
             "lgDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_LearnerGroupTracker_lgDestination_lgProcessed_lgFk",
+            "name": "index_LearnerGroupReplicate_lgDestination_lgProcessed_lgPk",
             "unique": false,
             "columnNames": [
               "lgDestination",
               "lgProcessed",
-              "lgFk"
+              "lgPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_LearnerGroupTracker_lgDestination_lgProcessed_lgFk` ON `${TABLE_NAME}` (`lgDestination`, `lgProcessed`, `lgFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_LearnerGroupReplicate_lgDestination_lgProcessed_lgPk` ON `${TABLE_NAME}` (`lgDestination`, `lgProcessed`, `lgPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "LearnerGroupMemberTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`lgmFk` INTEGER NOT NULL, `lgmVersionId` INTEGER NOT NULL, `lgmDestination` INTEGER NOT NULL, `lgmProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`lgmFk`, `lgmDestination`))",
+        "tableName": "LearnerGroupMemberReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`lgmPk` INTEGER NOT NULL, `lgmVersionId` INTEGER NOT NULL, `lgmDestination` INTEGER NOT NULL, `lgmProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`lgmPk`, `lgmDestination`))",
         "fields": [
           {
-            "fieldPath": "lgmFk",
-            "columnName": "lgmFk",
+            "fieldPath": "lgmPk",
+            "columnName": "lgmPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -8198,33 +8198,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "lgmFk",
+            "lgmPk",
             "lgmDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_LearnerGroupMemberTracker_lgmDestination_lgmProcessed_lgmFk",
+            "name": "index_LearnerGroupMemberReplicate_lgmDestination_lgmProcessed_lgmPk",
             "unique": false,
             "columnNames": [
               "lgmDestination",
               "lgmProcessed",
-              "lgmFk"
+              "lgmPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_LearnerGroupMemberTracker_lgmDestination_lgmProcessed_lgmFk` ON `${TABLE_NAME}` (`lgmDestination`, `lgmProcessed`, `lgmFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_LearnerGroupMemberReplicate_lgmDestination_lgmProcessed_lgmPk` ON `${TABLE_NAME}` (`lgmDestination`, `lgmProcessed`, `lgmPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "GroupLearningSessionTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`glsFk` INTEGER NOT NULL, `glsVersionId` INTEGER NOT NULL, `glsDestination` INTEGER NOT NULL, `glsProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`glsFk`, `glsDestination`))",
+        "tableName": "GroupLearningSessionReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`glsPk` INTEGER NOT NULL, `glsVersionId` INTEGER NOT NULL, `glsDestination` INTEGER NOT NULL, `glsProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`glsPk`, `glsDestination`))",
         "fields": [
           {
-            "fieldPath": "glsFk",
-            "columnName": "glsFk",
+            "fieldPath": "glsPk",
+            "columnName": "glsPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -8250,33 +8250,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "glsFk",
+            "glsPk",
             "glsDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_GroupLearningSessionTracker_glsDestination_glsProcessed_glsFk",
+            "name": "index_GroupLearningSessionReplicate_glsDestination_glsProcessed_glsPk",
             "unique": false,
             "columnNames": [
               "glsDestination",
               "glsProcessed",
-              "glsFk"
+              "glsPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_GroupLearningSessionTracker_glsDestination_glsProcessed_glsFk` ON `${TABLE_NAME}` (`glsDestination`, `glsProcessed`, `glsFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_GroupLearningSessionReplicate_glsDestination_glsProcessed_glsPk` ON `${TABLE_NAME}` (`glsDestination`, `glsProcessed`, `glsPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "SiteTermsTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`stFk` INTEGER NOT NULL, `stVersionId` INTEGER NOT NULL, `stDestination` INTEGER NOT NULL, `stProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`stFk`, `stDestination`))",
+        "tableName": "SiteTermsReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`stPk` INTEGER NOT NULL, `stVersionId` INTEGER NOT NULL, `stDestination` INTEGER NOT NULL, `stProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`stPk`, `stDestination`))",
         "fields": [
           {
-            "fieldPath": "stFk",
-            "columnName": "stFk",
+            "fieldPath": "stPk",
+            "columnName": "stPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -8302,33 +8302,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "stFk",
+            "stPk",
             "stDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_SiteTermsTracker_stDestination_stProcessed_stFk",
+            "name": "index_SiteTermsReplicate_stDestination_stProcessed_stPk",
             "unique": false,
             "columnNames": [
               "stDestination",
               "stProcessed",
-              "stFk"
+              "stPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_SiteTermsTracker_stDestination_stProcessed_stFk` ON `${TABLE_NAME}` (`stDestination`, `stProcessed`, `stFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_SiteTermsReplicate_stDestination_stProcessed_stPk` ON `${TABLE_NAME}` (`stDestination`, `stProcessed`, `stPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "ClazzContentJoinTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ccjFk` INTEGER NOT NULL, `ccjVersionId` INTEGER NOT NULL, `ccjDestination` INTEGER NOT NULL, `ccjProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`ccjFk`, `ccjDestination`))",
+        "tableName": "ClazzContentJoinReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ccjPk` INTEGER NOT NULL, `ccjVersionId` INTEGER NOT NULL, `ccjDestination` INTEGER NOT NULL, `ccjProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`ccjPk`, `ccjDestination`))",
         "fields": [
           {
-            "fieldPath": "ccjFk",
-            "columnName": "ccjFk",
+            "fieldPath": "ccjPk",
+            "columnName": "ccjPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -8354,33 +8354,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "ccjFk",
+            "ccjPk",
             "ccjDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_ClazzContentJoinTracker_ccjDestination_ccjProcessed_ccjFk",
+            "name": "index_ClazzContentJoinReplicate_ccjDestination_ccjProcessed_ccjPk",
             "unique": false,
             "columnNames": [
               "ccjDestination",
               "ccjProcessed",
-              "ccjFk"
+              "ccjPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzContentJoinTracker_ccjDestination_ccjProcessed_ccjFk` ON `${TABLE_NAME}` (`ccjDestination`, `ccjProcessed`, `ccjFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzContentJoinReplicate_ccjDestination_ccjProcessed_ccjPk` ON `${TABLE_NAME}` (`ccjDestination`, `ccjProcessed`, `ccjPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "PersonParentJoinTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ppjFk` INTEGER NOT NULL, `ppjVersionId` INTEGER NOT NULL, `ppjDestination` INTEGER NOT NULL, `ppjProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`ppjFk`, `ppjDestination`))",
+        "tableName": "PersonParentJoinReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ppjPk` INTEGER NOT NULL, `ppjVersionId` INTEGER NOT NULL, `ppjDestination` INTEGER NOT NULL, `ppjProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`ppjPk`, `ppjDestination`))",
         "fields": [
           {
-            "fieldPath": "ppjFk",
-            "columnName": "ppjFk",
+            "fieldPath": "ppjPk",
+            "columnName": "ppjPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -8406,33 +8406,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "ppjFk",
+            "ppjPk",
             "ppjDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_PersonParentJoinTracker_ppjDestination_ppjProcessed_ppjFk",
+            "name": "index_PersonParentJoinReplicate_ppjDestination_ppjProcessed_ppjPk",
             "unique": false,
             "columnNames": [
               "ppjDestination",
               "ppjProcessed",
-              "ppjFk"
+              "ppjPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonParentJoinTracker_ppjDestination_ppjProcessed_ppjFk` ON `${TABLE_NAME}` (`ppjDestination`, `ppjProcessed`, `ppjFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonParentJoinReplicate_ppjDestination_ppjProcessed_ppjPk` ON `${TABLE_NAME}` (`ppjDestination`, `ppjProcessed`, `ppjPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "ScopedGrantTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sgFk` INTEGER NOT NULL, `sgVersionId` INTEGER NOT NULL, `sgDestination` INTEGER NOT NULL, `sgProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`sgFk`, `sgDestination`))",
+        "tableName": "ScopedGrantReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sgPk` INTEGER NOT NULL, `sgVersionId` INTEGER NOT NULL, `sgDestination` INTEGER NOT NULL, `sgProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`sgPk`, `sgDestination`))",
         "fields": [
           {
-            "fieldPath": "sgFk",
-            "columnName": "sgFk",
+            "fieldPath": "sgPk",
+            "columnName": "sgPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -8458,33 +8458,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "sgFk",
+            "sgPk",
             "sgDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_ScopedGrantTracker_sgDestination_sgProcessed_sgFk",
+            "name": "index_ScopedGrantReplicate_sgDestination_sgProcessed_sgPk",
             "unique": false,
             "columnNames": [
               "sgDestination",
               "sgProcessed",
-              "sgFk"
+              "sgPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ScopedGrantTracker_sgDestination_sgProcessed_sgFk` ON `${TABLE_NAME}` (`sgDestination`, `sgProcessed`, `sgFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ScopedGrantReplicate_sgDestination_sgProcessed_sgPk` ON `${TABLE_NAME}` (`sgDestination`, `sgProcessed`, `sgPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "ErrorReportTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`erFk` INTEGER NOT NULL, `erVersionId` INTEGER NOT NULL, `erDestination` INTEGER NOT NULL, `erProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`erFk`, `erDestination`))",
+        "tableName": "ErrorReportReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`erPk` INTEGER NOT NULL, `erVersionId` INTEGER NOT NULL, `erDestination` INTEGER NOT NULL, `erProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`erPk`, `erDestination`))",
         "fields": [
           {
-            "fieldPath": "erFk",
-            "columnName": "erFk",
+            "fieldPath": "erPk",
+            "columnName": "erPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -8510,33 +8510,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "erFk",
+            "erPk",
             "erDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_ErrorReportTracker_erDestination_erProcessed_erFk",
+            "name": "index_ErrorReportReplicate_erDestination_erProcessed_erPk",
             "unique": false,
             "columnNames": [
               "erDestination",
               "erProcessed",
-              "erFk"
+              "erPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ErrorReportTracker_erDestination_erProcessed_erFk` ON `${TABLE_NAME}` (`erDestination`, `erProcessed`, `erFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ErrorReportReplicate_erDestination_erProcessed_erPk` ON `${TABLE_NAME}` (`erDestination`, `erProcessed`, `erPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "ClazzAssignmentTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`caFk` INTEGER NOT NULL, `caVersionId` INTEGER NOT NULL, `caDestination` INTEGER NOT NULL, `caProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`caFk`, `caDestination`))",
+        "tableName": "ClazzAssignmentReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`caPk` INTEGER NOT NULL, `caVersionId` INTEGER NOT NULL, `caDestination` INTEGER NOT NULL, `caProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`caPk`, `caDestination`))",
         "fields": [
           {
-            "fieldPath": "caFk",
-            "columnName": "caFk",
+            "fieldPath": "caPk",
+            "columnName": "caPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -8562,33 +8562,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "caFk",
+            "caPk",
             "caDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_ClazzAssignmentTracker_caDestination_caProcessed_caFk",
+            "name": "index_ClazzAssignmentReplicate_caDestination_caProcessed_caPk",
             "unique": false,
             "columnNames": [
               "caDestination",
               "caProcessed",
-              "caFk"
+              "caPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzAssignmentTracker_caDestination_caProcessed_caFk` ON `${TABLE_NAME}` (`caDestination`, `caProcessed`, `caFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzAssignmentReplicate_caDestination_caProcessed_caPk` ON `${TABLE_NAME}` (`caDestination`, `caProcessed`, `caPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "ClazzAssignmentContentJoinTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cacjFk` INTEGER NOT NULL, `cacjVersionId` INTEGER NOT NULL, `cacjDestination` INTEGER NOT NULL, `cacjProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`cacjFk`, `cacjDestination`))",
+        "tableName": "ClazzAssignmentContentJoinReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cacjPk` INTEGER NOT NULL, `cacjVersionId` INTEGER NOT NULL, `cacjDestination` INTEGER NOT NULL, `cacjProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`cacjPk`, `cacjDestination`))",
         "fields": [
           {
-            "fieldPath": "cacjFk",
-            "columnName": "cacjFk",
+            "fieldPath": "cacjPk",
+            "columnName": "cacjPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -8614,33 +8614,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "cacjFk",
+            "cacjPk",
             "cacjDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_ClazzAssignmentContentJoinTracker_cacjDestination_cacjProcessed_cacjFk",
+            "name": "index_ClazzAssignmentContentJoinReplicate_cacjDestination_cacjProcessed_cacjPk",
             "unique": false,
             "columnNames": [
               "cacjDestination",
               "cacjProcessed",
-              "cacjFk"
+              "cacjPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzAssignmentContentJoinTracker_cacjDestination_cacjProcessed_cacjFk` ON `${TABLE_NAME}` (`cacjDestination`, `cacjProcessed`, `cacjFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzAssignmentContentJoinReplicate_cacjDestination_cacjProcessed_cacjPk` ON `${TABLE_NAME}` (`cacjDestination`, `cacjProcessed`, `cacjPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "PersonAuth2Tracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`paFk` INTEGER NOT NULL, `paVersionId` INTEGER NOT NULL, `paDestination` INTEGER NOT NULL, `paProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`paFk`, `paDestination`))",
+        "tableName": "PersonAuth2Replicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`paPk` INTEGER NOT NULL, `paVersionId` INTEGER NOT NULL, `paDestination` INTEGER NOT NULL, `paProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`paPk`, `paDestination`))",
         "fields": [
           {
-            "fieldPath": "paFk",
-            "columnName": "paFk",
+            "fieldPath": "paPk",
+            "columnName": "paPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -8666,33 +8666,33 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "paFk",
+            "paPk",
             "paDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_PersonAuth2Tracker_paDestination_paProcessed_paFk",
+            "name": "index_PersonAuth2Replicate_paDestination_paProcessed_paPk",
             "unique": false,
             "columnNames": [
               "paDestination",
               "paProcessed",
-              "paFk"
+              "paPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonAuth2Tracker_paDestination_paProcessed_paFk` ON `${TABLE_NAME}` (`paDestination`, `paProcessed`, `paFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonAuth2Replicate_paDestination_paProcessed_paPk` ON `${TABLE_NAME}` (`paDestination`, `paProcessed`, `paPk`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "UserSessionTracker",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`usFk` INTEGER NOT NULL, `usVersionId` INTEGER NOT NULL, `usDestination` INTEGER NOT NULL, `usProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`usFk`, `usDestination`))",
+        "tableName": "UserSessionReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`usPk` INTEGER NOT NULL, `usVersionId` INTEGER NOT NULL, `usDestination` INTEGER NOT NULL, `usProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`usPk`, `usDestination`))",
         "fields": [
           {
-            "fieldPath": "usFk",
-            "columnName": "usFk",
+            "fieldPath": "usPk",
+            "columnName": "usPk",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -8718,22 +8718,22 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "usFk",
+            "usPk",
             "usDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_UserSessionTracker_usDestination_usProcessed_usFk",
+            "name": "index_UserSessionReplicate_usDestination_usProcessed_usPk",
             "unique": false,
             "columnNames": [
               "usDestination",
               "usProcessed",
-              "usFk"
+              "usPk"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_UserSessionTracker_usDestination_usProcessed_usFk` ON `${TABLE_NAME}` (`usDestination`, `usProcessed`, `usFk`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_UserSessionReplicate_usDestination_usProcessed_usPk` ON `${TABLE_NAME}` (`usDestination`, `usProcessed`, `usPk`)"
           }
         ],
         "foreignKeys": []
@@ -8742,7 +8742,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '171ad4172effc201c237deea57583622')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9c98527cc617380ae2d73f2035fae952')"
     ]
   }
 }
