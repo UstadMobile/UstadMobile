@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.util.UMFileUtil
@@ -62,16 +62,16 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                         return@execute
                     }
 
-                    val data = it.receive<ImportedContentEntryMetaData>()
+                    val data = it.receive<MetadataResult>()
                     view.showProgress = false
 
                     if (arguments.containsKey(ARG_RESULT_DEST_KEY)) {
-                        finishWithResult(safeStringify(di, ListSerializer(ImportedContentEntryMetaData.serializer()), listOf(data)))
+                        finishWithResult(safeStringify(di, ListSerializer(MetadataResult.serializer()), listOf(data)))
                     } else {
                         val args = mutableMapOf<String, String>()
                         args.putEntityAsJson(
                             ARG_IMPORTED_METADATA,
-                            ImportedContentEntryMetaData.serializer(), data)
+                            MetadataResult.serializer(), data)
                         args[ARG_POPUPTO_ON_FINISH] = ContentEntryImportLinkView.VIEW_NAME
                         args.putFromOtherMapIfPresent(arguments, ARG_LEAF)
                         args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)

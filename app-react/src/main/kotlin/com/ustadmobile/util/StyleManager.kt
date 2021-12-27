@@ -168,7 +168,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         }
     }
 
-    val attendance by css {
+    val screenWithChartOnLeft by css {
         marginRight = 0.spacingUnits
         media(theme.breakpoints.up(tabletAndHighEnd)) {
             marginRight = 2.spacingUnits

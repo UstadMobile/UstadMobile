@@ -2,6 +2,7 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.mui.ext.createStyledComponent
 import com.ustadmobile.util.StyleManager
+import kotlinx.css.hyphenize
 import mui.material.FormControl
 import mui.material.FormControlProps
 import react.RBuilder
@@ -13,7 +14,7 @@ enum class FormControlComponent {
     div, fieldSet;
 
     override fun toString(): String {
-        return super.toString().toHyphenCase()
+        return super.toString().hyphenize()
     }
 }
 

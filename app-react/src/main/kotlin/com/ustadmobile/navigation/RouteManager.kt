@@ -12,6 +12,8 @@ object RouteManager {
     val destinationList = listOf(
         UstadDestination("library_books", MessageID.content, ContentEntryList2View.VIEW_NAME_HOME,
             ContentEntryListComponent::class, true),
+        UstadDestination(view = ContentEntryList2View.VIEW_NAME,
+             component = ContentEntryListComponent::class,  showSearch = true),
         UstadDestination("school", MessageID.schools,SchoolListView.VIEW_NAME, SchoolListComponent::class, showSearch = true),
         UstadDestination("people", MessageID.classes,ClazzList2View.VIEW_NAME, ClazzListComponent::class, showSearch = true),
         UstadDestination("person", MessageID.people, PersonListView.VIEW_NAME, PersonListComponent::class, showSearch = true),
@@ -66,6 +68,7 @@ object RouteManager {
         UstadDestination(view = ReportTemplateListView.VIEW_NAME, component = ReportTemplateListComponent::class),
         UstadDestination(view = ReportEditView.VIEW_NAME, component = ReportEditComponent::class),
         UstadDestination(view = ReportFilterEditView.VIEW_NAME, component = ReportFilterEditComponent::class),
+        UstadDestination(view = ReportDetailView.VIEW_NAME, component = ReportDetailComponent::class),
         UstadDestination(labelId= MessageID.accounts, view = AccountListView.VIEW_NAME, component = PlaceHolderComponent::class)
     )
 

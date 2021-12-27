@@ -1,31 +1,13 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.mui.ext.createStyledComponent
-import kotlinx.css.Display
-import kotlinx.css.FlexDirection
-import kotlinx.css.display
-import kotlinx.css.flexDirection
+import kotlinx.css.*
 import mui.material.Grid
 import mui.material.GridProps
 import mui.material.GridWrap
 import react.RBuilder
 import styled.StyledHandler
 import styled.css
-
-fun String.toHyphenCase(): String {
-var text = ""
-    var isFirst = true
-    this.forEach {
-        if (it in 'A'..'Z') {
-            if (!isFirst) text += "-"
-            text += it.lowercaseChar()
-        } else {
-            text += it
-        }
-        isFirst = false
-    }
-    return text
-}
 
 @Suppress("EnumEntryName")
 enum class GridAlignContent {
@@ -37,7 +19,7 @@ enum class GridAlignContent {
     spaceAround;
 
     override fun toString(): String {
-        return super.toString().toHyphenCase()
+        return super.toString().hyphenize()
     }
 }
 
@@ -50,7 +32,7 @@ enum class GridAlignItems {
     baseline;
 
     override fun toString(): String {
-        return super.toString().toHyphenCase()
+        return super.toString().hyphenize()
     }
 }
 
@@ -63,7 +45,7 @@ enum class GridJustify {
     spaceAround;
 
     override fun toString(): String {
-        return super.toString().toHyphenCase()
+        return super.toString().hyphenize()
     }
 }
 

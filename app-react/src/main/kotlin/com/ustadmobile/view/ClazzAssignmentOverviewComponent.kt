@@ -138,7 +138,6 @@ class ClazzAssignmentOverviewComponent(mProps: UmProps): UstadDetailComponent<Cl
     }
 
     override fun RBuilder.render() {
-        val lifecycle = this
         if(entity == null) return
         styledDiv {
             css {
@@ -199,8 +198,7 @@ class ClazzAssignmentOverviewComponent(mProps: UmProps): UstadDetailComponent<Cl
                                     css{
                                         width = LinearDimension("97%")
                                     }
-                                   createContentEntryListItem(lifecycle,
-                                       appDatabase,content, systemImpl, false,
+                                   createContentEntryListItem(content, systemImpl, false,
                                        onClick = {
                                        entryItemListener.onClickContentEntry(it)
                                    }){

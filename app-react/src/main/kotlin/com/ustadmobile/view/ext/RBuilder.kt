@@ -4,15 +4,11 @@ package com.ustadmobile.view.ext
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_SESSION_PREFKEY
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.controller.BitmaskEditPresenter
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.core.util.ext.isContentComplete
 import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.ext.toolbarJsCssToPartialCss
@@ -36,7 +32,6 @@ import com.ustadmobile.util.StyleManager.mainComponentProfileInnerAvatar
 import com.ustadmobile.util.StyleManager.mainComponentSearch
 import com.ustadmobile.util.StyleManager.mainComponentSearchIcon
 import com.ustadmobile.util.StyleManager.personListItemAvatar
-import com.ustadmobile.util.StyleManager.secondaryActionBtn
 import com.ustadmobile.util.StyleManager.studentProgressBar
 import com.ustadmobile.util.StyleManager.toolbarTitle
 import com.ustadmobile.util.UmProps
@@ -47,8 +42,6 @@ import com.ustadmobile.util.ext.*
 import com.ustadmobile.util.getViewNameFromUrl
 import com.ustadmobile.view.ContentEntryListComponent
 import kotlinx.browser.window
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
 import mui.material.GridProps
@@ -308,35 +301,35 @@ fun RBuilder.setBitmaskListText(systemImpl: UstadMobileSystemImpl,textBitmaskVal
 }
 
 fun RBuilder.createListItemWithLeftIconTitleAndDescription(
-    iconName: String, title: String? = null,
+    iconName: String,
+    title: String? = null,
     description: String? = null,
     avatarVariant: AvatarVariant = AvatarVariant.circle){
 
     umGridContainer {
-        umItem(GridSize.cells3,  GridSize.cells1){
+        umItem(GridSize.cells3,  GridSize.cells2){
             umItemThumbnail(iconName, avatarVariant = avatarVariant)
         }
 
         umItem(GridSize.cells9, GridSize.cells10){
-            css{
-                marginTop = LinearDimension("5px")
-            }
-            if(title != null){
-                umItem(GridSize.cells11){
-                    umTypography(title,
-                        variant = TypographyVariant.body1,
+            umGridContainer {
+                if(title != null){
+                    umItem(GridSize.cells12){
+                        umTypography(title,
+                            variant = TypographyVariant.body1,
                         ){
-                        css (alignTextToStart)
+                            css (alignTextToStart)
+                        }
                     }
                 }
-            }
 
-            if(description != null){
-                umItem(GridSize.cells11){
-                    umTypography(description,
-                        variant = TypographyVariant.body2,
+                if(description != null){
+                    umItem(GridSize.cells12){
+                        umTypography(description,
+                            variant = TypographyVariant.body2,
                         ){
-                        css (alignTextToStart)
+                            css (alignTextToStart)
+                        }
                     }
                 }
             }
@@ -350,32 +343,31 @@ fun RBuilder.createItemWithLeftIconTitleDescriptionAndIconBtnOnRight(
     title: String?,
     description: String?,
     onClick:(Boolean, Event)-> Unit) {
-    umGridContainer(GridSpacing.spacing4) {
+    umGridContainer {
         attrs.onClick = {
-            it.stopPropagation()
+            stopEventPropagation(it)
             onClick.invoke(false, it.nativeEvent)
         }
-        umItem(GridSize.cells2, GridSize.cells1){
+        umItem(GridSize.cells2, GridSize.cells2){
             umProfileAvatar(-1,leftIcon)
         }
 
         umItem(GridSize.cells7, GridSize.cells9){
-            css{
-                marginLeft = 2.spacingUnits
-            }
-            umItem(GridSize.cells11){
-                umTypography(title,
-                    variant = TypographyVariant.body1,
+            umGridContainer {
+                umItem(GridSize.cells12){
+                    umTypography(title,
+                        variant = TypographyVariant.body1,
                     ){
-                    css (alignTextToStart)
+                        css (alignTextToStart)
+                    }
                 }
-            }
 
-            umItem(GridSize.cells11){
-                umTypography(description,
-                    variant = TypographyVariant.body2,
+                umItem(GridSize.cells12){
+                    umTypography(description,
+                        variant = TypographyVariant.body2,
                     ){
-                    css (alignTextToStart)
+                        css (alignTextToStart)
+                    }
                 }
             }
         }
@@ -388,7 +380,7 @@ fun RBuilder.createItemWithLeftIconTitleDescriptionAndIconBtnOnRight(
                 }
                 umIconButton(iconName, size = IconButtonSize.medium,
                     onClick = {
-                        it.stopPropagation()
+                        stopEventPropagation(it)
                         onClick.invoke(true, it)
                     }
                 ){
@@ -839,14 +831,14 @@ fun RBuilder.umPartner(logo: String){
 }
 
 fun RBuilder.createContentEntryListItem(
-    component: dynamic,
-    appDatabase: UmAppDatabase,
     item: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
     systemImpl: UstadMobileSystemImpl,
     showSelectBtn: Boolean = false,
+    downloaded: Boolean = true,
     onClick: ((ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit)? = null,
     onSecondaryAction: (() -> Unit)? = null){
 
+    /*
     var downloadStatus: ContentJobItemProgress? = null
 
     val statusObserver = ObserverFnWrapper<ContentJobItemProgress?>{
@@ -856,7 +848,7 @@ fun RBuilder.createContentEntryListItem(
                 progress = 100
             }
         }
-    }
+    }*/
 
     umGridContainer(columnSpacing = GridSpacing.spacing4) {
         if(onClick != null){
@@ -894,45 +886,48 @@ fun RBuilder.createContentEntryListItem(
 
                 umItem(GridSize.cells12){
                     umGridContainer(columnSpacing = GridSpacing.spacing1){
-                        css{
-                            display = displayProperty(item.leaf, true)
-                        }
                         val messageId = ContentEntryListComponent.CONTENT_ENTRY_TYPE_LABEL_MAP[item.contentTypeFlag] ?: MessageID.untitled
                         val icon = ContentEntryListComponent.CONTENT_ENTRY_TYPE_ICON_MAP[item.contentTypeFlag] ?: ""
+
                         umItem(GridSize.cells2, GridSize.cells1) {
-                            umAvatar(className = "${StyleManager.name}-contentEntryListContentAvatarClass") {
-                                umIcon(icon, className= "${StyleManager.name}-contentEntryListContentTyeIconClass"){
-                                    css{marginTop = 4.px}
+                            if(item.leaf){
+                                umAvatar(className = "${StyleManager.name}-contentEntryListContentAvatarClass") {
+                                    umIcon(icon, className= "${StyleManager.name}-contentEntryListContentTyeIconClass"){
+                                        css{marginTop = 4.px}
+                                    }
                                 }
                             }
                         }
 
                         umItem(GridSize.cells8, GridSize.cells9) {
-                            umTypography(systemImpl.getString(messageId, this),
-                                variant = TypographyVariant.body2,
-                                gutterBottom = true)
+                            if(item.leaf){
+                                umTypography(systemImpl.getString(messageId, this),
+                                    variant = TypographyVariant.body2,
+                                    gutterBottom = true)
+                            }
                         }
 
-                        if(!showSelectBtn && item.leaf){
-                            val downloadLength = downloadStatus?.total ?: 0
+                        /* val downloadLength = downloadStatus?.total ?: 0
                             val downloadedSoFar = downloadStatus?.progress ?: 0
                             val progress = if(downloadLength > 0) {
                                 ((downloadedSoFar.toFloat() / downloadLength) * 100).toInt()
                             }else {
                                 0
-                            }
+                            }*/
+
+                        if(!showSelectBtn){
                             umItem(GridSize.cells2) {
                                 css(centerItem)
                                 styledSpan{
                                     css{
                                         width = 45.px
                                     }
-                                    umIconButton(if(progress == 100) "check_circle" else "download",
+                                    umIconButton(if(downloaded) "check_circle" else "download",
                                         size = IconButtonSize.medium, onClick = {
                                             stopEventPropagation(it)
                                             onSecondaryAction?.invoke()
                                         }){
-                                        css(secondaryActionBtn)
+                                        css(StyleManager.secondaryActionBtn)
                                     }
                                 }
                             }
@@ -945,13 +940,9 @@ fun RBuilder.createContentEntryListItem(
                                     variant = ButtonVariant.outlined,
                                     color = UMColor.secondary,
                                     onClick = {
-                                        it.stopPropagation()
+                                        stopEventPropagation(it)
                                         onSecondaryAction?.invoke()
-                                    }){
-                                    css {
-                                        display = displayProperty(showSelectBtn)
-                                    }
-                                }
+                                    })
                             }
                         }
                     }
@@ -960,12 +951,12 @@ fun RBuilder.createContentEntryListItem(
         }
     }
 
-    GlobalScope.launch {
+    /*GlobalScope.launch {
         val downloadStatus: RateLimitedLiveData<ContentJobItemProgress?> = RateLimitedLiveData(appDatabase, listOf("ContentJobItem"), 1000) {
             appDatabase.contentJobItemDao.findProgressForActiveContentJobItem(item.contentEntryUid)
         }
         downloadStatus.observe(component as DoorLifecycleOwner, statusObserver)
-    }
+    }*/
 }
 
 fun RBuilder.createListItemWithPersonAndAttendanceProgress(

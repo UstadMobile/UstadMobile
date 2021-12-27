@@ -44,7 +44,7 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
         get() = dbRepo?.contentEntryDao
 
     override val viewName: String
-        get() = ContentEntryList2View.VIEW_NAME
+        get() = ContentEntryList2View.VIEW_NAME_HOME
 
     override var editOptionVisible: Boolean = false
         get() = field
@@ -72,8 +72,7 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
     override fun RBuilder.renderListItem(item: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
         val showSelectBtn = arguments.determineListMode().toString() == ListViewMode.PICKER.toString() &&
                 (arguments[ARG_SELECT_FOLDER_VISIBLE]?.toBoolean() == true || item.leaf)
-        createContentEntryListItem(this,
-            appDatabase,item,systemImpl, showSelectBtn){
+        createContentEntryListItem(item,systemImpl, showSelectBtn){
             if(showSelectBtn){
                 mPresenter?.onClickSelectContentEntry(item)
             }else {
