@@ -146,7 +146,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
             return //no one is really logged in
 
         presenterScope.launch {
-            val contentEntry = db.contentEntryDao.findByUid(contentEntryUid) ?: return@launch
+            val contentEntry = db.contentEntryDao.findByUidAsync(contentEntryUid) ?: return@launch
             if(contentEntry.completionCriteria != ContentEntry.COMPLETION_CRITERIA_MIN_SCORE) return@launch
             val completedScore = db.statementDao.findCompletedScoreForSession(contextRegistration)
             var scoreTotal = completedScore?.resultScore ?: 0
