@@ -1,8 +1,8 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Query
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.LearnerGroupMember
 import com.ustadmobile.lib.db.entities.LearnerGroupMemberWithPerson
@@ -29,6 +29,6 @@ abstract class LearnerGroupMemberDao : BaseDao<LearnerGroupMember> {
     AND GroupLearningSession.groupLearningSessionContentUid = :contentEntryUid 
     ORDER BY learnerGroupMemberRole ASC
     """)
-    abstract fun findLearnerGroupMembersByGroupIdAndEntryList(learnerGroupUid: Long, contentEntryUid: Long): List<LearnerGroupMemberWithPerson>
+    abstract suspend fun findLearnerGroupMembersByGroupIdAndEntryList(learnerGroupUid: Long, contentEntryUid: Long): List<LearnerGroupMemberWithPerson>
 
 }
