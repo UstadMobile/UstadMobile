@@ -13,7 +13,10 @@ suspend fun UmAppDatabase.initJsRepo(impl: UstadMobileSystemImpl){
         roleDao.insertDefaultRolesIfRequired()
         impl.setAppPref(SplashView.TAG_LOADED,"true", this)
         preload()
+    }
 
+    val site = siteDao.getSiteAsync()
+    if(site == null){
         siteDao.insertAsync(Site().apply {
             siteUid = 1L
             siteName = "My Site"

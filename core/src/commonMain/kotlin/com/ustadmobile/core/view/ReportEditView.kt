@@ -19,7 +19,7 @@ interface ReportEditView: UstadEditView<ReportWithSeriesWithFilters> {
 
     companion object {
 
-        const val VIEW_NAME = "ReportEditEditView"
+        const val VIEW_NAME = "ReportEditView"
 
     }
 

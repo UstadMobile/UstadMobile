@@ -32,6 +32,7 @@ import com.ustadmobile.util.ThemeManager.isDarkModeActive
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.util.Util
+import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.createCreateNewItem
 import com.ustadmobile.view.ext.umGridContainer
@@ -325,9 +326,11 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                                     }
 
                                     attrs.onMouseDown = {
+                                        stopEventPropagation(it)
                                         handleListItemPress(entry)
                                     }
                                     attrs.onMouseUp = {
+                                        stopEventPropagation(it)
                                         handleListItemRelease(entry)
                                     }
                                 }

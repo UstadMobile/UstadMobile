@@ -21,6 +21,8 @@ open class ReportFilter {
 
     var reportFilterValueBetweenY: String? = null
 
+
+
     companion object {
 
         const val FIELD_PERSON_GENDER = 100
@@ -53,6 +55,36 @@ open class ReportFilter {
 
         const val CONDITION_NOT_IN_LIST = 207
 
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as ReportFilter
+
+        if (reportFilterUid != other.reportFilterUid) return false
+        if (reportFilterSeriesUid != other.reportFilterSeriesUid) return false
+        if (reportFilterField != other.reportFilterField) return false
+        if (reportFilterCondition != other.reportFilterCondition) return false
+        if (reportFilterValue != other.reportFilterValue) return false
+        if (reportFilterDropDownValue != other.reportFilterDropDownValue) return false
+        if (reportFilterValueBetweenX != other.reportFilterValueBetweenX) return false
+        if (reportFilterValueBetweenY != other.reportFilterValueBetweenY) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = reportFilterUid
+        result = 31 * result + reportFilterSeriesUid
+        result = 31 * result + reportFilterField
+        result = 31 * result + reportFilterCondition
+        result = 31 * result + (reportFilterValue?.hashCode() ?: 0)
+        result = 31 * result + reportFilterDropDownValue
+        result = 31 * result + (reportFilterValueBetweenX?.hashCode() ?: 0)
+        result = 31 * result + (reportFilterValueBetweenY?.hashCode() ?: 0)
+        return result
     }
 
 
