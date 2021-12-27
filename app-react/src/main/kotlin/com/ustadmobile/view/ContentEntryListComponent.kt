@@ -70,9 +70,10 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
     }
 
     override fun RBuilder.renderListItem(item: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
-        val showSelectBtn = arguments.determineListMode().toString() == ListViewMode.PICKER.toString() &&
-                (arguments[ARG_SELECT_FOLDER_VISIBLE]?.toBoolean() == true || item.leaf)
-        createContentEntryListItem(item,systemImpl, showSelectBtn){
+        val showSelectBtn = arguments.determineListMode().toString() == ListViewMode.PICKER.toString()
+                && (arguments[ARG_SELECT_FOLDER_VISIBLE]?.toBoolean() ?: true || item.leaf)
+        val showStatus = arguments.determineListMode().toString() != ListViewMode.PICKER.toString()
+        createContentEntryListItem(item,systemImpl, showSelectBtn, showStatus){
             if(showSelectBtn){
                 mPresenter?.onClickSelectContentEntry(item)
             }else {
@@ -85,11 +86,6 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
         mPresenter?.onClickContentEntry(entry)
     }
 
-    override fun onFabClicked() {
-        setState {
-            showAddEntryOptions = true
-        }
-    }
 
     override fun showContentEntryAddOptions() {
         setState {

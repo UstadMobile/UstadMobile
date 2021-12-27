@@ -834,6 +834,7 @@ fun RBuilder.createContentEntryListItem(
     item: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
     systemImpl: UstadMobileSystemImpl,
     showSelectBtn: Boolean = false,
+    showStatus: Boolean = false,
     downloaded: Boolean = true,
     onClick: ((ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit)? = null,
     onSecondaryAction: (() -> Unit)? = null){
@@ -915,35 +916,39 @@ fun RBuilder.createContentEntryListItem(
                                 0
                             }*/
 
-                        if(!showSelectBtn){
-                            umItem(GridSize.cells2) {
-                                css(centerItem)
-                                styledSpan{
-                                    css{
-                                        width = 45.px
+                        umItem(GridSize.cells2) {
+                            umGridContainer {
+                                if(showStatus){
+                                    umItem(GridSize.cells12) {
+                                        css(centerItem)
+                                        styledSpan{
+                                            css{
+                                                width = 45.px
+                                            }
+                                            umIconButton(if(downloaded) "check_circle" else "download",
+                                                size = IconButtonSize.medium, onClick = {
+                                                    stopEventPropagation(it)
+                                                    onSecondaryAction?.invoke()
+                                                }){
+                                                css(StyleManager.secondaryActionBtn)
+                                            }
+                                        }
                                     }
-                                    umIconButton(if(downloaded) "check_circle" else "download",
-                                        size = IconButtonSize.medium, onClick = {
-                                            stopEventPropagation(it)
-                                            onSecondaryAction?.invoke()
-                                        }){
-                                        css(StyleManager.secondaryActionBtn)
+                                }
+                                if(showSelectBtn){
+                                    umItem(GridSize.cells12){
+                                        css(centerItem)
+                                        umButton(systemImpl.getString(MessageID.select_item, this).format(""),
+                                            variant = ButtonVariant.outlined,
+                                            color = UMColor.secondary,
+                                            onClick = {
+                                                stopEventPropagation(it)
+                                                onSecondaryAction?.invoke()
+                                            })
                                     }
                                 }
                             }
-                        }
 
-                        if(showSelectBtn){
-                            umItem(GridSize.cells2){
-                                css(StyleManager.alignTextCenter)
-                                umButton(systemImpl.getString(MessageID.select_item, this).format(""),
-                                    variant = ButtonVariant.outlined,
-                                    color = UMColor.secondary,
-                                    onClick = {
-                                        stopEventPropagation(it)
-                                        onSecondaryAction?.invoke()
-                                    })
-                            }
                         }
                     }
                 }

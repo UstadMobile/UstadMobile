@@ -11,15 +11,13 @@ import com.ustadmobile.core.view.ClazzDetailView.Companion.ARG_TABS
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_CLAZZ
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_OPTION
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
@@ -139,7 +137,7 @@ class ClazzDetailPresenter(context: Any,
                 ClazzContentJoin().apply {
                     ccjClazzUid = arguments[ARG_ENTITY_UID]?.toLong() ?: return@apply
                     ccjContentEntryUid = entry.contentEntryUid
-                    ccjUid = repo.clazzContentJoinDao.insert(this)
+                    ccjUid = repo.clazzContentJoinDao.insertAsync(this)
                 }
 
                 view.showSnackBar(

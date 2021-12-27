@@ -249,7 +249,6 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 val args = mutableMapOf(
                         ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_PARENT,
                         ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString())
-
                 navigateForResult(
                         NavigateForResultOptions(this,
                                 null, ContentEntryList2View.VIEW_NAME,
