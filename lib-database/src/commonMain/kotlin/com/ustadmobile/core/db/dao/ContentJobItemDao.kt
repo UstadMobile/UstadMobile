@@ -49,7 +49,8 @@ abstract class ContentJobItemDao {
                        (SELECT cjiFinishTime 
                           FROM ContentJobItem 
                          WHERE cjiPluginId != 14 
-                           AND cjiRecursiveStatus = ${JobStatus.COMPLETE}
+                           AND (cjiRecursiveStatus = ${JobStatus.COMPLETE} 
+                                OR cjiRecursiveStatus = ${JobStatus.PARTIAL_FAILED})
                            AND cjiContentEntryUid = :contentEntryUid
 					  ORDER BY cjiFinishTime DESC LIMIT 1) > 
 						COALESCE((SELECT cjiFinishTime 

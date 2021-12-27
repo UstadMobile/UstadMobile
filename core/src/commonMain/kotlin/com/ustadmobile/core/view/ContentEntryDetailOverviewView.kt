@@ -1,7 +1,10 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
+import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
+import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
+import com.ustadmobile.lib.db.entities.ContentJobItemProgress
 
 
 interface ContentEntryDetailOverviewView: UstadDetailView<ContentEntryWithMostRecentContainer> {
@@ -23,7 +26,9 @@ interface ContentEntryDetailOverviewView: UstadDetailView<ContentEntryWithMostRe
 
     var canUpdate: Boolean
 
-    var hasContentToOpenOrDelete: Boolean
+    var canDelete: Boolean
+
+    var canOpen: Boolean
 
     var contentJobItemStatus: Int
 
