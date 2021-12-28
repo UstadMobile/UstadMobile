@@ -4,14 +4,59 @@ import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.annotation.RepoHttpAccessible
-import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 
 @Dao
 @Repository
 abstract class ContentEntryDao : BaseDao<ContentEntry> {
+
+    @Query("""
+        REPLACE INTO ContentEntryReplicate(cePk, ceVersionId, ceDestination)
+         SELECT contentEntryUid AS ceUid,
+                ContentEntry.contentEntryLct AS ceVersionId,
+                :newNodeId AS siteDestination
+           FROM ContentEntry
+          WHERE ContentEntry.contentEntryLct != COALESCE(
+                (SELECT ceVersionId
+                   FROM ContentEntryReplicate
+                  WHERE cePk = ContentEntry.contentEntryUid
+                    AND ceDestination = :newNodeId), 0) 
+         /*psql ON CONFLICT(cePk, ceDestination) DO UPDATE
+                SET ceProcessed = false
+         */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([ContentEntry::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+    @Query("""
+        REPLACE INTO ContentEntryReplicate(cePk, ceVersionId, ceDestination)
+         SELECT ContentEntry.contentEntryUid AS cePk,
+                ContentEntry.contentEntryLct AS ceVersionId,
+                UserSession.usClientNodeId AS siteDestination
+           FROM ChangeLog
+                JOIN ContentEntry
+                    ON ChangeLog.chTableId = ${ContentEntry.TABLE_ID}
+                       AND ChangeLog.chEntityPk = ContentEntry.contentEntryUid
+                JOIN UserSession
+          WHERE UserSession.usClientNodeId != (
+                SELECT nodeClientId 
+                  FROM SyncNode
+                 LIMIT 1)
+            AND ContentEntry.contentEntryLct != COALESCE(
+                (SELECT ceVersionId
+                   FROM ContentEntryReplicate
+                  WHERE cePk = ContentEntry.contentEntryUid
+                    AND ceDestination = UserSession.usClientNodeId), 0)     
+        /*psql ON CONFLICT(cePk, ceDestination) DO UPDATE
+            SET ceProcessed = false
+         */               
+    """)
+    @ReplicationRunOnChange([ContentEntry::class])
+    @ReplicationCheckPendingNotificationsFor([ContentEntry::class])
+    abstract suspend fun replicateOnChange()
 
     @JsName("insertListAsync")
     @Insert
@@ -326,15 +371,27 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Query(ALL_ENTRIES_RECURSIVE_SQL)
     abstract fun getAllEntriesRecursivelyAsList(contentEntryUid: Long): List<ContentEntryWithParentChildJoinAndMostRecentContainer>
 
-    @Query("""UPDATE ContentEntry SET ceInactive = :ceInactive, 
-            contentEntryLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+    @Query("""
+            UPDATE ContentEntry 
+               SET ceInactive = :ceInactive, 
+                   contentEntryLastChangedBy = 
+                        (SELECT COALESCE(
+                                (SELECT nodeClientId 
+                                  FROM SyncNode 
+                                 LIMIT 1), 0)) 
             WHERE ContentEntry.contentEntryUid = :contentEntryUid""")
     @JsName("updateContentEntryInActive")
     abstract fun updateContentEntryInActive(contentEntryUid: Long, ceInactive: Boolean)
 
-    @Query("""UPDATE ContentEntry SET contentTypeFlag = :contentFlag,
-            contentEntryLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
-            WHERE ContentEntry.contentEntryUid = :contentEntryUid""")
+    @Query("""
+        UPDATE ContentEntry 
+           SET contentTypeFlag = :contentFlag,
+               contentEntryLastChangedBy = 
+               (SELECT COALESCE(
+                                (SELECT nodeClientId 
+                                  FROM SyncNode 
+                                 LIMIT 1), 0))  
+         WHERE ContentEntry.contentEntryUid = :contentEntryUid""")
     @JsName("updateContentEntryContentFlag")
     abstract fun updateContentEntryContentFlag(contentFlag: Int, contentEntryUid: Long)
 
