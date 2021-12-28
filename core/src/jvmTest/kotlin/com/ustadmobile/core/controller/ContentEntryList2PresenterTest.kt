@@ -6,6 +6,9 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.UstadBackStackEntry
+import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.*
@@ -17,14 +20,15 @@ import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.util.test.ext.insertContentEntryWithParentChildJoinAndMostRecentContainer
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.ListSerializer
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.kodein.di.DI
-import org.kodein.di.instance
+import org.kodein.di.*
 
 class ContentEntryList2PresenterTest {
 
@@ -51,6 +55,13 @@ class ContentEntryList2PresenterTest {
 
     private lateinit var di: DI
 
+    private lateinit var testNavController: UstadNavController
+
+    private lateinit var ustadBackStackEntry: UstadBackStackEntry
+
+    private lateinit var savedStateHandle: UstadSavedStateHandle
+
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -59,8 +70,18 @@ class ContentEntryList2PresenterTest {
         }
         context = Any()
 
+        savedStateHandle = mock{}
+        ustadBackStackEntry = mock{
+            on{savedStateHandle}.thenReturn(savedStateHandle)
+        }
+
+        testNavController = mock{
+            on { getBackStackEntry(any()) }.thenReturn(ustadBackStackEntry)
+        }
+
         di = DI {
             import(ustadTestRule.diModule)
+            bind<UstadNavController>(overrides = true) with singleton { testNavController }
         }
 
         val repo: UmAppDatabase by di.activeRepoInstance()
@@ -113,17 +134,20 @@ class ContentEntryList2PresenterTest {
     @Test
     fun givenPresenterCreatedInPickerMode_whenOnClickEntryCalledOnALeaf_thenShouldFinishWithResult() {
         createEntries()
-        val args = presenterArgs.plus(UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
+        val args = presenterArgs.plus(
+                UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString()).toMutableMap()
+        args.putAll(mapOf(UstadView.ARG_RESULT_DEST_VIEWNAME to "view",
+            UstadView.ARG_RESULT_DEST_KEY to "key"))
         val presenter = ContentEntryList2Presenter(context,
-                args , mockView, di, mockLifecycleOwner)
+            args , mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
         createdEntries?.get(0)?.let { presenter.onClickContentEntry(it) }
 
-        argumentCaptor<List<ContentEntry>>().apply{
-            verify(mockView, timeout(defaultTimeout).times(1)).finishWithResult(capture())
-            assertEquals("Got expected result", firstValue[0], createdEntries?.get(0))
+        verify(savedStateHandle, timeout(2000))[any()] = argWhere<String> {
+            safeParseList(di, ListSerializer(ContentEntry.serializer()),
+                ContentEntry::class, it).first().contentEntryUid == createdEntries?.get(0)?.contentEntryUid
         }
     }
 
@@ -161,7 +185,10 @@ class ContentEntryList2PresenterTest {
             repo.insertContentEntryWithParentChildJoinAndMostRecentContainer(
                     6, createdEntries?.get(0)?.contentEntryUid!!)
         }
-        val args = presenterArgs.plus(UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
+        val args = presenterArgs.plus(
+            UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString()).toMutableMap()
+        args.putAll(mapOf(UstadView.ARG_RESULT_DEST_VIEWNAME to "view",
+            UstadView.ARG_RESULT_DEST_KEY to "key"))
         val presenter = ContentEntryList2Presenter(context,
                 args , mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
@@ -173,9 +200,9 @@ class ContentEntryList2PresenterTest {
 
         createdChildEntries[0].let { presenter.onClickContentEntry(it) }
 
-        argumentCaptor<List<ContentEntry>>().apply{
-            verify(mockView, timeout(defaultTimeout).times(1)).finishWithResult(capture())
-            assertEquals("Got expected result", firstValue[0], createdChildEntries[0])
+        verify(savedStateHandle, timeout(2000))[any()] = argWhere<String> {
+            safeParseList(di, ListSerializer(ContentEntry.serializer()),
+                ContentEntry::class, it).first().contentEntryUid == createdChildEntries[0].contentEntryUid
         }
     }
 

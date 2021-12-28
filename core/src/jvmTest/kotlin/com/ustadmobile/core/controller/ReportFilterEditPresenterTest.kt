@@ -8,7 +8,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadBackStackEntry
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.captureLastEntityValue
@@ -60,11 +59,13 @@ class ReportFilterEditPresenterTest {
         context = Any()
 
         savedStateHandle = mock{}
+
         ustadBackStackEntry = mock{
             on{savedStateHandle}.thenReturn(savedStateHandle)
         }
 
         testNavController = mock{
+            on { currentBackStackEntry }.thenReturn(ustadBackStackEntry)
             on { getBackStackEntry(any()) }.thenReturn(ustadBackStackEntry)
         }
 
@@ -99,9 +100,6 @@ class ReportFilterEditPresenterTest {
         presenter.handleClickSave(initialEntity)
 
         verify(systemImpl, timeout(5000)).getString(eq(MessageID.field_required_prompt), any())
-
-        verify(testNavController, never()).popBackStack(any(), any())
-
     }
 
     @Test
