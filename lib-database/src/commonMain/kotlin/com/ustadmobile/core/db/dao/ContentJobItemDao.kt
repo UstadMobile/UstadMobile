@@ -49,7 +49,8 @@ abstract class ContentJobItemDao {
                        (SELECT cjiFinishTime 
                           FROM ContentJobItem 
                          WHERE cjiPluginId != 14 
-                           AND cjiRecursiveStatus = ${JobStatus.COMPLETE}
+                           AND (cjiRecursiveStatus = ${JobStatus.COMPLETE} 
+                                OR cjiRecursiveStatus = ${JobStatus.PARTIAL_FAILED})
                            AND cjiContentEntryUid = :contentEntryUid
 					  ORDER BY cjiFinishTime DESC LIMIT 1) > 
 						COALESCE((SELECT cjiFinishTime 
@@ -211,4 +212,12 @@ abstract class ContentJobItemDao {
          WHERE cjiUid = :cjiUid  
     """)
     abstract suspend fun updateUploadSessionUuid(cjiUid: Long, uploadSessionUuid: String)
+
+
+    @Query("""
+        SELECT * 
+          FROM ContentJobItem
+         WHERE cjiJobUid = :jobId 
+    """)
+    abstract fun findAllByJobId(jobId: Long): List<ContentJobItem>
 }

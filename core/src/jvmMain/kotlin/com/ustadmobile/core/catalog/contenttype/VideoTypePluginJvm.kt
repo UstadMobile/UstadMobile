@@ -158,7 +158,7 @@ class VideoTypePluginJvm(
 
             val localUri = process.getLocalOrCachedUri()
 
-            val fileName = localUri.getFileName(context)
+            val fileName = uri.getFileName(context)
 
             if(!supportedFileExtensions.any { fileName.endsWith(it, true) }) {
                 return@withContext null
@@ -173,7 +173,7 @@ class VideoTypePluginJvm(
             }
 
             val entry = ContentEntryWithLanguage().apply {
-                this.title = file.nameWithoutExtension
+                this.title = fileName
                 this.leaf = true
                 sourceUrl = uri.uri.toString()
                 this.contentTypeFlag = ContentEntry.TYPE_VIDEO
