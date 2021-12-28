@@ -40,11 +40,9 @@ class HolidayCalendarEditComponent(mProps: UmProps): UstadEditComponent<HolidayC
     private var holidays: List<Holiday> = listOf()
 
     private val holidayObserver = ObserverFnWrapper<List<Holiday>> {
-        if(!it.isNullOrEmpty())
-            console.log(it.map { x -> x.holUid.toString()})
-            setState {
-                holidays = it
-            }
+        setState {
+            holidays = it
+        }
     }
 
     override var holidayList: DoorLiveData<List<Holiday>>? = null
@@ -136,7 +134,8 @@ class HolidayListComponent(mProps: SimpleListProps<Holiday>): UstadSimpleList<Si
 
             createListItemWithLeftIconTitleAndDescription("date_range",item.holName,
                 "${Date(item.holStartTime).standardFormat()} " +
-                        "- ${Date(item.holEndTime).standardFormat()}"
+                        "- ${Date(item.holEndTime).standardFormat()}",
+                onMainList = true
             )
         }
     }

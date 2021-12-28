@@ -9,13 +9,14 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.fieldsOnlyFormScreen
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.*
-import com.ustadmobile.mui.components.*
 import react.RBuilder
 import react.dom.html.InputType
 import react.setState
@@ -108,8 +109,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
             }
         }
 
-    private val scheduleObserver = ObserverFnWrapper<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?> {
-        if(it == null) return@ObserverFnWrapper
+    private val contentListObserver = ObserverFnWrapper<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>> {
         setState {
             contentList = it
         }
@@ -118,9 +118,9 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
     override var clazzAssignmentContent: DoorMutableLiveData<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>? = null
         get() = field
         set(value) {
-            field?.removeObserver(scheduleObserver)
+            field?.removeObserver(contentListObserver)
             field = value
-            value?.observe(this, scheduleObserver)
+            value?.observe(this, contentListObserver)
         }
 
     override var fieldsEnabled: Boolean = false
@@ -336,8 +336,6 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
 
                     createListSectionTitle(getString(MessageID.content), TypographyVariant.h6)
 
-                    umSpacer()
-
                     val createNewItem = CreateNewItem(true, MessageID.add_content){
                         mPresenter?.contentOneToManyJoinListener?.onClickNew()
                     }
@@ -350,6 +348,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                     }
 
                     umItem {
+                        css(defaultMarginTop)
                         createListItemWithTitleAndSwitch(getString(MessageID.allow_class_comments), entity?.caClassCommentEnabled ?: false){
                             setState {
                                 entity?.caClassCommentEnabled = !(entity?.caClassCommentEnabled ?: false)

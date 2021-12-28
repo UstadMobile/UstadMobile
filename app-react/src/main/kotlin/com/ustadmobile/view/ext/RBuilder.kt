@@ -304,14 +304,15 @@ fun RBuilder.createListItemWithLeftIconTitleAndDescription(
     iconName: String,
     title: String? = null,
     description: String? = null,
+    onMainList: Boolean = false,
     avatarVariant: AvatarVariant = AvatarVariant.circle){
 
     umGridContainer {
-        umItem(GridSize.cells3,  GridSize.cells2){
+        umItem(GridSize.cells3,  if(onMainList) GridSize.cells1 else GridSize.cells2){
             umItemThumbnail(iconName, avatarVariant = avatarVariant)
         }
 
-        umItem(GridSize.cells9, GridSize.cells10){
+        umItem(GridSize.cells9, if(onMainList) GridSize.cells11 else GridSize.cells10){
             umGridContainer {
                 if(title != null){
                     umItem(GridSize.cells12){

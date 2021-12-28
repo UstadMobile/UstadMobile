@@ -76,7 +76,8 @@ class ZonesListComponent(mProps: SimpleListProps<TimeZone>):
             attrs.onClick = {
                 onClick.invoke(it.nativeEvent)
             }
-            createListItemWithLeftIconTitleAndDescription("query_builder",item.name, item.timeName)
+            createListItemWithLeftIconTitleAndDescription("query_builder",item.name,
+                item.timeName, onMainList = true)
         }
     }
 }

@@ -37,7 +37,8 @@ class LanguageListComponent(mProps: UmProps): UstadListComponent<Language, Langu
     override fun RBuilder.renderListItem(item: Language) {
         createListItemWithLeftIconTitleAndDescription("language",
             item.name,
-            "${item.iso_639_2_standard}/${item.iso_639_3_standard}")
+            "${item.iso_639_2_standard}/${item.iso_639_3_standard}",
+            onMainList = true)
     }
 
     override fun handleClickEntry(entry: Language) {

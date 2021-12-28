@@ -11,6 +11,7 @@ import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ScopedGrantAndName
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
@@ -18,7 +19,6 @@ import com.ustadmobile.util.Util.ASSET_ENTRY
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.*
-import com.ustadmobile.mui.components.*
 import react.RBuilder
 import react.setState
 import styled.css
@@ -53,8 +53,7 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
 
     private var scheduleList: List<Schedule> = listOf()
 
-    private val scheduleObserver = ObserverFnWrapper<List<Schedule>?> {
-        if(it.isNullOrEmpty()) return@ObserverFnWrapper
+    private val scheduleObserver = ObserverFnWrapper<List<Schedule>> {
         setState {
             scheduleList = it
         }

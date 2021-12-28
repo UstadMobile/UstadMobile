@@ -38,7 +38,7 @@ class HolidayCalendarListComponent(mProps: UmProps): UstadListComponent<HolidayC
         val titleText = getString(MessageID.num_items_with_name)
             .format(item.numEntries, getString(MessageID.holidays))
         createListItemWithLeftIconTitleAndDescription("calendar_today",
-            item.umCalendarName, titleText
+            item.umCalendarName, titleText, onMainList = true
         )
     }
 

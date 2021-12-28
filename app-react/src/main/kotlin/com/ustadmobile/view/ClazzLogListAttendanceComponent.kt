@@ -3,7 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.mui.components.GridSize
 import com.ustadmobile.mui.components.GridSpacing
 import com.ustadmobile.mui.umChart
-import com.ustadmobile.util.StyleManager.attendance
+import com.ustadmobile.util.StyleManager.screenWithChartOnLeft
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.view.ext.umGridContainer
@@ -22,7 +22,7 @@ class ClazzLogListAttendanceComponent(mProps: UmProps) : UstadBaseComponent<UmPr
 
     override fun RBuilder.render() {
         styledDiv {
-            css(attendance)
+            css(screenWithChartOnLeft)
             umGridContainer(columnSpacing = GridSpacing.spacing4) {
                 umItem(GridSize.cells12, GridSize.cells7){
                     chartData?.let {

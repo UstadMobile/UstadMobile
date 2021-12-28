@@ -230,7 +230,7 @@ class ReportEditComponent (mProps: UmProps): UstadEditComponent<ReportWithSeries
                     umItem(GridSize.cells12){
                         css(horizontalList)
                         for (series in seriesList){
-                           renderSeriesItem(series, seriesList.indexOf(series))
+                           renderSeriesItem(series, seriesList.size > 1 && showSeriesDeleteButton)
                         }
                     }
                 }
@@ -255,7 +255,7 @@ class ReportEditComponent (mProps: UmProps): UstadEditComponent<ReportWithSeries
         entity = null
     }
 
-    private fun RBuilder.renderSeriesItem(series: ReportSeries, index : Int){
+    private fun RBuilder.renderSeriesItem(series: ReportSeries, showDelete : Boolean){
         umGridContainer {
             umItem(GridSize.cells12) {
                 umGridContainer {
@@ -273,11 +273,11 @@ class ReportEditComponent (mProps: UmProps): UstadEditComponent<ReportWithSeries
                                 }
                             }){
                             css{
-                                width = LinearDimension(if(index == 0) "100%" else "95%")
+                                width = LinearDimension(if(!showDelete) "100%" else "95%")
                             }
                         }
 
-                        if(showSeriesDeleteButton && index != 0){
+                        if(showDelete){
                             styledSpan {
                                 css{
                                     margin(left = 3.spacingUnits, top = 2.spacingUnits)
