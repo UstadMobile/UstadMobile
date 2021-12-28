@@ -5,17 +5,14 @@ import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ContentPluginIds.DELETE_CONTENT_ENTRY_PLUGIN
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
+import com.ustadmobile.core.util.ext.deleteFilesForContentJob
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import io.ktor.client.*
 import org.kodein.di.DI
-import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import java.io.File
 
 class DeleteContentEntryPlugin(
         private var context: Any,
@@ -47,7 +44,7 @@ class DeleteContentEntryPlugin(
         progress.onProgress(contentJobItem)
 
         // delete all containerEntries, containerEntryFiles and torrentFile for this contentEntry
-        val numFailures = deleteFilesForContentEntry(contentJobItem.cjiContentEntryUid, di, endpoint)
+        val numFailures = deleteFilesForContentJob(contentJobItem.cjiJobUid, di, endpoint)
 
         contentJobItem.cjiItemProgress = 100
         progress.onProgress(contentJobItem)

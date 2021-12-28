@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import com.ustadmobile.core.db.JobStatus
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 
 @Dao
@@ -50,7 +49,8 @@ abstract class ContentJobItemDao {
                        (SELECT cjiFinishTime 
                           FROM ContentJobItem 
                          WHERE cjiPluginId != 14 
-                           AND cjiRecursiveStatus = ${JobStatus.COMPLETE}
+                           AND (cjiRecursiveStatus = ${JobStatus.COMPLETE} 
+                                OR cjiRecursiveStatus = ${JobStatus.PARTIAL_FAILED})
                            AND cjiContentEntryUid = :contentEntryUid
 					  ORDER BY cjiFinishTime DESC LIMIT 1) > 
 						COALESCE((SELECT cjiFinishTime 
@@ -132,6 +132,13 @@ abstract class ContentJobItemDao {
     abstract suspend fun updateConnectivityNeeded(contentJobItemId: Long, connectivityNeeded: Boolean)
 
 
+    @Query("""
+        UPDATE ContentJobItem
+           SET cjiContainerProcessed = :cjiContainerProcessed
+         WHERE cjiUid = :contentJobItemId   
+    """)
+    abstract suspend fun updateContainerProcessed(contentJobItemId: Long, cjiContainerProcessed: Boolean)
+
     @Transaction
     open suspend fun commitProgressUpdates(updates: List<ContentJobItemProgressUpdate>) {
         updates.forEach {
@@ -205,4 +212,12 @@ abstract class ContentJobItemDao {
          WHERE cjiUid = :cjiUid  
     """)
     abstract suspend fun updateUploadSessionUuid(cjiUid: Long, uploadSessionUuid: String)
+
+
+    @Query("""
+        SELECT * 
+          FROM ContentJobItem
+         WHERE cjiJobUid = :jobId 
+    """)
+    abstract fun findAllByJobId(jobId: Long): List<ContentJobItem>
 }

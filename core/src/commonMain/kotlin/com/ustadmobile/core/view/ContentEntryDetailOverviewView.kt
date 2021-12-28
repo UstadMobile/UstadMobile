@@ -26,7 +26,9 @@ interface ContentEntryDetailOverviewView: UstadDetailView<ContentEntryWithMostRe
 
     var canUpdate: Boolean
 
-    var hasContentToOpenOrDelete: Boolean
+    var canDelete: Boolean
+
+    var canOpen: Boolean
 
     var contentJobItemStatus: Int
 

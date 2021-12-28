@@ -3,13 +3,11 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.storeCompletedStatement
-import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
-import com.ustadmobile.core.io.ext.getSize
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.util.ContentEntryOpener
@@ -26,9 +24,6 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.door.*
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.Json
 import org.kodein.di.*
 
 
@@ -118,7 +113,12 @@ class ContentEntryDetailOverviewPresenter(context: Any,
 
             db.containerDao.hasContainerWithFilesToDelete(entityUid)
                     .observeWithLifecycleOwner(lifecycleOwner) {
-                        view.hasContentToOpenOrDelete = it ?: false
+                        view.canDelete = it ?: false
+                    }
+
+            db.containerDao.hasContainerWithFilesToOpen(entityUid)
+                    .observeWithLifecycleOwner(lifecycleOwner){
+                        view.canOpen = it ?: false
                     }
 
             db.containerDao.hasContainerWithFilesToDownload(entityUid)

@@ -83,6 +83,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
+    ustadVersionCode = 221
 
     wrapperVersion = "pre.270-kotlin-1.6.0"
 
@@ -104,10 +105,8 @@ ext {
     version_npm_emotion = "11.6.0"
     version_npm_google_charts = "^3.0.15"
 
-    version_door = "0.0.32u"
+    version_door = "0.0.32s"
     version_xmlpullparserkmp = '0.0.20'
-
-    ustadVersionCode = 220
 
     version_gradle_buildconfig_plugin = "1.1.7"
     version_jacoco_tool = "0.8.5"
