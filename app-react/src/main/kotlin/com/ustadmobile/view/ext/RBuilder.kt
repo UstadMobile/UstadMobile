@@ -760,35 +760,37 @@ fun RBuilder.umTopBar(
 }
 
 fun RBuilder.createProfileAction(
-    icon: String, title: String, xs: GridSize,
-    sm: GridSize? = null, visible: Boolean = false,
+    icon: String,
+    title: String,
+    xs: GridSize,
+    sm: GridSize? = null,
+    visible: Boolean = false,
+    variant: TypographyVariant = TypographyVariant.body1,
     action:() -> Unit){
-    umItem(xs, sm){
-        css{
-            display = displayProperty(visible, true)
-        }
+   if(visible){
+       umItem(xs, sm){
+           umPaper(variant = PaperVariant.elevation) {
+               attrs.onClick = {
+                   action()
+               }
+               css {
+                   +StyleManager.personDetailComponentActions
+               }
 
-        umPaper(variant = PaperVariant.elevation) {
-            attrs.onClick = {
-                action()
-            }
-            css {
-                +StyleManager.personDetailComponentActions
-            }
+               umIcon(icon){
+                   css{
+                       +StyleManager.personDetailComponentActionIcon
+                   }
+               }
 
-            umIcon(icon){
-                css{
-                    +StyleManager.personDetailComponentActionIcon
-                }
-            }
-
-            umTypography(title,
-                variant = TypographyVariant.body1,
-                gutterBottom = true){
-                css(alignTextToStart)
-            }
-        }
-    }
+               umTypography(title,
+                   variant = variant,
+                   gutterBottom = true){
+                   css(alignTextToStart)
+               }
+           }
+       }
+   }
 }
 
 fun RBuilder.createListItemWithTitleAndSwitch(title: String, enabled: Boolean, onClick: (Event) -> Unit){

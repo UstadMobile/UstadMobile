@@ -6,18 +6,18 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.SchoolListView
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemDesc
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.util.ext.wordBreakLimit
 import com.ustadmobile.util.ext.format
+import com.ustadmobile.util.ext.wordBreakLimit
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
-import com.ustadmobile.mui.components.*
 import kotlinx.css.Position
 import kotlinx.css.display
 import kotlinx.css.padding
@@ -94,20 +94,22 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
             }
 
             umGridContainer{
-                umItem(GridSize.cells1){
-                    umIcon("place", color = IconColor.inherit){
-                        css(gridListSecondaryItemIcons)
-                    }
-                }
-
-                umItem(GridSize.cells11){
-                    umTypography(item.schoolAddress){
-                        css{
-                            +alignTextToStart
-                            +gridListSecondaryItemDesc
+                if(item.schoolAddress?.isNotEmpty() == true){
+                    umItem(GridSize.cells1){
+                        umIcon("place", color = IconColor.inherit){
+                            css(gridListSecondaryItemIcons)
                         }
                     }
 
+                    umItem(GridSize.cells11){
+                        umTypography(item.schoolAddress){
+                            css{
+                                +alignTextToStart
+                                +gridListSecondaryItemDesc
+                            }
+                        }
+
+                    }
                 }
 
                 umItem(GridSize.cells1){

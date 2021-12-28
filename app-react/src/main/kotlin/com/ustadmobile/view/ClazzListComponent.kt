@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.clazzListRoleChip
@@ -19,7 +20,6 @@ import com.ustadmobile.view.ext.circleIndicator
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
-import com.ustadmobile.mui.components.*
 import kotlinx.css.*
 import react.RBuilder
 import react.setState
@@ -113,7 +113,7 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
 
                 umItem(GridSize.cells4){
                     val attendancesPercentage = getString(MessageID.x_percent_attended)
-                        .format(item.attendanceAverage * 100)
+                        .format(if(item.attendanceAverage >= 0) item.attendanceAverage * 100 else 0)
                     umTypography(attendancesPercentage){
                         css{
                             +alignTextToStart

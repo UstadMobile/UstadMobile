@@ -9,6 +9,7 @@ import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
@@ -16,16 +17,17 @@ import com.ustadmobile.util.StyleManager.chipSetFilter
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.contentEntryDetailOverviewComponentOpenBtn
 import com.ustadmobile.util.StyleManager.defaultMarginTop
+import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.detailPaddingBottom
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util.ASSET_BOOK
 import com.ustadmobile.util.Util.ASSET_FOLDER
 import com.ustadmobile.util.ext.joinString
+import com.ustadmobile.view.ext.createProfileAction
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
-import com.ustadmobile.mui.components.*
 import kotlinx.css.*
 import react.RBuilder
 import react.setState
@@ -107,14 +109,22 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
                 field = value
             }
         }
-
-    override var hasContentToOpenOrDelete: Boolean = false
+    override var canDelete: Boolean = false
         get() = field
         set(value) {
             setState {
                 field = value
             }
         }
+
+    override var canOpen: Boolean = false
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
 
     override var contentJobItemStatus: Int = 0
         get() = field
@@ -212,8 +222,8 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
                         }
                     }
 
-                   if((canDownload || hasContentToOpenOrDelete) && showEntryDownloadOpenBtn){
-                       umButton(getString(MessageID.open),
+                   if((canDownload || canOpen) && showEntryDownloadOpenBtn){
+                       umButton(getString(if(canDownload) MessageID.download else MessageID.open),
                            size = ButtonSize.large,
                            color = UMColor.secondary,
                            variant = ButtonVariant.contained,
@@ -335,6 +345,24 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
 
                             umTypography(entity?.description, paragraph = true){
                                 css(alignTextToStart)
+                            }
+                        }
+
+                        umGridContainer(GridSpacing.spacing4) {
+                            css(defaultPaddingTop)
+                            createProfileAction("library_add_check",getString(MessageID.mark_complete), GridSize.cells4, GridSize.cells4,
+                                markCompleteVisible, TypographyVariant.body2){
+                                mPresenter?.handleOnClickMarkComplete()
+                            }
+
+                            createProfileAction("delete",getString(MessageID.delete), GridSize.cells4, GridSize.cells4,
+                                markCompleteVisible, TypographyVariant.body2){
+                                mPresenter?.handleOnClickDeleteButton()
+                            }
+
+                            createProfileAction("download",getString(MessageID.manage_download), GridSize.cells4, GridSize.cells4,
+                                markCompleteVisible, TypographyVariant.body2){
+                                mPresenter?.handleOnClickManageDownload()
                             }
                         }
 
