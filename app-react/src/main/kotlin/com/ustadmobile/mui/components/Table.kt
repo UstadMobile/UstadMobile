@@ -17,7 +17,7 @@ enum class TableSize {
 }
 
 enum class TablePadding{
-    normal, checkbox, none, default;
+    normal, checkbox, none;
 
     override fun toString(): String {
         return super.toString().hyphenize()
@@ -59,7 +59,7 @@ fun RBuilder.umTableRow(
 
 fun RBuilder.umTableCell(
     align: Align = Align.inherit,
-    padding: TablePadding = TablePadding.default,
+    padding: TablePadding = TablePadding.normal,
     scope: String? = "row",
     colSpan: Int = 1,
     size: TableSize = TableSize.medium,
@@ -70,7 +70,7 @@ fun RBuilder.umTableCell(
     attrs.size = size.toString()
     attrs.align = align.toString()
     attrs.scope = scope
-    attrs.asDynamic().colspan = colSpan.toString()
+    attrs.asDynamic().colSpan = colSpan.toString()
 }
 
 fun RBuilder.umTableContainer(

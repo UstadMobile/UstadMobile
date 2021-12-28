@@ -46,7 +46,8 @@ class ReportTemplateListComponent(props: UmProps): UstadListComponent<Report,
 
         createListItemWithLeftIconTitleAndDescription(
             "pie_chart",
-            reportTitle ?: "", reportDesc)
+            reportTitle ?: "", reportDesc,
+            onMainList = true)
 
     }
 
