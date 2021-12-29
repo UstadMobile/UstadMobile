@@ -55,7 +55,11 @@
             type="boolean" />
 
         <variable
-            name="hasContentToOpenOrDelete"
+            name="canDelete"
+            type="boolean" />
+
+        <variable
+            name="canOpen"
             type="boolean" />
 
         <variable
@@ -246,10 +250,10 @@
                     android:id="@+id/entryDownloadOpenBtn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:enabled="@{canDownload || hasContentToOpenOrDelete}"
+                    android:enabled="@{canDownload || canOpen}"
                     android:onClick="@{()-> fragmentEventHandler.handleOnClickOpenDownloadButton()}"
                     android:padding="@dimen/dimen_16dp"
-                    android:text="@{hasContentToOpenOrDelete ? @string/open : @string/download}"
+                    android:text="@{canOpen ? @string/open : @string/download}"
                     android:textStyle="bold" />
 
                 <com.ustadmobile.port.android.view.DownloadProgressView
@@ -326,7 +330,7 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/entry_detail_delete_button"
-                    android:visibility="@{hasContentToOpenOrDelete ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{canDelete ? View.VISIBLE : View.GONE}"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

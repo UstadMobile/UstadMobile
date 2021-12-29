@@ -1,14 +1,13 @@
 package com.ustadmobile.core.controller
 
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.mock
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
+import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.impl.nav.navigateToErrorScreen
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.tincan.UmAccountActor
 import com.ustadmobile.core.tincan.UmAccountGroupActor
@@ -18,8 +17,8 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.ext.toDoorUri
@@ -40,7 +39,9 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import org.mockito.Mockito.timeout
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.*
 import java.util.*
+import kotlin.collections.set
 
 
 class XapiPackageContentPresenterTest {
@@ -186,6 +187,26 @@ class XapiPackageContentPresenterTest {
         }
 
         verify(mockedView, timeout(15000)).contentTitle = "Tin Can Tetris Example"
+    }
+
+    @Test
+    fun givenInvalidXapi_whenLoaded_shouldGoToErrorScreen(){
+
+        val db: UmAppDatabase by di.on(endpoint).instance(tag = TAG_DB)
+        db.containerEntryDao.deleteByContainerUid(xapiContainer.containerUid)
+
+        val args = Hashtable<String, String>()
+        Assert.assertNotNull(xapiContainer)
+        args[UstadView.ARG_CONTAINER_UID] = xapiContainer.containerUid.toString()
+        args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
+        args[ARG_CLAZZUID] = clazz.clazzUid.toString()
+
+        val xapiPresenter = XapiPackageContentPresenter(context, args, mockedView, di)
+        xapiPresenter.onStart()
+        xapiPresenter.onCreate(null)
+
+        val spyController: UstadNavController = di.direct.instance()
+        verify(spyController, timeout(1000)).navigateToErrorScreen(eq(Exception()), eq(di), eq(context))
     }
 
 

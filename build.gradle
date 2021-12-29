@@ -83,7 +83,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 220
+    ustadVersionCode = 221
 
     version_door = "0.0.32s"
     version_xmlpullparserkmp = '0.0.18'
