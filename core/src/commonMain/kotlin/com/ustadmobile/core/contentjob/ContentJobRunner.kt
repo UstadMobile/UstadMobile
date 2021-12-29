@@ -136,7 +136,6 @@ class ContentJobRunner(
                 var metadataResult: MetadataResult? = null
                 if(item.contentJobItem?.cjiContentEntryUid == 0L) {
                     metadataResult = contentPluginManager.extractMetadata(sourceUri, processContext)
-                        ?: throw FatalContentJobException("ContentJobItem #${item.contentJobItem?.cjiUid}: cannot extract metadata")
                     val contentEntryUid = repo.contentEntryDao.insertAsync(metadataResult.entry)
                     item.contentJobItem?.cjiContentEntryUid = contentEntryUid
                     db.contentJobItemDao.updateContentEntryUid(item.contentJobItem?.cjiUid ?: 0,
@@ -153,8 +152,7 @@ class ContentJobRunner(
 
                 val pluginId = if(item.contentJobItem?.cjiPluginId == 0) {
                     metadataResult?.pluginId ?: contentPluginManager.extractMetadata(sourceUri,
-                        processContext)?.pluginId ?:
-                        throw FatalContentJobException("ContentJobItem #${item.contentJobItem?.cjiUid}: cannot determine pluginId")
+                        processContext).pluginId
                 }else {
                     item.contentJobItem?.cjiPluginId ?: 0
                 }
@@ -204,10 +202,9 @@ class ContentJobRunner(
                     val finalStatus: Int = when {
                         processException == null && processResult != null -> processResult.status
                         processException is FatalContentJobException -> JobStatus.FAILED
+                        processException is ContentTypeNotSupportedException -> JobStatus.COMPLETE
                         processException is ConnectivityCancellationException -> JobStatus.QUEUED
-                        processException is CancellationException -> {
-                            JobStatus.CANCELED
-                        }
+                        processException is CancellationException -> JobStatus.CANCELED
                         (item.contentJobItem?.cjiAttemptCount ?: maxItemAttempts) >= maxItemAttempts -> JobStatus.FAILED
                         else -> JobStatus.QUEUED
                     }
