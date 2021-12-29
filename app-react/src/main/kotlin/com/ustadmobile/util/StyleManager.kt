@@ -390,9 +390,21 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         alignItems = Align.center
     }
 
-    val centerItem by css {
+    val alignCenterItems by css {
         alignItems = Align.center
         textAlign = TextAlign.center
+        flexShrink = 0.0
+    }
+
+    val alignStartItems by css {
+        alignItems = Align.start
+        textAlign = TextAlign.start
+        flexShrink = 0.0
+    }
+
+    val alignEndItems by css {
+        alignItems = Align.end
+        textAlign = TextAlign.end
         flexShrink = 0.0
     }
 

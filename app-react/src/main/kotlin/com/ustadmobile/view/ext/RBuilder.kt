@@ -19,7 +19,7 @@ import com.ustadmobile.navigation.UstadDestination
 import com.ustadmobile.redux.ReduxAppState
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
-import com.ustadmobile.util.StyleManager.centerItem
+import com.ustadmobile.util.StyleManager.alignCenterItems
 import com.ustadmobile.util.StyleManager.defaultMarginBottom
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.displayProperty
@@ -185,6 +185,9 @@ fun RBuilder.umProfileAvatar(attachmentId: Long, fallback: String){
     umAvatar(src,variant = AvatarVariant.circular){
         css (personListItemAvatar)
         if(src == null) umIcon(fallback, className= "${StyleManager.name}-fallBackAvatarClass")
+        window.setTimeout({
+            attrs.src = "https://www.mockofun.com/wp-content/uploads/2019/12/circle-photo.jpg"
+        }, 2000)
     }
 }
 
@@ -197,9 +200,14 @@ fun RBuilder.umItemThumbnail(
     marginTop: LinearDimension = 1.spacingUnits,
     avatarVariant: AvatarVariant = AvatarVariant.square,
     className: String? = "${StyleManager.name}-${if(width <= 50) "defaultThumbnailClass"  
-    else if(width in 51..69) "mediumThumbnailClass" else "maxThumbnailClass"}"
+    else if(width in 51..69) "mediumThumbnailClass" else "maxThumbnailClass"}",
+    onClick: (() -> Unit)? = null
 ){
     umAvatar(src,variant = avatarVariant){
+        attrs.onClick = {
+            stopEventPropagation(it)
+            onClick?.invoke()
+        }
         css {
             this.marginTop = marginTop
             this.width = LinearDimension("${width}px")
@@ -214,18 +222,6 @@ fun RBuilder.umItemThumbnail(
     }
 }
 
-
-fun RBuilder.onClickCall(phoneNumber: String?){
-
-}
-
-fun RBuilder.onClickEmail(email: String?){
-
-}
-
-fun RBuilder.onClickSMS(phoneNumber: String?){
-
-}
 
 fun RBuilder.createListSectionTitle(titleText: String, variant: TypographyVariant? = null){
     styledDiv {
@@ -374,7 +370,7 @@ fun RBuilder.createItemWithLeftIconTitleDescriptionAndIconBtnOnRight(
         }
 
         umItem(GridSize.cells2, GridSize.cells1){
-            css(centerItem)
+            css(alignCenterItems)
             styledSpan {
                 css{
                     width = 40.px
@@ -575,7 +571,7 @@ fun RBuilder.createListItemWithTitleDescriptionAndRightAction(
 
         if(withAction){
             umItem(GridSize.cells2, GridSize.cells1){
-                css(centerItem)
+                css(alignCenterItems)
                styledSpan {
                    css{
                        width = 40.px
@@ -759,7 +755,7 @@ fun RBuilder.umTopBar(
     }
 }
 
-fun RBuilder.createProfileAction(
+fun RBuilder.createTopMainAction(
     icon: String,
     title: String,
     xs: GridSize,
@@ -923,7 +919,7 @@ fun RBuilder.createContentEntryListItem(
                             umGridContainer {
                                 if(showStatus){
                                     umItem(GridSize.cells12) {
-                                        css(centerItem)
+                                        css(alignCenterItems)
                                         styledSpan{
                                             css{
                                                 width = 45.px
@@ -940,7 +936,7 @@ fun RBuilder.createContentEntryListItem(
                                 }
                                 if(showSelectBtn){
                                     umItem(GridSize.cells12){
-                                        css(centerItem)
+                                        css(alignCenterItems)
                                         umButton(systemImpl.getString(MessageID.select_item, this).format(""),
                                             variant = ButtonVariant.outlined,
                                             color = UMColor.secondary,
@@ -1350,7 +1346,7 @@ fun RBuilder.createSummaryCard(title: Any?, subTitle: String){
         umPaper(variant = PaperVariant.elevation) {
             css {
                 +StyleManager.personDetailComponentActions
-                +StyleManager.centerItem
+                +StyleManager.alignCenterItems
             }
 
             umTypography(title?.toString() ?: "",

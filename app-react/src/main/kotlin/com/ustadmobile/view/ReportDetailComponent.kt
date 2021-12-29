@@ -7,6 +7,8 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.ReportDetailView
+import com.ustadmobile.core.view.ReportEditView
+import com.ustadmobile.core.view.ReportTemplateListView
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
@@ -14,10 +16,13 @@ import com.ustadmobile.lib.db.entities.StatementEntityWithDisplayDetails
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager.screenWithChartOnLeft
 import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.util.ext.toDate
+import com.ustadmobile.view.ext.createTopMainAction
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
+import kotlinx.css.border
 import react.RBuilder
 import react.setState
 import styled.css
@@ -50,14 +55,12 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
         set(value) {
             field = value
             if(value?.isNotEmpty() == true){
-                repeat(value.size - 1){ index ->
+                repeat(value.size){ index ->
                     seriesTitle.add(chartData?.seriesData?.get(index)?.series?.reportSeriesName)
                     val liveData = value[index].getData(0,Int.MAX_VALUE)
                     val observerFnWrapper = ObserverFnWrapper<List<StatementEntityWithDisplayDetails>>{
-                        setState {
-                            statementSeriesList.add(it)
-                        }
-                        console.log(statementSeriesList)
+                        statementSeriesList.add(it)
+                        setState {}
                     }
                     liveData.removeObserver(observerFnWrapper)
                     liveData.observe(this, observerFnWrapper)
@@ -96,7 +99,36 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
             css(screenWithChartOnLeft)
             umGridContainer(columnSpacing = GridSpacing.spacing4) {
                 umItem(GridSize.cells12, GridSize.cells6){
+                    umGridContainer {
 
+                        umItem(GridSize.cells12) {
+                            createTopMainAction("exit_to_app",getString(MessageID.export), GridSize.cells4, GridSize.cells4){
+                                //export to png
+                            }
+
+                            if(chartData?.reportWithFilters?.reportUid ?: 0 == 0L){
+                                createTopMainAction("addchart",getString(MessageID.add_to).format(getString(MessageID.dashboard)), GridSize.cells4, GridSize.cells4){
+                                    chartData?.reportWithFilters?.let {
+                                        mPresenter?.handleOnClickAddFromDashboard(it)
+                                        if (it.reportUid == 0L) {
+                                            navController.popBackStack(ReportEditView.VIEW_NAME, true)
+                                            navController.popBackStack(ReportTemplateListView.VIEW_NAME, true)
+                                        }
+                                    }
+                                }
+                            }
+
+                            if(saveAsTemplateVisible){
+                                createTopMainAction("post_add",getString(MessageID.save_as_template), GridSize.cells4, GridSize.cells4){
+                                    chartData?.reportWithFilters?.let {
+                                        mPresenter?.handleOnClickAddAsTemplate(it)
+                                        showSnackBar(getString(MessageID.added))
+                                    }
+                                }
+                            }
+
+                        }
+                    }
                 }
 
                 umItem(GridSize.cells12, GridSize.cells6){
@@ -125,6 +157,9 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
                            statementSeriesList.forEachIndexed { index, statements ->
                               umTableBody {
                                   umTableRow {
+                                      css{
+                                          border = "0px solid transparent"
+                                      }
                                       umTableCell(colSpan = 4) {
                                           umTypography(seriesTitle[index]) {  }
                                       }

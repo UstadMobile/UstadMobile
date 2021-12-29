@@ -8,6 +8,7 @@ import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -16,7 +17,6 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.*
-import com.ustadmobile.mui.components.*
 import kotlinx.css.paddingBottom
 import kotlinx.css.paddingTop
 import kotlinx.css.px
@@ -120,7 +120,7 @@ class SchoolDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<Schoo
 
                         createInformation("email", entity?.schoolEmailAddress,
                             getString(MessageID.email)){
-                            onClickEmail(entity?.schoolEmailAddress)
+                            //TODO: Handle open mail link
                         }
 
                         createInformation("language", entity?.schoolTimeZone,

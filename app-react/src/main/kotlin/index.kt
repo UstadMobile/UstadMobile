@@ -99,7 +99,8 @@ private val diModule = DI.Module("UstadApp-React"){
     constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with false
 
     bind<ClientId>(tag = UstadMobileSystemCommon.TAG_CLIENT_ID) with scoped(EndpointScope.Default).singleton {
-        ClientId(990099)
+        val nodeIdAndAuth: NodeIdAndAuth = instance()
+        ClientId(nodeIdAndAuth.nodeId)
     }
 
     bind<ReduxThemeState>() with singleton{

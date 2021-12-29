@@ -18,7 +18,7 @@ import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.centerContainer
-import com.ustadmobile.util.StyleManager.centerItem
+import com.ustadmobile.util.StyleManager.alignCenterItems
 import com.ustadmobile.util.StyleManager.chipSetFilter
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.displayProperty
@@ -226,7 +226,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
               css (centerContainer)
               styledDiv {
                   css{
-                      +centerItem
+                      +alignCenterItems
                       width = LinearDimension("200px")
                   }
                   umIcon(emptyList.icon ?: "crop_free", className = "${StyleManager.name}-emptyListIcon")

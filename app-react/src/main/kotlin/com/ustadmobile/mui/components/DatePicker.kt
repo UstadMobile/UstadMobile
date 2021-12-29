@@ -214,7 +214,7 @@ fun RBuilder.umTimePicker(
     handler: StyledHandler<UMDateTimePickerProps>? = null
 ) = LocalizationProvider{
     attrs.dateAdapter = AdapterDateFns.default
-    timePicker(label, onChange, value, ampm, ampmInClock,inputFormat ?:"HH:mm", helperText,
+    timePicker(label, onChange, value, ampm, ampmInClock,inputFormat ?:"h:m", helperText,
         error, minDate, maxDate, onAccept, onClose, onError,cancelText, okText,
         inputVariant, openTo,toolbarTitle,views,className, handler)
 }

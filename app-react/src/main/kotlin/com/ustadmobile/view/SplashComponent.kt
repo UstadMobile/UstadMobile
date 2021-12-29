@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.controller.SplashPresenter
-import com.ustadmobile.util.StyleManager.centerItem
+import com.ustadmobile.util.StyleManager.alignCenterItems
 import com.ustadmobile.util.StyleManager.partnersList
 import com.ustadmobile.util.StyleManager.splashComponentContainer
 import com.ustadmobile.util.StyleManager.splashComponentPreloadContainer
@@ -61,9 +61,9 @@ class SplashComponent (props: UmProps): RComponent<UmProps, UmState>(props), Spl
                     styledDiv {
                         css(splashComponentPreloadContainer)
                         umGridContainer {
-                            css(centerItem)
+                            css(alignCenterItems)
                             umItem(GridSize.cells12) {
-                                css(centerItem)
+                                css(alignCenterItems)
                                 styledImg {
                                     css{
                                         width = LinearDimension("90%")
@@ -73,7 +73,7 @@ class SplashComponent (props: UmProps): RComponent<UmProps, UmState>(props), Spl
                             }
 
                             umItem(GridSize.cells12) {
-                                css(centerItem)
+                                css(alignCenterItems)
                                 val color = when {
                                     ThemeManager.isDarkModeActive() -> LinearProgressColor.secondary
                                     else -> LinearProgressColor.primary

@@ -15,6 +15,7 @@ import com.ustadmobile.util.StyleManager.gridListSecondaryItemDesc
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.format
+import com.ustadmobile.util.ext.roundTo
 import com.ustadmobile.util.ext.wordBreakLimit
 import com.ustadmobile.view.ext.statusCircleIndicator
 import com.ustadmobile.view.ext.umEntityAvatar
@@ -113,7 +114,7 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
 
                 umItem(GridSize.cells4){
                     val attendancesPercentage = getString(MessageID.x_percent_attended)
-                        .format(if(item.attendanceAverage >= 0) item.attendanceAverage * 100 else 0)
+                        .format((if(item.attendanceAverage >= 0) item.attendanceAverage * 100 else 0f).roundTo())
                     umTypography(attendancesPercentage){
                         css{
                             +alignTextToStart

@@ -12,7 +12,7 @@ external interface ShapeOptions {
 
 @Suppress("EnumEntryName")
 enum class UMColor {
-    default, inherit, primary, secondary
+    default, inherit, primary, secondary, error,info, success, standard
 }
 
 

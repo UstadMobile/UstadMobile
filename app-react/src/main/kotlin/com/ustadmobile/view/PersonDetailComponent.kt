@@ -11,6 +11,7 @@ import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
@@ -20,7 +21,6 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.*
-import com.ustadmobile.mui.components.*
 import kotlinx.css.LinearDimension
 import kotlinx.css.marginTop
 import kotlinx.css.padding
@@ -99,23 +99,23 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
             umGridContainer {
                 umItem(GridSize.cells12){
                     umGridContainer(GridSpacing.spacing4) {
-                        createProfileAction("call", getString(MessageID.call), GridSize.cells4, GridSize.cells2,
+                        createTopMainAction("call", getString(MessageID.call), GridSize.cells4, GridSize.cells2,
                             entity?.phoneNum != null){
-                            onClickCall(entity?.phoneNum)
+
                         }
-                        createProfileAction("message",getString(MessageID.text), GridSize.cells4, GridSize.cells2,
+                        createTopMainAction("message",getString(MessageID.text), GridSize.cells4, GridSize.cells2,
                             entity?.phoneNum != null){
-                            onClickSMS(entity?.phoneNum)
+
                         }
-                        createProfileAction("email",getString(MessageID.email), GridSize.cells4, GridSize.cells2,
+                        createTopMainAction("email",getString(MessageID.email), GridSize.cells4, GridSize.cells2,
                             entity?.emailAddr != null){
-                            onClickEmail(entity?.emailAddr)
+
                         }
-                        createProfileAction("vpn_key",getString(MessageID.change_password), GridSize.cells6, GridSize.cells3,
+                        createTopMainAction("vpn_key",getString(MessageID.change_password), GridSize.cells6, GridSize.cells3,
                             changePasswordVisible){
                             mPresenter?.handleChangePassword()
                         }
-                        createProfileAction("person_add",getString(MessageID.create_account), GridSize.cells6, GridSize.cells3,
+                        createTopMainAction("person_add",getString(MessageID.create_account), GridSize.cells6, GridSize.cells3,
                             showCreateAccountVisible){
                             mPresenter?.handleCreateAccount()
                         }

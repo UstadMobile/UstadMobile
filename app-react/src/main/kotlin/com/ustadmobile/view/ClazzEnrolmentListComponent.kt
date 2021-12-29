@@ -100,7 +100,7 @@ class ClazzEnrolmentListComponent (props: UmProps): UstadListComponent<ClazzEnro
     override fun RBuilder.renderHeaderView() {
         umGridContainer(rowSpacing = GridSpacing.spacing2){
             umItem(GridSize.cells12) {
-                createProfileAction("person",
+                createTopMainAction("person",
                     getString(MessageID.view_profile),
                     GridSize.cells6,
                     GridSize.cells2,true){

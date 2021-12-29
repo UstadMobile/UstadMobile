@@ -14,7 +14,6 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
@@ -112,6 +111,7 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
                 holder.binding.clazzlogViewpager2.currentItem = min(holder.binding.clazzlogViewpager2.currentItem + 1,
                         holder.mClazzLogList?.size ?: 0)
             }
+            Locale.ENGLISH
 
             holder.binding.prevButton.setOnClickListener {
                 holder.binding.clazzlogViewpager2.currentItem = max(holder.binding.clazzlogViewpager2.currentItem - 1, 0)
@@ -257,11 +257,11 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
     companion object {
         val DIFFUTIL_CLAZZATTENDANCERECORD = object: DiffUtil.ItemCallback<ClazzLogAttendanceRecordWithPerson>() {
             override fun areItemsTheSame(oldItem: ClazzLogAttendanceRecordWithPerson, newItem: ClazzLogAttendanceRecordWithPerson): Boolean {
-                return oldItem === newItem
+                return oldItem == newItem
             }
 
             override fun areContentsTheSame(oldItem: ClazzLogAttendanceRecordWithPerson, newItem: ClazzLogAttendanceRecordWithPerson): Boolean {
-                return oldItem === newItem
+                return oldItem == newItem
             }
         }
 

@@ -24,7 +24,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util.ASSET_BOOK
 import com.ustadmobile.util.Util.ASSET_FOLDER
 import com.ustadmobile.util.ext.joinString
-import com.ustadmobile.view.ext.createProfileAction
+import com.ustadmobile.view.ext.createTopMainAction
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
@@ -350,17 +350,17 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
 
                         umGridContainer(GridSpacing.spacing4) {
                             css(defaultPaddingTop)
-                            createProfileAction("library_add_check",getString(MessageID.mark_complete), GridSize.cells4, GridSize.cells4,
+                            createTopMainAction("library_add_check",getString(MessageID.mark_complete), GridSize.cells4, GridSize.cells4,
                                 markCompleteVisible, TypographyVariant.body2){
                                 mPresenter?.handleOnClickMarkComplete()
                             }
 
-                            createProfileAction("delete",getString(MessageID.delete), GridSize.cells4, GridSize.cells4,
+                            createTopMainAction("delete",getString(MessageID.delete), GridSize.cells4, GridSize.cells4,
                                 markCompleteVisible, TypographyVariant.body2){
                                 mPresenter?.handleOnClickDeleteButton()
                             }
 
-                            createProfileAction("download",getString(MessageID.manage_download), GridSize.cells4, GridSize.cells4,
+                            createTopMainAction("download",getString(MessageID.manage_download), GridSize.cells4, GridSize.cells4,
                                 markCompleteVisible, TypographyVariant.body2){
                                 mPresenter?.handleOnClickManageDownload()
                             }
