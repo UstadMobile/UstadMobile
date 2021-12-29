@@ -272,7 +272,7 @@ fun RBuilder.createInformation(icon:String? = null, data: String?, label: String
     }
 }
 
-fun RBuilder.circleIndicator(threshold: kotlin.Float) {
+fun RBuilder.statusCircleIndicator(threshold: kotlin.Float) {
     umIcon("circle",
         color = when {
             threshold > 0.8f -> IconColor.primary
@@ -424,7 +424,7 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
                                     css{
                                         padding(right = 2.spacingUnits)
                                     }
-                                    circleIndicator(attendance)
+                                    statusCircleIndicator(attendance)
                                 }
                                 umTypography(attendanceLabel?.format(attendance * 100)){
                                     css{
@@ -620,7 +620,7 @@ fun RBuilder.createListItemWithAttendance(
             umItem(GridSize.cells12, GridSize.cells12){
                 umGridContainer{
                     umItem(GridSize.cells1){
-                        circleIndicator(attendance)
+                        statusCircleIndicator(attendance)
                     }
 
                     umItem(GridSize.cells4){

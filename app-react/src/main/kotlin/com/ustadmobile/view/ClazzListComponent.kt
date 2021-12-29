@@ -16,7 +16,7 @@ import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.wordBreakLimit
-import com.ustadmobile.view.ext.circleIndicator
+import com.ustadmobile.view.ext.statusCircleIndicator
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
@@ -108,7 +108,7 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
                 }
 
                 umItem(GridSize.cells1){
-                    circleIndicator(item.attendanceAverage)
+                    statusCircleIndicator(item.attendanceAverage)
                 }
 
                 umItem(GridSize.cells4){
