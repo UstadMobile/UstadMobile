@@ -18,8 +18,8 @@ import com.ustadmobile.navigation.RouteManager.destinationList
 import com.ustadmobile.navigation.UstadDestination
 import com.ustadmobile.redux.ReduxAppState
 import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.alignCenterItems
+import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.defaultMarginBottom
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.displayProperty
@@ -185,9 +185,6 @@ fun RBuilder.umProfileAvatar(attachmentId: Long, fallback: String){
     umAvatar(src,variant = AvatarVariant.circular){
         css (personListItemAvatar)
         if(src == null) umIcon(fallback, className= "${StyleManager.name}-fallBackAvatarClass")
-        window.setTimeout({
-            attrs.src = "https://www.mockofun.com/wp-content/uploads/2019/12/circle-photo.jpg"
-        }, 2000)
     }
 }
 
