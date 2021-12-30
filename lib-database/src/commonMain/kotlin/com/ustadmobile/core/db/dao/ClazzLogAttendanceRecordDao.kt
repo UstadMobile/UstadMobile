@@ -5,7 +5,8 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson
 
 @Dao
 @Repository
@@ -29,7 +30,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
 
     @Query("""UPDATE ClazzLogAttendanceRecord
         SET clazzLogAttendanceRecordClazzLogUid = :newClazzLogUid,
-        clazzLogAttendanceRecordLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1)
+        clazzLogAttendanceRecordLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0)
         WHERE clazzLogAttendanceRecordClazzLogUid = :oldClazzLogUid
     """)
     abstract fun updateRescheduledClazzLogUids(oldClazzLogUid: Long, newClazzLogUid: Long)

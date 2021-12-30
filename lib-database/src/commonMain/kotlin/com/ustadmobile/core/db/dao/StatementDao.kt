@@ -52,7 +52,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
 
 
     @Query("""UPDATE StatementEntity SET extensionProgress = :progress,
-            statementLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            statementLastChangedBy = COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
             WHERE statementUid = :uid""")
     abstract fun updateProgress(uid: Long, progress: Int)
 

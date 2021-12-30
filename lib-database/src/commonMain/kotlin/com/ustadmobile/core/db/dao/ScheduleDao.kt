@@ -1,7 +1,7 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.Schedule
@@ -23,7 +23,7 @@ abstract class ScheduleDao : BaseDao<Schedule>, OneToManyJoinDao<Schedule> {
     }
 
     @Query("""UPDATE Schedule SET scheduleActive = :active,
-            scheduleLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            scheduleLastChangedBy = COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
             WHERE scheduleUid = :scheduleUid""")
     abstract suspend fun updateScheduleActivated(scheduleUid: Long, active: Boolean)
 

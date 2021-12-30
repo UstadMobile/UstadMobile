@@ -60,6 +60,7 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
                     val liveData = value[index].getData(0,Int.MAX_VALUE)
                     val observerFnWrapper = ObserverFnWrapper<List<StatementEntityWithDisplayDetails>>{
                         statementSeriesList.add(it)
+                        console.log(it)
                         setState {}
                     }
                     liveData.removeObserver(observerFnWrapper)

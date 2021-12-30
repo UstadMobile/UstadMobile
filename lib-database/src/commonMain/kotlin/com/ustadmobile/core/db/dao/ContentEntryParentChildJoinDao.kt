@@ -1,6 +1,9 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
@@ -64,7 +67,7 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
 
     @Query("""UPDATE ContentEntryParentChildJoin 
                SET cepcjParentContentEntryUid = :contentEntryUid, 
-               cepcjLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+               cepcjLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
                WHERE cepcjUid IN (:selectedItems)""")
     abstract suspend fun moveListOfEntriesToNewParent(contentEntryUid: Long, selectedItems: List<Long>)
 }

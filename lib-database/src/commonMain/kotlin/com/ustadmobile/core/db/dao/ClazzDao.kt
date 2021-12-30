@@ -55,7 +55,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
 
 
     @Query("UPDATE Clazz SET clazzSchoolUid = :schoolUid, " +
-            " clazzLastChangedBy = (SELECT nodeClientId FROM SyncNode) WHERE clazzUid = :clazzUid ")
+            " clazzLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) WHERE clazzUid = :clazzUid ")
     abstract suspend fun updateSchoolOnClazzUid(clazzUid: Long, schoolUid: Long)
 
     /**

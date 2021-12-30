@@ -17,7 +17,7 @@ abstract class HolidayDao: BaseDao<Holiday>, OneToManyJoinDao<Holiday> {
     abstract suspend fun findByHolidayCalendaUidAsync(holidayCalendarUid: Long): List<Holiday>
 
     @Query("""UPDATE Holiday SET holActive = :active, 
-        holLastModBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+        holLastModBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
         WHERE holUid = :holidayUid""")
     abstract suspend fun updateActiveByUidAsync(holidayUid: Long, active: Boolean)
 

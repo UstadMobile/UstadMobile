@@ -338,13 +338,13 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract fun getAllEntriesRecursivelyAsList(contentEntryUid: Long): List<ContentEntryWithParentChildJoinAndMostRecentContainer>
 
     @Query("""UPDATE ContentEntry SET ceInactive = :ceInactive, 
-            contentEntryLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            contentEntryLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
             WHERE ContentEntry.contentEntryUid = :contentEntryUid""")
     @JsName("updateContentEntryInActive")
     abstract fun updateContentEntryInActive(contentEntryUid: Long, ceInactive: Boolean)
 
     @Query("""UPDATE ContentEntry SET contentTypeFlag = :contentFlag,
-            contentEntryLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            contentEntryLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
             WHERE ContentEntry.contentEntryUid = :contentEntryUid""")
     @JsName("updateContentEntryContentFlag")
     abstract fun updateContentEntryContentFlag(contentFlag: Int, contentEntryUid: Long)
@@ -381,7 +381,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
 
     @Query("""UPDATE ContentEntry SET ceInactive = :toggleVisibility, 
-                contentEntryLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+                contentEntryLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
                 WHERE contentEntryUid IN (:selectedItem)""")
     abstract suspend fun toggleVisibilityContentEntryItems(toggleVisibility: Boolean, selectedItem: List<Long>)
 
