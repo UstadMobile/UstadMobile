@@ -36,6 +36,7 @@ import com.ustadmobile.view.ext.appBarSpacer
 import com.ustadmobile.view.ext.renderRoutes
 import com.ustadmobile.view.ext.umTopBar
 import kotlinext.js.jsObject
+import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -86,7 +87,6 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
      */
     private fun onDestinationChanged() {
         val destination = lookupDestinationName(getViewNameFromUrl()) ?: defaultDestination
-
         destination.takeIf { it.labelId != 0 && it.labelId != MessageID.content}?.apply {
             ustadComponentTitle = getString(labelId)
         }
@@ -95,6 +95,11 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
             currentDestination = destination
             activeAccount = accountManager.activeAccount
         }
+
+        window.setTimeout({
+            val settings = document.getElementById("home-${MessageID.settings}")
+            settings?.asDynamic()?.style?.display = if(activeAccount?.admin == false) "none" else "flex"
+        }, 500)
     }
 
 
@@ -207,6 +212,7 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                         destination.icon?.let {
                             umListItemWithIcon(it, getString(destination.labelId),
                                 divider = destination.divider ,
+                                id = "home-${destination.labelId}",
                                 onClick = {
                                     systemImpl.go(destination.view, mapOf(),this)
                                 },
@@ -214,6 +220,7 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                                 css{
                                     +alignTextToStart
                                     padding = "8px 16px"
+                                    display = if(destination.labelId == MessageID.settings) Display.none else Display.flex
                                 }
                             }
                         }
