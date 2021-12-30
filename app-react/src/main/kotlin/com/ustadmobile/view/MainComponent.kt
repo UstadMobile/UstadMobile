@@ -55,7 +55,7 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
 
     private var activeAccount: UmAccount? = null
 
-    override var viewName: String? = null
+    override var viewNames: List<String>? = null
 
     private var appState: ReduxAppState = ReduxAppState()
 

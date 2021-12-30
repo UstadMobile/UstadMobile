@@ -14,8 +14,8 @@ import react.RBuilder
 class HolidayCalendarListComponent(mProps: UmProps): UstadListComponent<HolidayCalendar, HolidayCalendarWithNumEntries>(mProps),
     HolidayCalendarListView {
 
-    override val viewName: String
-        get() = HolidayCalendarListView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(HolidayCalendarListView.VIEW_NAME)
 
     private var mPresenter: HolidayCalendarListPresenter? = null
 

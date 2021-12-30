@@ -26,12 +26,12 @@ class ScheduleEditComponent (mProps: UmProps): UstadEditComponent<Schedule>(mPro
     override val mEditPresenter: UstadEditPresenter<*, Schedule>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = ScheduleEditView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ScheduleEditView.VIEW_NAME)
 
-    val okText = getString(MessageID.ok)
+    private val okText = getString(MessageID.ok)
 
-    val cancelText = getString(MessageID.cancel)
+    private val cancelText = getString(MessageID.cancel)
 
     private var fromTimeLabel = FieldLabel(text = getString(MessageID.from))
 

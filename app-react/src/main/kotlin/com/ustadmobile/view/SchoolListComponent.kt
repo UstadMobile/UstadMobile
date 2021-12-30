@@ -33,15 +33,14 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
 
     private var mPresenter: SchoolListPresenter? = null
 
-
     override val displayTypeRepo: Any?
         get() = dbRepo?.schoolDao
 
     override val listPresenter: UstadListPresenter<*, in SchoolWithMemberCountAndLocation>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = SchoolListView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(SchoolListView.VIEW_NAME)
 
     override var newSchoolListOptionVisible: Boolean = false
         get() = field

@@ -3,6 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.controller.InviteViaLinkPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.InviteViaLinkView
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -15,7 +16,6 @@ import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.createListItemWithIconAndTitle
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
-import com.ustadmobile.mui.components.*
 import kotlinx.css.marginTop
 import react.RBuilder
 import react.setState
@@ -26,8 +26,8 @@ class InviteViaLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmSta
 
     private var mPresenter: InviteViaLinkPresenter? = null
 
-    override val viewName: String
-        get() = InviteViaLinkView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(InviteViaLinkView.VIEW_NAME)
 
     override var inviteLink: String? = null
         get() = field

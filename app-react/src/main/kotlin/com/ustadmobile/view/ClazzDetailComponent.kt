@@ -17,8 +17,8 @@ class ClazzDetailComponent(mProps: UmProps): UstadDetailComponent<Clazz>(mProps)
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = ClazzDetailView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ClazzDetailView.VIEW_NAME)
 
     private var tabsToRender: List<UmTab>? = null
 

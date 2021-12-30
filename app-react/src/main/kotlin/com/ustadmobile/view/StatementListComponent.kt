@@ -6,6 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.StatementListView
 import com.ustadmobile.lib.db.entities.StatementWithSessionDetailDisplay
 import com.ustadmobile.lib.db.entities.VerbEntity
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.*
@@ -13,7 +14,6 @@ import com.ustadmobile.view.ext.setStatementQuestionAnswer
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import com.ustadmobile.view.ext.umItemThumbnail
-import com.ustadmobile.mui.components.*
 import kotlinx.css.FlexDirection
 import kotlinx.css.LinearDimension
 import kotlinx.css.padding
@@ -33,8 +33,8 @@ class StatementListComponent(props: UmProps): UstadListComponent<StatementWithSe
     override val displayTypeRepo: Any?
         get() = dbRepo?.statementDao
 
-    override val viewName: String
-        get() = StatementListView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(StatementListView.VIEW_NAME)
 
     override fun RBuilder.renderListItem(item: StatementWithSessionDetailDisplay) {
         umGridContainer {

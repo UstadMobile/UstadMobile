@@ -29,8 +29,8 @@ class ScopedGrantEditComponent (mProps: UmProps): UstadEditComponent<ScopedGrant
     override val mEditPresenter: UstadEditPresenter<*, ScopedGrant>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = ScopedGrantEditView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ScopedGrantEditView.VIEW_NAME)
 
 
     private var scopeList: List<BitmaskFlag>? = null

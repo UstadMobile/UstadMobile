@@ -36,8 +36,8 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
 
     private var filterBySchoolUid: Long = 0
 
-    override val viewName: String
-        get() = SchoolMemberListView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(SchoolMemberListView.VIEW_NAME)
 
     override fun addMember() {
         val args = if (addPersonKeyName == "Person_" + Role.ROLE_SCHOOL_STAFF_UID.toString()) {

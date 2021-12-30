@@ -20,8 +20,8 @@ class LanguageListComponent(mProps: UmProps): UstadListComponent<Language, Langu
     override val listPresenter: UstadListPresenter<*, in Language>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = LanguageListView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(LanguageListView.VIEW_NAME)
 
     override fun onCreateView() {
         super.onCreateView()

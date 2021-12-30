@@ -24,8 +24,8 @@ class SchoolDetailComponent(mProps:UmProps): UstadDetailComponent<School>(mProps
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = SchoolDetailView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(SchoolDetailView.VIEW_NAME)
 
     override var entity: School? = null
         set(value) {

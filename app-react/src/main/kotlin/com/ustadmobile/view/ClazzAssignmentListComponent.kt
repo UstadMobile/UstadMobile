@@ -28,8 +28,8 @@ class ClazzAssignmentListComponent(mProps: UmProps): UstadListComponent<ClazzAss
 
     private var mPresenter: ClazzAssignmentListPresenter? = null
 
-    override val viewName: String
-        get() = ClazzAssignmentListView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ClazzAssignmentListView.VIEW_NAME)
 
     override val listPresenter: UstadListPresenter<*, in ClazzAssignmentWithMetrics>?
         get() = mPresenter

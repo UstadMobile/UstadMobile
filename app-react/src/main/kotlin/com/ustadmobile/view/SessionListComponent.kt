@@ -5,11 +5,11 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.lib.db.entities.PersonWithSessionsDisplay
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.*
 import com.ustadmobile.view.ext.*
-import com.ustadmobile.mui.components.*
 import kotlinx.css.FlexDirection
 import kotlinx.css.LinearDimension
 import kotlinx.css.padding
@@ -29,8 +29,8 @@ class SessionListComponent(props: UmProps): UstadListComponent<PersonWithSession
     override val displayTypeRepo: Any?
         get() = dbRepo?.userSessionDao
 
-    override val viewName: String
-        get() = SessionListView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(SessionListView.VIEW_NAME)
 
 
     override fun RBuilder.renderListItem(item: PersonWithSessionsDisplay) {

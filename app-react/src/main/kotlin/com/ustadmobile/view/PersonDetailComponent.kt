@@ -39,8 +39,8 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = PersonDetailView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(PersonDetailView.VIEW_NAME)
 
     private var classList: List<ClazzEnrolmentWithClazzAndAttendance>? = null
 

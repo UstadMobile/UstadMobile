@@ -36,8 +36,8 @@ class ReportFilterEditComponent (mProps: UmProps): UstadEditComponent<ReportFilt
     override val mEditPresenter: UstadEditPresenter<*, ReportFilter>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = ReportFilterEditView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ReportFilterEditView.VIEW_NAME)
 
 
     private var fieldLabel = FieldLabel(text = getString(MessageID.report_filter_edit_field))

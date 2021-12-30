@@ -32,8 +32,8 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
     override val mEditPresenter: UstadEditPresenter<*, ClazzWithHolidayCalendarAndSchool>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = ClazzEdit2View.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ClazzEdit2View.VIEW_NAME)
 
     private var clazzNameLabel = FieldLabel(text = getString(MessageID.class_name))
 

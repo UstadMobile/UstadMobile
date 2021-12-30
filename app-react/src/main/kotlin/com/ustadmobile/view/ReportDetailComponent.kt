@@ -36,8 +36,8 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = ReportDetailView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ReportDetailView.VIEW_NAME)
 
     override var saveAsTemplateVisible: Boolean = false
         get() = field

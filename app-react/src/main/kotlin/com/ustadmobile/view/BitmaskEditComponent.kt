@@ -27,8 +27,8 @@ class BitmaskEditComponent (mProps: UmProps): UstadEditComponent<LongWrapper>(mP
     override val mEditPresenter: UstadEditPresenter<*, LongWrapper>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = BitmaskEditView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(BitmaskEditView.VIEW_NAME)
 
 
     private var scopeList: List<BitmaskFlag>? = null

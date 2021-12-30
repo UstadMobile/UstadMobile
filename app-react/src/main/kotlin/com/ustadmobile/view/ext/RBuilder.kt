@@ -419,7 +419,7 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
                                     }
                                     statusCircleIndicator(attendance)
                                 }
-                                umTypography(attendanceLabel?.format(attendance * 100)){
+                                umTypography(attendanceLabel?.format(attendance.roundTo())){
                                     css{
                                         +alignTextToStart
                                         +gridListSecondaryItemDesc
@@ -617,7 +617,7 @@ fun RBuilder.createListItemWithAttendance(
                     }
 
                     umItem(GridSize.cells4){
-                        umTypography(attendanceLabel.format(attendance * 100)){
+                        umTypography(attendanceLabel.format(attendance.roundTo())){
                             css{
                                 +alignTextToStart
                                 +gridListSecondaryItemDesc
@@ -924,7 +924,7 @@ fun RBuilder.createContentEntryListItem(
                                             umIconButton(if(downloaded) "check_circle" else "download",
                                                 size = IconButtonSize.medium, onClick = {
                                                     stopEventPropagation(it)
-                                                    onSecondaryAction?.invoke()
+                                                    //onSecondaryAction?.invoke()
                                                 }){
                                                 css(StyleManager.secondaryActionBtn)
                                             }

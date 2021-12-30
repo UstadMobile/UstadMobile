@@ -41,8 +41,8 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
 
     private var translations: List<ContentEntryRelatedEntryJoinWithLanguage> = listOf()
 
-    override val viewName: String
-        get() = ContentEntryDetailOverviewView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ContentEntryDetailOverviewView.VIEW_NAME)
 
     private var currentDownloadJobItemStatus: Int = -1
 

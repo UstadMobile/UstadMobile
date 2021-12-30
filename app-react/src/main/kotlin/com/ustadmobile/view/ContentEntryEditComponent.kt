@@ -9,6 +9,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -20,7 +21,6 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
-import com.ustadmobile.mui.components.*
 import kotlinx.css.*
 import org.w3c.dom.events.MouseEvent
 import react.RBuilder
@@ -36,8 +36,8 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
     override val mEditPresenter: UstadEditPresenter<*, ContentEntryWithLanguage>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = ContentEntryEdit2View.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ContentEntryEdit2View.VIEW_NAME)
 
     private var titleLabel = FieldLabel(text = getString(MessageID.title))
 

@@ -36,8 +36,8 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = ClazzDetailOverviewView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ClazzDetailOverviewView.VIEW_NAME)
 
     private var schedules: List<Schedule> = listOf()
 

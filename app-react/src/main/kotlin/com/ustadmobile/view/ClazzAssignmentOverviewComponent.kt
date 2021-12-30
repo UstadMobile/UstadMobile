@@ -39,8 +39,8 @@ class ClazzAssignmentOverviewComponent(mProps: UmProps): UstadDetailComponent<Cl
 
     private var showScoreMetrics = false
 
-    override val viewName: String
-        get() = ClazzAssignmentDetailOverviewView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ClazzAssignmentDetailOverviewView.VIEW_NAME)
 
     private var showClassCommentDialog = false
 

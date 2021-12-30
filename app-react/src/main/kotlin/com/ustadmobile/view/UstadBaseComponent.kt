@@ -48,12 +48,13 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
 
     protected lateinit var arguments: Map<String, String>
 
-    protected abstract val viewName: String?
+    protected abstract val viewNames: List<String>?
 
     private val lifecycleStatus = atomic(0)
 
     private var hashChangeListener:(Event) -> Unit = { (it as HashChangeEvent)
-        if(viewName == getViewNameFromUrl(it.newURL)){
+        //Refresh component as arguments changes and prevent loading it multiple times
+        if(viewNames?.indexOf(getViewNameFromUrl(it.newURL)) != -1){
             arguments = urlSearchParamsToMap()
             onCreateView()
         }

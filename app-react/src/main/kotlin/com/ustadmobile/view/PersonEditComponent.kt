@@ -46,8 +46,8 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
 
     private var displayRegField = Display.flex
 
-    override val viewName: String
-        get() = PersonEditView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(PersonEditView.VIEW_NAME)
 
     override var genderOptions: List<MessageIdOption>? = null
         get() = field

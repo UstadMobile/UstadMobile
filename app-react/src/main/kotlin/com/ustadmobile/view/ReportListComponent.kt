@@ -5,8 +5,8 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ReportListView
 import com.ustadmobile.lib.db.entities.Report
+import com.ustadmobile.util.UmProps
 import react.RBuilder
-import com.ustadmobile.util.*
 
 class ReportListComponent(mProps: UmProps):  UstadListComponent<Report, Report>(mProps),
     ReportListView {
@@ -19,8 +19,8 @@ class ReportListComponent(mProps: UmProps):  UstadListComponent<Report, Report>(
     override val listPresenter: UstadListPresenter<*, in Report>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = ReportListView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ReportListView.VIEW_NAME)
 
     override fun onCreateView() {
         super.onCreateView()

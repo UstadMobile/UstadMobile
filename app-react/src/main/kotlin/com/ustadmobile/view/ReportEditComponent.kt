@@ -31,8 +31,8 @@ class ReportEditComponent (mProps: UmProps): UstadEditComponent<ReportWithSeries
     override val mEditPresenter: UstadEditPresenter<*, ReportWithSeriesWithFilters>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = ReportEditView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ReportEditView.VIEW_NAME)
 
     private var showSeriesDeleteButton = false
 

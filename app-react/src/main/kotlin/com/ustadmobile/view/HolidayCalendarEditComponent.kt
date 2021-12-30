@@ -34,8 +34,8 @@ class HolidayCalendarEditComponent(mProps: UmProps): UstadEditComponent<HolidayC
     override val mEditPresenter: UstadEditPresenter<*, HolidayCalendar>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = HolidayCalendarEditView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(HolidayCalendarEditView.VIEW_NAME)
 
     private var holidays: List<Holiday> = listOf()
 

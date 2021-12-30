@@ -28,8 +28,8 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
 
     private var mPresenter: ClazzAssignmentEditPresenter? = null
 
-    override val viewName: String
-        get() = ClazzAssignmentEditView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ClazzAssignmentEditView.VIEW_NAME)
 
     override val mEditPresenter: UstadEditPresenter<*, ClazzAssignment>?
         get() = mPresenter

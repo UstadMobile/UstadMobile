@@ -29,8 +29,8 @@ class ClazzLogEditComponent (mProps: UmProps): UstadEditComponent<ClazzLog>(mPro
     override val mEditPresenter: UstadEditPresenter<*, ClazzLog>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = ClazzLogEditView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ClazzLogEditView.VIEW_NAME)
 
     private var dateLabel = FieldLabel(text = getString(MessageID.date))
 

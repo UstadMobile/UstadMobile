@@ -9,12 +9,12 @@ import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.horizontalList
 import com.ustadmobile.util.StyleManager.listComponentContainer
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.view.ext.*
-import com.ustadmobile.mui.components.*
 import kotlinx.css.*
 import react.RBuilder
 import react.setState
@@ -32,8 +32,8 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
 
     private var showPrivateCommentDialog = false
 
-    override val viewName: String
-        get() = ClazzAssignmentDetailStudentProgressView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ClazzAssignmentDetailStudentProgressView.VIEW_NAME)
 
     private var privateComments: List<CommentsWithPerson> = listOf()
 
