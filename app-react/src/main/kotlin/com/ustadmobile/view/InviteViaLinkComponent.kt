@@ -66,7 +66,7 @@ class InviteViaLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmSta
                 +contentContainer
                 marginTop = 4.spacingUnits
             }
-            umGridContainer(GridSpacing.spacing4) {
+            umGridContainer(rowSpacing = GridSpacing.spacing4) {
 
                 umItem(sm = GridSize.cells12){
                     umTypography(getString(MessageID.invite_link_desc).format(entityName ?: ""),

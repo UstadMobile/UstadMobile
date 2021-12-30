@@ -18,7 +18,7 @@ object RouteManager {
         UstadDestination("people", MessageID.classes,ClazzList2View.VIEW_NAME, ClazzListComponent::class, showSearch = true),
         UstadDestination("person", MessageID.people, PersonListView.VIEW_NAME, PersonListComponent::class, showSearch = true),
         UstadDestination("pie_chart", MessageID.reports, ReportListView.VIEW_NAME, ReportListComponent::class, divider = true),
-        UstadDestination("settings", MessageID.settings, SettingsView.VIEW_NAME, PlaceHolderComponent::class),
+        UstadDestination("settings", MessageID.settings, SettingsView.VIEW_NAME, SettingsComponent::class),
         UstadDestination(view = AccountListView.VIEW_NAME, component = AccountListComponent::class),
         UstadDestination(view = Login2View.VIEW_NAME, labelId = MessageID.login, component = LoginComponent::class, showNavigation = false),
         UstadDestination(view = ContentEntryDetailView.VIEW_NAME, component = ContentEntryDetailComponent::class),
@@ -70,8 +70,7 @@ object RouteManager {
         UstadDestination(view = ReportTemplateListView.VIEW_NAME, component = ReportTemplateListComponent::class),
         UstadDestination(view = ReportEditView.VIEW_NAME, component = ReportEditComponent::class),
         UstadDestination(view = ReportFilterEditView.VIEW_NAME, component = ReportFilterEditComponent::class),
-        UstadDestination(view = ReportDetailView.VIEW_NAME, component = ReportDetailComponent::class),
-        UstadDestination(labelId= MessageID.accounts, view = AccountListView.VIEW_NAME, component = PlaceHolderComponent::class)
+        UstadDestination(view = ReportDetailView.VIEW_NAME, component = ReportDetailComponent::class)
     )
 
     /**
