@@ -95,7 +95,7 @@ class ClazzAssignmentListComponent(mProps: UmProps): UstadListComponent<ClazzAss
                                         padding(right = 2.spacingUnits)
                                     }
                                 }
-                                umTypography(item.caDeadlineDate.toDate().standardFormat(),
+                                umTypography(item.caDeadlineDate.toDate()?.standardFormat(),
                                     variant = TypographyVariant.body2) {
                                     css(alignTextToStart)
                                 }

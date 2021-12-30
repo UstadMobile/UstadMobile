@@ -86,8 +86,8 @@ class StatementListComponent(props: UmProps): UstadListComponent<StatementWithSe
                                     umIcon("calendar_today", fontSize = IconFontSize.small)
                                 }
 
-                                umTypography("${item.timestamp.toDate().standardFormat()} " +
-                                        "- ${item.timestamp.toDate().formattedInHoursAndMinutes()}",
+                                umTypography("${item.timestamp.toDate()?.standardFormat()} " +
+                                        "- ${item.timestamp.toDate()?.formattedInHoursAndMinutes()}",
                                     variant = TypographyVariant.body1,
                                     paragraph = true){
                                     css(StyleManager.alignTextToStart)

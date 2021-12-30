@@ -10,15 +10,13 @@ import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.util.ext.startOfDay
-import com.ustadmobile.util.ext.timeInMillsFromStartOfDay
-import com.ustadmobile.util.ext.toDate
+import com.ustadmobile.util.ext.*
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import react.RBuilder
 import react.setState
 import styled.css
+import styled.styledDiv
 import kotlin.js.Date
 
 class ClazzLogEditComponent (mProps: UmProps): UstadEditComponent<ClazzLog>(mProps),
@@ -106,42 +104,46 @@ class ClazzLogEditComponent (mProps: UmProps): UstadEditComponent<ClazzLog>(mPro
     }
 
     override fun RBuilder.render() {
-        umGridContainer(GridSpacing.spacing4) {
+        styledDiv {
             css{
                 +contentContainer
                 +defaultPaddingTop
             }
-            umItem(GridSize.cells12, GridSize.cells6 ) {
-                umDatePicker(
-                    label = "${dateLabel.text}",
-                    error = dateLabel.error,
-                    helperText = dateLabel.errorText,
-                    value = dateFieldValue.toDate(),
-                    inputVariant = FormControlVariant.outlined,
-                    onChange = {
-                        setState {
-                            date = it.startOfDay(timeZone).getTime().toLong()
-                            dateFieldValue = it.getTime().toLong()
-                            dateError = null
-                        }
-                    })
-            }
 
-            umItem(GridSize.cells12, GridSize.cells6 ) {
+            umGridContainer(columnSpacing = GridSpacing.spacing4) {
+                umItem(GridSize.cells12, GridSize.cells6) {
+                    umDatePicker(
+                        label = "${dateLabel.text}",
+                        error = dateLabel.error,
+                        helperText = dateLabel.errorText,
+                        value = dateFieldValue.toDate(),
+                        inputFormat = DATE_FORMAT_DD_MMM_YYYY,
+                        inputVariant = FormControlVariant.outlined,
+                        onChange = {
+                            setState {
+                                date = it.startOfDay(timeZone).getTime().toLong()
+                                dateFieldValue = it.getTime().toLong()
+                                dateError = null
+                            }
+                        })
+                }
 
-                umTimePicker(
-                    label = "${timeLabel.text}",
-                    error = timeLabel.error,
-                    helperText = timeLabel.errorText,
-                    value = timeFieldValue.toDate(),
-                    inputVariant = FormControlVariant.outlined,
-                    onChange = {
-                        setState {
-                            time = it.timeInMillsFromStartOfDay(timeZone)
-                            timeFieldValue = it.getTime().toLong()
-                            timeError = null
-                        }
-                    })
+                umItem(GridSize.cells12, GridSize.cells6 ) {
+
+                    umTimePicker(
+                        label = "${timeLabel.text}",
+                        error = timeLabel.error,
+                        helperText = timeLabel.errorText,
+                        value = timeFieldValue.toDate(),
+                        inputVariant = FormControlVariant.outlined,
+                        onChange = {
+                            setState {
+                                time = it.timeInMillsFromStartOfDay(timeZone)
+                                timeFieldValue = it.getTime().toLong()
+                                timeError = null
+                            }
+                        })
+                }
             }
         }
     }

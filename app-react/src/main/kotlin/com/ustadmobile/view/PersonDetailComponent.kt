@@ -157,7 +157,7 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
 
                                 umItem(GridSize.cells12){
                                     createInformation("event",
-                                        entity?.dateOfBirth.toDate().standardFormat(),
+                                        entity?.dateOfBirth.toDate()?.standardFormat(),
                                         getString(MessageID.birthday)
                                     )
 

@@ -181,7 +181,7 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
                                           }
 
                                           umTableCell{
-                                              umTypography(statement.timestamp.toDate().standardFormat()) {  }
+                                              umTypography(statement.timestamp.toDate()?.standardFormat()) {  }
                                           }
                                       }
                                   }

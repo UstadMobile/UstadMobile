@@ -3,19 +3,21 @@ package com.ustadmobile.util.ext
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.moment
-import com.ustadmobile.door.util.systemTimeInMillis
 import kotlin.js.Date
 
 /**
- * Convert milliseconds to date
+ * Max date that can be represented on JS
  */
-fun Long?.toDate(): Date {
-    val mills = when {
-        this ?: 0L == 0L -> systemTimeInMillis()
-        this == Long.MAX_VALUE -> 8640000000000000
-        else -> this
+val MAX_VALUE: Long
+    get() = 8640000000000000L
+
+fun Long?.toDate(): Date? {
+    return when {
+        this ?: 0L == 0L -> null
+        this == Long.MAX_VALUE -> Date(MAX_VALUE)
+        this == null -> null
+        else -> Date(this)
     }
-    return Date(mills!!)
 }
 
 fun Long?.formatToStringHoursMinutesSeconds(impl: UstadMobileSystemImpl): String {

@@ -3,23 +3,33 @@ package com.ustadmobile.util.ext
 import com.ustadmobile.core.util.moment
 import kotlin.js.Date
 
-fun Date.formatDate(format: String = "DD/MM/YYYY", timezone: String? = null): String {
+const val DATE_FORMAT_DD_MMM_YYYY_HM = "DD MMM YYYY - h:m"
+
+const val DATE_FORMAT_DD_MMM_YYYY = "DD MMM YYYY"
+
+const val DATE_FORMAT_DDDD_MMMM_DD_H_M = "dddd, MMMM DD h:m"
+
+const val DATE_FORMAT_DD_MM_YYYY = "DD/MM/YYYY"
+
+const val DATE_FORMAT_MMMM_DD_YYYY = "MMMM DD, YYYY"
+
+const val TIME_FORMAT_H_M = "h:m"
+
+fun Date.formatDate(format: String? = DATE_FORMAT_DD_MM_YYYY, timezone: String? = null): String {
     val utc = moment.utc(this).toDate()
     return moment(utc).utcOffset(timezone ?: "").format(format) as String
 }
 
-fun Date.maxDate() = Date(8640000000000000)
+fun Date.standardFormat(timezone: String? = null): String = formatDate(DATE_FORMAT_DD_MM_YYYY, timezone)
 
-fun Date.standardFormat(timezone: String? = null): String = formatDate("DD/MM/YYYY", timezone)
-
-fun Date.fullDateFormat(format: String = "MMMM DD, YYYY", timezone: String? = null)
+fun Date.fullDateFormat(format: String = DATE_FORMAT_MMMM_DD_YYYY, timezone: String? = null)
 : String = formatDate(format, timezone)
 
-fun Date.formattedInHoursAndMinutes(timezone: String? = null) : String = formatDate("HH:mm", timezone)
+fun Date.formattedInHoursAndMinutes(timezone: String? = null) : String = formatDate(TIME_FORMAT_H_M, timezone)
 
-fun Date.formattedWithFullMonth(timezone: String? = null): String = formatDate("DD/MMMM/YYYY", timezone)
+fun Date.formattedWithFullMonth(timezone: String? = null): String = formatDate(DATE_FORMAT_DD_MM_YYYY, timezone)
 
-fun Date.formatFullDate(timezone: String? = null): String = formatDate("dddd, MMMM DD h:m", timezone)
+fun Date.formatFullDate(timezone: String? = null): String = formatDate(DATE_FORMAT_DDDD_MMMM_DD_H_M, timezone)
 
 fun Date.startOfDay(timezone: String? = null) : Date{
     val utc = moment.utc(this).toDate()

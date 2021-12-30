@@ -55,8 +55,8 @@ class SessionListComponent(props: UmProps): UstadListComponent<PersonWithSession
                 }
 
                 umItem(GridSize.cells12){
-                    umTypography("${item.startDate.toDate().standardFormat()} " +
-                            "- ${item.startDate.toDate().formattedInHoursAndMinutes()}",
+                    umTypography("${item.startDate.toDate()?.standardFormat()} " +
+                            "- ${item.startDate.toDate()?.formattedInHoursAndMinutes()}",
                         variant = TypographyVariant.body1,
                         paragraph = true){
                         css(StyleManager.alignTextToStart)

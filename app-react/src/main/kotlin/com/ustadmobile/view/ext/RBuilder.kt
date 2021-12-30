@@ -1028,8 +1028,8 @@ fun RBuilder.createListItemWithPersonAndAttendanceProgress(
                }
 
                umItem (GridSize.cells12){
-                   val endDate = if(item.endDate == 0L) "" else " - ${item.endDate.toDate().standardFormat()}"
-                   umTypography("${item.startDate.toDate().standardFormat()}$endDate",
+                   val endDate = if(item.endDate == 0L) "" else " - ${item.endDate.toDate()?.standardFormat()}"
+                   umTypography("${item.startDate.toDate()?.standardFormat()}$endDate",
                        variant = TypographyVariant.body1){
                        css (alignTextToStart)
                    }
@@ -1252,8 +1252,8 @@ fun RBuilder.createContentEntryListItemWithAttemptsAndProgress(
                 }
 
                 umItem(GridSize.cells12, GridSize.cells3) {
-                    val endDate = if(item.endDate == 0L) "" else " - ${item.endDate.toDate().standardFormat()}"
-                    umTypography("${item.startDate.toDate().standardFormat()}$endDate",
+                    val endDate = if(item.endDate == 0L) "" else " - ${item.endDate.toDate()?.standardFormat()}"
+                    umTypography("${item.startDate.toDate()?.standardFormat()}$endDate",
                         variant = TypographyVariant.body2){
                         css (alignTextToStart)
                     }

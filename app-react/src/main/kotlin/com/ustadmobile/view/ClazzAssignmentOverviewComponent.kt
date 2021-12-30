@@ -160,8 +160,8 @@ class ClazzAssignmentOverviewComponent(mProps: UmProps): UstadDetailComponent<Cl
                         umIcon("event_available")
                     }
 
-                    umTypography("${entity?.caDeadlineDate.toDate().fullDateFormat()} " +
-                            "- ${entity?.caDeadlineDate.toDate().formattedInHoursAndMinutes()}"){
+                    umTypography("${entity?.caDeadlineDate.toDate()?.fullDateFormat()} " +
+                            "- ${entity?.caDeadlineDate.toDate()?.formattedInHoursAndMinutes()}"){
                         css{
                             marginTop = LinearDimension("2px")
                             +StyleManager.alignTextToStart

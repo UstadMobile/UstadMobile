@@ -22,6 +22,7 @@ import com.ustadmobile.util.StyleManager.tabsContainer
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util
 import com.ustadmobile.util.Util.stopEventPropagation
+import com.ustadmobile.util.ext.DATE_FORMAT_DD_MMM_YYYY_HM
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.formatDate
 import com.ustadmobile.util.ext.toDate
@@ -148,7 +149,7 @@ class ClazzLogEditAttendanceComponent (mProps: UmProps): UstadEditComponent<Claz
                        css{
                            +alignCenterItems
                        }
-                       umTypography(entity?.logDate.toDate().formatDate("DD MMM YYYY - h:m",clazzLogTimezone),
+                       umTypography(entity?.logDate.toDate()?.formatDate(DATE_FORMAT_DD_MMM_YYYY_HM,clazzLogTimezone),
                            variant = TypographyVariant.h6){
                            css{
                                margin(top = 1.spacingUnits)

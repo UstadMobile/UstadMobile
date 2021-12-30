@@ -44,7 +44,7 @@ fun RBuilder.umTextField(
     handler: StyledHandler<UMTextFieldProps>? = null
 ) = createStyledComponent(TextField, className, handler) {
     css(defaultFullWidth)
-    com.ustadmobile.mui.components.setProps(
+    setProps(
         this, autoComplete, autoFocus, disabled, error, fullWidth, helperText,
         id, label, margin, false, name, onChange, placeholder, required, null, null,
         false, type, value, variant
@@ -72,28 +72,9 @@ fun RBuilder.umTextFieldMultiLine(
     handler: StyledHandler<UMTextFieldProps>? = null
 ) = createStyledComponent(TextField, className, handler) {
     css(defaultFullWidth)
-    com.ustadmobile.mui.components.setProps(
-        this,
-        null,
-        autoFocus,
-        disabled,
-        error,
-        fullWidth,
-        helperText,
-        id,
-        label,
-        margin,
-        true,
-        name,
-        onChange,
-        placeholder,
-        required,
-        rows,
-        rowsMax,
-        false,
-        InputType.text,
-        value,
-        variant
+    setProps(this, null, autoFocus,
+        disabled, error, fullWidth, helperText, id, label, margin, true, name, onChange,
+        placeholder, required, rows, rowsMax, false, InputType.text, value, variant
     )
 }
 
@@ -119,28 +100,10 @@ fun RBuilder.umTextFieldSelect(
     className: String? = null,
     handler: StyledHandler<UMTextFieldProps>? = null
 ) = createStyledComponent(TextField, className, handler) {
-    com.ustadmobile.mui.components.setProps(
-        this,
-        autoComplete,
-        autoFocus,
-        disabled,
-        error,
-        fullWidth,
-        helperText,
-        id,
-        label,
-        margin,
-        false,
-        name,
-        onChange,
-        placeholder,
-        required,
-        null,
-        null,
-        true,
-        InputType.text,
-        value,
-        variant
+    setProps(
+        this, autoComplete, autoFocus, disabled, error, fullWidth, helperText,
+        id, label, margin, false, name, onChange, placeholder, required, null,
+        null, true, InputType.text, value, variant
     )
     css{
         +defaultFullWidth
@@ -177,7 +140,7 @@ private fun setProps(
     select: Boolean,
     type: InputType,
     value: String?,
-    variant: FormControlVariant
+    variant: FormControlVariant,
 ) {
     autoComplete?.let { textField.attrs.autoComplete = it }
     textField.attrs.autoFocus = autoFocus
@@ -202,8 +165,9 @@ private fun setProps(
     rowsMax?.let { textField.attrs.maxRows = it }
     textField.attrs.select = select
     textField.attrs.type = type
-    textField.attrs.value = value ?: ""
-    //textField.attrs.defaultValue = it
+    value?.let {
+        textField.attrs.value = it
+    }
     textField.attrs.variant = variant.toString()
 }
 
