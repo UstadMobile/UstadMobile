@@ -368,7 +368,6 @@ class TestContentJobRunner {
 
             val runner = ContentJobRunner(2, endpoint, di)
 
-
             val result = launch {
                 runner.runJob()
             }
@@ -385,6 +384,7 @@ class TestContentJobRunner {
 
             Assert.assertTrue("cancellation exception called from plugin", cancellationExceptionCalled)
             Assert.assertFalse("job not completed", jobCompleted)
+            val containerFolder: File = di.onActiveAccount().direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
             val allJobItems = runBlocking { db.contentJobItemDao.findAll() }
             allJobItems.forEach {
                 Assert.assertEquals("job is cancelled", JobStatus.CANCELED, it.cjiStatus)
@@ -392,7 +392,7 @@ class TestContentJobRunner {
                 Assert.assertEquals("entry is inActive", true, entry!!.ceInactive)
                 val listOfEntryAndFile = db.containerEntryDao.findByContainer(it.cjiContainerUid)
                 Assert.assertEquals("no files and containerEntry remain", 0, listOfEntryAndFile.size)
-
+                Assert.assertTrue("container folder doesnt exist", !File(containerFolder, "${it.cjiContainerUid}").exists())
             }
 
         }

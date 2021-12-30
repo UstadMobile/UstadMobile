@@ -151,9 +151,11 @@ class LearnerGroupMemberListPresenterTest {
             }
         }
 
-        val list = repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntryList(1, 1)
-        assertEquals("member added", 2, list.size)
-        assertEquals("new member in the list", "ustad mobile", list[1].person!!.fullName())
+        runBlocking {
+            val list = repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntryList(1, 1)
+            assertEquals("member added", 2, list.size)
+            assertEquals("new member in the list", "ustad mobile", list[1].person!!.fullName())
+        }
 
     }
 

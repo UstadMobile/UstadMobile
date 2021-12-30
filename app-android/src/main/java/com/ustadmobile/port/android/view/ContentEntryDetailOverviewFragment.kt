@@ -3,13 +3,15 @@ package com.ustadmobile.port.android.view
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
-import androidx.lifecycle.*
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import io.github.aakira.napier.Napier
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -22,7 +24,8 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.*
+import com.ustadmobile.core.util.ext.toNullableStringMap
+import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
@@ -92,12 +95,17 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
             mBinding?.canUpdate = value
         }
 
-    override var hasContentToOpenOrDelete: Boolean = false
+    override var canDelete: Boolean = false
         set(value) {
             field = value
-            mBinding?.hasContentToOpenOrDelete = value
+            mBinding?.canDelete = value
         }
 
+    override var canOpen: Boolean = false
+        set(value) {
+            field = value
+            mBinding?.canOpen = value
+        }
 
     private inner class PresenterViewLifecycleObserver: DefaultLifecycleObserver {
         override fun onStart(owner: LifecycleOwner) {
