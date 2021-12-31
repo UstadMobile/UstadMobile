@@ -11,6 +11,9 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.UstadBackStackEntry
+import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.*
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.lib.db.entities.Report
@@ -19,14 +22,17 @@ import org.junit.Assert
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
+import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.util.test.ext.insertTestStatementsForReports
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
-import org.kodein.di.DI
-import org.kodein.di.instance
+import org.kodein.di.*
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -59,6 +65,7 @@ class ReportDetailPresenterTest {
 
         di = DI {
             import(ustadTestRule.diModule)
+
         }
 
         val repo: UmAppDatabase by di.activeRepoInstance()
@@ -141,8 +148,7 @@ class ReportDetailPresenterTest {
     @Test
     fun givenReportExists_whenHandleOnClickEditCalled_thenSystemImplGoToEditViewIsCalled() {
         val repo: UmAppDatabase by di.activeRepoInstance()
-        val systemImpl: UstadMobileSystemImpl by di.instance()
-
+        val testNavController:UstadNavController = di.direct.instance()
         val testEntity = ReportWithSeriesWithFilters().apply {
             //set variables here
             xAxis = Report.MONTH
@@ -161,8 +167,12 @@ class ReportDetailPresenterTest {
 
         presenter.handleClickEdit()
 
-        verify(systemImpl, timeout(5000)).go(eq(ReportEditView.VIEW_NAME),
-                eq(mapOf(ARG_ENTITY_UID to testEntity.reportUid.toString())), any())
+        argumentCaptor<Map<String, String>>().apply {
+            verify(testNavController, times(1)).navigate(any(), capture(), any())
+
+            Assert.assertTrue("Same arguments were passed during navigation",
+                lastValue[ARG_ENTITY_UID].toString() == testEntity.reportUid.toString())
+        }
     }
 
 }
