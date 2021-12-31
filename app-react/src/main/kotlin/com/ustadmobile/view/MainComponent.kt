@@ -110,8 +110,8 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                 css (mainComponentWrapperContainer)
 
                 //Loading indicator
-                umLinearProgress(color = if(isDarkModeActive()) LinearProgressColor.secondary
-                else LinearProgressColor.primary) {
+                umLinearProgress(color = if(isDarkModeActive()) UMColor.secondary
+                else UMColor.primary) {
                     css(mainComponentProgressIndicator)
                     attrs.asDynamic().id = "um-progress"
                 }

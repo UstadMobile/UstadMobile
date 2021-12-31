@@ -35,9 +35,9 @@ class ReportEditPresenter(context: Any,
                           lifecycleOwner: DoorLifecycleOwner)
     : UstadEditPresenter<ReportEditView, ReportWithSeriesWithFilters>(context, arguments, view, di, lifecycleOwner) {
 
-    private val seriesCounter = atomic(0)
+    private val seriesCounter = atomic(1)
 
-    private val filterCounter = atomic(0)
+    private val filterCounter = atomic(1)
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB

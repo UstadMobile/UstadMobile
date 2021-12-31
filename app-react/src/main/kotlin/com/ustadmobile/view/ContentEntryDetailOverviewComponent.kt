@@ -215,7 +215,7 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
 
                     if(scoreProgress?.progress ?: 0 > 0){
                         umLinearProgress((scoreProgress?.progress ?: 0).toDouble(),
-                            variant = LinearProgressVariant.determinate){
+                            variant = ProgressVariant.determinate){
                             css {
                                 padding(top = 1.spacingUnits, bottom = 1.spacingUnits)
                             }

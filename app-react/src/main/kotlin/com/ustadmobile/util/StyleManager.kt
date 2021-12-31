@@ -7,6 +7,7 @@ import com.ustadmobile.mui.theme.styledModule
 import com.ustadmobile.redux.ReduxAppStateManager
 import down
 import kotlinx.css.*
+import kotlinx.css.properties.LineHeight
 import kotlinx.css.properties.Timing
 import kotlinx.css.properties.Transition
 import kotlinx.css.properties.ms
@@ -331,6 +332,14 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
        else Display.none
     }
 
+    fun maxLines(builder: CssBuilder,maxLine: Int) {
+        val baseLineHeight = 1.5
+        builder.lineHeight = LineHeight("${baseLineHeight}em")
+        builder.height = LinearDimension("${baseLineHeight * maxLine}em")
+        builder.textOverflow = TextOverflow.ellipsis
+        builder.overflow = Overflow.hidden
+    }
+
     val tabsContainer by css {
         flexGrow = 1.0
         height = LinearDimension("100%")
@@ -351,6 +360,13 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         }
     }
 
+    val scrollOnMobile by css {
+        overflow = Overflow.scroll
+        media(theme.breakpoints.up(tabletAndHighEnd)){
+            overflow = Overflow.hidden
+        }
+    }
+
     val contentContainer by css {
         marginLeft = 1.spacingUnits
         marginRight = 1.spacingUnits
@@ -365,6 +381,12 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
             marginLeft = 3.spacingUnits
             marginRight = 3.spacingUnits
         }
+    }
+
+
+    val reportActionText by css {
+        fontSize = LinearDimension("1em")
+        textAlign = TextAlign.center
     }
 
     val startIcon by css{

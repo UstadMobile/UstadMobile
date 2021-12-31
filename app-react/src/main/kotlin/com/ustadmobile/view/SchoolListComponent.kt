@@ -12,6 +12,7 @@ import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemDesc
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
+import com.ustadmobile.util.StyleManager.maxLines
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.wordBreakLimit
@@ -81,7 +82,10 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
 
             umTypography(item.schoolName,
                 variant = TypographyVariant.h6){
-                css(alignTextToStart)
+                css{
+                    +alignTextToStart
+                    maxLines(this, 1)
+                }
             }
 
             umTypography(item.schoolDesc?.wordBreakLimit(),
@@ -89,6 +93,9 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
                 css{
                     display = displayProperty(item.schoolDesc != null, true)
                     +alignTextToStart
+                    if(item.schoolDesc?.isNotEmpty() == true){
+                        maxLines(this, 1)
+                    }
                 }
             }
 

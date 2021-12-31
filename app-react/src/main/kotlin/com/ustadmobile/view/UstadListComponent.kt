@@ -17,8 +17,8 @@ import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.centerContainer
 import com.ustadmobile.util.StyleManager.alignCenterItems
+import com.ustadmobile.util.StyleManager.centerContainer
 import com.ustadmobile.util.StyleManager.chipSetFilter
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.displayProperty
@@ -57,9 +57,9 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     private var isEventHandled = false
 
-    private var selectedEntries: MutableList<DT> = concurrentSafeListOf()
+    private var selectedListItems: MutableList<DT> = concurrentSafeListOf()
 
-    private var listItems: List<DT> = concurrentSafeListOf()
+    protected var dataListItems: List<DT> = concurrentSafeListOf()
 
     protected var showEditOptionsMenu:Boolean = false
 
@@ -95,7 +95,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
             field = value
         }
 
-    private var multiColumnItemSize = GridSize.cells4
+    var multiColumnItemSize = GridSize.cells4
         get() = field
         set(value) {
             setState {
@@ -125,8 +125,9 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     private val dataObserver = ObserverFnWrapper<List<DT>>{
         setState {
-            listItems = it
+            dataListItems = it
         }
+        onDataListLoaded()
     }
 
 
@@ -219,6 +220,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
         renderAddContentOptionsDialog()
     }
 
+    open fun onDataListLoaded(){}
 
     private fun RBuilder.renderEmptyList(){
       if(showEmptyState){
@@ -307,16 +309,16 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
             renderNewItem()
 
-            if(listItems.isEmpty()){
+            if(dataListItems.isEmpty()){
                 renderEmptyList()
             }else {
                 umItem(GridSize.cells12){
                     umGridContainer(GridSpacing.spacing4) {
-                        listItems.forEach {entry->
+                        dataListItems.forEach { entry->
                             umItem(GridSize.cells12, multiColumnItemSize){
                                 css{
                                     cursor = Cursor.pointer
-                                    backgroundColor = Color(if(selectedEntries.indexOf(entry) != -1)
+                                    backgroundColor = Color(if(selectedListItems.indexOf(entry) != -1)
                                         theme.palette.action.selected
                                     else theme.palette.background.default)
                                 }
@@ -344,17 +346,17 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     private fun RBuilder.renderSingleColumnList(){
        umList {
-            css{ +(styleList() ?: if(listItems.isNotEmpty()) horizontalList else horizontalListEmpty) }
+            css{ +(styleList() ?: if(dataListItems.isNotEmpty()) horizontalList else horizontalListEmpty) }
 
             renderNewItem(false)
 
-            if(listItems.isEmpty()){
+            if(dataListItems.isEmpty()){
                 renderEmptyList()
             }else {
-                listItems.forEach {entry->
+                dataListItems.forEach { entry->
                     umListItem(button = true) {
                         css{
-                            backgroundColor = Color(if(selectedEntries.indexOf(entry) != -1)
+                            backgroundColor = Color(if(selectedListItems.indexOf(entry) != -1)
                                 theme.palette.action.selected
                             else theme.palette.background.paper)
                             width = LinearDimension("100%")
@@ -387,7 +389,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
         }else{
             if(!isEventHandled){
                 isEventHandled = true
-                if(selectedEntries.isEmpty()){
+                if(selectedListItems.isEmpty()){
                     handleClickEntry(entry)
                 }else{
                     handleSelectedEntry(entry)
@@ -398,14 +400,14 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
     }
 
     private fun handleSelectedEntry(entry: DT){
-        val exists = selectedEntries.indexOf(entry) != -1
+        val exists = selectedListItems.indexOf(entry) != -1
         setState {
             if(exists){
-                selectedEntries.remove(entry)
+                selectedListItems.remove(entry)
             }else{
-                selectedEntries.add(entry)
+                selectedListItems.add(entry)
             }
-            listPresenter?.handleSelectionOptionChanged(selectedEntries)
+            listPresenter?.handleSelectionOptionChanged(selectedListItems)
         }
     }
 
@@ -442,16 +444,16 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
 
     private fun RBuilder.renderMenuOptions(){
-        val hideOptions = selectedEntries.isNullOrEmpty() or !showEditOptionsMenu
+        val hideOptions = selectedListItems.isNullOrEmpty() or !showEditOptionsMenu
         umGridContainer(spacing = GridSpacing.spacing2) {
             css{
                 +selectionContainer
                 marginBottom = 2.spacingUnits
             }
-            val titleMd = if(selectedEntries.isNullOrEmpty()) GridSize.cells11 else GridSize.cells7
-            val titleMobile = if(selectedEntries.isNullOrEmpty()) GridSize.cells10 else GridSize.cells7
-            val iconsMd = if(selectedEntries.isNullOrEmpty()) GridSize.cellsAuto else GridSize.cells5
-            val iconsMobile = if(selectedEntries.isNullOrEmpty()) GridSize.cells1 else GridSize.cells5
+            val titleMd = if(selectedListItems.isNullOrEmpty()) GridSize.cells11 else GridSize.cells7
+            val titleMobile = if(selectedListItems.isNullOrEmpty()) GridSize.cells10 else GridSize.cells7
+            val iconsMd = if(selectedListItems.isNullOrEmpty()) GridSize.cellsAuto else GridSize.cells5
+            val iconsMobile = if(selectedListItems.isNullOrEmpty()) GridSize.cells1 else GridSize.cells5
             umItem(titleMobile, titleMd){
                 umTypography(variant = TypographyVariant.subtitle1){
                     css {
@@ -459,7 +461,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                         marginLeft = 2.spacingUnits
                         display = displayProperty(!hideOptions)
                     }
-                    +getString(MessageID.items_selected).format(selectedEntries.size)
+                    +getString(MessageID.items_selected).format(selectedListItems.size)
                 }
             }
 
@@ -475,9 +477,9 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                             umIconButton(SELECTION_ICONS_MAP[option]?:"delete",
                                 color = UMColor.default){
                                 attrs.onClick = {
-                                    listPresenter?.handleClickSelectionOption(selectedEntries, option)
+                                    listPresenter?.handleClickSelectionOption(selectedListItems, option)
                                     setState {
-                                        selectedEntries.clear()
+                                        selectedListItems.clear()
                                     }
                                 }
                             }
@@ -530,7 +532,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
         super.onDestroyView()
         dbRepo = null
         listPresenter?.onDestroy()
-        selectedEntries.clear()
+        selectedListItems.clear()
     }
 
 

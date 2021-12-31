@@ -11,6 +11,8 @@ const val DATE_FORMAT_DDDD_MMMM_DD_H_M = "dddd, MMMM DD h:m"
 
 const val DATE_FORMAT_DD_MM_YYYY = "DD/MM/YYYY"
 
+const val DATE_FORMAT_MM_YYYY = "MM/YYYY"
+
 const val DATE_FORMAT_MMMM_DD_YYYY = "MMMM DD, YYYY"
 
 const val TIME_FORMAT_H_M = "h:m"
@@ -43,4 +45,9 @@ fun Date.endOfDay(timezone: String? = null) : Date{
 
 fun Date.timeInMillsFromStartOfDay(timezone: String? = null): Long {
     return (this.getTime() - this.startOfDay(timezone).getTime()).toLong()
+}
+
+fun Date.addDays(days: Int, timezone: String? = null): Date {
+    val utc = moment.utc(this).toDate()
+    return moment(utc).utcOffset(timezone ?: "").add(days, "days").toDate()
 }

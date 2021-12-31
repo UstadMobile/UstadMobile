@@ -21,7 +21,6 @@ import com.ustadmobile.util.Util.loadAssetsAsText
 import com.ustadmobile.util.Util.loadFileContentAsMap
 import com.ustadmobile.util.urlSearchParamsToMap
 import com.ustadmobile.view.SplashView
-import com.ustadmobile.view.SplashView.Companion.TAG_LOADED
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.GlobalScope

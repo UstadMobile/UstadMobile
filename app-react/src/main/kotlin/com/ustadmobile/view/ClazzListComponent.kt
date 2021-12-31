@@ -13,6 +13,7 @@ import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.clazzListRoleChip
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemDesc
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
+import com.ustadmobile.util.StyleManager.maxLines
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.roundTo
@@ -82,11 +83,19 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
             }
 
             umTypography(item.clazzName, TypographyVariant.h6){
-                css(alignTextToStart)
+                css{
+                    +alignTextToStart
+                    maxLines(this, 1)
+                }
             }
 
             umTypography(item.clazzDesc?.wordBreakLimit(), TypographyVariant.body1){
-                css(alignTextToStart)
+                css{
+                    +alignTextToStart
+                   if(!item.clazzDesc.isNullOrEmpty()){
+                       maxLines(this, 2)
+                   }
+                }
             }
 
             umGridContainer{

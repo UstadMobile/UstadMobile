@@ -6,6 +6,7 @@ import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.core.util.ext.isContentComplete
 import com.ustadmobile.core.view.Login2View
@@ -40,7 +41,10 @@ import com.ustadmobile.util.Util.ASSET_ACCOUNT
 import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.util.ext.*
 import com.ustadmobile.util.getViewNameFromUrl
+import com.ustadmobile.view.ChartOptions
+import com.ustadmobile.view.ChartType
 import com.ustadmobile.view.ContentEntryListComponent
+import com.ustadmobile.view.umChart
 import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
@@ -54,6 +58,9 @@ import react.router.Route
 import react.router.Routes
 import react.router.dom.HashRouter
 import styled.*
+import kotlin.js.Date
+import kotlin.js.Json
+import kotlin.js.json
 import kotlin.reflect.KClass
 
 fun RBuilder.appBarSpacer() {
@@ -759,6 +766,8 @@ fun RBuilder.createTopMainAction(
     sm: GridSize? = null,
     visible: Boolean = false,
     variant: TypographyVariant = TypographyVariant.body1,
+    textAlign: TypographyAlign = TypographyAlign.left,
+    textClassName: String? = null,
     action:() -> Unit){
    if(visible){
        umItem(xs, sm){
@@ -778,9 +787,8 @@ fun RBuilder.createTopMainAction(
 
                umTypography(title,
                    variant = variant,
-                   gutterBottom = true){
-                   css(alignTextToStart)
-               }
+                   align = textAlign,
+                   gutterBottom = true, className = textClassName)
            }
        }
    }
@@ -1038,7 +1046,7 @@ fun RBuilder.createListItemWithPersonAndAttendanceProgress(
                if(item.scoreProgress?.progress ?: 0 > 0){
                    umItem (GridSize.cells12, flexDirection = FlexDirection.row){
                        umLinearProgress(item.scoreProgress?.progress?.toDouble(),
-                           variant = LinearProgressVariant.determinate){
+                           variant = ProgressVariant.determinate){
                            css (studentProgressBar)
                        }
 
@@ -1059,7 +1067,7 @@ fun RBuilder.createListItemWithPersonAndAttendanceProgress(
                if(item.scoreProgress?.resultMax ?: 0 > 0){
                    umItem (GridSize.cells12, flexDirection = FlexDirection.row){
                        umLinearProgress(item.scoreProgress?.resultMax?.toDouble(),
-                           variant = LinearProgressVariant.determinate){
+                           variant = ProgressVariant.determinate){
                            css (studentProgressBar)
                        }
                        styledSpan {
@@ -1212,7 +1220,7 @@ fun RBuilder.createContentEntryListItemWithAttemptsAndProgress(
                 umItem(GridSize.cells12) {
                     if(item.scoreProgress?.progress ?: 0 > 0){
                         umLinearProgress(item.scoreProgress?.progress?.toDouble(),
-                            variant = LinearProgressVariant.determinate){
+                            variant = ProgressVariant.determinate){
                             css{
                                 marginTop = 1.spacingUnits
                                 width = LinearDimension("80px")
@@ -1343,7 +1351,7 @@ fun RBuilder.createSummaryCard(title: Any?, subTitle: String){
         umPaper(variant = PaperVariant.elevation) {
             css {
                 +StyleManager.personDetailComponentActions
-                +StyleManager.alignCenterItems
+                +alignCenterItems
             }
 
             umTypography(title?.toString() ?: "",
@@ -1358,5 +1366,74 @@ fun RBuilder.createSummaryCard(title: Any?, subTitle: String){
                 css(alignTextToStart)
             }
         }
+    }
+}
+
+fun RBuilder.drawChart(
+    chartData: ChartData ? = null,
+    height: Int = 400,
+    chartType: ChartType = ChartType.ComboChart){
+    if(chartData != null){
+        val dataTable = mutableListOf<MutableList<Any>>()
+        val chartOption: ChartOptions = ChartOptions().apply {
+            seriesType = "bars"
+            colors = arrayOf("#009999", "#FF9900", "#0099FF", "#FF3333", "#663399", "#669999",
+                "#FF3366", "#990099", "#996666", "#339933", "#FFCC00", "#9966CC", "#FFCC99",
+                "#99FFCC", "#0066CC", "#66CCFF", "#FF66FF", "#4D4D4D", "#0066FF", "#FF6600", "#33FFFF",
+                "#669933","#808080", "#AF4CAB", "#0040FF","#99CC66","#B1DEFB","#FF7FAA", "#FF8000",
+                "#F0AA89", "#6AFF6A", "#339999", "#CCCCCC")
+        }
+        var distinctXAxisSet = chartData.seriesData.flatMap { it.dataList }
+            .mapNotNull {
+                it.xAxis
+            }.toSet()
+        val xAxisData = chartData.reportWithFilters.xAxis
+
+        if(xAxisData == Report.MONTH){
+            distinctXAxisSet = distinctXAxisSet.sortedBy {
+                Date(it).formatDate(DATE_FORMAT_MM_YYYY)
+            }.toSet()
+        }
+
+        val labels = mutableListOf<Any>("")
+        labels.addAll(chartData.seriesData.map{it.series.reportSeriesName ?: ""}.toList())
+        dataTable.add(labels)
+        val options: Json = json("" to "")
+
+        val dataSet: MutableMap<String, MutableList<Any>> = mutableMapOf()
+        distinctXAxisSet.forEach { dataSet[it] = mutableListOf(it) }
+
+        chartData.seriesData.forEachIndexed { index, data ->
+            val seriesType = if(data.series.reportSeriesVisualType == ReportSeries.BAR_CHART)
+                "bars" else "line"
+            options[index.toString()] = json("type" to seriesType)
+            val groupedByXAxis = data.dataList.filter { it.xAxis != null }.groupBy { it.xAxis }
+            val distinctSubgroups = data.dataList.mapNotNull { it.subgroup }.toSet()
+            distinctXAxisSet.forEach { xAxisKey ->
+                dataSet[xAxisKey]?.add(groupedByXAxis[xAxisKey]?.firstOrNull()?.yAxis ?: 0f)
+            }
+
+            if(distinctSubgroups.isNotEmpty()){
+                distinctSubgroups.forEach { subGroup ->
+                    val label = "${data.series.reportSeriesName} - " +
+                            data.subGroupFormatter?.format(subGroup)
+                    dataTable.first().add(label)
+                    distinctXAxisSet.forEach { xAxisKey ->
+                        val valData = groupedByXAxis[xAxisKey]?.firstOrNull { it.subgroup == subGroup }
+                        if(valData != null){
+                            dataSet[xAxisKey]?.add(valData.yAxis)
+                        }
+                    }
+                }
+            }
+        }
+
+        dataSet.values.forEach { dataTable.add(it)}
+
+        umChart(
+            data = dataTable.map { it.toTypedArray() }.toTypedArray(),
+            height = height.px,
+            chartType = chartType,
+            options = chartOption){}
     }
 }

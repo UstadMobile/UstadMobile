@@ -8,7 +8,6 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.umChart
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignCenterItems
 import com.ustadmobile.util.UmProps

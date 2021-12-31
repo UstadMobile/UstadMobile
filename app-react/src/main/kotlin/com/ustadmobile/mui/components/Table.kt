@@ -5,7 +5,6 @@ import kotlinx.css.Align
 import kotlinx.css.hyphenize
 import mui.material.*
 import react.RBuilder
-import react.ReactElement
 import styled.StyledHandler
 @Suppress("EnumEntryName")
 enum class TableSize {
@@ -74,9 +73,6 @@ fun RBuilder.umTableCell(
 }
 
 fun RBuilder.umTableContainer(
-    component: ReactElement = umPaper {  },
     className: String? = null,
     handler: StyledHandler<TableContainerProps>? = null
-) = createStyledComponent(TableContainer, className, handler) {
-    //attrs.asDynamic().component = component
-}
+) = createStyledComponent(TableContainer, className, handler){}
