@@ -504,17 +504,17 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         textAlign = TextAlign.center
         position = Position.relative
         width = LinearDimension("98%")
-        height = LinearDimension("300px")
+        height = 300.px
     }
 
     val entityThumbnailClass by css {
         textAlign = TextAlign.center
         position = Position.relative
         width = LinearDimension("100%")
-        height = LinearDimension("80px")
+        height = 80.px
         media(theme.breakpoints.up(tabletAndHighEnd)){
             width = LinearDimension("70%")
-            height = LinearDimension("120px")
+            height = 120.px
         }
     }
 
@@ -551,7 +551,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     }
 
     val secondaryActionBtn by css{
-        width = LinearDimension("60px")
+        width = 60.px
         padding = "16px"
     }
 
@@ -653,18 +653,24 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
 
     val partnerItem by css {
-        width = LinearDimension("50px")
-        paddingLeft = 2.spacingUnits
+        height = 50.px
+        padding(left = 1.spacingUnits)
+        verticalAlign = VerticalAlign.middle
         media(theme.breakpoints.up(tabletAndHighEnd)) {
-            width = LinearDimension("80px")
-            paddingLeft = 3.spacingUnits
+            padding(left = 2.spacingUnits)
+            height = 80.px
         }
     }
 
     val partnersList by css {
         position = Position.fixed
-        right = 15.px
-        bottom = 15.px
+        right = 2.spacingUnits
+        bottom = 2.spacingUnits
+        width = LinearDimension("100vh")
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            bottom = 4.spacingUnits
+            right = 3.spacingUnits
+        }
     }
 
     val studentProgressBar by css{

@@ -7,6 +7,7 @@ import com.ustadmobile.mui.components.umCssBaseline
 import com.ustadmobile.mui.components.umLinearProgress
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager.alignCenterItems
+import com.ustadmobile.util.StyleManager.alignEndItems
 import com.ustadmobile.util.StyleManager.partnersList
 import com.ustadmobile.util.StyleManager.splashComponentContainer
 import com.ustadmobile.util.StyleManager.splashComponentPreloadContainer
@@ -15,8 +16,10 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.view.ext.umPartner
 import kotlinx.browser.document
 import kotlinx.coroutines.Runnable
+import kotlinx.css.FlexDirection
 import kotlinx.css.LinearDimension
 import kotlinx.css.width
 import react.RBuilder
@@ -93,9 +96,13 @@ class SplashComponent (props: UmProps): RComponent<UmProps, UmState>(props), Spl
                     }
                 }
 
-                styledDiv {
-                    css(partnersList)
-                    umGridContainer {}
+                umItem(GridSize.cells12, flexDirection = FlexDirection.rowReverse) {
+                    css{
+                        +partnersList
+                        +alignEndItems
+                    }
+                    umPartner("irc.png")
+                    umPartner("expo.png")
                 }
             }
         }

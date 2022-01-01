@@ -826,7 +826,11 @@ fun RBuilder.createListItemWithTitleAndSwitch(title: String, enabled: Boolean, o
 }
 
 fun RBuilder.umPartner(logo: String){
-    umItem(GridSize.cells3) {
+    styledSpan {
+        css{
+            +alignCenterItems
+            padding(left = 3.spacingUnits)
+        }
         styledImg {
             css(StyleManager.partnerItem)
             attrs.src = "assets/$logo"
