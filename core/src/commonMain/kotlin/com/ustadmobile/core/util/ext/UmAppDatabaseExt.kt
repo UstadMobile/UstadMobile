@@ -247,8 +247,10 @@ suspend fun UmAppDatabase.approvePendingSchoolMember(member: SchoolMember, schoo
 /**
  * Inserts the person, sets its group and groupmember. Does not check if its an update
  */
-suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(entity: T,
-    groupFlag: Int = PersonGroup.PERSONGROUP_FLAG_PERSONGROUP): T{
+suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(
+    entity: T,
+    groupFlag: Int = PersonGroup.PERSONGROUP_FLAG_PERSONGROUP
+): T{
 
     val groupPerson = PersonGroup().apply {
         groupName = "Person individual group"

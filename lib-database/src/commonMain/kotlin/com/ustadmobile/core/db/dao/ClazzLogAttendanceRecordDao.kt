@@ -12,7 +12,7 @@ import com.ustadmobile.lib.db.entities.*
 abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
 
     @Insert
-    abstract suspend fun insertListAsync(entities: List<ClazzLogAttendanceRecord>): Array<Long>
+    abstract suspend fun insertListAsync(entities: List<ClazzLogAttendanceRecord>)
 
     @Query("SELECT * from ClazzLogAttendanceRecord WHERE clazzLogAttendanceRecordUid = :uid")
     abstract fun findByUid(uid: Long): ClazzLogAttendanceRecord?

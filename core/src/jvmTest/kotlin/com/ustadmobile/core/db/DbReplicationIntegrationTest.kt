@@ -17,7 +17,9 @@ import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.*
 import com.ustadmobile.door.replication.doorReplicationRoute
 import com.ustadmobile.door.util.NodeIdAuthCache
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ScopedGrant
 import com.ustadmobile.lib.rest.ext.initAdminUser
 import com.ustadmobile.lib.rest.ext.ktorInitRepo
 import io.github.aakira.napier.DebugAntilog
@@ -210,9 +212,6 @@ class DbReplicationIntegrationTest {
             }
         }
         remoteServer.start()
-
-//        localDb =
-//        localDbRepo = localDi.on(Endpoint(TEST_SERVER_HOST)).direct.instance(tag = DoorTag.TAG_REPO)
     }
 
     @Test
@@ -235,7 +234,7 @@ class DbReplicationIntegrationTest {
 
         //wait for contententry to land...
         runBlocking {
-            localDb.waitUntil(10001 * 1000, listOf("ContentEntry")) {
+            localDb.waitUntil(10001, listOf("ContentEntry")) {
                 localDb.contentEntryDao.findByUid(contentEntry.contentEntryUid) != null
             }
         }
@@ -256,6 +255,49 @@ class DbReplicationIntegrationTest {
         Assert.assertNotNull(localDb.contentEntryDao.findByUid(contentEntry.contentEntryUid))
         Assert.assertNotNull(localDb.contentEntryDao.findByUid(contentEntry2.contentEntryUid))
     }
+
+    @Test
+    fun givenUserSessionCreated_whenConnectedAndClazzCreated_thenScopedGrantShouldReplicateAndClazzShouldReplicate() {
+        val accountManager: UstadAccountManager by localDi.instance()
+        val adminPerson = remoteDb.personDao.findByUsername("admin") !!
+
+        //put the person who just "logged in" in the local database
+        localDb.personDao.insert(adminPerson)
+
+        runBlocking {
+            accountManager.addSession(adminPerson, TEST_SERVER_HOST, "secret")
+        }
+
+        //wait for contententry to land...
+        runBlocking {
+            localDb.waitUntilAsync(10003, listOf("ScopedGrant")) {
+                localDb.scopedGrantDao.findByTableIdAndEntityUid(ScopedGrant.ALL_TABLES,
+                    ScopedGrant.ALL_ENTITIES).firstOrNull { it.scopedGrant?.sgGroupUid == adminPerson.personGroupUid } != null
+            }
+        }
+
+        val replicatedScopedGrant = runBlocking {
+            localDb.scopedGrantDao.findByTableIdAndEntityUid(ScopedGrant.ALL_TABLES,
+                ScopedGrant.ALL_ENTITIES).firstOrNull { it.scopedGrant?.sgGroupUid == adminPerson.personGroupUid }
+        }
+
+        Assert.assertNotNull(replicatedScopedGrant)
+
+        val clazz = Clazz().apply {
+            this.clazzName = "Test class"
+            clazzUid = remoteDb.clazzDao.insert(this)
+        }
+
+        runBlocking {
+            localDb.waitUntil(10004, listOf("Clazz")) {
+                localDb.clazzDao.findByUid(clazz.clazzUid) != null
+            }
+        }
+
+        Assert.assertNotNull(localDb.clazzDao.findByUid(clazz.clazzUid))
+
+    }
+
 
     companion object {
 
