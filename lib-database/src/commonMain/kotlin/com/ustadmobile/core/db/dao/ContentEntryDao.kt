@@ -352,6 +352,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
      * not yet have the indexes
      */
     @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
+    @RepoHttpAccessible
     @Query("""
         WITH RECURSIVE 
                ContentEntry_recursive(contentEntryUid, containerSize) AS (

@@ -1,7 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.*
-import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import kotlin.js.JsName
@@ -11,6 +11,53 @@ data class UmContentEntriesWithFileSize(var numEntries: Int = 0, var fileSize: L
 @Repository
 @Dao
 abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJoin> {
+
+    @Query("""
+     REPLACE INTO ContentEntryParentChildJoinReplicate(cepcjPk, cepcjVersionId, cepcjDestination)
+      SELECT ContentEntryParentChildJoin.cepcjUid AS cepcjUid,
+             ContentEntryParentChildJoin.cepcjLct AS cepcjVersionId,
+             :newNodeId AS cepcjDestination
+        FROM ContentEntryParentChildJoin
+       WHERE ContentEntryParentChildJoin.cepcjLct != COALESCE(
+             (SELECT cepcjVersionId
+                FROM ContentEntryParentChildJoinReplicate
+               WHERE cepcjPk = ContentEntryParentChildJoin.cepcjUid
+                 AND cepcjDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(cepcjPk, cepcjDestination) DO UPDATE
+             SET cepcjProcessed = false, cepcjVersionId = EXCLUDED.cepcjVersionId
+      */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([ContentEntryParentChildJoin::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+    @Query("""
+    REPLACE INTO ContentEntryParentChildJoinReplicate(cepcjPk, cepcjVersionId, cepcjDestination)
+    SELECT ContentEntryParentChildJoin.cepcjUid AS cepcjUid,
+         ContentEntryParentChildJoin.cepcjLct AS cepcjVersionId,
+         UserSession.usClientNodeId AS cepcjDestination
+    FROM ChangeLog
+         JOIN ContentEntryParentChildJoin
+             ON ChangeLog.chTableId = 7
+                AND ChangeLog.chEntityPk = ContentEntryParentChildJoin.cepcjUid
+         JOIN UserSession
+    WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId 
+           FROM SyncNode
+          LIMIT 1)
+     AND ContentEntryParentChildJoin.cepcjLct != COALESCE(
+         (SELECT cepcjVersionId
+            FROM ContentEntryParentChildJoinReplicate
+           WHERE cepcjPk = ContentEntryParentChildJoin.cepcjUid
+             AND cepcjDestination = UserSession.usClientNodeId), 0)
+    /*psql ON CONFLICT(cepcjPk, cepcjDestination) DO UPDATE
+     SET cepcjProcessed = false, cepcjVersionId = EXCLUDED.cepcjVersionId
+    */               
+    """)
+    @ReplicationRunOnChange([ContentEntryParentChildJoin::class])
+    @ReplicationCheckPendingNotificationsFor([ContentEntryParentChildJoin::class])
+    abstract suspend fun replicateOnChange()
+
 
     @JsName("insertListAsync")
     @Insert
@@ -38,18 +85,6 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
 
     @Query("SELECT * FROM ContentEntryParentChildJoin WHERE " + "cepcjParentContentEntryUid = :parentUid AND cepcjChildContentEntryUid = :childUid LIMIT 1")
     abstract fun findJoinByParentChildUuids(parentUid: Long, childUid: Long): ContentEntryParentChildJoin?
-
-    @Query("WITH RECURSIVE ContentEntryRecursive(contentEntryUid,containerSize) AS " +
-            "(VALUES (:contentEntryUid,  " +
-            "(SELECT Container.fileSize FROM Container WHERE Container.containerContentEntryUid = :contentEntryUid " +
-            "ORDER BY Container.cntLastModified DESC LIMIT 1 )) " +
-            "UNION ALL " +
-            "SELECT inner_pcj.cepcjChildContentEntryUid as contentEntryUid," +
-            "(SELECT Container.fileSize FROM Container WHERE Container.containerContentEntryUid = inner_pcj.cepcjChildContentEntryUid " +
-            "ORDER BY Container.cntLastModified DESC LIMIT 1 ) AS containerSize FROM ContentEntryParentChildJoin as inner_pcj " +
-            "JOIN ContentEntryRecursive  AS outer_pcj ON outer_pcj.contentEntryUid = inner_pcj.cepcjParentContentEntryUid) " +
-            " SELECT sum(ContentEntryRecursive.containerSize) as fileSize, count(*) as numEntries FROM ContentEntryRecursive WHERE containerSize != 0")
-    abstract suspend fun getParentChildContainerRecursiveAsync(contentEntryUid: Long) : UmContentEntriesWithFileSize ?
 
     @Query("SELECT ContentEntry.* FROM ContentEntry " +
             "WHERE NOT EXISTS(SELECT cepcjUid FROM ContentEntryParentChildJoin WHERE cepcjChildContentEntryUid = ContentEntry.contentEntryUid) " +

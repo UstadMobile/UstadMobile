@@ -3,7 +3,6 @@ package com.ustadmobile.core.db
 import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.door.DoorDatabaseRepository
-import com.ustadmobile.door.ext.withDoorTransaction
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.replication.ReplicationSubscriptionManager
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -36,13 +35,14 @@ class RepSubscriptionInitListener : ReplicationSubscriptionManager.SubscriptionI
                 })
 
                 transactDb.grantScopedPermission(systemPerson, Role.ALL_PERMISSIONS,
-                    ScopedGrant.ALL_TABLES, 0L)
+                    ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
 
                 transactDb.userSessionDao.insertSession(UserSession().apply {
                     this.usClientNodeId = remoteNodeId
                     this.usPersonUid = systemPerson.personUid
                     this.usEndTime = Long.MAX_VALUE
                     this.usStartTime = systemTimeInMillis()
+                    this.usStatus = UserSession.STATUS_ACTIVE
                     usSessionType = UserSession.TYPE_UPSTREAM
                 })
             }

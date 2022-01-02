@@ -40,4 +40,20 @@ public class PersonGroupReplicate {
   @ColumnInfo(defaultValue = "0")
   @ReplicationTrackerProcessed
   public var pgProcessed: Boolean = false
+
+  companion object {
+    const val SELECT_PERSONGROUP_REPLICATE_FIELDS_SQL = """
+      PersonGroup.groupUid AS pgUid,
+      PersonGroup.groupLct AS pgVersionId
+    """
+
+    const val PERSONGROUP_REPLICATE_NOT_ALREADY_UPDATE_SQL = """
+      PersonGroup.groupLct != COALESCE(
+         (SELECT pgVersionId
+            FROM PersonGroupReplicate
+           WHERE pgPk = PersonGroup.groupUid
+             AND pgDestination = UserSession.usClientNodeId), 0)
+    """
+
+  }
 }

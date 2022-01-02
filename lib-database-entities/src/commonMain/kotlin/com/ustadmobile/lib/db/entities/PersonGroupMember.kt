@@ -48,6 +48,21 @@ import kotlinx.serialization.Serializable
 //               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}""")
 @Serializable
 @ReplicateEntity(tableId = PersonGroupMember.TABLE_ID, tracker = PersonGroupMemberReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "persongroupmember_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO PersonGroupMember(groupMemberUid, groupMemberActive, groupMemberPersonUid, groupMemberGroupUid, groupMemberMasterCsn, groupMemberLocalCsn, groupMemberLastChangedBy, groupMemberLct) 
+         VALUES (NEW.groupMemberUid, NEW.groupMemberActive, NEW.groupMemberPersonUid, NEW.groupMemberGroupUid, NEW.groupMemberMasterCsn, NEW.groupMemberLocalCsn, NEW.groupMemberLastChangedBy, NEW.groupMemberLct) 
+         /*psql ON CONFLICT (groupMemberUid) DO UPDATE 
+         SET groupMemberActive = EXCLUDED.groupMemberActive, groupMemberPersonUid = EXCLUDED.groupMemberPersonUid, groupMemberGroupUid = EXCLUDED.groupMemberGroupUid, groupMemberMasterCsn = EXCLUDED.groupMemberMasterCsn, groupMemberLocalCsn = EXCLUDED.groupMemberLocalCsn, groupMemberLastChangedBy = EXCLUDED.groupMemberLastChangedBy, groupMemberLct = EXCLUDED.groupMemberLct
+         */"""
+     ]
+ )
+))
 class PersonGroupMember() {
 
 

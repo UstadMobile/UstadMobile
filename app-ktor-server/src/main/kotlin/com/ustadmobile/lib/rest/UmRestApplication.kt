@@ -21,7 +21,7 @@ import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.*
 import com.ustadmobile.core.catalog.contenttype.ApacheIndexerPlugin
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.impl.*
@@ -63,6 +63,7 @@ import com.ustadmobile.door.ext.doorDatabaseMetadata
 import kotlinx.coroutines.GlobalScope
 import com.ustadmobile.door.ext.nodeIdAuthCache
 import com.ustadmobile.door.util.NodeIdAuthCache
+import com.ustadmobile.core.db.RepIncomingListener
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -181,6 +182,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                     .addCallback(ContentJobItemTriggersCallback())
                     .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                 .build()
+            db.addIncomingReplicationListener(RepIncomingListener(db))
             runBlocking {
                 db.connectivityStatusDao.insertAsync(ConnectivityStatus().apply {
                     connectivityState = ConnectivityStatus.STATE_UNMETERED

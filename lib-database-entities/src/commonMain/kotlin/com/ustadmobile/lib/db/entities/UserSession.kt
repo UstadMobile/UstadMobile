@@ -102,5 +102,13 @@ class UserSession {
 
         const val REASON_PASSWORD_CHANGED = 3
 
+        const val USER_SESSION_NOT_LOCAL_DEVICE_SQL = """
+            UserSession.usClientNodeId != (
+                 SELECT nodeClientId 
+                   FROM SyncNode
+                  LIMIT 1)
+        """
+
     }
+
 }

@@ -32,10 +32,8 @@ import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.ext.addInvalidationListener
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.view.ContainerMounter
-import com.ustadmobile.door.ChangeListenerRequest
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.NanoHttpdCall
@@ -43,9 +41,6 @@ import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepository
-import com.ustadmobile.door.ext.doorDatabaseMetadata
-import com.ustadmobile.door.replication.ReplicationNotificationDispatcher
-import com.ustadmobile.door.replication.ReplicationSubscriptionManager
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.android.generated.MessageIDMap

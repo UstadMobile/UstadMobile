@@ -10,6 +10,21 @@ import com.ustadmobile.door.annotation.*
  */
 @Entity
 @ReplicateEntity(tableId = PersonAuth2.TABLE_ID, tracker = PersonAuth2Replicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "personauth2_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO PersonAuth2(pauthUid, pauthMechanism, pauthAuth, pauthLcsn, pauthPcsn, pauthLcb, pauthLct) 
+         VALUES (NEW.pauthUid, NEW.pauthMechanism, NEW.pauthAuth, NEW.pauthLcsn, NEW.pauthPcsn, NEW.pauthLcb, NEW.pauthLct) 
+         /*psql ON CONFLICT (pauthUid) DO UPDATE 
+         SET pauthMechanism = EXCLUDED.pauthMechanism, pauthAuth = EXCLUDED.pauthAuth, pauthLcsn = EXCLUDED.pauthLcsn, pauthPcsn = EXCLUDED.pauthPcsn, pauthLcb = EXCLUDED.pauthLcb, pauthLct = EXCLUDED.pauthLct
+         */"""
+     ]
+ )
+))
 //@SyncableEntity(tableId = PersonAuth2.TABLE_ID,
 //    syncFindAllQuery = """
 //        SELECT PersonAuth2.*

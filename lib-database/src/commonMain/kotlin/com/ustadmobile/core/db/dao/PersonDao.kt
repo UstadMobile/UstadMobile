@@ -8,11 +8,12 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.annotation.QueryLiveTables
-import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Person.Companion.FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
+import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
+import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
 import com.ustadmobile.lib.util.encryptPassword
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.serialization.Serializable
@@ -22,6 +23,60 @@ import kotlin.js.JsName
 @Dao
 @Repository
 abstract class PersonDao : BaseDao<Person> {
+
+    @Query("""
+     REPLACE INTO PersonReplicate(personPk, personVersionId, personDestination)
+      SELECT Person.personUid AS personUid,
+             Person.personLct AS personVersionId,
+             :newNodeId AS personDestination
+        FROM UserSession
+             JOIN PersonGroupMember
+                ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+                   $JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
+                   ${Role.PERMISSION_PERSON_SELECT}
+                   $JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
+       WHERE UserSession.usClientNodeId = :newNodeId
+         AND Person.personLct != COALESCE(
+             (SELECT personVersionId
+                FROM PersonReplicate
+               WHERE personPk = Person.personUid
+                 AND personDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(personPk, personDestination) DO UPDATE
+             SET personProcessed = false, personVersionId = EXCLUDED.personVersionId
+      */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([Person::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+     @Query("""
+ REPLACE INTO PersonReplicate(personPk, personVersionId, personDestination)
+  SELECT Person.personUid AS personUid,
+         Person.personLct AS personVersionId,
+         UserSession.usClientNodeId AS personDestination
+    FROM ChangeLog
+         JOIN Person
+             ON ChangeLog.chTableId = 9
+                AND ChangeLog.chEntityPk = Person.personUid
+         ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+            ${Role.PERMISSION_PERSON_SELECT}
+            ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
+   WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId 
+           FROM SyncNode
+          LIMIT 1)
+     AND Person.personLct != COALESCE(
+         (SELECT personVersionId
+            FROM PersonReplicate
+           WHERE personPk = Person.personUid
+             AND personDestination = UserSession.usClientNodeId), 0)
+ /*psql ON CONFLICT(personPk, personDestination) DO UPDATE
+     SET personProcessed = false, personVersion = EXCLUDED.personVersion
+  */               
+ """)
+    @ReplicationRunOnChange([Person::class])
+    @ReplicationCheckPendingNotificationsFor([Person::class])
+    abstract suspend fun replicateOnChange()
 
     @JsName("insertListAsync")
     @Insert

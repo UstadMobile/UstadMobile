@@ -8,6 +8,7 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
+import com.ustadmobile.core.db.RepSubscriptionInitListener
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
@@ -67,7 +68,8 @@ fun DI.directActiveRepoInstance() = onActiveAccountDirect().instance<UmAppDataba
  * Simply override the built in bindings if required for specific tests
  */
 class UstadTestRule(
-    val repoReplicationSubscriptionEnabled: Boolean = false
+    val repoReplicationSubscriptionEnabled: Boolean = false,
+    val repSubscriptionInitListener: RepSubscriptionInitListener? = null
 ): TestWatcher() {
 
     lateinit var coroutineDispatcher: ExecutorCoroutineDispatcher
@@ -133,11 +135,12 @@ class UstadTestRule(
             bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope).singleton {
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(
-                    Any(), context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
-                    instance(), instance()
+                    Any(), UMFileUtil.joinPaths(context.url, "UmAppDatabase/"), nodeIdAndAuth.nodeId,
+                    nodeIdAndAuth.auth, instance(), instance()
                 ) {
                     attachmentsDir = File(tempFolder, "attachments").absolutePath
                     this.useReplicationSubscription = repoReplicationSubscriptionEnabled
+                    this.replicationSubscriptionInitListener = repSubscriptionInitListener
                 })
                 ).also {
                     it.siteDao.insert(Site().apply {

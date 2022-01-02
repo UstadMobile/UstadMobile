@@ -4,13 +4,75 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.lib.db.entities.ScopedGrant
-import com.ustadmobile.lib.db.entities.ScopedGrantAndName
+import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.entities.*
 
 @Dao
 @Repository
 abstract class ScopedGrantDao {
+
+    @Query("""
+     REPLACE INTO ScopedGrantReplicate(sgPk, sgVersionId, sgDestination)
+      SELECT ScopedGrantWithPerm.sgUid AS sgPk,
+             ScopedGrantWithPerm.sgLct AS sgVersionId,
+             :newNodeId AS sgDestination
+        FROM UserSession
+             JOIN PersonGroupMember
+                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+               ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_PERSON_SELECT}
+                    ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+             JOIN PersonGroupMember PersonsWithPerm_GroupMember
+                    ON PersonsWithPerm_GroupMember.groupMemberPersonUid = Person.personUid
+             JOIN ScopedGrant ScopedGrantWithPerm
+                    ON PersonsWithPerm_GroupMember.groupMemberGroupUid = ScopedGrantWithPerm.sgGroupUid
+       WHERE UserSession.usClientNodeId = :newNodeId
+         AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+         AND ScopedGrantWithPerm.sgLct != COALESCE(
+             (SELECT sgVersionId
+                FROM ScopedGrantReplicate
+               WHERE sgPk = ScopedGrantWithPerm.sgUid
+                 AND sgDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(sgPk, sgDestination) DO UPDATE
+             SET sgProcessed = false, sgVersionId = EXCLUDED.sgVersionId
+      */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([ScopedGrant::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+    @Query("""
+ REPLACE INTO ScopedGrantReplicate(sgPk, sgVersionId, sgDestination)
+  SELECT ScopedGrantEntity.sgUid AS sgPk,
+         ScopedGrantEntity.sgLct AS sgVersionId,
+         UserSession.usClientNodeId AS sgDestination
+    FROM ChangeLog
+         JOIN ScopedGrant ScopedGrantEntity
+             ON ChangeLog.chTableId = 48
+                AND ChangeLog.chEntityPk = ScopedGrantEntity.sgUid
+         JOIN PersonGroupMember
+              ON PersonGroupMember.groupMemberGroupUid = ScopedGrantEntity.sgGroupUid
+         JOIN Person
+              ON PersonGroupMember.groupMemberPersonUid = Person.personUid
+         ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+              ${Role.PERMISSION_PERSON_SELECT}
+              ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
+   WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId 
+           FROM SyncNode
+          LIMIT 1)
+     AND ScopedGrantEntity.sgLct != COALESCE(
+         (SELECT sgVersionId
+            FROM ScopedGrantReplicate
+           WHERE sgPk = ScopedGrantEntity.sgUid
+             AND sgDestination = UserSession.usClientNodeId), 0)
+ /*psql ON CONFLICT(sgPk, sgDestination) DO UPDATE
+     SET sgProcessed = false, sgVersionId = EXCLUDED.sgVersionId
+  */               
+    """)
+    @ReplicationRunOnChange([ScopedGrant::class])
+    @ReplicationCheckPendingNotificationsFor([ScopedGrant::class])
+    abstract suspend fun replicateOnChange()
 
     @Insert
     abstract suspend fun insertAsync(scopedGrant: ScopedGrant): Long

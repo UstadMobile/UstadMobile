@@ -9,6 +9,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.test.waitUntil
+import com.ustadmobile.core.util.test.waitUntilAsync
 import com.ustadmobile.core.view.LearnerGroupMemberListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
@@ -145,7 +146,7 @@ class LearnerGroupMemberListPresenterTest {
         presenter.handleNewMemberToGroup(person)
 
         runBlocking {
-            repo.waitUntil(5000, listOf("LearnerGroupMember")) {
+            repo.waitUntilAsync(5000, listOf("LearnerGroupMember")) {
                 repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntryList(
                     1, 1).size == 2
             }

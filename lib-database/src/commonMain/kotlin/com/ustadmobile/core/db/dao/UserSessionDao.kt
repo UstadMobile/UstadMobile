@@ -16,35 +16,68 @@ import com.ustadmobile.lib.db.entities.UserSessionAndPerson
 abstract class UserSessionDao {
 
     /*
-                JOIN Person
-                     ON UserSessionSubject.usPersonUid = Person.personUid
-                ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_SELECT}) > 0
-                JOIN UserSession
-                     ON UserSession.usPersonUid = Person.personUid
-                        AND (:newNodeId = 0 OR UserSession.usClientNodeId = :newNodeId)
-                */
+     * Here UserSessionSubject represents the UserSession for which we are checking access permissions
+     * to decide whether or not to replicate. UserSession represents the UserSessions being used to
+     * determine if permission is granted.
+     */
     @Query("""
-        REPLACE INTO UserSessionTrkr(usForeignKey, usVersionId, usDestination)
-         SELECT UserSessionSubject.usUid AS usForeignKey,
+        REPLACE INTO UserSessionReplicate(usPk, usVersionId, usDestination)
+         SELECT UserSessionSubject.usUid AS usPk,
                 UserSessionSubject.usLct AS usVersionId,
-                /*UserSession.usClientNodeId AS usDestination */
-                DoorNode.nodeId AS usDestination
+                UserSession.usClientNodeId AS usDestination
            FROM ChangeLog
                 JOIN UserSession UserSessionSubject
                      ON ChangeLog.chTableId = ${UserSession.TABLE_ID}
                         AND ChangeLog.chEntityPk = UserSessionSubject.usUid
-                JOIN DoorNode
-                     ON (:newNodeId = 0 OR DoorNode.nodeId = :newNodeId)
+                        AND UserSessionSubject.usSessionType = ${UserSession.TYPE_STANDARD}
+                JOIN Person
+                     ON UserSessionSubject.usPersonUid = Person.personUid
+                ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_PERSON_SELECT}
+                    ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}     
                         
           WHERE UserSessionSubject.usLct != COALESCE(
                 (SELECT usVersionId
-                   FROM UserSessionTrkr
-                  WHERE UserSessionTrkr.usForeignKey = UserSessionSubject.usUid
-                    AND UserSessionTrkr.usDestination = DoorNode.nodeId/*UserSession.usClientNodeId*/), 0)
+                   FROM UserSessionReplicate
+                  WHERE UserSessionReplicate.usPk = UserSessionSubject.usUid
+                    AND UserSessionReplicate.usDestination = UserSession.usClientNodeId), 0)
+        /*psql ON CONFLICT(usPk, usDestination) DO UPDATE
+                SET usProcessed = false, usVersionId = EXCLUDED.usVersionId
+         */           
     """)
     @ReplicationRunOnChange(value = [UserSession::class])
     @ReplicationCheckPendingNotificationsFor([UserSession::class])
-    abstract suspend fun updateReplicationTrackers(@NewNodeIdParam newNodeId: Long)
+    abstract suspend fun updateReplicationTrackers()
+
+    /*
+     * Here UserSessionSubject represents the UserSession for which we are checking access permissions
+     * to decide whether or not to replicate. UserSession represents the UserSessions being used to
+     * determine if permission is granted.
+     */
+    @Query("""
+        REPLACE INTO UserSessionReplicate(usPk, usVersionId, usDestination)
+         SELECT UserSessionSubject.usUid AS usPk,
+                UserSessionSubject.usLct AS usVersionId,
+                UserSession.usClientNodeId AS usDestination
+           FROM UserSession 
+                JOIN PersonGroupMember
+                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+                ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_PERSON_SELECT}
+                    ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+                JOIN UserSession UserSessionSubject
+                     ON UserSessionSubject.usPersonUid = Person.personUid
+                        AND UserSessionSubject.usSessionType = ${UserSession.TYPE_STANDARD}
+          WHERE UserSession.usClientNodeId = :newNodeId
+            AND UserSessionSubject.usLct != COALESCE(
+                (SELECT usVersionId
+                   FROM UserSessionReplicate
+                  WHERE UserSessionReplicate.usPk = UserSessionSubject.usUid
+                    AND UserSessionReplicate.usDestination = UserSession.usClientNodeId), 0)
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([UserSession::class])
+    abstract suspend fun updateReplicationTrackersOnNewNode(@NewNodeIdParam newNodeId: Long)
 
     @Insert
     abstract suspend fun insertSession(session: UserSession): Long
@@ -120,6 +153,14 @@ abstract class UserSessionDao {
     """)
     abstract suspend fun endOtherSessions(personUid: Long, exemptNodeId: Long, newStatus: Int,
                                           reason: Int)
+
+    @Query("""
+        SELECT UserSession.usClientNodeId
+          FROM UserSession
+         WHERE UserSession.usPersonUid IN (:personUids)
+           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+    """)
+    abstract suspend fun findActiveNodeIdsByPersonUids(personUids: List<Long>): List<Long>
 
     companion object {
         const val FIND_LOCAL_SESSIONS_SQL = """
