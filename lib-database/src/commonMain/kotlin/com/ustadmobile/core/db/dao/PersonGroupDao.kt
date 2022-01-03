@@ -18,7 +18,7 @@ import com.ustadmobile.lib.db.entities.UserSession.Companion.USER_SESSION_NOT_LO
 abstract class PersonGroupDao : BaseDao<PersonGroup> {
 
     @Query("""
-     REPLACE INTO PersonGroupReplicate(pgPk, pgVersionId, pgDestination)
+     REPLACE INTO PersonGroupReplicate(pgPk, pgDestination)
       SELECT $SELECT_PERSONGROUP_REPLICATE_FIELDS_SQL,
              :newNodeId AS pgDestination
         FROM UserSession
@@ -35,7 +35,7 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
          AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
          AND $PERSONGROUP_REPLICATE_NOT_ALREADY_UPDATE_SQL
       /*psql ON CONFLICT(pgPk, pgDestination) DO UPDATE
-             SET pgProcessed = false, pgVersionId = EXCLUDED.pgVersionId
+             SET pgPending = true
       */       
     """)
     @ReplicationRunOnNewNode
@@ -43,7 +43,7 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
     abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
 
     @Query("""
- REPLACE INTO PersonGroupReplicate(pgPk, pgVersionId, pgDestination)
+ REPLACE INTO PersonGroupReplicate(pgPk, pgDestination)
   SELECT $SELECT_PERSONGROUP_REPLICATE_FIELDS_SQL ,
          UserSession.usClientNodeId AS pgDestination
     FROM ChangeLog
@@ -60,7 +60,7 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
    WHERE $USER_SESSION_NOT_LOCAL_DEVICE_SQL
      AND $PERSONGROUP_REPLICATE_NOT_ALREADY_UPDATE_SQL
  /*psql ON CONFLICT(pgPk, pgDestination) DO UPDATE
-     SET pgProcessed = false, pgVersionId = EXCLUDED.pgVersionId
+     SET pgPending = true
   */               
     """)
     @ReplicationRunOnChange([PersonGroup::class])

@@ -20,9 +20,8 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_TEACHER
 abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
 
     @Query("""
-     REPLACE INTO ClazzReplicate(clazzPk, clazzVersionId, clazzDestination)
+     REPLACE INTO ClazzReplicate(clazzPk, clazzDestination)
       SELECT Clazz.clazzUid AS clazzUid,
-             Clazz.clazzLct AS clazzVersionId,
              :newNodeId AS clazzDestination
         FROM UserSession
                JOIN PersonGroupMember 
@@ -37,7 +36,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
                WHERE clazzPk = Clazz.clazzUid
                  AND clazzDestination = :newNodeId), 0) 
       /*psql ON CONFLICT(clazzPk, clazzDestination) DO UPDATE
-             SET clazzProcessed = false, clazzVersionId = EXCLUDED.clazzVersionId
+             SET clazzPending = true
       */       
     """)
     @ReplicationRunOnNewNode
@@ -45,9 +44,8 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
 
      @Query("""
- REPLACE INTO ClazzReplicate(clazzPk, clazzVersionId, clazzDestination)
+ REPLACE INTO ClazzReplicate(clazzPk, clazzDestination)
   SELECT Clazz.clazzUid AS clazzUid,
-         Clazz.clazzLct AS clazzVersionId,
          UserSession.usClientNodeId AS clazzDestination
     FROM ChangeLog
          JOIN Clazz
@@ -66,7 +64,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
            WHERE clazzPk = Clazz.clazzUid
              AND clazzDestination = UserSession.usClientNodeId), 0)
   /*psql ON CONFLICT(clazzPk, clazzDestination) DO UPDATE
-      SET clazzProcessed = false, clazzVersion = EXCLUDED.clazzVersion
+      SET clazzPending = true
    */               
  """)
     @ReplicationRunOnChange([Clazz::class])

@@ -36,6 +36,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import org.junit.Test
 import org.junit.Before
+import org.junit.After
 import org.junit.Rule
 import org.junit.Assert
 import org.kodein.di.*
@@ -212,6 +213,11 @@ class DbReplicationIntegrationTest {
             }
         }
         remoteServer.start()
+    }
+
+    @After
+    fun stop() {
+        remoteServer.stop(1000, 1000)
     }
 
     @Test

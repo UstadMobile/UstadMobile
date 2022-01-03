@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import com.ustadmobile.door.annotation.ReplicationDestinationNodeId
 import com.ustadmobile.door.annotation.ReplicationEntityForeignKey
-import com.ustadmobile.door.annotation.ReplicationTrackerProcessed
+import com.ustadmobile.door.annotation.ReplicationPending
 import com.ustadmobile.door.annotation.ReplicationVersionId
 import kotlinx.serialization.Serializable
 
@@ -22,7 +22,7 @@ data class AgentEntityTrkr(
     var aeTrkrDestination: Long = 0,
 
     @ColumnInfo(defaultValue = "0")
-    @ReplicationTrackerProcessed
+    @ReplicationPending
     var aeTrkrProcessed: Boolean = false
 
 

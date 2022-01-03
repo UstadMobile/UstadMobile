@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import com.ustadmobile.door.annotation.ReplicationDestinationNodeId
 import com.ustadmobile.door.annotation.ReplicationEntityForeignKey
-import com.ustadmobile.door.annotation.ReplicationTrackerProcessed
+import com.ustadmobile.door.annotation.ReplicationPending
 import com.ustadmobile.door.annotation.ReplicationVersionId
 
 @Entity(primaryKeys = arrayOf("usForeignKey", "usDestination"))
@@ -20,7 +20,7 @@ class UserSessionTrkr {
     var usDestination: Long = 0
 
     @ColumnInfo(defaultValue = "0")
-    @ReplicationTrackerProcessed
+    @ReplicationPending
     var usTrkrProcessed: Boolean = false
 
 

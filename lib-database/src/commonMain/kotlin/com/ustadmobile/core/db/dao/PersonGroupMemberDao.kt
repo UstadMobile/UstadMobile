@@ -12,9 +12,8 @@ import com.ustadmobile.lib.db.entities.Role
 abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
 
     @Query("""
-     REPLACE INTO PersonGroupMemberReplicate(pgmPk, pgmVersionId, pgmDestination)
+     REPLACE INTO PersonGroupMemberReplicate(pgmPk, pgmDestination)
       SELECT PersonGroupMember.groupMemberUid AS pgmUid,
-             PersonGroupMember.groupMemberLct AS pgmVersionId,
              :newNodeId AS pgmDestination
         FROM UserSession
              JOIN PersonGroupMember
@@ -30,7 +29,7 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
                WHERE pgmPk = PersonGroupMember.groupMemberUid
                  AND pgmDestination = :newNodeId), 0) 
       /*psql ON CONFLICT(pgmPk, pgmDestination) DO UPDATE
-             SET pgmProcessed = false, pgmVersionId = EXCLUDED.pgmVersionId
+             SET pgmPending = true
       */       
     """)
     @ReplicationRunOnNewNode
@@ -38,9 +37,8 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
     abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
 
     @Query("""
- REPLACE INTO PersonGroupMemberReplicate(pgmPk, pgmVersionId, pgmDestination)
+ REPLACE INTO PersonGroupMemberReplicate(pgmPk, pgmDestination)
   SELECT PersonGroupMember.groupMemberUid AS pgmUid,
-         PersonGroupMember.groupMemberLct AS pgmVersionId,
          UserSession.usClientNodeId AS pgmDestination
     FROM ChangeLog
          JOIN PersonGroupMember
@@ -57,7 +55,7 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
            WHERE pgmPk = PersonGroupMember.groupMemberUid
              AND pgmDestination = UserSession.usClientNodeId), 0)
      /*psql ON CONFLICT(pgmPk, pgmDestination) DO UPDATE
-         SET pgmProcessed = false, pgmVersionId = EXCLUDED.pgmVersionId
+         SET pgmPending = true
       */               
      """)
     @ReplicationRunOnChange([PersonGroupMember::class])

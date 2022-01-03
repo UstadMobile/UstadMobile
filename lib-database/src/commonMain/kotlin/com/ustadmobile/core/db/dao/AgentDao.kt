@@ -14,9 +14,8 @@ import com.ustadmobile.lib.db.entities.Role
 abstract class AgentDao :BaseDao<AgentEntity> {
 
     @Query("""
-     REPLACE INTO AgentEntityReplicate(aePk, aeVersionId, aeDestination)
+     REPLACE INTO AgentEntityReplicate(aePk, aeDestination)
       SELECT AgentEntity.agentUid AS aeUid,
-             AgentEntity.agentLct AS aeVersionId,
              :newNodeId AS aeDestination
         FROM UserSession
         JOIN PersonGroupMember 
@@ -33,7 +32,7 @@ abstract class AgentDao :BaseDao<AgentEntity> {
                WHERE aePk = AgentEntity.agentUid
                  AND aeDestination = :newNodeId), 0) 
       /*psql ON CONFLICT(aePk, aeDestination) DO UPDATE
-             SET aeProcessed = false
+             SET aePending = true
       */       
      """)
     @ReplicationRunOnNewNode
@@ -41,9 +40,8 @@ abstract class AgentDao :BaseDao<AgentEntity> {
     abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
 
     @Query("""
-     REPLACE INTO AgentEntityReplicate(aePk, aeVersionId, aeDestination)
+     REPLACE INTO AgentEntityReplicate(aePk, aeDestination)
       SELECT AgentEntity.agentUid AS aeUid,
-             AgentEntity.agentLct AS aeVersionId,
              UserSession.usClientNodeId AS aeDestination
         FROM ChangeLog
              JOIN AgentEntity
@@ -64,7 +62,7 @@ abstract class AgentDao :BaseDao<AgentEntity> {
                WHERE aePk = AgentEntity.agentUid
                  AND aeDestination = UserSession.usClientNodeId), 0)
      /*psql ON CONFLICT(aePk, aeDestination) DO UPDATE
-         SET aeProcessed = false
+         SET aePending = true
       */               
     """)
     @ReplicationRunOnChange([AgentEntity::class])

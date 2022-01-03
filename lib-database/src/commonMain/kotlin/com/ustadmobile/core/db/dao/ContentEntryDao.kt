@@ -13,9 +13,8 @@ import kotlin.js.JsName
 abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
     @Query("""
-        REPLACE INTO ContentEntryReplicate(cePk, ceVersionId, ceDestination)
+        REPLACE INTO ContentEntryReplicate(cePk, ceDestination)
          SELECT contentEntryUid AS ceUid,
-                ContentEntry.contentEntryLct AS ceVersionId,
                 :newNodeId AS siteDestination
            FROM ContentEntry
           WHERE ContentEntry.contentEntryLct != COALESCE(
@@ -24,7 +23,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                   WHERE cePk = ContentEntry.contentEntryUid
                     AND ceDestination = :newNodeId), 0) 
          /*psql ON CONFLICT(cePk, ceDestination) DO UPDATE
-                SET ceProcessed = false
+                SET cePending = true
          */       
     """)
     @ReplicationRunOnNewNode
@@ -32,9 +31,8 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
 
     @Query("""
-        REPLACE INTO ContentEntryReplicate(cePk, ceVersionId, ceDestination)
+        REPLACE INTO ContentEntryReplicate(cePk, ceDestination)
          SELECT ContentEntry.contentEntryUid AS cePk,
-                ContentEntry.contentEntryLct AS ceVersionId,
                 UserSession.usClientNodeId AS siteDestination
            FROM ChangeLog
                 JOIN ContentEntry
@@ -51,7 +49,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                   WHERE cePk = ContentEntry.contentEntryUid
                     AND ceDestination = UserSession.usClientNodeId), 0)     
         /*psql ON CONFLICT(cePk, ceDestination) DO UPDATE
-            SET ceProcessed = false
+            SET cePending = true
          */               
     """)
     @ReplicationRunOnChange([ContentEntry::class])

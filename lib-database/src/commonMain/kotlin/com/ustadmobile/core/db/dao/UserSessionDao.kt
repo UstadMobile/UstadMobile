@@ -21,9 +21,8 @@ abstract class UserSessionDao {
      * determine if permission is granted.
      */
     @Query("""
-        REPLACE INTO UserSessionReplicate(usPk, usVersionId, usDestination)
+        REPLACE INTO UserSessionReplicate(usPk, usDestination)
          SELECT UserSessionSubject.usUid AS usPk,
-                UserSessionSubject.usLct AS usVersionId,
                 UserSession.usClientNodeId AS usDestination
            FROM ChangeLog
                 JOIN UserSession UserSessionSubject
@@ -42,7 +41,7 @@ abstract class UserSessionDao {
                   WHERE UserSessionReplicate.usPk = UserSessionSubject.usUid
                     AND UserSessionReplicate.usDestination = UserSession.usClientNodeId), 0)
         /*psql ON CONFLICT(usPk, usDestination) DO UPDATE
-                SET usProcessed = false, usVersionId = EXCLUDED.usVersionId
+                SET usPending = true
          */           
     """)
     @ReplicationRunOnChange(value = [UserSession::class])
@@ -55,9 +54,8 @@ abstract class UserSessionDao {
      * determine if permission is granted.
      */
     @Query("""
-        REPLACE INTO UserSessionReplicate(usPk, usVersionId, usDestination)
+        REPLACE INTO UserSessionReplicate(usPk, usDestination)
          SELECT UserSessionSubject.usUid AS usPk,
-                UserSessionSubject.usLct AS usVersionId,
                 UserSession.usClientNodeId AS usDestination
            FROM UserSession 
                 JOIN PersonGroupMember

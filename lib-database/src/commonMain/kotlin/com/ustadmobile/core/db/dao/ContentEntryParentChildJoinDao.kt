@@ -13,9 +13,8 @@ data class UmContentEntriesWithFileSize(var numEntries: Int = 0, var fileSize: L
 abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJoin> {
 
     @Query("""
-     REPLACE INTO ContentEntryParentChildJoinReplicate(cepcjPk, cepcjVersionId, cepcjDestination)
+     REPLACE INTO ContentEntryParentChildJoinReplicate(cepcjPk, cepcjDestination)
       SELECT ContentEntryParentChildJoin.cepcjUid AS cepcjUid,
-             ContentEntryParentChildJoin.cepcjLct AS cepcjVersionId,
              :newNodeId AS cepcjDestination
         FROM ContentEntryParentChildJoin
        WHERE ContentEntryParentChildJoin.cepcjLct != COALESCE(
@@ -24,7 +23,7 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
                WHERE cepcjPk = ContentEntryParentChildJoin.cepcjUid
                  AND cepcjDestination = :newNodeId), 0) 
       /*psql ON CONFLICT(cepcjPk, cepcjDestination) DO UPDATE
-             SET cepcjProcessed = false, cepcjVersionId = EXCLUDED.cepcjVersionId
+             SET cepcjPending = true
       */       
     """)
     @ReplicationRunOnNewNode
@@ -32,9 +31,8 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
     abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
 
     @Query("""
-    REPLACE INTO ContentEntryParentChildJoinReplicate(cepcjPk, cepcjVersionId, cepcjDestination)
+    REPLACE INTO ContentEntryParentChildJoinReplicate(cepcjPk, cepcjDestination)
     SELECT ContentEntryParentChildJoin.cepcjUid AS cepcjUid,
-         ContentEntryParentChildJoin.cepcjLct AS cepcjVersionId,
          UserSession.usClientNodeId AS cepcjDestination
     FROM ChangeLog
          JOIN ContentEntryParentChildJoin
@@ -51,7 +49,7 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
            WHERE cepcjPk = ContentEntryParentChildJoin.cepcjUid
              AND cepcjDestination = UserSession.usClientNodeId), 0)
     /*psql ON CONFLICT(cepcjPk, cepcjDestination) DO UPDATE
-     SET cepcjProcessed = false, cepcjVersionId = EXCLUDED.cepcjVersionId
+     SET cepcjPending = true
     */               
     """)
     @ReplicationRunOnChange([ContentEntryParentChildJoin::class])

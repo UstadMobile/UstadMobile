@@ -12,9 +12,8 @@ import com.ustadmobile.lib.db.entities.*
 abstract class ScopedGrantDao {
 
     @Query("""
-     REPLACE INTO ScopedGrantReplicate(sgPk, sgVersionId, sgDestination)
+     REPLACE INTO ScopedGrantReplicate(sgPk, sgDestination)
       SELECT ScopedGrantWithPerm.sgUid AS sgPk,
-             ScopedGrantWithPerm.sgLct AS sgVersionId,
              :newNodeId AS sgDestination
         FROM UserSession
              JOIN PersonGroupMember
@@ -34,7 +33,7 @@ abstract class ScopedGrantDao {
                WHERE sgPk = ScopedGrantWithPerm.sgUid
                  AND sgDestination = :newNodeId), 0) 
       /*psql ON CONFLICT(sgPk, sgDestination) DO UPDATE
-             SET sgProcessed = false, sgVersionId = EXCLUDED.sgVersionId
+             SET sgPending = true
       */       
     """)
     @ReplicationRunOnNewNode
@@ -42,9 +41,8 @@ abstract class ScopedGrantDao {
     abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
 
     @Query("""
- REPLACE INTO ScopedGrantReplicate(sgPk, sgVersionId, sgDestination)
+ REPLACE INTO ScopedGrantReplicate(sgPk, sgDestination)
   SELECT ScopedGrantEntity.sgUid AS sgPk,
-         ScopedGrantEntity.sgLct AS sgVersionId,
          UserSession.usClientNodeId AS sgDestination
     FROM ChangeLog
          JOIN ScopedGrant ScopedGrantEntity
@@ -67,7 +65,7 @@ abstract class ScopedGrantDao {
            WHERE sgPk = ScopedGrantEntity.sgUid
              AND sgDestination = UserSession.usClientNodeId), 0)
  /*psql ON CONFLICT(sgPk, sgDestination) DO UPDATE
-     SET sgProcessed = false, sgVersionId = EXCLUDED.sgVersionId
+     SET sgPending = true
   */               
     """)
     @ReplicationRunOnChange([ScopedGrant::class])

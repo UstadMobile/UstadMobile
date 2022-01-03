@@ -20,9 +20,8 @@ abstract class SiteDao: BaseDao<Site>{
     abstract suspend fun updateAsync(workspace: Site)
 
     @Query("""
-        REPLACE INTO SiteReplicate(sitePk, siteVersionId, siteDestination)
+        REPLACE INTO SiteReplicate(sitePk, siteDestination)
          SELECT Site.siteUid AS sitePk,
-                Site.siteLct AS siteVersionId,
                 :newNodeId AS siteDestination
            FROM Site
           WHERE Site.siteLct != COALESCE(
@@ -31,7 +30,7 @@ abstract class SiteDao: BaseDao<Site>{
                   WHERE sitePk = Site.siteUid
                     AND siteDestination = :newNodeId), 0) 
          /*psql ON CONFLICT(sitePk, siteDestination) DO UPDATE
-                SET siteProcessed = false
+                SET sitePending = true
          */       
     """)
     @ReplicationRunOnNewNode
@@ -40,9 +39,8 @@ abstract class SiteDao: BaseDao<Site>{
 
 
     @Query("""
-        REPLACE INTO SiteReplicate(sitePk, siteVersionId, siteDestination)
+        REPLACE INTO SiteReplicate(sitePk, siteDestination)
          SELECT Site.siteUid AS sitePk,
-                Site.siteLct AS siteVersionId,
                 UserSession.usClientNodeId AS siteDestination
            FROM ChangeLog
                 JOIN Site 
@@ -59,7 +57,7 @@ abstract class SiteDao: BaseDao<Site>{
                   WHERE sitePk = Site.siteUid
                     AND siteDestination = UserSession.usClientNodeId), 0)     
         /*psql  ON CONFLICT(sitePk, siteDestination) DO UPDATE
-            SET siteProcessed = false
+            SET sitePending = true
          */               
     """)
     @ReplicationRunOnChange([Site::class])

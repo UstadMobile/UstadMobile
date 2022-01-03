@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import com.ustadmobile.door.annotation.ReplicationDestinationNodeId
 import com.ustadmobile.door.annotation.ReplicationEntityForeignKey
-import com.ustadmobile.door.annotation.ReplicationTrackerProcessed
+import com.ustadmobile.door.annotation.ReplicationPending
 import com.ustadmobile.door.annotation.ReplicationVersionId
 import kotlinx.serialization.Serializable
 
@@ -22,7 +22,7 @@ class ScopedGrantTrkr {
     @ReplicationDestinationNodeId
     var sgDestination: Long = 0
 
-    @ReplicationTrackerProcessed
+    @ReplicationPending
     var sgProcessed: Boolean = false
 
 }

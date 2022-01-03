@@ -25,9 +25,8 @@ import kotlin.js.JsName
 abstract class PersonDao : BaseDao<Person> {
 
     @Query("""
-     REPLACE INTO PersonReplicate(personPk, personVersionId, personDestination)
+     REPLACE INTO PersonReplicate(personPk, personDestination)
       SELECT Person.personUid AS personUid,
-             Person.personLct AS personVersionId,
              :newNodeId AS personDestination
         FROM UserSession
              JOIN PersonGroupMember
@@ -42,7 +41,7 @@ abstract class PersonDao : BaseDao<Person> {
                WHERE personPk = Person.personUid
                  AND personDestination = :newNodeId), 0) 
       /*psql ON CONFLICT(personPk, personDestination) DO UPDATE
-             SET personProcessed = false, personVersionId = EXCLUDED.personVersionId
+             SET personPending = true
       */       
     """)
     @ReplicationRunOnNewNode
@@ -50,9 +49,8 @@ abstract class PersonDao : BaseDao<Person> {
     abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
 
      @Query("""
- REPLACE INTO PersonReplicate(personPk, personVersionId, personDestination)
+ REPLACE INTO PersonReplicate(personPk, personDestination)
   SELECT Person.personUid AS personUid,
-         Person.personLct AS personVersionId,
          UserSession.usClientNodeId AS personDestination
     FROM ChangeLog
          JOIN Person
@@ -71,7 +69,7 @@ abstract class PersonDao : BaseDao<Person> {
            WHERE personPk = Person.personUid
              AND personDestination = UserSession.usClientNodeId), 0)
  /*psql ON CONFLICT(personPk, personDestination) DO UPDATE
-     SET personProcessed = false, personVersion = EXCLUDED.personVersion
+     SET personPending = true
   */               
  """)
     @ReplicationRunOnChange([Person::class])

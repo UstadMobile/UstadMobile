@@ -14,9 +14,8 @@ import com.ustadmobile.lib.db.entities.Role
 abstract class PersonAuth2Dao {
 
     @Query("""
-     REPLACE INTO PersonAuth2Replicate(paPk, paVersionId, paDestination)
+     REPLACE INTO PersonAuth2Replicate(paPk, paDestination)
       SELECT PersonAuth2.pauthUid AS paUid,
-             PersonAuth2.pauthLct AS paVersionId,
              :newNodeId AS paDestination
         FROM UserSession
         JOIN PersonGroupMember
@@ -33,7 +32,7 @@ abstract class PersonAuth2Dao {
                WHERE paPk = PersonAuth2.pauthUid
                  AND paDestination = :newNodeId), 0) 
       /*psql ON CONFLICT(paPk, paDestination) DO UPDATE
-             SET paProcessed = false, paVersionId = EXCLUDED.paVersionId
+             SET paPending = true
       */       
  """)
     @ReplicationRunOnNewNode
@@ -41,9 +40,8 @@ abstract class PersonAuth2Dao {
     abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
 
      @Query("""
- REPLACE INTO PersonAuth2Replicate(paPk, paVersionId, paDestination)
+ REPLACE INTO PersonAuth2Replicate(paPk, paDestination)
   SELECT PersonAuth2.pauthUid AS paUid,
-         PersonAuth2.pauthLct AS paVersionId,
          UserSession.usClientNodeId AS paDestination
     FROM ChangeLog
          JOIN PersonAuth2
@@ -64,7 +62,7 @@ abstract class PersonAuth2Dao {
            WHERE paPk = PersonAuth2.pauthUid
              AND paDestination = UserSession.usClientNodeId), 0)
  /*psql ON CONFLICT(paPk, paDestination) DO UPDATE
-     SET paProcessed = false, paVersionId = EXCLUDED.paVersionId
+     SET paPending = true
   */               
     """)
     @ReplicationRunOnChange([PersonAuth2::class])

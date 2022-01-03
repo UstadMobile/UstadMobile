@@ -19,9 +19,8 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS
 abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
 
     @Query("""
-     REPLACE INTO ClazzEnrolmentReplicate(cePk, ceVersionId, ceDestination)
+     REPLACE INTO ClazzEnrolmentReplicate(cePk, ceDestination)
       SELECT ClazzEnrolment.clazzEnrolmentUid AS ceUid,
-             ClazzEnrolment.clazzEnrolmentLct AS ceVersionId,
              :newNodeId AS ceDestination
         FROM UserSession
              JOIN PersonGroupMember 
@@ -39,7 +38,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                WHERE cePk = ClazzEnrolment.clazzEnrolmentUid
                  AND ceDestination = :newNodeId), 0) 
       /*psql ON CONFLICT(cePk, ceDestination) DO UPDATE
-             SET ceProcessed = false, ceVersionId = EXCLUDED.ceVersionId
+             SET cePending = true
       */       
     """)
     @ReplicationRunOnNewNode
@@ -47,9 +46,8 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
 
      @Query("""
- REPLACE INTO ClazzEnrolmentReplicate(cePk, ceVersionId, ceDestination)
+ REPLACE INTO ClazzEnrolmentReplicate(cePk, ceDestination)
   SELECT ClazzEnrolment.clazzEnrolmentUid AS ceUid,
-         ClazzEnrolment.clazzEnrolmentLct AS ceVersionId,
          UserSession.usClientNodeId AS ceDestination
     FROM ChangeLog
          JOIN ClazzEnrolment
@@ -68,7 +66,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
            WHERE cePk = ClazzEnrolment.clazzEnrolmentUid
              AND ceDestination = UserSession.usClientNodeId), 0)
  /*psql ON CONFLICT(cePk, ceDestination) DO UPDATE
-     SET ceProcessed = false, ceVersion = EXCLUDED.ceVersion
+     SET cePending = true, ceVersion = EXCLUDED.ceVersion
   */               
     """)
     @ReplicationRunOnChange([ClazzEnrolment::class])
