@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 91,
-    "identityHash": "8d65977879b3200d5f848295f4e05f38",
+    "identityHash": "af7b14c0cb74e8221f79b60b29f083c2",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -6091,137 +6091,6 @@
         "foreignKeys": []
       },
       {
-        "tableName": "UserSessionTrkr",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`usForeignKey` INTEGER NOT NULL, `usVersionId` INTEGER NOT NULL, `usDestination` INTEGER NOT NULL, `usTrkrProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`usForeignKey`, `usDestination`))",
-        "fields": [
-          {
-            "fieldPath": "usForeignKey",
-            "columnName": "usForeignKey",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "usVersionId",
-            "columnName": "usVersionId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "usDestination",
-            "columnName": "usDestination",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "usTrkrProcessed",
-            "columnName": "usTrkrProcessed",
-            "affinity": "INTEGER",
-            "notNull": true,
-            "defaultValue": "0"
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "usForeignKey",
-            "usDestination"
-          ],
-          "autoGenerate": false
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "ScopedGrantTrkr",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sgForeignKey` INTEGER NOT NULL, `sgVersionId` INTEGER NOT NULL, `sgDestination` INTEGER NOT NULL, `sgProcessed` INTEGER NOT NULL, PRIMARY KEY(`sgForeignKey`, `sgVersionId`))",
-        "fields": [
-          {
-            "fieldPath": "sgForeignKey",
-            "columnName": "sgForeignKey",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "sgVersionId",
-            "columnName": "sgVersionId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "sgDestination",
-            "columnName": "sgDestination",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "sgProcessed",
-            "columnName": "sgProcessed",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "sgForeignKey",
-            "sgVersionId"
-          ],
-          "autoGenerate": false
-        },
-        "indices": [
-          {
-            "name": "index_ScopedGrantTrkr_sgDestination_sgProcessed_sgForeignKey",
-            "unique": false,
-            "columnNames": [
-              "sgDestination",
-              "sgProcessed",
-              "sgForeignKey"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ScopedGrantTrkr_sgDestination_sgProcessed_sgForeignKey` ON `${TABLE_NAME}` (`sgDestination`, `sgProcessed`, `sgForeignKey`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "AgentEntityTrkr",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aeTrkrForeignKey` INTEGER NOT NULL, `aeTrkrLastModified` INTEGER NOT NULL, `aeTrkrDestination` INTEGER NOT NULL, `aeTrkrProcessed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`aeTrkrForeignKey`, `aeTrkrDestination`))",
-        "fields": [
-          {
-            "fieldPath": "aeTrkrForeignKey",
-            "columnName": "aeTrkrForeignKey",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aeTrkrLastModified",
-            "columnName": "aeTrkrLastModified",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aeTrkrDestination",
-            "columnName": "aeTrkrDestination",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aeTrkrProcessed",
-            "columnName": "aeTrkrProcessed",
-            "affinity": "INTEGER",
-            "notNull": true,
-            "defaultValue": "0"
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "aeTrkrForeignKey",
-            "aeTrkrDestination"
-          ],
-          "autoGenerate": false
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
         "tableName": "ReplicationStatus",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`repStatusId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tableId` INTEGER NOT NULL, `priority` INTEGER NOT NULL, `nodeId` INTEGER NOT NULL, `lastRemoteChangeTime` INTEGER NOT NULL, `lastFetchReplicationCompleteTime` INTEGER NOT NULL, `lastLocalChangeTime` INTEGER NOT NULL, `lastSendReplicationCompleteTime` INTEGER NOT NULL)",
         "fields": [
@@ -9259,7 +9128,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8d65977879b3200d5f848295f4e05f38')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'af7b14c0cb74e8221f79b60b29f083c2')"
     ]
   }
 }

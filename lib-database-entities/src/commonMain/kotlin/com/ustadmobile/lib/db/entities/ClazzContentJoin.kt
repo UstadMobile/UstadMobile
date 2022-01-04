@@ -9,6 +9,21 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @ReplicateEntity(tableId = TABLE_ID, tracker = ClazzContentJoinReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "clazzcontentjoin_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO ClazzContentJoin(ccjUid, ccjContentEntryUid, ccjClazzUid, ccjActive, ccjLocalChangeSeqNum, ccjMasterChangeSeqNum, ccjLastChangedBy, ccjLct) 
+         VALUES (NEW.ccjUid, NEW.ccjContentEntryUid, NEW.ccjClazzUid, NEW.ccjActive, NEW.ccjLocalChangeSeqNum, NEW.ccjMasterChangeSeqNum, NEW.ccjLastChangedBy, NEW.ccjLct) 
+         /*psql ON CONFLICT (ccjUid) DO UPDATE 
+         SET ccjContentEntryUid = EXCLUDED.ccjContentEntryUid, ccjClazzUid = EXCLUDED.ccjClazzUid, ccjActive = EXCLUDED.ccjActive, ccjLocalChangeSeqNum = EXCLUDED.ccjLocalChangeSeqNum, ccjMasterChangeSeqNum = EXCLUDED.ccjMasterChangeSeqNum, ccjLastChangedBy = EXCLUDED.ccjLastChangedBy, ccjLct = EXCLUDED.ccjLct
+         */"""
+     ]
+ )
+))
 /*
 @SyncableEntity(tableId = TABLE_ID,
         notifyOnUpdate = [

@@ -58,10 +58,6 @@ import kotlin.jvm.JvmField
     ChangeLog::class,
     ZombieAttachmentData::class,
     DoorNode::class,
-
-    UserSessionTrkr::class,
-    ScopedGrantTrkr::class,
-    AgentEntityTrkr::class,
     ReplicationStatus::class,
 
     ClazzLogReplicate::class,

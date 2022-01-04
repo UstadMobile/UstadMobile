@@ -32,7 +32,7 @@ import kotlinx.serialization.Serializable
 //         WHERE UserSession.usClientNodeId = :clientId
 //    """)
 @Serializable
-@ReplicateEntity(tableId = SchoolPicture.TABLE_ID, tracker = AgentEntityTrkr::class)
+//@ReplicateEntity(tableId = SchoolPicture.TABLE_ID, tracker = AgentEntityTrkr::class)
 open class SchoolPicture() {
 
     @PrimaryKey(autoGenerate = true)

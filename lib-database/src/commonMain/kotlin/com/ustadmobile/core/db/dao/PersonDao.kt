@@ -99,65 +99,6 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT COUNT(*) FROM Person where Person.username = :username")
     abstract suspend fun findByUsernameCount(username: String): Int
 
-    @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
-    suspend fun registerAsync(newPerson: Person, password: String): UmAccount? {
-        if (newPerson.username.isNullOrBlank())
-            throw IllegalArgumentException("New person to be registered has null or blank username")
-
-        val person = findUidAndPasswordHashAsync(newPerson.username ?: "")
-        if (person == null) {
-            //OK to go ahead and create
-            newPerson.personUid = insert(newPerson)
-            val newPersonAuth = PersonAuth(newPerson.personUid,
-                    ENCRYPTED_PASS_PREFIX + encryptPassword(password))
-            insertPersonAuth(newPersonAuth)
-            return createAndInsertAccessToken(newPerson.personUid, newPerson.username!!)
-        } else {
-            throw IllegalArgumentException("Username already exists")
-        }
-    }
-
-    @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
-    open suspend fun registerUser(firstName: String, lastName: String, email:String,
-                                  username:String, password: String): Long {
-        val newPerson = Person()
-        newPerson.firstNames = firstName
-        newPerson.lastName = lastName
-        newPerson.emailAddr = email
-        newPerson.username = username
-
-        if (newPerson.username.isNullOrBlank()) {
-            print("New person to be registered has null or blank username")
-            return 0
-
-        }else {
-
-            val person = findUidAndPasswordHashAsync(newPerson.username ?: "")
-            if (person == null) {
-                //OK to go ahead and create
-                newPerson.personUid = insert(newPerson)
-                val newPersonAuth = PersonAuth(newPerson.personUid,
-                        ENCRYPTED_PASS_PREFIX + encryptPassword(password))
-                insertPersonAuth(newPersonAuth)
-                println("New Person uid: " + newPerson.personUid)
-
-                return newPerson.personUid
-            } else {
-                print("Username already exists")
-                return 0
-            }
-        }
-    }
-
-
-    private fun createAndInsertAccessToken(personUid: Long, username: String): UmAccount {
-        val accessToken = AccessToken(personUid,
-                getSystemTimeInMillis() + SESSION_LENGTH)
-        accessToken.token = randomUuid().toString()
-
-        insertAccessToken(accessToken)
-        return UmAccount(personUid, username, accessToken.token, "")
-    }
 
     fun authenticate(token: String, personUid: Long): Boolean {
         return isValidToken(token, personUid)
