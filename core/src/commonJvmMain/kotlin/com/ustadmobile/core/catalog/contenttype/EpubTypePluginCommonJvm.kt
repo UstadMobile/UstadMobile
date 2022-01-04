@@ -167,7 +167,9 @@ class EpubTypePluginCommonJvm(
                     if(contentNeedUpload) {
                         val progressListenerAdapter = NetworkProgressListenerAdapter(progress,
                             contentJobItem)
-                        uploader.upload(contentJobItem, progressListenerAdapter, httpClient, endpoint)
+                        return@withContext ProcessResult(uploader.upload(
+                                contentJobItem, progressListenerAdapter, httpClient, endpoint
+                        ))
                     }
 
                     return@withContext ProcessResult(JobStatus.COMPLETE)
