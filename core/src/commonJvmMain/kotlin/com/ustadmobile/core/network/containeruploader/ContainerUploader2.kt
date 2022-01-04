@@ -100,10 +100,24 @@ actual class ContainerUploader2 actual constructor(
                     bytesUploaded += bytesRead
                     progressListener?.onProgress(
                         uploadSessionParams.startFrom + bytesUploaded, bytesToUpload)
+
                 }
             }else{
                 bytesToUpload = 0
             }
+
+            val statement = httpClient.post<HttpStatement>("${endpoint.url}ContainerUpload2/${request.uploadUuid}/close"){
+                body = defaultSerializer().write(request.entriesToUpload,
+                        ContentType.Application.Json.withUtf8Charset())
+            }.execute()
+            if(statement.status.value != 204){
+                throw IllegalStateException(statement.status.description)
+            }
+
+            progressListener?.onProgress(bytesUploaded, bytesToUpload)
+
+
+
         }catch(e: Exception) {
             e.printStackTrace()
             throw e
@@ -115,20 +129,7 @@ actual class ContainerUploader2 actual constructor(
             response?.closeQuietly()
         }
 
-        try {
-            val statement = httpClient.post<HttpStatement>("${endpoint.url}ContainerUpload2/${request.uploadUuid}/close"){
-                body = defaultSerializer().write(request.entriesToUpload,
-                        ContentType.Application.Json.withUtf8Charset())
-            }.execute()
-            if(statement.status.value != 204){
-                throw IllegalStateException(statement.status.description)
-            }
-        }catch(e: Exception){
-            e.printStackTrace()
-            throw e
-        }
 
-        progressListener?.onProgress(bytesUploaded, bytesToUpload)
         return@withContext  if(bytesUploaded == bytesToUpload) {
             JobStatus.COMPLETE
         } else {
