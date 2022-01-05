@@ -22,7 +22,8 @@ abstract class ContentJobItemDao {
                JOIN ContentJob
                ON ContentJobItem.cjiJobUid = ContentJob.cjUid
          WHERE ContentJobItem.cjiJobUid = :contentJobUid
-           AND ContentJobItem.cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.COMPLETE_MIN}
+           AND (ContentJobItem.cjiStatus = ${JobStatus.QUEUED} OR 
+                ContentJobItem.cjiStatus = ${JobStatus.WAITING_FOR_CONNECTION})
            AND (
                 NOT cjiConnectivityNeeded 
                 OR ((SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_UNMETERED}) 
@@ -49,8 +50,7 @@ abstract class ContentJobItemDao {
                        (SELECT cjiFinishTime 
                           FROM ContentJobItem 
                          WHERE cjiPluginId != 14 
-                           AND (cjiRecursiveStatus = ${JobStatus.COMPLETE} 
-                                OR cjiRecursiveStatus = ${JobStatus.PARTIAL_FAILED})
+                           AND cjiRecursiveStatus = ${JobStatus.COMPLETE}
                            AND cjiContentEntryUid = :contentEntryUid
 					  ORDER BY cjiFinishTime DESC LIMIT 1) > 
 						COALESCE((SELECT cjiFinishTime 
@@ -73,16 +73,35 @@ abstract class ContentJobItemDao {
 
 
     @Query("""
-        SELECT cjiRecursiveProgress AS progress, cjiRecursiveTotal AS total, cjNotificationTitle as progressTitle
+        SELECT cjiRecursiveProgress AS progress, 
+               cjiRecursiveTotal AS total, 
+               cjNotificationTitle as progressTitle,
+               ContentJobItem.cjiUid
+          FROM ContentJobItem
+          JOIN ContentJob
+            ON ContentJob.cjUid = ContentJobItem.cjiJobUid
+         WHERE cjiContentEntryUid = :contentEntryUid
+           AND cjiRecursiveStatus >= ${JobStatus.QUEUED}
+           AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX}
+      ORDER BY cjiStartTime DESC
+    """)
+    abstract fun findProgressForActiveContentJobItem(contentEntryUid: Long): List<ContentJobItemProgress>
+
+
+    @Query("""
+        SELECT cjiRecursiveProgress AS progress, 
+               cjiRecursiveTotal AS total, 
+               cjNotificationTitle as progressTitle,
+               ContentJobItem.cjiUid
           FROM ContentJobItem
           JOIN ContentJob
             ON ContentJob.cjUid = ContentJobItem.cjiJobUid
          WHERE cjiContentEntryUid = :contentEntryUid
            AND cjiRecursiveStatus >= ${JobStatus.RUNNING_MIN}
            AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX}
-      ORDER BY cjiStartTime DESC LIMIT 1 
+      ORDER BY cjiStartTime DESC LIMIT 1
     """)
-    abstract suspend fun findProgressForActiveContentJobItem(contentEntryUid: Long): ContentJobItemProgress?
+    abstract suspend fun findLatestProgressForActiveContentJobItem(contentEntryUid: Long): ContentJobItemProgress?
 
     @Insert
     abstract suspend fun insertJobItem(jobItem: ContentJobItem) : Long
