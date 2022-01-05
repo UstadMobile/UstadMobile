@@ -129,9 +129,9 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                 UPDATE ClazzEnrolment
                    SET clazzEnrolmentActive = :active,
                        clazzEnrolmentLastChangedBy = 
-                        (SELECT nodeClientId 
+                        COALESCE((SELECT nodeClientId 
                           FROM SyncNode 
-                         LIMIT 1) 
+                         LIMIT 1), 0)  
                 WHERE clazzEnrolmentPersonUid = :personUid 
                       AND clazzEnrolmentClazzUid = :clazzUid
                       AND clazzEnrolmentRole = :roleId""")

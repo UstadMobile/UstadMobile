@@ -34,7 +34,7 @@ class PersonListComponent(mProps: UmProps): UstadListComponent<Person, PersonWit
         if(arguments.containsKey(UstadView.ARG_CODE_TABLE)){
             inviteNewText = getString(MessageID.invite_with_link)
         }
-        createNewText = getString(MessageID.add_a_new_person)
+        addNewEntryText = getString(MessageID.add_a_new_person)
         ustadComponentTitle = getString(MessageID.people)
         mPresenter = PersonListPresenter(this, arguments, this,di,this)
         mPresenter?.onCreate(mapOf())

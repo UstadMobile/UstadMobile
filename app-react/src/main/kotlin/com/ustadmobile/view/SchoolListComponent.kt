@@ -57,7 +57,7 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
         fabManager?.text = getString(MessageID.school)
         mPresenter = SchoolListPresenter(this, arguments,
             this, di, this)
-        createNewText = getString(MessageID.add_a_new_school)
+        addNewEntryText = getString(MessageID.add_a_new_school)
         showCreateNewItem = true
         mPresenter?.onCreate(mapOf())
     }

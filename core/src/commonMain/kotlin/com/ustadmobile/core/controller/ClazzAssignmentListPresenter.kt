@@ -73,6 +73,8 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
                 mapOf(UstadView.ARG_CLAZZUID to clazzUid.toString()), context)
     }
 
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {}
+
     override fun onClickSort(sortOption: SortOrderOption) {
         super.onClickSort(sortOption)
         updateListOnView()

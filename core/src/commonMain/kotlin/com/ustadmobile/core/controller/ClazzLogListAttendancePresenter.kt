@@ -180,6 +180,8 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
         }
     }
 
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {}
+
     fun handleClickGraphDuration(days: Int) {
         val endOfDay = DateTime.now().toOffsetByTimezone(clazzTimeZone ?: "UTC")
                 .localEndOfDay.utc.unixMillisLong

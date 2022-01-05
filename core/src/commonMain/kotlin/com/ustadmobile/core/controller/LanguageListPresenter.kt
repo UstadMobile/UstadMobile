@@ -76,6 +76,10 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
         )
     }
 
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {
+        handleClickCreateNewFab()
+    }
+
     override suspend fun onCheckListSelectionOptions(account: UmAccount?): List<SelectionOption> {
         return listOf(SelectionOption.HIDE)
     }

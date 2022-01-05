@@ -15,7 +15,7 @@ const val DATE_FORMAT_MM_YYYY = "MM/YYYY"
 
 const val DATE_FORMAT_MMMM_DD_YYYY = "MMMM DD, YYYY"
 
-const val TIME_FORMAT_H_M = "h:m"
+const val TIME_FORMAT_H_M = "h:mm"
 
 fun Date.formatDate(format: String? = DATE_FORMAT_DD_MM_YYYY, timezone: String? = null): String {
     val utc = moment.utc(this).toDate()

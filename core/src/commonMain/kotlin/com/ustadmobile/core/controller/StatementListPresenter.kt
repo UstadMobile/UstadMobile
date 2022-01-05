@@ -1,8 +1,8 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.view.StatementListView
 import com.ustadmobile.core.view.SessionListView.Companion.ARG_CONTEXT_REGISTRATION
+import com.ustadmobile.core.view.StatementListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -58,5 +58,7 @@ class StatementListPresenter(context: Any, arguments: Map<String, String>,
     override fun handleClickCreateNewFab() {
 
     }
+
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {}
 
 }

@@ -176,7 +176,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                 label = "${startDateLabel.text}",
                                 error = startDateLabel.error,
                                 helperText = startDateLabel.errorText,
-                                value = entity?.caStartDate.toDate(),
+                                value = entity?.caStartDate.toDate(true),
                                 inputVariant = FormControlVariant.outlined,
                                 onChange = {
                                     setState {
@@ -192,7 +192,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                 label = "${startTimeLabel.text}",
                                 error = startTimeLabel.error,
                                 helperText = startTimeLabel.errorText,
-                                value = entity?.caStartDate.toDate(),
+                                value = entity?.caStartDate.toDate(true),
                                 inputVariant = FormControlVariant.outlined,
                                 onChange = {
                                     setState {
@@ -237,7 +237,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                 label = "${deadlineTimeLabel.text}",
                                 error = deadlineTimeLabel.error,
                                 helperText = deadlineTimeLabel.errorText,
-                                value = entity?.caDeadlineDate.toDate(),
+                                value = entity?.caDeadlineDate.toDate(true),
                                 inputVariant = FormControlVariant.outlined,
                                 onChange = {
                                     setState {
@@ -276,7 +276,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                         label = "${endOfGraceLabel.text}",
                                         error = endOfGraceLabel.error,
                                         helperText = endOfGraceLabel.errorText,
-                                        value = entity?.caGracePeriodDate.toDate(),
+                                        value = entity?.caGracePeriodDate.toDate(true),
                                         inputVariant = FormControlVariant.outlined,
                                         onChange = {
                                             setState {

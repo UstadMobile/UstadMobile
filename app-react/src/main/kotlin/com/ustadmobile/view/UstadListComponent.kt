@@ -31,7 +31,6 @@ import com.ustadmobile.util.StyleManager.theme
 import com.ustadmobile.util.ThemeManager.isDarkModeActive
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
-import com.ustadmobile.util.Util
 import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.createCreateNewItem
@@ -83,7 +82,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
             }
         }
 
-    var createNewText: String = getString(MessageID.add_new_content)
+    var addNewEntryText: String = getString(MessageID.add_new_content)
         get() = field
         set(value) {
             field = value
@@ -206,7 +205,13 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
             renderMenuOptions()
 
-            renderHeaderView()
+            styledDiv {
+                css{
+                    paddingBottom = 2.spacingUnits
+                }
+
+                renderHeaderView()
+            }
 
             if(linearLayout)
                 renderSingleColumnList()
@@ -258,10 +263,10 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                     }
                     umListItem(button = true) {
                         attrs.onClick = {
-                            Util.stopEventPropagation(it)
-                            handleClickCreateNewEntry()
+                            stopEventPropagation(it)
+                            handleClickAddNewEntry()
                         }
-                        createCreateNewItem(createNewText)
+                        createCreateNewItem(addNewEntryText)
                     }
                 }
 
@@ -280,13 +285,16 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                     }
                 }
             }else {
-                umListItem( button = true, alignItems = ListItemAlignItems.flexStart) {
+                umListItem(
+                    button = true,
+                    alignItems = ListItemAlignItems.flexStart) {
                     css(listCreateNewContainer)
                     attrs.divider = true
                     attrs.onClick = {
-                        handleClickCreateNewEntry()
+                        stopEventPropagation(it)
+                        handleClickAddNewEntry()
                     }
-                    createCreateNewItem(createNewText)
+                    createCreateNewItem(addNewEntryText)
                 }
 
                 if(inviteNewText.isNotEmpty()){
@@ -506,6 +514,10 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     open fun handleClickCreateNewEntry(){
         listPresenter?.handleClickCreateNewFab()
+    }
+
+    open fun handleClickAddNewEntry(){
+        listPresenter?.handleClickAddNewItem()
     }
 
     open fun handleInviteClicked(){}

@@ -15,7 +15,6 @@ import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -132,8 +131,7 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
      */
     override fun onClick(view: View?) {
         if (view?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.person_edit_dest, Person::class.java,
-            argBundle = arguments?: Bundle())
+            mPresenter?.handleClickAddNewItem()
         else {
             super.onClick(view)
         }

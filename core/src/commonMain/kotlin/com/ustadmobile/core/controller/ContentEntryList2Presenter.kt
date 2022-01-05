@@ -265,6 +265,10 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     }
 
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {
+        handleClickCreateNewFab()
+    }
+
 
     fun handleClickEditFolder() {
         systemImpl.go(ContentEntryEdit2View.VIEW_NAME,

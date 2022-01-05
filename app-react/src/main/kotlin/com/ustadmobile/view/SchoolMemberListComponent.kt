@@ -1,5 +1,6 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.controller.PersonListPresenter
 import com.ustadmobile.core.controller.SchoolMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -47,7 +48,7 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
                 PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL to filterBySchoolUid.toString(),
                 UstadView.ARG_CODE_TABLE to School.TABLE_ID.toString())
         }
-        mPresenter?.handleAddMemberClicked(args, addPersonKeyName)
+        mPresenter?.handleClickAddNewItem(args, addPersonKeyName)
     }
 
     private var pendingStudents: List<SchoolMemberWithPerson> = listOf()
@@ -79,7 +80,7 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
         } else {
             MessageID.student
         }
-        createNewText = "${getString(MessageID.add_new)} $addNewStringId"
+        addNewEntryText = "${getString(MessageID.add_new)} $addNewStringId"
 
         fabManager?.visible = true
         fabManager?.icon = "add"
@@ -104,6 +105,11 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
 
     override fun handleClickEntry(entry: SchoolMemberWithPerson) {
         mPresenter?.handleClickEntry(entry)
+    }
+
+    override fun handleClickCreateNewEntry() {
+        mPresenter?.handleClickAddNewItem(arguments,
+            PersonListPresenter.RESULT_PERSON_KEY)
     }
 
     override fun RBuilder.renderFooterView() {

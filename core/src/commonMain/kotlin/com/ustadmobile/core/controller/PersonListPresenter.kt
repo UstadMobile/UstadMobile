@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.util.safeStringify
@@ -95,6 +96,19 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
         systemImpl.go(PersonEditView.VIEW_NAME, mapOf(), context)
     }
 
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {
+        navigateForResult(
+            NavigateForResultOptions(
+                this, null,
+                PersonEditView.VIEW_NAME,
+                Person::class,
+                Person.serializer(),
+                destinationResultKey ?: RESULT_PERSON_KEY,
+                arguments = args?.toMutableMap() ?: arguments.toMutableMap()
+            )
+        )
+    }
+
 
     override fun onClickSort(sortOption: SortOrderOption) {
         super.onClickSort(sortOption)
@@ -154,5 +168,7 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
                 SortOrderOption(MessageID.last_name, PersonDao.SORT_LAST_NAME_ASC, true),
                 SortOrderOption(MessageID.last_name, PersonDao.SORT_LAST_NAME_DESC, false)
         )
+
+        const val RESULT_PERSON_KEY = "Person"
     }
 }

@@ -44,6 +44,10 @@ class LeavingReasonListPresenter(context: Any, arguments: Map<String, String>, v
         )
     }
 
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {
+        handleClickCreateNewFab()
+    }
+
     fun onClickLeavingReason(leavingReason: LeavingReason) {
         when(mListMode) {
             ListViewMode.PICKER -> finishWithResult(safeStringify(di,

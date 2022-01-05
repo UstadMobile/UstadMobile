@@ -17,7 +17,6 @@ import com.ustadmobile.core.view.ReportListView
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -118,7 +117,7 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
      */
     override fun onClick(v: View?) {
         if (v?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.report_edit_dest, Report::class.java)
+            mPresenter?.handleClickAddNewItem()
         else {
             super.onClick(v)
         }

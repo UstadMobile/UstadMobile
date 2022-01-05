@@ -5,6 +5,8 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.core.view.ClazzList2View
+import com.ustadmobile.core.view.PersonListView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.mui.components.*
@@ -48,6 +50,7 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
         fabManager?.text = getString(MessageID.clazz)
         ustadComponentTitle = getString(MessageID.classes)
         linearLayout = false
+        addNewEntryText = getString(MessageID.add_a_new_class)
         mPresenter = ClazzListPresenter(this, arguments, this,di,this)
         mPresenter?.onCreate(mapOf())
     }
@@ -134,6 +137,18 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
                 }
             }
         }
+    }
+
+    override fun handleClickAddNewEntry() {
+        var args = mutableMapOf<String, String>()
+        val filterExcludeMembersOfSchool =
+            arguments[PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
+        if(filterExcludeMembersOfSchool != 0L){
+            args = mutableMapOf(UstadView.ARG_SCHOOL_UID to filterExcludeMembersOfSchool.toString())
+        }
+        args.putAll(arguments)
+        console.log(arguments)
+        mPresenter?.handleClickAddNewItem(args)
     }
 
     override fun handleClickEntry(entry: ClazzWithListDisplayDetails) {

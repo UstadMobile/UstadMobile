@@ -11,10 +11,10 @@ import kotlin.js.Date
 val MAX_VALUE: Long
     get() = 8640000000000000L
 
-fun Long?.toDate(): Date? {
+fun Long?.toDate(emptyIfMaxValue: Boolean = false): Date? {
     return when {
         this ?: 0L == 0L -> null
-        this == Long.MAX_VALUE -> Date(MAX_VALUE)
+        this == Long.MAX_VALUE -> if(emptyIfMaxValue) null else Date(MAX_VALUE)
         this == null -> null
         else -> Date(this)
     }

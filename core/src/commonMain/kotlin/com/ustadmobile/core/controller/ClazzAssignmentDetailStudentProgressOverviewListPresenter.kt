@@ -59,9 +59,9 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
 
     }
 
-    override fun handleClickCreateNewFab() {
+    override fun handleClickCreateNewFab() {}
 
-    }
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {}
 
     override fun onClickSort(sortOption: SortOrderOption) {
         super.onClickSort(sortOption)

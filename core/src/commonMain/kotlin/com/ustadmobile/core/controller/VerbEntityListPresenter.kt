@@ -57,6 +57,8 @@ class VerbEntityListPresenter(context: Any, arguments: Map<String, String>, view
 
     }
 
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {}
+
     override fun handleClickEntry(entry: VerbDisplay) {
         view.finishWithResult(listOf(entry))
     }

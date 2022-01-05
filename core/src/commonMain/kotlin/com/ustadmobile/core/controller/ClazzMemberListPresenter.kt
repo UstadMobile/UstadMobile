@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import io.github.aakira.napier.Napier
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
@@ -10,19 +9,20 @@ import com.ustadmobile.core.util.ext.approvePendingClazzEnrolment
 import com.ustadmobile.core.util.ext.declinePendingClazzEnrolment
 import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.util.ext.toQueryLikeParam
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ClazzEnrolmentListView
+import com.ustadmobile.core.view.ClazzMemberListView
+import com.ustadmobile.core.view.PersonListView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
-import kotlinx.coroutines.GlobalScope
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
-import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
 
 class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, view: ClazzMemberListView,
@@ -114,6 +114,8 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     override fun handleClickCreateNewFab() {
         //there really isn't a fab here. There are buttons for add teacher and add student in the list itself
     }
+
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {}
 
     override fun onClickSort(sortOption: SortOrderOption) {
         super.onClickSort(sortOption)

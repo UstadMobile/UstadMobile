@@ -90,7 +90,7 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
 
     override fun onCreateView() {
         super.onCreateView()
-        createNewText = getString(MessageID.add_a_teacher)
+        addNewEntryText = getString(MessageID.add_a_teacher)
         showEmptyState = false
         filterByClazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
         mPresenter = ClazzMemberListPresenter(this, arguments, this, di, this)
@@ -126,7 +126,7 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
         mPresenter?.handleClickEntry(entry)
     }
 
-    override fun handleClickCreateNewEntry() {
+    override fun handleClickAddNewEntry() {
         navigateToPickNewMember(ClazzEnrolment.ROLE_TEACHER)
     }
 
@@ -135,8 +135,7 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
         sectionTitle: String,
         role: Int,
         createNewLabel: Int = 0,
-        pending: Boolean = false
-    ){
+        pending: Boolean = false){
 
         umGridContainer(rowSpacing = GridSpacing.spacing1) {
             css(StyleManager.defaultDoubleMarginTop)

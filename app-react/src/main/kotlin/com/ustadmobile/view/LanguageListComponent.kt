@@ -27,7 +27,7 @@ class LanguageListComponent(mProps: UmProps): UstadListComponent<Language, Langu
         super.onCreateView()
         ustadComponentTitle = getString(MessageID.languages)
         showCreateNewItem = true
-        createNewText = getString(MessageID.add_a_new_language)
+        addNewEntryText = getString(MessageID.add_a_new_language)
         fabManager?.text = getString(MessageID.language)
         mPresenter = LanguageListPresenter(this, arguments,
             this, di, this)

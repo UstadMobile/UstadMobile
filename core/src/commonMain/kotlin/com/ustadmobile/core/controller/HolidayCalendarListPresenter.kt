@@ -57,6 +57,10 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>,
         )
     }
 
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {
+        handleClickCreateNewFab()
+    }
+
 
 
     override fun handleClickSortOrder(sortOption: IdOption) {

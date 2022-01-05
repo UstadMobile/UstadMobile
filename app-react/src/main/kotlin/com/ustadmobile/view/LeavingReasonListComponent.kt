@@ -25,7 +25,7 @@ class LeavingReasonListComponent(props: UmProps): UstadListComponent<LeavingReas
 
     override fun onCreateView() {
         super.onCreateView()
-        createNewText = getString(MessageID.add_leaving_reason)
+        addNewEntryText = getString(MessageID.add_leaving_reason)
         showCreateNewItem = true
         fabManager?.text = getString(MessageID.leaving_reason)
         ustadComponentTitle = getString(MessageID.select_leaving_reason)

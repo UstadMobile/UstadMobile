@@ -53,8 +53,7 @@ class ReportListComponent(mProps: UmProps):  UstadListComponent<Report, Report>(
     override fun onCreateView() {
         super.onCreateView()
         linearLayout = false
-        //multiColumnItemSize = GridSize.cells6
-        createNewText = getString(MessageID.create_a_new_report)
+        addNewEntryText = getString(MessageID.create_a_new_report)
         fabManager?.text = getString(MessageID.report)
         mPresenter = ReportListPresenter(this, arguments, this, di, this)
         mPresenter?.onCreate(mapOf())
@@ -124,6 +123,7 @@ class ReportListComponent(mProps: UmProps):  UstadListComponent<Report, Report>(
     override fun handleClickEntry(entry: Report) {
         mPresenter?.handleClickEntry(entry)
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

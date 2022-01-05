@@ -1,7 +1,7 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.view.StatementListView
 import com.ustadmobile.core.view.SessionListView
+import com.ustadmobile.core.view.StatementListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -49,6 +49,8 @@ class SessionListPresenter(context: Any, arguments: Map<String, String>,
     override fun handleClickCreateNewFab() {
 
     }
+
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {}
 
     fun onClickPersonWithSessionDisplay(personWithStatementDisplay: PersonWithSessionsDisplay) {
         systemImpl.go(StatementListView.VIEW_NAME,

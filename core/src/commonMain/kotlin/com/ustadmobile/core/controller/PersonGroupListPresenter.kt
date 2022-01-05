@@ -61,6 +61,8 @@ class PersonGroupListPresenter(context: Any, arguments: Map<String, String>, vie
         systemImpl.go(PersonGroupEditView.VIEW_NAME, mapOf(), context)
     }
 
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {}
+
     override fun handleClickSortOrder(sortOption: IdOption) {
         val sortOrder = (sortOption as? PersonGroupListSortOption)?.sortOrder ?: return
         if(sortOrder != currentSortOrder) {

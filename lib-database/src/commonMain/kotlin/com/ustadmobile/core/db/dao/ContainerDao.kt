@@ -218,9 +218,9 @@ abstract class ContainerDao : BaseDao<Container> {
                       JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid
                      WHERE ContainerEntry.ceContainerUid = Container.containerUid), 0),
                    cntLastModBy = 
-                   (SELECT nodeClientId 
+                   COALESCE((SELECT nodeClientId 
                       FROM SyncNode 
-                     LIMIT 1)
+                     LIMIT 1), 0)
                      
              WHERE containerUid = :containerUid
         """
