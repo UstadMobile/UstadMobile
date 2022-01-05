@@ -7,9 +7,23 @@ import com.ustadmobile.lib.db.entities.StateContentEntity.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-//@SyncableEntity(tableId = TABLE_ID)
 @Serializable
 @ReplicateEntity(tableId = StateContentEntity.TABLE_ID, tracker = StateContentEntityReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "statecontententity_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO StateContentEntity(stateContentUid, stateContentStateUid, stateContentKey, stateContentValue, isIsactive, stateContentMasterChangeSeqNum, stateContentLocalChangeSeqNum, stateContentLastChangedBy, stateContentLct) 
+         VALUES (NEW.stateContentUid, NEW.stateContentStateUid, NEW.stateContentKey, NEW.stateContentValue, NEW.isIsactive, NEW.stateContentMasterChangeSeqNum, NEW.stateContentLocalChangeSeqNum, NEW.stateContentLastChangedBy, NEW.stateContentLct) 
+         /*psql ON CONFLICT (stateContentUid) DO UPDATE 
+         SET stateContentStateUid = EXCLUDED.stateContentStateUid, stateContentKey = EXCLUDED.stateContentKey, stateContentValue = EXCLUDED.stateContentValue, isIsactive = EXCLUDED.isIsactive, stateContentMasterChangeSeqNum = EXCLUDED.stateContentMasterChangeSeqNum, stateContentLocalChangeSeqNum = EXCLUDED.stateContentLocalChangeSeqNum, stateContentLastChangedBy = EXCLUDED.stateContentLastChangedBy, stateContentLct = EXCLUDED.stateContentLct
+         */"""
+     ]
+ )
+))
 //TODO
 class StateContentEntity {
 

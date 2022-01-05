@@ -4,18 +4,69 @@ import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.School
+import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.School.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT1
 import com.ustadmobile.lib.db.entities.School.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT2
 import com.ustadmobile.lib.db.entities.School.Companion.JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
-import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
-import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
+import com.ustadmobile.lib.db.entities.School.Companion.JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
 
 @Repository
 @Dao
 abstract class SchoolDao : BaseDao<School> {
+
+    @Query("""
+     REPLACE INTO SchoolReplicate(schoolPk, schoolDestination)
+      SELECT School.schoolUid AS schoolPk,
+             :newNodeId AS schoolDestination
+        FROM UserSession
+             JOIN PersonGroupMember
+                  ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+             $JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT1
+                  ${Role.PERMISSION_SCHOOL_SELECT}
+                  $JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT2
+       WHERE UserSession.usClientNodeId = :newNodeId
+         AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+         AND School.schoolLct != COALESCE(
+             (SELECT schoolVersionId
+                FROM SchoolReplicate
+               WHERE schoolPk = School.schoolUid
+                 AND schoolDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(schoolPk, schoolDestination) DO UPDATE
+             SET schoolPending = true
+      */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([School::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+    @Query("""
+ REPLACE INTO SchoolReplicate(schoolPk, schoolDestination)
+  SELECT School.schoolUid AS schoolUid,
+         UserSession.usClientNodeId AS schoolDestination
+    FROM ChangeLog
+         JOIN School
+              ON ChangeLog.chTableId = ${School.TABLE_ID}
+                  AND ChangeLog.chEntityPk = School.schoolUid
+              $JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
+                  ${Role.PERMISSION_SCHOOL_SELECT}
+                  $JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
+   WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId 
+           FROM SyncNode
+          LIMIT 1)
+     AND School.schoolLct != COALESCE(
+         (SELECT schoolVersionId
+            FROM SchoolReplicate
+           WHERE schoolPk = School.schoolUid
+             AND schoolDestination = UserSession.usClientNodeId), 0)
+ /*psql ON CONFLICT(schoolPk, schoolDestination) DO UPDATE
+     SET schoolPending = true
+  */               
+    """)
+    @ReplicationRunOnChange([School::class])
+    @ReplicationCheckPendingNotificationsFor([School::class])
+    abstract suspend fun replicateOnChange()
 
     @Query("SELECT * FROM School WHERE schoolUid = :schoolUid AND CAST(schoolActive AS INTEGER) = 1")
     abstract suspend fun findByUidAsync(schoolUid: Long): School?

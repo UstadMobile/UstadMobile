@@ -6,13 +6,59 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import com.ustadmobile.core.db.dao.OneToManyJoinDao
-import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.SyncNode
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
+import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
 abstract class SiteTermsDao : OneToManyJoinDao<SiteTerms> {
+
+    @Query("""
+     REPLACE INTO SiteTermsReplicate(stPk, stDestination)
+      SELECT SiteTerms.sTermsUid AS stPk,
+             :newNodeId AS stDestination
+        FROM SiteTerms
+       WHERE SiteTerms.sTermsLct != COALESCE(
+             (SELECT stVersionId
+                FROM SiteTermsReplicate
+               WHERE stPk = SiteTerms.sTermsUid
+                 AND stDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(stPk, stDestination) DO UPDATE
+             SET stPending = true
+      */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([SiteTerms::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+    @Query("""
+ REPLACE INTO SiteTermsReplicate(stPk, stDestination)
+  SELECT SiteTerms.sTermsUid AS stUid,
+         UserSession.usClientNodeId AS stDestination
+    FROM ChangeLog
+         JOIN SiteTerms
+             ON ChangeLog.chTableId = ${SiteTerms.TABLE_ID}
+                AND ChangeLog.chEntityPk = SiteTerms.sTermsUid
+         JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+   WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId 
+           FROM SyncNode
+          LIMIT 1)
+     AND SiteTerms.sTermsLct != COALESCE(
+         (SELECT stVersionId
+            FROM SiteTermsReplicate
+           WHERE stPk = SiteTerms.sTermsUid
+             AND stDestination = UserSession.usClientNodeId), 0)
+ /*psql ON CONFLICT(stPk, stDestination) DO UPDATE
+     SET stPending = true
+  */               
+ """)
+    @ReplicationRunOnChange([SiteTerms::class])
+    @ReplicationCheckPendingNotificationsFor([SiteTerms::class])
+    abstract suspend fun replicateOnChange()
 
     @Query("""
         SELECT * FROM SiteTerms WHERE sTermsUid = coalesce(
@@ -53,7 +99,7 @@ abstract class SiteTermsDao : OneToManyJoinDao<SiteTerms> {
     @Query("""
         UPDATE SiteTerms 
         SET sTermsActive = :active,
-        sTermsLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1)
+        sTermsLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL}
         WHERE sTermsUid = :sTermsUid
         """)
     abstract suspend fun updateActiveByUid(sTermsUid: Long, active: Boolean)

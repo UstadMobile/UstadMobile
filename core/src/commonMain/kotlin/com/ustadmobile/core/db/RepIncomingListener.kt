@@ -3,10 +3,7 @@ package com.ustadmobile.core.db
 import com.ustadmobile.door.IncomingReplicationEvent
 import com.ustadmobile.door.IncomingReplicationListener
 import com.ustadmobile.door.ext.replicationNotificationDispatcher
-import com.ustadmobile.lib.db.entities.ClazzEnrolment
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonGroupMember
-import com.ustadmobile.lib.db.entities.UserSession
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -50,6 +47,19 @@ class RepIncomingListener(private val db: UmAppDatabase) : IncomingReplicationLi
 
                 val affectedNodes = db.userSessionDao.findAllActiveNodeIdsWithClazzBasedPermission(
                     clazzUids)
+                affectedNodes.forEach {
+                    db.replicationNotificationDispatcher.onNewDoorNode(it, "")
+                }
+            }
+
+            SchoolMember.TABLE_ID -> {
+                val jsonArray: JsonArray = incomingReplicationEvent.incomingReplicationData
+                val schoolUids = jsonArray.mapNotNull {
+                    it.jsonObject.get("schoolUid")?.jsonPrimitive?.longOrNull
+                }.toSet().toList()
+
+                val affectedNodes = db.userSessionDao.findAllActiveNodeIdsWithSchoolBasedPermission(
+                    schoolUids)
                 affectedNodes.forEach {
                     db.replicationNotificationDispatcher.onNewDoorNode(it, "")
                 }

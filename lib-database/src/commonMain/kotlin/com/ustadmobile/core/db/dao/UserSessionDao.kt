@@ -177,6 +177,17 @@ abstract class UserSessionDao {
     """)
     abstract suspend fun findAllActiveNodeIdsWithClazzBasedPermission(clazzUids: List<Long>): List<Long>
 
+    @Query("""
+        SELECT UserSession.usClientNodeId
+          FROM ScopedGrant
+               JOIN PersonGroupMember 
+                    ON PersonGroupMember.groupMemberGroupUid = ScopedGrant.sgGroupUid
+               JOIN UserSession
+                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+         WHERE ScopedGrant.sgTableId = ${School.TABLE_ID} 
+           AND ScopedGrant.sgEntityUid IN (:schoolUids) 
+    """)
+    abstract suspend fun findAllActiveNodeIdsWithSchoolBasedPermission(schoolUids: List<Long>): List<Long>
 
     companion object {
         const val FIND_LOCAL_SESSIONS_SQL = """

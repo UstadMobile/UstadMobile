@@ -9,21 +9,6 @@ import kotlinx.serialization.Serializable
 @Entity(indices = [
     Index(value = ["usPersonUid", "usStatus", "usClientNodeId"], name = "person_status_node_idx"),
     Index(value = ["usClientNodeId", "usStatus", "usPersonUid"], name = "node_status_person_idx")])
-//@SyncableEntity(tableId = UserSession.TABLE_ID,
-//    syncFindAllQuery = """
-//        SELECT UserSession.*
-//          FROM UserSession
-//         WHERE usClientNodeId =  :clientId
-//    """,
-//    notifyOnUpdate = ["""
-//        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
-//               $TABLEID_SYNC_ALL_TABLES AS tableId
-//          FROM ChangeLog
-//               JOIN UserSession
-//                    ON ChangeLog.chTableId = ${UserSession.TABLE_ID}
-//                       AND ChangeLog.chEntityPk = UserSession.usUid
-//
-//    """])
 @Serializable
 @ReplicateEntity(tableId = UserSession.TABLE_ID, tracker = UserSessionReplicate::class)
 @Triggers(arrayOf(
