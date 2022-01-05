@@ -76,9 +76,7 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
      * If ListMode is BROWSE then the child implementation should call systemImpl.go itself to direct
      * the user to the detail view (or otherwise)
      */
-    open fun handleClickEntry(entry: RT) {
-        view.takeIf { mListMode == ListViewMode.PICKER }?.finishWithResult(listOf(entry))
-    }
+    open fun handleClickEntry(entry: RT) {}
 
     open fun handleClickSelectionOption(selectedItem: List<RT>, option: SelectionOption) {
 

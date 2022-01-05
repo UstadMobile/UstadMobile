@@ -531,10 +531,6 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
         listPresenter?.onClickSort(sortOption)
     }
 
-    override fun finishWithResult(result: List<RT>) {
-        TODO("finishWithResult: Not used anymore")
-    }
-
     override fun onFabClicked() {
         super.onFabClicked()
         handleClickCreateNewEntry()

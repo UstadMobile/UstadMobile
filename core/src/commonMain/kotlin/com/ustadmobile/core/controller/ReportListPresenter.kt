@@ -5,6 +5,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -12,6 +13,7 @@ import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class ReportListPresenter(context: Any, arguments: Map<String, String>, view: ReportListView,
@@ -54,7 +56,8 @@ class ReportListPresenter(context: Any, arguments: Map<String, String>, view: Re
 
     override fun handleClickEntry(entry: Report) {
         when (mListMode) {
-            ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
+            ListViewMode.PICKER -> finishWithResult(
+                safeStringify(di, ListSerializer(Report.serializer()), listOf(entry)))
             ListViewMode.BROWSER -> systemImpl.go(ReportDetailView.VIEW_NAME,
                     mapOf(UstadView.ARG_ENTITY_UID to entry.reportUid.toString()), context)
         }

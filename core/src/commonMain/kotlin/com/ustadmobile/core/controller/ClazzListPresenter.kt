@@ -37,7 +37,7 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-
+        clazzList2ItemListener.presenter = this
         filterExcludeMembersOfSchool = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
         filterAlreadySelectedList = arguments[ClazzList2View.ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST]
                 ?.split(",")?.filter { it.isNotEmpty() }?.map { it.trim().toLong() }
