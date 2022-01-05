@@ -8,18 +8,20 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
+import com.ustadmobile.core.util.ext.grantScopedPermission
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.util.test.waitUntilAsync
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.*
 import com.ustadmobile.door.replication.doorReplicationRoute
 import com.ustadmobile.door.util.NodeIdAuthCache
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ScopedGrant
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.rest.ext.initAdminUser
 import com.ustadmobile.lib.rest.ext.ktorInitRepo
 import io.github.aakira.napier.DebugAntilog
@@ -301,6 +303,108 @@ class DbReplicationIntegrationTest {
         }
 
         Assert.assertNotNull(localDb.clazzDao.findByUid(clazz.clazzUid))
+
+    }
+
+    @Test
+    fun givenClazzCreatedOnServer_whenUserWithScopedPermissionConnected_thenShouldReplicateClazzWithPermissionAndNotOthers() {
+        val localAccountManager: UstadAccountManager by localDi.instance()
+
+        //create the new user
+        val teacherPerson = runBlocking {
+            remoteDb.insertPersonAndGroup(Person().apply {
+                firstNames = "Teacher"
+                lastName = "Teacher"
+                username = "teacher"
+            })
+        }
+
+        val newClazz = Clazz().apply {
+            clazzName = "Test clazz"
+            clazzUid = remoteDb.clazzDao.insert(this)
+        }
+
+        val anotherClazz = Clazz().apply {
+            clazzName = "Other clazz"
+            clazzUid = remoteDb.clazzDao.insert(this)
+        }
+
+        runBlocking {
+            remoteDb.grantScopedPermission(teacherPerson,
+                Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT, Clazz.TABLE_ID, newClazz.clazzUid)
+        }
+
+        localDb.personDao.insert(teacherPerson)
+        runBlocking {
+            localAccountManager.addSession(teacherPerson, TEST_SERVER_HOST, "secret")
+        }
+
+        runBlocking {
+            localDb.waitUntil(10006, listOf("Clazz")) {
+                localDb.clazzDao.findByUid(newClazz.clazzUid) != null
+            }
+        }
+
+        Assert.assertNotNull(localDb.clazzDao.findByUid(newClazz.clazzUid))
+
+        //make sure that the other class does not come
+        Thread.sleep(1000)
+        Assert.assertNull(localDb.clazzDao.findByUid(anotherClazz.clazzUid))
+    }
+
+    @Test
+    fun givenUserLoggedInWithPermissionOnClazz_whenNewPersonEnroledInClazz_thenShouldReplicateRelatedEntities() {
+        val localAccountManager: UstadAccountManager by localDi.instance()
+
+        //create the new user
+        val teacherPerson = runBlocking {
+            remoteDb.insertPersonAndGroup(Person().apply {
+                firstNames = "Teacher"
+                lastName = "Teacher"
+                username = "teacher"
+            })
+        }
+
+        val studentPerson = runBlocking {
+            remoteDb.insertPersonAndGroup(Person().apply {
+                firstNames = "Student"
+                lastName = "student"
+                username = "student"
+            })
+        }
+
+        val newClazz = Clazz().apply {
+            clazzName = "Test clazz"
+            clazzUid = remoteDb.clazzDao.insert(this)
+        }
+
+        runBlocking {
+            remoteDb.grantScopedPermission(teacherPerson,
+                Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT, Clazz.TABLE_ID, newClazz.clazzUid)
+        }
+
+        localDb.personDao.insert(teacherPerson)
+        runBlocking {
+            localAccountManager.addSession(teacherPerson, TEST_SERVER_HOST, "secret")
+        }
+
+        runBlocking {
+            localDb.waitUntil(10007, listOf("Clazz")) {
+                localDb.clazzDao.findByUid(newClazz.clazzUid) != null
+            }
+        }
+
+        runBlocking {
+            remoteDb.enrolPersonIntoClazzAtLocalTimezone(studentPerson, newClazz.clazzUid,
+                ClazzEnrolment.ROLE_STUDENT)
+            val localDbNodeId = (localDbRepo as DoorDatabaseRepository).config.nodeId
+            remoteDb.replicationNotificationDispatcher.onNewDoorNode(localDbNodeId, "")
+
+            localDb.waitUntil(10008, listOf("Person")) {
+                localDb.personDao.findByUsername(studentPerson.username) != null
+            }
+        }
+
 
     }
 

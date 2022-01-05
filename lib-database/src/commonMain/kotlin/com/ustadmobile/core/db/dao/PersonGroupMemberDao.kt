@@ -44,7 +44,11 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
          JOIN PersonGroupMember
              ON ChangeLog.chTableId = ${PersonGroupMember.TABLE_ID}
                 AND ChangeLog.chEntityPk = PersonGroupMember.groupMemberUid
-         JOIN UserSession
+         JOIN Person
+              ON PersonGroupMember.groupMemberPersonUid = Person.personUid
+         ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+              ${Role.PERMISSION_PERSON_SELECT}
+              ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
    WHERE UserSession.usClientNodeId != (
          SELECT nodeClientId 
            FROM SyncNode

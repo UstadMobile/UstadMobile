@@ -35,6 +35,21 @@ import kotlinx.serialization.Serializable
 //    """)
 @ReplicateEntity(tableId = LearnerGroupMember.TABLE_ID, tracker = LearnerGroupMemberReplicate::class)
 @Serializable
+@Triggers(arrayOf(
+ Trigger(
+     name = "learnergroupmember_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO LearnerGroupMember(learnerGroupMemberUid, learnerGroupMemberPersonUid, learnerGroupMemberLgUid, learnerGroupMemberRole, learnerGroupMemberActive, learnerGroupMemberMCSN, learnerGroupMemberCSN, learnerGroupMemberLCB, learnerGroupMemberLct) 
+         VALUES (NEW.learnerGroupMemberUid, NEW.learnerGroupMemberPersonUid, NEW.learnerGroupMemberLgUid, NEW.learnerGroupMemberRole, NEW.learnerGroupMemberActive, NEW.learnerGroupMemberMCSN, NEW.learnerGroupMemberCSN, NEW.learnerGroupMemberLCB, NEW.learnerGroupMemberLct) 
+         /*psql ON CONFLICT (learnerGroupMemberUid) DO UPDATE 
+         SET learnerGroupMemberPersonUid = EXCLUDED.learnerGroupMemberPersonUid, learnerGroupMemberLgUid = EXCLUDED.learnerGroupMemberLgUid, learnerGroupMemberRole = EXCLUDED.learnerGroupMemberRole, learnerGroupMemberActive = EXCLUDED.learnerGroupMemberActive, learnerGroupMemberMCSN = EXCLUDED.learnerGroupMemberMCSN, learnerGroupMemberCSN = EXCLUDED.learnerGroupMemberCSN, learnerGroupMemberLCB = EXCLUDED.learnerGroupMemberLCB, learnerGroupMemberLct = EXCLUDED.learnerGroupMemberLct
+         */"""
+     ]
+ )
+))
 open class LearnerGroupMember {
 
     @PrimaryKey(autoGenerate = true)

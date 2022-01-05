@@ -84,8 +84,4 @@ suspend fun UmAppDatabase.initAdminUser(
 
 fun UmAppDatabase.ktorInitRepo() {
     insertDefaultSite()
-
-    runBlocking {
-        roleDao.insertDefaultRolesIfRequired()
-    }
 }

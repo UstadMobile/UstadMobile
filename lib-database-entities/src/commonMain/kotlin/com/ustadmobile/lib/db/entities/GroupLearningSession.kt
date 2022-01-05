@@ -10,6 +10,21 @@ import kotlinx.serialization.Serializable
 @Entity
 @ReplicateEntity(tableId = GroupLearningSession.TABLE_ID,
     tracker = GroupLearningSessionReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "grouplearningsession_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO GroupLearningSession(groupLearningSessionUid, groupLearningSessionContentUid, groupLearningSessionLearnerGroupUid, groupLearningSessionInactive, groupLearningSessionMCSN, groupLearningSessionCSN, groupLearningSessionLCB, groupLearningSessionLct) 
+         VALUES (NEW.groupLearningSessionUid, NEW.groupLearningSessionContentUid, NEW.groupLearningSessionLearnerGroupUid, NEW.groupLearningSessionInactive, NEW.groupLearningSessionMCSN, NEW.groupLearningSessionCSN, NEW.groupLearningSessionLCB, NEW.groupLearningSessionLct) 
+         /*psql ON CONFLICT (groupLearningSessionUid) DO UPDATE 
+         SET groupLearningSessionContentUid = EXCLUDED.groupLearningSessionContentUid, groupLearningSessionLearnerGroupUid = EXCLUDED.groupLearningSessionLearnerGroupUid, groupLearningSessionInactive = EXCLUDED.groupLearningSessionInactive, groupLearningSessionMCSN = EXCLUDED.groupLearningSessionMCSN, groupLearningSessionCSN = EXCLUDED.groupLearningSessionCSN, groupLearningSessionLCB = EXCLUDED.groupLearningSessionLCB, groupLearningSessionLct = EXCLUDED.groupLearningSessionLct
+         */"""
+     ]
+ )
+))
 //@SyncableEntity(tableId = GroupLearningSession.TABLE_ID,
 //    notifyOnUpdate = ["""
 //        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,

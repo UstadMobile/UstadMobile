@@ -73,39 +73,6 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @ReplicationCheckPendingNotificationsFor([ClazzEnrolment::class])
     abstract suspend fun replicateClazzEnrolmentOnChange()
 
-
-//    @ReplicationRunOnChange(value = [ClazzEnrolment::class])
-//    @ReplicationCheckPendingNotificationsFor(value = [Person::class])
-//    @Query("""
-//        INSERT INTO PersonTrkr(...)
-//             SELECT Person.personUid as personFk ... UserSession.usClientNodeId AS personDestination
-//              FROM ChangeLog
-//              JOIN ClazzEnrolment
-//                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID}
-//                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-//              $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
-//                  ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT}
-//                  $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
-//                  /* ADD JOIN TO PERSON FROM UserSession */
-//    """)
-//    abstract suspend fun updatePersonReplicationOnClazzEnrolmentChange()
-//
-//    @ReplicationRunOnChange(value = [ClazzEnrolment::class])
-//    @ReplicationCheckPendingNotificationsFor(value = [AgentEntity::class])
-//    @Query("""
-//     INSERT INTO AgentEntityTrkr
-//          SELECT AgentEntity.uid AS agentFk, UserSession.usClientNodeId as agentDestination
-//            FROM ChangeLog
-//            JOIN ClazzEnrolment
-//                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID}
-//                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-//            $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
-//                    ${Role.PERMISSION_PERSON_SELECT}
-//                    $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
-//            /* Add JOIN to AgentEntity */
-//    """)
-//    abstract suspend fun updateAgentEntityOnClazzEnrolmentChange()
-
     /**
      * Note: When actually enroling into a class, use UmAppDatbaseExt#processEnrolmentIntoClass
      * to ensure that permissions, group membership, etc. are taken care of

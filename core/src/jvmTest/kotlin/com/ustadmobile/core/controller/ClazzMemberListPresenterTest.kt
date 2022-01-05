@@ -18,7 +18,6 @@ import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT_PENDING
-import com.ustadmobile.util.test.ext.insertPersonWithRole
 import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert

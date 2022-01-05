@@ -667,20 +667,6 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW LanguageVariant_ReceiveView AS  SELECT LanguageVariant.*, LanguageVariantReplicate.* FROM LanguageVariant LEFT JOIN LanguageVariantReplicate ON LanguageVariantReplicate.lvPk = LanguageVariant.langVariantUid "
         _stmtList +=
-            " CREATE TABLE IF NOT EXISTS RoleReplicate ( rolePk INTEGER NOT NULL, roleVersionId INTEGER NOT NULL DEFAULT 0, roleDestination INTEGER NOT NULL, rolePending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (rolePk, roleDestination)) "
-        _stmtList +=
-            " CREATE INDEX index_RoleReplicate_rolePk_roleDestination_roleVersionId ON RoleReplicate (rolePk, roleDestination, roleVersionId) "
-        _stmtList +=
-            " CREATE INDEX index_RoleReplicate_roleDestination_rolePending ON RoleReplicate (roleDestination, rolePending) "
-        _stmtList +=
-            " CREATE TRIGGER ch_ins_45 AFTER INSERT ON Role BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 45 AS chTableId, NEW.roleUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 45 AND chEntityPk = NEW.roleUid); END "
-        _stmtList +=
-            " CREATE TRIGGER ch_upd_45 AFTER UPDATE ON Role BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 45 AS chTableId, NEW.roleUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 45 AND chEntityPk = NEW.roleUid); END "
-        _stmtList +=
-            " CREATE TRIGGER ch_del_45 AFTER DELETE ON Role BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 45 AS chTableId, OLD.roleUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 45 AND chEntityPk = OLD.roleUid); END "
-        _stmtList +=
-            "CREATE VIEW Role_ReceiveView AS  SELECT Role.*, RoleReplicate.* FROM Role LEFT JOIN RoleReplicate ON RoleReplicate.rolePk = Role.roleUid "
-        _stmtList +=
             " CREATE TABLE IF NOT EXISTS PersonGroupReplicate ( pgPk INTEGER NOT NULL, pgVersionId INTEGER NOT NULL DEFAULT 0, pgDestination INTEGER NOT NULL, pgPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (pgPk, pgDestination)) "
         _stmtList +=
             " CREATE INDEX index_PersonGroupReplicate_pgPk_pgDestination_pgVersionId ON PersonGroupReplicate (pgPk, pgDestination, pgVersionId) "
@@ -1393,22 +1379,6 @@ private fun DoorSqlDatabase.addReplicationEntities() {
             " CREATE TRIGGER ch_del_10_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_10_fn(); "
         _stmtList +=
             "CREATE VIEW LanguageVariant_ReceiveView AS  SELECT LanguageVariant.*, LanguageVariantReplicate.* FROM LanguageVariant LEFT JOIN LanguageVariantReplicate ON LanguageVariantReplicate.lvPk = LanguageVariant.langVariantUid "
-        _stmtList +=
-            " CREATE TABLE IF NOT EXISTS RoleReplicate ( rolePk BIGINT NOT NULL, roleVersionId BIGINT NOT NULL DEFAULT 0, roleDestination BIGINT NOT NULL, rolePending BOOL NOT NULL DEFAULT true, PRIMARY KEY (rolePk, roleDestination)) "
-        _stmtList +=
-            " CREATE INDEX index_RoleReplicate_rolePk_roleDestination_roleVersionId ON RoleReplicate (rolePk, roleDestination, roleVersionId) "
-        _stmtList +=
-            " CREATE INDEX index_RoleReplicate_roleDestination_rolePending ON RoleReplicate (roleDestination, rolePending) "
-        _stmtList +=
-            " CREATE OR REPLACE FUNCTION ch_upd_45_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (45, NEW.roleUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
-        _stmtList +=
-            " CREATE TRIGGER ch_upd_45_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_45_fn(); "
-        _stmtList +=
-            " CREATE OR REPLACE FUNCTION ch_del_45_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (45, OLD.roleUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
-        _stmtList +=
-            " CREATE TRIGGER ch_del_45_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_45_fn(); "
-        _stmtList +=
-            "CREATE VIEW Role_ReceiveView AS  SELECT Role.*, RoleReplicate.* FROM Role LEFT JOIN RoleReplicate ON RoleReplicate.rolePk = Role.roleUid "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS PersonGroupReplicate ( pgPk BIGINT NOT NULL, pgVersionId BIGINT NOT NULL DEFAULT 0, pgDestination BIGINT NOT NULL, pgPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (pgPk, pgDestination)) "
         _stmtList +=

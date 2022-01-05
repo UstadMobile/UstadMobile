@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 91,
-    "identityHash": "af7b14c0cb74e8221f79b60b29f083c2",
+    "identityHash": "d4a6ec40aae05043d0a75060d714387a",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -7235,69 +7235,6 @@
         "foreignKeys": []
       },
       {
-        "tableName": "RoleReplicate",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rolePk` INTEGER NOT NULL, `roleVersionId` INTEGER NOT NULL DEFAULT 0, `roleDestination` INTEGER NOT NULL, `rolePending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`rolePk`, `roleDestination`))",
-        "fields": [
-          {
-            "fieldPath": "rolePk",
-            "columnName": "rolePk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "roleVersionId",
-            "columnName": "roleVersionId",
-            "affinity": "INTEGER",
-            "notNull": true,
-            "defaultValue": "0"
-          },
-          {
-            "fieldPath": "roleDestination",
-            "columnName": "roleDestination",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rolePending",
-            "columnName": "rolePending",
-            "affinity": "INTEGER",
-            "notNull": true,
-            "defaultValue": "1"
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "rolePk",
-            "roleDestination"
-          ],
-          "autoGenerate": false
-        },
-        "indices": [
-          {
-            "name": "index_RoleReplicate_rolePk_roleDestination_roleVersionId",
-            "unique": false,
-            "columnNames": [
-              "rolePk",
-              "roleDestination",
-              "roleVersionId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_RoleReplicate_rolePk_roleDestination_roleVersionId` ON `${TABLE_NAME}` (`rolePk`, `roleDestination`, `roleVersionId`)"
-          },
-          {
-            "name": "index_RoleReplicate_roleDestination_rolePending",
-            "unique": false,
-            "columnNames": [
-              "roleDestination",
-              "rolePending"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_RoleReplicate_roleDestination_rolePending` ON `${TABLE_NAME}` (`roleDestination`, `rolePending`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
         "tableName": "PersonGroupReplicate",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pgPk` INTEGER NOT NULL, `pgVersionId` INTEGER NOT NULL DEFAULT 0, `pgDestination` INTEGER NOT NULL, `pgPending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`pgPk`, `pgDestination`))",
         "fields": [
@@ -9128,7 +9065,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'af7b14c0cb74e8221f79b60b29f083c2')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd4a6ec40aae05043d0a75060d714387a')"
     ]
   }
 }

@@ -40,6 +40,21 @@ import kotlinx.serialization.Serializable
 //    """)
 @ReplicateEntity(tableId = LearnerGroup.TABLE_ID, tracker = LearnerGroupReplicate::class)
 @Serializable
+@Triggers(arrayOf(
+ Trigger(
+     name = "learnergroup_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO LearnerGroup(learnerGroupUid, learnerGroupName, learnerGroupDescription, learnerGroupActive, learnerGroupMCSN, learnerGroupCSN, learnerGroupLCB, learnerGroupLct) 
+         VALUES (NEW.learnerGroupUid, NEW.learnerGroupName, NEW.learnerGroupDescription, NEW.learnerGroupActive, NEW.learnerGroupMCSN, NEW.learnerGroupCSN, NEW.learnerGroupLCB, NEW.learnerGroupLct) 
+         /*psql ON CONFLICT (learnerGroupUid) DO UPDATE 
+         SET learnerGroupName = EXCLUDED.learnerGroupName, learnerGroupDescription = EXCLUDED.learnerGroupDescription, learnerGroupActive = EXCLUDED.learnerGroupActive, learnerGroupMCSN = EXCLUDED.learnerGroupMCSN, learnerGroupCSN = EXCLUDED.learnerGroupCSN, learnerGroupLCB = EXCLUDED.learnerGroupLCB, learnerGroupLct = EXCLUDED.learnerGroupLct
+         */"""
+     ]
+ )
+))
 class LearnerGroup {
 
     @PrimaryKey(autoGenerate = true)

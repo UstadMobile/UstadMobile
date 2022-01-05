@@ -17,7 +17,6 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.util.test.ext.insertPersonWithRole
 import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import kotlinx.coroutines.runBlocking
 import org.junit.Before

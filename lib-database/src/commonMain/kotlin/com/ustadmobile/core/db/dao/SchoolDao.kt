@@ -7,6 +7,9 @@ import androidx.room.Update
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.School
+import com.ustadmobile.lib.db.entities.School.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT1
+import com.ustadmobile.lib.db.entities.School.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT2
+import com.ustadmobile.lib.db.entities.School.Companion.JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
 
@@ -28,45 +31,55 @@ abstract class SchoolDao : BaseDao<School> {
 
 
     /** Check if a permission is present on a specific entity e.g. updateState/modify etc */
-    @Query("SELECT EXISTS(SELECT 1 FROM School WHERE " +
-            "School.schoolUid = :schoolUid AND :accountPersonUid IN " +
-            "(${ENTITY_PERSONS_WITH_PERMISSION}))")
+    @Query("""
+    Select EXISTS(
+           SELECT School.schoolUid 
+             FROM School
+                  $JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT1 :permission) > 0
+             JOIN PersonGroupMember AS PrsGrpMbr
+                   ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
+                      AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid
+            WHERE School.schoolUid = :schoolUid)      
+    """)
     abstract suspend fun personHasPermissionWithSchool(accountPersonUid: Long,
                                                        schoolUid: Long,
                                                       permission: Long) : Boolean
 
 
     @Query("""
-        SELECT School.*, 
-            (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND 
-            CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1 
-            AND SchoolMember.schoolMemberRole = ${Role.ROLE_SCHOOL_STUDENT_UID}) as numStudents,
-            (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND 
-            CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1 
-            AND SchoolMember.schoolMemberRole = ${Role.ROLE_SCHOOL_STAFF_UID}) as numTeachers, 
-            '' as locationName,
-            (SELECT COUNT(*) FROM Clazz WHERE Clazz.clazzSchoolUid = School.schoolUid AND CAST(Clazz.clazzUid AS INTEGER) = 1 ) as clazzCount
-        FROM 
-            PersonGroupMember
-            LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
-            LEFT JOIN School ON 
-                CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = :personUid) AS INTEGER) = 1
-                OR ((Role.rolePermissions & :permission) > 0 AND EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid = School.schoolUid)
-        WHERE
-            PersonGroupMember.groupMemberPersonUid = :personUid
-            AND PersonGroupMember.groupMemberActive 
-            AND CAST(schoolActive AS INTEGER) = 1
-            AND schoolName LIKE :searchBit
-        GROUP BY School.schoolUid
-        ORDER BY CASE(:sortOrder)
-            WHEN $SORT_NAME_ASC THEN School.schoolName
-            ELSE ''
-        END ASC,
-        CASE(:sortOrder)
-            WHEN $SORT_NAME_DESC THEN School.schoolName
-            ELSE ''
-        END DESC""")
+       SELECT School.*, 
+              (SELECT COUNT(*) 
+                  FROM SchoolMember 
+                 WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid 
+                   AND CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1 
+                   AND SchoolMember.schoolMemberRole = ${Role.ROLE_SCHOOL_STUDENT_UID}) as numStudents,
+              (SELECT COUNT(*) 
+                 FROM SchoolMember 
+                WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid 
+                  AND CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1 
+                  AND SchoolMember.schoolMemberRole = ${Role.ROLE_SCHOOL_STAFF_UID}) as numTeachers, 
+               '' as locationName,
+              (SELECT COUNT(*) 
+                 FROM Clazz 
+                WHERE Clazz.clazzSchoolUid = School.schoolUid 
+                  AND CAST(Clazz.clazzUid AS INTEGER) = 1 ) as clazzCount
+         FROM PersonGroupMember
+              $JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT1
+                    :permission
+                    $JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT2
+        WHERE PersonGroupMember.groupMemberPersonUid = :personUid
+          AND PersonGroupMember.groupMemberActive 
+          AND CAST(schoolActive AS INTEGER) = 1
+          AND schoolName LIKE :searchBit
+     GROUP BY School.schoolUid
+     ORDER BY CASE(:sortOrder)
+              WHEN $SORT_NAME_ASC THEN School.schoolName
+              ELSE ''
+              END ASC,
+              CASE(:sortOrder)
+              WHEN $SORT_NAME_DESC THEN School.schoolName
+              ELSE ''
+              END DESC""")
     abstract fun findAllActiveSchoolWithMemberCountAndLocationName(searchBit: String,
                     personUid: Long, permission: Long, sortOrder: Int)
             : DoorDataSourceFactory<Int, SchoolWithMemberCountAndLocation>

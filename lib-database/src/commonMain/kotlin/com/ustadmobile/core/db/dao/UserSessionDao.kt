@@ -6,10 +6,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.UserSession
-import com.ustadmobile.lib.db.entities.UserSessionAndPerson
+import com.ustadmobile.lib.db.entities.*
 
 @Dao
 @Repository
@@ -159,6 +156,27 @@ abstract class UserSessionDao {
            AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
     """)
     abstract suspend fun findActiveNodeIdsByPersonUids(personUids: List<Long>): List<Long>
+
+    /**
+     * This query will find the nodeids for all users where the device has permissions that are
+     * influenced by a given class.
+     */
+    @Query("""
+        SELECT UserSession.usClientNodeId
+          FROM ScopedGrant
+               JOIN PersonGroupMember 
+                    ON PersonGroupMember.groupMemberGroupUid = ScopedGrant.sgGroupUid
+               JOIN UserSession
+                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+         WHERE (ScopedGrant.sgTableId = ${Clazz.TABLE_ID} AND ScopedGrant.sgEntityUid IN (:clazzUids))
+            OR (ScopedGrant.sgTableId = ${School.TABLE_ID} AND ScopedGrant.sgEntityUid IN 
+                (SELECT clazzSchoolUid
+                   FROM Clazz
+                  WHERE clazzUid IN (:clazzUids)))
+          
+    """)
+    abstract suspend fun findAllActiveNodeIdsWithClazzBasedPermission(clazzUids: List<Long>): List<Long>
+
 
     companion object {
         const val FIND_LOCAL_SESSIONS_SQL = """

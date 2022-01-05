@@ -11,9 +11,7 @@ import kotlinx.serialization.Serializable
     //Index to handle permission queries
     Index(value=["rolePermissions"])
 ])
-//@SyncableEntity(tableId = Role.TABLE_ID)
 @Serializable
-@ReplicateEntity(tableId = Role.TABLE_ID, tracker = RoleReplicate::class)
 open class Role() {
 
     @PrimaryKey(autoGenerate = true)

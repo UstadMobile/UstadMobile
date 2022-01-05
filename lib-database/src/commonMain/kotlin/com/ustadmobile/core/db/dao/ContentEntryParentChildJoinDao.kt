@@ -4,6 +4,7 @@ import androidx.room.*
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
+import com.ustadmobile.lib.db.entities.UserSession
 import kotlin.js.JsName
 
 data class UmContentEntriesWithFileSize(var numEntries: Int = 0, var fileSize: Long = 0L)
@@ -38,7 +39,7 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
          JOIN ContentEntryParentChildJoin
              ON ChangeLog.chTableId = 7
                 AND ChangeLog.chEntityPk = ContentEntryParentChildJoin.cepcjUid
-         JOIN UserSession
+         JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
     WHERE UserSession.usClientNodeId != (
          SELECT nodeClientId 
            FROM SyncNode

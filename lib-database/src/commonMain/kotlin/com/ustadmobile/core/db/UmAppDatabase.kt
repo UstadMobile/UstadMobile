@@ -77,7 +77,6 @@ import kotlin.jvm.JvmField
     ContentCategoryReplicate::class,
     LanguageReplicate::class,
     LanguageVariantReplicate::class,
-    RoleReplicate::class,
     PersonGroupReplicate::class,
     PersonGroupMemberReplicate::class,
     PersonPictureReplicate::class,
@@ -197,9 +196,6 @@ abstract class UmAppDatabase : DoorDatabase() {
 
     @JsName("accessTokenDao")
     abstract val accessTokenDao: AccessTokenDao
-
-    @JsName("roleDao")
-    abstract val roleDao: RoleDao
 
     @JsName("personGroupDao")
     abstract val personGroupDao: PersonGroupDao
