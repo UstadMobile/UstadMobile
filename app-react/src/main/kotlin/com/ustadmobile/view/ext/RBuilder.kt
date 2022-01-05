@@ -1233,7 +1233,8 @@ fun RBuilder.createSummaryCard(title: Any?, subTitle: String){
 fun RBuilder.drawChart(
     chartData: ChartData ? = null,
     height: Int = 400,
-    chartType: ChartType = ChartType.ComboChart){
+    chartType: ChartType = ChartType.ComboChart,
+    onChartRendered: ((Boolean) -> Unit)? = null){
     if(chartData != null){
         val dataTable = mutableListOf<MutableList<Any>>()
         val chartOption: ChartOptions = ChartOptions().apply {
@@ -1291,10 +1292,16 @@ fun RBuilder.drawChart(
 
         dataSet.values.forEach { dataTable.add(it)}
 
-        umChart(
-            data = dataTable.map { it.toTypedArray() }.toTypedArray(),
-            height = height.px,
-            chartType = chartType,
-            options = chartOption){}
+        val dataSetTable = dataTable.map { it.toTypedArray() }.toTypedArray()
+        val drawChart = dataSetTable.first().size == dataSetTable.last().size
+        if(drawChart){
+            umChart(
+                data = dataSetTable,
+                height = height.px,
+                chartType = chartType,
+                options = chartOption){}
+        }
+
+        onChartRendered?.invoke(drawChart)
     }
 }

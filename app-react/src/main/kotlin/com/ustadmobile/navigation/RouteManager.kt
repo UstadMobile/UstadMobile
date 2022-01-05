@@ -70,6 +70,7 @@ object RouteManager {
         UstadDestination(view = ReportTemplateListView.VIEW_NAME, component = ReportTemplateListComponent::class),
         UstadDestination(view = ReportEditView.VIEW_NAME, component = ReportEditComponent::class),
         UstadDestination(view = ReportFilterEditView.VIEW_NAME, component = ReportFilterEditComponent::class),
+        UstadDestination(view = ContentEntryList2View.FOLDER_VIEW_NAME, component = ContentEntryListComponent::class),
         UstadDestination(view = ReportDetailView.VIEW_NAME, component = ReportDetailComponent::class)
     )
 

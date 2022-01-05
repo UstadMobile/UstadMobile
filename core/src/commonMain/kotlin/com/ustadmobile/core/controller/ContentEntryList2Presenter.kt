@@ -158,7 +158,9 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         GlobalScope.launch(doorMainDispatcher()) {
             when (option) {
                 SelectionOption.MOVE -> {
-                    handleClickMove(selectedItem)
+                    handleClickMove(selectedItem.mapNotNull {
+                        (it as? ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer)?.contentEntryParentChildJoin?.cepcjUid
+                    }.joinToString(","))
                 }
                 SelectionOption.HIDE -> {
                     when(contentFilter){
@@ -182,14 +184,11 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
      *
      * @param childrenToMove list of child entries selected to move
      */
-    fun handleClickMove(childrenToMove: List<ContentEntry>){
-
+    private fun handleClickMove(childrenToMove: String){
         val args = mutableMapOf(ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
                 ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_PARENT,
                 ARG_SHOW_ONLY_FOLDER_FILTER to true.toString(),
-                KEY_SELECTED_ITEMS to childrenToMove.mapNotNull {
-                    (it as? ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer)?.contentEntryParentChildJoin?.cepcjUid
-                }.joinToString(","))
+                KEY_SELECTED_ITEMS to childrenToMove)
 
         navigateForResult(
                 NavigateForResultOptions(this,

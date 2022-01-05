@@ -49,6 +49,8 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
     override val viewNames: List<String>
         get() = listOf(ReportDetailView.VIEW_NAME)
 
+    var showChart = true
+
     override var saveAsTemplateVisible: Boolean = false
         get() = field
         set(value) {
@@ -146,15 +148,19 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
                                 }
                             }
                         }
-                        umItem(GridSize.cells12){
-                            css{
-                                +defaultDoubleMarginTop
-                                +alignCenterItems
+
+                        if(showChart){
+                            umItem(GridSize.cells12){
+                                css{
+                                    +defaultDoubleMarginTop
+                                    +alignCenterItems
+                                }
+                                //ID is used for exporting the chart
+                                attrs.asDynamic().id = "chat-area"
+                                drawChart(chartData){
+                                    showChart = it
+                                }
                             }
-                            attrs.asDynamic().id = "chat-area"
-
-                            drawChart(chartData)
-
                         }
                     }
                 }

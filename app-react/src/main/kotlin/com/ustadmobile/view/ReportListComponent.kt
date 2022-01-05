@@ -103,7 +103,11 @@ class ReportListComponent(mProps: UmProps):  UstadListComponent<Report, Report>(
                 css{
                     position = Position.relative
                 }
-                drawChart(chartData, height = 200)
+                drawChart(chartData, height = 200){
+                    if(!it){
+                        chartDataMap.remove(item.reportUid)
+                    }
+                }
             }
             styledDiv {
                 css {

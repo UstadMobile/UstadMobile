@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
@@ -46,6 +47,7 @@ import react.RBuilder
 import react.setState
 import styled.css
 import styled.styledDiv
+import styled.styledSpan
 
 abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<UmProps,UmState>(props),
     UstadListView<RT, DT>, OnSortOptionSelected {
@@ -201,9 +203,9 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                 +contentContainer
             }
 
-            renderFilters()
+            renderEntrySelectionMenuOptions()
 
-            renderMenuOptions()
+            renderEntriesFilterOptions()
 
             styledDiv {
                 css{
@@ -421,7 +423,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     abstract fun RBuilder.renderListItem(item: DT)
 
-    private fun RBuilder.renderFilters(){
+    private fun RBuilder.renderEntriesFilterOptions(){
         if(listFilterOptionChips == null) return
         styledDiv {
             css{
@@ -451,50 +453,77 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
     }
 
 
-    private fun RBuilder.renderMenuOptions(){
+    private fun RBuilder.renderEntrySelectionMenuOptions(){
         val hideOptions = selectedListItems.isNullOrEmpty() or !showEditOptionsMenu
-        umGridContainer(spacing = GridSpacing.spacing2) {
+        umGridContainer {
             css{
                 +selectionContainer
-                marginBottom = 2.spacingUnits
-            }
-            val titleMd = if(selectedListItems.isNullOrEmpty()) GridSize.cells11 else GridSize.cells7
-            val titleMobile = if(selectedListItems.isNullOrEmpty()) GridSize.cells10 else GridSize.cells7
-            val iconsMd = if(selectedListItems.isNullOrEmpty()) GridSize.cellsAuto else GridSize.cells5
-            val iconsMobile = if(selectedListItems.isNullOrEmpty()) GridSize.cells1 else GridSize.cells5
-            umItem(titleMobile, titleMd){
-                umTypography(variant = TypographyVariant.subtitle1){
-                    css {
-                        marginTop = 10.px
-                        marginLeft = 2.spacingUnits
-                        display = displayProperty(!hideOptions)
-                    }
-                    +getString(MessageID.items_selected).format(selectedListItems.size)
-                }
             }
 
-            umItem(iconsMobile, iconsMd){
-                umGridContainer(
-                    spacing= GridSpacing.spacing2,
-                    justify = GridJustify.flexEnd){
-                    selectionOptions?.forEach { option ->
-                        gridItem {
-                            css {
-                                display = displayProperty(!hideOptions)
+            umItem(GridSize.cells7, flexDirection = FlexDirection.row){
+                if(selectedListItems.isNotEmpty()){
+                    styledSpan{
+                        css{
+                            marginRight = 2.spacingUnits
+                        }
+
+                        umIconButton("close",
+                            color = UMColor.default){
+                            css{
+                                marginTop = 4.px
                             }
-                            umIconButton(SELECTION_ICONS_MAP[option]?:"delete",
-                                color = UMColor.default){
-                                attrs.onClick = {
-                                    listPresenter?.handleClickSelectionOption(selectedListItems, option)
-                                    setState {
-                                        selectedListItems.clear()
-                                    }
+                            attrs.onClick = {
+                                stopEventPropagation(it)
+                                setState {
+                                    selectedListItems = mutableListOf()
                                 }
                             }
                         }
                     }
-                    renderEditOptionMenu()
+                    styledSpan {
+                        umTypography(variant = TypographyVariant.subtitle1){
+                            css {
+                                marginTop = 10.px
+                                marginLeft = 2.spacingUnits
+                                fontSize = LinearDimension("1.2em")
+                                display = displayProperty(!hideOptions)
+                            }
+                            +getString(MessageID.items_selected).format(selectedListItems.size)
+                        }
+                    }
                 }
+            }
+
+            umItem(GridSize.cells5, flexDirection = FlexDirection.rowReverse) {
+               if(selectedListItems.isEmpty()){
+                   styledSpan {
+                       css{
+                           marginLeft = 2.spacingUnits
+                       }
+                       renderEditOptionMenu()
+                   }
+               }
+
+               if(selectedListItems.isNotEmpty()){
+                   selectionOptions?.reversed()?.forEach { option ->
+                       styledSpan {
+                           css{
+                               marginLeft = 2.spacingUnits
+                           }
+                           umIconButton(SELECTION_ICONS_MAP[option]?:"delete",
+                               color = UMColor.default){
+                               attrs.onClick = {
+                                   stopEventPropagation(it)
+                                   val selectedEntries = copyOnWriteListOf(selectedListItems)
+                                   listPresenter?.handleClickSelectionOption(selectedEntries.first(), option)
+                                   setState {
+                                       selectedListItems.clear()
+                                   }
+                               }
+                           }
+                       }
+                   }
+               }
             }
 
         }
@@ -548,9 +577,9 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
         val SELECTION_ICONS_MAP = mapOf(SelectionOption.EDIT to "edit",
                 SelectionOption.DELETE to "delete",
                 SelectionOption.MOVE to "drive_file_move",
-                SelectionOption.HIDE to "visibility",
-                SelectionOption.UNHIDE to "visibility_of")
+                SelectionOption.HIDE to "visibility_off",
+                SelectionOption.UNHIDE to "visibility")
 
-        val UI_LISTENER_TIMEOUT = 100
+        private const val UI_LISTENER_TIMEOUT = 100
     }
 }
