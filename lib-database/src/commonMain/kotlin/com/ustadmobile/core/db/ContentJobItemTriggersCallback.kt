@@ -146,7 +146,11 @@ class ContentJobItemTriggersCallback: DoorDatabaseCallback {
     }
 
     override fun onOpen(db: DoorSqlDatabase) {
-
+        if(db.dbType() == DoorDbType.SQLITE) {
+            db.execSQL("""
+                PRAGMA recursive_triggers = ON;
+            """)
+        }
     }
 
     companion object {
@@ -173,17 +177,17 @@ class ContentJobItemTriggersCallback: DoorDatabaseCallback {
 							(SELECT Count(*) FROM (${getStatus(id)})) = 
 							(SELECT Count(*) 
 							   FROM (${getStatus(id)}) 
-							  WHERE status =  ${JobStatus.COMPLETE}) 
+							  WHERE status = ${JobStatus.COMPLETE}) 
 					      THEN  ${JobStatus.COMPLETE} 
                           WHEN (SELECT Count(*) FROM (${getStatus(id)})) = 
                             (SELECT Count(*) 
 							   FROM (${getStatus(id)}) 
-							  WHERE status =  ${JobStatus.FAILED}) 
+							  WHERE status = ${JobStatus.FAILED}) 
                          THEN ${JobStatus.FAILED}
                          WHEN EXISTS (SELECT status
 										FROM (${getStatus(id)}) 
-									    WHERE status = ${JobStatus.FAILED}
-                                           OR status = ${JobStatus.PARTIAL_FAILED})
+									    WHERE (status = ${JobStatus.FAILED}
+                                           OR status = ${JobStatus.PARTIAL_FAILED}))
 						  THEN ${JobStatus.PARTIAL_FAILED}
 						  WHEN EXISTS (SELECT status 
 										FROM (${getStatus(id)}) 	
