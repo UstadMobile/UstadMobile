@@ -5,6 +5,7 @@ import com.ustadmobile.core.io.UploadSessionManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
+import io.github.aakira.napier.Napier
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.request.*
@@ -83,7 +84,7 @@ fun Route.ContainerUploadRoute2() {
                     call.respond(HttpStatusCode.NoContent, "")
                 }else {
                     val missingEntries = "Missing ContainerEntriesWithMd5Sum ${differenceList.joinToString(";")}"
-                    println(missingEntries)
+                    Napier.d(missingEntries)
                     call.respond(HttpStatusCode.BadRequest, missingEntries)
                 }
             }catch(e: Exception){

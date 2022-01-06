@@ -1,9 +1,5 @@
 package com.ustadmobile.lib.contentscrapers
 
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.spy
-import org.mockito.kotlin.whenever
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
@@ -19,7 +15,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.LAST_MODIFIED_TXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.africanbooks.AsbScraper
 import com.ustadmobile.lib.contentscrapers.ddl.DdlContentScraper
-import com.ustadmobile.lib.contentscrapers.folder.TestFolderIndexer
+import com.ustadmobile.lib.contentscrapers.harscraper.TestHarScraper
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanExerciseScraper
 import com.ustadmobile.lib.contentscrapers.prathambooks.IndexPrathamContentScraper
 import com.ustadmobile.lib.contentscrapers.ytindexer.ChildYoutubeScraper
@@ -31,7 +27,6 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import okio.Buffer
-import okio.Okio
 import okio.buffer
 import okio.source
 import org.apache.commons.io.IOUtils
@@ -41,6 +36,10 @@ import org.junit.Before
 import org.junit.Test
 import org.kodein.di.*
 import org.mockito.Mockito
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.whenever
 import java.io.File
 import java.io.IOException
 import java.net.URISyntaxException
@@ -57,7 +56,7 @@ class TestPrathamContentScraper {
 
     private lateinit var di: DI
     private lateinit var endpointScope: EndpointScope
-    private val endpoint = Endpoint(TestFolderIndexer.TEST_ENDPOINT)
+    private val endpoint = Endpoint(TestHarScraper.TEST_ENDPOINT)
 
     val tmpDir = Files.createTempDirectory("folder").toFile()
     val containerDir = Files.createTempDirectory("container").toFile()
