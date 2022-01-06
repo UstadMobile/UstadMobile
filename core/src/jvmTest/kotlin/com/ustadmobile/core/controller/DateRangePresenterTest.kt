@@ -6,18 +6,23 @@ import org.mockito.kotlin.*
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.UstadBackStackEntry
+import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.captureLastEntityValue
+import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.DateRangeView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.DateRangeMoment
 import com.ustadmobile.lib.db.entities.Moment
+import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
+import kotlinx.serialization.builtins.ListSerializer
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
+import org.kodein.di.*
 
 
 /**
@@ -39,6 +44,12 @@ class DateRangePresenterTest {
 
     private lateinit var mockLifecycleOwner: DoorLifecycleOwner
 
+    private lateinit var testNavController: UstadNavController
+
+    private lateinit var ustadBackStackEntry: UstadBackStackEntry
+
+    private lateinit var savedStateHandle: UstadSavedStateHandle
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -47,8 +58,18 @@ class DateRangePresenterTest {
         }
         context = Any()
 
+        savedStateHandle = mock{}
+        ustadBackStackEntry = mock{
+            on{savedStateHandle}.thenReturn(savedStateHandle)
+        }
+
+        testNavController = mock{
+            on { getBackStackEntry(any()) }.thenReturn(ustadBackStackEntry)
+        }
+
         di = DI {
             import(ustadTestRule.diModule)
+            bind<UstadNavController>(overrides = true) with singleton { testNavController }
         }
     }
 
@@ -74,8 +95,10 @@ class DateRangePresenterTest {
 
         presenter.handleClickSave(initialEntity)
 
-        verify(mockView, timeout(5000)).finishWithResult(listOf(initialEntity))
-
+        verify(savedStateHandle, timeout(2000))[any()] = argWhere<String> {
+            safeParseList(di, ListSerializer(DateRangeMoment.serializer()),
+                DateRangeMoment::class, it).first().fromMoment.typeFlag == Moment.TYPE_FLAG_RELATIVE
+        }
     }
 
     @Test

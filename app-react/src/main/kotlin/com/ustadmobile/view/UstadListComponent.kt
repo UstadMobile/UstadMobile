@@ -215,6 +215,8 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     override fun onCreateView() {
         super.onCreateView()
+        fabManager?.icon = "add"
+        fabManager?.text = ""
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
         window.setTimeout({
             searchManager?.searchListener = listPresenter
@@ -374,7 +376,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                             if(useCards){
                                 umPaper(elevation = 4) {
                                     css{
-                                        width = LinearDimension("95%")
+                                        width = LinearDimension("97%")
                                     }
                                     renderListItem(entry)
                                 }

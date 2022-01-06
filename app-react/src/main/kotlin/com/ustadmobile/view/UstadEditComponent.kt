@@ -33,10 +33,6 @@ abstract class UstadEditComponent<T: Any>(mProps: UmProps): UstadBaseComponent<U
         mEditPresenter?.handleClickSave(entityVal)
     }
 
-    override fun finishWithResult(result: List<T>) {
-        TODO("finishWithResult: Not used anymore, handle it MPP way")
-    }
-
     protected fun setEditTitle(newTitleId: Int, editStringId: Int) {
         window.setTimeout({
             val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L

@@ -10,7 +10,6 @@ import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.fieldsOnlyFormScreen
 import com.ustadmobile.util.UmProps
@@ -307,7 +306,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                     if(entity?.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY){
                         umFormControl(variant = FormControlVariant.outlined) {
                             css{
-                                +StyleManager.defaultMarginTop
+                                +defaultMarginTop
                             }
                             umInputLabel("${penaltyLabel.text}",
                                 id = penaltyLabel.id,
