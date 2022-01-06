@@ -27,7 +27,7 @@ class ContentPluginManager(val pluginList: List<ContentPlugin>) {
         return pluginList.find { it.pluginId == id } ?: throw FatalContentJobException("invalid pluginId")
     }
 
-    suspend fun extractMetadata(uri: DoorUri, processContext: ContentJobProcessContext): MetadataResult? {
+    suspend fun extractMetadata(uri: DoorUri, processContext: ContentJobProcessContext): MetadataResult {
         pluginList.forEach {
             try {
                 return it.extractMetadata(uri, processContext) ?: return@forEach
@@ -38,7 +38,7 @@ class ContentPluginManager(val pluginList: List<ContentPlugin>) {
                 e.printStackTrace()
             }
         }
-        return null
+        throw ContentTypeNotSupportedException("no contentType plugin support found")
     }
 
 }

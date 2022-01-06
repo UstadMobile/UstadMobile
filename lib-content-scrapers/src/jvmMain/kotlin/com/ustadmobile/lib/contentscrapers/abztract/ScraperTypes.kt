@@ -1,11 +1,9 @@
+
+import com.ustadmobile.lib.contentscrapers.abztract.UrlScraper
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubeChannelIndexer
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubePlaylistIndexer
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubeScraper
-import com.ustadmobile.lib.contentscrapers.apache.ApacheIndexer
-import com.ustadmobile.lib.contentscrapers.abztract.UrlScraper
 import com.ustadmobile.lib.contentscrapers.ddl.*
-import com.ustadmobile.lib.contentscrapers.folder.FolderIndexer
-import com.ustadmobile.lib.contentscrapers.folder.FileScraper
 import com.ustadmobile.lib.contentscrapers.googledrive.GoogleDriveScraper
 import com.ustadmobile.lib.contentscrapers.habaybna.HabFrontPageIndexer
 import com.ustadmobile.lib.contentscrapers.khanacademy.*
@@ -59,9 +57,7 @@ object ScraperTypes {
             KHAN_TOPIC_INDEXER to IndexerMap(KhanTopicIndexer::class.java, null),
             KHAN_CHANNEL_INDEXER to IndexerMap(KhanYoutubeChannelIndexer::class.java, null),
             YOUTUBE_CHANNEL_INDEXER to IndexerMap(YoutubeChannelIndexer::class.java, null),
-            YOUTUBE_PLAYLIST_INDEXER to IndexerMap(YoutubePlaylistIndexer::class.java, null),
-            FOLDER_INDEXER to IndexerMap(FolderIndexer::class.java, null),
-            APACHE_INDEXER to IndexerMap(ApacheIndexer::class.java, null))
+            YOUTUBE_PLAYLIST_INDEXER to IndexerMap(YoutubePlaylistIndexer::class.java, null))
 
 
     const val DDL_ARTICLE_SCRAPER = "ddlArticleScraper"
@@ -89,7 +85,6 @@ object ScraperTypes {
             KHAN_FULL_EXERCISE_SCRAPER to KhanExerciseScraper::class.java,
             KHAN_LITE_VIDEO_SCRAPER to KhanLiteVideoScraper::class.java,
             YOUTUBE_VIDEO_SCRAPER to YoutubeScraper::class.java,
-            FOLDER_SCRAPER to FileScraper::class.java,
             URL_SCRAPER to UrlScraper::class.java,
             GOOGLE_DRIVE_SCRAPE to GoogleDriveScraper::class.java)
 
