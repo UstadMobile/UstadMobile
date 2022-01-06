@@ -8,7 +8,6 @@ import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import org.kodein.di.DI
-import java.io.File
 import org.kodein.di.android.di
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -26,7 +25,7 @@ class StorageOptionsAutocompleteTextView: DropDownListAutoCompleteTextView<Conta
             val systemImpl: UstadMobileSystemImpl = di.direct.instance()
             return String.format(systemImpl.getString(
                     MessageID.download_storage_option_device, context as Any), item.name,
-                    UMFileUtil.formatFileSize(File(item.dirUri).usableSpace))
+                    UMFileUtil.formatFileSize(item.usableSpace))
         }
 
     }
