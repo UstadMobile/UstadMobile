@@ -60,6 +60,7 @@ class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps)
         super.onCreateView()
         fabManager?.text = getString(MessageID.clazz)
         linearLayout = false
+        multiColumnItemSize = GridSize.cells6
         mPresenter = ClazzAssignmentDetailStudentProgressOverviewListPresenter(this, arguments, this,di,this)
         mPresenter?.onCreate(mapOf())
     }
@@ -90,6 +91,7 @@ class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps)
             umItem(GridSize.cells2, GridSize.cells1){
                 umProfileAvatar(item.personUid, "person")
             }
+
             umItem(GridSize.cells10, GridSize.cells11){
                 umGridContainer {
                     umItem(GridSize.cells12){
@@ -140,11 +142,13 @@ class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps)
 
                     }
 
-                    umItem (GridSize.cells12){
-                        val endDate = if(item.endDate == 0L) "" else " - ${item.endDate.toDate()?.standardFormat()}"
-                        umTypography("${item.startDate.toDate()?.standardFormat()}$endDate",
-                            variant = TypographyVariant.body1){
-                            css (StyleManager.alignTextToStart)
+                    if(item.startDate > 0L){
+                        umItem (GridSize.cells12){
+                            val endDate = if(item.endDate == 0L) "" else " - ${item.endDate.toDate()?.standardFormat()}"
+                            umTypography("${item.startDate.toDate()?.standardFormat()}$endDate",
+                                variant = TypographyVariant.body1){
+                                css (StyleManager.alignTextToStart)
+                            }
                         }
                     }
 
@@ -193,22 +197,24 @@ class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps)
                         }
                     }
 
-                    umItem(GridSize.cells12, flexDirection = FlexDirection.row){
-                        styledSpan {
-                            css {
-                                padding(right = 4.spacingUnits)
-                            }
-                            umIcon("comment", fontSize = IconFontSize.small){
-                                css{
-                                    marginTop = 1.px
+                    if(!item.latestPrivateComment.isNullOrEmpty()){
+                        umItem(GridSize.cells12, flexDirection = FlexDirection.row){
+                            styledSpan {
+                                css {
+                                    padding(right = 4.spacingUnits)
+                                }
+                                umIcon("comment", fontSize = IconFontSize.small){
+                                    css{
+                                        marginTop = 1.px
+                                    }
                                 }
                             }
-                        }
 
-                        umTypography(item.latestPrivateComment,
-                            variant = TypographyVariant.body2,
-                            paragraph = true){
-                            css(StyleManager.alignTextToStart)
+                            umTypography(item.latestPrivateComment,
+                                variant = TypographyVariant.body2,
+                                paragraph = true){
+                                css(StyleManager.alignTextToStart)
+                            }
                         }
                     }
                 }
