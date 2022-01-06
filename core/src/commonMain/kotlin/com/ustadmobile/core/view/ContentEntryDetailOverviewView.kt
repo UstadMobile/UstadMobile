@@ -32,7 +32,7 @@ interface ContentEntryDetailOverviewView: UstadDetailView<ContentEntryWithMostRe
 
     var contentJobItemStatus: Int
 
-    var contentJobItemProgress: ContentJobItemProgress?
+    var contentJobItemProgress: List<ContentJobItemProgress>?
 
     companion object {
 

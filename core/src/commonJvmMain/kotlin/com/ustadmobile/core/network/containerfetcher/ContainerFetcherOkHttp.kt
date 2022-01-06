@@ -119,7 +119,7 @@ class ContainerFetcherOkHttp(
             downloadStatus = if(totalBytesRead == payloadExpected) {
                 JobStatus.COMPLETE
             }else {
-                JobStatus.PAUSED
+                JobStatus.QUEUED
             }
             Napier.d("$logPrefix done downloaded ${bytesSoFar.get() - bytesToSkipWriting}/expected ${payloadExpected} bytes" +
                 " in ${System.currentTimeMillis() - startTime}ms")

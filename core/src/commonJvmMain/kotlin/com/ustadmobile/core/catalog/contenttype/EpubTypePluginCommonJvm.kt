@@ -160,14 +160,16 @@ class EpubTypePluginCommonJvm(
                             .isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid ?: 0)
 
                         if (!haveConnectivityToContinueJob) {
-                            return@withContext ProcessResult(JobStatus.QUEUED)
+                            return@withContext ProcessResult(JobStatus.WAITING_FOR_CONNECTION)
                         }
                     }
 
                     if(contentNeedUpload) {
                         val progressListenerAdapter = NetworkProgressListenerAdapter(progress,
                             contentJobItem)
-                        uploader.upload(contentJobItem, progressListenerAdapter, httpClient, endpoint)
+                        return@withContext ProcessResult(uploader.upload(
+                                contentJobItem, progressListenerAdapter, httpClient, endpoint
+                        ))
                     }
 
                     return@withContext ProcessResult(JobStatus.COMPLETE)
