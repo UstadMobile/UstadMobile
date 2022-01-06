@@ -201,17 +201,23 @@ class ContentJobRunner(
                 withContext(NonCancellable) {
                     val finalStatus: Int = when {
                         processException == null && processResult != null -> processResult.status
-                        processException is FatalContentJobException -> JobStatus.FAILED
+                        processException is FatalContentJobException -> {
+                            item.contentJobItem?.cjiAttemptCount = (item.contentJobItem?.cjiAttemptCount ?: 0) + 1
+                            JobStatus.FAILED
+                        }
                         processException is ContentTypeNotSupportedException -> JobStatus.COMPLETE
                         processException is ConnectivityCancellationException -> JobStatus.QUEUED
                         processException is CancellationException -> JobStatus.CANCELED
                         (item.contentJobItem?.cjiAttemptCount ?: maxItemAttempts) >= maxItemAttempts -> JobStatus.FAILED
-                        else -> JobStatus.QUEUED
+                        else -> {
+                            item.contentJobItem?.cjiAttemptCount = (item.contentJobItem?.cjiAttemptCount ?: 0) + 1
+                            JobStatus.QUEUED
+                        }
                     }
 
                     db.contentJobItemDao.updateJobItemAttemptCountAndStatus(
                         item.contentJobItem?.cjiUid ?: 0,
-                        (item.contentJobItem?.cjiAttemptCount ?: 0) + 1, finalStatus)
+                        item.contentJobItem?.cjiAttemptCount?: 0, finalStatus)
                     db.contentJobItemDao.updateFinishTimeForJob(item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
 
                     activeJobItemIds -= (item.contentJobItem?.cjiUid ?: 0)

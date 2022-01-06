@@ -127,15 +127,16 @@ class VideoTypePluginJvm(
                     val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid
                             ?: 0)
                     if (!haveConnectivityToContinueJob) {
-                        return@withContext ProcessResult(JobStatus.QUEUED)
+                        return@withContext ProcessResult(JobStatus.WAITING_FOR_CONNECTION)
                     }
                 }
 
 
                 if(contentNeedUpload) {
-                    uploader.upload(contentJobItem,
+                    return@withContext ProcessResult(uploader.upload(contentJobItem,
                         NetworkProgressListenerAdapter(progress, contentJobItem), httpClient,
-                        endpoint)
+                        endpoint
+                    ))
                 }
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)
