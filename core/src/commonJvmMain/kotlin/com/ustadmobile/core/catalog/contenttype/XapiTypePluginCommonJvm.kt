@@ -77,7 +77,7 @@ class XapiTypePluginCommonJvm(
                 val xpp = xppFactory.newPullParser()
                 xpp.setInput(it, "UTF-8")
                 val activity = TinCanXML.loadFromXML(xpp).launchActivity
-                        ?: throw IOException("TinCanXml from name has no launchActivity!")
+                        ?: return@withContext null
 
                 val entry = ContentEntryWithLanguage().apply {
                     contentFlags = ContentEntry.FLAG_IMPORTED
@@ -148,7 +148,9 @@ class XapiTypePluginCommonJvm(
                 if(contentNeedUpload) {
                     val progressListenerAdapter = NetworkProgressListenerAdapter(progress,
                         contentJobItem)
-                    uploader.upload(contentJobItem, progressListenerAdapter, httpClient, endpoint)
+                    return@withContext ProcessResult(uploader.upload(
+                            contentJobItem, progressListenerAdapter, httpClient, endpoint
+                    ))
                 }
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)
