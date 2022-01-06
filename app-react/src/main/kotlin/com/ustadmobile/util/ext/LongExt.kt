@@ -11,11 +11,10 @@ import kotlin.js.Date
 val MAX_VALUE: Long
     get() = 8640000000000000L
 
-fun Long?.toDate(emptyIfMaxValue: Boolean = false): Date? {
+fun Long?.toDate(emptyIfMaxValue: Boolean = true): Date? {
     return when {
-        this ?: 0L == 0L -> null
+        this ?: 0L == 0L || this == null -> null
         this == Long.MAX_VALUE -> if(emptyIfMaxValue) null else Date(MAX_VALUE)
-        this == null -> null
         else -> Date(this)
     }
 }
@@ -42,6 +41,6 @@ fun Long?.formatToStringHoursMinutesSeconds(impl: UstadMobileSystemImpl): String
     return result
 }
 
-fun Long?.isSetDate(): Boolean {
+fun Long?.isRealDate(): Boolean {
     return this != null && this != 0L && this != 8640000000000000
 }

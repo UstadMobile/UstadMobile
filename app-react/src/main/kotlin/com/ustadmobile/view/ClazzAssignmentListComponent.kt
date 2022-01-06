@@ -10,7 +10,7 @@ import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.util.ext.isSetDate
+import com.ustadmobile.util.ext.isRealDate
 import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.umGridContainer
@@ -87,7 +87,7 @@ class ClazzAssignmentListComponent(mProps: UmProps): UstadListComponent<ClazzAss
 
                     umGridContainer(rowSpacing =  GridSpacing.spacing1) {
 
-                        if(item.caDeadlineDate.isSetDate()){
+                        if(item.caDeadlineDate.isRealDate()){
                             umItem(GridSize.cells12, GridSize.cells4, flexDirection = FlexDirection.row){
                                 styledSpan {
                                     umIcon("calendar_today")

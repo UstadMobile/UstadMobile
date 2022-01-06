@@ -160,11 +160,11 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
             }
         }
 
-    override var contentJobItemProgress: ContentJobItemProgress? = null
+    override var contentJobItemProgress: List<ContentJobItemProgress>? = null
         get() = field
         set(value) {
 
-            setState {
+            /*setState {
                 if(value != null) {
 
                     if(value.progressTitle != null){
@@ -180,7 +180,7 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
                     downloadProgress = 0f
                 }
                 field = value
-            }
+            }*/
         }
 
     override var entity: ContentEntryWithMostRecentContainer? = null

@@ -6,6 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.UmPlatform
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_CLAZZ
@@ -155,20 +156,25 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     }
 
     override fun handleClickSelectionOption(selectedItem: List<ContentEntry>, option: SelectionOption) {
+        val selectedEntryIds = selectedItem.mapNotNull {
+            (it as? ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer)?.contentEntryParentChildJoin?.cepcjUid
+        }.joinToString(",")
+
+        val selectedUidList = selectedItem.map { it.contentEntryUid }
+
         GlobalScope.launch(doorMainDispatcher()) {
             when (option) {
                 SelectionOption.MOVE -> {
-                    handleClickMove(selectedItem.mapNotNull {
-                        (it as? ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer)?.contentEntryParentChildJoin?.cepcjUid
-                    }.joinToString(","))
+                    UmPlatform.console(selectedEntryIds)
+                    handleClickMove(selectedEntryIds)
                 }
                 SelectionOption.HIDE -> {
                     when(contentFilter){
                         ARG_DISPLAY_CONTENT_BY_PARENT ->{
-                            repo.contentEntryDao.toggleVisibilityContentEntryItems(true, selectedItem.map { it.contentEntryUid })
+                            repo.contentEntryDao.toggleVisibilityContentEntryItems(true, selectedUidList)
                         }
                         ARG_DISPLAY_CONTENT_BY_CLAZZ ->{
-                            repo.clazzContentJoinDao.toggleVisibilityClazzContent(false, selectedItem.map { it.contentEntryUid })
+                            repo.clazzContentJoinDao.toggleVisibilityClazzContent(false, selectedUidList)
                         }
                     }
                 }

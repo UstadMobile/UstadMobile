@@ -221,7 +221,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                 label = "${deadlineDateLabel.text}",
                                 error = deadlineDateLabel.error,
                                 helperText = deadlineDateLabel.errorText,
-                                value = entity?.caDeadlineDate.toDate(),
+                                value = entity?.caDeadlineDate.toDate(true),
                                 inputVariant = FormControlVariant.outlined,
                                 onChange = {
                                     setState {
@@ -292,7 +292,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                     label = "${endOgraceTimeLabel.text}",
                                     error = endOgraceTimeLabel.error,
                                     helperText = endOgraceTimeLabel.errorText,
-                                    value = entity?.caGracePeriodDate.toDate(),
+                                    value = entity?.caGracePeriodDate.toDate(true),
                                     inputVariant = FormControlVariant.outlined,
                                     onChange = {
                                         setState {
