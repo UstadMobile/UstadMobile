@@ -144,7 +144,8 @@ class ContentJobItemTriggersCallback: DoorDatabaseCallback {
                  BEGIN 
                  UPDATE ContentJobItem
                     SET cjiRecursiveStatus = ${statusCheck(CHILD_ID)}
-                    WHERE contentJobItem.cjiUid = NEW.cjiUid AND NEW.cjiStatus != OLD.cjiStatus; 
+                  WHERE contentJobItem.cjiUid = NEW.cjiUid 
+                    AND NEW.cjiStatus != OLD.cjiStatus;
                  RETURN NEW;     
                  END ${'$'}${'$'} LANGUAGE plpgsql  
                  """,
@@ -193,40 +194,40 @@ class ContentJobItemTriggersCallback: DoorDatabaseCallback {
 
         fun getStatus(id: String): String {
             return """
-                    SELECT cjiRecursiveStatus AS status 
+                  (SELECT cjiRecursiveStatus AS status 
                      FROM ContentJobItem 
                     WHERE cjiParentCjiUid = $id
               UNION
-                    SELECT cjiStatus AS status
-                      FROM ContentJobItem 
-                     WHERE cjiUid = $id
+                   SELECT cjiStatus AS status
+                     FROM ContentJobItem 
+                    WHERE cjiUid = $id) AS JobStatus
             """
         }
 
         fun statusCheck(id: String): String {
             return """
                   (CASE WHEN 
-							(SELECT Count(*) FROM (${getStatus(id)})) = 
+							(SELECT Count(*) FROM ${getStatus(id)}) = 
 							(SELECT Count(*) 
-							   FROM (${getStatus(id)}) 
+							   FROM ${getStatus(id)} 
 							  WHERE status = ${JobStatus.COMPLETE}) 
 					      THEN  ${JobStatus.COMPLETE} 
-                          WHEN (SELECT Count(*) FROM (${getStatus(id)})) = 
+                          WHEN (SELECT Count(*) FROM ${getStatus(id)}) = 
                             (SELECT Count(*) 
-							   FROM (${getStatus(id)}) 
+							   FROM ${getStatus(id)} 
 							  WHERE status = ${JobStatus.FAILED}) 
                          THEN ${JobStatus.FAILED}
                          WHEN EXISTS (SELECT status
-										FROM (${getStatus(id)}) 
+										FROM ${getStatus(id)} 
 									    WHERE (status = ${JobStatus.FAILED}
                                            OR status = ${JobStatus.PARTIAL_FAILED}))
 						  THEN ${JobStatus.PARTIAL_FAILED}
 						  WHEN EXISTS (SELECT status 
-										FROM (${getStatus(id)}) 	
+										FROM ${getStatus(id)}	
 										WHERE status = ${JobStatus.RUNNING})
 						  THEN ${JobStatus.RUNNING}
 						  WHEN EXISTS (SELECT status
-										FROM (${getStatus(id)}) 
+										FROM ${getStatus(id)} 
 									    WHERE status = ${JobStatus.WAITING_FOR_CONNECTION})
 						  THEN ${JobStatus.WAITING_FOR_CONNECTION} 
 						  ELSE ${JobStatus.QUEUED} END)  
