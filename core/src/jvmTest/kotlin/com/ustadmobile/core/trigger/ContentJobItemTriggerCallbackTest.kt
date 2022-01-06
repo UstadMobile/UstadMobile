@@ -47,11 +47,15 @@ class ContentJobItemTriggerCallbackTest {
         parentJobItem = ContentJobItem().apply{
             cjiUid = 1
             cjiJobUid = contentJob.cjUid
+            cjiItemProgress = 100
+            cjiItemTotal = 100
             cjiStatus = JobStatus.COMPLETE
         }
         childJobItem = ContentJobItem().apply {
             cjiUid = 2
             cjiJobUid = contentJob.cjUid
+            cjiItemTotal = 100
+            cjiItemProgress = 0
             cjiParentCjiUid = parentJobItem.cjiUid
             cjiStatus = JobStatus.QUEUED
         }
@@ -68,8 +72,11 @@ class ContentJobItemTriggerCallbackTest {
 
         runBlocking {
             db.contentJobItemDao.updateItemStatus(childJobItem.cjiUid, JobStatus.QUEUED)
-            val jobItem = db.contentJobItemDao.findByUidAsync(parentJobItem.cjiUid)
-            Assert.assertEquals("parent job queued", JobStatus.QUEUED, jobItem!!.cjiRecursiveStatus)
+            db.contentJobItemDao.updateItemProgress(childJobItem.cjiUid, 0, 100)
+            val jobItem = db.contentJobItemDao.findByUidAsync(parentJobItem.cjiUid)!!
+            Assert.assertEquals("parent job progress", 100, jobItem.cjiRecursiveProgress)
+            Assert.assertEquals("parent job total", 200, jobItem.cjiRecursiveTotal)
+            Assert.assertEquals("parent job queued", JobStatus.QUEUED, jobItem.cjiRecursiveStatus)
         }
 
     }
@@ -79,8 +86,11 @@ class ContentJobItemTriggerCallbackTest {
 
         runBlocking {
             db.contentJobItemDao.updateItemStatus(childJobItem.cjiUid, JobStatus.RUNNING)
-            val parentJobItem = db.contentJobItemDao.findByUidAsync(parentJobItem.cjiUid)
-            Assert.assertEquals("parent job running", JobStatus.RUNNING, parentJobItem!!.cjiRecursiveStatus)
+            db.contentJobItemDao.updateItemProgress(childJobItem.cjiUid, 25, 100)
+            val parentJobItem = db.contentJobItemDao.findByUidAsync(parentJobItem.cjiUid)!!
+            Assert.assertEquals("parent job progress", 125, parentJobItem.cjiRecursiveProgress)
+            Assert.assertEquals("parent job total", 200, parentJobItem.cjiRecursiveTotal)
+            Assert.assertEquals("parent job running", JobStatus.RUNNING, parentJobItem.cjiRecursiveStatus)
         }
 
 
@@ -94,11 +104,12 @@ class ContentJobItemTriggerCallbackTest {
             db.contentJobItemDao.updateItemStatus(childJobItem.cjiUid, JobStatus.COMPLETE)
             val childItem = db.contentJobItemDao.findByUidAsync(childJobItem.cjiUid)
             Assert.assertEquals("child job completed", JobStatus.COMPLETE, childItem!!.cjiRecursiveStatus)
-            val jobItem = db.contentJobItemDao.findByUidAsync(parentJobItem.cjiUid)
-            Assert.assertEquals("parent job completed", JobStatus.COMPLETE, jobItem!!.cjiRecursiveStatus)
+            db.contentJobItemDao.updateItemProgress(childJobItem.cjiUid, 100, 100)
+            val jobItem = db.contentJobItemDao.findByUidAsync(parentJobItem.cjiUid)!!
+            Assert.assertEquals("parent job progress", 200, jobItem.cjiRecursiveProgress)
+            Assert.assertEquals("parent job total", 200, jobItem.cjiRecursiveTotal)
+            Assert.assertEquals("parent job completed", JobStatus.COMPLETE, jobItem.cjiRecursiveStatus)
         }
-
-
 
     }
 
@@ -108,8 +119,11 @@ class ContentJobItemTriggerCallbackTest {
         runBlocking {
             db.contentJobItemDao.updateItemStatus(parentJobItem.cjiUid, JobStatus.FAILED)
             db.contentJobItemDao.updateItemStatus(childJobItem.cjiUid, JobStatus.FAILED)
-            val jobItem = db.contentJobItemDao.findByUidAsync(parentJobItem.cjiUid)
-            Assert.assertEquals("parent job failed", JobStatus.FAILED, jobItem!!.cjiRecursiveStatus)
+            db.contentJobItemDao.updateItemProgress(childJobItem.cjiUid, 90, 100)
+            val jobItem = db.contentJobItemDao.findByUidAsync(parentJobItem.cjiUid)!!
+            Assert.assertEquals("parent job progress", 190, jobItem.cjiRecursiveProgress)
+            Assert.assertEquals("parent job total", 200, jobItem.cjiRecursiveTotal)
+            Assert.assertEquals("parent job failed", JobStatus.FAILED, jobItem.cjiRecursiveStatus)
         }
 
     }
@@ -120,9 +134,11 @@ class ContentJobItemTriggerCallbackTest {
 
         runBlocking {
             db.contentJobItemDao.updateItemStatus(childJobItem.cjiUid, JobStatus.WAITING_FOR_CONNECTION)
-            val jobItem = db.contentJobItemDao.findByUidAsync(parentJobItem.cjiUid)
-            Assert.assertEquals("parent job waiting for connection", JobStatus.WAITING_FOR_CONNECTION, jobItem!!.cjiRecursiveStatus)
-
+            db.contentJobItemDao.updateItemProgress(childJobItem.cjiUid, 50, 100)
+            val jobItem = db.contentJobItemDao.findByUidAsync(parentJobItem.cjiUid)!!
+            Assert.assertEquals("parent job progress", 150, jobItem.cjiRecursiveProgress)
+            Assert.assertEquals("parent job total", 200, jobItem.cjiRecursiveTotal)
+            Assert.assertEquals("parent job waiting for connection", JobStatus.WAITING_FOR_CONNECTION, jobItem.cjiRecursiveStatus)
         }
 
 
@@ -141,9 +157,13 @@ class ContentJobItemTriggerCallbackTest {
         runBlocking {
             db.contentJobItemDao.insertJobItem(child2)
             db.contentJobItemDao.updateItemStatus(childJobItem.cjiUid, JobStatus.FAILED)
+            db.contentJobItemDao.updateItemProgress(childJobItem.cjiUid, 75, 100)
             db.contentJobItemDao.updateItemStatus(child2.cjiUid, JobStatus.COMPLETE)
-            val jobItem = db.contentJobItemDao.findByUidAsync(parentJobItem.cjiUid)
-            Assert.assertEquals("parent job partial failed", JobStatus.PARTIAL_FAILED, jobItem!!.cjiRecursiveStatus)
+            db.contentJobItemDao.updateItemProgress(child2.cjiUid, 100, 100)
+            val jobItem = db.contentJobItemDao.findByUidAsync(parentJobItem.cjiUid)!!
+            Assert.assertEquals("parent job progress", 275, jobItem.cjiRecursiveProgress)
+            Assert.assertEquals("parent job total", 300, jobItem.cjiRecursiveTotal)
+            Assert.assertEquals("parent job partial failed", JobStatus.PARTIAL_FAILED, jobItem.cjiRecursiveStatus)
         }
 
     }
@@ -179,17 +199,25 @@ class ContentJobItemTriggerCallbackTest {
         runBlocking {
             db.contentJobItemDao.insertJobItems(listOf(childFolder, child3, child4))
             db.contentJobItemDao.updateItemStatus(childJobItem.cjiUid, JobStatus.COMPLETE)
+            db.contentJobItemDao.updateItemProgress(childJobItem.cjiUid, 100, 100)
             db.contentJobItemDao.updateItemStatus(childFolder.cjiUid, JobStatus.COMPLETE)
+            db.contentJobItemDao.updateItemProgress(childFolder.cjiUid, 100, 100)
 
             db.contentJobItemDao.updateItemStatus(child3.cjiUid, JobStatus.FAILED)
+            db.contentJobItemDao.updateItemProgress(child3.cjiUid, 25, 100)
             db.contentJobItemDao.updateItemStatus(child4.cjiUid, JobStatus.COMPLETE)
+            db.contentJobItemDao.updateItemProgress(child4.cjiUid, 100, 100)
 
 
-            val childFolderItem = db.contentJobItemDao.findByUidAsync(childFolder.cjiUid)
-            Assert.assertEquals("subfolder partial failed", JobStatus.PARTIAL_FAILED, childFolderItem!!.cjiRecursiveStatus)
+            val childFolderItem = db.contentJobItemDao.findByUidAsync(childFolder.cjiUid)!!
+            Assert.assertEquals("subfolder job progress", 225, childFolderItem.cjiRecursiveProgress)
+            Assert.assertEquals("subfolder job total", 300, childFolderItem.cjiRecursiveTotal)
+            Assert.assertEquals("subfolder partial failed", JobStatus.PARTIAL_FAILED, childFolderItem.cjiRecursiveStatus)
 
-            val jobItem = db.contentJobItemDao.findByUidAsync(parentJobItem.cjiUid)
-            Assert.assertEquals("parent job partial failed", JobStatus.PARTIAL_FAILED, jobItem!!.cjiRecursiveStatus)
+            val jobItem = db.contentJobItemDao.findByUidAsync(parentJobItem.cjiUid)!!
+            Assert.assertEquals("parent job progress", 425, jobItem.cjiRecursiveProgress)
+            Assert.assertEquals("parent job total", 500, jobItem.cjiRecursiveTotal)
+            Assert.assertEquals("parent job partial failed", JobStatus.PARTIAL_FAILED, jobItem.cjiRecursiveStatus)
         }
 
     }
