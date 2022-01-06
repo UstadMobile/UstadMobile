@@ -68,6 +68,9 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     protected var dbRepo: UmAppDatabase? = null
 
+    /**
+     * Flag which shows/hide empty state on a list
+     */
     protected var showEmptyState = true
         get() = field
         set(value) {
@@ -76,6 +79,9 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
             }
         }
 
+    /**
+     * Flag which shows and hide the ADD entry layout at the top of the list
+     */
     protected var showCreateNewItem:Boolean = false
         get() = field
         set(value) {
@@ -96,7 +102,28 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
             field = value
         }
 
+    /**
+     * Determines number of columns to be used on GridLayout.
+     * GridSize.cells12 = Will take the entire screen
+     * columns = (12/preferred grid size)
+     * i.e GridSize.cells4, will display 3 columns (12/4)
+     */
     var multiColumnItemSize = GridSize.cells4
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
+    /**
+     * Flag to indicated which host design to be used on Gridlayout.
+     * TRUE = Use Card design
+     * FALSE = Use plain design
+     *
+     * i.e it has no effect on LinearLayout when set.
+     */
+    var useCards = true
         get() = field
         set(value) {
             setState {
@@ -322,29 +349,38 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
             if(dataListItems.isEmpty()){
                 renderEmptyList()
             }else {
-                umItem(GridSize.cells12){
-                    umGridContainer(GridSpacing.spacing4) {
-                        dataListItems.forEach { entry->
-                            umItem(GridSize.cells12, multiColumnItemSize){
-                                css{
-                                    cursor = Cursor.pointer
-                                    backgroundColor = Color(if(selectedListItems.indexOf(entry) != -1)
-                                        theme.palette.action.selected
-                                    else theme.palette.background.default)
-                                }
-                                umPaper(elevation = 4) {
-                                    styledDiv {
-                                        renderListItem(entry)
-                                    }
+                umGridContainer(GridSpacing.spacing4) {
+                    dataListItems.forEach { entry->
+                        umItem(GridSize.cells12, multiColumnItemSize){
+                            css{
+                                cursor = Cursor.pointer
+                                backgroundColor = Color(if(selectedListItems.indexOf(entry) != -1)
+                                    theme.palette.action.selected
+                                else theme.palette.background.default)
+                                +alignCenterItems
+                                padding(1.spacingUnits)
+                            }
 
-                                    attrs.onMouseDown = {
-                                        stopEventPropagation(it)
-                                        handleListItemPress(entry)
+                            attrs.onMouseDown = {
+                                stopEventPropagation(it)
+                                handleListItemPress(entry)
+                            }
+
+                            attrs.onMouseUp = {
+                                stopEventPropagation(it)
+                                handleListItemRelease(entry)
+                            }
+
+                            if(useCards){
+                                umPaper(elevation = 4) {
+                                    css{
+                                        width = LinearDimension("95%")
                                     }
-                                    attrs.onMouseUp = {
-                                        stopEventPropagation(it)
-                                        handleListItemRelease(entry)
-                                    }
+                                    renderListItem(entry)
+                                }
+                            }else {
+                                umListItem(button = true){
+                                    renderListItem(entry)
                                 }
                             }
                         }

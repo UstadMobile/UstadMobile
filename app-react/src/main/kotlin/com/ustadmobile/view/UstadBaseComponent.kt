@@ -157,7 +157,7 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
         lifecycleObservers.remove(observer)
     }
 
-    open fun getString(messageId: Int): String {
+    final fun getString(messageId: Int): String {
         return if(messageId == 0) "" else systemImpl.getString(messageId, this)
     }
 

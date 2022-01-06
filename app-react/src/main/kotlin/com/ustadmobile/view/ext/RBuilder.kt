@@ -7,7 +7,6 @@ import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.ChartData
-import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.core.util.ext.isContentComplete
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.lib.db.entities.*
@@ -1061,149 +1060,6 @@ fun setStatementQuestionAnswer(statementEntity: StatementEntity): String{
     return statementText ?: ""
 }
 
-fun RBuilder.createContentEntryListItemWithAttemptsAndProgress(
-    systemImpl: UstadMobileSystemImpl,
-    item: ContentWithAttemptSummary,
-    onClick: ((ContentWithAttemptSummary) -> Unit)? = null
-){
-    umGridContainer {
-        attrs.onClick = {
-            onClick?.invoke(item)
-        }
-        umItem(GridSize.cells4, GridSize.cells2){
-            umGridContainer {
-                umItem(GridSize.cells12) {
-                    umItemThumbnail("class",item.contentEntryThumbnailUrl, width = 80,
-                        iconColor = Color(StyleManager.theme.palette.action.disabled),
-                        avatarBackgroundColor = Color.transparent)
-                }
-
-                umItem(GridSize.cells12) {
-                    if(item.scoreProgress?.progress ?: 0 > 0){
-                        umLinearProgress(item.scoreProgress?.progress?.toDouble(),
-                            variant = ProgressVariant.determinate){
-                            css{
-                                marginTop = 1.spacingUnits
-                                width = LinearDimension("80px")
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        umItem(GridSize.cells8, GridSize.cells10){
-            umGridContainer {
-
-                umItem(GridSize.cells12){
-                    umTypography(item.contentEntryTitle,
-                        variant = TypographyVariant.h6){
-                        css(alignTextToStart)
-                    }
-                }
-
-                umItem(GridSize.cells12, GridSize.cells3, flexDirection = FlexDirection.row){
-                    styledSpan {
-                        css{
-                            padding(right = 3.spacingUnits)
-                        }
-                        umIcon("restore", fontSize = IconFontSize.small){
-                            css{
-                                marginTop = 1.px
-                            }
-                        }
-                    }
-
-                    umTypography("${item.attempts} ${systemImpl.getString(MessageID.attempts, this)}",
-                        variant = TypographyVariant.body2){
-                        css(alignTextToStart)
-                    }
-                }
-
-                umItem(GridSize.cells12, GridSize.cells3) {
-                    val endDate = if(item.endDate == 0L) "" else " - ${item.endDate.toDate()?.standardFormat()}"
-                    umTypography("${item.startDate.toDate()?.standardFormat()}$endDate",
-                        variant = TypographyVariant.body2){
-                        css (alignTextToStart)
-                    }
-                }
-
-                if(item.duration > 60000){
-                    umItem (GridSize.cells12, flexDirection = FlexDirection.row){
-                        styledSpan {
-                            css{
-                                padding(right = 2.spacingUnits)
-                            }
-                            umIcon("timer", fontSize = IconFontSize.small){
-                                css{
-                                    marginTop = 1.px
-                                }
-                            }
-                        }
-
-                        styledSpan {
-                            css{
-                                padding(right = 2.spacingUnits)
-                            }
-
-                            umTypography(item.duration.formatToStringHoursMinutesSeconds(systemImpl),
-                                variant = TypographyVariant.body1,
-                                paragraph = true){
-                                css(alignTextToStart)
-                            }
-                        }
-                    }
-                }
-
-                umItem(GridSize.cells12, flexDirection = FlexDirection.row){
-                    styledSpan {
-                        css{
-                            padding(right = 3.spacingUnits)
-                        }
-                        umIcon("emoji_events", fontSize = IconFontSize.small){
-                            css{
-                                marginTop = 1.px
-                            }
-                        }
-                    }
-
-                    umTypography("${item.scoreProgress?.calculateScoreWithPenalty()}%",
-                        variant = TypographyVariant.body2){
-                        css(alignTextToStart)
-                    }
-
-                    val hideScore = item.scoreProgress == null || (item.scoreProgress?.resultScore == 0 && item.scoreProgress?.progress == 0)
-
-                    if(!hideScore){
-                        styledSpan {
-                            css{
-                                padding(left = 3.spacingUnits)
-                            }
-                            umTypography("(${item.scoreProgress?.resultScore} / ${item.scoreProgress?.resultMax})",
-                                variant = TypographyVariant.body2){
-                                css(alignTextToStart)
-                            }
-                        }
-                    }
-
-
-                    if(item.scoreProgress?.penalty ?:0 > 0){
-                        styledSpan {
-                            css{
-                                padding(left = 3.spacingUnits)
-                            }
-                            umTypography(systemImpl.getString(MessageID.late_penalty, this).format(item.scoreProgress?.penalty ?: 0),
-                                variant = TypographyVariant.body2){
-                                css(alignTextToStart)
-                            }
-                        }
-                    }
-
-                }
-            }
-        }
-    }
-}
 
 
 fun RBuilder.createSummaryCard(title: Any?, subTitle: String){
@@ -1293,7 +1149,7 @@ fun RBuilder.drawChart(
         dataSet.values.forEach { dataTable.add(it)}
 
         val dataSetTable = dataTable.map { it.toTypedArray() }.toTypedArray()
-        val drawChart = dataSetTable.first().size == dataSetTable.last().size
+        val drawChart = dataSetTable.first().size == dataSetTable.last().size && dataSetTable.size > 1
         if(drawChart){
             umChart(
                 data = dataSetTable,

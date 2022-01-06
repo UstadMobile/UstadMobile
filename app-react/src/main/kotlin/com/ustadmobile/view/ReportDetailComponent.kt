@@ -117,12 +117,14 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
                 umItem(GridSize.cells12){
                     umItem(GridSize.cells12){
                         umGridContainer(GridSpacing.spacing4) {
-                            createTopMainAction("exit_to_app",
-                                "${getString(MessageID.export)} ${getString(MessageID.report)}",
-                                GridSize.cells12,
-                                GridSize.cells4,
-                                visible = true){
-                                exportToPng("chat-area", entity?.reportTitle)
+                            if(showChart){
+                                createTopMainAction("exit_to_app",
+                                    "${getString(MessageID.export)} ${getString(MessageID.report)}",
+                                    GridSize.cells12,
+                                    GridSize.cells4,
+                                    visible = true){
+                                    exportToPng("chat-area", entity?.reportTitle)
+                                }
                             }
 
                             createTopMainAction("addchart",

@@ -60,6 +60,7 @@ class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps)
         super.onCreateView()
         fabManager?.text = getString(MessageID.clazz)
         linearLayout = false
+        useCards = false
         multiColumnItemSize = GridSize.cells6
         mPresenter = ClazzAssignmentDetailStudentProgressOverviewListPresenter(this, arguments, this,di,this)
         mPresenter?.onCreate(mapOf())
@@ -82,17 +83,17 @@ class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps)
     }
 
     override fun RBuilder.renderListItem(item: PersonWithAttemptsSummary) {
-        umGridContainer(columnSpacing = GridSpacing.spacing6) {
+        umGridContainer(GridSpacing.spacing4) {
             val padding = LinearDimension("4px")
             css{
                 padding(top = padding, bottom = padding)
             }
 
-            umItem(GridSize.cells2, GridSize.cells1){
+            umItem(GridSize.cells2, GridSize.cells2){
                 umProfileAvatar(item.personUid, "person")
             }
 
-            umItem(GridSize.cells10, GridSize.cells11){
+            umItem(GridSize.cells9, GridSize.cells10){
                 umGridContainer {
                     umItem(GridSize.cells12){
                         umTypography("${item.firstNames} ${item.lastName}",
