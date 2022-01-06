@@ -25,128 +25,19 @@ class ContentJobItemTriggersCallback: DoorDatabaseCallback {
 
     override fun onCreate(db: DoorSqlDatabase) {
         if(db.dbType() == DoorDbType.SQLITE) {
-            db.execSqlBatch(arrayOf(
-                """
-                CREATE TRIGGER ContentJobItem_InsertTrigger 
-                AFTER INSERT ON ContentJobItem
-                BEGIN
-                UPDATE ContentJobItem 
-                   SET cjiRecursiveProgress = NEW.cjiItemProgress,
-                       cjiRecursiveTotal = NEW.cjiItemTotal
-                WHERE ContentJobItem.cjiUid = NEW.cjiUid;
-                END;
-                """,
-                """
-                CREATE TRIGGER ContentJobItem_UpdateRecursiveTotals 
-                AFTER UPDATE ON ContentJobItem
-                FOR EACH ROW WHEN (
-                    NEW.cjiItemProgress != OLD.cjiItemProgress
-                        OR NEW.cjiItemTotal != OLD.cjiItemTotal)
-                BEGIN
-                UPDATE ContentJobItem 
-                   SET cjiRecursiveProgress = (cjiRecursiveProgress + (NEW.cjiItemProgress - OLD.cjiItemProgress)),
-                       cjiRecursiveTotal = (cjiRecursiveTotal + (NEW.cjiItemTotal - OLD.cjiItemTotal))
-                 WHERE ContentJobItem.cjiUid = NEW.cjiUid;
-                END;
-                """,
-                """
-                CREATE TRIGGER ContentJobItem_UpdateRecursiveStatus
-                AFTER UPDATE ON ContentJobItem
-                FOR EACH ROW WHEN (NEW.cjiStatus != OLD.cjiStatus)
-                BEGIN 
-                UPDATE ContentJobItem
-                    SET cjiRecursiveStatus = ${statusCheck(CHILD_ID)}
-                    WHERE contentJobItem.cjiUid = NEW.cjiUid;
-                END;    
-                """,
-                """
-                CREATE TRIGGER ContentJobItem_UpdateParents
-                AFTER UPDATE ON ContentJobItem
-                FOR EACH ROW WHEN (
-                        NEW.cjiParentCjiUid != 0 
-                    AND (NEW.cjiRecursiveProgress != OLD.cjiRecursiveProgress
-                         OR NEW.cjiRecursiveTotal != OLD.cjiRecursiveTotal))
-                BEGIN
-                UPDATE ContentJobItem 
-                   SET cjiRecursiveProgress = (cjiRecursiveProgress + (NEW.cjiRecursiveProgress - OLD.cjiRecursiveProgress)),
-                       cjiRecursiveTotal = (cjiRecursiveTotal + (NEW.cjiRecursiveTotal - OLD.cjiRecursiveTotal))
-                 WHERE ContentJobItem.cjiUid = NEW.cjiParentCjiUid;
-                END;
-                """,
-                """
-                CREATE TRIGGER ContentJobItem_UpdateStatusParent
-                AFTER UPDATE ON ContentJobItem
-                FOR EACH ROW WHEN (
-                         NEW.cjiParentCjiUid != 0
-                    AND (New.cjiRecursiveStatus != OLD.cjiRecursiveStatus))
-                BEGIN
-                UPDATE ContentJobItem
-                   SET cjiRecursiveStatus = ${statusCheck(PARENT_ID)}
-                 WHERE ContentJobItem.cjiUid = NEW.cjiParentCjiUid;
-                 END;
-                """
-
-            ))
+            db.execSqlBatch(DatabaseTriggers.sqliteContentJobItemTriggers)
         }else {
-            db.execSqlBatch(arrayOf(
-                """
-                CREATE OR REPLACE FUNCTION contentjobiteminsert_fn() RETURNS TRIGGER AS ${'$'}${'$'} 
-                BEGIN
-                UPDATE ContentJobItem 
-                   SET cjiRecursiveProgress = NEW.cjiItemProgress,
-                       cjiRecursiveTotal = NEW.cjiItemTotal
-                 WHERE ContentJobItem.cjiUid = NEW.cjiUid;
-                RETURN NULL; 
-                END ${'$'}${'$'} LANGUAGE plpgsql
-                """,
-                """
-                CREATE TRIGGER contentjobiteminsert_trig 
-                AFTER INSERT ON ContentJobItem
-                FOR EACH ROW EXECUTE PROCEDURE contentjobiteminsert_fn()    
-                """,
-
-                """
-                CREATE OR REPLACE FUNCTION contentjobitem_updaterecursivetotals_fn() RETURNS TRIGGER AS ${'$'}${'$'}
-                BEGIN
-                UPDATE ContentJobItem 
-                   SET cjiRecursiveProgress = (cjiRecursiveProgress + (NEW.cjiItemProgress - OLD.cjiItemProgress)),
-                       cjiRecursiveTotal = (cjiRecursiveTotal + (NEW.cjiItemTotal - OLD.cjiItemTotal))
-                 WHERE (NEW.cjiItemProgress != OLD.cjiItemProgress OR NEW.cjiItemTotal != OLD.cjiItemTotal)
-                   AND ContentJobItem.cjiUid = NEW.cjiUid;
-                RETURN NULL;
-                END ${'$'}${'$'} LANGUAGE plpgsql
-                """,
-                """
-                CREATE TRIGGER contentjobitem_updaterecursivetotals_trig
-                AFTER UPDATE ON ContentJobItem
-                FOR EACH ROW EXECUTE PROCEDURE contentjobitem_updaterecursivetotals_fn();
-                """,
-
-                """
-                CREATE OR REPLACE FUNCTION contentjobitem_updateparents_fn() RETURNS TRIGGER AS ${'$'}${'$'}
-                BEGIN 
-                UPDATE ContentJobItem 
-                   SET cjiRecursiveProgress = (cjiRecursiveProgress + (NEW.cjiRecursiveProgress - OLD.cjiRecursiveProgress)),
-                       cjiRecursiveTotal = (cjiRecursiveTotal + (NEW.cjiRecursiveTotal - OLD.cjiRecursiveTotal))
-                 WHERE (NEW.cjiRecursiveProgress != OLD.cjiRecursiveProgress
-                        OR NEW.cjiRecursiveTotal != OLD.cjiRecursiveTotal)
-                    AND ContentJobItem.cjiUid = NEW.cjiParentCjiUid
-                    AND NEW.cjiParentCjiUid != 0;  
-                RETURN NULL;
-                END ${'$'}${'$'} LANGUAGE plpgsql
-                """,
-                """
-                CREATE TRIGGER contentjobitem_updateparents_trig
-                AFTER UPDATE ON ContentJobItem
-                FOR EACH ROW EXECUTE PROCEDURE contentjobitem_updateparents_fn();    
-                """
-            ))
+            db.execSqlBatch(DatabaseTriggers.postgresContentJobItemTriggers)
         }
 
     }
 
     override fun onOpen(db: DoorSqlDatabase) {
-
+        if(db.dbType() == DoorDbType.SQLITE) {
+            db.execSQL("""
+                PRAGMA recursive_triggers = ON;
+            """)
+        }
     }
 
     companion object {
@@ -157,40 +48,40 @@ class ContentJobItemTriggersCallback: DoorDatabaseCallback {
 
         fun getStatus(id: String): String {
             return """
-                    SELECT cjiRecursiveStatus AS status 
+                  (SELECT cjiRecursiveStatus AS status 
                      FROM ContentJobItem 
                     WHERE cjiParentCjiUid = $id
               UNION
-                    SELECT cjiStatus AS status
-                      FROM ContentJobItem 
-                     WHERE cjiUid = $id
+                   SELECT cjiStatus AS status
+                     FROM ContentJobItem 
+                    WHERE cjiUid = $id) AS JobStatus
             """
         }
 
         fun statusCheck(id: String): String {
             return """
                   (CASE WHEN 
-							(SELECT Count(*) FROM (${getStatus(id)})) = 
+							(SELECT Count(*) FROM ${getStatus(id)}) = 
 							(SELECT Count(*) 
-							   FROM (${getStatus(id)}) 
-							  WHERE status =  ${JobStatus.COMPLETE}) 
+							   FROM ${getStatus(id)} 
+							  WHERE status = ${JobStatus.COMPLETE}) 
 					      THEN  ${JobStatus.COMPLETE} 
-                          WHEN (SELECT Count(*) FROM (${getStatus(id)})) = 
+                          WHEN (SELECT Count(*) FROM ${getStatus(id)}) = 
                             (SELECT Count(*) 
-							   FROM (${getStatus(id)}) 
-							  WHERE status =  ${JobStatus.FAILED}) 
+							   FROM ${getStatus(id)} 
+							  WHERE status = ${JobStatus.FAILED}) 
                          THEN ${JobStatus.FAILED}
                          WHEN EXISTS (SELECT status
-										FROM (${getStatus(id)}) 
-									    WHERE status = ${JobStatus.FAILED}
-                                           OR status = ${JobStatus.PARTIAL_FAILED})
+										FROM ${getStatus(id)} 
+									    WHERE (status = ${JobStatus.FAILED}
+                                           OR status = ${JobStatus.PARTIAL_FAILED}))
 						  THEN ${JobStatus.PARTIAL_FAILED}
 						  WHEN EXISTS (SELECT status 
-										FROM (${getStatus(id)}) 	
+										FROM ${getStatus(id)}	
 										WHERE status = ${JobStatus.RUNNING})
 						  THEN ${JobStatus.RUNNING}
 						  WHEN EXISTS (SELECT status
-										FROM (${getStatus(id)}) 
+										FROM ${getStatus(id)} 
 									    WHERE status = ${JobStatus.WAITING_FOR_CONNECTION})
 						  THEN ${JobStatus.WAITING_FOR_CONNECTION} 
 						  ELSE ${JobStatus.QUEUED} END)  

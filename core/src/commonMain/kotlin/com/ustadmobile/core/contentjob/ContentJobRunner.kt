@@ -136,7 +136,6 @@ class ContentJobRunner(
                 var metadataResult: MetadataResult? = null
                 if(item.contentJobItem?.cjiContentEntryUid == 0L) {
                     metadataResult = contentPluginManager.extractMetadata(sourceUri, processContext)
-                        ?: throw FatalContentJobException("ContentJobItem #${item.contentJobItem?.cjiUid}: cannot extract metadata")
                     val contentEntryUid = repo.contentEntryDao.insertAsync(metadataResult.entry)
                     item.contentJobItem?.cjiContentEntryUid = contentEntryUid
                     db.contentJobItemDao.updateContentEntryUid(item.contentJobItem?.cjiUid ?: 0,
@@ -153,8 +152,7 @@ class ContentJobRunner(
 
                 val pluginId = if(item.contentJobItem?.cjiPluginId == 0) {
                     metadataResult?.pluginId ?: contentPluginManager.extractMetadata(sourceUri,
-                        processContext)?.pluginId ?:
-                        throw FatalContentJobException("ContentJobItem #${item.contentJobItem?.cjiUid}: cannot determine pluginId")
+                        processContext).pluginId
                 }else {
                     item.contentJobItem?.cjiPluginId ?: 0
                 }
@@ -202,19 +200,30 @@ class ContentJobRunner(
             }finally {
                 withContext(NonCancellable) {
                     val finalStatus: Int = when {
-                        processException == null && processResult != null -> processResult.status
-                        processException is FatalContentJobException -> JobStatus.FAILED
-                        processException is ConnectivityCancellationException -> JobStatus.QUEUED
-                        processException is CancellationException -> {
-                            JobStatus.CANCELED
+                        processException == null && processResult != null -> {
+                            // it can be queued due to connectivity required to continue the job, don't count that as an attempt
+                            if(processResult.status != JobStatus.QUEUED){
+                                item.contentJobItem?.cjiAttemptCount = (item.contentJobItem?.cjiAttemptCount ?: 0) + 1
+                            }
+                            processResult.status
                         }
+                        processException is FatalContentJobException -> {
+                            item.contentJobItem?.cjiAttemptCount = (item.contentJobItem?.cjiAttemptCount ?: 0) + 1
+                            JobStatus.FAILED
+                        }
+                        processException is ContentTypeNotSupportedException -> JobStatus.COMPLETE
+                        processException is ConnectivityCancellationException -> JobStatus.QUEUED
+                        processException is CancellationException -> JobStatus.CANCELED
                         (item.contentJobItem?.cjiAttemptCount ?: maxItemAttempts) >= maxItemAttempts -> JobStatus.FAILED
-                        else -> JobStatus.QUEUED
+                        else -> {
+                            item.contentJobItem?.cjiAttemptCount = (item.contentJobItem?.cjiAttemptCount ?: 0) + 1
+                            JobStatus.QUEUED
+                        }
                     }
 
                     db.contentJobItemDao.updateJobItemAttemptCountAndStatus(
                         item.contentJobItem?.cjiUid ?: 0,
-                        (item.contentJobItem?.cjiAttemptCount ?: 0) + 1, finalStatus)
+                        item.contentJobItem?.cjiAttemptCount?: 0, finalStatus)
                     db.contentJobItemDao.updateFinishTimeForJob(item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
 
                     activeJobItemIds -= (item.contentJobItem?.cjiUid ?: 0)

@@ -373,7 +373,6 @@ class ContentEntryEdit2Presenter(
             ContentJobProcessContext(doorUri, createTemporaryDir("content"),
                     mutableMapOf(), di).use { processContext ->
                 val metadata = pluginManager.extractMetadata(DoorUri.parse(uri), processContext)
-                    ?: throw IllegalArgumentException("no metadata found")
                 view.metadataResult = metadata
                 val plugin = pluginManager.getPluginById(metadata.pluginId)
                 entry = metadata.entry

@@ -133,9 +133,10 @@ class VideoTypePluginJvm(
 
 
                 if(contentNeedUpload) {
-                    uploader.upload(contentJobItem,
+                    return@withContext ProcessResult(uploader.upload(contentJobItem,
                         NetworkProgressListenerAdapter(progress, contentJobItem), httpClient,
-                        endpoint)
+                        endpoint
+                    ))
                 }
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)

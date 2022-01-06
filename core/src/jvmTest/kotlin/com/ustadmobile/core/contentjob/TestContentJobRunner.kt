@@ -257,7 +257,7 @@ class TestContentJobRunner {
 
             val allJobItems = runBlocking { db.contentJobItemDao.findAll() }
             allJobItems.forEach {
-                Assert.assertEquals("job attempted match count", maxAttempts + 1, it.cjiAttemptCount)
+                Assert.assertEquals("job attempted match count", maxAttempts, it.cjiAttemptCount)
                 Assert.assertEquals("job failed", JobStatus.FAILED, it.cjiRecursiveStatus)
             }
         }
@@ -273,21 +273,16 @@ class TestContentJobRunner {
                     cjiJobUid = 2
                     cjiConnectivityNeeded = false
                     cjiStatus = JobStatus.QUEUED
-                    cjiPluginId = TEST_PLUGIN_ID
+                    cjiPluginId = 0
                     sourceUri = "dummy:///test_$it"
                 }
             }
             db.contentJobItemDao.insertJobItems(jobItems)
             val pluginManager: ContentPluginManager by di.onActiveAccount().instance()
-            val mockPlugin = mock<ContentPlugin> {
-                onBlocking {
-                    extractMetadata(any(), any()) }.thenAnswer{
+            pluginManager.stub {
+                onBlocking { extractMetadata(any(), any())}.thenAnswer {
                     throw IllegalStateException("unexpected error while extracting")
                 }
-            }
-
-            pluginManager.stub {
-                on { getPluginById(any()) }.thenReturn(mockPlugin)
             }
 
             val runner = ContentJobRunner(2, endpoint, di, maxItemAttempts = maxAttempts)
@@ -296,8 +291,40 @@ class TestContentJobRunner {
 
             val allJobItems = runBlocking { db.contentJobItemDao.findAll() }
             allJobItems.forEach {
-                Assert.assertEquals("job attempted match count", maxAttempts + 1, it.cjiAttemptCount)
+                Assert.assertEquals("job attempted match count", maxAttempts, it.cjiAttemptCount)
                 Assert.assertEquals("job failed", JobStatus.FAILED, it.cjiRecursiveStatus)
+            }
+        }
+    }
+
+    @Test
+    fun givenJobCreated_whenJobItemNotSupportedWhenExtractMetadata_thenJobItemCompleted() {
+        runBlocking {
+            val maxAttempts = 3
+            db.contentJobDao.insertAsync(ContentJob(cjUid = 2))
+            val jobItems = (0 .. 2).map {
+                ContentJobItem().apply {
+                    cjiJobUid = 2
+                    cjiConnectivityNeeded = false
+                    cjiStatus = JobStatus.QUEUED
+                    sourceUri = "dummy:///test_$it"
+                }
+            }
+            db.contentJobItemDao.insertJobItems(jobItems)
+            val pluginManager: ContentPluginManager by di.onActiveAccount().instance()
+            pluginManager.stub {
+                onBlocking { extractMetadata(any(), any())}.thenAnswer {
+                    throw ContentTypeNotSupportedException()
+                }
+            }
+
+            val runner = ContentJobRunner(2, endpoint, di, maxItemAttempts = maxAttempts)
+            runner.runJob()
+
+
+            val allJobItems = runBlocking { db.contentJobItemDao.findAll() }
+            allJobItems.forEach {
+                Assert.assertEquals("job completed", JobStatus.COMPLETE, it.cjiRecursiveStatus)
             }
         }
     }
