@@ -35,7 +35,7 @@ class ContentJobItemTriggerCallbackTest {
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE),
                 randomUuid().toString())
 
-        db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+        db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabaseTriggerTest")
                 .addSyncCallback(nodeIdAndAuth)
                 .addCallback(ContentJobItemTriggersCallback())
                 .build()
@@ -92,7 +92,6 @@ class ContentJobItemTriggerCallbackTest {
             Assert.assertEquals("parent job total", 200, parentJobItem.cjiRecursiveTotal)
             Assert.assertEquals("parent job running", JobStatus.RUNNING, parentJobItem.cjiRecursiveStatus)
         }
-
 
     }
 

@@ -200,7 +200,13 @@ class ContentJobRunner(
             }finally {
                 withContext(NonCancellable) {
                     val finalStatus: Int = when {
-                        processException == null && processResult != null -> processResult.status
+                        processException == null && processResult != null -> {
+                            // it can be queued due to connectivity required to continue the job, don't count that as an attempt
+                            if(processResult.status != JobStatus.QUEUED){
+                                item.contentJobItem?.cjiAttemptCount = (item.contentJobItem?.cjiAttemptCount ?: 0) + 1
+                            }
+                            processResult.status
+                        }
                         processException is FatalContentJobException -> {
                             item.contentJobItem?.cjiAttemptCount = (item.contentJobItem?.cjiAttemptCount ?: 0) + 1
                             JobStatus.FAILED
