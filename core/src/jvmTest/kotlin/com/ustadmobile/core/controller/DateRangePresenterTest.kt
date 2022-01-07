@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.DateRangeView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.DateRangeMoment
@@ -75,7 +76,10 @@ class DateRangePresenterTest {
 
     @Test
     fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalled_thenShouldReturnToResult() {
-        val presenterArgs = mapOf<String, String>()
+        val presenterArgs = mapOf<String, String>(
+            UstadView.ARG_RESULT_DEST_VIEWNAME to "view",
+            UstadView.ARG_RESULT_DEST_KEY to "key"
+        )
 
         val presenter = DateRangePresenter(context,
                 presenterArgs, mockView, mockLifecycleOwner, di)
