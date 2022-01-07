@@ -6,7 +6,6 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.util.test.waitUntilAsync
@@ -56,11 +55,11 @@ class DbReplicationIntegrationTest {
     private val remoteDb: UmAppDatabase
         get() = remoteDi.on(Endpoint("localhost")).direct.instance(tag = DoorTag.TAG_DB)
 
-    private val localDb: UmAppDatabase
-        get() = localDi.on(Endpoint(TEST_SERVER_HOST)).direct.instance(tag = DoorTag.TAG_DB)
+    private val localDb1: UmAppDatabase
+        get() = localDi1.on(Endpoint(TEST_SERVER_HOST)).direct.instance(tag = DoorTag.TAG_DB)
 
-    private val localDbRepo: UmAppDatabase
-        get() = localDi.on(Endpoint(TEST_SERVER_HOST)).direct.instance(tag = DoorTag.TAG_REPO)
+    private val localDbRepo1: UmAppDatabase
+        get() = localDi1.on(Endpoint(TEST_SERVER_HOST)).direct.instance(tag = DoorTag.TAG_REPO)
 
     private lateinit var remoteVirtualHostScope: EndpointScope
 
@@ -70,20 +69,19 @@ class DbReplicationIntegrationTest {
 
     private lateinit var jsonSerializer: Json
 
-    private lateinit var localDi: DI
+    private lateinit var localDi1: DI
 
+    private lateinit var localDi2: DI
 
+    private val localDb2: UmAppDatabase
+        get() = localDi2.on(Endpoint(TEST_SERVER_HOST)).direct.instance(tag = DoorTag.TAG_DB)
+
+    private val localDbRepo2: UmAppDatabase
+        get() = localDi2.on(Endpoint(TEST_SERVER_HOST)).direct.instance(tag = DoorTag.TAG_REPO)
 
     @Rule
     @JvmField
     var tempFolder = TemporaryFolder()
-
-    @Rule
-    @JvmField
-    var ustadTestRule = UstadTestRule(
-        repoReplicationSubscriptionEnabled = true,
-        repSubscriptionInitListener = RepSubscriptionInitListener()
-    )
 
     //We can't use the normal UstadTestRule because we need multiple client databases for the same
     // endpoint.
@@ -212,9 +210,14 @@ class DbReplicationIntegrationTest {
         }
 
 
-        localDi = DI {
-            //import(ustadTestRule.diModule)
+        localDi1 = DI {
             bindDbAndRelated("local1", true)
+
+            registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
+        }
+
+        localDi2 = DI {
+            bindDbAndRelated("local2", true)
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
         }
@@ -255,11 +258,11 @@ class DbReplicationIntegrationTest {
             contentEntryUid = remoteDb.contentEntryDao.insert(this)
         }
 
-        val accountManager: UstadAccountManager by localDi.instance()
+        val accountManager: UstadAccountManager by localDi1.instance()
         val adminPerson = remoteDb.personDao.findByUsername("admin") !!
 
         //put the person who just "logged in" in the local database
-        localDb.personDao.insert(adminPerson)
+        localDb1.personDao.insert(adminPerson)
 
         runBlocking {
             accountManager.addSession(adminPerson, TEST_SERVER_HOST, "secret")
@@ -267,8 +270,8 @@ class DbReplicationIntegrationTest {
 
         //wait for contententry to land...
         runBlocking {
-            localDb.waitUntil(10001, listOf("ContentEntry")) {
-                localDb.contentEntryDao.findByUid(contentEntry.contentEntryUid) != null
+            localDb1.waitUntil(10001, listOf("ContentEntry")) {
+                localDb1.contentEntryDao.findByUid(contentEntry.contentEntryUid) != null
             }
         }
 
@@ -279,23 +282,23 @@ class DbReplicationIntegrationTest {
         }
 
         runBlocking {
-            localDb.waitUntil(10002, listOf("ContentEntry")) {
-                localDb.contentEntryDao.findByUid(contentEntry2.contentEntryUid) != null
+            localDb1.waitUntil(10002, listOf("ContentEntry")) {
+                localDb1.contentEntryDao.findByUid(contentEntry2.contentEntryUid) != null
             }
         }
 
 
-        Assert.assertNotNull(localDb.contentEntryDao.findByUid(contentEntry.contentEntryUid))
-        Assert.assertNotNull(localDb.contentEntryDao.findByUid(contentEntry2.contentEntryUid))
+        Assert.assertNotNull(localDb1.contentEntryDao.findByUid(contentEntry.contentEntryUid))
+        Assert.assertNotNull(localDb1.contentEntryDao.findByUid(contentEntry2.contentEntryUid))
     }
 
     @Test
     fun givenUserSessionCreated_whenConnectedAndClazzCreated_thenScopedGrantShouldReplicateAndClazzShouldReplicate() {
-        val accountManager: UstadAccountManager by localDi.instance()
+        val accountManager: UstadAccountManager by localDi1.instance()
         val adminPerson = remoteDb.personDao.findByUsername("admin") !!
 
         //put the person who just "logged in" in the local database
-        localDb.personDao.insert(adminPerson)
+        localDb1.personDao.insert(adminPerson)
 
         runBlocking {
             accountManager.addSession(adminPerson, TEST_SERVER_HOST, "secret")
@@ -303,14 +306,14 @@ class DbReplicationIntegrationTest {
 
         //wait for contententry to land...
         runBlocking {
-            localDb.waitUntilAsync(10003, listOf("ScopedGrant")) {
-                localDb.scopedGrantDao.findByTableIdAndEntityUid(ScopedGrant.ALL_TABLES,
+            localDb1.waitUntilAsync(10003, listOf("ScopedGrant")) {
+                localDb1.scopedGrantDao.findByTableIdAndEntityUid(ScopedGrant.ALL_TABLES,
                     ScopedGrant.ALL_ENTITIES).firstOrNull { it.scopedGrant?.sgGroupUid == adminPerson.personGroupUid } != null
             }
         }
 
         val replicatedScopedGrant = runBlocking {
-            localDb.scopedGrantDao.findByTableIdAndEntityUid(ScopedGrant.ALL_TABLES,
+            localDb1.scopedGrantDao.findByTableIdAndEntityUid(ScopedGrant.ALL_TABLES,
                 ScopedGrant.ALL_ENTITIES).firstOrNull { it.scopedGrant?.sgGroupUid == adminPerson.personGroupUid }
         }
 
@@ -322,18 +325,18 @@ class DbReplicationIntegrationTest {
         }
 
         runBlocking {
-            localDb.waitUntil(10004, listOf("Clazz")) {
-                localDb.clazzDao.findByUid(clazz.clazzUid) != null
+            localDb1.waitUntil(10004, listOf("Clazz")) {
+                localDb1.clazzDao.findByUid(clazz.clazzUid) != null
             }
         }
 
-        Assert.assertNotNull(localDb.clazzDao.findByUid(clazz.clazzUid))
+        Assert.assertNotNull(localDb1.clazzDao.findByUid(clazz.clazzUid))
 
     }
 
     @Test
     fun givenClazzCreatedOnServer_whenUserWithScopedPermissionConnected_thenShouldReplicateClazzWithPermissionAndNotOthers() {
-        val localAccountManager: UstadAccountManager by localDi.instance()
+        val localAccountManager: UstadAccountManager by localDi1.instance()
 
         //create the new user
         val teacherPerson = runBlocking {
@@ -359,27 +362,27 @@ class DbReplicationIntegrationTest {
                 Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT, Clazz.TABLE_ID, newClazz.clazzUid)
         }
 
-        localDb.personDao.insert(teacherPerson)
+        localDb1.personDao.insert(teacherPerson)
         runBlocking {
             localAccountManager.addSession(teacherPerson, TEST_SERVER_HOST, "secret")
         }
 
         runBlocking {
-            localDb.waitUntil(10006, listOf("Clazz")) {
-                localDb.clazzDao.findByUid(newClazz.clazzUid) != null
+            localDb1.waitUntil(10006, listOf("Clazz")) {
+                localDb1.clazzDao.findByUid(newClazz.clazzUid) != null
             }
         }
 
-        Assert.assertNotNull(localDb.clazzDao.findByUid(newClazz.clazzUid))
+        Assert.assertNotNull(localDb1.clazzDao.findByUid(newClazz.clazzUid))
 
         //make sure that the other class does not come
         Thread.sleep(1000)
-        Assert.assertNull(localDb.clazzDao.findByUid(anotherClazz.clazzUid))
+        Assert.assertNull(localDb1.clazzDao.findByUid(anotherClazz.clazzUid))
     }
 
     @Test
     fun givenUserLoggedInWithPermissionOnClazz_whenNewPersonEnroledInClazz_thenShouldReplicateRelatedEntities() {
-        val localAccountManager: UstadAccountManager by localDi.instance()
+        val localAccountManager: UstadAccountManager by localDi1.instance()
 
         //create the new user
         val teacherPerson = runBlocking {
@@ -408,36 +411,36 @@ class DbReplicationIntegrationTest {
                 Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT, Clazz.TABLE_ID, newClazz.clazzUid)
         }
 
-        localDb.personDao.insert(teacherPerson)
+        localDb1.personDao.insert(teacherPerson)
         runBlocking {
             localAccountManager.addSession(teacherPerson, TEST_SERVER_HOST, "secret")
         }
 
         runBlocking {
-            localDb.waitUntil(10007, listOf("Clazz")) {
-                localDb.clazzDao.findByUid(newClazz.clazzUid) != null
+            localDb1.waitUntil(10007, listOf("Clazz")) {
+                localDb1.clazzDao.findByUid(newClazz.clazzUid) != null
             }
         }
 
         runBlocking {
             remoteDb.enrolPersonIntoClazzAtLocalTimezone(studentPerson, newClazz.clazzUid,
                 ClazzEnrolment.ROLE_STUDENT)
-            val localDbNodeId = (localDbRepo as DoorDatabaseRepository).config.nodeId
+            val localDbNodeId = (localDbRepo1 as DoorDatabaseRepository).config.nodeId
             remoteDb.replicationNotificationDispatcher.onNewDoorNode(localDbNodeId, "")
 
-            localDb.waitUntil(10008, listOf("Person")) {
-                localDb.personDao.findByUsername(studentPerson.username) != null
+            localDb1.waitUntil(10008, listOf("Person")) {
+                localDb1.personDao.findByUsername(studentPerson.username) != null
             }
         }
     }
 
     @Test
     fun givenEmptyDatabase_whenNewClazzCreated_whenReplicatedThenAllClazzGroupsShouldReplicate() {
-        val accountManager: UstadAccountManager by localDi.instance()
+        val accountManager: UstadAccountManager by localDi1.instance()
         val adminPerson = remoteDb.personDao.findByUsername("admin") !!
 
         //put the person who just "logged in" in the local database
-        localDb.personDao.insert(adminPerson)
+        localDb1.personDao.insert(adminPerson)
 
         runBlocking {
             accountManager.addSession(adminPerson, TEST_SERVER_HOST, "secret")
@@ -445,8 +448,8 @@ class DbReplicationIntegrationTest {
 
         //wait for admin scopedgrant to land...
         runBlocking {
-            localDb.waitUntilAsync(10003, listOf("ScopedGrant")) {
-                localDb.scopedGrantDao.findByTableIdAndEntityUid(ScopedGrant.ALL_TABLES,
+            localDb1.waitUntilAsync(10003, listOf("ScopedGrant")) {
+                localDb1.scopedGrantDao.findByTableIdAndEntityUid(ScopedGrant.ALL_TABLES,
                     ScopedGrant.ALL_ENTITIES).firstOrNull { it.scopedGrant?.sgGroupUid == adminPerson.personGroupUid } != null
             }
         }
@@ -457,8 +460,8 @@ class DbReplicationIntegrationTest {
         }
 
         runBlocking {
-            localDb.createNewClazzAndGroups(newClazz, localDi.direct.instance(), Any())
-            localDb.scopedGrantDao.insertAsync(ScopedGrant().apply {
+            localDb1.createNewClazzAndGroups(newClazz, localDi1.direct.instance(), Any())
+            localDb1.scopedGrantDao.insertAsync(ScopedGrant().apply {
                 sgFlags = ScopedGrant.FLAG_TEACHER_GROUP.or(ScopedGrant.FLAG_NO_DELETE)
                 sgPermissions = Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT
                 sgEntityUid = newClazz.clazzUid
@@ -474,7 +477,7 @@ class DbReplicationIntegrationTest {
         }
 
         val scopedGrantsOnLocal = runBlocking {
-            localDb.scopedGrantDao.findByTableIdAndEntityUid(Clazz.TABLE_ID,
+            localDb1.scopedGrantDao.findByTableIdAndEntityUid(Clazz.TABLE_ID,
                 newClazz.clazzUid)
         }
 
@@ -497,6 +500,82 @@ class DbReplicationIntegrationTest {
             .findByUid(newClazz.clazzTeachersPersonGroupUid))
     }
 
+    @Test
+    fun givenClazzCreatedOnRemote1ByAdmin_whenTeacherStartsSessionOnLocal2_thenShouldReplicateAllRelatedEntities() {
+        val accountManager1: UstadAccountManager by localDi1.instance()
+        val accountManager2: UstadAccountManager by localDi2.instance()
+
+        val adminPerson = remoteDb.personDao.findByUsername("admin") !!
+
+        //put the person who just "logged in" in the local database
+        localDb1.personDao.insert(adminPerson)
+
+        runBlocking {
+            accountManager1.addSession(adminPerson, TEST_SERVER_HOST, "secret")
+        }
+
+        val teacherPerson = runBlocking {
+            localDb1.insertPersonAndGroup(Person().apply {
+               firstNames = "Edna"
+                lastName = "K"
+                username = "edna"
+            })
+        }
+
+        val newClazz = Clazz().apply {
+            clazzName = "Test Clazz"
+        }
+
+
+        runBlocking {
+            localDb1.createNewClazzAndGroups(newClazz, localDi1.direct.instance(), Any())
+
+            //Create scopedgrants for groups (that would otherwisee be handled by clazzeditpresenter)
+            localDb1.grantScopedPermission(newClazz.clazzTeachersPersonGroupUid,
+                Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT, Clazz.TABLE_ID, newClazz.clazzUid)
+            localDb1.grantScopedPermission(newClazz.clazzStudentsPersonGroupUid,
+                Role.ROLE_CLAZZ_STUDENT_PERMISSIONS_DEFAULT, Clazz.TABLE_ID, newClazz.clazzUid)
+        }
+
+        runBlocking {
+            localDb1.enrolPersonIntoClazzAtLocalTimezone(teacherPerson, newClazz.clazzUid,
+                ClazzEnrolment.ROLE_TEACHER)
+        }
+
+        //wait for the new entities to hit the server
+        runBlocking {
+            remoteDb.waitUntilAsync(10042, listOf("Clazz")) {
+                remoteDb.clazzDao.findByUid(newClazz.clazzUid) != null
+            }
+        }
+
+        runBlocking {
+            Assert.assertNull("Teacher not on local2 until login",
+                localDb2.personDao.findByUid(teacherPerson.personUid))
+        }
+
+
+        //Now login as teacher on local2 as would happen when they login
+        localDb2.personDao.insert(teacherPerson)
+
+        runBlocking {
+            accountManager2.addSession(teacherPerson, TEST_SERVER_HOST, "secret2")
+        }
+
+        val teacherInDb2AfterAddSession = runBlocking { localDb2.personDao.findByUid(teacherPerson.personUid) }
+        Assert.assertNotNull(teacherInDb2AfterAddSession)
+
+
+        runBlocking {
+            localDb2.waitUntil(10043, listOf("Clazz")) {
+                localDb2.clazzDao.findByUid(newClazz.clazzUid) != null
+            }
+        }
+
+        Assert.assertEquals("Got clazz into localdb2",
+            localDb1.clazzDao.findByUid(newClazz.clazzUid),
+            localDb2.clazzDao.findByUid(newClazz.clazzUid))
+    }
 
     companion object {
 

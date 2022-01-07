@@ -105,6 +105,64 @@ open class Clazz() {
         this.isClazzActive = true
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as Clazz
+
+        if (clazzUid != other.clazzUid) return false
+        if (clazzName != other.clazzName) return false
+        if (clazzDesc != other.clazzDesc) return false
+        if (attendanceAverage != other.attendanceAverage) return false
+        if (clazzHolidayUMCalendarUid != other.clazzHolidayUMCalendarUid) return false
+        if (clazzScheuleUMCalendarUid != other.clazzScheuleUMCalendarUid) return false
+        if (isClazzActive != other.isClazzActive) return false
+        if (clazzLocationUid != other.clazzLocationUid) return false
+        if (clazzStartTime != other.clazzStartTime) return false
+        if (clazzEndTime != other.clazzEndTime) return false
+        if (clazzFeatures != other.clazzFeatures) return false
+        if (clazzSchoolUid != other.clazzSchoolUid) return false
+        if (clazzMasterChangeSeqNum != other.clazzMasterChangeSeqNum) return false
+        if (clazzLocalChangeSeqNum != other.clazzLocalChangeSeqNum) return false
+        if (clazzLastChangedBy != other.clazzLastChangedBy) return false
+        if (clazzLct != other.clazzLct) return false
+        if (clazzTimeZone != other.clazzTimeZone) return false
+        if (clazzStudentsPersonGroupUid != other.clazzStudentsPersonGroupUid) return false
+        if (clazzTeachersPersonGroupUid != other.clazzTeachersPersonGroupUid) return false
+        if (clazzPendingStudentsPersonGroupUid != other.clazzPendingStudentsPersonGroupUid) return false
+        if (clazzParentsPersonGroupUid != other.clazzParentsPersonGroupUid) return false
+        if (clazzCode != other.clazzCode) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = clazzUid.hashCode()
+        result = 31 * result + (clazzName?.hashCode() ?: 0)
+        result = 31 * result + (clazzDesc?.hashCode() ?: 0)
+        result = 31 * result + attendanceAverage.hashCode()
+        result = 31 * result + clazzHolidayUMCalendarUid.hashCode()
+        result = 31 * result + clazzScheuleUMCalendarUid.hashCode()
+        result = 31 * result + isClazzActive.hashCode()
+        result = 31 * result + clazzLocationUid.hashCode()
+        result = 31 * result + clazzStartTime.hashCode()
+        result = 31 * result + clazzEndTime.hashCode()
+        result = 31 * result + clazzFeatures.hashCode()
+        result = 31 * result + clazzSchoolUid.hashCode()
+        result = 31 * result + clazzMasterChangeSeqNum.hashCode()
+        result = 31 * result + clazzLocalChangeSeqNum.hashCode()
+        result = 31 * result + clazzLastChangedBy
+        result = 31 * result + clazzLct.hashCode()
+        result = 31 * result + (clazzTimeZone?.hashCode() ?: 0)
+        result = 31 * result + clazzStudentsPersonGroupUid.hashCode()
+        result = 31 * result + clazzTeachersPersonGroupUid.hashCode()
+        result = 31 * result + clazzPendingStudentsPersonGroupUid.hashCode()
+        result = 31 * result + clazzParentsPersonGroupUid.hashCode()
+        result = 31 * result + (clazzCode?.hashCode() ?: 0)
+        return result
+    }
+
     companion object {
 
         const val TABLE_ID = 6
