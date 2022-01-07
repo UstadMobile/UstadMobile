@@ -51,7 +51,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
          UserSession.usClientNodeId AS ceDestination
     FROM ChangeLog
          JOIN ClazzEnrolment
-             ON ChangeLog.chTableId = 65
+             ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID}
                 AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
          $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
                     ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}
@@ -66,7 +66,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
            WHERE cePk = ClazzEnrolment.clazzEnrolmentUid
              AND ceDestination = UserSession.usClientNodeId), 0)
  /*psql ON CONFLICT(cePk, ceDestination) DO UPDATE
-     SET cePending = true, ceVersion = EXCLUDED.ceVersion
+     SET cePending = true
   */               
     """)
     @ReplicationRunOnChange([ClazzEnrolment::class])

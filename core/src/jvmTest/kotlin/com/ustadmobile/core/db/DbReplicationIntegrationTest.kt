@@ -4,14 +4,10 @@ import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileConstants
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
-import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
-import com.ustadmobile.core.util.ext.grantScopedPermission
-import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.util.test.waitUntilAsync
 import com.ustadmobile.door.DatabaseBuilder
@@ -19,11 +15,12 @@ import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.*
-import com.ustadmobile.door.replication.doorReplicationRoute
 import com.ustadmobile.door.util.NodeIdAuthCache
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.rest.ext.initAdminUser
 import com.ustadmobile.lib.rest.ext.ktorInitRepo
+import com.ustadmobile.lib.util.randomString
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import io.ktor.application.*
@@ -47,6 +44,7 @@ import org.junit.rules.TemporaryFolder
 import org.kodein.di.ktor.DIFeature
 import java.io.File
 import kotlin.random.Random
+import javax.naming.InitialContext
 
 
 class DbReplicationIntegrationTest {
@@ -55,7 +53,8 @@ class DbReplicationIntegrationTest {
 
     private lateinit var remoteDi: DI
 
-    private lateinit var remoteDb: UmAppDatabase
+    private val remoteDb: UmAppDatabase
+        get() = remoteDi.on(Endpoint("localhost")).direct.instance(tag = DoorTag.TAG_DB)
 
     private val localDb: UmAppDatabase
         get() = localDi.on(Endpoint(TEST_SERVER_HOST)).direct.instance(tag = DoorTag.TAG_DB)
@@ -86,6 +85,102 @@ class DbReplicationIntegrationTest {
         repSubscriptionInitListener = RepSubscriptionInitListener()
     )
 
+    //We can't use the normal UstadTestRule because we need multiple client databases for the same
+    // endpoint.
+    private fun DI.MainBuilder.bindDbAndRelated(
+        dbName: String,
+        //"Client" mode means use the replication subscription
+        clientMode: Boolean
+    ) {
+        bind<UstadMobileSystemImpl>() with singleton {
+            UstadMobileSystemImpl(instance(tag  = DiTag.XPP_FACTORY_NSAWARE),
+                tempFolder.newFolder())
+        }
+
+        bind<UstadAccountManager>() with singleton {
+            UstadAccountManager(instance(), Any(), di)
+        }
+
+        bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
+            XmlPullParserFactory.newInstance().also {
+                it.isNamespaceAware = true
+            }
+        }
+
+        bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(remoteVirtualHostScope).singleton {
+            val nodeIdAndAuth: NodeIdAndAuth = instance()
+            InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
+            DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
+                .addSyncCallback(nodeIdAndAuth)
+                .addCallback(ContentJobItemTriggersCallback())
+                .build().also { db ->
+                    db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
+                    db.addIncomingReplicationListener(RepIncomingListener(db))
+                }
+        }
+
+        bind<HttpClient>() with singleton {
+            httpClient
+        }
+
+        bind<OkHttpClient>() with singleton {
+            okHttpClient
+        }
+
+        bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(remoteVirtualHostScope).singleton {
+            val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+            val doorNode = instance<NodeIdAndAuth>()
+            val endpoint = if(clientMode) TEST_SERVER_ENDPOINT else "http://localhost/"
+            val repo: UmAppDatabase = db.asRepository(RepositoryConfig.repositoryConfig(
+                Any(), endpoint,
+                doorNode.nodeId, doorNode.auth, instance(), instance()
+            ) {
+                useReplicationSubscription = clientMode
+                if(clientMode)
+                    replicationSubscriptionInitListener = RepSubscriptionInitListener()
+
+                attachmentsDir = tempFolder.newFolder().absolutePath
+            }).also {
+                if(clientMode) {
+                    it.siteDao.insert(Site().apply {
+                        siteName = "Test"
+                        authSalt = randomString(16)
+                    })
+                }
+            }
+
+            repo
+        }
+
+        bind<NodeIdAndAuth>() with scoped(remoteVirtualHostScope).singleton {
+            NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), "secret")
+        }
+
+        bind<NodeIdAuthCache>() with scoped(remoteVirtualHostScope).singleton {
+            instance<UmAppDatabase>(tag = DoorTag.TAG_DB).nodeIdAuthCache
+        }
+
+        bind<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT) with scoped(remoteVirtualHostScope).singleton {
+            tempFolder.newFolder("contextroot")
+        }
+
+        bind<Pbkdf2Params>() with singleton {
+            val systemImpl: UstadMobileSystemImpl = instance()
+            val numIterations = systemImpl.getAppConfigInt(
+                AppConfig.KEY_PBKDF2_ITERATIONS,
+                UstadMobileConstants.PBKDF2_ITERATIONS, context)
+            val keyLength = systemImpl.getAppConfigInt(
+                AppConfig.KEY_PBKDF2_KEYLENGTH,
+                UstadMobileConstants.PBKDF2_KEYLENGTH, context)
+
+            Pbkdf2Params(numIterations, keyLength)
+        }
+
+        bind<AuthManager>() with scoped(EndpointScope.Default).singleton {
+            AuthManager(context, di)
+        }
+    }
+
     @Before
     fun setup() {
         Napier.takeLogarithm()
@@ -101,82 +196,9 @@ class DbReplicationIntegrationTest {
         }
 
         remoteVirtualHostScope = EndpointScope()
-        val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), "secret")
-        remoteDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
-            .addSyncCallback(nodeIdAndAuth)
-            .addCallback(ContentJobItemTriggersCallback())
-            .build().also { db ->
-                db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
-                db.addIncomingReplicationListener(RepIncomingListener(db))
-            }
 
         remoteDi = DI {
-            bind<UstadMobileSystemImpl>() with singleton {
-                UstadMobileSystemImpl(instance(tag  = DiTag.XPP_FACTORY_NSAWARE),
-                    tempFolder.newFolder())
-            }
-
-            bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
-                XmlPullParserFactory.newInstance().also {
-                    it.isNamespaceAware = true
-                }
-            }
-
-            bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(remoteVirtualHostScope).singleton {
-                remoteDb
-            }
-
-            bind<HttpClient>() with singleton {
-                httpClient
-            }
-
-            bind<OkHttpClient>() with singleton {
-                okHttpClient
-            }
-
-            bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(remoteVirtualHostScope).singleton {
-                val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
-                val doorNode = instance<NodeIdAndAuth>()
-                val repo: UmAppDatabase = db.asRepository(RepositoryConfig.repositoryConfig(
-                    Any(), "http://localhost/",
-                    doorNode.nodeId, doorNode.auth, instance(), instance()
-                ) {
-                    useReplicationSubscription = false
-                    attachmentsDir = tempFolder.newFolder().absolutePath
-                })
-
-
-
-                repo
-            }
-
-            bind<NodeIdAndAuth>() with scoped(remoteVirtualHostScope).singleton {
-                nodeIdAndAuth
-            }
-
-            bind<NodeIdAuthCache>() with scoped(remoteVirtualHostScope).singleton {
-                instance<UmAppDatabase>(tag = DoorTag.TAG_DB).nodeIdAuthCache
-            }
-
-            bind<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT) with scoped(remoteVirtualHostScope).singleton {
-                tempFolder.newFolder("contextroot")
-            }
-
-            bind<Pbkdf2Params>() with singleton {
-                val systemImpl: UstadMobileSystemImpl = instance()
-                val numIterations = systemImpl.getAppConfigInt(
-                    AppConfig.KEY_PBKDF2_ITERATIONS,
-                    UstadMobileConstants.PBKDF2_ITERATIONS, context)
-                val keyLength = systemImpl.getAppConfigInt(
-                    AppConfig.KEY_PBKDF2_KEYLENGTH,
-                    UstadMobileConstants.PBKDF2_KEYLENGTH, context)
-
-                Pbkdf2Params(numIterations, keyLength)
-            }
-
-            bind<AuthManager>() with scoped(EndpointScope.Default).singleton {
-                AuthManager(context, di)
-            }
+            bindDbAndRelated("UmAppDatabase", false)
 
             registerContextTranslator { _: ApplicationCall -> Endpoint("localhost") }
         }
@@ -191,7 +213,10 @@ class DbReplicationIntegrationTest {
 
 
         localDi = DI {
-            import(ustadTestRule.diModule)
+            //import(ustadTestRule.diModule)
+            bindDbAndRelated("local1", true)
+
+            registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
         }
 
         jsonSerializer = Json {
@@ -404,8 +429,72 @@ class DbReplicationIntegrationTest {
                 localDb.personDao.findByUsername(studentPerson.username) != null
             }
         }
+    }
 
+    @Test
+    fun givenEmptyDatabase_whenNewClazzCreated_whenReplicatedThenAllClazzGroupsShouldReplicate() {
+        val accountManager: UstadAccountManager by localDi.instance()
+        val adminPerson = remoteDb.personDao.findByUsername("admin") !!
 
+        //put the person who just "logged in" in the local database
+        localDb.personDao.insert(adminPerson)
+
+        runBlocking {
+            accountManager.addSession(adminPerson, TEST_SERVER_HOST, "secret")
+        }
+
+        //wait for admin scopedgrant to land...
+        runBlocking {
+            localDb.waitUntilAsync(10003, listOf("ScopedGrant")) {
+                localDb.scopedGrantDao.findByTableIdAndEntityUid(ScopedGrant.ALL_TABLES,
+                    ScopedGrant.ALL_ENTITIES).firstOrNull { it.scopedGrant?.sgGroupUid == adminPerson.personGroupUid } != null
+            }
+        }
+
+        val newClazz = Clazz().apply {
+            clazzName = "Test Class"
+            clazzStartTime = systemTimeInMillis()
+        }
+
+        runBlocking {
+            localDb.createNewClazzAndGroups(newClazz, localDi.direct.instance(), Any())
+            localDb.scopedGrantDao.insertAsync(ScopedGrant().apply {
+                sgFlags = ScopedGrant.FLAG_TEACHER_GROUP.or(ScopedGrant.FLAG_NO_DELETE)
+                sgPermissions = Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT
+                sgEntityUid = newClazz.clazzUid
+                sgTableId = Clazz.TABLE_ID
+                sgGroupUid = newClazz.clazzTeachersPersonGroupUid
+            })
+        }
+
+        runBlocking {
+            remoteDb.waitUntil(10018, listOf("Clazz")) {
+                remoteDb.clazzDao.findByUid(newClazz.clazzUid) != null
+            }
+        }
+
+        val scopedGrantsOnLocal = runBlocking {
+            localDb.scopedGrantDao.findByTableIdAndEntityUid(Clazz.TABLE_ID,
+                newClazz.clazzUid)
+        }
+
+        runBlocking {
+            remoteDb.waitUntilAsync(10021, listOf("ScopedGrant")) {
+                val found = remoteDb.scopedGrantDao.findByTableIdAndEntityIdSync(Clazz.TABLE_ID,
+                    newClazz.clazzUid)
+                println("Found # ${found.size}")
+                found.size == scopedGrantsOnLocal.size
+            }
+        }
+
+        runBlocking {
+            remoteDb.waitUntil(10019, listOf("PersonGroup")) {
+                remoteDb.personGroupDao.findByUid(newClazz.clazzTeachersPersonGroupUid) != null
+            }
+        }
+
+        Assert.assertNotNull(remoteDb.personGroupDao
+            .findByUid(newClazz.clazzTeachersPersonGroupUid))
     }
 
 
@@ -413,7 +502,7 @@ class DbReplicationIntegrationTest {
 
         const val TEST_SERVER_HOST = "http://localhost:8089/"
 
-        const val TEST_SERVER_ENDPOINT = "${TEST_SERVER_HOST}UmAppDatabase"
+        const val TEST_SERVER_ENDPOINT = "${TEST_SERVER_HOST}UmAppDatabase/"
 
     }
 

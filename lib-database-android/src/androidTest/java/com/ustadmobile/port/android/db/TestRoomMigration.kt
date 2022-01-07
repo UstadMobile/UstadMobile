@@ -631,7 +631,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 92, true,
-            UmAppDatabaseReplicationMigration90_91.asRoomMigration())
+            UmAppDatabaseReplicationMigration91_92.asRoomMigration())
     }
 
 

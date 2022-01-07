@@ -34,7 +34,8 @@ abstract class PersonDao : BaseDao<Person> {
                    $JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
                    ${Role.PERMISSION_PERSON_SELECT}
                    $JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
-       WHERE UserSession.usClientNodeId = :newNodeId
+       WHERE Person.personType = ${Person.TYPE_NORMAL_PERSON}
+         AND UserSession.usClientNodeId = :newNodeId
          AND Person.personLct != COALESCE(
              (SELECT personVersionId
                 FROM PersonReplicate
@@ -59,7 +60,8 @@ abstract class PersonDao : BaseDao<Person> {
          ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
             ${Role.PERMISSION_PERSON_SELECT}
             ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
-   WHERE UserSession.usClientNodeId != (
+   WHERE Person.personType = ${Person.TYPE_NORMAL_PERSON}
+     AND UserSession.usClientNodeId != (
          SELECT nodeClientId 
            FROM SyncNode
           LIMIT 1)
