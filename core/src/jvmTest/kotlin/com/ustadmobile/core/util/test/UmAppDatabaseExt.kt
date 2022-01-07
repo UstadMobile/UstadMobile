@@ -19,10 +19,11 @@ suspend fun UmAppDatabase.waitUntil(timeout: Long, tableNames: List<String>, che
     removeChangeListener(changeListener)
 }
 
-suspend fun UmAppDatabase.waitUntilAsync(
+private suspend fun UmAppDatabase.waitUntilWithWaitFn(
     timeout: Long,
     tableNames: List<String>,
-    checker: suspend () -> Boolean
+    checker: suspend () -> Boolean,
+    waitFn: suspend (time: Long, suspend() -> Unit) -> Unit
 ) {
     val completableDeferred = CompletableDeferred<Boolean>()
     val changeListener = ChangeListenerRequest(tableNames) {
@@ -34,8 +35,31 @@ suspend fun UmAppDatabase.waitUntilAsync(
 
     addChangeListener(changeListener)
     this.handleTablesChanged(tableNames)
-    withTimeout(timeout) { completableDeferred.await() }
+    try {
+        waitFn(timeout) {
+            completableDeferred.await()
+        }
+    }finally {
+        removeChangeListener(changeListener)
+    }
+}
+suspend fun UmAppDatabase.waitUntilAsyncOrTimeout(
+    timeout: Long,
+    tableNames: List<String>,
+    checker: suspend () -> Boolean
+) {
+    waitUntilWithWaitFn(timeout, tableNames, checker) { time, block ->
+        withTimeout(time) { block() }
+    }
+}
 
-    removeChangeListener(changeListener)
+suspend fun UmAppDatabase.waitUntilAsyncOrContinueAfter(
+    timeout: Long,
+    tableNames: List<String>,
+    checker: suspend () -> Boolean
+) {
+    waitUntilWithWaitFn(timeout, tableNames, checker) { time, block ->
+        withTimeoutOrNull(time) { block() }
+    }
 }
 

@@ -8,7 +8,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.test.waitUntil
-import com.ustadmobile.core.util.test.waitUntilAsync
+import com.ustadmobile.core.util.test.waitUntilAsyncOrContinueAfter
+import com.ustadmobile.core.util.test.waitUntilAsyncOrTimeout
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.RepositoryConfig
@@ -42,6 +43,7 @@ import org.xmlpull.v1.XmlPullParserFactory
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.ktor.DIFeature
 import java.io.File
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.random.Random
 import javax.naming.InitialContext
 
@@ -52,8 +54,10 @@ class DbReplicationIntegrationTest {
 
     private lateinit var remoteDi: DI
 
+    private val remoteEndpoint = Endpoint("localhost")
+
     private val remoteDb: UmAppDatabase
-        get() = remoteDi.on(Endpoint("localhost")).direct.instance(tag = DoorTag.TAG_DB)
+        get() = remoteDi.on(remoteEndpoint).direct.instance(tag = DoorTag.TAG_DB)
 
     private val localDb1: UmAppDatabase
         get() = localDi1.on(Endpoint(TEST_SERVER_HOST)).direct.instance(tag = DoorTag.TAG_DB)
@@ -90,6 +94,9 @@ class DbReplicationIntegrationTest {
         //"Client" mode means use the replication subscription
         clientMode: Boolean
     ) {
+        val dbCreated = AtomicBoolean(false)
+        val repoCreated = AtomicBoolean(false)
+
         bind<UstadMobileSystemImpl>() with singleton {
             UstadMobileSystemImpl(instance(tag  = DiTag.XPP_FACTORY_NSAWARE),
                 tempFolder.newFolder())
@@ -106,6 +113,10 @@ class DbReplicationIntegrationTest {
         }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(remoteVirtualHostScope).singleton {
+            if(dbCreated.get())
+                throw IllegalStateException("Attempted to create db again for $dbName !")
+
+            dbCreated.set(true)
             val nodeIdAndAuth: NodeIdAndAuth = instance()
             InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
             DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
@@ -126,6 +137,11 @@ class DbReplicationIntegrationTest {
         }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(remoteVirtualHostScope).singleton {
+            if(repoCreated.get()) {
+                throw IllegalStateException("Already created repo for $dbCreated")
+            }
+
+            repoCreated.set(true)
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
             val doorNode = instance<NodeIdAndAuth>()
             val endpoint = if(clientMode) TEST_SERVER_ENDPOINT else "http://localhost/"
@@ -184,6 +200,9 @@ class DbReplicationIntegrationTest {
         Napier.takeLogarithm()
         Napier.base(DebugAntilog())
 
+        val dbTime = systemTimeInMillis()
+        Napier.i("===Test run dbTime = $dbTime ====")
+
         okHttpClient = OkHttpClient.Builder().build()
 
         httpClient = HttpClient(OkHttp) {
@@ -196,8 +215,9 @@ class DbReplicationIntegrationTest {
         remoteVirtualHostScope = EndpointScope()
 
         remoteDi = DI {
-            bindDbAndRelated("UmAppDatabase", false)
+            bindDbAndRelated("UmAppDatabase_${dbTime}", false)
 
+            registerContextTranslator { _: String -> Endpoint("localhost") }
             registerContextTranslator { _: ApplicationCall -> Endpoint("localhost") }
         }
 
@@ -206,18 +226,18 @@ class DbReplicationIntegrationTest {
         remoteRepo.preload()
         remoteRepo.ktorInitRepo()
         runBlocking {
-            remoteRepo.initAdminUser(Endpoint("localhost"), remoteDi)
+            remoteRepo.initAdminUser(remoteEndpoint, remoteDi)
         }
 
 
         localDi1 = DI {
-            bindDbAndRelated("local1", true)
+            bindDbAndRelated("local1_${dbTime}", true)
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
         }
 
         localDi2 = DI {
-            bindDbAndRelated("local2", true)
+            bindDbAndRelated("local2_${dbTime}", true)
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
         }
@@ -306,7 +326,7 @@ class DbReplicationIntegrationTest {
 
         //wait for contententry to land...
         runBlocking {
-            localDb1.waitUntilAsync(10003, listOf("ScopedGrant")) {
+            localDb1.waitUntilAsyncOrTimeout(10003, listOf("ScopedGrant")) {
                 localDb1.scopedGrantDao.findByTableIdAndEntityUid(ScopedGrant.ALL_TABLES,
                     ScopedGrant.ALL_ENTITIES).firstOrNull { it.scopedGrant?.sgGroupUid == adminPerson.personGroupUid } != null
             }
@@ -448,11 +468,21 @@ class DbReplicationIntegrationTest {
 
         //wait for admin scopedgrant to land...
         runBlocking {
-            localDb1.waitUntilAsync(10003, listOf("ScopedGrant")) {
+            //This check is flaky if using waitUntilOrTimeout ... however
+            // the scopedgrant entity itself always arrives.
+            localDb1.waitUntilAsyncOrContinueAfter(10003, listOf("ScopedGrant")) {
                 localDb1.scopedGrantDao.findByTableIdAndEntityUid(ScopedGrant.ALL_TABLES,
                     ScopedGrant.ALL_ENTITIES).firstOrNull { it.scopedGrant?.sgGroupUid == adminPerson.personGroupUid } != null
             }
         }
+
+        val adminScopedGrant = runBlocking {
+            localDb1.scopedGrantDao.findByTableIdAndEntityUid(ScopedGrant.ALL_TABLES,
+                ScopedGrant.ALL_ENTITIES).firstOrNull {
+                it.scopedGrant?.sgGroupUid == adminPerson.personGroupUid
+            }
+        }
+        Assert.assertNotNull("Can find admin scopedgrant", adminScopedGrant)
 
         val newClazz = Clazz().apply {
             clazzName = "Test Class"
@@ -482,7 +512,7 @@ class DbReplicationIntegrationTest {
         }
 
         runBlocking {
-            remoteDb.waitUntilAsync(10021, listOf("ScopedGrant")) {
+            remoteDb.waitUntilAsyncOrContinueAfter(10021, listOf("ScopedGrant")) {
                 val found = remoteDb.scopedGrantDao.findByTableIdAndEntityIdSync(Clazz.TABLE_ID,
                     newClazz.clazzUid)
                 println("Found # ${found.size}")
@@ -491,7 +521,7 @@ class DbReplicationIntegrationTest {
         }
 
         runBlocking {
-            remoteDb.waitUntil(10019, listOf("PersonGroup")) {
+            remoteDb.waitUntilAsyncOrContinueAfter(10019, listOf("PersonGroup")) {
                 remoteDb.personGroupDao.findByUid(newClazz.clazzTeachersPersonGroupUid) != null
             }
         }
@@ -544,7 +574,7 @@ class DbReplicationIntegrationTest {
 
         //wait for the new entities to hit the server
         runBlocking {
-            remoteDb.waitUntilAsync(10042, listOf("Clazz")) {
+            remoteDb.waitUntilAsyncOrTimeout(10042, listOf("Clazz")) {
                 remoteDb.clazzDao.findByUid(newClazz.clazzUid) != null
             }
         }
