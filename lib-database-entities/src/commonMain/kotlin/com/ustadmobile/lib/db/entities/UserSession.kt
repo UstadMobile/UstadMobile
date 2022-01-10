@@ -10,7 +10,8 @@ import kotlinx.serialization.Serializable
     Index(value = ["usPersonUid", "usStatus", "usClientNodeId"], name = "person_status_node_idx"),
     Index(value = ["usClientNodeId", "usStatus", "usPersonUid"], name = "node_status_person_idx")])
 @Serializable
-@ReplicateEntity(tableId = UserSession.TABLE_ID, tracker = UserSessionReplicate::class)
+@ReplicateEntity(tableId = UserSession.TABLE_ID, tracker = UserSessionReplicate::class,
+    priority = ReplicateEntity.HIGHEST_PRIORITY)
 @Triggers(arrayOf(
     Trigger(name="usersession_remote_ins",
         order = Trigger.Order.INSTEAD_OF,

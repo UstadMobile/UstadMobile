@@ -47,7 +47,8 @@ import kotlinx.serialization.Serializable
 //         WHERE UserSession.usClientNodeId = :clientId
 //               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}""")
 @Serializable
-@ReplicateEntity(tableId = PersonGroupMember.TABLE_ID, tracker = PersonGroupMemberReplicate::class)
+@ReplicateEntity(tableId = PersonGroupMember.TABLE_ID, tracker = PersonGroupMemberReplicate::class,
+    priority = ReplicateEntity.HIGHEST_PRIORITY)
 @Triggers(arrayOf(
  Trigger(
      name = "persongroupmember_remote_insert",

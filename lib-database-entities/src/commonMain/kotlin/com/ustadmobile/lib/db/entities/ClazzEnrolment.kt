@@ -25,7 +25,8 @@ import kotlinx.serialization.Serializable
     //Index for streamlining ClazzList where the number of users is counted by role
     Index(value = ["clazzEnrolmentClazzUid", "clazzEnrolmentRole"])
 ])
-@ReplicateEntity(tableId = TABLE_ID, tracker = ClazzEnrolmentReplicate::class)
+@ReplicateEntity(tableId = TABLE_ID, tracker = ClazzEnrolmentReplicate::class,
+    priority = ReplicateEntity.HIGHEST_PRIORITY + 1)
 @Triggers(arrayOf(
      Trigger(
          name = "clazzenrolment_remote_insert",

@@ -189,7 +189,8 @@ import kotlinx.serialization.Serializable
 //                   AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
 //    """)
 @Serializable
-@ReplicateEntity(tableId = SchoolMember.TABLE_ID, tracker = SchoolMemberReplicate::class)
+@ReplicateEntity(tableId = SchoolMember.TABLE_ID, tracker = SchoolMemberReplicate::class,
+    priority = ReplicateEntity.HIGHEST_PRIORITY + 1)
 @Triggers(arrayOf(
  Trigger(
      name = "schoolmember_remote_insert",

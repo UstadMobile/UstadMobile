@@ -35,6 +35,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import org.junit.Test
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.After
 import org.junit.Rule
 import org.junit.Assert
@@ -197,9 +198,6 @@ class DbReplicationIntegrationTest {
 
     @Before
     fun setup() {
-        Napier.takeLogarithm()
-        Napier.base(DebugAntilog())
-
         val dbTime = systemTimeInMillis()
         Napier.i("===Test run dbTime = $dbTime ====")
 
@@ -288,12 +286,14 @@ class DbReplicationIntegrationTest {
             accountManager.addSession(adminPerson, TEST_SERVER_HOST, "secret")
         }
 
+        val startTime = systemTimeInMillis()
         //wait for contententry to land...
         runBlocking {
             localDb1.waitUntil(10001, listOf("ContentEntry")) {
                 localDb1.contentEntryDao.findByUid(contentEntry.contentEntryUid) != null
             }
         }
+        Napier.i("Time for ContentEntry to replicaet: ${systemTimeInMillis() - startTime}ms")
 
         //now create a second one
         val contentEntry2 = ContentEntry().apply {
@@ -513,21 +513,12 @@ class DbReplicationIntegrationTest {
 
         runBlocking {
             remoteDb.waitUntilAsyncOrContinueAfter(10021, listOf("ScopedGrant")) {
-                val found = remoteDb.scopedGrantDao.findByTableIdAndEntityIdSync(Clazz.TABLE_ID,
+                val foundOnRemote = remoteDb.scopedGrantDao.findByTableIdAndEntityIdSync(Clazz.TABLE_ID,
                     newClazz.clazzUid)
-                println("Found # ${found.size}")
-                found.size == scopedGrantsOnLocal.size
+                println("Found # ${foundOnRemote.size}")
+                foundOnRemote.size == scopedGrantsOnLocal.size
             }
         }
-
-        runBlocking {
-            remoteDb.waitUntilAsyncOrContinueAfter(10019, listOf("PersonGroup")) {
-                remoteDb.personGroupDao.findByUid(newClazz.clazzTeachersPersonGroupUid) != null
-            }
-        }
-
-        Assert.assertNotNull(remoteDb.personGroupDao
-            .findByUid(newClazz.clazzTeachersPersonGroupUid))
     }
 
     @Test
@@ -602,12 +593,35 @@ class DbReplicationIntegrationTest {
             }
         }
 
+        runBlocking {
+            localDb2.waitUntil(10046, listOf("PersonGroupMember")) {
+                runBlocking {
+                    localDb2.personGroupMemberDao.findByPersonUidAndGroupUid(teacherPerson.personUid,
+                        newClazz.clazzTeachersPersonGroupUid) != null
+                }
+            }
+        }
+
+        runBlocking {
+            localDb2.waitUntilAsyncOrTimeout(10044, listOf("Clazz", "ScopedGrant", "PersonGroup", "PersonGroupMember", "ClazzEnrolment")) {
+                localDb2.clazzDao.personHasPermissionWithClazz(teacherPerson.personUid,
+                    newClazz.clazzUid, Role.PERMISSION_CLAZZ_SELECT)
+            }
+        }
+
         Assert.assertEquals("Got clazz into localdb2",
             localDb1.clazzDao.findByUid(newClazz.clazzUid),
             localDb2.clazzDao.findByUid(newClazz.clazzUid))
     }
 
     companion object {
+
+        @JvmStatic
+        @BeforeClass
+        fun beforeClass(){
+            Napier.takeLogarithm()
+            Napier.base(DebugAntilog())
+        }
 
         const val TEST_SERVER_HOST = "http://localhost:8089/"
 

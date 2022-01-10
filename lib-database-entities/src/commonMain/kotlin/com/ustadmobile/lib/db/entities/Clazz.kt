@@ -11,7 +11,8 @@ import com.ustadmobile.lib.db.entities.Clazz.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@ReplicateEntity(tableId = TABLE_ID, tracker = ClazzReplicate::class)
+@ReplicateEntity(tableId = TABLE_ID, tracker = ClazzReplicate::class,
+    priority = ReplicateEntity.HIGHEST_PRIORITY)
 @Triggers(arrayOf(
  Trigger(
      name = "clazz_remote_insert",

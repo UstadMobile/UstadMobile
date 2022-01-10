@@ -150,12 +150,21 @@ abstract class UserSessionDao {
                                           reason: Int)
 
     @Query("""
-        SELECT UserSession.usClientNodeId
+        SELECT DISTINCT UserSession.usClientNodeId
           FROM UserSession
          WHERE UserSession.usPersonUid IN (:personUids)
            AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
     """)
     abstract suspend fun findActiveNodeIdsByPersonUids(personUids: List<Long>): List<Long>
+
+    @Query("""
+        SELECT DISTINCT UserSession.usClientNodeId
+          FROM UserSession
+               JOIN PersonGroupMember 
+                    ON PersonGroupMember.groupMemberPersonUid = UserSession.usPersonUid
+         WHERE PersonGroupMember.groupMemberGroupUid IN (:groupUids)            
+    """)
+    abstract suspend fun findActiveNodesIdsByGroupUids(groupUids: List<Long>): List<Long>
 
     /**
      * This query will find the nodeids for all users where the device has permissions that are
