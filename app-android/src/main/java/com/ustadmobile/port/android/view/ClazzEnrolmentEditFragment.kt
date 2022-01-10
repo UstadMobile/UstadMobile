@@ -17,6 +17,7 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.binding.MODE_END_OF_DAY
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import java.util.*
@@ -86,6 +87,7 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
             field = value
             mBinding?.clazzEnrolment = value
             mBinding?.dateTimeMode = MODE_START_OF_DAY
+            mBinding?.dateTimeModeEnd = MODE_END_OF_DAY
             mBinding?.timeZoneId = value?.timeZone?:"UTC"
         }
 
