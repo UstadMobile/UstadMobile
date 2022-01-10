@@ -257,7 +257,7 @@ class TestContentJobRunner {
 
             val allJobItems = runBlocking { db.contentJobItemDao.findAll() }
             allJobItems.forEach {
-                Assert.assertEquals("job attempted match count", maxAttempts + 1, it.cjiAttemptCount)
+                Assert.assertEquals("job attempted match count", maxAttempts, it.cjiAttemptCount)
                 Assert.assertEquals("job failed", JobStatus.FAILED, it.cjiRecursiveStatus)
             }
         }
@@ -291,7 +291,7 @@ class TestContentJobRunner {
 
             val allJobItems = runBlocking { db.contentJobItemDao.findAll() }
             allJobItems.forEach {
-                Assert.assertEquals("job attempted match count", maxAttempts + 1, it.cjiAttemptCount)
+                Assert.assertEquals("job attempted match count", maxAttempts, it.cjiAttemptCount)
                 Assert.assertEquals("job failed", JobStatus.FAILED, it.cjiRecursiveStatus)
             }
         }

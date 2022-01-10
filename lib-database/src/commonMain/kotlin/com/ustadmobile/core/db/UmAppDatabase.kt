@@ -63,7 +63,7 @@ import kotlin.jvm.JvmField
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 90)
+], version = 91)
 @MinSyncVersion(60)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -5261,6 +5261,14 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_90_91 = DoorMigrationStatementList(90, 91) { db ->
+            if(db.dbType() == DoorDbType.SQLITE) {
+                DatabaseTriggers.sqliteContentJobItemTriggers.toList()
+            }else {
+                DatabaseTriggers.postgresContentJobItemTriggers.toList()
+            }
+        }
+
 
 
 fun migrationList(nodeId: Int) = listOf<DoorMigration>(
@@ -5278,7 +5286,7 @@ fun migrationList(nodeId: Int) = listOf<DoorMigration>(
     MIGRATION_76_77, MIGRATION_77_78, MIGRATION_78_79, MIGRATION_78_79,
     MIGRATION_79_80, MIGRATION_80_81, MIGRATION_81_82, MIGRATION_82_83, MIGRATION_83_84,
     MIGRATION_84_85, MIGRATION_85_86, MIGRATION_86_87, MIGRATION_87_88,
-    MIGRATION_88_89, MIGRATION_89_90
+    MIGRATION_88_89, MIGRATION_89_90, MIGRATION_90_91
 )
 
 internal fun migrate67to68(nodeId: Int)= DoorMigrationSync(67, 68) { database ->
