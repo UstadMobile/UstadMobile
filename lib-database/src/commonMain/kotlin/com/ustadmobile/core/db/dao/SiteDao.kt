@@ -1,20 +1,25 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Site
 
 @Dao
 @Repository
-abstract class SiteDao: BaseDao<Site>{
+abstract class SiteDao {
 
     @Query("SELECT * FROM Site LIMIT 1")
     abstract fun getSite(): Site?
 
     @Query("SELECT * FROM Site LIMIT 1")
+    @RepoHttpAccessible
     abstract suspend fun getSiteAsync(): Site?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun replaceAsync(site: Site): Long
+
+    @Insert
+    abstract fun insert(site: Site): Long
 
     @Update
     abstract suspend fun updateAsync(workspace: Site)

@@ -33,8 +33,10 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
+import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import okhttp3.mockwebserver.RecordedRequest
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -46,11 +48,55 @@ import kotlin.random.Random
 
 class UstadAccountManagerTest {
 
+    inner class AccountManagerMockServerDispatcher : Dispatcher() {
+
+        var authUmAccount = UmAccount(42L, "bob", "", mockServerUrl)
+
+        var registerUmAccount = authUmAccount
+
+        var authResponseCode = 200
+
+        private fun UmAccount.toMockResponse() : MockResponse{
+            return MockResponse()
+                .setBody(Json.encodeToString(UmAccount.serializer(), this))
+                .setResponseCode(authResponseCode)
+                .addHeader("Content-Type", "application/json; charset=utf-8")
+        }
+
+        override fun dispatch(request: RecordedRequest): MockResponse {
+            return when {
+                request.path?.startsWith("/auth/login") == true -> {
+                    authUmAccount.toMockResponse()
+                }
+                request.path?.startsWith("/auth/register") == true -> {
+                    registerUmAccount.toMockResponse()
+                }
+
+                request.path?.startsWith("/UmAppDatabase/SiteDao/getSiteAsync") == true -> {
+                    MockResponse()
+                        .setBody(Json.encodeToString(Site.serializer(), Site().apply {
+                            authSalt = randomString(20)
+                        }))
+                        .setResponseCode(200)
+                        .addHeader("Content-Type", "application/json; charset=utf-8")
+                }
+
+                request.path?.startsWith("/auth/person") == true -> {
+                    authUmAccount.toMockResponse()
+                }
+
+                else -> MockResponse().setResponseCode(404)
+            }
+        }
+    }
+
     lateinit var mockSystemImpl: UstadMobileSystemImpl
 
     val appContext = Any()
 
     lateinit var mockWebServer: MockWebServer
+
+    lateinit var mockDispatcher:AccountManagerMockServerDispatcher
 
     lateinit var mockServerUrl: String
 
@@ -64,14 +110,6 @@ class UstadAccountManagerTest {
 
     private lateinit var db: UmAppDatabase
 
-    private fun MockWebServer.enqueueValidAccountResponse(umAccount: UmAccount =
-                                                                  UmAccount(42L, "bob", "", mockServerUrl)) {
-        enqueue(MockResponse()
-                .setBody(Json.encodeToString(UmAccount.serializer(), umAccount))
-                .setResponseCode(200)
-                .addHeader("Content-Type", "application/json; charset=utf-8"))
-    }
-
     @Before
     fun setup() {
         mockSystemImpl = mock {
@@ -81,9 +119,10 @@ class UstadAccountManagerTest {
 
         mockWebServer = MockWebServer().also {
             it.start()
+            mockServerUrl = it.url("/").toString()
+            mockDispatcher = AccountManagerMockServerDispatcher()
+            it.dispatcher = mockDispatcher
         }
-
-        mockServerUrl = mockWebServer.url("/").toString()
 
         endpointScope = EndpointScope()
 
@@ -142,6 +181,7 @@ class UstadAccountManagerTest {
         repo.siteDao.insert(Site().apply {
             authSalt = randomString(20)
         })
+        db = di.on(Endpoint(mockServerUrl)).direct.instance(tag = DoorTag.TAG_DB)
     }
 
     private fun Person.createTestUserSession(repo: UmAppDatabase): UserSession {
@@ -165,6 +205,26 @@ class UstadAccountManagerTest {
     }
 
     @Test
+    fun givenNoSiteOrPersonInDb_whenLoginCalledForfirstLogin_shouldInitLogin() {
+        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
+        db.execSQLBatch("DELETE FROM Site", "DELETE FROM Person")
+
+
+        runBlocking {
+            accountManager.login("bob", "password", mockServerUrl)
+        }
+
+        Assert.assertEquals("Active account is the newly logged in account",
+            mockDispatcher.authUmAccount.userAtServer,
+            accountManager.activeAccount.userAtServer)
+
+        val storedAccounts = runBlocking {
+            accountManager.storedAccountsLive.waitUntil { it.size == 1 }
+        }
+
+    }
+
+    @Test
     fun givenValidLoginCredentials_whenLoginCalledForFirstLogin_shouldInitLogin() {
         val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
         val loggedInAccount = UmAccount(42L, "bob", "",
@@ -179,7 +239,7 @@ class UstadAccountManagerTest {
             })
         }
 
-        mockWebServer.enqueueValidAccountResponse(loggedInAccount)
+        mockDispatcher.authUmAccount = loggedInAccount
 
         runBlocking {
             accountManager.login("bob", "password", mockServerUrl)
@@ -245,7 +305,7 @@ class UstadAccountManagerTest {
         val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
 
         val loggedInAccount = UmAccount(42L, "bob", "", mockServerUrl)
-        mockWebServer.enqueueValidAccountResponse(loggedInAccount)
+        mockDispatcher.authUmAccount = loggedInAccount
 
         runBlocking {
             accountManager.login("bob", "password", mockServerUrl)
@@ -274,8 +334,7 @@ class UstadAccountManagerTest {
     fun givenInvalidLoginCredentials_whenLoginCalled_thenShouldThrowException() {
         val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
 
-        mockWebServer.enqueue(MockResponse()
-                .setResponseCode(403))
+        mockDispatcher.authResponseCode = 403
 
         var exception: Exception? = null
         try {
@@ -294,8 +353,7 @@ class UstadAccountManagerTest {
     fun givenAccountRequiresParentalConsent_whenLoginCalled_thenShouldThrowException() {
         val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
 
-        mockWebServer.enqueue(MockResponse()
-            .setResponseCode(424))
+        mockDispatcher.authResponseCode = 424
 
         var exception: Exception? = null
         try {
@@ -416,9 +474,7 @@ class UstadAccountManagerTest {
         }
 
         val accountResponse = UmAccount(42L, "mary", "", "")
-        mockWebServer.enqueue(MockResponse()
-                .setBody(json.encodeToString(UmAccount.serializer(), accountResponse))
-                .addHeader("Content-Type", "application/json; charset=utf-8"))
+        mockDispatcher.registerUmAccount = accountResponse
 
         val accountRegistered = runBlocking {
             accountManager.register(personToRegister, mockServerUrl)

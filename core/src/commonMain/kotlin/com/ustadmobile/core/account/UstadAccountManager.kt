@@ -8,10 +8,7 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.door.*
-import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.concurrentSafeListOf
-import com.ustadmobile.door.ext.onRepoWithFallbackToDb
-import com.ustadmobile.door.ext.toHexString
+import com.ustadmobile.door.ext.*
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_GUESTPERSON
@@ -347,8 +344,20 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
             }
         }
 
-//        val person = repo.personDao.findByUid(responseAccount.personUid)
-//            ?: throw IllegalStateException("Internal error: could not get person object")
+        val siteInDb = db.siteDao.getSiteAsync()
+        if(siteInDb == null) {
+            val siteResponse = httpClient.get<HttpResponse> {
+                doorNodeAndVersionHeaders(repo as DoorDatabaseRepository)
+                url("${endpointUrl.removeSuffix("/")}/UmAppDatabase/SiteDao/getSiteAsync")
+            }
+            if(siteResponse.status.value == 200) {
+                val siteObj = siteResponse.receive<Site>()
+                repo.siteDao.replaceAsync(siteObj)
+            }else {
+                throw IllegalStateException("Internal error: no Site in database and could not fetch it from server")
+            }
+        }
+
         val newSession = addSession(personInDb, endpointUrl, password)
 
         activeEndpoint = Endpoint(endpointUrl)
