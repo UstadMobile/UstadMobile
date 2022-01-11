@@ -13,7 +13,9 @@ suspend fun UmAppDatabase.waitUntil(timeout: Long, tableNames: List<String>, che
     }
 
     addChangeListener(changeListener)
-    changeListener.onInvalidated.onTablesInvalidated(tableNames)
+    if(checker())
+        completableDeferred.complete(true)
+
     withTimeout(timeout) { completableDeferred.await() }
 
     removeChangeListener(changeListener)
@@ -34,8 +36,9 @@ private suspend fun UmAppDatabase.waitUntilWithWaitFn(
     }
 
     addChangeListener(changeListener)
-    changeListener.onInvalidated.onTablesInvalidated(tableNames
-    )
+    if(checker())
+        completableDeferred.complete(true)
+
     try {
         waitFn(timeout) {
             completableDeferred.await()

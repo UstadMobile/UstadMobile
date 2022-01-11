@@ -326,7 +326,7 @@ class DbReplicationIntegrationTest {
 
         //wait for contententry to land...
         runBlocking {
-            localDb1.waitUntilAsyncOrTimeout(10003, listOf("ScopedGrant")) {
+            localDb1.waitUntilAsyncOrTimeout(10003, listOf("ScopedGrant", "PersonGroup", "Person")) {
                 localDb1.scopedGrantDao.findByTableIdAndEntityUid(ScopedGrant.ALL_TABLES,
                     ScopedGrant.ALL_ENTITIES).firstOrNull { it.scopedGrant?.sgGroupUid == adminPerson.personGroupUid } != null
             }
@@ -470,7 +470,7 @@ class DbReplicationIntegrationTest {
         runBlocking {
             //This check is flaky if using waitUntilOrTimeout ... however
             // the scopedgrant entity itself always arrives.
-            localDb1.waitUntilAsyncOrContinueAfter(10003, listOf("ScopedGrant")) {
+            localDb1.waitUntilAsyncOrContinueAfter(10003, listOf("ScopedGrant", "Person", "PersonGroup")) {
                 localDb1.scopedGrantDao.findByTableIdAndEntityUid(ScopedGrant.ALL_TABLES,
                     ScopedGrant.ALL_ENTITIES).firstOrNull { it.scopedGrant?.sgGroupUid == adminPerson.personGroupUid } != null
             }
