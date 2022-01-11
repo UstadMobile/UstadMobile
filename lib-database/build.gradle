@@ -86,9 +86,11 @@ kapt {
         arg("doordb_template_fixupdatetrigger_sqlite", project.file("build/migrationtemplates"))
         arg("doordb_migrations_out", "$buildDir/generated/source/door-migrations")
 
-        arg("doordb_postgres_url", rootProject.ext.buildConfigProperties["door.postgresUrl"])
-        arg("doordb_postgres_user", rootProject.ext.buildConfigProperties["door.postgresUser"])
-        arg("doordb_postgres_password", rootProject.ext.buildConfigProperties["door.postgresPass"])
+
+        //TODO: set default values for this so it can build without.
+        //arg("doordb_postgres_url", rootProject.ext.buildConfigProperties["door.postgresUrl"])
+        //arg("doordb_postgres_user", rootProject.ext.buildConfigProperties["door.postgresUser"])
+        //arg("doordb_postgres_password", rootProject.ext.buildConfigProperties["door.postgresPass"])
     }
 }
 
