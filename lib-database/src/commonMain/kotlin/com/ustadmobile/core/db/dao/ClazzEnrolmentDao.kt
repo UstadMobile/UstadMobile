@@ -25,11 +25,11 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         FROM UserSession
              JOIN PersonGroupMember 
                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-             JOIN ScopedGrant 
-                   ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                      AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_SELECT}) > 0 
+             ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_PERSON_SELECT} 
+                    ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2} 
              JOIN ClazzEnrolment 
-                   ON $FROM_SCOPEDGRANT_TO_CLAZZENROLMENT_JOIN__ON_CLAUSE
+                   ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
        WHERE UserSession.usClientNodeId = :newNodeId
          AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
          AND ClazzEnrolment.clazzEnrolmentLct != COALESCE(
@@ -53,9 +53,11 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
          JOIN ClazzEnrolment
              ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID}
                 AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-         $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
-                    ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}
-                    $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
+         JOIN Clazz
+             ON Clazz.clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
+         ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+             ${Role.PERMISSION_CLAZZ_SELECT}
+             ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
    WHERE UserSession.usClientNodeId != (
          SELECT nodeClientId 
            FROM SyncNode

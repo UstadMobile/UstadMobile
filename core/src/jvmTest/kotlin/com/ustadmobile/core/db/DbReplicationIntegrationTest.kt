@@ -612,6 +612,26 @@ class DbReplicationIntegrationTest {
         Assert.assertEquals("Got clazz into localdb2",
             localDb1.clazzDao.findByUid(newClazz.clazzUid),
             localDb2.clazzDao.findByUid(newClazz.clazzUid))
+
+        runBlocking {
+            localDb2.waitUntilAsyncOrTimeout(10045, listOf("ClazzEnrolment")) {
+                localDb2.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(
+                    teacherPerson.personUid, newClazz.clazzUid) != null
+            }
+        }
+
+        val teacherEnrolmentOnLocal2 = runBlocking {
+            localDb2.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(
+                teacherPerson.personUid, newClazz.clazzUid)
+        }
+        Assert.assertNotNull("Got teacher's clazz enrolment on local device",
+            teacherEnrolmentOnLocal2)
+
+
+        runBlocking {
+            localDb1.userSessionDao
+                .findAllActiveNodeIdsWithClazzBasedPermission(listOf(1))
+        }
     }
 
     companion object {
