@@ -12,7 +12,6 @@ import kotlinx.serialization.Serializable
     //Index to provide fields required in permission queries
     Index(value = ["erGroupUid", "erRoleUid", "erTableId"])
 ])
-//@SyncableEntity(tableId = EntityRole.TABLE_ID)
 @Serializable
 @Deprecated("Replaced with ScopedGrant")
 open class EntityRole() {

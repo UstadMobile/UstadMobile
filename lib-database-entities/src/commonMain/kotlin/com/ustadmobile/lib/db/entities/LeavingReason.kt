@@ -6,7 +6,6 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-//@SyncableEntity(tableId = LeavingReason.TABLE_ID)
 @ReplicateEntity(tableId = LeavingReason.TABLE_ID, tracker = LeavingReasonReplicate::class)
 @Serializable
 @Triggers(arrayOf(

@@ -32,39 +32,6 @@ import kotlinx.serialization.Serializable
             """
         ])
 ))
-
-//@SyncableEntity(tableId = TABLE_ID,
-//    notifyOnUpdate = ["""
-//        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
-//               ${ScopedGrant.TABLE_ID} AS tableId
-//          FROM ChangeLog
-//               JOIN ScopedGrant ScopedGrantEntity
-//                    ON ChangeLog.chTableId = ${ScopedGrant.TABLE_ID}
-//                           AND ChangeLog.chEntityPk = ScopedGrantEntity.sgUid
-//               JOIN PersonGroupMember
-//                    ON PersonGroupMember.groupMemberGroupUid = ScopedGrantEntity.sgGroupUid
-//               JOIN Person
-//                    ON PersonGroupMember.groupMemberPersonUid = Person.personUid
-//               ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-//                    ${Role.PERMISSION_PERSON_SELECT}
-//                    ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
-//          """],
-//    syncFindAllQuery = """
-//        SELECT ScopedGrantWithPerm.*
-//          FROM UserSession
-//               JOIN PersonGroupMember
-//                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-//               ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1}
-//                    ${Role.PERMISSION_PERSON_SELECT}
-//                    ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
-//               JOIN PersonGroupMember PersonsWithPerm_GroupMember
-//                    ON PersonsWithPerm_GroupMember.groupMemberPersonUid = Person.personUid
-//               JOIN ScopedGrant ScopedGrantWithPerm
-//                    ON PersonsWithPerm_GroupMember.groupMemberGroupUid = ScopedGrantWithPerm.sgGroupUid
-//         WHERE UserSession.usClientNodeId = :clientId
-//           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-//    """
-//)
 @Serializable
 class ScopedGrant {
 

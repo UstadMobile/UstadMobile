@@ -30,30 +30,6 @@ import kotlinx.serialization.Serializable
          ]
      )
  ))
-//@SyncableEntity(tableId = TABLE_ID,
-//
-//    notifyOnUpdate = ["""
-//        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
-//               ${TABLE_ID} AS tableId
-//          FROM ChangeLog
-//               JOIN Person
-//                    ON ChangeLog.chTableId = $TABLE_ID
-//                       AND ChangeLog.chEntityPk = Person.personUid
-//               ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-//                    ${Role.PERMISSION_PERSON_SELECT}
-//                    ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
-//        """],
-//        syncFindAllQuery ="""
-//            SELECT Person.*
-//              FROM UserSession
-//                   JOIN PersonGroupMember
-//                        ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-//                   $JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
-//                        ${Role.PERMISSION_PERSON_SELECT}
-//                        $JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
-//             WHERE UserSession.usClientNodeId = :clientId
-//        """
-//    )
 @Serializable
 open class Person() {
 

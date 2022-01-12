@@ -13,12 +13,6 @@ import kotlinx.serialization.Serializable
  */
 @Entity
 /*
-@SyncableEntity(tableId = TABLE_ID,
-        notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, $TABLE_ID AS tableId
-        FROM UserSession
-    """])
- */
 @ReplicateEntity(tableId = TABLE_ID, tracker = ContentEntryContentCategoryJoinReplicate::class)
 @Serializable
 @Triggers(arrayOf(

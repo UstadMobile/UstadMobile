@@ -6,7 +6,6 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 
-//@SyncableEntity(tableId = 56)
 @Entity
 @Serializable
 data class CustomField(

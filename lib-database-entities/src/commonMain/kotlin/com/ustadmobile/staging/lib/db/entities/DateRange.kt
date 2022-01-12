@@ -6,7 +6,6 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 
-//@SyncableEntity(tableId = 17)
 @Entity
 @Serializable
 class DateRange() {

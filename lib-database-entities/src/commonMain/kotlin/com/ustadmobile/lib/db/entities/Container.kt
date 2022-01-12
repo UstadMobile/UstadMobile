@@ -25,16 +25,6 @@ import kotlinx.serialization.Serializable
      ]
  )
 ))
-/*
-@SyncableEntity(tableId = Container.TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId as deviceId, 
-               ${Container.TABLE_ID} AS tableId 
-          FROM UserSession
-    """]
-)
-
- */
 @Serializable
 open class Container() {
 

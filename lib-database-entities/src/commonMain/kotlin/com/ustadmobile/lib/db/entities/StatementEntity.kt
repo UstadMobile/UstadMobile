@@ -12,36 +12,6 @@ import kotlinx.serialization.Serializable
     Index(value = ["statementContentEntryUid","statementPersonUid","contentEntryRoot",
                     "timestamp","statementLocalChangeSeqNum"])
 ])
-//@SyncableEntity(tableId = StatementEntity.TABLE_ID,
-//    notifyOnUpdate = ["""
-//        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
-//               ${StatementEntity.TABLE_ID} AS tableId
-//          FROM ChangeLog
-//            JOIN StatementEntity
-//                 ON ChangeLog.chTableId = ${StatementEntity.TABLE_ID}
-//                    AND ChangeLog.chEntityPk = StatementEntity.statementUid
-//            JOIN ScopedGrant
-//                 ON ${StatementEntity.FROM_STATEMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE}
-//                    AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
-//            JOIN PersonGroupMember
-//                 ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-//            JOIN UserSession
-//                 ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-//                    AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-//                """],
-//    syncFindAllQuery = """
-//        SELECT StatementEntity.*
-//          FROM UserSession
-//               JOIN PersonGroupMember
-//                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-//               JOIN ScopedGrant
-//                    ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-//                    AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
-//               JOIN StatementEntity
-//                        ON ${StatementEntity.FROM_SCOPEDGRANT_TO_STATEMENT_JOIN_ON_CLAUSE}
-//         WHERE UserSession.usClientNodeId = :clientId
-//               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}"""
-//)
 @Serializable
 @ReplicateEntity(tableId = StatementEntity.TABLE_ID, tracker = StatementEntityReplicate::class)
 @Triggers(arrayOf(

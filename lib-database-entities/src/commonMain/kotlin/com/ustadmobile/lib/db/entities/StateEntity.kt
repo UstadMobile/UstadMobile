@@ -6,29 +6,6 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-//@SyncableEntity(tableId = StateEntity.TABLE_ID,
-//    notifyOnUpdate = ["""
-//        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
-//               ${StateEntity.TABLE_ID} AS tableId
-//          FROM ChangeLog
-//               JOIN StateEntity
-//                    ON ChangeLog.chTableId = ${StateEntity.TABLE_ID}
-//                       AND ChangeLog.chEntityPk = StateEntity.stateUid
-//               JOIN AgentEntity
-//                    ON StateEntity.agentUid = AgentEntity.agentUid
-//               JOIN UserSession
-//                    ON AgentEntity.agentPersonUid = UserSession.usPersonUid
-//                       AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}"""],
-//    syncFindAllQuery = """
-//        SELECT StateEntity.*
-//          FROM StateEntity
-//               JOIN AgentEntity
-//                    ON StateEntity.agentUid = AgentEntity.agentUid
-//               JOIN UserSession
-//                    ON AgentEntity.agentPersonUid = UserSession.usPersonUid
-//         WHERE UserSession.usClientNodeId = :clientId
-//           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-//    """)
 @Serializable
 @ReplicateEntity(tableId = StateEntity.TABLE_ID, tracker = StateEntityReplicate::class)
 @Triggers(arrayOf(

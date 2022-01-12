@@ -24,38 +24,6 @@ import kotlinx.serialization.Serializable
      ]
  )
 ))
-/*
-@SyncableEntity(tableId = TABLE_ID,
-        notifyOnUpdate =  [
-            """
-           SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-                  $TABLE_ID AS tableId 
-            FROM ChangeLog
-                 JOIN ClazzAssignment
-                     ON ChangeLog.chTableId = $TABLE_ID 
-                            AND ClazzAssignment.caUid = ChangeLog.chEntityPk
-                 JOIN Clazz 
-                    ON Clazz.clazzUid = ClazzAssignment.caClazzUid 
-               ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_ASSIGNMENT_SELECT}
-                    ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}                           
-        """
-        ],
-        syncFindAllQuery = """
-           SELECT ClazzAssignment.* 
-          FROM UserSession
-               JOIN PersonGroupMember 
-                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-               ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_ASSIGNMENT_SELECT} 
-                    ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
-               JOIN ClazzAssignment
-                    ON ClazzAssignment.caClazzUid = Clazz.clazzUid
-         WHERE UserSession.usClientNodeId = :clientId
-               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-        """)
-
- */
 @Serializable
 open class ClazzAssignment {
 

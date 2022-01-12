@@ -7,25 +7,6 @@ import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NONE
 import kotlinx.serialization.Serializable
 
 @Entity
-//@SyncableEntity(tableId = Report.TABLE_ID,
-//    notifyOnUpdate = ["""
-//        SELECT DISTINCT UserSession.usClientNodeId as deviceId,
-//               ${Report.TABLE_ID} AS tableId
-//          FROM ChangeLog
-//               JOIN Report
-//                    ON ChangeLog.chTableId = ${Report.TABLE_ID} AND ChangeLog.chEntityPk = Report.reportUid
-//               JOIN UserSession
-//                    ON Report.reportOwnerUid = UserSession.usPersonUid
-//                       AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}"""],
-//    syncFindAllQuery = """
-//        SELECT Report.*
-//          FROM Report
-//               JOIN UserSession
-//                    ON Report.reportOwnerUid = UserSession.usPersonUid
-//                       AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-//         WHERE UserSession.usClientNodeId = :clientId
-//    """
-//)
 @Serializable
 @ReplicateEntity(tableId = Report.TABLE_ID, tracker = ReportReplicate::class)
 @Triggers(arrayOf(

@@ -7,12 +7,6 @@ import com.ustadmobile.lib.db.entities.Language.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-//@SyncableEntity(tableId = TABLE_ID,
-//        notifyOnUpdate = ["""
-//        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
-//               $TABLE_ID as tableId
-//          FROM UserSession
-//    """])
 @Serializable
 @ReplicateEntity(tableId = TABLE_ID, tracker = LanguageReplicate::class)
 @Triggers(arrayOf(

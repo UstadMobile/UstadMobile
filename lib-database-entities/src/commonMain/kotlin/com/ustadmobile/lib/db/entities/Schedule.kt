@@ -5,33 +5,6 @@ import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
-//@SyncableEntity(tableId = Schedule.TABLE_ID,
-//    notifyOnUpdate = ["""
-//        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
-//               ${Schedule.TABLE_ID} AS tableId
-//          FROM ChangeLog
-//               JOIN Schedule
-//               ON ChangeLog.chTableId = ${Schedule.TABLE_ID}
-//                    AND Schedule.scheduleUid = ChangeLog.chEntityPk
-//               JOIN Clazz
-//                    ON Clazz.clazzUid = Schedule.scheduleClazzUid
-//               ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-//                    ${Role.PERMISSION_CLAZZ_SELECT}
-//                    ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
-//                   """],
-//    syncFindAllQuery = """
-//        SELECT Schedule.*
-//          FROM UserSession
-//               JOIN PersonGroupMember
-//                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-//               ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
-//                    ${Role.PERMISSION_CLAZZ_SELECT}
-//                    ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
-//               JOIN Schedule
-//                    ON Schedule.scheduleClazzUid = Clazz.clazzUid
-//         WHERE UserSession.usClientNodeId = :clientId
-//               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}"""
-//)
 @Entity
 @Serializable
 @ReplicateEntity(tableId = Schedule.TABLE_ID, tracker = ScheduleReplicate::class)

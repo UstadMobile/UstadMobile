@@ -9,41 +9,6 @@ import kotlinx.serialization.Serializable
 
 @ReplicateEntity(tableId = ClazzLogAttendanceRecord.TABLE_ID,
     tracker = ClazzLogAttendanceRecordReplicate::class)
-/*
-@SyncableEntity(tableId = ClazzLogAttendanceRecord.TABLE_ID,
-    notifyOnUpdate = [
-        """
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-               ${ClazzLogAttendanceRecord.TABLE_ID} AS tableId 
-          FROM ChangeLog
-            JOIN ClazzLogAttendanceRecord 
-                 ON ChangeLog.chTableId = ${ClazzLogAttendanceRecord.TABLE_ID} 
-                    AND ChangeLog.chEntityPk = ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid
-            JOIN ScopedGrant 
-                 ON $FROM_CLAZZLOGATTENDANCERECORD_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
-                    AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT}) > 0
-            JOIN PersonGroupMember 
-                 ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-            JOIN UserSession
-                 ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-                    AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-        """
-    ],
-    syncFindAllQuery = """
-            SELECT ClazzLogAttendanceRecord.*
-              FROM UserSession
-                   JOIN PersonGroupMember 
-                        ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-                   JOIN ScopedGrant 
-                        ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                            AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT}) > 0
-                   JOIN ClazzLogAttendanceRecord 
-                        ON $FROM_SCOPEDGRANT_TO_CLAZZLOGATTENDANCERECORD_JOIN_ON_CLAUSE
-             WHERE UserSession.usClientNodeId = :clientId
-                   AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-        """)
-
- */
 @Entity
 @Serializable
 open class ClazzLogAttendanceRecord {

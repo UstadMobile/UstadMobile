@@ -12,31 +12,6 @@ import kotlinx.serialization.Serializable
 
 
 @Entity
-//@SyncableEntity(tableId = School.TABLE_ID,
-//    notifyOnUpdate = ["""
-//        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
-//               ${School.TABLE_ID} AS tableId
-//          FROM ChangeLog
-//               JOIN School
-//                    ON ChangeLog.chTableId = ${School.TABLE_ID}
-//                            AND ChangeLog.chEntityPk = School.schoolUid
-//
-//               $JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
-//                    ${Role.PERMISSION_SCHOOL_SELECT}
-//                    $JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
-//                """],
-//    syncFindAllQuery = """
-//        SELECT School.*
-//          FROM UserSession
-//               JOIN PersonGroupMember
-//                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-//               $JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT1
-//                    ${Role.PERMISSION_SCHOOL_SELECT}
-//                    $JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT2
-//         WHERE UserSession.usClientNodeId = :clientId
-//               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-//    """
-//)
 @Serializable
 @ReplicateEntity(tableId = School.TABLE_ID, tracker = SchoolReplicate::class)
 @Triggers(arrayOf(

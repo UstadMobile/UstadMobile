@@ -9,12 +9,6 @@ import kotlinx.serialization.Serializable
  * Represents a Caledar which will be liked to multiple holidays, schedules etc
  * Its basically a collection of dates and time. (holidays and schedules)
  */
-//@SyncableEntity(tableId = HolidayCalendar.TABLE_ID,
-//        notifyOnUpdate = ["""
-//        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
-//               ${HolidayCalendar.TABLE_ID} AS tableId
-//          FROM UserSession
-//    """])
 @Entity
 @Serializable
 @ReplicateEntity(tableId = HolidayCalendar.TABLE_ID, tracker = HolidayCalendarReplicate::class)

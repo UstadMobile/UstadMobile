@@ -30,12 +30,6 @@ import kotlinx.serialization.Serializable
      ]
  )
 ))
-//@SyncableEntity(tableId = TABLE_ID,
-//        notifyOnUpdate = ["""
-//        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
-//               $TABLE_ID AS tableId
-//          FROM UserSession
-//    """])
 @Serializable
 class ContentEntryParentChildJoin(
     @ColumnInfo(index = true)

@@ -6,33 +6,7 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-//@SyncableEntity(tableId = SchoolPicture.TABLE_ID,
-//    notifyOnUpdate = ["""
-//        SELECT DISTINCT UserSession.usPersonUid AS deviceId,
-//               ${SchoolPicture.TABLE_ID} AS tableId
-//          FROM ChangeLog
-//                JOIN SchoolPicture
-//                     ON ChangeLog.chTableId = ${SchoolPicture.TABLE_ID}
-//                            AND ChangeLog.chEntityPk = SchoolPicture.schoolPictureUid
-//                JOIN School
-//                     ON SchoolPicture.schoolPictureUid = School.schoolUid
-//                ${School.JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-//                    ${Role.PERMISSION_SCHOOL_SELECT}
-//                    ${School.JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}"""],
-//    syncFindAllQuery = """
-//        SELECT SchoolPicture.*
-//          FROM UserSession
-//               JOIN PersonGroupMember
-//                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-//               ${School.JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT1}
-//                    ${Role.PERMISSION_SCHOOL_SELECT}
-//                    ${School.JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT2}
-//               JOIN SchoolPicture
-//                    ON SchoolPicture.schoolPictureUid = School.schoolUid
-//         WHERE UserSession.usClientNodeId = :clientId
-//    """)
 @Serializable
-//@ReplicateEntity(tableId = SchoolPicture.TABLE_ID, tracker = AgentEntityTrkr::class)
 open class SchoolPicture() {
 
     @PrimaryKey(autoGenerate = true)
