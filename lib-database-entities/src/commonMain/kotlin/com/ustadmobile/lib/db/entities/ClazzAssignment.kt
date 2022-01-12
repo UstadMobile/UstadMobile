@@ -16,10 +16,10 @@ import kotlinx.serialization.Serializable
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
      sqlStatements = [
-         """REPLACE INTO ClazzAssignment(caUid, caTitle, caDescription, caDeadlineDate, caStartDate, caLateSubmissionType, caLateSubmissionPenalty, caGracePeriodDate, caActive, caClassCommentEnabled, caPrivateCommentsEnabled, caClazzUid, caLocalChangeSeqNum, caMasterChangeSeqNum, caLastChangedBy, caLct) 
-         VALUES (NEW.caUid, NEW.caTitle, NEW.caDescription, NEW.caDeadlineDate, NEW.caStartDate, NEW.caLateSubmissionType, NEW.caLateSubmissionPenalty, NEW.caGracePeriodDate, NEW.caActive, NEW.caClassCommentEnabled, NEW.caPrivateCommentsEnabled, NEW.caClazzUid, NEW.caLocalChangeSeqNum, NEW.caMasterChangeSeqNum, NEW.caLastChangedBy, NEW.caLct) 
+         """REPLACE INTO ClazzAssignment(caUid, caTitle, caDescription, caAssignmentType, caDeadlineDate, caStartDate, caLateSubmissionType, caLateSubmissionPenalty, caGracePeriodDate, caActive, caClassCommentEnabled, caPrivateCommentsEnabled, caRequireFileSubmission, caFileSubmissionWeight, caFileType, caSizeLimit, caNumberOfFiles, caEditAfterSubmissionType, caMarkingType, caMaxScore, caClazzUid, caLocalChangeSeqNum, caMasterChangeSeqNum, caLastChangedBy, caLct) 
+         VALUES (NEW.caUid, NEW.caTitle, NEW.caDescription, NEW.caAssignmentType, NEW.caDeadlineDate, NEW.caStartDate, NEW.caLateSubmissionType, NEW.caLateSubmissionPenalty, NEW.caGracePeriodDate, NEW.caActive, NEW.caClassCommentEnabled, NEW.caPrivateCommentsEnabled, NEW.caRequireFileSubmission, NEW.caFileSubmissionWeight, NEW.caFileType, NEW.caSizeLimit, NEW.caNumberOfFiles, NEW.caEditAfterSubmissionType, NEW.caMarkingType, NEW.caMaxScore, NEW.caClazzUid, NEW.caLocalChangeSeqNum, NEW.caMasterChangeSeqNum, NEW.caLastChangedBy, NEW.caLct) 
          /*psql ON CONFLICT (caUid) DO UPDATE 
-         SET caTitle = EXCLUDED.caTitle, caDescription = EXCLUDED.caDescription, caDeadlineDate = EXCLUDED.caDeadlineDate, caStartDate = EXCLUDED.caStartDate, caLateSubmissionType = EXCLUDED.caLateSubmissionType, caLateSubmissionPenalty = EXCLUDED.caLateSubmissionPenalty, caGracePeriodDate = EXCLUDED.caGracePeriodDate, caActive = EXCLUDED.caActive, caClassCommentEnabled = EXCLUDED.caClassCommentEnabled, caPrivateCommentsEnabled = EXCLUDED.caPrivateCommentsEnabled, caClazzUid = EXCLUDED.caClazzUid, caLocalChangeSeqNum = EXCLUDED.caLocalChangeSeqNum, caMasterChangeSeqNum = EXCLUDED.caMasterChangeSeqNum, caLastChangedBy = EXCLUDED.caLastChangedBy, caLct = EXCLUDED.caLct
+         SET caTitle = EXCLUDED.caTitle, caDescription = EXCLUDED.caDescription, caAssignmentType = EXCLUDED.caAssignmentType, caDeadlineDate = EXCLUDED.caDeadlineDate, caStartDate = EXCLUDED.caStartDate, caLateSubmissionType = EXCLUDED.caLateSubmissionType, caLateSubmissionPenalty = EXCLUDED.caLateSubmissionPenalty, caGracePeriodDate = EXCLUDED.caGracePeriodDate, caActive = EXCLUDED.caActive, caClassCommentEnabled = EXCLUDED.caClassCommentEnabled, caPrivateCommentsEnabled = EXCLUDED.caPrivateCommentsEnabled, caRequireFileSubmission = EXCLUDED.caRequireFileSubmission, caFileSubmissionWeight = EXCLUDED.caFileSubmissionWeight, caFileType = EXCLUDED.caFileType, caSizeLimit = EXCLUDED.caSizeLimit, caNumberOfFiles = EXCLUDED.caNumberOfFiles, caEditAfterSubmissionType = EXCLUDED.caEditAfterSubmissionType, caMarkingType = EXCLUDED.caMarkingType, caMaxScore = EXCLUDED.caMaxScore, caClazzUid = EXCLUDED.caClazzUid, caLocalChangeSeqNum = EXCLUDED.caLocalChangeSeqNum, caMasterChangeSeqNum = EXCLUDED.caMasterChangeSeqNum, caLastChangedBy = EXCLUDED.caLastChangedBy, caLct = EXCLUDED.caLct
          */"""
      ]
  )
@@ -34,6 +34,7 @@ open class ClazzAssignment {
 
     var caDescription: String? = null
 
+    @ColumnInfo(defaultValue = "0")
     var caAssignmentType: Int = 0
 
     var caDeadlineDate: Long = Long.MAX_VALUE
@@ -52,20 +53,28 @@ open class ClazzAssignment {
 
     var caPrivateCommentsEnabled: Boolean = false
 
+    @ColumnInfo(defaultValue = "1")
     var caRequireFileSubmission: Boolean = true
 
+    @ColumnInfo(defaultValue = "0")
     var caFileSubmissionWeight: Int = 0
 
+    @ColumnInfo(defaultValue = "0")
     var caFileType: Int = 0
 
+    @ColumnInfo(defaultValue = "50")
     var caSizeLimit: Int = 50
 
+    @ColumnInfo(defaultValue = "0")
     var caNumberOfFiles: Int = 0
 
+    @ColumnInfo(defaultValue = "0")
     var caEditAfterSubmissionType: Int = 0
 
+    @ColumnInfo(defaultValue = "0")
     var caMarkingType: Int = 0
 
+    @ColumnInfo(defaultValue = "0")
     var caMaxScore: Int = 0
 
     @ColumnInfo(index = true)
