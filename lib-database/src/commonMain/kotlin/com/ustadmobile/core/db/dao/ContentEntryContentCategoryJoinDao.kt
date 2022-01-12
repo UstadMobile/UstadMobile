@@ -11,7 +11,7 @@ abstract class ContentEntryContentCategoryJoinDao : BaseDao<ContentEntryContentC
 
     @Query("""
      REPLACE INTO ContentEntryContentCategoryJoinReplicate(ceccjPk, ceccjDestination)
-      SELECT ContentEntryContentCategoryJoin.ceccjUid AS ceccjPk,
+      SELECT DISTINCT ContentEntryContentCategoryJoin.ceccjUid AS ceccjPk,
              :newNodeId AS ceccjDestination
         FROM ContentEntryContentCategoryJoin
        WHERE ContentEntryContentCategoryJoin.ceccjLct != COALESCE(
@@ -29,7 +29,7 @@ abstract class ContentEntryContentCategoryJoinDao : BaseDao<ContentEntryContentC
 
     @Query("""
  REPLACE INTO ContentEntryContentCategoryJoinReplicate(ceccjPk, ceccjDestination)
-  SELECT ContentEntryContentCategoryJoin.ceccjUid AS ceccjUid,
+  SELECT DISTINCT ContentEntryContentCategoryJoin.ceccjUid AS ceccjUid,
          UserSession.usClientNodeId AS ceccjDestination
     FROM ChangeLog
          JOIN ContentEntryContentCategoryJoin

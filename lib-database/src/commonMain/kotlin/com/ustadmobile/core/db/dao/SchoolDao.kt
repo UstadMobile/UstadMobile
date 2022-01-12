@@ -17,7 +17,7 @@ abstract class SchoolDao : BaseDao<School> {
 
     @Query("""
      REPLACE INTO SchoolReplicate(schoolPk, schoolDestination)
-      SELECT School.schoolUid AS schoolPk,
+      SELECT DISTINCT School.schoolUid AS schoolPk,
              :newNodeId AS schoolDestination
         FROM UserSession
              JOIN PersonGroupMember
@@ -42,7 +42,7 @@ abstract class SchoolDao : BaseDao<School> {
 
     @Query("""
  REPLACE INTO SchoolReplicate(schoolPk, schoolDestination)
-  SELECT School.schoolUid AS schoolUid,
+  SELECT DISTINCT School.schoolUid AS schoolUid,
          UserSession.usClientNodeId AS schoolDestination
     FROM ChangeLog
          JOIN School

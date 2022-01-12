@@ -18,7 +18,7 @@ abstract class ContentEntryRelatedEntryJoinDao : BaseDao<ContentEntryRelatedEntr
 
     @Query("""
      REPLACE INTO ContentEntryRelatedEntryJoinReplicate(cerejPk, cerejDestination)
-      SELECT ContentEntryRelatedEntryJoin.cerejUid AS cerejPk,
+      SELECT DISTINCT ContentEntryRelatedEntryJoin.cerejUid AS cerejPk,
              :newNodeId AS cerejDestination
         FROM ContentEntryRelatedEntryJoin
        WHERE ContentEntryRelatedEntryJoin.cerejLct != COALESCE(
@@ -36,7 +36,7 @@ abstract class ContentEntryRelatedEntryJoinDao : BaseDao<ContentEntryRelatedEntr
 
     @Query("""
  REPLACE INTO ContentEntryRelatedEntryJoinReplicate(cerejPk, cerejDestination)
-  SELECT ContentEntryRelatedEntryJoin.cerejUid AS cerejUid,
+  SELECT DISTINCT ContentEntryRelatedEntryJoin.cerejUid AS cerejUid,
          UserSession.usClientNodeId AS cerejDestination
     FROM ChangeLog
          JOIN ContentEntryRelatedEntryJoin

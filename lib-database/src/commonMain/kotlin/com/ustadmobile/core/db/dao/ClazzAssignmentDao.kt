@@ -21,7 +21,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
 
     @Query("""
      REPLACE INTO ClazzAssignmentReplicate(caPk, caDestination)
-      SELECT ClazzAssignment.caUid AS caUid,
+      SELECT DISTINCT ClazzAssignment.caUid AS caUid,
              :newNodeId AS caDestination
         FROM UserSession
              JOIN PersonGroupMember 
@@ -48,7 +48,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
 
     @Query("""
  REPLACE INTO ClazzAssignmentReplicate(caPk, caDestination)
-  SELECT ClazzAssignment.caUid AS caUid,
+  SELECT DISTINCT ClazzAssignment.caUid AS caUid,
          UserSession.usClientNodeId AS caDestination
     FROM ChangeLog
          JOIN ClazzAssignment

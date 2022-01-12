@@ -14,7 +14,7 @@ abstract class HolidayDao: BaseDao<Holiday>, OneToManyJoinDao<Holiday> {
 
     @Query("""
      REPLACE INTO HolidayReplicate(holidayPk, holidayDestination)
-      SELECT Holiday.holUid AS holidayPk,
+      SELECT DISTINCT Holiday.holUid AS holidayPk,
              :newNodeId AS holidayDestination
         FROM Holiday
        WHERE Holiday.holLct != COALESCE(
@@ -33,7 +33,7 @@ abstract class HolidayDao: BaseDao<Holiday>, OneToManyJoinDao<Holiday> {
 
     @Query("""
  REPLACE INTO HolidayReplicate(holidayPk, holidayDestination)
-  SELECT Holiday.holUid AS holidayUid,
+  SELECT DISTINCT Holiday.holUid AS holidayUid,
          UserSession.usClientNodeId AS holidayDestination
     FROM ChangeLog
          JOIN Holiday

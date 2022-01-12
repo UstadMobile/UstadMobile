@@ -18,7 +18,7 @@ abstract class ReportDao : BaseDao<Report> {
 
     @Query("""
      REPLACE INTO ReportReplicate(reportPk, reportDestination)
-      SELECT Report.reportUid AS reportPk,
+      SELECT DISTINCT Report.reportUid AS reportPk,
              :newNodeId AS reportDestination
         FROM Report
              JOIN UserSession
@@ -40,7 +40,7 @@ abstract class ReportDao : BaseDao<Report> {
 
     @Query("""
  REPLACE INTO ReportReplicate(reportPk, reportDestination)
-  SELECT Report.reportUid AS reportUid,
+  SELECT DISTINCT Report.reportUid AS reportUid,
          UserSession.usClientNodeId AS reportDestination
     FROM ChangeLog
          JOIN Report

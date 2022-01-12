@@ -13,7 +13,7 @@ abstract class StateContentDao : BaseDao<StateContentEntity> {
 
     @Query("""
      REPLACE INTO StateContentEntityReplicate(scePk, sceDestination)
-      SELECT StateContentEntity.stateContentUid AS scePk,
+      SELECT DISTINCT StateContentEntity.stateContentUid AS scePk,
              :newNodeId AS sceDestination
         FROM StateContentEntity
        WHERE StateContentEntity.stateContentLct != COALESCE(
@@ -31,7 +31,7 @@ abstract class StateContentDao : BaseDao<StateContentEntity> {
 
     @Query("""
  REPLACE INTO StateContentEntityReplicate(scePk, sceDestination)
-  SELECT StateContentEntity.stateContentUid AS sceUid,
+  SELECT DISTINCT StateContentEntity.stateContentUid AS sceUid,
          UserSession.usClientNodeId AS sceDestination
     FROM ChangeLog
          JOIN StateContentEntity

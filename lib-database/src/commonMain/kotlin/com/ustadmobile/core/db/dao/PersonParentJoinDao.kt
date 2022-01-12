@@ -13,7 +13,7 @@ abstract class PersonParentJoinDao {
 
     @Query("""
      REPLACE INTO PersonParentJoinReplicate(ppjPk, ppjDestination)
-      SELECT PersonParentJoin.ppjUid AS ppjPk,
+      SELECT DISTINCT PersonParentJoin.ppjUid AS ppjPk,
              :newNodeId AS ppjDestination
         FROM UserSession
              JOIN PersonGroupMember
@@ -39,7 +39,7 @@ abstract class PersonParentJoinDao {
 
     @Query("""
  REPLACE INTO PersonParentJoinReplicate(ppjPk, ppjDestination)
-  SELECT PersonParentJoin.ppjUid AS ppjUid,
+  SELECT DISTINCT PersonParentJoin.ppjUid AS ppjUid,
          UserSession.usClientNodeId AS ppjDestination
     FROM ChangeLog
          JOIN PersonParentJoin

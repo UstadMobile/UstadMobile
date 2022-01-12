@@ -20,7 +20,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
 
     @Query("""
      REPLACE INTO ClazzEnrolmentReplicate(cePk, ceDestination)
-      SELECT ClazzEnrolment.clazzEnrolmentUid AS ceUid,
+      SELECT DISTINCT ClazzEnrolment.clazzEnrolmentUid AS ceUid,
              :newNodeId AS ceDestination
         FROM UserSession
              JOIN PersonGroupMember 
@@ -47,7 +47,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
 
      @Query("""
  REPLACE INTO ClazzEnrolmentReplicate(cePk, ceDestination)
-  SELECT ClazzEnrolment.clazzEnrolmentUid AS ceUid,
+  SELECT DISTINCT ClazzEnrolment.clazzEnrolmentUid AS ceUid,
          UserSession.usClientNodeId AS ceDestination
     FROM ChangeLog
          JOIN ClazzEnrolment

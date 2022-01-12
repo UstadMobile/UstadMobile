@@ -27,7 +27,7 @@ abstract class SiteDao {
 
     @Query("""
         REPLACE INTO SiteReplicate(sitePk, siteDestination)
-         SELECT Site.siteUid AS sitePk,
+         SELECT DISTINCT Site.siteUid AS sitePk,
                 :newNodeId AS siteDestination
            FROM Site
           WHERE Site.siteLct != COALESCE(
@@ -46,7 +46,7 @@ abstract class SiteDao {
 
     @Query("""
         REPLACE INTO SiteReplicate(sitePk, siteDestination)
-         SELECT Site.siteUid AS sitePk,
+         SELECT DISTINCT Site.siteUid AS sitePk,
                 UserSession.usClientNodeId AS siteDestination
            FROM ChangeLog
                 JOIN Site 

@@ -16,7 +16,7 @@ abstract class GroupLearningSessionDao : BaseDao<GroupLearningSession> {
 
     @Query("""
      REPLACE INTO GroupLearningSessionReplicate(glsPk, glsDestination)
-      SELECT GroupLearningSession.groupLearningSessionUid AS glsPk,
+      SELECT DISTINCT GroupLearningSession.groupLearningSessionUid AS glsPk,
              :newNodeId AS glsDestination
         FROM UserSession
              JOIN PersonGroupMember
@@ -45,7 +45,7 @@ abstract class GroupLearningSessionDao : BaseDao<GroupLearningSession> {
 
     @Query("""
  REPLACE INTO GroupLearningSessionReplicate(glsPk, glsDestination)
-  SELECT GroupLearningSession.groupLearningSessionUid AS glsUid,
+  SELECT DISTINCT GroupLearningSession.groupLearningSessionUid AS glsUid,
          UserSession.usClientNodeId AS glsDestination
     FROM ChangeLog
          JOIN GroupLearningSession

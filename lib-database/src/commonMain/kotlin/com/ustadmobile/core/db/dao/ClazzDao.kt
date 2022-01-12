@@ -21,7 +21,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
 
     @Query("""
      REPLACE INTO ClazzReplicate(clazzPk, clazzDestination)
-      SELECT Clazz.clazzUid AS clazzUid,
+      SELECT DISTINCT Clazz.clazzUid AS clazzUid,
              :newNodeId AS clazzDestination
         FROM UserSession
                JOIN PersonGroupMember 
@@ -45,7 +45,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
 
      @Query("""
  REPLACE INTO ClazzReplicate(clazzPk, clazzDestination)
-  SELECT Clazz.clazzUid AS clazzUid,
+  SELECT DISTINCT Clazz.clazzUid AS clazzUid,
          UserSession.usClientNodeId AS clazzDestination
     FROM ChangeLog
          JOIN Clazz

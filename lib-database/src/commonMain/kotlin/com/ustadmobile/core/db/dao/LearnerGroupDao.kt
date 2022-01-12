@@ -15,7 +15,7 @@ abstract class LearnerGroupDao : BaseDao<LearnerGroup> {
 
     @Query("""
      REPLACE INTO LearnerGroupReplicate(lgPk, lgDestination)
-      SELECT LearnerGroup.learnerGroupUid AS lgPk,
+      SELECT DISTINCT LearnerGroup.learnerGroupUid AS lgPk,
              :newNodeId AS lgDestination
         FROM UserSession
              JOIN PersonGroupMember
@@ -44,7 +44,7 @@ abstract class LearnerGroupDao : BaseDao<LearnerGroup> {
 
     @Query("""
  REPLACE INTO LearnerGroupReplicate(lgPk, lgDestination)
-  SELECT LearnerGroup.learnerGroupUid AS lgUid,
+  SELECT DISTINCT LearnerGroup.learnerGroupUid AS lgUid,
          UserSession.usClientNodeId AS lgDestination
     FROM ChangeLog
          JOIN LearnerGroup

@@ -15,7 +15,7 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
 
     @Query("""
      REPLACE INTO ClazzAssignmentContentJoinReplicate(cacjPk, cacjDestination)
-      SELECT ClazzAssignmentContentJoin.cacjUid AS cacjUid,
+      SELECT DISTINCT ClazzAssignmentContentJoin.cacjUid AS cacjUid,
              :newNodeId AS cacjDestination
         FROM UserSession
                JOIN PersonGroupMember 
@@ -44,7 +44,7 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
 
     @Query("""
  REPLACE INTO ClazzAssignmentContentJoinReplicate(cacjPk, cacjDestination)
-  SELECT ClazzAssignmentContentJoin.cacjUid AS cacjUid,
+  SELECT DISTINCT ClazzAssignmentContentJoin.cacjUid AS cacjUid,
          UserSession.usClientNodeId AS cacjDestination
     FROM ChangeLog
          JOIN ClazzAssignmentContentJoin

@@ -17,7 +17,7 @@ abstract class ScheduleDao : BaseDao<Schedule>, OneToManyJoinDao<Schedule> {
 
     @Query("""
      REPLACE INTO ScheduleReplicate(schedulePk, scheduleDestination)
-      SELECT Schedule.scheduleUid AS schedulePk,
+      SELECT DISTINCT Schedule.scheduleUid AS schedulePk,
              :newNodeId AS scheduleDestination
         FROM UserSession
               JOIN PersonGroupMember
@@ -44,7 +44,7 @@ abstract class ScheduleDao : BaseDao<Schedule>, OneToManyJoinDao<Schedule> {
 
  @Query("""
  REPLACE INTO ScheduleReplicate(schedulePk, scheduleDestination)
-  SELECT Schedule.scheduleUid AS scheduleUid,
+  SELECT DISTINCT Schedule.scheduleUid AS scheduleUid,
          UserSession.usClientNodeId AS scheduleDestination
     FROM ChangeLog
          JOIN Schedule

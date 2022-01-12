@@ -14,7 +14,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
     @Query("""
         REPLACE INTO ContentEntryReplicate(cePk, ceDestination)
-         SELECT contentEntryUid AS ceUid,
+         SELECT DISTINCT contentEntryUid AS ceUid,
                 :newNodeId AS siteDestination
            FROM ContentEntry
           WHERE ContentEntry.contentEntryLct != COALESCE(
@@ -32,13 +32,13 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
     @Query("""
         REPLACE INTO ContentEntryReplicate(cePk, ceDestination)
-         SELECT ContentEntry.contentEntryUid AS cePk,
+         SELECT DISTINCT ContentEntry.contentEntryUid AS cePk,
                 UserSession.usClientNodeId AS siteDestination
            FROM ChangeLog
                 JOIN ContentEntry
                     ON ChangeLog.chTableId = ${ContentEntry.TABLE_ID}
                        AND ChangeLog.chEntityPk = ContentEntry.contentEntryUid
-                JOIN UserSession
+                JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
           WHERE UserSession.usClientNodeId != (
                 SELECT nodeClientId 
                   FROM SyncNode

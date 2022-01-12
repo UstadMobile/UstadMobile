@@ -11,6 +11,7 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerUidAndMimeType
 import com.ustadmobile.lib.db.entities.ContainerWithContentEntry
 import com.ustadmobile.door.SyncNode
+import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
@@ -18,7 +19,7 @@ abstract class ContainerDao : BaseDao<Container> {
 
     @Query("""
          REPLACE INTO ContainerReplicate(containerPk, containerDestination)
-          SELECT Container.containerUid AS containerPk,
+          SELECT DISTINCT Container.containerUid AS containerPk,
                  :newNodeId AS containerDestination
             FROM Container
            WHERE Container.cntLct != COALESCE(
@@ -36,13 +37,13 @@ abstract class ContainerDao : BaseDao<Container> {
 
     @Query("""
  REPLACE INTO ContainerReplicate(containerPk, containerDestination)
-  SELECT Container.containerUid AS containerUid,
+  SELECT DISTINCT Container.containerUid AS containerUid,
          UserSession.usClientNodeId AS containerDestination
     FROM ChangeLog
          JOIN Container
              ON ChangeLog.chTableId = ${Container.TABLE_ID}
                 AND ChangeLog.chEntityPk = Container.containerUid
-         JOIN UserSession
+         JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
    WHERE UserSession.usClientNodeId != (
          SELECT nodeClientId 
            FROM SyncNode
