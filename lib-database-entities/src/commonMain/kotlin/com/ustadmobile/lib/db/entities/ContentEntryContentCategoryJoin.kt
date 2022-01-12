@@ -12,7 +12,6 @@ import kotlinx.serialization.Serializable
  * Join entity to link ContentEntry many:many with ContentCategory
  */
 @Entity
-/*
 @ReplicateEntity(tableId = TABLE_ID, tracker = ContentEntryContentCategoryJoinReplicate::class)
 @Serializable
 @Triggers(arrayOf(
