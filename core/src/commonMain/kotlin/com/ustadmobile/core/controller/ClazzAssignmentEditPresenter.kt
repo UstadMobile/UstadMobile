@@ -233,7 +233,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             })
             // need to run in transaction to update the weight of each 1
             contentToUpdate.forEach {
-                repo.clazzAssignmentContentJoinDao.updateWeightForAssignmentAndContent(it.contentEntryUid, entity.caUid)
+                repo.clazzAssignmentContentJoinDao.updateWeightForAssignmentAndContent(it.contentEntryUid, entity.caUid, it.assignmentContentWeight)
             }
 
             repo.clazzAssignmentContentJoinDao.deactivateByUids(contentToDelete, entity.caUid)
