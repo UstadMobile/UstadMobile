@@ -55,8 +55,7 @@ val Long.isSet2: Boolean
     get(){
         return (
                 (this < -TWELVE_HOURS_IN_MS || this > TWELVE_HOURS_IN_MS)  &&
-                (this < (Long.MAX_VALUE - TWELVE_HOURS_IN_MS)  )
-                )
+                (this < (Long.MAX_VALUE - TWELVE_HOURS_IN_MS)))
     }
 
 @BindingAdapter(value = ["dateTimeInMillis", "timeZoneId", "dateTimeInMillisMode"])
@@ -74,7 +73,7 @@ fun TextView.setDateTime2(timeInMillis: Long, timeZoneId: String?, dateTimeInMil
             it.set(Calendar.MINUTE, 0)
             it.set(Calendar.SECOND, 0)
             it.set(Calendar.MILLISECOND, 0)
-        }else {
+        }else if(dateTimeInMillisMode == MODE_END_OF_DAY && it.timeInMillis != (Long.MAX_VALUE - TWELVE_HOURS_IN_MS)){
             it.set(Calendar.HOUR_OF_DAY, 23)
             it.set(Calendar.MINUTE, 59)
             it.set(Calendar.SECOND, 59)
