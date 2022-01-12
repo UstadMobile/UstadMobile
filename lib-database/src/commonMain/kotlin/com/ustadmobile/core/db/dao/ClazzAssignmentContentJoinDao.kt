@@ -1,9 +1,8 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Query
-import androidx.room.Transaction
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 
@@ -99,6 +98,16 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
     abstract suspend fun updateInActiveByClazzAssignmentContentJoinUid(contentUid: Long, active : Boolean,
                                                                        clazzAssignmentUid: Long)
 
+
+    @Query("""
+        UPDATE ClazzAssignmentContentJoin
+           SET cacjWeight = :weight
+         WHERE cacjContentUid = :contentUid 
+           AND cacjAssignmentUid = :clazzAssignmentUid
+    """)
+    abstract suspend fun updateWeightForAssignmentAndContent(contentUid: Long,
+                                                             clazzAssignmentUid: Long, weight: Int)
+
     suspend fun deactivateByUids(uidList: List<Long>, clazzAssignmentUid: Long) {
         uidList.forEach {
             updateInActiveByClazzAssignmentContentJoinUid(it, false, clazzAssignmentUid)
@@ -129,9 +138,9 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
                                
                              COALESCE((CASE WHEN ClazzAssignmentRollUp.cacheContentComplete 
                                             THEN 1 ELSE 0 END),0) AS totalCompletedContent,
-                        
+                             cacjWeight AS assignmentContentWeight,
                              1 as totalContent
-                           
+                             
                              
                       FROM ClazzAssignmentContentJoin
                             LEFT JOIN ContentEntry 

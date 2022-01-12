@@ -53,6 +53,8 @@ class ClazzAssignmentContentJoin {
 
     var cacjActive : Boolean = true
 
+    var cacjWeight: Int = 0
+
     @MasterChangeSeqNum
     var cacjMCSN: Long = 0
 

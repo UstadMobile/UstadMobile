@@ -3,8 +3,8 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.*
 import android.widget.AdapterView
+import android.widget.CompoundButton
 import androidx.core.widget.doAfterTextChanged
-import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
@@ -84,6 +84,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         mBinding = FragmentClazzAssignmentEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.typeSelectionListener = this
+            it.fileRequiredListener = onFileRequiredChanged
             it.caDeadlineDateTextinput.setEndIconOnClickListener(deadlineDateListener)
             it.caDeadlineDate.doAfterTextChanged{
                 if(it?.isNullOrEmpty() == true){
@@ -170,7 +171,8 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             }else{
                 View.GONE
             }
-
+            mBinding?.fileSubmissionVisibility = if(value?.caRequireFileSubmission == true)
+                View.VISIBLE else View.GONE
         }
 
     override var fieldsEnabled: Boolean = false
@@ -206,6 +208,12 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             mBinding?.caStartDateError = value
         }
 
+    override var caWeightError: String? = null
+        get() = field
+        set(value) {
+            field = value
+        }
+
     override var timeZone: String? = null
         set(value) {
             val newText = getText(R.string.class_timezone).toString() + " " + value
@@ -219,6 +227,32 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             field = value
             mBinding?.lateSubmissionOptions = value
         }
+    override var editAfterSubmissionOptions: List<ClazzAssignmentEditPresenter.EditAfterSubmissionOptionsMessageIdOption>? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.editAfterSubmissionOptions = value
+        }
+    override var fileTypeOptions: List<ClazzAssignmentEditPresenter.FileTypeOptionsMessageIdOption>? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.fileTypeOptions = value
+        }
+    override var assignmentTypeOptions: List<ClazzAssignmentEditPresenter.AssignmentTypeOptionsMessageIdOption>? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.assignmentTypeOptions = value
+        }
+
+    override var markingTypeOptions: List<ClazzAssignmentEditPresenter.MarkingTypeOptionsMessageIdOption>? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.markingTypeOptions = value
+        }
+
 
     override var clazzAssignmentContent: DoorMutableLiveData
             <List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>? = null
@@ -247,6 +281,10 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
 
     override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
 
+    }
+
+    private val onFileRequiredChanged: CompoundButton.OnCheckedChangeListener = CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+        mBinding?.fileSubmissionVisibility = if(isChecked) View.VISIBLE else View.GONE
     }
 
 }

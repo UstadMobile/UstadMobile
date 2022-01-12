@@ -10,7 +10,6 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
@@ -34,6 +33,52 @@ class ClazzAssignmentEditPresenter(context: Any,
     }
 
     class LateSubmissionOptionsMessageIdOption(day: LateSubmissionOptions, context: Any)
+        : MessageIdOption(day.messageId, context, day.optionVal)
+
+
+    enum class AssignmentTypeOptions(val optionVal: Int, val messageId: Int){
+        INDIVIDUAL(ClazzAssignment.ASSIGNMENT_TYPE_INDIVIDUAL, MessageID.individual),
+        GROUP(ClazzAssignment.ASSIGNMENT_TYPE_GROUP, MessageID.group)
+    }
+    class AssignmentTypeOptionsMessageIdOption(day: AssignmentTypeOptions, context: Any)
+        : MessageIdOption(day.messageId, context, day.optionVal)
+
+
+    enum class EditAfterSubmissionOptions(val optionVal: Int, val messageId: Int) {
+        ALLOWED_DEADLINE(ClazzAssignment.EDIT_AFTER_SUBMISSION_TYPE_ALLOWED_DEADLINE,
+                MessageID.allowed_till_deadline),
+        ALLOWED_GRACE(ClazzAssignment.EDIT_AFTER_SUBMISSION_TYPE_ALLOWED_GRACE,
+                MessageID.allowed_till_grace),
+        NOT_ALLOWED(ClazzAssignment.EDIT_AFTER_SUBMISSION_TYPE_NOT_ALLOWED,
+                MessageID.not_allowed)
+    }
+
+    class  EditAfterSubmissionOptionsMessageIdOption(day: EditAfterSubmissionOptions, context: Any)
+        : MessageIdOption(day.messageId, context, day.optionVal)
+
+
+    enum class FileTypeOptions(val optionVal: Int, val messageId: Int) {
+        ANY(ClazzAssignment.FILE_TYPE_ANY,
+                MessageID.file_type_any),
+        DOCUMENT(ClazzAssignment.FILE_TYPE_DOC,
+                MessageID.file_document),
+        IMAGE(ClazzAssignment.FILE_TYPE_IMAGE,
+                MessageID.file_image),
+        VIDEO(ClazzAssignment.FILE_TYPE_VIDEO,
+                MessageID.video),
+        AUDIO(ClazzAssignment.FILE_TYPE_AUDIO,
+                MessageID.audio)
+    }
+
+    class  FileTypeOptionsMessageIdOption(day: FileTypeOptions, context: Any)
+        : MessageIdOption(day.messageId, context, day.optionVal)
+
+
+    enum class MarkingTypeOptions(val optionVal: Int, val messageId: Int){
+        TEACHER(ClazzAssignment.MARKING_TYPE_TEACHER, MessageID.teacher),
+        PEERS(ClazzAssignment.MARKING_TYPE_PEERS, MessageID.peers)
+    }
+    class MarkingTypeOptionsMessageIdOption(day: MarkingTypeOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
 
@@ -64,6 +109,10 @@ class ClazzAssignmentEditPresenter(context: Any,
         super.onCreate(savedState)
         view.clazzAssignmentContent = contentOneToManyJoinEditHelper.liveList
         view.lateSubmissionOptions = LateSubmissionOptions.values().map { LateSubmissionOptionsMessageIdOption(it, context) }
+        view.markingTypeOptions = MarkingTypeOptions.values().map { MarkingTypeOptionsMessageIdOption(it, context) }
+        view.assignmentTypeOptions = AssignmentTypeOptions.values().map { AssignmentTypeOptionsMessageIdOption(it, context) }
+        view.editAfterSubmissionOptions = EditAfterSubmissionOptions.values().map { EditAfterSubmissionOptionsMessageIdOption(it, context) }
+        view.fileTypeOptions = FileTypeOptions.values().map { FileTypeOptionsMessageIdOption(it, context) }
     }
 
 
@@ -173,13 +222,19 @@ class ClazzAssignmentEditPresenter(context: Any,
 
             val contentToInsert = contentOneToManyJoinEditHelper.entitiesToInsert
             val contentToDelete = contentOneToManyJoinEditHelper.primaryKeysToDeactivate
+            val contentToUpdate = contentOneToManyJoinEditHelper.entitiesToUpdate
 
             repo.clazzAssignmentContentJoinDao.insertListAsync(contentToInsert.map {
                 ClazzAssignmentContentJoin().apply {
                     cacjContentUid = it.contentEntryUid
                     cacjAssignmentUid = entity.caUid
+                    cacjWeight = it.assignmentContentWeight
                 }
             })
+            // need to run in transaction to update the weight of each 1
+            contentToUpdate.forEach {
+                repo.clazzAssignmentContentJoinDao.updateWeightForAssignmentAndContent(it.contentEntryUid, entity.caUid)
+            }
 
             repo.clazzAssignmentContentJoinDao.deactivateByUids(contentToDelete, entity.caUid)
 

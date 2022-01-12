@@ -689,6 +689,42 @@
     <string name="started_date" formatted="false">Started %1$s</string>
 
 
+    <string name="assignment_type">Assignment Type</string>
+    <string name="individual">Individual</string>
+    <string name="group">Group</string>
+
+    <!-- used to display the weight percentage of an assignment in a class -->
+    <string name="weight">Weight</string>
+
+    <string name="require_file_submission">Require file submission</string>
+
+    <string name="file_submission">File submissions</string>
+
+    <string name="file_type_any">Any</string>
+    <string name="file_document">Document (pdf, docx, odt)</string>
+    <string name="file_image">Image</string>
+
+    <!-- used to display the size limit of a file a user can upload -->
+    <string name="size_limit">Size limit (MB)</string>
+
+    <!-- used to display the number of files a user can attach -->
+    <string name="number_of_files"># Files</string>
+
+    <string name="edit_after_submission">Editing after submission</string>
+    <string name="allowed_till_deadline">Allowed till deadline</string>
+    <string name="allowed_till_grace">Allowed till end of grace period</string>
+    <string name="not_allowed">Not allowed</string>
+
+    <string name="marking_type">Marking type</string>
+
+    <string name="peers">Peers</string>
+
+    <string name="file_type">File type</string>
+
+
+
+
+
     <!-- plurals are used to handle different languages that require special treatment
     e.g number 0 in arabic
     possible quantities: zero, one, two, few, many, and other.-->

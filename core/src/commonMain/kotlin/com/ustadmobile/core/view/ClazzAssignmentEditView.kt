@@ -12,10 +12,19 @@ interface ClazzAssignmentEditView: UstadEditView<ClazzAssignment> {
     var caDeadlineError: String?
     var caTitleError: String?
     var caStartDateError: String?
+    var caWeightError: String?
 
     var timeZone: String?
 
     var lateSubmissionOptions: List<ClazzAssignmentEditPresenter.LateSubmissionOptionsMessageIdOption>?
+
+    var editAfterSubmissionOptions: List<ClazzAssignmentEditPresenter.EditAfterSubmissionOptionsMessageIdOption>?
+
+    var fileTypeOptions: List<ClazzAssignmentEditPresenter.FileTypeOptionsMessageIdOption>?
+
+    var assignmentTypeOptions: List<ClazzAssignmentEditPresenter.AssignmentTypeOptionsMessageIdOption>?
+
+    var markingTypeOptions: List<ClazzAssignmentEditPresenter.MarkingTypeOptionsMessageIdOption>?
 
     var clazzAssignmentContent: DoorMutableLiveData<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>?
 

@@ -47,6 +47,8 @@ open class ClazzAssignment {
 
     var caDescription: String? = null
 
+    var caAssignmentType: Int = 0
+
     var caDeadlineDate: Long = Long.MAX_VALUE
 
     var caStartDate: Long = 0
@@ -62,6 +64,22 @@ open class ClazzAssignment {
     var caClassCommentEnabled: Boolean = true
 
     var caPrivateCommentsEnabled: Boolean = false
+
+    var caRequireFileSubmission: Boolean = true
+
+    var caFileSubmissionWeight: Int = 0
+
+    var caFileType: Int = 0
+
+    var caSizeLimit: Int = 50
+
+    var caNumberOfFiles: Int = 0
+
+    var caEditAfterSubmissionType: Int = 0
+
+    var caMarkingType: Int = 0
+
+    var caMaxScore: Int = 0
 
     @ColumnInfo(index = true)
     var caClazzUid: Long = 0
@@ -86,8 +104,21 @@ open class ClazzAssignment {
         const val ASSIGNMENT_LATE_SUBMISSION_PENALTY = 2
         const val ASSIGNMENT_LATE_SUBMISSION_ACCEPT = 3
 
+        const val ASSIGNMENT_TYPE_INDIVIDUAL = 1
+        const val ASSIGNMENT_TYPE_GROUP = 2
 
+        const val EDIT_AFTER_SUBMISSION_TYPE_ALLOWED_DEADLINE = 1
+        const val EDIT_AFTER_SUBMISSION_TYPE_ALLOWED_GRACE = 2
+        const val EDIT_AFTER_SUBMISSION_TYPE_NOT_ALLOWED = 3
 
+        const val MARKING_TYPE_TEACHER = 1
+        const val MARKING_TYPE_PEERS = 2
+
+        const val FILE_TYPE_ANY = 0
+        const val FILE_TYPE_DOC = 1
+        const val FILE_TYPE_IMAGE = 2
+        const val FILE_TYPE_VIDEO = 3
+        const val FILE_TYPE_AUDIO = 4
 
     }
 
