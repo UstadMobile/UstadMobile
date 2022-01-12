@@ -88,7 +88,7 @@ class RedirectPresenterTest {
         mPresenter = RedirectPresenter(context, mapOf(),
                 mockedView, di)
         mPresenter.onCreate(null)
-        verify(impl, timeout(5000)).goToViewLink(eq(ContentEntryList2View.VIEW_NAME), any(), any())
+        verify(impl, timeout(5000)).goToViewLink(eq(ContentEntryList2View.VIEW_NAME_HOME), any(), any())
     }
 
     @Test

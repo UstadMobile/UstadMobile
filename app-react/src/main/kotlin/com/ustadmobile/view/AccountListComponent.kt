@@ -15,6 +15,7 @@ import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.defaultPaddingTopBottom
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
+import com.ustadmobile.util.Util
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.createCreateNewItem
 import com.ustadmobile.view.ext.umGridContainer
@@ -23,7 +24,6 @@ import com.ustadmobile.view.ext.umProfileAvatar
 import kotlinx.css.Cursor
 import kotlinx.css.cursor
 import kotlinx.css.marginTop
-import kotlinx.html.js.onClickFunction
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
@@ -34,8 +34,8 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
 
     private var mPresenter: AccountListPresenter? = null
 
-    override val viewName: String
-        get() = AccountListView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(AccountListView.VIEW_NAME)
 
     private var mCurrentStoredAccounts: List<UserSessionWithPersonAndEndpoint>? = null
 
@@ -108,12 +108,14 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
                     cursor = Cursor.pointer
                 }
 
-                attrs.onClickFunction = {
-                    mPresenter?.handleClickAddAccount()
+                umListItem(button = true) {
+                    attrs.onClick = {
+                        Util.stopEventPropagation(it)
+                        mPresenter?.handleClickAddAccount()
+                    }
+                    createCreateNewItem(getString(MessageID.add_another)
+                        .format(getString(MessageID.account)))
                 }
-
-                createCreateNewItem(getString(MessageID.add_another)
-                    .format(getString(MessageID.account)))
             }
         }
     }
@@ -137,7 +139,7 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
         }
     }
 
-    interface AccountPros: ListProps<UserSessionWithPersonAndEndpoint>{
+    interface AccountPros: SimpleListProps<UserSessionWithPersonAndEndpoint>{
         var activeAccount: Boolean
     }
 
@@ -165,7 +167,7 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
                     umItem(GridSize.cells12){
 
                         umGridContainer {
-                            umItem(GridSize.cells2,GridSize.cells1){
+                            umItem(GridSize.cells2, GridSize.cells1){
                                 umIcon("person")
                             }
 
@@ -176,7 +178,7 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
                                 }
                             }
 
-                            umItem(GridSize.cells2,GridSize.cells1){
+                            umItem(GridSize.cells2, GridSize.cells1){
                                 umIcon("link")
                             }
 
@@ -192,7 +194,7 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
                     umItem(GridSize.cells12){
                         css(defaultMarginTop)
                         umGridContainer(GridSpacing.spacing2) {
-                            umItem(GridSize.cells7,GridSize.cells4){
+                            umItem(GridSize.cells7, GridSize.cells4){
                                 umButton(getString(MessageID.my).format(getString(MessageID.profile)),
                                     size = ButtonSize.large,
                                     variant = ButtonVariant.outlined,
@@ -204,13 +206,12 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
                             }
 
                             if(props.activeAccount){
-                                umItem(GridSize.cells5,GridSize.cells4){
+                                umItem(GridSize.cells5, GridSize.cells4){
                                     umButton(getString(MessageID.logout),
                                         size = ButtonSize.large,
                                         variant = ButtonVariant.outlined,
                                         color = UMColor.primary,
                                         onClick = {
-                                            it.stopPropagation()
                                             presenter.handleClickLogout(item)
                                         })
                                 }
@@ -222,7 +223,7 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
 
                 if(!props.activeAccount){
                     umItem(GridSize.cells2){
-                        umIconButton("delete", onClick = {
+                        umIconButton("delete",id = "delete_account_btn", onClick = {
                             presenter.handleClickDeleteSession(item)
                         })
                     }

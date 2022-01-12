@@ -2,11 +2,14 @@ package com.ustadmobile.view.ext
 
 
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_SESSION_PREFKEY
+import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.controller.BitmaskEditPresenter
-import com.ustadmobile.core.controller.ScopedGrantEditPresenter
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.ChartData
+import com.ustadmobile.core.util.ext.isContentComplete
 import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.ext.toolbarJsCssToPartialCss
 import com.ustadmobile.mui.theme.UMColor
@@ -15,6 +18,7 @@ import com.ustadmobile.navigation.RouteManager.destinationList
 import com.ustadmobile.navigation.UstadDestination
 import com.ustadmobile.redux.ReduxAppState
 import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.alignCenterItems
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.defaultMarginBottom
 import com.ustadmobile.util.StyleManager.defaultMarginTop
@@ -30,10 +34,15 @@ import com.ustadmobile.util.StyleManager.mainComponentSearchIcon
 import com.ustadmobile.util.StyleManager.personListItemAvatar
 import com.ustadmobile.util.StyleManager.toolbarTitle
 import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.Util
 import com.ustadmobile.util.Util.ASSET_ACCOUNT
 import com.ustadmobile.util.Util.stopEventPropagation
-import com.ustadmobile.util.ext.format
+import com.ustadmobile.util.ext.*
 import com.ustadmobile.util.getViewNameFromUrl
+import com.ustadmobile.view.ChartOptions
+import com.ustadmobile.view.ChartType
+import com.ustadmobile.view.ContentEntryListComponent
+import com.ustadmobile.view.umChart
 import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
@@ -47,6 +56,9 @@ import react.router.Route
 import react.router.Routes
 import react.router.dom.HashRouter
 import styled.*
+import kotlin.js.Date
+import kotlin.js.Json
+import kotlin.js.json
 import kotlin.reflect.KClass
 
 fun RBuilder.appBarSpacer() {
@@ -181,18 +193,37 @@ fun RBuilder.umProfileAvatar(attachmentId: Long, fallback: String){
     }
 }
 
+fun RBuilder.umItemThumbnail(
+    iconName: String,
+    src: String? = null,
+    iconColor: Color = Color(StyleManager.theme.palette.background.paper),
+    avatarBackgroundColor: Color = Color(StyleManager.theme.palette.action.disabled),
+    width: Int = 50,
+    marginTop: LinearDimension = 1.spacingUnits,
+    avatarVariant: AvatarVariant = AvatarVariant.square,
+    className: String? = "${StyleManager.name}-${if(width <= 50) "defaultThumbnailClass"  
+    else if(width in 51..69) "mediumThumbnailClass" else "maxThumbnailClass"}",
+    onClick: (() -> Unit)? = null
+){
+    umAvatar(src,variant = avatarVariant){
+        attrs.onClick = {
+            stopEventPropagation(it)
+            onClick?.invoke()
+        }
+        css {
+            this.marginTop = marginTop
+            this.width = LinearDimension("${width}px")
+            this.height = LinearDimension("${width}px")
+            backgroundColor = avatarBackgroundColor
+            color = iconColor
+        }
 
-fun RBuilder.onClickCall(phoneNumber: String?){
-
+        if(src == null){
+            umIcon(iconName, className = className)
+        }
+    }
 }
 
-fun RBuilder.onClickEmail(email: String?){
-
-}
-
-fun RBuilder.onClickSMS(phoneNumber: String?){
-
-}
 
 fun RBuilder.createListSectionTitle(titleText: String, variant: TypographyVariant? = null){
     styledDiv {
@@ -239,7 +270,7 @@ fun RBuilder.createInformation(icon:String? = null, data: String?, label: String
     }
 }
 
-fun RBuilder.circleIndicator(threshold: kotlin.Float) {
+fun RBuilder.statusCircleIndicator(threshold: kotlin.Float) {
     umIcon("circle",
         color = when {
             threshold > 0.8f -> IconColor.primary
@@ -254,8 +285,7 @@ fun RBuilder.createCreateNewItem(createNewText: String, iconName: String = "add"
     styledDiv {
         css(listItemCreateNewDiv)
         umListItemIcon(iconName,"${StyleManager.name}-listCreateNewIconClass")
-        umTypography(createNewText,variant = TypographyVariant.button,
-            ) {
+        umTypography(createNewText,variant = TypographyVariant.button,) {
             css{
                 marginTop = 4.px
             }
@@ -268,37 +298,37 @@ fun RBuilder.setBitmaskListText(systemImpl: UstadMobileSystemImpl,textBitmaskVal
         .joinToString { systemImpl.getString(it.messageId, this) }
 }
 
-fun RBuilder.createItemWithIconTitleAndDescription(
-    iconName: String, title: String? = null,
+fun RBuilder.createListItemWithLeftIconTitleAndDescription(
+    iconName: String,
+    title: String? = null,
     description: String? = null,
-    scaleOnLargeSmall: Boolean = false){
+    onMainList: Boolean = false,
+    avatarVariant: AvatarVariant = AvatarVariant.circle){
 
-    umGridContainer(columnSpacing = GridSpacing.spacing2) {
-        umItem(GridSize.cells2, if(scaleOnLargeSmall) GridSize.cells2 else GridSize.cells1){
-            umProfileAvatar(-1,iconName)
+    umGridContainer {
+        umItem(GridSize.cells3,  if(onMainList) GridSize.cells1 else GridSize.cells2){
+            umItemThumbnail(iconName, avatarVariant = avatarVariant)
         }
 
-        umItem(GridSize.cells8, if(scaleOnLargeSmall) GridSize.cells8 else GridSize.cells10){
-            css{
-                marginTop = LinearDimension("5px")
-                marginLeft = 2.spacingUnits
-            }
-            if(title != null){
-                umItem(GridSize.cells11){
-                    umTypography(title,
-                        variant = TypographyVariant.body1,
+        umItem(GridSize.cells9, if(onMainList) GridSize.cells11 else GridSize.cells10){
+            umGridContainer {
+                if(title != null){
+                    umItem(GridSize.cells12){
+                        umTypography(title,
+                            variant = TypographyVariant.body1,
                         ){
-                        css (alignTextToStart)
+                            css (alignTextToStart)
+                        }
                     }
                 }
-            }
 
-            if(description != null){
-                umItem(GridSize.cells11){
-                    umTypography(description,
-                        variant = TypographyVariant.body2,
+                if(description != null){
+                    umItem(GridSize.cells12){
+                        umTypography(description,
+                            variant = TypographyVariant.body2,
                         ){
-                        css (alignTextToStart)
+                            css (alignTextToStart)
+                        }
                     }
                 }
             }
@@ -306,55 +336,55 @@ fun RBuilder.createItemWithIconTitleAndDescription(
     }
 }
 
-fun RBuilder.createItemWithIconTitleDescriptionAndIconBtn(
+fun RBuilder.createItemWithLeftIconTitleDescriptionAndIconBtnOnRight(
     leftIcon: String,
     iconName: String,
     title: String?,
     description: String?,
     onClick:(Boolean, Event)-> Unit) {
-    umGridContainer(GridSpacing.spacing4) {
+    umGridContainer {
         attrs.onClick = {
-            it.stopPropagation()
+            stopEventPropagation(it)
             onClick.invoke(false, it.nativeEvent)
         }
-        umItem(GridSize.cells2, GridSize.cells1){
+        umItem(GridSize.cells2, GridSize.cells2){
             umProfileAvatar(-1,leftIcon)
         }
 
         umItem(GridSize.cells7, GridSize.cells9){
-            css{
-                marginLeft = 2.spacingUnits
-            }
-            umItem(GridSize.cells11){
-                umTypography(title,
-                    variant = TypographyVariant.body1,
+            umGridContainer {
+                umItem(GridSize.cells12){
+                    umTypography(title,
+                        variant = TypographyVariant.body1,
                     ){
-                    css (alignTextToStart)
+                        css (alignTextToStart)
+                    }
                 }
-            }
 
-            umItem(GridSize.cells11){
-                umTypography(description,
-                    variant = TypographyVariant.body2,
+                umItem(GridSize.cells12){
+                    umTypography(description,
+                        variant = TypographyVariant.body2,
                     ){
-                    css (alignTextToStart)
+                        css (alignTextToStart)
+                    }
                 }
             }
         }
 
         umItem(GridSize.cells2, GridSize.cells1){
-            css{
-                alignContent = Align.center
-                alignItems = Align.center
-            }
-
-            umIconButton(iconName, size = IconButtonSize.medium,
-                onClick = {
-                    it.stopPropagation()
-                    onClick.invoke(true, it)
+            css(alignCenterItems)
+            styledSpan {
+                css{
+                    width = 40.px
                 }
-            ){
-                css(defaultMarginTop)
+                umIconButton(iconName, size = IconButtonSize.medium,
+                    onClick = {
+                        stopEventPropagation(it)
+                        onClick.invoke(true, it)
+                    }
+                ){
+                    css(defaultMarginTop)
+                }
             }
         }
     }
@@ -374,7 +404,7 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
             umProfileAvatar(personUid, "person")
         }
 
-        umItem(GridSize.cells9,GridSize.cells11){
+        umItem(GridSize.cells9, GridSize.cells11){
             umGridContainer {
                 umItem(GridSize.cells12){
                     umTypography(fullName,variant = TypographyVariant.h6){
@@ -392,9 +422,9 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
                                     css{
                                         padding(right = 2.spacingUnits)
                                     }
-                                    circleIndicator(attendance)
+                                    statusCircleIndicator(attendance)
                                 }
-                                umTypography(attendanceLabel?.format(attendance * 100)){
+                                umTypography(attendanceLabel?.format(attendance.roundTo())){
                                     css{
                                         +alignTextToStart
                                         +gridListSecondaryItemDesc
@@ -411,21 +441,26 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
                                     umItem(GridSize.cells4){
                                         umIconButton("check",
                                             onClick = {
-                                                onClickAccept?.invoke()
                                                 stopEventPropagation(it)
+                                                onClickAccept?.invoke()
                                             },
                                             className = "${StyleManager.name}-successClass",
                                             size = IconButtonSize.small)
                                     }
 
                                     umItem(GridSize.cells4){
-                                        umIconButton("close",
-                                            onClick = {
-                                                onClickDecline?.invoke()
-                                                stopEventPropagation(it)
-                                            },
-                                            className = "${StyleManager.name}-errorClass",
-                                            size = IconButtonSize.small)
+                                        styledSpan {
+                                            css{
+                                                width = 40.px
+                                            }
+                                            umIconButton("close",
+                                                onClick = {
+                                                    stopEventPropagation(it)
+                                                    onClickDecline?.invoke()
+                                                },
+                                                className = "${StyleManager.name}-errorClass",
+                                                size = IconButtonSize.small)
+                                        }
                                     }
                                 }
                             }
@@ -467,6 +502,45 @@ fun RBuilder.createPersonListItemWithNameAndUserName(item: Person){
     }
 }
 
+
+fun RBuilder.createListItemWithPersonTitleDescriptionAndAvatarOnLeft(
+    title: String,
+    subTitle: String? = null,
+    iconName: String,
+    personUid: Long = -1L,
+    onClick: (() -> Unit)? = null){
+    umGridContainer {
+        attrs.onClick = {
+            onClick?.invoke()
+        }
+        val padding = LinearDimension("4px")
+        css{
+            padding(top = padding, bottom = padding)
+        }
+
+        umItem(GridSize.cells3 , GridSize.cells1){
+            umProfileAvatar(personUid, iconName)
+        }
+
+        umItem(GridSize.cells9, GridSize.cells11){
+            umItem(GridSize.cells12){
+                umTypography(title,
+                    variant = TypographyVariant.h6){
+                    css (alignTextToStart)
+                }
+            }
+
+            umItem(GridSize.cells12){
+                umTypography(subTitle,
+                    variant = TypographyVariant.body1,
+                    paragraph = true){
+                    css(alignTextToStart)
+                }
+            }
+        }
+    }
+}
+
 fun RBuilder.createListItemWithTitleDescriptionAndRightAction(
     title: String,
     iconName: String,
@@ -498,12 +572,18 @@ fun RBuilder.createListItemWithTitleDescriptionAndRightAction(
         }
 
         if(withAction){
-            gridItem(GridSize.cells2, GridSize.cells1, alignItems = GridAlignItems.center){
-                umIconButton(iconName,
-                    onClick = {
-                        onActionClick?.invoke(it)
-                        stopEventPropagation(it)
-                    })
+            umItem(GridSize.cells2, GridSize.cells1){
+                css(alignCenterItems)
+               styledSpan {
+                   css{
+                       width = 40.px
+                   }
+
+                   umIconButton(iconName,
+                       onClick = {
+                           onActionClick?.invoke(it)
+                       })
+               }
             }
         }
     }
@@ -518,7 +598,7 @@ fun RBuilder.createListItemWithAttendance(
             umProfileAvatar(-1, iconName)
         }
 
-        umItem(GridSize.cells9,GridSize.cells10){
+        umItem(GridSize.cells9, GridSize.cells10){
             umItem(GridSize.cells12, GridSize.cells12){
                 umTypography(title,
                     variant = TypographyVariant.body1){
@@ -538,14 +618,14 @@ fun RBuilder.createListItemWithAttendance(
             umItem(GridSize.cells12, GridSize.cells12){
                 umGridContainer{
                     umItem(GridSize.cells1){
-                        circleIndicator(attendance)
+                        statusCircleIndicator(attendance)
                     }
 
                     umItem(GridSize.cells4){
-                        umTypography(attendanceLabel.format(attendance * 100)){
+                        umTypography(attendanceLabel.format(attendance.roundTo())){
                             css{
                                 +alignTextToStart
-                                +StyleManager.gridListSecondaryItemDesc
+                                +gridListSecondaryItemDesc
                             }
                         }
 
@@ -558,7 +638,10 @@ fun RBuilder.createListItemWithAttendance(
 
 
 fun RBuilder.createListItemWithIconAndTitle(
-    iconName: String, title: String, onClick: (() -> Unit)? = null){
+    iconName: String,
+    title: String,
+    onClick: (() -> Unit)? = null
+){
     umGridContainer(GridSpacing.spacing1) {
         attrs.onClick = {
             onClick?.invoke()
@@ -582,16 +665,6 @@ fun RBuilder.createListItemWithIconAndTitle(
             }
         }
     }
-}
-
-fun RBuilder.permissionListText(
-    systemImpl: UstadMobileSystemImpl,
-    tableId: Int, bitmaskValue: Long): String? {
-
-    val flagMessageIds = ScopedGrantEditPresenter.PERMISSION_LIST_MAP[tableId]
-    return flagMessageIds?.map { it.toBitmaskFlag(bitmaskValue) }
-        ?.filter { it.enabled }
-        ?.joinToString { systemImpl.getString(it.messageId, this) }
 }
 
 fun RBuilder.umSpacer(
@@ -684,35 +757,39 @@ fun RBuilder.umTopBar(
     }
 }
 
-fun RBuilder.createAction(icon: String, title: String, xs: GridSize,
-                          sm: GridSize? = null, visible: Boolean = false,
-                          action:() -> Unit){
-    umItem(xs, sm){
-        css{
-            display = displayProperty(visible, true)
-        }
+fun RBuilder.createTopMainAction(
+    icon: String,
+    title: String,
+    xs: GridSize,
+    sm: GridSize? = null,
+    visible: Boolean = false,
+    variant: TypographyVariant = TypographyVariant.body1,
+    textAlign: TypographyAlign = TypographyAlign.left,
+    textClassName: String? = null,
+    action:() -> Unit){
+   if(visible){
+       umItem(xs, sm){
+           umPaper(variant = PaperVariant.elevation) {
+               attrs.onClick = {
+                   action()
+               }
+               css {
+                   +StyleManager.personDetailComponentActions
+               }
 
-        umPaper(variant = PaperVariant.elevation) {
-            attrs.onClick = {
-                action()
-            }
-            css {
-                +StyleManager.personDetailComponentActions
-            }
+               umIcon(icon){
+                   css{
+                       +StyleManager.personDetailComponentActionIcon
+                   }
+               }
 
-            umIcon(icon){
-                css{
-                    +StyleManager.personDetailComponentActionIcon
-                }
-            }
-
-            umTypography(title,
-                variant = TypographyVariant.body1,
-                gutterBottom = true){
-                css(alignTextToStart)
-            }
-        }
-    }
+               umTypography(title,
+                   variant = variant,
+                   align = textAlign,
+                   gutterBottom = true, className = textClassName)
+           }
+       }
+   }
 }
 
 fun RBuilder.createListItemWithTitleAndSwitch(title: String, enabled: Boolean, onClick: (Event) -> Unit){
@@ -747,10 +824,340 @@ fun RBuilder.createListItemWithTitleAndSwitch(title: String, enabled: Boolean, o
 }
 
 fun RBuilder.umPartner(logo: String){
-    umItem(GridSize.cells3) {
+    styledSpan {
+        css{
+            +alignCenterItems
+            padding(left = 3.spacingUnits)
+        }
         styledImg {
             css(StyleManager.partnerItem)
             attrs.src = "assets/$logo"
         }
+    }
+}
+
+fun RBuilder.createContentEntryListItem(
+    item: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
+    systemImpl: UstadMobileSystemImpl,
+    showSelectBtn: Boolean = false,
+    showStatus: Boolean = false,
+    downloaded: Boolean = true,
+    onClick: ((ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit)? = null,
+    onSecondaryAction: (() -> Unit)? = null){
+
+    /*
+    var downloadStatus: ContentJobItemProgress? = null
+
+    val statusObserver = ObserverFnWrapper<ContentJobItemProgress?>{
+        (component as Component<*,*>).setState {
+            downloadStatus = ContentJobItemProgress().apply {
+                total = 1000
+                progress = 100
+            }
+        }
+    }*/
+
+    umGridContainer(columnSpacing = GridSpacing.spacing4) {
+        if(onClick != null){
+            attrs.onClick = {
+                stopEventPropagation(it)
+                onClick.invoke(item)
+            }
+        }
+
+        umItem(GridSize.cells4, GridSize.cells2){
+            umItemThumbnail( if(item.leaf) "class" else "folder", item.thumbnailUrl,width = 80,
+                iconColor = Color(StyleManager.theme.palette.action.disabled),
+                avatarBackgroundColor = Color.transparent)
+        }
+
+        umItem(GridSize.cells8, GridSize.cells10){
+            umGridContainer {
+                umItem(GridSize.cells12){
+                    umTypography(item.title,
+                        variant = TypographyVariant.h6){
+                        css {
+                            +alignTextToStart
+                            marginBottom = LinearDimension("10px")
+                        }
+                    }
+                }
+
+                umItem(GridSize.cells12){
+                    umTypography(item.description?.wordBreakLimit(if(Util.isMobile()) 8 else 50),
+                        variant = TypographyVariant.body1,
+                        paragraph = true){
+                        css(alignTextToStart)
+                    }
+                }
+
+                umItem(GridSize.cells12){
+                    umGridContainer(columnSpacing = GridSpacing.spacing1){
+                        val messageId = ContentEntryListComponent.CONTENT_ENTRY_TYPE_LABEL_MAP[item.contentTypeFlag] ?: MessageID.untitled
+                        val icon = ContentEntryListComponent.CONTENT_ENTRY_TYPE_ICON_MAP[item.contentTypeFlag] ?: ""
+
+                        umItem(GridSize.cells2, GridSize.cells1) {
+                            if(item.leaf){
+                                umAvatar(className = "${StyleManager.name}-contentEntryListContentAvatarClass") {
+                                    umIcon(icon, className= "${StyleManager.name}-contentEntryListContentTyeIconClass"){
+                                        css{marginTop = 4.px}
+                                    }
+                                }
+                            }
+                        }
+
+                        umItem(GridSize.cells8, GridSize.cells9) {
+                            if(item.leaf){
+                                umTypography(systemImpl.getString(messageId, this),
+                                    variant = TypographyVariant.body2,
+                                    gutterBottom = true)
+                            }
+                        }
+
+                        /* val downloadLength = downloadStatus?.total ?: 0
+                            val downloadedSoFar = downloadStatus?.progress ?: 0
+                            val progress = if(downloadLength > 0) {
+                                ((downloadedSoFar.toFloat() / downloadLength) * 100).toInt()
+                            }else {
+                                0
+                            }*/
+
+                        umItem(GridSize.cells2) {
+                            umGridContainer {
+                                if(showStatus){
+                                    umItem(GridSize.cells12) {
+                                        css(alignCenterItems)
+                                        styledSpan{
+                                            css{
+                                                width = 45.px
+                                            }
+                                            umIconButton(if(downloaded) "check_circle" else "download",
+                                                size = IconButtonSize.medium, onClick = {
+                                                    stopEventPropagation(it)
+                                                    //onSecondaryAction?.invoke()
+                                                }){
+                                                css(StyleManager.secondaryActionBtn)
+                                            }
+                                        }
+                                    }
+                                }
+                                if(showSelectBtn){
+                                    umItem(GridSize.cells12){
+                                        css(alignCenterItems)
+                                        umButton(systemImpl.getString(MessageID.select_item, this).format(""),
+                                            variant = ButtonVariant.outlined,
+                                            color = UMColor.secondary,
+                                            onClick = {
+                                                stopEventPropagation(it)
+                                                onSecondaryAction?.invoke()
+                                            })
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /*GlobalScope.launch {
+        val downloadStatus: RateLimitedLiveData<ContentJobItemProgress?> = RateLimitedLiveData(appDatabase, listOf("ContentJobItem"), 1000) {
+            appDatabase.contentJobItemDao.findProgressForActiveContentJobItem(item.contentEntryUid)
+        }
+        downloadStatus.observe(component as DoorLifecycleOwner, statusObserver)
+    }*/
+}
+
+
+fun RBuilder.renderCreateCommentSection(label: String,onClick: () -> Unit){
+    umItem(GridSize.cells12, flexDirection = FlexDirection.row){
+        styledSpan {
+            css{
+                padding(right = 4.spacingUnits)
+            }
+            umIcon("person"){
+                css {
+                    marginTop = LinearDimension("20px")
+                }
+            }
+        }
+
+        umItem(GridSize.cells11){
+            umTextField(
+                disabled = true,
+                label = label,
+                variant = FormControlVariant.outlined){
+                attrs.onClick = {
+                    onClick.invoke()
+                }
+            }
+        }
+
+    }
+}
+
+private fun RBuilder.iconProgress(progress: ContentEntryStatementScoreProgress?): String{
+    return when (progress?.isContentComplete()) {
+        StatementEntity.CONTENT_COMPLETE, StatementEntity.CONTENT_PASSED -> "check_circle"
+        StatementEntity.CONTENT_FAILED -> "cancel"
+        else -> ""
+    }
+}
+
+fun isContentCompleteImage(person: PersonWithSessionsDisplay): String{
+    return if(person.resultComplete){
+        when(person.resultSuccess){
+            StatementEntity.RESULT_SUCCESS -> "done"
+            StatementEntity.RESULT_FAILURE -> "close"
+            else -> "query_builder"
+        }
+    }else{
+        "query_builder"
+    }
+}
+
+fun setContentComplete(systemImpl: UstadMobileSystemImpl,person: PersonWithSessionsDisplay): String{
+    val context = Any()
+    return  if(person.resultComplete){
+        when(person.resultSuccess){
+            StatementEntity.RESULT_SUCCESS -> systemImpl.getString(MessageID.passed, context)
+            StatementEntity.RESULT_FAILURE -> systemImpl.getString(MessageID.failed, context)
+            StatementEntity.RESULT_UNSET ->systemImpl.getString(MessageID.completed, context)
+            else -> ""
+        }
+    }else{
+        systemImpl.getString(MessageID.incomplete, context)
+    } + " - "
+}
+
+fun setStatementQuestionAnswer(statementEntity: StatementEntity): String{
+    val fullStatementJson = statementEntity.fullStatement ?: return ""
+    val statement = JSON.parse<Statement>(fullStatementJson)
+    var statementText = statement.`object`?.definition?.description?.get("en-US")
+    val answerResponse = statement.result?.response
+    if(answerResponse?.isNotEmpty() == true || answerResponse?.contains("[,]") == true){
+        val responses = answerResponse.split("[,]")
+        val choiceMap = statement.`object`?.definition?.choices
+        val sourceMap = statement.`object`?.definition?.source
+        val targetMap = statement.`object`?.definition?.target
+        statementText += "\n"
+        responses.forEachIndexed { i, it ->
+
+            var description = choiceMap?.find { choice -> choice.id == it }?.description?.get("en-US")
+            if(it.contains("[.]")){
+                val dragResponse = it.split("[.]")
+                description = ""
+                description += sourceMap?.find { source -> source.id == dragResponse[0] }?.description?.get("en-US")
+                description += " on "
+                description += targetMap?.find { target -> target.id == dragResponse[1] }?.description?.get("en-US")
+            }
+            statementText += "${i+1}: ${if(description.isNullOrEmpty()) it else description} \n"
+        }
+
+    }
+    return statementText ?: ""
+}
+
+
+
+fun RBuilder.createSummaryCard(title: Any?, subTitle: String){
+    umItem(GridSize.cells12, GridSize.cells4){
+
+        umPaper(variant = PaperVariant.elevation) {
+            css {
+                +StyleManager.personDetailComponentActions
+                +alignCenterItems
+            }
+
+            umTypography(title?.toString() ?: "",
+                variant = TypographyVariant.h4,
+                gutterBottom = true){
+                css(StyleManager.alignTextCenter)
+            }
+
+            umTypography(subTitle,
+                variant = TypographyVariant.body1,
+                gutterBottom = true){
+                css(alignTextToStart)
+            }
+        }
+    }
+}
+
+fun RBuilder.drawChart(
+    chartData: ChartData ? = null,
+    height: Int = 400,
+    chartType: ChartType = ChartType.ComboChart,
+    onChartRendered: ((Boolean) -> Unit)? = null){
+    if(chartData != null){
+        val dataTable = mutableListOf<MutableList<Any>>()
+        val chartOption: ChartOptions = ChartOptions().apply {
+            seriesType = "bars"
+            colors = arrayOf("#009999", "#FF9900", "#0099FF", "#FF3333", "#663399", "#669999",
+                "#FF3366", "#990099", "#996666", "#339933", "#FFCC00", "#9966CC", "#FFCC99",
+                "#99FFCC", "#0066CC", "#66CCFF", "#FF66FF", "#4D4D4D", "#0066FF", "#FF6600", "#33FFFF",
+                "#669933","#808080", "#AF4CAB", "#0040FF","#99CC66","#B1DEFB","#FF7FAA", "#FF8000",
+                "#F0AA89", "#6AFF6A", "#339999", "#CCCCCC")
+        }
+        var distinctXAxisSet = chartData.seriesData.flatMap { it.dataList }
+            .mapNotNull {
+                it.xAxis
+            }.toSet()
+        val xAxisData = chartData.reportWithFilters.xAxis
+
+        if(xAxisData == Report.MONTH){
+            distinctXAxisSet = distinctXAxisSet.sortedBy {
+                Date(it).formatDate(DATE_FORMAT_MM_YYYY)
+            }.toSet()
+        }
+
+        val labels = mutableListOf<Any>("")
+        labels.addAll(chartData.seriesData.map{it.series.reportSeriesName ?: ""}.toList())
+        dataTable.add(labels)
+        val options: Json = json("" to "")
+
+        val dataSet: MutableMap<String, MutableList<Any>> = mutableMapOf()
+        distinctXAxisSet.forEach { dataSet[it] = mutableListOf(it) }
+
+        chartData.seriesData.forEachIndexed { index, data ->
+            val seriesType = if(data.series.reportSeriesVisualType == ReportSeries.BAR_CHART)
+                "bars" else "line"
+            options[index.toString()] = json("type" to seriesType)
+            val groupedByXAxis = data.dataList.filter { it.xAxis != null }.groupBy { it.xAxis }
+            val distinctSubgroups = data.dataList.mapNotNull { it.subgroup }.toSet()
+            distinctXAxisSet.forEach { xAxisKey ->
+                dataSet[xAxisKey]?.add(groupedByXAxis[xAxisKey]?.firstOrNull()?.yAxis ?: 0f)
+            }
+
+            if(distinctSubgroups.isNotEmpty()){
+                distinctSubgroups.forEach { subGroup ->
+                    val label = "${data.series.reportSeriesName} - " +
+                            data.subGroupFormatter?.format(subGroup)
+                    dataTable.first().add(label)
+                    distinctXAxisSet.forEach { xAxisKey ->
+                        val valData = groupedByXAxis[xAxisKey]?.firstOrNull { it.subgroup == subGroup }
+                        if(valData != null){
+                            dataSet[xAxisKey]?.add(valData.yAxis)
+                        }
+                    }
+                }
+            }
+        }
+
+        dataSet.values.forEach { dataTable.add(it)}
+
+        val dataSetTable = dataTable.map { it.toTypedArray() }.toTypedArray()
+        val drawChart = dataSetTable.first().size == dataSetTable.last().size && dataSetTable.size > 1
+        if(drawChart){
+            umChart(
+                data = dataSetTable,
+                height = height.px,
+                chartType = chartType,
+                options = chartOption){}
+        }
+
+        onChartRendered?.invoke(drawChart)
     }
 }

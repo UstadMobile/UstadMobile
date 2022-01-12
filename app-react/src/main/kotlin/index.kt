@@ -1,10 +1,7 @@
 
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.AppConfig
-import com.ustadmobile.core.impl.UstadMobileConstants
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJs
@@ -102,7 +99,8 @@ private val diModule = DI.Module("UstadApp-React"){
     constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with false
 
     bind<ClientId>(tag = UstadMobileSystemCommon.TAG_CLIENT_ID) with scoped(EndpointScope.Default).singleton {
-        ClientId(990099)
+        val nodeIdAndAuth: NodeIdAndAuth = instance()
+        ClientId(nodeIdAndAuth.nodeId)
     }
 
     bind<ReduxThemeState>() with singleton{
@@ -144,6 +142,10 @@ private val diModule = DI.Module("UstadApp-React"){
 
     bind<UstadNavController>() with provider {
         NavControllerJs()
+    }
+
+    bind<ContainerStorageManager> () with scoped(EndpointScope.Default).singleton{
+        ContainerStorageManager(context, di)
     }
 
     registerContextTranslator {

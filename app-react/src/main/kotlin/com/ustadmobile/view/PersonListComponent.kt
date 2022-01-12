@@ -20,8 +20,8 @@ class PersonListComponent(mProps: UmProps): UstadListComponent<Person, PersonWit
     override val displayTypeRepo: Any?
         get() = dbRepo?.personDao
 
-    override val viewName: String
-        get() = PersonListView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(PersonListView.VIEW_NAME)
 
 
     override val listPresenter: UstadListPresenter<*, in PersonWithDisplayDetails>?
@@ -34,7 +34,7 @@ class PersonListComponent(mProps: UmProps): UstadListComponent<Person, PersonWit
         if(arguments.containsKey(UstadView.ARG_CODE_TABLE)){
             inviteNewText = getString(MessageID.invite_with_link)
         }
-        createNewText = getString(MessageID.add_a_new_person)
+        addNewEntryText = getString(MessageID.add_a_new_person)
         ustadComponentTitle = getString(MessageID.people)
         mPresenter = PersonListPresenter(this, arguments, this,di,this)
         mPresenter?.onCreate(mapOf())

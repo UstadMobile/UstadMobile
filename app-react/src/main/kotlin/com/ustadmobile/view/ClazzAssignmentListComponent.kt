@@ -10,11 +10,12 @@ import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.util.ext.isSetDate
+import com.ustadmobile.util.ext.isRealDate
 import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.view.ext.umItemThumbnail
 import kotlinx.css.FlexDirection
 import kotlinx.css.padding
 import react.RBuilder
@@ -27,8 +28,8 @@ class ClazzAssignmentListComponent(mProps: UmProps): UstadListComponent<ClazzAss
 
     private var mPresenter: ClazzAssignmentListPresenter? = null
 
-    override val viewName: String
-        get() = ClazzAssignmentListView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ClazzAssignmentListView.VIEW_NAME)
 
     override val listPresenter: UstadListPresenter<*, in ClazzAssignmentWithMetrics>?
         get() = mPresenter
@@ -62,9 +63,7 @@ class ClazzAssignmentListComponent(mProps: UmProps): UstadListComponent<ClazzAss
             }
 
             umItem(GridSize.cells3, GridSize.cells1) {
-                umAvatar(variant = AvatarVariant.circle) {
-                    umIcon("assignment")
-                }
+                umItemThumbnail("assignment", avatarVariant = AvatarVariant.circle, width = 60)
             }
 
             umItem(GridSize.cells9, GridSize.cells11) {
@@ -88,7 +87,7 @@ class ClazzAssignmentListComponent(mProps: UmProps): UstadListComponent<ClazzAss
 
                     umGridContainer(rowSpacing =  GridSpacing.spacing1) {
 
-                        if(item.caDeadlineDate.isSetDate()){
+                        if(item.caDeadlineDate.isRealDate()){
                             umItem(GridSize.cells12, GridSize.cells4, flexDirection = FlexDirection.row){
                                 styledSpan {
                                     umIcon("calendar_today")
@@ -96,7 +95,7 @@ class ClazzAssignmentListComponent(mProps: UmProps): UstadListComponent<ClazzAss
                                         padding(right = 2.spacingUnits)
                                     }
                                 }
-                                umTypography(item.caDeadlineDate.toDate().standardFormat(),
+                                umTypography(item.caDeadlineDate.toDate()?.standardFormat(),
                                     variant = TypographyVariant.body2) {
                                     css(alignTextToStart)
                                 }

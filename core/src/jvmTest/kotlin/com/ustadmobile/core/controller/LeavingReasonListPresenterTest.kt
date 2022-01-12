@@ -48,16 +48,15 @@ class LeavingReasonListPresenterTest {
     @Before
     fun setup() {
         mockView = mock { }
-        mockNavController = mock()
         mockLifecycleOwner = mock {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
 
         di = DI {
             import(ustadTestRule.diModule)
-            bind<UstadNavController>(overrides = true) with singleton { mockNavController }
         }
         val repo: UmAppDatabase by di.activeRepoInstance()
+        mockNavController = di.direct.instance()
         context = Any()
         repoLeavingReasonDaoSpy = spy(repo.leavingReasonDao)
         whenever(repo.leavingReasonDao).thenReturn(repoLeavingReasonDaoSpy)

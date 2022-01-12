@@ -72,14 +72,13 @@ class VideoTypePluginJvm(
             val localVideoUri = process.getLocalOrCachedUri()
             val videoFile = localVideoUri.toFile()
             var newVideo = File(videoFile.parentFile, "new${videoFile.nameWithoutExtension}.mp4")
-            val videoIsProcessed = contentJobItem.cjiContainerUid != 0L
             val contentNeedUpload = !videoUri.isRemote()
             contentJobItem.updateTotalFromLocalUriIfNeeded(localVideoUri, contentNeedUpload,
                 progress, context, di)
 
             try {
 
-                if(!videoIsProcessed) {
+                if(!contentJobItem.cjiContainerProcessed) {
 
                     val compressVideo: Boolean = process.params["compress"]?.toBoolean() ?: false
 
@@ -102,6 +101,10 @@ class VideoTypePluginJvm(
 
                             }
 
+                    contentJobItem.cjiContainerUid = container.containerUid
+                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                            container.containerUid)
+
                     val containerFolder = jobItem.contentJob?.toUri
                             ?: defaultContainerDir.toURI().toString()
                     val containerFolderUri = DoorUri.parse(containerFolder)
@@ -112,11 +115,11 @@ class VideoTypePluginJvm(
                             ContainerAddOptions(containerFolderUri))
 
                     // after container has files and torrent added, update contentJob
-                    contentJobItem.cjiContainerUid = container.containerUid
-                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
-                        container.containerUid)
+
                     contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
                         progress)
+
+                    db.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
 
                     contentJobItem.cjiConnectivityNeeded = true
                     db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
@@ -124,15 +127,16 @@ class VideoTypePluginJvm(
                     val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid
                             ?: 0)
                     if (!haveConnectivityToContinueJob) {
-                        return@withContext ProcessResult(JobStatus.QUEUED)
+                        return@withContext ProcessResult(JobStatus.WAITING_FOR_CONNECTION)
                     }
                 }
 
 
                 if(contentNeedUpload) {
-                    uploader.upload(contentJobItem,
+                    return@withContext ProcessResult(uploader.upload(contentJobItem,
                         NetworkProgressListenerAdapter(progress, contentJobItem), httpClient,
-                        endpoint)
+                        endpoint
+                    ))
                 }
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)
@@ -155,7 +159,7 @@ class VideoTypePluginJvm(
 
             val localUri = process.getLocalOrCachedUri()
 
-            val fileName = localUri.getFileName(context)
+            val fileName = uri.getFileName(context)
 
             if(!supportedFileExtensions.any { fileName.endsWith(it, true) }) {
                 return@withContext null
@@ -170,7 +174,7 @@ class VideoTypePluginJvm(
             }
 
             val entry = ContentEntryWithLanguage().apply {
-                this.title = file.nameWithoutExtension
+                this.title = fileName
                 this.leaf = true
                 sourceUrl = uri.uri.toString()
                 this.contentTypeFlag = ContentEntry.TYPE_VIDEO

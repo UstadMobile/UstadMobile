@@ -22,7 +22,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
         classpath "org.jetbrains.kotlinx:atomicfu-gradle-plugin:$atomicfu_version"
-        classpath "com.gradle:gradle-enterprise-gradle-plugin:3.7.1"
+        classpath "com.gradle:gradle-enterprise-gradle-plugin:3.7.2"
         classpath "com.github.ben-manes:gradle-versions-plugin:$version_gradle_versions_plugin"
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -83,6 +83,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
+    ustadVersionCode = 221
 
     wrapperVersion = "pre.270-kotlin-1.6.0"
 
@@ -97,23 +98,24 @@ ext {
     version_npm_moment_timezone = "^0.5.34"
     version_npm_mement_io = "^1.3.13"
     version_npm_picker_ui = "^3.3.10"
+    version_npm_mui_lab = "5.0.0-alpha.58"
     version_npm_timezones = "^1.5.2"
     version_npm_tabtracker = "^2.2.3"
     version_npm_buffer = "^6.0.3"
     version_npm_asmcrypto = "^2.3.2"
     version_npm_emotion = "11.6.0"
     version_npm_google_charts = "^3.0.15"
+    version_npm_html_to_image = "^1.9.0"
+    version_npm_date_fns = "2.27.0"
 
-    version_door = "0.0.32u"
-    version_xmlpullparserkmp = '0.0.19'
-
-    ustadVersionCode = 220
+    version_door = "0.0.32t-jsv6"
+    version_xmlpullparserkmp = '0.0.20'
 
     version_gradle_buildconfig_plugin = "1.1.7"
     version_jacoco_tool = "0.8.5"
     version_kotlin_jvmTarget = "1.8"
     version_kotlinx_serialization = "1.3.1"
-    version_klock = "2.0.7"
+    version_klock = "2.2.2"
     version_ktor = "1.6.7"
     version_coroutines = "1.5.2"
     version_atomicfu = "0.17.0"
@@ -124,20 +126,18 @@ ext {
     version_json = "20160212"
 
     version_okhttp = "4.9.1"
-    version_commons_io = "2.6"
+    version_commons_io = "2.11.0"
     version_gson = "2.8.9"
-    version_apache_commons_cli = "1.4"
+    version_apache_commons_cli = "1.5.0"
     version_apache_commons_lang = "3.10"
     version_apache_commons_text = "1.8"
     version_apache_commons_dbcp2 = "2.7.0"
     version_apache_commons_compress = "1.20"
     version_mpandroidchart = "v3.1.0"
 
-    version_mockwebserver = "4.9.0"
-    version_kotlinpoet = "1.7.2"
+    version_mockwebserver = "4.9.1"
     version_simple_jndi = "0.23.0"
     version_sqlite_jdbc = "3.34.0"
-    version_jsqlparser = "3.1"
     version_core_mockito = "3.8.0"
     version_kotlin_mockito = "4.0.0"
     version_compressor = "3.0.1"
@@ -167,32 +167,32 @@ ext {
     version_kaspresso = "1.2.1"
 
     //Androidx versions as per https://developer.android.com/jetpack/androidx/versions
-    version_androidx_annotation = "1.1.0"
+    version_androidx_annotation = "1.3.0"
 
-    version_android_material = "1.3.0"
-    version_androidx_appcompat = "1.2.0"
+    version_android_material = "1.4.0"
+    version_androidx_appcompat = "1.4.0"
     version_androidx_legacy_support = "1.0.0"
-    version_androidx_activity = "1.2.3"
-    version_androidx_fragment = "1.3.6"
-    version_androidx_core = '1.3.2'
+    version_androidx_activity = "1.4.0"
+    version_androidx_fragment = "1.4.0"
+    version_androidx_core = '1.7.0'
     version_androidx_cardview = "1.0.0"
     version_androidx_coordinatorlayout = "1.1.0"
-    version_androidx_lifecycle = "2.3.0"
+    version_androidx_lifecycle = "2.4.0"
     version_androidx_legacy = "1.0.0"
     version_android_room = "2.4.0-rc01"
     version_androidx_arch = "2.1.0"
-    version_androidx_recyclerview = "1.2.0"
+    version_androidx_recyclerview = "1.2.1"
     version_android_multidex = "2.0.1"
-    version_android_workmanager = "2.5.0"
+    version_android_workmanager = "2.7.1"
     version_androidx_paging = "2.1.2"
-    version_android_constraint_layout = "2.0.4"
+    version_android_constraint_layout = "2.1.2"
     version_android_flexbox = "3.0.0"
     version_android_espresso = "3.4.0"
-    version_android_acra = "5.7.0"
+    version_android_acra = "5.8.4"
     version_android_junit_runner = "1.4.0"
     version_androidx_test_ext_junit = "1.1.3" //see https://mvnrepository.com/artifact/androidx.test.ext/junit
     version_android_espresso_recyclerviewchildactions = "1.0"
-    version_androidx_databinding = "4.2.1"
+    version_androidx_databinding = "7.0.4"
     version_android_mockito = "4.0.0"
     version_android_roboelectric = "4.5.1"
     version_android_uiautomator = "2.2.0"

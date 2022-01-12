@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.SchoolDao
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.util.safeStringify
@@ -62,6 +63,19 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
         systemImpl.go(SchoolEditView.VIEW_NAME, mapOf(), context)
     }
 
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {
+        navigateForResult(
+            NavigateForResultOptions(this,
+                null,
+                SchoolEditView.VIEW_NAME,
+                School::class,
+                School.serializer(),
+                destinationResultKey ?: SCHOOL_RESULT_KEY,
+                arguments = args?.toMutableMap() ?: arguments.toMutableMap()
+            )
+        )
+    }
+
     override fun onClickSort(sortOption: SortOrderOption) {
         super.onClickSort(sortOption)
         updateListOnView()
@@ -80,6 +94,8 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
     }
 
     companion object {
+
+        const val SCHOOL_RESULT_KEY = "School"
 
         val SORT_OPTIONS = listOf(
                 SortOrderOption(MessageID.name, SchoolDao.SORT_NAME_ASC, true),

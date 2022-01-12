@@ -7,6 +7,7 @@ import com.ustadmobile.mui.theme.styledModule
 import com.ustadmobile.redux.ReduxAppStateManager
 import down
 import kotlinx.css.*
+import kotlinx.css.properties.LineHeight
 import kotlinx.css.properties.Timing
 import kotlinx.css.properties.Transition
 import kotlinx.css.properties.ms
@@ -168,7 +169,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         }
     }
 
-    val attendance by css {
+    val screenWithChartOnLeft by css {
         marginRight = 0.spacingUnits
         media(theme.breakpoints.up(tabletAndHighEnd)) {
             marginRight = 2.spacingUnits
@@ -331,6 +332,14 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
        else Display.none
     }
 
+    fun maxLines(builder: CssBuilder,maxLine: Int) {
+        val baseLineHeight = 1.5
+        builder.lineHeight = LineHeight("${baseLineHeight}em")
+        builder.height = LinearDimension("${baseLineHeight * maxLine}em")
+        builder.textOverflow = TextOverflow.ellipsis
+        builder.overflow = Overflow.hidden
+    }
+
     val tabsContainer by css {
         flexGrow = 1.0
         height = LinearDimension("100%")
@@ -351,6 +360,13 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         }
     }
 
+    val scrollOnMobile by css {
+        overflow = Overflow.scroll
+        media(theme.breakpoints.up(tabletAndHighEnd)){
+            overflow = Overflow.hidden
+        }
+    }
+
     val contentContainer by css {
         marginLeft = 1.spacingUnits
         marginRight = 1.spacingUnits
@@ -365,6 +381,12 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
             marginLeft = 3.spacingUnits
             marginRight = 3.spacingUnits
         }
+    }
+
+
+    val reportActionText by css {
+        fontSize = LinearDimension("1em")
+        textAlign = TextAlign.center
     }
 
     val startIcon by css{
@@ -390,9 +412,21 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         alignItems = Align.center
     }
 
-    val centerItem by css {
+    val alignCenterItems by css {
         alignItems = Align.center
         textAlign = TextAlign.center
+        flexShrink = 0.0
+    }
+
+    val alignStartItems by css {
+        alignItems = Align.start
+        textAlign = TextAlign.start
+        flexShrink = 0.0
+    }
+
+    val alignEndItems by css {
+        alignItems = Align.end
+        textAlign = TextAlign.end
         flexShrink = 0.0
     }
 
@@ -470,17 +504,17 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         textAlign = TextAlign.center
         position = Position.relative
         width = LinearDimension("98%")
-        height = LinearDimension("300px")
+        height = 300.px
     }
 
     val entityThumbnailClass by css {
         textAlign = TextAlign.center
         position = Position.relative
         width = LinearDimension("100%")
-        height = LinearDimension("80px")
+        height = 80.px
         media(theme.breakpoints.up(tabletAndHighEnd)){
             width = LinearDimension("70%")
-            height = LinearDimension("120px")
+            height = 120.px
         }
     }
 
@@ -500,8 +534,25 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     }
 
     val fallBackAvatarClass by css {
-        fontSize = LinearDimension("1em")
+        fontSize = LinearDimension("2em")
         marginBottom = 4.px
+    }
+
+    val maxThumbnailClass by css {
+        fontSize = LinearDimension("5em")
+    }
+
+    val mediumThumbnailClass by css {
+        fontSize = LinearDimension("2em")
+    }
+
+    val defaultThumbnailClass by css {
+        fontSize = LinearDimension("1.2em")
+    }
+
+    val secondaryActionBtn by css{
+        width = 60.px
+        padding = "16px"
     }
 
     val personListItemAvatar by css {
@@ -602,18 +653,33 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
 
     val partnerItem by css {
-        width = LinearDimension("50px")
-        paddingLeft = 2.spacingUnits
+        height = 40.px
+        padding(left = 1.spacingUnits)
+        verticalAlign = VerticalAlign.middle
         media(theme.breakpoints.up(tabletAndHighEnd)) {
-            width = LinearDimension("80px")
-            paddingLeft = 3.spacingUnits
+            padding(left = 2.spacingUnits)
+            height = 60.px
         }
     }
 
     val partnersList by css {
         position = Position.fixed
-        right = 15.px
-        bottom = 15.px
+        right = 2.spacingUnits
+        bottom = 2.spacingUnits
+        width = LinearDimension("100vh")
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            bottom = 4.spacingUnits
+            right = 3.spacingUnits
+        }
+    }
+
+    val studentProgressBar by css{
+        width = LinearDimension("50%")
+        paddingRight = 2.spacingUnits
+        marginTop = 10.px
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            width = LinearDimension("80%")
+        }
     }
 
     override val di: DI

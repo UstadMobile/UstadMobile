@@ -1,16 +1,16 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_TEACHER
+import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
 
 @Repository
 @Dao
@@ -55,7 +55,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
 
 
     @Query("UPDATE Clazz SET clazzSchoolUid = :schoolUid, " +
-            " clazzLastChangedBy = (SELECT nodeClientId FROM SyncNode) WHERE clazzUid = :clazzUid ")
+            " clazzLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) WHERE clazzUid = :clazzUid ")
     abstract suspend fun updateSchoolOnClazzUid(clazzUid: Long, schoolUid: Long)
 
     /**
@@ -147,7 +147,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         CAST((SELECT SUM(clazzLogNumPresent) FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid AND clazzLogStatusFlag = 4) AS REAL) /
         CAST(MAX(1.0, (SELECT SUM(clazzLogNumPresent) + SUM(clazzLogNumPartial) + SUM(clazzLogNumAbsent)
         FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid AND clazzLogStatusFlag = $STATUS_RECORDED)) AS REAL),
-        clazzLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1)
+        clazzLastChangedBy = COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1),0)
         WHERE clazzUid = :clazzUid
     """)
     abstract suspend fun updateClazzAttendanceAverageAsync(clazzUid: Long)

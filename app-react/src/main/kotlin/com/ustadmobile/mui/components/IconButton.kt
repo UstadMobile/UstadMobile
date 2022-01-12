@@ -2,6 +2,7 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.mui.ext.createStyledComponent
 import com.ustadmobile.mui.theme.UMColor
+import com.ustadmobile.util.Util.stopEventPropagation
 import mui.material.IconButton
 import mui.material.IconButtonProps
 import org.w3c.dom.events.Event
@@ -35,12 +36,11 @@ fun RBuilder.umIconButton(
     attrs.size = size.toString()
     edge?.let { attrs.edge = it.toString() }
     attrs.onClick = {
+        stopEventPropagation(it)
         onClick?.invoke(it.nativeEvent)
     }
 
-    id?.let {
-        attrs.id = id
-    }
+    id?.let { attrs.id = it }
 
     var colorToApply = iconColor
 
@@ -50,6 +50,7 @@ fun RBuilder.umIconButton(
             UMColor.default -> IconColor.action
             UMColor.secondary -> IconColor.secondary
             UMColor.primary -> IconColor.primary
+            else -> IconColor.inherit
         }
     }
 

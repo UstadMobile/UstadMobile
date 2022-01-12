@@ -29,8 +29,8 @@ class ScopedGrantEditComponent (mProps: UmProps): UstadEditComponent<ScopedGrant
     override val mEditPresenter: UstadEditPresenter<*, ScopedGrant>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = ScopedGrantEditView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ScopedGrantEditView.VIEW_NAME)
 
 
     private var scopeList: List<BitmaskFlag>? = null
@@ -106,7 +106,7 @@ class ScopedGrantEditComponent (mProps: UmProps): UstadEditComponent<ScopedGrant
         entity = null
     }
 
-    class ScopedGrantComponent(mProps: ListProps<BitmaskFlag>): UstadSimpleList<ListProps<BitmaskFlag>>(mProps){
+    class ScopedGrantComponent(mProps: SimpleListProps<BitmaskFlag>): UstadSimpleList<SimpleListProps<BitmaskFlag>>(mProps){
 
         override fun RBuilder.renderListItem(item: dynamic, onClick: (Event) -> Unit) {
 

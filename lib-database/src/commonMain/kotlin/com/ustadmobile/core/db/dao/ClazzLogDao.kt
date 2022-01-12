@@ -1,12 +1,11 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.ClazzLog
-import com.ustadmobile.lib.db.entities.Role
 
 
 @Repository
@@ -81,7 +80,7 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
 
     @Query("""UPDATE ClazzLog 
         SET clazzLogStatusFlag = :newStatus,
-        clazzLogLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1)
+        clazzLogLCB =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0)
         WHERE clazzLogUid = :clazzLogUid""")
     abstract fun updateStatusByClazzLogUid(clazzLogUid: Long, newStatus: Int)
 

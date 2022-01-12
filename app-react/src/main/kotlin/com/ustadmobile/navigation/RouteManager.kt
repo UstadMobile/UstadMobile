@@ -10,13 +10,15 @@ import com.ustadmobile.view.*
 object RouteManager {
 
     val destinationList = listOf(
-        UstadDestination("library_books", MessageID.content, ContentEntryList2View.VIEW_NAME,
+        UstadDestination("library_books", MessageID.content, ContentEntryList2View.VIEW_NAME_HOME,
             ContentEntryListComponent::class, true),
+        UstadDestination(view = ContentEntryList2View.VIEW_NAME,
+             component = ContentEntryListComponent::class,  showSearch = true),
         UstadDestination("school", MessageID.schools,SchoolListView.VIEW_NAME, SchoolListComponent::class, showSearch = true),
         UstadDestination("people", MessageID.classes,ClazzList2View.VIEW_NAME, ClazzListComponent::class, showSearch = true),
         UstadDestination("person", MessageID.people, PersonListView.VIEW_NAME, PersonListComponent::class, showSearch = true),
         UstadDestination("pie_chart", MessageID.reports, ReportListView.VIEW_NAME, ReportListComponent::class, divider = true),
-        UstadDestination("settings", MessageID.settings, SettingsView.VIEW_NAME, PlaceHolderComponent::class),
+        UstadDestination("settings", MessageID.settings, SettingsView.VIEW_NAME, SettingsComponent::class),
         UstadDestination(view = AccountListView.VIEW_NAME, component = AccountListComponent::class),
         UstadDestination(view = Login2View.VIEW_NAME, labelId = MessageID.login, component = LoginComponent::class, showNavigation = false),
         UstadDestination(view = ContentEntryDetailView.VIEW_NAME, component = ContentEntryDetailComponent::class),
@@ -38,6 +40,8 @@ object RouteManager {
         UstadDestination(view = ClazzMemberListView.VIEW_NAME, component = ClazzMemberListComponent::class, showSearch = true),
         UstadDestination(view = ClazzDetailOverviewView.VIEW_NAME, component = ClazzDetailOverviewComponent::class),
         UstadDestination(view = ClazzLogListAttendanceView.VIEW_NAME, component = ClazzLogListAttendanceComponent::class),
+        UstadDestination(view = ClazzLogEditView.VIEW_NAME, component = ClazzLogEditComponent::class),
+        UstadDestination(view = ClazzLogEditAttendanceView.VIEW_NAME, component = ClazzLogEditAttendanceComponent::class),
         UstadDestination(view = SchoolDetailView.VIEW_NAME, component = SchoolDetailComponent::class),
         UstadDestination(view = SchoolDetailOverviewView.VIEW_NAME, component = SchoolDetailOverviewComponent::class),
         UstadDestination(view = SchoolMemberListView.VIEW_NAME, component = SchoolMemberListComponent::class, showSearch = true),
@@ -57,7 +61,17 @@ object RouteManager {
         UstadDestination(view = LeavingReasonEditView.VIEW_NAME, component = LeavingReasonEditComponent::class),
         UstadDestination(view = ClazzAssignmentListView.VIEW_NAME, component = ClazzAssignmentListComponent::class),
         UstadDestination(view = ClazzAssignmentEditView.VIEW_NAME, component = ClazzAssignmentEditComponent::class),
-        UstadDestination(labelId= MessageID.accounts, view = AccountListView.VIEW_NAME, component = PlaceHolderComponent::class)
+        UstadDestination(view = ClazzAssignmentDetailView.VIEW_NAME, component = ClazzAssignmentDetailComponent::class),
+        UstadDestination(view = ClazzAssignmentDetailOverviewView.VIEW_NAME, component = ClazzAssignmentOverviewComponent::class),
+        UstadDestination(view = ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME, component = ClazzAssignmentDetailStudentProgressListOverviewComponent::class),
+        UstadDestination(view = ClazzAssignmentDetailStudentProgressView.VIEW_NAME, component = ClazzAssignmentDetailStudentProgressComponent::class),
+        UstadDestination(view = SessionListView.VIEW_NAME, component = SessionListComponent::class, showSearch = true),
+        UstadDestination(view = StatementListView.VIEW_NAME, component = StatementListComponent::class),
+        UstadDestination(view = ReportTemplateListView.VIEW_NAME, component = ReportTemplateListComponent::class),
+        UstadDestination(view = ReportEditView.VIEW_NAME, component = ReportEditComponent::class),
+        UstadDestination(view = ReportFilterEditView.VIEW_NAME, component = ReportFilterEditComponent::class),
+        UstadDestination(view = ContentEntryList2View.FOLDER_VIEW_NAME, component = ContentEntryListComponent::class),
+        UstadDestination(view = ReportDetailView.VIEW_NAME, component = ReportDetailComponent::class)
     )
 
     /**
@@ -71,7 +85,7 @@ object RouteManager {
 
 
     val firstDestination: UstadDestination = destinationList.first {
-        it.view == ContentEntryList2View.VIEW_NAME
+        it.view == ContentEntryList2View.VIEW_NAME_HOME
     }
 
     /**

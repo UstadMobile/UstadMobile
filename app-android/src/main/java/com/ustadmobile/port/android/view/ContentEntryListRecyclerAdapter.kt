@@ -15,9 +15,6 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusA
 import com.ustadmobile.lib.db.entities.ContentJobItemProgress
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -92,7 +89,7 @@ class ContentEntryListRecyclerAdapter(var itemListener: ContentEntryListItemList
                 appDatabase.contentJobItemDao.findStatusForActiveContentJobItem(item.contentEntryUid)
             }
             holder.contentJobItemProgress = RateLimitedLiveData(appDatabase, listOf("ContentJobItem"), 1000) {
-                appDatabase.contentJobItemDao.findProgressForActiveContentJobItem(item.contentEntryUid)
+                appDatabase.contentJobItemDao.findLatestProgressForActiveContentJobItem(item.contentEntryUid)
             }
         }else{
             holder.downloadJobItemLiveData = null

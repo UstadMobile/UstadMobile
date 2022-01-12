@@ -2,8 +2,9 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.mui.ext.createStyledComponent
 import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.ext.DATE_FORMAT_DD_MM_YYYY
+import com.ustadmobile.util.ext.TIME_FORMAT_H_M
 import com.ustadmobile.util.ext.formatDate
-import com.ustadmobile.util.ext.standardFormat
 import kotlinx.css.Color
 import kotlinx.css.RuleSet
 import kotlinx.css.color
@@ -33,7 +34,7 @@ enum class  DateTimePickerOpenTo {
 private fun RBuilder.renderTextField(
     props: BaseTextFieldProps,
     label: String,
-    value: Date,
+    value: Date? = null,
     format: String? = null,
     error: Boolean = false,
     helperText: String? = null,
@@ -41,11 +42,14 @@ private fun RBuilder.renderTextField(
 ): ReactElement {
     return umTextField(
         label = label,
-        value = if(format == null) value.standardFormat() else value.formatDate(format.uppercase()),
         helperText = helperText,
         error = error){
         attrs.onClick = {
             props.inputProps?.onClick?.invoke(it.asDynamic())
+        }
+
+        value?.let {
+            attrs.value = it.formatDate(format)
         }
         attrs.variant = props.variant
         ruleSet?.let { css(it) }
@@ -55,7 +59,7 @@ private fun RBuilder.renderTextField(
 fun RBuilder.timePicker(
     label: String,
     onChange:(Date)-> Unit,
-    value: Date = Date(),
+    value: Date? = null,
     ampm: Boolean = false,
     ampmInClock: Boolean = false,
     inputFormat: String? = null,
@@ -83,7 +87,7 @@ fun RBuilder.timePicker(
 fun RBuilder.datePicker(
     label: String,
     onChange:(Date)-> Unit,
-    value: Date = Date(),
+    value: Date? = null,
     inputFormat: String? = null,
     helperText: String? = null,
     error: Boolean = false,
@@ -111,7 +115,7 @@ private fun RBuilder.setProps(
     isTime: Boolean,
     label: String,
     onChange:(Date)-> Unit,
-    value: Date = Date(),
+    value: Date? = null,
     inputFormat: String? = null,
     helperText: String? = null,
     error: Boolean = false,
@@ -129,10 +133,8 @@ private fun RBuilder.setProps(
     ampm: Boolean = true,
     ampmInClock: Boolean = false
 ){
-    var changedValue = value
-    field.attrs.asDynamic().value = changedValue
+    field.attrs.asDynamic().value = value ?: Date()
     field.attrs.onChange = {
-        changedValue = it
         onChange.invoke(it)
     }
     field.attrs.asDynamic().views  = views
@@ -144,7 +146,7 @@ private fun RBuilder.setProps(
     onError?.let { field.attrs.asDynamic().onError = it}
     onAccept?.let { field.attrs.asDynamic().onAccept = it}
     onClose?.let { field.attrs.asDynamic().onClose = it}
-    inputFormat?.let { field.attrs.asDynamic().inputFormat = it}
+    field.attrs.asDynamic().inputFormat = inputFormat?.lowercase()
     toolbarTitle?.let { field.attrs.asDynamic().toolbarTitle = it}
     field.css {
         color = Color.white
@@ -165,8 +167,8 @@ private fun RBuilder.setProps(
 fun RBuilder.umDatePicker(
     label: String,
     onChange:(Date)-> Unit,
-    value: Date = Date(),
-    inputFormat: String? = null,
+    value: Date? = null,
+    inputFormat: String? = DATE_FORMAT_DD_MM_YYYY,
     helperText: String? = null,
     error: Boolean = false,
     minDate: Date? = null,
@@ -184,7 +186,7 @@ fun RBuilder.umDatePicker(
     handler: StyledHandler<UMDateTimePickerProps>? = null
 ) = LocalizationProvider{
     attrs.dateAdapter = AdapterDateFns.default
-    datePicker(label, onChange,value, inputFormat ?: "dd/MM/yyyy", helperText,
+    datePicker(label, onChange,value, inputFormat, helperText,
         error, minDate, maxDate, onAccept, onClose, onError,cancelText, okText,
         inputVariant, openTo,toolbarTitle,views,className, handler)
 }
@@ -193,8 +195,8 @@ fun RBuilder.umDatePicker(
 fun RBuilder.umTimePicker(
     label: String,
     onChange:(Date)-> Unit,
-    value: Date = Date(),
-    inputFormat: String? = null,
+    value: Date? = null,
+    inputFormat: String? = TIME_FORMAT_H_M,
     helperText: String? = null,
     error: Boolean = false,
     minDate: Date? = null,
@@ -207,14 +209,14 @@ fun RBuilder.umTimePicker(
     inputVariant: FormControlVariant = FormControlVariant.outlined,
     openTo: DateTimePickerOpenTo? = DateTimePickerOpenTo.day,
     toolbarTitle: String? = null,
-    views: Array<String>? = arrayOf("hours" ,"minutes"),
+    views: Array<String>? = arrayOf("hours" ,"minutes","seconds"),
     className: String? = null,
     ampm: Boolean = true,
     ampmInClock: Boolean = false,
     handler: StyledHandler<UMDateTimePickerProps>? = null
 ) = LocalizationProvider{
     attrs.dateAdapter = AdapterDateFns.default
-    timePicker(label, onChange, value, ampm, ampmInClock,inputFormat ?:"HH:mm", helperText,
+    timePicker(label, onChange, value, ampm, ampmInClock,inputFormat, helperText,
         error, minDate, maxDate, onAccept, onClose, onError,cancelText, okText,
         inputVariant, openTo,toolbarTitle,views,className, handler)
 }

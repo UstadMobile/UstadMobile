@@ -39,8 +39,8 @@ class NavControllerJs: UstadNavController {
             dispatch(ReduxNavStackState(navStack))
         }
 
-        currentBackStackEntry?.arguments?.let { args ->
-            navigate(viewName, args, false)
+        currentBackStackEntry?.let { entry ->
+            navigate(entry.viewName, entry.arguments, false)
         }
     }
 

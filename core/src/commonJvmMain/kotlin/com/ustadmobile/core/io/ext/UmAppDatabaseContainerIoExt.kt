@@ -21,6 +21,8 @@ import com.ustadmobile.door.ext.openInputStream
 import org.kodein.di.DI
 import com.ustadmobile.core.contentformats.har.HarEntry
 import java.util.Base64
+import kotlinx.coroutines.NonCancellable
+import kotlin.coroutines.cancellation.CancellationException
 
 actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: DoorUri,
                                                    recursive: Boolean, context:Any, di: DI,
@@ -31,8 +33,10 @@ actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: D
     val db = repo.db as UmAppDatabase
 
     dirUri.toFile().listFiles()?.forEach { childFile ->
-        db.addFileToContainerInternal(containerUid, childFile, recursive, addOptions,
-                "", context = context, di = di)
+        withContext(NonCancellable) {
+            db.addFileToContainerInternal(containerUid, childFile, recursive, addOptions,
+                        "", context = context, di = di)
+        }
     }
 
     containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
@@ -43,8 +47,10 @@ actual suspend fun UmAppDatabase.addFileToContainer(containerUid: Long, fileUri:
     val repo = this as? DoorDatabaseRepository
             ?: throw IllegalStateException("Must use repo for addFileToContainer")
     val db = repo.db as UmAppDatabase
-    db.addFileToContainerInternal(containerUid, fileUri.toFile(), false,
-            addOptions, "", pathInContainer, context, di)
+    withContext(NonCancellable) {
+        db.addFileToContainerInternal(containerUid, fileUri.toFile(), false,
+                addOptions, "", pathInContainer, context, di)
+    }
 }
 
 
@@ -127,9 +133,11 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
 
     }else if(recursive && file.isDirectory) {
         file.listFiles()?.forEach { childFile ->
-            addFileToContainerInternal(containerUid, childFile, true, addOptions,
-                    relativePathPrefix = "$relativePathPrefix${file.name}/",
-                    context = context, di = di)
+            withContext(NonCancellable) {
+                addFileToContainerInternal(containerUid, childFile, true, addOptions,
+                        relativePathPrefix = "$relativePathPrefix${file.name}/",
+                        context = context, di = di)
+            }
         }
     }
 }
@@ -182,7 +190,9 @@ suspend fun UmAppDatabase.addContainerFromUri(containerUid: Long, uri: com.ustad
     val repo = this as? DoorDatabaseRepository
             ?: throw IllegalStateException("Must use repo for addFileToContainer")
     val db = repo.db as UmAppDatabase
-    val containerFile = db.insertOrLookupContainerEntryFile(containerUid, inputStream, size, nameInContainer, addOptions)
+    val containerFile = withContext(NonCancellable) {
+        db.insertOrLookupContainerEntryFile(containerUid, inputStream, size, nameInContainer, addOptions)
+    }
 
     ContainerEntry().apply {
         this.cePath = nameInContainer
@@ -205,8 +215,11 @@ suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
             while(zipIn.nextEntry?.also { zipEntry = it } != null) {
                 val zipEntryVal = zipEntry ?: throw IllegalStateException("ZipEntry is not null in loop")
                 val nameInZip = zipEntryVal.name
-                val containerFile = db.insertOrLookupContainerEntryFile(containerUid, zipIn, zipEntryVal.size,
-                        nameInZip, addOptions)
+
+                val containerFile = withContext(NonCancellable) {
+                    db.insertOrLookupContainerEntryFile(containerUid, zipIn, zipEntryVal.size,
+                                nameInZip, addOptions)
+                }
 
                 val entryPath = addOptions.fileNamer.nameContainerFile(nameInZip, nameInZip)
 

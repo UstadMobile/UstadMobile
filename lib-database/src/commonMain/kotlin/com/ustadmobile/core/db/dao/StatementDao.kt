@@ -1,10 +1,10 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.RawQuery
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.SimpleDoorQuery
@@ -52,7 +52,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
 
 
     @Query("""UPDATE StatementEntity SET extensionProgress = :progress,
-            statementLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            statementLastChangedBy = COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
             WHERE statementUid = :uid""")
     abstract fun updateProgress(uid: Long, progress: Int)
 
@@ -243,7 +243,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                   AND statementVerbUid = ${VerbEntity.VERB_ANSWERED_UID} 
              GROUP BY xObjectUid)
     """)
-    abstract fun calculateScoreForSession(contextRegistration: String): ContentEntryStatementScoreProgress?
+    abstract suspend fun calculateScoreForSession(contextRegistration: String): ContentEntryStatementScoreProgress?
 
 
     @Query("""
@@ -266,7 +266,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
               resultSuccess DESC 
               LIMIT 1
     """)
-    abstract fun findCompletedScoreForSession(contextRegistration: String): ContentEntryStatementScoreProgress?
+    abstract suspend fun findCompletedScoreForSession(contextRegistration: String): ContentEntryStatementScoreProgress?
 
 
     @Query("""

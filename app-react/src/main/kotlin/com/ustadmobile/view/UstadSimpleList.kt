@@ -13,6 +13,7 @@ import com.ustadmobile.util.StyleManager.listCreateNewContainer
 import com.ustadmobile.util.StyleManager.theme
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
+import com.ustadmobile.util.Util
 import com.ustadmobile.view.ext.createCreateNewItem
 import kotlinx.css.*
 import org.w3c.dom.events.Event
@@ -20,7 +21,7 @@ import react.RBuilder
 import styled.css
 import styled.styledDiv
 
-interface ListProps<T>: UmProps {
+interface SimpleListProps<T>: UmProps {
     var entries: List<T>
     var onEntryClicked: ((entry: dynamic) -> Unit)?
     var createNewItem: CreateNewItem?
@@ -36,14 +37,18 @@ interface ListProps<T>: UmProps {
     var presenter: UstadBaseController<*>
 
     var listener: OneToManyJoinEditListener<T>?
+
+    var hideDivider: Boolean
 }
 
 data class CreateNewItem(var visible: Boolean = false, var labelId: Int = 0, var onClickCreateNew: (() -> Unit)? = null)
 
-abstract class UstadSimpleList<P: ListProps<*>>(mProps: P) : UstadBaseComponent<P,UmState>(mProps){
+/**
+ * This is meant for simple lists which on Android are either paged or simple list.
+ */
+abstract class UstadSimpleList<P: SimpleListProps<*>>(mProps: P) : UstadBaseComponent<P,UmState>(mProps){
 
-    override val viewName: String?
-        get() = ""
+    override val viewNames: List<String>? = null
 
     override fun RBuilder.render() {
         styledDiv {
@@ -51,7 +56,7 @@ abstract class UstadSimpleList<P: ListProps<*>>(mProps: P) : UstadBaseComponent<
                 if(!props.mainList){
                     +listComponentContainer
                     width = LinearDimension("98%")
-                }else{
+                } else {
                     +listComponentContainerWithScroll
                 }
             }
@@ -69,9 +74,8 @@ abstract class UstadSimpleList<P: ListProps<*>>(mProps: P) : UstadBaseComponent<
                         +listCreateNewContainer
                         marginBottom = 1.spacingUnits
                     }
-                    attrs.divider = true
                     attrs.onClick = {
-                        it.stopPropagation()
+                        Util.stopEventPropagation(it)
                         props.createNewItem?.onClickCreateNew?.invoke()
                     }
                     createCreateNewItem(getString(props.createNewItem?.labelId ?: 0))

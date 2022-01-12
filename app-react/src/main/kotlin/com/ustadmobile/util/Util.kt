@@ -6,7 +6,6 @@ import kotlinx.browser.window
 import kotlinx.coroutines.await
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
-import org.w3c.dom.events.Event
 import kotlin.js.Promise
 
 object Util {
@@ -40,9 +39,8 @@ object Util {
     }
 
 
-    fun stopEventPropagation(event: Event){
+    fun stopEventPropagation(event: dynamic){
         event.preventDefault()
-        event.stopImmediatePropagation()
         event.stopPropagation()
     }
 

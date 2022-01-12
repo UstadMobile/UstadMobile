@@ -5,6 +5,7 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_ID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.util.copyOnWriteListOf
@@ -51,7 +52,8 @@ abstract class UstadEditPresenter<V: UstadEditView<RT>, RT: Any>(
 
     protected val isExistingEntityOrPickerMode
         get() = (arguments[ARG_ENTITY_UID]?.toLong() ?: 0L) != 0L ||
-                arguments[ARG_RESULT_DEST_ID] != null
+                arguments[ARG_RESULT_DEST_ID] != null ||
+                arguments[ARG_RESULT_DEST_VIEWNAME] != null
 
     fun onFinish(detailViewName: String, entityUid: Long, entity: RT, serializer: KSerializer<RT>) {
 

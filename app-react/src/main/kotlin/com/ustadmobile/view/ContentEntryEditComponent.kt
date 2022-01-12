@@ -36,8 +36,8 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
     override val mEditPresenter: UstadEditPresenter<*, ContentEntryWithLanguage>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = ContentEntryEdit2View.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ContentEntryEdit2View.VIEW_NAME)
 
     private var titleLabel = FieldLabel(text = getString(MessageID.title))
 

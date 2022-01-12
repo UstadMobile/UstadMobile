@@ -53,10 +53,10 @@ abstract class UserSessionDao {
            SET usAuth = null,
                usStatus = :newStatus,
                usReason = :reason,
-               usLcb = (SELECT COALESCE(
+               usLcb = COALESCE(
                                (SELECT nodeClientId
                                   FROM SyncNode
-                                 LIMIT 1), 0))
+                                 LIMIT 1), 0)
          WHERE UserSession.usUid = :sessionUid                        
                
     """)

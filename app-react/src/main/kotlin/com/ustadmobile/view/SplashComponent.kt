@@ -1,8 +1,13 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.controller.SplashPresenter
-import com.ustadmobile.mui.components.*
-import com.ustadmobile.util.StyleManager.centerItem
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.themeContext
+import com.ustadmobile.mui.components.umCssBaseline
+import com.ustadmobile.mui.components.umLinearProgress
+import com.ustadmobile.mui.theme.UMColor
+import com.ustadmobile.util.StyleManager.alignCenterItems
+import com.ustadmobile.util.StyleManager.alignEndItems
 import com.ustadmobile.util.StyleManager.partnersList
 import com.ustadmobile.util.StyleManager.splashComponentContainer
 import com.ustadmobile.util.StyleManager.splashComponentPreloadContainer
@@ -14,6 +19,7 @@ import com.ustadmobile.view.ext.umItem
 import com.ustadmobile.view.ext.umPartner
 import kotlinx.browser.document
 import kotlinx.coroutines.Runnable
+import kotlinx.css.FlexDirection
 import kotlinx.css.LinearDimension
 import kotlinx.css.width
 import react.RBuilder
@@ -62,9 +68,9 @@ class SplashComponent (props: UmProps): RComponent<UmProps, UmState>(props), Spl
                     styledDiv {
                         css(splashComponentPreloadContainer)
                         umGridContainer {
-                            css(centerItem)
+                            css(alignCenterItems)
                             umItem(GridSize.cells12) {
-                                css(centerItem)
+                                css(alignCenterItems)
                                 styledImg {
                                     css{
                                         width = LinearDimension("90%")
@@ -74,10 +80,10 @@ class SplashComponent (props: UmProps): RComponent<UmProps, UmState>(props), Spl
                             }
 
                             umItem(GridSize.cells12) {
-                                css(centerItem)
+                                css(alignCenterItems)
                                 val color = when {
-                                    ThemeManager.isDarkModeActive() -> LinearProgressColor.secondary
-                                    else -> LinearProgressColor.primary
+                                    ThemeManager.isDarkModeActive() -> UMColor.secondary
+                                    else -> UMColor.primary
                                 }
 
                                 umLinearProgress(color = color) {
@@ -89,14 +95,15 @@ class SplashComponent (props: UmProps): RComponent<UmProps, UmState>(props), Spl
                         }
                     }
                 }
-                    styledDiv {
-                        css(partnersList)
-                        umGridContainer {
-                            umPartner("tajik_emblem.webp")
-                            umPartner("unicef_tj.webp")
-                            umPartner("Eu_logo_tg.webp")
-                        }
+                umItem(GridSize.cells12, flexDirection = FlexDirection.rowReverse) {
+                    css{
+                        +partnersList
+                        +alignEndItems
                     }
+                    umPartner("tajik_emblem.webp")
+                    umPartner("unicef_tj.webp")
+                    umPartner("Eu_logo_tg.webp")
+                }
             }
         }
     }

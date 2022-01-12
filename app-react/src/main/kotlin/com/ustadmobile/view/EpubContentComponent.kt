@@ -17,7 +17,7 @@ class EpubContentComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
             field = value
         }
 
-    override var viewName: String? = EpubContentView.VIEW_NAME
+    override var viewNames: List<String>? = listOf(EpubContentView.VIEW_NAME)
 
     override var windowTitle: String? = null
         get() = field

@@ -1,12 +1,10 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.mui.ext.createStyledComponent
-import kotlinx.css.flexGrow
 import mui.material.Toolbar
 import mui.material.ToolbarProps
 import react.RBuilder
 import styled.StyledHandler
-import styled.css
 
 @Suppress("EnumEntryName")
 enum class ToolbarVariant {

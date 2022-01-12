@@ -254,6 +254,8 @@ class DownloadDialogPresenter(
 
     private suspend fun createDeleteJob() {
         val entry = appDatabaseRepo.contentEntryDao.findByUid(contentEntryUid)
+        val container = appDatabaseRepo.containerDao
+                .getMostRecentDownloadedContainerForContentEntryAsync(contentEntryUid)
         val job = ContentJob().apply {
             cjNotificationTitle = impl.getString(MessageID.deleting_content, context)
                     .replace("%1\$s",entry?.title ?: "")
@@ -262,8 +264,9 @@ class DownloadDialogPresenter(
         currentJobId = job.cjUid
         ContentJobItem().apply {
             cjiJobUid = job.cjUid
-            sourceUri = "" // TODO entry
+            sourceUri = entry?.toDeepLink(accountManager.activeEndpoint)
             cjiPluginId = DELETE_CONTENT_ENTRY_PLUGIN
+            cjiContainerUid = container?.containerUid ?: 0
             cjiContentEntryUid = entry?.contentEntryUid ?: 0
             cjiIsLeaf = true
             cjiItemTotal = 100

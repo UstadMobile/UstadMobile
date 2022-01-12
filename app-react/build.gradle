@@ -50,8 +50,9 @@ dependencies {
     implementation npm("moment","$version_npm_moment")
     implementation npm("moment-timezone","$version_npm_moment_timezone")
     implementation npm("@date-io/moment","$version_npm_mement_io")
-    implementation npm("@mui/lab","5.0.0-alpha.58")
-    implementation npm("date-fns","2.27.0")
+    implementation npm("@mui/lab","$version_npm_mui_lab")
+    implementation npm("date-fns","$version_npm_date_fns")
+    implementation npm("html-to-image","$version_npm_html_to_image")
     implementation "com.ustadmobile.door:room-annotations:$version_door"
     implementation "org.kodein.di:kodein-di:$version_kodein_di"
     implementation npm("react-google-charts","$version_npm_google_charts")

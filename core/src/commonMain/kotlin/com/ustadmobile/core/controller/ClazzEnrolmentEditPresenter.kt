@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.UmPlatform
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.processEnrolmentIntoClass
 import com.ustadmobile.core.util.ext.putEntityAsJson
@@ -100,7 +101,9 @@ class ClazzEnrolmentEditPresenter(context: Any,
             entity?.leavingReason = reason
             entity?.clazzEnrolmentLeavingReasonUid = reason.leavingReasonUid
             view.entity = entity
-            requireSavedStateHandle()[SAVEDSTATE_KEY_LEAVING_REASON] = null
+            UmPlatform.run {
+                requireSavedStateHandle()[SAVEDSTATE_KEY_LEAVING_REASON] = null
+            }
         }
 
     }

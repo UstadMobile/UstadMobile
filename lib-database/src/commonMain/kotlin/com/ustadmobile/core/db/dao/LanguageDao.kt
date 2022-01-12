@@ -1,13 +1,10 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.lib.db.entities.LeavingReason
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.Report
 import kotlin.js.JsName
 
 @Dao
@@ -76,7 +73,7 @@ abstract class LanguageDao : BaseDao<Language> {
 
 
     @Query("""UPDATE Language SET languageActive = :toggleVisibility, 
-                langLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+                langLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
                 WHERE langUid IN (:selectedItem)""")
     abstract suspend fun toggleVisibilityLanguage(toggleVisibility: Boolean, selectedItem: List<Long>)
 

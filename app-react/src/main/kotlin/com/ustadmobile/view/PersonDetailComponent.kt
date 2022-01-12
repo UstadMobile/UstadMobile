@@ -39,8 +39,8 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = PersonDetailView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(PersonDetailView.VIEW_NAME)
 
     private var classList: List<ClazzEnrolmentWithClazzAndAttendance>? = null
 
@@ -99,23 +99,23 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
             umGridContainer {
                 umItem(GridSize.cells12){
                     umGridContainer(GridSpacing.spacing4) {
-                        createAction("call", getString(MessageID.call), GridSize.cells4, GridSize.cells2,
+                        createTopMainAction("call", getString(MessageID.call), GridSize.cells4, GridSize.cells2,
                             entity?.phoneNum != null){
-                            onClickCall(entity?.phoneNum)
+
                         }
-                        createAction("message",getString(MessageID.text), GridSize.cells4, GridSize.cells2,
+                        createTopMainAction("message",getString(MessageID.text), GridSize.cells4, GridSize.cells2,
                             entity?.phoneNum != null){
-                            onClickSMS(entity?.phoneNum)
+
                         }
-                        createAction("email",getString(MessageID.email), GridSize.cells4, GridSize.cells2,
+                        createTopMainAction("email",getString(MessageID.email), GridSize.cells4, GridSize.cells2,
                             entity?.emailAddr != null){
-                            onClickEmail(entity?.emailAddr)
+
                         }
-                        createAction("vpn_key",getString(MessageID.change_password), GridSize.cells6, GridSize.cells3,
+                        createTopMainAction("vpn_key",getString(MessageID.change_password), GridSize.cells6, GridSize.cells3,
                             changePasswordVisible){
                             mPresenter?.handleChangePassword()
                         }
-                        createAction("person_add",getString(MessageID.create_account), GridSize.cells6, GridSize.cells3,
+                        createTopMainAction("person_add",getString(MessageID.create_account), GridSize.cells6, GridSize.cells3,
                             showCreateAccountVisible){
                             mPresenter?.handleCreateAccount()
                         }
@@ -157,7 +157,7 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
 
                                 umItem(GridSize.cells12){
                                     createInformation("event",
-                                        entity?.dateOfBirth.toDate().standardFormat(),
+                                        entity?.dateOfBirth.toDate()?.standardFormat(),
                                         getString(MessageID.birthday)
                                     )
 
@@ -219,8 +219,8 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
         mPresenter = null
     }
 
-    class ClazzEnrolmentWithClazzSimpleListComponent(mProps: ListProps<ClazzEnrolmentWithClazzAndAttendance>):
-        UstadSimpleList<ListProps<ClazzEnrolmentWithClazzAndAttendance>>(mProps){
+    class ClazzEnrolmentWithClazzSimpleListComponent(mProps: SimpleListProps<ClazzEnrolmentWithClazzAndAttendance>):
+        UstadSimpleList<SimpleListProps<ClazzEnrolmentWithClazzAndAttendance>>(mProps){
 
         override fun RBuilder.renderListItem(item: ClazzEnrolmentWithClazzAndAttendance, onClick: (Event) -> Unit) {
             umGridContainer {

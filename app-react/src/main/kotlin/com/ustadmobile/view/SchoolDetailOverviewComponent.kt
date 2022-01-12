@@ -34,8 +34,8 @@ class SchoolDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<Schoo
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = SchoolDetailOverviewView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(SchoolDetailOverviewView.VIEW_NAME)
 
     private var schoolClazzList: List<ClazzWithListDisplayDetails>? = null
 
@@ -120,7 +120,7 @@ class SchoolDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<Schoo
 
                         createInformation("email", entity?.schoolEmailAddress,
                             getString(MessageID.email)){
-                            onClickEmail(entity?.schoolEmailAddress)
+                            //TODO: Handle open mail link
                         }
 
                         createInformation("language", entity?.schoolTimeZone,
@@ -156,8 +156,8 @@ class SchoolDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<Schoo
         entity = null
     }
 
-    class SchoolClazzesComponent(mProps: ListProps<ClazzWithListDisplayDetails>):
-        UstadSimpleList<ListProps<ClazzWithListDisplayDetails>>(mProps){
+    class SchoolClazzesComponent(mProps: SimpleListProps<ClazzWithListDisplayDetails>):
+        UstadSimpleList<SimpleListProps<ClazzWithListDisplayDetails>>(mProps){
 
         override fun RBuilder.renderListItem(item: dynamic, onClick: (Event) -> Unit) {
             umGridContainer(GridSpacing.spacing5) {

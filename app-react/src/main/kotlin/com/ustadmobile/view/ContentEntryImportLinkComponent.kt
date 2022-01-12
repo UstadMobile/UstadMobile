@@ -27,8 +27,8 @@ class ContentEntryImportLinkComponent(mProps: UmProps): UstadEditComponent<Strin
     override val mEditPresenter: UstadEditPresenter<*, String>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = SiteEnterLinkView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(SiteEnterLinkView.VIEW_NAME)
 
     var importLinkLabel = FieldLabel(getString(MessageID.enter_url))
 

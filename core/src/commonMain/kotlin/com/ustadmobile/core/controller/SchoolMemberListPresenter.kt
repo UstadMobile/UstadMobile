@@ -123,7 +123,7 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
         updateListOnView()
     }
 
-    fun handleAddMemberClicked(args: Map<String, String>, destinationResultKey: String){
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {
         navigateForResult(
             NavigateForResultOptions(
                 this,null,
@@ -132,7 +132,7 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
                 Person.serializer(),
                 destinationResultKey,
                 true,
-                arguments = args.toMutableMap(),
+                arguments = args?.toMutableMap() ?: mutableMapOf(),
             )
         )
     }

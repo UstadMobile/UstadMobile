@@ -1,26 +1,27 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.controller.ScopedGrantEditPresenter
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ScopedGrantOneToManyHelper
 import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ScopedGrant
 import com.ustadmobile.lib.db.entities.ScopedGrantAndName
-import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
-import com.ustadmobile.view.ext.createItemWithIconTitleDescriptionAndIconBtn
-import com.ustadmobile.view.ext.permissionListText
+import com.ustadmobile.view.ext.createListItemWithLeftIconTitleAndDescription
+import com.ustadmobile.view.ext.createItemWithLeftIconTitleDescriptionAndIconBtnOnRight
 import com.ustadmobile.view.ext.umGridContainer
 import org.w3c.dom.events.Event
 import react.RBuilder
 
 
-class ScopeGrantListComponent(mProps: ListProps<ScopedGrantAndName>): UstadSimpleList<ListProps<ScopedGrantAndName>>(mProps){
+class ScopeGrantListComponent(mProps: SimpleListProps<ScopedGrantAndName>): UstadSimpleList<SimpleListProps<ScopedGrantAndName>>(mProps){
 
     override fun RBuilder.renderListItem(item: ScopedGrantAndName, onClick: (Event) -> Unit) {
         val showDelete = item.scopedGrant?.sgFlags?.hasFlag(ScopedGrant.FLAG_NO_DELETE) == false
         val permissionList = permissionListText(systemImpl, Clazz.TABLE_ID,
             item.scopedGrant?.sgPermissions ?: 0)
         if(showDelete){
-            createItemWithIconTitleDescriptionAndIconBtn("admin_panel_settings",
+            createItemWithLeftIconTitleDescriptionAndIconBtnOnRight("admin_panel_settings",
                 "delete",item.name, permissionList){ delete, event ->
                 if(delete){
                     props.listener?.onClickDelete(item)
@@ -33,12 +34,22 @@ class ScopeGrantListComponent(mProps: ListProps<ScopedGrantAndName>): UstadSimpl
                 attrs.onClick = {
                     onClick.invoke(it.nativeEvent)
                 }
-                createItemWithIconTitleAndDescription("admin_panel_settings",
+                createListItemWithLeftIconTitleAndDescription("admin_panel_settings",
                     item.name, permissionList)
             }
         }
     }
 
+}
+
+fun RBuilder.permissionListText(
+    systemImpl: UstadMobileSystemImpl,
+    tableId: Int, bitmaskValue: Long): String? {
+
+    val flagMessageIds = ScopedGrantEditPresenter.PERMISSION_LIST_MAP[tableId]
+    return flagMessageIds?.map { it.toBitmaskFlag(bitmaskValue) }
+        ?.filter { it.enabled }
+        ?.joinToString { systemImpl.getString(it.messageId, this) }
 }
 
 

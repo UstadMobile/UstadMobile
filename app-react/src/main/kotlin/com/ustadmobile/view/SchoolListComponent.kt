@@ -12,9 +12,10 @@ import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemDesc
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
+import com.ustadmobile.util.StyleManager.maxLines
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.util.ext.wordBreakLimit
 import com.ustadmobile.util.ext.format
+import com.ustadmobile.util.ext.wordBreakLimit
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
@@ -33,15 +34,14 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
 
     private var mPresenter: SchoolListPresenter? = null
 
-
     override val displayTypeRepo: Any?
         get() = dbRepo?.schoolDao
 
     override val listPresenter: UstadListPresenter<*, in SchoolWithMemberCountAndLocation>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = SchoolListView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(SchoolListView.VIEW_NAME)
 
     override var newSchoolListOptionVisible: Boolean = false
         get() = field
@@ -57,7 +57,7 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
         fabManager?.text = getString(MessageID.school)
         mPresenter = SchoolListPresenter(this, arguments,
             this, di, this)
-        createNewText = getString(MessageID.add_a_new_school)
+        addNewEntryText = getString(MessageID.add_a_new_school)
         showCreateNewItem = true
         mPresenter?.onCreate(mapOf())
     }
@@ -82,7 +82,10 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
 
             umTypography(item.schoolName,
                 variant = TypographyVariant.h6){
-                css(alignTextToStart)
+                css{
+                    +alignTextToStart
+                    maxLines(this, 1)
+                }
             }
 
             umTypography(item.schoolDesc?.wordBreakLimit(),
@@ -90,24 +93,29 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
                 css{
                     display = displayProperty(item.schoolDesc != null, true)
                     +alignTextToStart
+                    if(item.schoolDesc?.isNotEmpty() == true){
+                        maxLines(this, 1)
+                    }
                 }
             }
 
             umGridContainer{
-                umItem(GridSize.cells1){
-                    umIcon("place", color = IconColor.inherit){
-                        css(gridListSecondaryItemIcons)
-                    }
-                }
-
-                umItem(GridSize.cells11){
-                    umTypography(item.schoolAddress){
-                        css{
-                            +alignTextToStart
-                            +gridListSecondaryItemDesc
+                if(item.schoolAddress?.isNotEmpty() == true){
+                    umItem(GridSize.cells1){
+                        umIcon("place", color = IconColor.inherit){
+                            css(gridListSecondaryItemIcons)
                         }
                     }
 
+                    umItem(GridSize.cells11){
+                        umTypography(item.schoolAddress){
+                            css{
+                                +alignTextToStart
+                                +gridListSecondaryItemDesc
+                            }
+                        }
+
+                    }
                 }
 
                 umItem(GridSize.cells1){

@@ -41,7 +41,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContainerMounter
@@ -53,12 +52,12 @@ import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.ktor.client.*
-import io.ktor.client.request.get
+import io.ktor.client.request.*
 import kotlinx.coroutines.*
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import org.kodein.di.direct
 import kotlin.js.JsName
 import kotlin.jvm.Volatile
 import kotlin.math.max
@@ -89,6 +88,11 @@ class EpubContentPresenter(context: Any,
     private val mountHandler: ContainerMounter by instance()
 
     private val systemImpl: UstadMobileSystemImpl by instance()
+
+    private var onCreateException: Exception? = null
+
+    private var isStarted: Boolean = false
+
 
     //The time that the
     private var startTime: Long = 0L
@@ -131,6 +135,11 @@ class EpubContentPresenter(context: Any,
     override fun onStart() {
         super.onStart()
         startTime = getSystemTimeInMillis()
+        isStarted = true
+        onCreateException?.also {
+            navigateToErrorScreen(it)
+        }
+        onCreateException = null
     }
 
     override fun onStop() {
@@ -246,9 +255,17 @@ class EpubContentPresenter(context: Any,
                 view.progressVisible = false
             })
         } catch (e: Exception) {
-            dumpException(e)
+            if(e !is CancellationException) {
+                if(isStarted){
+                    navigateToErrorScreen(e)
+                }else{
+                    onCreateException = e
+                }
+            }
         }
     }
+
+
 
     @JsName("handleClickNavItem")
     fun handleClickNavItem(navItem: EpubNavItem) {

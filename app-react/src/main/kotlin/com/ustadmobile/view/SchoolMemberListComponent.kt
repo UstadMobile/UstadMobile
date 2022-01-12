@@ -1,5 +1,6 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.controller.PersonListPresenter
 import com.ustadmobile.core.controller.SchoolMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -36,8 +37,8 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
 
     private var filterBySchoolUid: Long = 0
 
-    override val viewName: String
-        get() = SchoolMemberListView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(SchoolMemberListView.VIEW_NAME)
 
     override fun addMember() {
         val args = if (addPersonKeyName == "Person_" + Role.ROLE_SCHOOL_STAFF_UID.toString()) {
@@ -47,7 +48,7 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
                 PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL to filterBySchoolUid.toString(),
                 UstadView.ARG_CODE_TABLE to School.TABLE_ID.toString())
         }
-        mPresenter?.handleAddMemberClicked(args, addPersonKeyName)
+        mPresenter?.handleClickAddNewItem(args, addPersonKeyName)
     }
 
     private var pendingStudents: List<SchoolMemberWithPerson> = listOf()
@@ -79,7 +80,7 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
         } else {
             MessageID.student
         }
-        createNewText = "${getString(MessageID.add_new)} $addNewStringId"
+        addNewEntryText = "${getString(MessageID.add_new)} $addNewStringId"
 
         fabManager?.visible = true
         fabManager?.icon = "add"
@@ -104,6 +105,11 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
 
     override fun handleClickEntry(entry: SchoolMemberWithPerson) {
         mPresenter?.handleClickEntry(entry)
+    }
+
+    override fun handleClickCreateNewEntry() {
+        mPresenter?.handleClickAddNewItem(arguments,
+            PersonListPresenter.RESULT_PERSON_KEY)
     }
 
     override fun RBuilder.renderFooterView() {
@@ -132,8 +138,8 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
         mPresenter = null
     }
 
-    class MembersListComponent(mProps: ListProps<SchoolMemberWithPerson>):
-        UstadSimpleList<ListProps<SchoolMemberWithPerson>>(mProps){
+    class MembersListComponent(mProps: SimpleListProps<SchoolMemberWithPerson>):
+        UstadSimpleList<SimpleListProps<SchoolMemberWithPerson>>(mProps){
 
         override fun RBuilder.renderListItem(item: SchoolMemberWithPerson, onClick: (Event) -> Unit) {
             val presenter = props.presenter as SchoolMemberListPresenter

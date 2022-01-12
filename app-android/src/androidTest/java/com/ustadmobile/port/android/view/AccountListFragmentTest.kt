@@ -393,7 +393,7 @@ class AccountListFragmentTest : TestCase() {
             }
 
             assertEquals("It navigated to first expected destination",
-                R.id.content_entry_list_dest, systemImplNavRule.navController.currentDestination?.id)
+                R.id.content_entry_list_home_dest, systemImplNavRule.navController.currentDestination?.id)
         }
 
 

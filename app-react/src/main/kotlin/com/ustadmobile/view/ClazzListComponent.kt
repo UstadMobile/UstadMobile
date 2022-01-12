@@ -5,6 +5,8 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.core.view.ClazzList2View
+import com.ustadmobile.core.view.PersonListView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.mui.components.*
@@ -13,10 +15,12 @@ import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.clazzListRoleChip
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemDesc
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
+import com.ustadmobile.util.StyleManager.maxLines
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.format
+import com.ustadmobile.util.ext.roundTo
 import com.ustadmobile.util.ext.wordBreakLimit
-import com.ustadmobile.view.ext.circleIndicator
+import com.ustadmobile.view.ext.statusCircleIndicator
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
@@ -35,8 +39,8 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
     override val displayTypeRepo: Any?
         get() = dbRepo?.clazzDao
 
-    override val viewName: String
-        get() = ClazzList2View.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ClazzList2View.VIEW_NAME)
 
     override val listPresenter: UstadListPresenter<*, in ClazzWithListDisplayDetails>?
         get() = mPresenter
@@ -46,6 +50,7 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
         fabManager?.text = getString(MessageID.clazz)
         ustadComponentTitle = getString(MessageID.classes)
         linearLayout = false
+        addNewEntryText = getString(MessageID.add_a_new_class)
         mPresenter = ClazzListPresenter(this, arguments, this,di,this)
         mPresenter?.onCreate(mapOf())
     }
@@ -80,12 +85,20 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
                 padding(2.spacingUnits)
             }
 
-            umTypography(item.clazzName,TypographyVariant.h6){
-                css(alignTextToStart)
+            umTypography(item.clazzName, TypographyVariant.h6){
+                css{
+                    +alignTextToStart
+                    maxLines(this, 1)
+                }
             }
 
-            umTypography(item.clazzDesc?.wordBreakLimit(),TypographyVariant.body1){
-                css(alignTextToStart)
+            umTypography(item.clazzDesc?.wordBreakLimit(), TypographyVariant.body1){
+                css{
+                    +alignTextToStart
+                   if(!item.clazzDesc.isNullOrEmpty()){
+                       maxLines(this, 2)
+                   }
+                }
             }
 
             umGridContainer{
@@ -108,12 +121,12 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
                 }
 
                 umItem(GridSize.cells1){
-                    circleIndicator(item.attendanceAverage)
+                    statusCircleIndicator(item.attendanceAverage)
                 }
 
                 umItem(GridSize.cells4){
                     val attendancesPercentage = getString(MessageID.x_percent_attended)
-                        .format(item.attendanceAverage * 100)
+                        .format((if(item.attendanceAverage >= 0) item.attendanceAverage * 100 else 0f).roundTo())
                     umTypography(attendancesPercentage){
                         css{
                             +alignTextToStart
@@ -124,6 +137,18 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
                 }
             }
         }
+    }
+
+    override fun handleClickAddNewEntry() {
+        var args = mutableMapOf<String, String>()
+        val filterExcludeMembersOfSchool =
+            arguments[PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
+        if(filterExcludeMembersOfSchool != 0L){
+            args = mutableMapOf(UstadView.ARG_SCHOOL_UID to filterExcludeMembersOfSchool.toString())
+        }
+        args.putAll(arguments)
+        console.log(arguments)
+        mPresenter?.handleClickAddNewItem(args)
     }
 
     override fun handleClickEntry(entry: ClazzWithListDisplayDetails) {

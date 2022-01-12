@@ -17,12 +17,14 @@ import com.ustadmobile.util.StyleManager.chipSetFilter
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.contentEntryDetailOverviewComponentOpenBtn
 import com.ustadmobile.util.StyleManager.defaultMarginTop
+import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.detailPaddingBottom
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util.ASSET_BOOK
 import com.ustadmobile.util.Util.ASSET_FOLDER
 import com.ustadmobile.util.ext.joinString
+import com.ustadmobile.view.ext.createTopMainAction
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
@@ -39,8 +41,8 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
 
     private var translations: List<ContentEntryRelatedEntryJoinWithLanguage> = listOf()
 
-    override val viewName: String
-        get() = ContentEntryDetailOverviewView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ContentEntryDetailOverviewView.VIEW_NAME)
 
     private var currentDownloadJobItemStatus: Int = -1
 
@@ -107,14 +109,22 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
                 field = value
             }
         }
-
-    override var hasContentToOpenOrDelete: Boolean = false
+    override var canDelete: Boolean = false
         get() = field
         set(value) {
             setState {
                 field = value
             }
         }
+
+    override var canOpen: Boolean = false
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
 
     override var contentJobItemStatus: Int = 0
         get() = field
@@ -150,11 +160,11 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
             }
         }
 
-    override var contentJobItemProgress: ContentJobItemProgress? = null
+    override var contentJobItemProgress: List<ContentJobItemProgress>? = null
         get() = field
         set(value) {
 
-            setState {
+            /*setState {
                 if(value != null) {
 
                     if(value.progressTitle != null){
@@ -170,7 +180,7 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
                     downloadProgress = 0f
                 }
                 field = value
-            }
+            }*/
         }
 
     override var entity: ContentEntryWithMostRecentContainer? = null
@@ -205,15 +215,15 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
 
                     if(scoreProgress?.progress ?: 0 > 0){
                         umLinearProgress((scoreProgress?.progress ?: 0).toDouble(),
-                            variant = LinearProgressVariant.determinate){
+                            variant = ProgressVariant.determinate){
                             css {
                                 padding(top = 1.spacingUnits, bottom = 1.spacingUnits)
                             }
                         }
                     }
 
-                   if((canDownload || hasContentToOpenOrDelete) && showEntryDownloadOpenBtn){
-                       umButton(getString(MessageID.open),
+                   if((canDownload || canOpen) && showEntryDownloadOpenBtn){
+                       umButton(getString(if(canDownload) MessageID.download else MessageID.open),
                            size = ButtonSize.large,
                            color = UMColor.secondary,
                            variant = ButtonVariant.contained,
@@ -335,6 +345,24 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
 
                             umTypography(entity?.description, paragraph = true){
                                 css(alignTextToStart)
+                            }
+                        }
+
+                        umGridContainer(GridSpacing.spacing4) {
+                            css(defaultPaddingTop)
+                            createTopMainAction("library_add_check",getString(MessageID.mark_complete), GridSize.cells4, GridSize.cells4,
+                                markCompleteVisible, TypographyVariant.body2){
+                                mPresenter?.handleOnClickMarkComplete()
+                            }
+
+                            createTopMainAction("delete",getString(MessageID.delete), GridSize.cells4, GridSize.cells4,
+                                markCompleteVisible, TypographyVariant.body2){
+                                mPresenter?.handleOnClickDeleteButton()
+                            }
+
+                            createTopMainAction("download",getString(MessageID.manage_download), GridSize.cells4, GridSize.cells4,
+                                markCompleteVisible, TypographyVariant.body2){
+                                mPresenter?.handleOnClickManageDownload()
                             }
                         }
 

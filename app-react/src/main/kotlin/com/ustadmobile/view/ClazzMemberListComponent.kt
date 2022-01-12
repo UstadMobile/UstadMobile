@@ -37,8 +37,8 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
     override val listPresenter: UstadListPresenter<*, in PersonWithClazzEnrolmentDetails>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = ClazzMemberListView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ClazzMemberListView.VIEW_NAME)
 
     private var students: List<PersonWithClazzEnrolmentDetails> = listOf()
 
@@ -90,7 +90,7 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
 
     override fun onCreateView() {
         super.onCreateView()
-        createNewText = getString(MessageID.add_a_teacher)
+        addNewEntryText = getString(MessageID.add_a_teacher)
         showEmptyState = false
         filterByClazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
         mPresenter = ClazzMemberListPresenter(this, arguments, this, di, this)
@@ -126,14 +126,16 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
         mPresenter?.handleClickEntry(entry)
     }
 
-    override fun handleClickCreateNewEntry() {
+    override fun handleClickAddNewEntry() {
         navigateToPickNewMember(ClazzEnrolment.ROLE_TEACHER)
     }
 
-    private fun RBuilder.createMemberList(members: List<PersonWithClazzEnrolmentDetails>,
-                                          sectionTitle: String, role: Int,
-                                          createNewLabel: Int = 0,
-                                          pending: Boolean = false){
+    private fun RBuilder.createMemberList(
+        members: List<PersonWithClazzEnrolmentDetails>,
+        sectionTitle: String,
+        role: Int,
+        createNewLabel: Int = 0,
+        pending: Boolean = false){
 
         umGridContainer(rowSpacing = GridSpacing.spacing1) {
             css(StyleManager.defaultDoubleMarginTop)
@@ -181,7 +183,7 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
     }
 }
 
-interface MemberListProps: ListProps<PersonWithClazzEnrolmentDetails>{
+interface MemberListProps: SimpleListProps<PersonWithClazzEnrolmentDetails>{
     var pending: Boolean
 }
 
@@ -191,8 +193,8 @@ class MembersListComponent(mProps: MemberListProps):
     override fun RBuilder.renderListItem(item: PersonWithClazzEnrolmentDetails, onClick: (Event) -> Unit) {
         umGridContainer {
             attrs.onClick = {
+                stopEventPropagation(it)
                 onClick.invoke(it.nativeEvent)
-                stopEventPropagation(it.nativeEvent)
             }
 
             val presenter = props.presenter as ClazzMemberListPresenter

@@ -15,7 +15,7 @@ import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.standardFormat
-import com.ustadmobile.view.ext.createItemWithIconTitleAndDescription
+import com.ustadmobile.view.ext.createListItemWithLeftIconTitleAndDescription
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.css.padding
@@ -34,17 +34,15 @@ class HolidayCalendarEditComponent(mProps: UmProps): UstadEditComponent<HolidayC
     override val mEditPresenter: UstadEditPresenter<*, HolidayCalendar>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = HolidayCalendarEditView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(HolidayCalendarEditView.VIEW_NAME)
 
     private var holidays: List<Holiday> = listOf()
 
     private val holidayObserver = ObserverFnWrapper<List<Holiday>> {
-        if(!it.isNullOrEmpty())
-            console.log(it.map { x -> x.holUid.toString()})
-            setState {
-                holidays = it
-            }
+        setState {
+            holidays = it
+        }
     }
 
     override var holidayList: DoorLiveData<List<Holiday>>? = null
@@ -127,16 +125,17 @@ class HolidayCalendarEditComponent(mProps: UmProps): UstadEditComponent<HolidayC
 }
 
 
-class HolidayListComponent(mProps: ListProps<Holiday>): UstadSimpleList<ListProps<Holiday>>(mProps){
+class HolidayListComponent(mProps: SimpleListProps<Holiday>): UstadSimpleList<SimpleListProps<Holiday>>(mProps){
     override fun RBuilder.renderListItem(item: Holiday, onClick: (Event) -> Unit) {
         umGridContainer {
             attrs.onClick = {
                 onClick.invoke(it.nativeEvent)
             }
 
-            createItemWithIconTitleAndDescription("date_range",item.holName,
+            createListItemWithLeftIconTitleAndDescription("date_range",item.holName,
                 "${Date(item.holStartTime).standardFormat()} " +
-                        "- ${Date(item.holEndTime).standardFormat()}"
+                        "- ${Date(item.holEndTime).standardFormat()}",
+                onMainList = true
             )
         }
     }

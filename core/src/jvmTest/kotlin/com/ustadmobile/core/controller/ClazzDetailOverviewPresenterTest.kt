@@ -58,16 +58,15 @@ class ClazzDetailOverviewPresenterTest {
         }
         context = Any()
 
-        mockNavController = mock()
-
         di = DI {
             import(ustadTestRule.diModule)
-            bind<UstadNavController>(overrides = true) with singleton { mockNavController }
         }
 
         val db: UmAppDatabase by di.activeDbInstance()
 
         val repo: UmAppDatabase by di.activeRepoInstance()
+
+        mockNavController = di.direct.instance()
 
         repoClazzDaoSpy = spy(repo.clazzDao).also {
             whenever(repo.clazzDao).thenReturn(it)

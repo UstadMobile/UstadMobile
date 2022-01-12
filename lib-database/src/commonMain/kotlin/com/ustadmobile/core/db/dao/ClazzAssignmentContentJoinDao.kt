@@ -1,9 +1,8 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Query
-import androidx.room.Transaction
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 
@@ -92,8 +91,8 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
     @Query("""
         UPDATE ClazzAssignmentContentJoin 
            SET cacjActive = :active,
-               cacjLCB = (SELECT nodeClientId 
-                            FROM SyncNode LIMIT 1) 
+               cacjLCB = COALESCE((SELECT nodeClientId 
+                            FROM SyncNode LIMIT 1), 0) 
         WHERE cacjContentUid = :contentUid 
           AND cacjAssignmentUid = :clazzAssignmentUid""")
     abstract suspend fun updateInActiveByClazzAssignmentContentJoinUid(contentUid: Long, active : Boolean,

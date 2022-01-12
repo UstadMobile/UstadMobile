@@ -25,7 +25,7 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
                                    di: DI, lifecycleOwner: DoorLifecycleOwner,
                                    private val assignmentItemListener: DefaultClazzAssignmentListItemListener
                                    = DefaultClazzAssignmentListItemListener(view, ListViewMode.BROWSER,
-                                           di.direct.instance(), context))
+                                           di.direct.instance(), context, di))
     : UstadListPresenter<ClazzAssignmentListView, ClazzAssignmentWithMetrics>(
         context, arguments, view, di, lifecycleOwner),
         ClazzAssignmentListItemListener by assignmentItemListener {
@@ -41,6 +41,7 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
+        assignmentItemListener.presenter = this
         clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0L
         assignmentItemListener.listViewMode = mListMode
         selectedSortOption = SORT_OPTIONS[0]
@@ -72,6 +73,8 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
         systemImpl.go(ClazzAssignmentEditView.VIEW_NAME,
                 mapOf(UstadView.ARG_CLAZZUID to clazzUid.toString()), context)
     }
+
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {}
 
     override fun onClickSort(sortOption: SortOrderOption) {
         super.onClickSort(sortOption)

@@ -1,12 +1,8 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.mui.ext.createStyledComponent
-import csstype.Properties
-import csstype.PropertiesBuilder
 import csstype.TransitionDuration
 import mui.material.*
-import mui.system.SxProps
-import mui.system.Theme
 import org.w3c.dom.events.Event
 import react.RBuilder
 import styled.StyledHandler

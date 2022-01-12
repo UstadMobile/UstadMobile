@@ -32,8 +32,16 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>,
     override fun handleClickEntry(entry: HolidayCalendar) {
         when(mListMode) {
             ListViewMode.PICKER -> finishWithResult(safeStringify(di, ListSerializer(HolidayCalendar.serializer()),listOf(entry)))
-            ListViewMode.BROWSER -> systemImpl.go(HolidayCalendarEditView.VIEW_NAME,
-                mapOf(UstadView.ARG_ENTITY_UID to entry.umCalendarUid.toString()), context)
+            ListViewMode.BROWSER -> navigateForResult(
+                NavigateForResultOptions(
+                    this, null,
+                    HolidayCalendarEditView.VIEW_NAME,
+                    HolidayCalendar::class,
+                    HolidayCalendar.serializer(),
+                    RESULT_DEST_KEY,
+                    arguments = mutableMapOf(UstadView.ARG_ENTITY_UID to entry.umCalendarUid.toString())
+                    )
+                )
         }
     }
 
@@ -47,6 +55,10 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>,
                 RESULT_DEST_KEY
             )
         )
+    }
+
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {
+        handleClickCreateNewFab()
     }
 
 

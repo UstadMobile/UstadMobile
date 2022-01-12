@@ -7,22 +7,18 @@ import com.ustadmobile.util.urlSearchParamsToMap
  */
 fun String.format(vararg args: Any): String{
     var placeHolder = this
-    val isFloatInterpolation = this.contains("f")
-    val charVar = (if(isFloatInterpolation) "f" else "%").toCharArray().first()
-    this.filter { it == charVar}.forEachIndexed { index, _ ->
-        val replaceTo = if(args.isNotEmpty() && args.size >= index) args[index].toString() else null
-        val replaceFromPrefix = when(isFloatInterpolation){
-            true -> "%${index + 1}.0"
-            else -> """%${index + 1}${"$"}"""
+    val results: MutableList<String> = mutableListOf()
+    var nextMatch:MatchResult? = "%\\d.\\df%|%\\d\\\$d%|%\\d\\\$d|%\\d\\\$s%|%\\d\\\$s".toRegex().find(this)
+    do{
+        if(nextMatch?.value != null){
+            val range = IntRange(nextMatch.range.first, nextMatch.range.last)
+            println()
+            results.add(placeHolder.substring(range))
         }
-        if(replaceTo != null){
-            placeHolder = placeHolder
-                .replace("${replaceFromPrefix}d",replaceTo)
-                .replace("${replaceFromPrefix}d%",replaceTo)
-                .replace("${replaceFromPrefix}s",replaceTo)
-                .replace("${replaceFromPrefix}s%",replaceTo)
-                .replace("${replaceFromPrefix}f%",replaceTo)
-        }
+        nextMatch = nextMatch?.next()
+    }while(nextMatch?.value != null)
+    results.forEachIndexed { index, part ->
+        placeHolder = placeHolder.replace(part, args[index].toString())
     }
     return placeHolder
 }

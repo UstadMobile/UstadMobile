@@ -32,8 +32,8 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
     override val mEditPresenter: UstadEditPresenter<*, ClazzWithHolidayCalendarAndSchool>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = ClazzEdit2View.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ClazzEdit2View.VIEW_NAME)
 
     private var clazzNameLabel = FieldLabel(text = getString(MessageID.class_name))
 
@@ -53,8 +53,7 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
 
     private var scheduleList: List<Schedule> = listOf()
 
-    private val scheduleObserver = ObserverFnWrapper<List<Schedule>?> {
-        if(it.isNullOrEmpty()) return@ObserverFnWrapper
+    private val scheduleObserver = ObserverFnWrapper<List<Schedule>> {
         setState {
             scheduleList = it
         }

@@ -18,7 +18,7 @@ class WebChunkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(m
             ustadComponentTitle = value?.title
         }
 
-    override var viewName: String? = null
+    override var viewNames: List<String>? = null
 
     override var url: String = ""
         get() = field
@@ -46,7 +46,7 @@ class WebChunkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(m
         mPresenter?.onDestroy()
         mPresenter = null
         entry = null
-        viewName = null
+        viewNames = null
     }
 
 }

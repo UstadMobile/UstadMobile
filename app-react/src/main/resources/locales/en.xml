@@ -90,6 +90,7 @@
     <string name="open">Open</string>
     <string name="downloading">Downloading</string>
     <string name="waiting">Waiting</string>
+    <string name="waiting_for_connection">Waiting for connection</string>
     <string name="queued">Queued</string>
     <string name="failed">Failed</string>
     <string name="passed">Passed</string>

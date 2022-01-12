@@ -36,10 +36,14 @@ import com.ustadmobile.view.ext.appBarSpacer
 import com.ustadmobile.view.ext.renderRoutes
 import com.ustadmobile.view.ext.umTopBar
 import kotlinext.js.jsObject
+import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.css.Display
 import kotlinx.css.display
 import kotlinx.css.padding
+import kotlinx.html.js.onClickFunction
 import mui.material.PaperProps
 import react.RBuilder
 import react.setState
@@ -52,7 +56,7 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
 
     private var activeAccount: UmAccount? = null
 
-    override var viewName: String? = null
+    override var viewNames: List<String>? = null
 
     private var appState: ReduxAppState = ReduxAppState()
 
@@ -80,10 +84,9 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
      * Similar to Android MainActivity NavController destination listener,
      * this trigger change on state to update visibility of frame items
      * i.e Side Nav, Bottom nav e.tc
-      */
+     */
     private fun onDestinationChanged() {
         val destination = lookupDestinationName(getViewNameFromUrl()) ?: defaultDestination
-
         destination.takeIf { it.labelId != 0 && it.labelId != MessageID.content}?.apply {
             ustadComponentTitle = getString(labelId)
         }
@@ -92,6 +95,11 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
             currentDestination = destination
             activeAccount = accountManager.activeAccount
         }
+
+        window.setTimeout({
+            val settings = document.getElementById("home-${MessageID.settings}")
+            settings?.asDynamic()?.style?.display = if(activeAccount?.admin == false) "none" else "flex"
+        }, 500)
     }
 
 
@@ -102,14 +110,19 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                 css (mainComponentWrapperContainer)
 
                 //Loading indicator
-                umLinearProgress(color = if(isDarkModeActive()) LinearProgressColor.secondary
-                else LinearProgressColor.primary) {
+                umLinearProgress(color = if(isDarkModeActive()) UMColor.secondary
+                else UMColor.primary) {
                     css(mainComponentProgressIndicator)
                     attrs.asDynamic().id = "um-progress"
                 }
 
                 styledDiv {
                     css(mainComponentContainer)
+                    attrs.onClickFunction = {
+                       GlobalScope.launch {
+                           //appDatabase.exportDatabase()
+                       }
+                    }
 
                     umTopBar(appState,
                         currentDestination,
@@ -199,6 +212,7 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                         destination.icon?.let {
                             umListItemWithIcon(it, getString(destination.labelId),
                                 divider = destination.divider ,
+                                id = "home-${destination.labelId}",
                                 onClick = {
                                     systemImpl.go(destination.view, mapOf(),this)
                                 },
@@ -206,6 +220,7 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                                 css{
                                     +alignTextToStart
                                     padding = "8px 16px"
+                                    display = if(destination.labelId == MessageID.settings) Display.none else Display.flex
                                 }
                             }
                         }

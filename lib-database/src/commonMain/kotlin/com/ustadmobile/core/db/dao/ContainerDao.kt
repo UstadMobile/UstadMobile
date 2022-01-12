@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.Container
@@ -74,14 +75,31 @@ abstract class ContainerDao : BaseDao<Container> {
 
     @Query("""
           SELECT EXISTS(SELECT 1
-                          FROM Container 
+                          FROM Container
+                     LEFT JOIN ContentJobItem
+                               ON ContentJobItem.cjiContainerUid = Container.containerUid  
                          WHERE Container.containerContentEntryUid = :contentEntryUid
+                           AND ContentJobItem.cjiRecursiveStatus = ${JobStatus.COMPLETE}
                            AND EXISTS (SELECT ContainerEntry.ceUid 
                                          FROM ContainerEntry
                                         WHERE ContainerEntry.ceContainerUid = Container.containerUid)   
                       ORDER BY cntLastModified DESC LIMIT 1)
     """)
     abstract fun hasContainerWithFilesToDelete(contentEntryUid: Long): DoorLiveData<Boolean>
+
+
+    @Query("""
+          SELECT EXISTS(SELECT 1
+                          FROM Container
+                     LEFT JOIN ContentJobItem
+                               ON ContentJobItem.cjiContainerUid = Container.containerUid  
+                         WHERE Container.containerContentEntryUid = :contentEntryUid
+                           AND EXISTS (SELECT ContainerEntry.ceUid 
+                                         FROM ContainerEntry
+                                        WHERE ContainerEntry.ceContainerUid = Container.containerUid)   
+                      ORDER BY cntLastModified DESC LIMIT 1)
+    """)
+    abstract fun hasContainerWithFilesToOpen(contentEntryUid: Long): DoorLiveData<Boolean>
 
     @Query("""
          SELECT (SELECT MAX(cntLastModified) 
@@ -200,9 +218,9 @@ abstract class ContainerDao : BaseDao<Container> {
                       JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid
                      WHERE ContainerEntry.ceContainerUid = Container.containerUid), 0),
                    cntLastModBy = 
-                   (SELECT nodeClientId 
+                   COALESCE((SELECT nodeClientId 
                       FROM SyncNode 
-                     LIMIT 1)
+                     LIMIT 1), 0)
                      
              WHERE containerUid = :containerUid
         """

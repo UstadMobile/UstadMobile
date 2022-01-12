@@ -55,13 +55,11 @@ class ClazzEnrolmentListPresenterTest {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
 
-        mockNavController = mock()
-
         di = DI {
             import(ustadTestRule.diModule)
-            bind<UstadNavController>(overrides = true) with singleton { mockNavController }
         }
         val repo: UmAppDatabase by di.activeRepoInstance()
+        mockNavController = di.direct.instance()
         context = Any()
         repoClazzEnrolmentDaoSpy = spy(repo.clazzEnrolmentDao)
         whenever(repo.clazzEnrolmentDao).thenReturn(repoClazzEnrolmentDaoSpy)

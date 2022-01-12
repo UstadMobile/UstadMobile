@@ -44,9 +44,11 @@ fun RBuilder.umTextField(
     handler: StyledHandler<UMTextFieldProps>? = null
 ) = createStyledComponent(TextField, className, handler) {
     css(defaultFullWidth)
-    setProps(this, autoComplete, autoFocus, disabled, error, fullWidth, helperText,
-        id, label, margin,false, name, onChange,placeholder, required, null, null,
-        false, type, value, variant)
+    setProps(
+        this, autoComplete, autoFocus, disabled, error, fullWidth, helperText,
+        id, label, margin, false, name, onChange, placeholder, required, null, null,
+        false, type, value, variant
+    )
 }
 
 fun RBuilder.umTextFieldMultiLine(
@@ -70,8 +72,10 @@ fun RBuilder.umTextFieldMultiLine(
     handler: StyledHandler<UMTextFieldProps>? = null
 ) = createStyledComponent(TextField, className, handler) {
     css(defaultFullWidth)
-    setProps(this, null, autoFocus, disabled, error, fullWidth, helperText, id, label, margin,
-        true, name, onChange, placeholder, required, rows, rowsMax, false, InputType.text, value, variant)
+    setProps(this, null, autoFocus,
+        disabled, error, fullWidth, helperText, id, label, margin, true, name, onChange,
+        placeholder, required, rows, rowsMax, false, InputType.text, value, variant
+    )
 }
 
 external interface UMTextFieldProps: TextFieldProps, StyledProps, BaseTextFieldProps
@@ -96,8 +100,11 @@ fun RBuilder.umTextFieldSelect(
     className: String? = null,
     handler: StyledHandler<UMTextFieldProps>? = null
 ) = createStyledComponent(TextField, className, handler) {
-    setProps(this, autoComplete, autoFocus, disabled, error, fullWidth, helperText, id, label, margin,
-        false, name, onChange, placeholder, required, null, null, true, InputType.text, value, variant)
+    setProps(
+        this, autoComplete, autoFocus, disabled, error, fullWidth, helperText,
+        id, label, margin, false, name, onChange, placeholder, required, null,
+        null, true, InputType.text, value, variant
+    )
     css{
         +defaultFullWidth
         +alignTextToStart
@@ -133,7 +140,7 @@ private fun setProps(
     select: Boolean,
     type: InputType,
     value: String?,
-    variant: FormControlVariant
+    variant: FormControlVariant,
 ) {
     autoComplete?.let { textField.attrs.autoComplete = it }
     textField.attrs.autoFocus = autoFocus
@@ -159,7 +166,6 @@ private fun setProps(
     textField.attrs.select = select
     textField.attrs.type = type
     textField.attrs.value = value ?: ""
-    //textField.attrs.defaultValue = it
     textField.attrs.variant = variant.toString()
 }
 

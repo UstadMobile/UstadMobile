@@ -26,11 +26,13 @@ interface ContentEntryDetailOverviewView: UstadDetailView<ContentEntryWithMostRe
 
     var canUpdate: Boolean
 
-    var hasContentToOpenOrDelete: Boolean
+    var canDelete: Boolean
+
+    var canOpen: Boolean
 
     var contentJobItemStatus: Int
 
-    var contentJobItemProgress: ContentJobItemProgress?
+    var contentJobItemProgress: List<ContentJobItemProgress>?
 
     companion object {
 

@@ -33,8 +33,8 @@ class SchoolEditComponent (mProps: UmProps): UstadEditComponent<SchoolWithHolida
     override val mEditPresenter: UstadEditPresenter<*, SchoolWithHolidayCalendar>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = SchoolEditView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(SchoolEditView.VIEW_NAME)
 
     private var nameLabel = FieldLabel(text = getString(MessageID.name))
 

@@ -21,7 +21,6 @@ import com.ustadmobile.util.Util.loadAssetsAsText
 import com.ustadmobile.util.Util.loadFileContentAsMap
 import com.ustadmobile.util.urlSearchParamsToMap
 import com.ustadmobile.view.SplashView
-import com.ustadmobile.view.SplashView.Companion.TAG_LOADED
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.GlobalScope
@@ -67,7 +66,7 @@ class SplashPresenter(private val view: SplashView): DIAware {
         dbBuilder.addCallback(ContentJobItemTriggersCallback())
             .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
 
-        umAppDatabase.initJsRepo(impl.getAppPref(TAG_LOADED, this).toBoolean())
+        umAppDatabase.initJsRepo(impl)
 
         val localeCode = impl.getDisplayedLocale(this)
         val defaultLocale = impl.getAppPref(AppConfig.KEY_DEFAULT_LANGUAGE, this)
@@ -92,7 +91,6 @@ class SplashPresenter(private val view: SplashView): DIAware {
             impl.currentTranslations = Pair(currentAssetPath, currentStrings)
         }
         view.appName = impl.getString(MessageID.app_name,this)
-        impl.setAppPref(TAG_LOADED,"true", this)
         view.loading = false
     }
 

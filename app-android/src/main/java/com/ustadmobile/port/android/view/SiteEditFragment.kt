@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSiteEditBinding
 import com.toughra.ustadmobile.databinding.ItemSiteTermsEditBinding
 import com.ustadmobile.core.controller.SiteEditPresenter
@@ -20,7 +19,6 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.port.android.util.ext.*
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 
 interface SiteEditFragmentEventHandler {
 
@@ -76,7 +74,8 @@ class SiteEditFragment: UstadEditFragment<Site>(), SiteEditView, SiteEditFragmen
 
     override fun onClickEditSiteTerms(workspaceTerms: SiteTermsWithLanguage?) {
         onSaveStateToBackStackStateHandle()
-        navigateToEditEntity(workspaceTerms, R.id.site_terms_edit_dest, SiteTermsWithLanguage::class.java)
+        onClickEditSiteTerms(workspaceTerms)
+
     }
 
     override fun onClickNewSiteTerms() = onClickEditSiteTerms(null)

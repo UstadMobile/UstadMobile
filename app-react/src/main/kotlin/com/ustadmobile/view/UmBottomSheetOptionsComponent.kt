@@ -3,10 +3,10 @@ package com.ustadmobile.view
 import Breakpoint
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
+import com.ustadmobile.mui.components.*
 import kotlinx.css.LinearDimension
 import kotlinx.css.width
 import react.RBuilder
@@ -18,7 +18,7 @@ import kotlin.js.Date
 
 data class UmDialogOptionItem(var icon: String?, var primaryText: Int, var secondaryText: Int = 0, val onOptionItemClicked: (() -> Unit)? = null)
 
-interface UmDialogOptionProps: UmProps {
+interface UmBottomSheetProps: UmProps {
     var optionItems: List<UmDialogOptionItem>
     var systemImpl: UstadMobileSystemImpl
     var shownAt: Long
@@ -26,7 +26,7 @@ interface UmDialogOptionProps: UmProps {
     var onDialogClosed: () -> Unit
 }
 
-class UmDialogComponent(mProps: UmDialogOptionProps): RComponent<UmDialogOptionProps, UmState>(mProps) {
+class UmBottomSheetOptionsComponent(mProps: UmBottomSheetProps): RComponent<UmBottomSheetProps, UmState>(mProps) {
 
     private var showDialog: Boolean = true
 
@@ -94,11 +94,11 @@ class UmDialogComponent(mProps: UmDialogOptionProps): RComponent<UmDialogOptionP
         }
     }
 
-    override fun componentDidUpdate(prevProps: UmDialogOptionProps, prevState: UmState, snapshot: Any) {
+    override fun componentDidUpdate(prevProps: UmBottomSheetProps, prevState: UmState, snapshot: Any) {
 
     }
 
-    override fun componentWillUpdate(nextProps: UmDialogOptionProps, nextState: UmState) {
+    override fun componentWillUpdate(nextProps: UmBottomSheetProps, nextState: UmState) {
         showDialog = nextProps.shownAt != props.shownAt
     }
 }
@@ -109,7 +109,7 @@ fun RBuilder.renderDialogOptions(
     shownAt: Long = Date().getTime().toLong(),
     title: String? = null,
     onDialogClosed: () -> Unit
-) = child(UmDialogComponent::class) {
+) = child(UmBottomSheetOptionsComponent::class) {
     attrs.optionItems = optionItems
     attrs.systemImpl = systemImpl
     attrs.shownAt = shownAt

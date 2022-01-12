@@ -28,8 +28,8 @@ class LanguageEditComponent (mProps: UmProps): UstadEditComponent<Language>(mPro
     override val mEditPresenter: UstadEditPresenter<*, Language>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = LanguageEditView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(LanguageEditView.VIEW_NAME)
 
     private var nameLabel = FieldLabel(text = getString(MessageID.name))
 

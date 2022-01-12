@@ -1,10 +1,10 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
@@ -55,7 +55,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     abstract suspend fun findEnrolmentWithLeavingReason(enrolmentUid: Long): ClazzEnrolmentWithLeavingReason?
 
     @Query("""UPDATE ClazzEnrolment SET clazzEnrolmentDateLeft = :endDate,
-            clazzEnrolmentLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1)
+            clazzEnrolmentLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0)
             WHERE clazzEnrolmentUid = :clazzEnrolmentUid""")
     abstract suspend fun updateDateLeftByUid(clazzEnrolmentUid: Long, endDate: Long)
 
@@ -129,9 +129,9 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                 UPDATE ClazzEnrolment
                    SET clazzEnrolmentActive = :active,
                        clazzEnrolmentLastChangedBy = 
-                        (SELECT nodeClientId 
+                        COALESCE((SELECT nodeClientId 
                           FROM SyncNode 
-                         LIMIT 1) 
+                         LIMIT 1), 0)  
                 WHERE clazzEnrolmentPersonUid = :personUid 
                       AND clazzEnrolmentClazzUid = :clazzUid
                       AND clazzEnrolmentRole = :roleId""")
@@ -199,7 +199,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
 
 
     @Query("""UPDATE ClazzEnrolment SET clazzEnrolmentActive = :enrolled,
-            clazzEnrolmentLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            clazzEnrolmentLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1),0) 
             WHERE clazzEnrolmentUid = :clazzEnrolmentUid""")
     abstract fun updateClazzEnrolmentActiveForClazzEnrolment(clazzEnrolmentUid: Long, enrolled: Int): Int
 
@@ -214,7 +214,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Query("""
             UPDATE ClazzEnrolment 
                SET clazzEnrolmentRole = :newRole,
-                   clazzEnrolmentLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+                   clazzEnrolmentLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
              -- Avoid potential for duplicate approvals if user was previously refused      
              WHERE clazzEnrolmentUid = COALESCE( 
                     (SELECT clazzEnrolmentUid

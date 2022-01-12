@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.harscraper
 
 import com.google.gson.GsonBuilder
-import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.contentformats.har.HarRegexPair
@@ -20,7 +19,6 @@ import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.door.ext.clearAllTablesAndResetSync
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.folder.TestFolderIndexer
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
@@ -32,9 +30,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
+import org.mockito.kotlin.spy
 import java.io.File
 import java.io.StringWriter
-import java.lang.IllegalArgumentException
 import java.nio.file.Files
 import javax.naming.InitialContext
 import kotlin.random.Random
@@ -60,7 +58,7 @@ class TestHarScraper {
 
     private lateinit var di: DI
     private lateinit var endpointScope: EndpointScope
-    private val endpoint = Endpoint(TestFolderIndexer.TEST_ENDPOINT)
+    private val endpoint = Endpoint(TEST_ENDPOINT)
 
     private val RESOURCE_PATH = "/com/ustadmobile/lib/contentscrapers/harcontent"
 
@@ -204,6 +202,12 @@ class TestHarScraper {
         Assert.assertEquals("regex was found and removed",  "http://localhost:${url.port}/pic_trull.jpg?style=abc.css", entry!!.request.url)
 
         scraper.close()
+
+    }
+
+    companion object {
+
+        const val TEST_ENDPOINT = "http://test.localhost.com/"
 
     }
 

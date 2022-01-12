@@ -7,7 +7,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.HolidayEditView
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.ext.targetInputValue
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
@@ -33,8 +32,8 @@ class HolidayEditComponent(mProps: UmProps): UstadEditComponent<Holiday>(mProps)
 
     private val holidayEnd = FieldLabel(getString(MessageID.end_date))
 
-    override val viewName: String
-        get() = HolidayEditView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(HolidayEditView.VIEW_NAME)
 
     override var fieldsEnabled: Boolean = false
         get() = field

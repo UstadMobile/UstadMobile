@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.core.view.ListViewMode
@@ -14,13 +15,15 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.*
 
 class DefaultClazzListItemListener(var view: ClazzList2View?,
                                    var listViewMode: ListViewMode,
                                    val context: Any,
                                    val arguments: Map<String, String>,
-                                   override val di: DI): ClazzListItemListener, DIAware {
+                                   override val di: DI,
+                                   var presenter: ClazzListPresenter? = null): ClazzListItemListener, DIAware {
 
     val systemImpl: UstadMobileSystemImpl by instance()
 
@@ -57,7 +60,7 @@ class DefaultClazzListItemListener(var view: ClazzList2View?,
                         arguments.plus(UstadView.ARG_CLAZZUID to clazz.clazzUid.toString()),
                         context)
             }else {
-                view?.finishWithResult(listOf(clazz))
+                presenter?.finishWithResult(safeStringify(di, ListSerializer(Clazz.serializer()), listOf(clazz)))
             }
         }
     }

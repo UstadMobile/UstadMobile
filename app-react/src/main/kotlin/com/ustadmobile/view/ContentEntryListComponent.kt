@@ -10,20 +10,16 @@ import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.theme.UMColor
-import com.ustadmobile.util.StyleManager
-import com.ustadmobile.util.StyleManager.alignTextToStart
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.umIconButton
+import com.ustadmobile.mui.components.umMenu
+import com.ustadmobile.mui.components.umMenuItem
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.util.Util
-import com.ustadmobile.util.ext.format
-import com.ustadmobile.util.ext.wordBreakLimit
-import com.ustadmobile.view.ext.umEntityAvatar
-import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.createContentEntryListItem
 import com.ustadmobile.view.ext.umItem
 import kotlinx.browser.document
-import kotlinx.css.*
+import kotlinx.css.display
 import org.w3c.dom.Element
 import react.RBuilder
 import react.setState
@@ -47,8 +43,9 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
     override val displayTypeRepo: Any?
         get() = dbRepo?.contentEntryDao
 
-    override val viewName: String
-        get() = ContentEntryList2View.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ContentEntryList2View.VIEW_NAME_HOME, ContentEntryList2View.VIEW_NAME,
+            ContentEntryList2View.FOLDER_VIEW_NAME)
 
     override var editOptionVisible: Boolean = false
         get() = field
@@ -74,74 +71,14 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
     }
 
     override fun RBuilder.renderListItem(item: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
-        val showSelectBtn = arguments.determineListMode().toString() == ListViewMode.PICKER.toString() &&
-                (arguments[ARG_SELECT_FOLDER_VISIBLE]?.toBoolean() == true || item.leaf)
-
-        umGridContainer(columnSpacing = GridSpacing.spacing4) {
-            umItem(GridSize.cells3){
-                umEntityAvatar(item.thumbnailUrl,
-                    if(item.leaf) Util.ASSET_BOOK else Util.ASSET_FOLDER,
-                    showIcon = false,
-                    className = "${StyleManager.name}-entityThumbnailClass")
-            }
-
-            umItem(GridSize.cells9){
-                umGridContainer {
-                    umItem(GridSize.cells12){
-                        umTypography(item.title,
-                            variant = TypographyVariant.h6){
-                            css {
-                                +alignTextToStart
-                                marginBottom = LinearDimension("10px")
-                            }
-                        }
-                    }
-
-                    umItem(GridSize.cells12){
-                        umTypography(item.description?.wordBreakLimit(if(Util.isMobile()) 8 else 50),
-                            variant = TypographyVariant.body1,
-                            paragraph = true){
-                            css(alignTextToStart)
-                        }
-                    }
-
-                    umItem(GridSize.cells12){
-                        umGridContainer(columnSpacing = GridSpacing.spacing1){
-                            css{
-                                display = displayProperty(item.leaf, true)
-                            }
-                            val messageId = CONTENT_ENTRY_TYPE_LABEL_MAP[item.contentTypeFlag] ?: MessageID.untitled
-                            val icon = CONTENT_ENTRY_TYPE_ICON_MAP[item.contentTypeFlag] ?: ""
-                            umItem(GridSize.cells2, GridSize.cells1) {
-                                umAvatar(className = "${StyleManager.name}-contentEntryListContentAvatarClass") {
-                                    umIcon(icon, className= "${StyleManager.name}-contentEntryListContentTyeIconClass"){
-                                        css{marginTop = 4.px}
-                                    }
-                                }
-                            }
-
-                            umItem(GridSize.cells8, GridSize.cells9) {
-                                umTypography(getString(messageId),
-                                    variant = TypographyVariant.body2,
-                                    gutterBottom = true)
-                            }
-
-                            umItem(GridSize.cells2){
-                                umButton(getString(MessageID.select_item).format(""),
-                                    variant = ButtonVariant.outlined,
-                                    color = UMColor.secondary,
-                                    onClick = {
-                                        it.stopPropagation()
-                                        mPresenter?.onClickSelectContentEntry(item)
-                                    }){
-                                    css {
-                                        display = displayProperty(showSelectBtn)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+        val showSelectBtn = arguments.determineListMode().toString() == ListViewMode.PICKER.toString()
+                && (arguments[ARG_SELECT_FOLDER_VISIBLE]?.toBoolean() ?: true || item.leaf)
+        val showStatus = arguments.determineListMode().toString() != ListViewMode.PICKER.toString()
+        createContentEntryListItem(item,systemImpl, showSelectBtn, showStatus){
+            if(showSelectBtn){
+                mPresenter?.onClickSelectContentEntry(item)
+            }else {
+                mPresenter?.onClickDownloadContentEntry(item)
             }
         }
     }
@@ -150,11 +87,6 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
         mPresenter?.onClickContentEntry(entry)
     }
 
-    override fun onFabClicked() {
-        setState {
-            showAddEntryOptions = true
-        }
-    }
 
     override fun showContentEntryAddOptions() {
         setState {

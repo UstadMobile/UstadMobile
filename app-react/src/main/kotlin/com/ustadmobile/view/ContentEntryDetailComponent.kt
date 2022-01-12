@@ -8,9 +8,9 @@ import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ACTIVE_TAB_INDEX
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.urlSearchParamsToMap
 import react.RBuilder
-import com.ustadmobile.util.*
 
 class ContentEntryDetailComponent(mProps: UmProps): UstadDetailComponent<ContentEntry>(mProps), ContentEntryDetailView {
 
@@ -19,8 +19,8 @@ class ContentEntryDetailComponent(mProps: UmProps): UstadDetailComponent<Content
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override val viewName: String
-        get() = ContentEntryDetailView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(ContentEntryDetailView.VIEW_NAME)
 
     private var tabsToRender: List<UmTab>? = null
 

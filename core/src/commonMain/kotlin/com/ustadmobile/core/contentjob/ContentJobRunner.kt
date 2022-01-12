@@ -7,16 +7,18 @@ import com.ustadmobile.core.io.ext.emptyRecursively
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.EventCollator
 import com.ustadmobile.core.util.createTemporaryDir
-import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
+import com.ustadmobile.core.util.ext.deleteFilesForContentJob
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.github.aakira.napier.Napier
+import io.ktor.utils.io.errors.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -27,7 +29,6 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import kotlin.jvm.Volatile
 import kotlin.math.min
-import com.ustadmobile.door.ext.dbType
 
 /**
  * Runs a given ContentJob.
@@ -135,7 +136,6 @@ class ContentJobRunner(
                 var metadataResult: MetadataResult? = null
                 if(item.contentJobItem?.cjiContentEntryUid == 0L) {
                     metadataResult = contentPluginManager.extractMetadata(sourceUri, processContext)
-                        ?: throw FatalContentJobException("ContentJobItem #${item.contentJobItem?.cjiUid}: cannot extract metadata")
                     val contentEntryUid = repo.contentEntryDao.insertAsync(metadataResult.entry)
                     item.contentJobItem?.cjiContentEntryUid = contentEntryUid
                     db.contentJobItemDao.updateContentEntryUid(item.contentJobItem?.cjiUid ?: 0,
@@ -152,19 +152,21 @@ class ContentJobRunner(
 
                 val pluginId = if(item.contentJobItem?.cjiPluginId == 0) {
                     metadataResult?.pluginId ?: contentPluginManager.extractMetadata(sourceUri,
-                        processContext)?.pluginId ?:
-                        throw FatalContentJobException("ContentJobItem #${item.contentJobItem?.cjiUid}: cannot determine pluginId")
+                        processContext).pluginId
                 }else {
                     item.contentJobItem?.cjiPluginId ?: 0
                 }
 
                 val plugin = contentPluginManager.getPluginById(pluginId)
 
-                // this is used to catch the exception of processJob
-                // as per https://kotlinlang.org/docs/exception-handling.html#supervision
-                val scope = CoroutineScope(SupervisorJob())
-                val jobResult = scope.async {
-                    plugin.processJob(item, processContext, this@ContentJobRunner)
+                val jobResult = async {
+                    try {
+                        plugin.processJob(item, processContext, this@ContentJobRunner)
+                    }catch(e: Exception) {
+                        Napier.e("jobResult: caught exception", e)
+                        processException = e
+                        ProcessResult(JobStatus.FAILED)
+                    }
                 }
 
                 mediatorObserver = DoorObserver {
@@ -183,16 +185,13 @@ class ContentJobRunner(
                     mediatorLiveData.observeForever(mediatorObserver)
                 }
 
-                try{
-                    processResult = jobResult.await()
-                }catch (e: Exception){
-                    throw e
-                }
 
+                processResult = jobResult.await()
                 db.contentJobItemDao.updateItemStatus(item.contentJobItem?.cjiUid ?: 0, processResult.status)
                 db.contentJobItemDao.updateFinishTimeForJob(item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
                 println("Processor #$id completed job #${item.contentJobItem?.cjiUid}")
                 delay(1000)
+
             }catch(e: Exception) {
                 //something went wrong
                 processException = e
@@ -201,22 +200,30 @@ class ContentJobRunner(
             }finally {
                 withContext(NonCancellable) {
                     val finalStatus: Int = when {
-                        processResult != null -> processResult.status
-                        processException is FatalContentJobException -> JobStatus.FAILED
-                        processException is ConnectivityCancellationException -> JobStatus.QUEUED
-                        processException is CancellationException -> {
-                            deleteFilesForContentEntry(
-                                    item.contentJobItem?.cjiContentEntryUid ?: 0,
-                                            di, endpoint)
-                            JobStatus.CANCELED
+                        processException == null && processResult != null -> {
+                            // it can be queued due to connectivity required to continue the job, don't count that as an attempt
+                            if(processResult.status != JobStatus.QUEUED){
+                                item.contentJobItem?.cjiAttemptCount = (item.contentJobItem?.cjiAttemptCount ?: 0) + 1
+                            }
+                            processResult.status
                         }
+                        processException is FatalContentJobException -> {
+                            item.contentJobItem?.cjiAttemptCount = (item.contentJobItem?.cjiAttemptCount ?: 0) + 1
+                            JobStatus.FAILED
+                        }
+                        processException is ContentTypeNotSupportedException -> JobStatus.COMPLETE
+                        processException is ConnectivityCancellationException -> JobStatus.QUEUED
+                        processException is CancellationException -> JobStatus.CANCELED
                         (item.contentJobItem?.cjiAttemptCount ?: maxItemAttempts) >= maxItemAttempts -> JobStatus.FAILED
-                        else -> JobStatus.QUEUED
+                        else -> {
+                            item.contentJobItem?.cjiAttemptCount = (item.contentJobItem?.cjiAttemptCount ?: 0) + 1
+                            JobStatus.QUEUED
+                        }
                     }
 
                     db.contentJobItemDao.updateJobItemAttemptCountAndStatus(
                         item.contentJobItem?.cjiUid ?: 0,
-                        (item.contentJobItem?.cjiAttemptCount ?: 0) + 1, finalStatus)
+                        item.contentJobItem?.cjiAttemptCount?: 0, finalStatus)
                     db.contentJobItemDao.updateFinishTimeForJob(item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
 
                     activeJobItemIds -= (item.contentJobItem?.cjiUid ?: 0)
@@ -233,8 +240,9 @@ class ContentJobRunner(
                 }
 
 
-                if(processException is CancellationException)
-                    throw processException
+                if(processException is CancellationException &&
+                        processException !is ConnectivityCancellationException)
+                    throw processException as CancellationException
 
                 checkQueueSignalChannel.send(true)
             }
@@ -263,9 +271,29 @@ class ContentJobRunner(
                 jobItemProducer = it
             }
 
-            repeat(numProcessors) {
-                Napier.d("launch processor $it")
-                launchProcessor(it, producerVal)
+            val jobList = mutableListOf<Job>()
+            try {
+                /* this is used so we can catch the exception for launchProcessor as seen in key point 5 in below article.
+                   https://www.lukaslechner.com/why-exception-handling-with-kotlin-coroutines-is-so-hard-and-how-to-successfully-master-it*/
+                coroutineScope {
+                    repeat(numProcessors) {
+                        Napier.d("launch processor $it")
+                        jobList += launchProcessor(it, producerVal)
+                    }
+                    Napier.d("run Job, send queue signal")
+                    checkQueueSignalChannel.send(true)
+                }
+
+            }catch(e: CancellationException) {
+                withContext(NonCancellable) {
+                    producerVal.cancel()
+                    coroutineContext.cancelChildren()
+                    jobList.forEach {
+                        it.cancelAndJoin()
+                    }
+                    deleteFilesForContentJob(jobId, di, endpoint)
+                    throw e
+                }
             }
 
             Napier.d("run Job, send queue signal")

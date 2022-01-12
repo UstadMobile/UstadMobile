@@ -303,16 +303,32 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
      * not yet have the indexes
      */
     @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
-    @Query("""WITH RECURSIVE ContentEntry_recursive(contentEntryUid, containerSize) AS (
-    SELECT contentEntryUid, 
-    (SELECT COALESCE((SELECT fileSize FROM Container WHERE containerContentEntryUid = ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1), 0)) AS containerSize 
-    FROM ContentEntry WHERE contentEntryUid = :contentEntryUid
-    UNION 
-    SELECT ContentEntry.contentEntryUid, (SELECT COALESCE((SELECT fileSize FROM Container WHERE containerContentEntryUid = ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1), 0)) AS containerSize  FROM ContentEntry
-    LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid,
-    ContentEntry_recursive
-    WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = ContentEntry_recursive.contentEntryUid)
-    SELECT COUNT(*) AS numEntries, SUM(containerSize) AS totalSize FROM ContentEntry_recursive""")
+    @Query("""
+        WITH RECURSIVE 
+               ContentEntry_recursive(contentEntryUid, containerSize) AS (
+               SELECT contentEntryUid, 
+                            (SELECT COALESCE((SELECT fileSize 
+                                           FROM Container 
+                                          WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
+                                       ORDER BY cntLastModified DESC LIMIT 1), 0)) AS containerSize 
+                 FROM ContentEntry 
+                WHERE contentEntryUid = :contentEntryUid
+                  AND NOT ceInactive
+        UNION 
+            SELECT ContentEntry.contentEntryUid, 
+                (SELECT COALESCE((SELECT fileSize 
+                                    FROM Container 
+                                   WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
+                                ORDER BY cntLastModified DESC LIMIT 1), 0)) AS containerSize  
+                  FROM ContentEntry
+             LEFT JOIN ContentEntryParentChildJoin 
+                    ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid,
+                            ContentEntry_recursive
+                  WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = ContentEntry_recursive.contentEntryUid
+                    AND NOT ceInactive)
+        SELECT COUNT(*) AS numEntries, 
+               SUM(containerSize) AS totalSize 
+          FROM ContentEntry_recursive""")
     abstract suspend fun getRecursiveDownloadTotals(contentEntryUid: Long): DownloadJobSizeInfo?
 
     @Query(ALL_ENTRIES_RECURSIVE_SQL)
@@ -322,13 +338,13 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract fun getAllEntriesRecursivelyAsList(contentEntryUid: Long): List<ContentEntryWithParentChildJoinAndMostRecentContainer>
 
     @Query("""UPDATE ContentEntry SET ceInactive = :ceInactive, 
-            contentEntryLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            contentEntryLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
             WHERE ContentEntry.contentEntryUid = :contentEntryUid""")
     @JsName("updateContentEntryInActive")
     abstract fun updateContentEntryInActive(contentEntryUid: Long, ceInactive: Boolean)
 
     @Query("""UPDATE ContentEntry SET contentTypeFlag = :contentFlag,
-            contentEntryLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            contentEntryLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
             WHERE ContentEntry.contentEntryUid = :contentEntryUid""")
     @JsName("updateContentEntryContentFlag")
     abstract fun updateContentEntryContentFlag(contentFlag: Int, contentEntryUid: Long)
@@ -353,8 +369,19 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                                                       permission: Long) : Boolean
 
 
+    @Query("""
+        UPDATE ContentEntry
+           SET ceInactive = :inactive
+         WHERE contentEntryUid IN (SELECT cjiContentEntryUid 
+                                     FROM ContentJobItem
+                                    WHERE cjiJobUid = :jobId
+                                      AND CAST(ContentJobItem.cjiContentDeletedOnCancellation AS INTEGER) = 1)
+    """)
+    abstract fun invalidateContentEntryCreatedByJob(jobId: Long, inactive: Boolean)
+
+
     @Query("""UPDATE ContentEntry SET ceInactive = :toggleVisibility, 
-                contentEntryLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+                contentEntryLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
                 WHERE contentEntryUid IN (:selectedItem)""")
     abstract suspend fun toggleVisibilityContentEntryItems(toggleVisibility: Boolean, selectedItem: List<Long>)
 

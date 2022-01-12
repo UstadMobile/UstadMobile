@@ -34,6 +34,7 @@ private val statusToMessageIdMap = mapOf(
         JobStatus.QUEUED to MessageID.queued,
         JobStatus.RUNNING to MessageID.in_progress,
         JobStatus.CANCELLING to MessageID.canceled,
+        JobStatus.WAITING_FOR_CONNECTION to MessageID.waiting,
         JobStatus.CANCELED to MessageID.canceled,
         JobStatus.COMPLETE to MessageID.completed,
         JobStatus.FAILED to MessageID.failed,

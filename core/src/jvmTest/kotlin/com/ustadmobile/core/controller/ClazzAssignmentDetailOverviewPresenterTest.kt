@@ -48,7 +48,6 @@ class ClazzAssignmentDetailOverviewPresenterTest {
     @Before
     fun setup() {
         mockView = mock { }
-        mockNavController = mock()
         mockLifecycleOwner = mock {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
@@ -56,10 +55,11 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
         di = DI {
             import(ustadTestRule.diModule)
-            bind<UstadNavController>(overrides = true) with singleton { mockNavController }
         }
 
         val repo: UmAppDatabase by di.activeRepoInstance()
+
+        mockNavController = di.direct.instance()
 
 
         repoClazzAssignmentDaoSpy = spy(repo.clazzAssignmentDao)

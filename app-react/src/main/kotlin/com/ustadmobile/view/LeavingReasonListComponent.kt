@@ -17,15 +17,15 @@ class LeavingReasonListComponent(props: UmProps): UstadListComponent<LeavingReas
     override val displayTypeRepo: Any?
         get() = dbRepo?.leavingReasonDao
 
-    override val viewName: String
-        get() = LeavingReasonListView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(LeavingReasonListView.VIEW_NAME)
 
     override val listPresenter: UstadListPresenter<*, in LeavingReason>?
         get() = mPresenter
 
     override fun onCreateView() {
         super.onCreateView()
-        createNewText = getString(MessageID.add_leaving_reason)
+        addNewEntryText = getString(MessageID.add_leaving_reason)
         showCreateNewItem = true
         fabManager?.text = getString(MessageID.leaving_reason)
         ustadComponentTitle = getString(MessageID.select_leaving_reason)

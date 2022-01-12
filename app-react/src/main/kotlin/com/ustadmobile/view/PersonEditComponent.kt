@@ -46,8 +46,8 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
 
     private var displayRegField = Display.flex
 
-    override val viewName: String
-        get() = PersonEditView.VIEW_NAME
+    override val viewNames: List<String>
+        get() = listOf(PersonEditView.VIEW_NAME)
 
     override var genderOptions: List<MessageIdOption>? = null
         get() = field
@@ -274,7 +274,7 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
                         })
 
                     umGridContainer(GridSpacing.spacing4) {
-                        umItem(GridSize.cells12,GridSize.cells6 ) {
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
 
                             umDatePicker(
                                 label = "${dobLabel.text}",
@@ -291,7 +291,7 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
 
                         }
 
-                        umItem(GridSize.cells12,GridSize.cells6 ) {
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
                             umTextFieldSelect(
                                 "${genderLabel.text}",
                                 entity?.gender.toString(),
@@ -322,7 +322,7 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
                         })
 
                     umGridContainer(GridSpacing.spacing4) {
-                        umItem(GridSize.cells12,GridSize.cells6 ) {
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
                             umTextField(
                                 label = getString(MessageID.phone_number),
                                 value = entity?.phoneNum,
@@ -335,7 +335,7 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
                                 })
                         }
 
-                        umItem(GridSize.cells12,GridSize.cells6 ) {
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
                             umTextField(
                                 label = "${emailLabel.text}",
                                 value = entity?.emailAddr,
@@ -374,7 +374,7 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
                             display = displayRegField
                         }
 
-                        umItem(GridSize.cells12,GridSize.cells6 ) {
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
                             css(defaultMarginTop)
 
                             umFormControl(variant = FormControlVariant.outlined) {
@@ -410,7 +410,7 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
                             }
                         }
 
-                        umItem(GridSize.cells12,GridSize.cells6 ) {
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
                             css(defaultMarginTop)
 
                             umFormControl(variant = FormControlVariant.outlined) {

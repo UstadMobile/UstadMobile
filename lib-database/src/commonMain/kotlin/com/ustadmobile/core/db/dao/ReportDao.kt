@@ -1,13 +1,11 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
-import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
 import kotlin.js.JsName
 
 @Dao
@@ -57,7 +55,7 @@ abstract class ReportDao : BaseDao<Report> {
     abstract fun findAllActiveReportList(isTemplate: Boolean): List<Report>
 
     @Query("""UPDATE Report SET reportInactive = :inactive,
-                reportLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+                reportLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
                 WHERE reportUid = :uid""")
     abstract fun updateReportInactive(inactive: Boolean, uid: Long)
 
@@ -67,7 +65,7 @@ abstract class ReportDao : BaseDao<Report> {
 
 
     @Query("""UPDATE Report SET reportInactive = :toggleVisibility, 
-                reportLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+                reportLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
                 WHERE reportUid IN (:selectedItem)""")
     abstract suspend fun toggleVisibilityReportItems(toggleVisibility: Boolean, selectedItem: List<Long>)
 

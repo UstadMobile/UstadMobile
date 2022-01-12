@@ -16,13 +16,13 @@ abstract class StateDao : BaseDao<StateEntity> {
     abstract fun findStateIdByAgentAndActivity(agentUid: Long, activityId: String, registration: String, since: String): List<StateEntity>
 
     @Query("""UPDATE StateEntity SET isIsactive = :isActive,
-            stateLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            stateLastChangedBy = COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
             WHERE agentUid = :agentUid AND activityId = :activityId 
             AND registration = :registration AND isIsactive""")
     abstract fun updateStateToInActive(agentUid: Long, activityId: String, registration: String, isActive: Boolean)
 
     @Query("""UPDATE StateEntity SET isIsactive = :isActive, 
-            stateLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            stateLastChangedBy = COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
             WHERE stateId = :stateId AND agentUid = :agentUid 
             AND activityId = :activityId AND registration = :registration 
             AND isIsactive""")

@@ -14,11 +14,12 @@ import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.alignCenterItems
 import com.ustadmobile.util.StyleManager.centerContainer
-import com.ustadmobile.util.StyleManager.centerItem
 import com.ustadmobile.util.StyleManager.chipSetFilter
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.displayProperty
@@ -31,6 +32,7 @@ import com.ustadmobile.util.StyleManager.theme
 import com.ustadmobile.util.ThemeManager.isDarkModeActive
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
+import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.createCreateNewItem
 import com.ustadmobile.view.ext.umGridContainer
@@ -45,6 +47,7 @@ import react.RBuilder
 import react.setState
 import styled.css
 import styled.styledDiv
+import styled.styledSpan
 
 abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<UmProps,UmState>(props),
     UstadListView<RT, DT>, OnSortOptionSelected {
@@ -55,9 +58,9 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     private var isEventHandled = false
 
-    private var selectedEntries: MutableList<DT> = concurrentSafeListOf()
+    private var selectedListItems: MutableList<DT> = concurrentSafeListOf()
 
-    private var listItems: List<DT> = concurrentSafeListOf()
+    protected var dataListItems: List<DT> = concurrentSafeListOf()
 
     protected var showEditOptionsMenu:Boolean = false
 
@@ -65,6 +68,9 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     protected var dbRepo: UmAppDatabase? = null
 
+    /**
+     * Flag which shows/hide empty state on a list
+     */
     protected var showEmptyState = true
         get() = field
         set(value) {
@@ -73,6 +79,9 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
             }
         }
 
+    /**
+     * Flag which shows and hide the ADD entry layout at the top of the list
+     */
     protected var showCreateNewItem:Boolean = false
         get() = field
         set(value) {
@@ -81,7 +90,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
             }
         }
 
-    var createNewText: String = getString(MessageID.add_new_content)
+    var addNewEntryText: String = getString(MessageID.add_new_content)
         get() = field
         set(value) {
             field = value
@@ -93,7 +102,28 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
             field = value
         }
 
-    private var multiColumnItemSize = GridSize.cells4
+    /**
+     * Determines number of columns to be used on GridLayout.
+     * GridSize.cells12 = Will take the entire screen
+     * columns = (12/preferred grid size)
+     * i.e GridSize.cells4, will display 3 columns (12/4)
+     */
+    var multiColumnItemSize = GridSize.cells4
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
+    /**
+     * Flag to indicated which host design to be used on Gridlayout.
+     * TRUE = Use Card design
+     * FALSE = Use plain design
+     *
+     * i.e it has no effect on LinearLayout when set.
+     */
+    var useCards = true
         get() = field
         set(value) {
             setState {
@@ -123,8 +153,9 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     private val dataObserver = ObserverFnWrapper<List<DT>>{
         setState {
-            listItems = it
+            dataListItems = it
         }
+        onDataListLoaded()
     }
 
 
@@ -184,6 +215,8 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     override fun onCreateView() {
         super.onCreateView()
+        fabManager?.icon = "add"
+        fabManager?.text = ""
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
         window.setTimeout({
             searchManager?.searchListener = listPresenter
@@ -199,11 +232,17 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                 +contentContainer
             }
 
-            renderFilters()
+            renderEntrySelectionMenuOptions()
 
-            renderMenuOptions()
+            renderEntriesFilterOptions()
 
-            renderHeaderView()
+            styledDiv {
+                css{
+                    paddingBottom = 2.spacingUnits
+                }
+
+                renderHeaderView()
+            }
 
             if(linearLayout)
                 renderSingleColumnList()
@@ -217,6 +256,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
         renderAddContentOptionsDialog()
     }
 
+    open fun onDataListLoaded(){}
 
     private fun RBuilder.renderEmptyList(){
       if(showEmptyState){
@@ -224,7 +264,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
               css (centerContainer)
               styledDiv {
                   css{
-                      +centerItem
+                      +alignCenterItems
                       width = LinearDimension("200px")
                   }
                   umIcon(emptyList.icon ?: "crop_free", className = "${StyleManager.name}-emptyListIcon")
@@ -252,10 +292,13 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                         +listCreateNewContainer
                         +horizontalList
                     }
-                    attrs.asDynamic().onClick = {
-                        handleClickCreateNewEntry()
+                    umListItem(button = true) {
+                        attrs.onClick = {
+                            stopEventPropagation(it)
+                            handleClickAddNewEntry()
+                        }
+                        createCreateNewItem(addNewEntryText)
                     }
-                    createCreateNewItem(createNewText)
                 }
 
 
@@ -273,13 +316,16 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                     }
                 }
             }else {
-                umListItem( button = true, alignItems = ListItemAlignItems.flexStart) {
+                umListItem(
+                    button = true,
+                    alignItems = ListItemAlignItems.flexStart) {
                     css(listCreateNewContainer)
                     attrs.divider = true
                     attrs.onClick = {
-                        handleClickCreateNewEntry()
+                        stopEventPropagation(it)
+                        handleClickAddNewEntry()
                     }
-                    createCreateNewItem(createNewText)
+                    createCreateNewItem(addNewEntryText)
                 }
 
                 if(inviteNewText.isNotEmpty()){
@@ -302,30 +348,41 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
             renderNewItem()
 
-            if(listItems.isEmpty()){
+            if(dataListItems.isEmpty()){
                 renderEmptyList()
             }else {
-                umItem(GridSize.cells12){
-                    umGridContainer(GridSpacing.spacing4) {
-                        listItems.forEach {entry->
-                            umItem(GridSize.cells12, multiColumnItemSize){
-                                css{
-                                    cursor = Cursor.pointer
-                                    backgroundColor = Color(if(selectedEntries.indexOf(entry) != -1)
-                                        theme.palette.action.selected
-                                    else theme.palette.background.default)
-                                }
-                                umPaper(elevation = 4) {
-                                    styledDiv {
-                                        renderListItem(entry)
-                                    }
+                umGridContainer(GridSpacing.spacing4) {
+                    dataListItems.forEach { entry->
+                        umItem(GridSize.cells12, multiColumnItemSize){
+                            css{
+                                cursor = Cursor.pointer
+                                backgroundColor = Color(if(selectedListItems.indexOf(entry) != -1)
+                                    theme.palette.action.selected
+                                else theme.palette.background.default)
+                                +alignCenterItems
+                                padding(1.spacingUnits)
+                            }
 
-                                    attrs.onMouseDown = {
-                                        handleListItemPress(entry)
+                            attrs.onMouseDown = {
+                                stopEventPropagation(it)
+                                handleListItemPress(entry)
+                            }
+
+                            attrs.onMouseUp = {
+                                stopEventPropagation(it)
+                                handleListItemRelease(entry)
+                            }
+
+                            if(useCards){
+                                umPaper(elevation = 4) {
+                                    css{
+                                        width = LinearDimension("97%")
                                     }
-                                    attrs.onMouseUp = {
-                                        handleListItemRelease(entry)
-                                    }
+                                    renderListItem(entry)
+                                }
+                            }else {
+                                umListItem(button = true){
+                                    renderListItem(entry)
                                 }
                             }
                         }
@@ -337,17 +394,17 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     private fun RBuilder.renderSingleColumnList(){
        umList {
-            css{ +(styleList() ?: if(listItems.isNotEmpty()) horizontalList else horizontalListEmpty) }
+            css{ +(styleList() ?: if(dataListItems.isNotEmpty()) horizontalList else horizontalListEmpty) }
 
             renderNewItem(false)
 
-            if(listItems.isEmpty()){
+            if(dataListItems.isEmpty()){
                 renderEmptyList()
             }else {
-                listItems.forEach {entry->
+                dataListItems.forEach { entry->
                     umListItem(button = true) {
                         css{
-                            backgroundColor = Color(if(selectedEntries.indexOf(entry) != -1)
+                            backgroundColor = Color(if(selectedListItems.indexOf(entry) != -1)
                                 theme.palette.action.selected
                             else theme.palette.background.paper)
                             width = LinearDimension("100%")
@@ -380,7 +437,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
         }else{
             if(!isEventHandled){
                 isEventHandled = true
-                if(selectedEntries.isEmpty()){
+                if(selectedListItems.isEmpty()){
                     handleClickEntry(entry)
                 }else{
                     handleSelectedEntry(entry)
@@ -391,20 +448,20 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
     }
 
     private fun handleSelectedEntry(entry: DT){
-        val exists = selectedEntries.indexOf(entry) != -1
+        val exists = selectedListItems.indexOf(entry) != -1
         setState {
             if(exists){
-                selectedEntries.remove(entry)
+                selectedListItems.remove(entry)
             }else{
-                selectedEntries.add(entry)
+                selectedListItems.add(entry)
             }
-            listPresenter?.handleSelectionOptionChanged(selectedEntries)
+            listPresenter?.handleSelectionOptionChanged(selectedListItems)
         }
     }
 
     abstract fun RBuilder.renderListItem(item: DT)
 
-    private fun RBuilder.renderFilters(){
+    private fun RBuilder.renderEntriesFilterOptions(){
         if(listFilterOptionChips == null) return
         styledDiv {
             css{
@@ -434,50 +491,77 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
     }
 
 
-    private fun RBuilder.renderMenuOptions(){
-        val hideOptions = selectedEntries.isNullOrEmpty() or !showEditOptionsMenu
-        umGridContainer(spacing = GridSpacing.spacing2) {
+    private fun RBuilder.renderEntrySelectionMenuOptions(){
+        val hideOptions = selectedListItems.isNullOrEmpty() or !showEditOptionsMenu
+        umGridContainer {
             css{
                 +selectionContainer
-                marginBottom = 2.spacingUnits
-            }
-            val titleMd = if(selectedEntries.isNullOrEmpty()) GridSize.cells11 else GridSize.cells7
-            val titleMobile = if(selectedEntries.isNullOrEmpty()) GridSize.cells10 else GridSize.cells7
-            val iconsMd = if(selectedEntries.isNullOrEmpty()) GridSize.cellsAuto else GridSize.cells5
-            val iconsMobile = if(selectedEntries.isNullOrEmpty()) GridSize.cells1 else GridSize.cells5
-            umItem(titleMobile, titleMd){
-                umTypography(variant = TypographyVariant.subtitle1){
-                    css {
-                        marginTop = 10.px
-                        marginLeft = 2.spacingUnits
-                        display = displayProperty(!hideOptions)
-                    }
-                    +getString(MessageID.items_selected).format(selectedEntries.size)
-                }
             }
 
-            umItem(iconsMobile, iconsMd){
-                umGridContainer(
-                    spacing= GridSpacing.spacing2,
-                    justify = GridJustify.flexEnd){
-                    selectionOptions?.forEach { option ->
-                        gridItem {
-                            css {
-                                display = displayProperty(!hideOptions)
+            umItem(GridSize.cells7, flexDirection = FlexDirection.row){
+                if(selectedListItems.isNotEmpty()){
+                    styledSpan{
+                        css{
+                            marginRight = 2.spacingUnits
+                        }
+
+                        umIconButton("close",
+                            color = UMColor.default){
+                            css{
+                                marginTop = 4.px
                             }
-                            umIconButton(SELECTION_ICONS_MAP[option]?:"delete",
-                                color = UMColor.default){
-                                attrs.onClick = {
-                                    listPresenter?.handleClickSelectionOption(selectedEntries, option)
-                                    setState {
-                                        selectedEntries.clear()
-                                    }
+                            attrs.onClick = {
+                                stopEventPropagation(it)
+                                setState {
+                                    selectedListItems = mutableListOf()
                                 }
                             }
                         }
                     }
-                    renderEditOptionMenu()
+                    styledSpan {
+                        umTypography(variant = TypographyVariant.subtitle1){
+                            css {
+                                marginTop = 10.px
+                                marginLeft = 2.spacingUnits
+                                fontSize = LinearDimension("1.2em")
+                                display = displayProperty(!hideOptions)
+                            }
+                            +getString(MessageID.items_selected).format(selectedListItems.size)
+                        }
+                    }
                 }
+            }
+
+            umItem(GridSize.cells5, flexDirection = FlexDirection.rowReverse) {
+               if(selectedListItems.isEmpty()){
+                   styledSpan {
+                       css{
+                           marginLeft = 2.spacingUnits
+                       }
+                       renderEditOptionMenu()
+                   }
+               }
+
+               if(selectedListItems.isNotEmpty()){
+                   selectionOptions?.reversed()?.forEach { option ->
+                       styledSpan {
+                           css{
+                               marginLeft = 2.spacingUnits
+                           }
+                           umIconButton(SELECTION_ICONS_MAP[option]?:"delete",
+                               color = UMColor.default){
+                               attrs.onClick = {
+                                   stopEventPropagation(it)
+                                   val selectedEntries = copyOnWriteListOf(selectedListItems)
+                                   listPresenter?.handleClickSelectionOption(selectedEntries.first(), option)
+                                   setState {
+                                       selectedListItems.clear()
+                                   }
+                               }
+                           }
+                       }
+                   }
+               }
             }
 
         }
@@ -499,6 +583,10 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
         listPresenter?.handleClickCreateNewFab()
     }
 
+    open fun handleClickAddNewEntry(){
+        listPresenter?.handleClickAddNewItem()
+    }
+
     open fun handleInviteClicked(){}
 
     open fun styleList(): RuleSet? {
@@ -510,10 +598,6 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
         listPresenter?.onClickSort(sortOption)
     }
 
-    override fun finishWithResult(result: List<RT>) {
-        TODO("finishWithResult: Not used anymore")
-    }
-
     override fun onFabClicked() {
         super.onFabClicked()
         handleClickCreateNewEntry()
@@ -523,7 +607,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
         super.onDestroyView()
         dbRepo = null
         listPresenter?.onDestroy()
-        selectedEntries.clear()
+        selectedListItems.clear()
     }
 
 
@@ -531,9 +615,9 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
         val SELECTION_ICONS_MAP = mapOf(SelectionOption.EDIT to "edit",
                 SelectionOption.DELETE to "delete",
                 SelectionOption.MOVE to "drive_file_move",
-                SelectionOption.HIDE to "visibility",
-                SelectionOption.UNHIDE to "visibility_of")
+                SelectionOption.HIDE to "visibility_off",
+                SelectionOption.UNHIDE to "visibility")
 
-        val UI_LISTENER_TIMEOUT = 100
+        private const val UI_LISTENER_TIMEOUT = 100
     }
 }
