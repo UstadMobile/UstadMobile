@@ -3,6 +3,7 @@ plugins {
     id 'application'
     id 'kotlin'
     id 'maven-publish'
+
     id 'com.github.johnrengelman.shadow' version "$version_shadow"
     id 'kotlinx-serialization'
 }

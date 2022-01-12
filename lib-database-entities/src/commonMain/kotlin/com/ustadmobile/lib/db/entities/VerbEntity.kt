@@ -15,11 +15,23 @@ class VerbDisplay {
 }
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, ${VerbEntity.TABLE_ID} AS tableId
-        FROM UserSession"""])
 @Serializable
+@ReplicateEntity(tableId = TABLE_ID, tracker = VerbEntityReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "verbentity_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO VerbEntity(verbUid, urlId, verbInActive, verbMasterChangeSeqNum, verbLocalChangeSeqNum, verbLastChangedBy, verbLct) 
+         VALUES (NEW.verbUid, NEW.urlId, NEW.verbInActive, NEW.verbMasterChangeSeqNum, NEW.verbLocalChangeSeqNum, NEW.verbLastChangedBy, NEW.verbLct) 
+         /*psql ON CONFLICT (verbUid) DO UPDATE 
+         SET urlId = EXCLUDED.urlId, verbInActive = EXCLUDED.verbInActive, verbMasterChangeSeqNum = EXCLUDED.verbMasterChangeSeqNum, verbLocalChangeSeqNum = EXCLUDED.verbLocalChangeSeqNum, verbLastChangedBy = EXCLUDED.verbLastChangedBy, verbLct = EXCLUDED.verbLct
+         */"""
+     ]
+ )
+))
 class VerbEntity() {
 
     constructor(uid: Long, url: String?) : this(){
@@ -44,6 +56,7 @@ class VerbEntity() {
     var verbLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var verbLct: Long = 0
 
     companion object {

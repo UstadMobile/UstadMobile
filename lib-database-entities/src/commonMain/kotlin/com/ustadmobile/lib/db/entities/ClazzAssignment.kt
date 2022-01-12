@@ -8,35 +8,22 @@ import com.ustadmobile.lib.db.entities.ClazzAssignment.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID,
-        notifyOnUpdate =  [
-            """
-           SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-                  $TABLE_ID AS tableId 
-            FROM ChangeLog
-                 JOIN ClazzAssignment
-                     ON ChangeLog.chTableId = $TABLE_ID 
-                            AND ClazzAssignment.caUid = ChangeLog.chEntityPk
-                 JOIN Clazz 
-                    ON Clazz.clazzUid = ClazzAssignment.caClazzUid 
-               ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_ASSIGNMENT_SELECT}
-                    ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}                           
-        """
-        ],
-        syncFindAllQuery = """
-           SELECT ClazzAssignment.* 
-          FROM UserSession
-               JOIN PersonGroupMember 
-                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-               ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_ASSIGNMENT_SELECT} 
-                    ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
-               JOIN ClazzAssignment
-                    ON ClazzAssignment.caClazzUid = Clazz.clazzUid
-         WHERE UserSession.usClientNodeId = :clientId
-               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-        """)
+@ReplicateEntity(tableId = TABLE_ID, tracker = ClazzAssignmentReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "clazzassignment_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO ClazzAssignment(caUid, caTitle, caDescription, caDeadlineDate, caStartDate, caLateSubmissionType, caLateSubmissionPenalty, caGracePeriodDate, caActive, caClassCommentEnabled, caPrivateCommentsEnabled, caClazzUid, caLocalChangeSeqNum, caMasterChangeSeqNum, caLastChangedBy, caLct) 
+         VALUES (NEW.caUid, NEW.caTitle, NEW.caDescription, NEW.caDeadlineDate, NEW.caStartDate, NEW.caLateSubmissionType, NEW.caLateSubmissionPenalty, NEW.caGracePeriodDate, NEW.caActive, NEW.caClassCommentEnabled, NEW.caPrivateCommentsEnabled, NEW.caClazzUid, NEW.caLocalChangeSeqNum, NEW.caMasterChangeSeqNum, NEW.caLastChangedBy, NEW.caLct) 
+         /*psql ON CONFLICT (caUid) DO UPDATE 
+         SET caTitle = EXCLUDED.caTitle, caDescription = EXCLUDED.caDescription, caDeadlineDate = EXCLUDED.caDeadlineDate, caStartDate = EXCLUDED.caStartDate, caLateSubmissionType = EXCLUDED.caLateSubmissionType, caLateSubmissionPenalty = EXCLUDED.caLateSubmissionPenalty, caGracePeriodDate = EXCLUDED.caGracePeriodDate, caActive = EXCLUDED.caActive, caClassCommentEnabled = EXCLUDED.caClassCommentEnabled, caPrivateCommentsEnabled = EXCLUDED.caPrivateCommentsEnabled, caClazzUid = EXCLUDED.caClazzUid, caLocalChangeSeqNum = EXCLUDED.caLocalChangeSeqNum, caMasterChangeSeqNum = EXCLUDED.caMasterChangeSeqNum, caLastChangedBy = EXCLUDED.caLastChangedBy, caLct = EXCLUDED.caLct
+         */"""
+     ]
+ )
+))
 @Serializable
 open class ClazzAssignment {
 
@@ -94,6 +81,7 @@ open class ClazzAssignment {
     var caLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var caLct: Long = 0
 
     companion object {

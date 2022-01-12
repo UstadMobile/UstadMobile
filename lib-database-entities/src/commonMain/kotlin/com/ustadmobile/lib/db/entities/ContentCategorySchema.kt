@@ -11,12 +11,22 @@ import kotlinx.serialization.Serializable
  * Represents a schema (list) of categories.
  */
 @Entity
-@SyncableEntity(tableId = TABLE_ID,
-        notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-               ${TABLE_ID} AS tableId 
-          FROM UserSession
-    """])
+@Triggers(arrayOf(
+     Trigger(
+         name = "contentcategoryschema_remote_insert",
+         order = Trigger.Order.INSTEAD_OF,
+         on = Trigger.On.RECEIVEVIEW,
+         events = [Trigger.Event.INSERT],
+         sqlStatements = [
+             """REPLACE INTO ContentCategorySchema(contentCategorySchemaUid, schemaName, schemaUrl, contentCategorySchemaLocalChangeSeqNum, contentCategorySchemaMasterChangeSeqNum, contentCategorySchemaLastChangedBy, contentCategorySchemaLct) 
+             VALUES (NEW.contentCategorySchemaUid, NEW.schemaName, NEW.schemaUrl, NEW.contentCategorySchemaLocalChangeSeqNum, NEW.contentCategorySchemaMasterChangeSeqNum, NEW.contentCategorySchemaLastChangedBy, NEW.contentCategorySchemaLct) 
+             /*psql ON CONFLICT (contentCategorySchemaUid) DO UPDATE 
+             SET schemaName = EXCLUDED.schemaName, schemaUrl = EXCLUDED.schemaUrl, contentCategorySchemaLocalChangeSeqNum = EXCLUDED.contentCategorySchemaLocalChangeSeqNum, contentCategorySchemaMasterChangeSeqNum = EXCLUDED.contentCategorySchemaMasterChangeSeqNum, contentCategorySchemaLastChangedBy = EXCLUDED.contentCategorySchemaLastChangedBy, contentCategorySchemaLct = EXCLUDED.contentCategorySchemaLct
+             */"""
+         ]
+     )
+ ))
+@ReplicateEntity(tableId = TABLE_ID, tracker = ContentCategorySchemaReplicate::class)
 @Serializable
 class ContentCategorySchema() {
 
@@ -37,6 +47,7 @@ class ContentCategorySchema() {
     var contentCategorySchemaLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var contentCategorySchemaLct: Long = 0
 
     override fun equals(other: Any?): Boolean {

@@ -8,7 +8,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
@@ -32,14 +32,14 @@ class ContentJobItemTriggerCallbackTest {
     @Before
     fun setup(){
 
-        val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
+        val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE),
                 randomUuid().toString())
 
         db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabaseTriggerTest")
-                .addSyncCallback(nodeIdAndAuth, true)
+                .addSyncCallback(nodeIdAndAuth)
                 .addCallback(ContentJobItemTriggersCallback())
                 .build()
-                .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
+                .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
 
         contentJob = ContentJob().apply{
             cjUid = 1

@@ -3,7 +3,6 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.ClientSyncManager
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
@@ -12,7 +11,6 @@ import kotlinx.serialization.Serializable
     //Index to handle permission queries
     Index(value=["rolePermissions"])
 ])
-@SyncableEntity(tableId = Role.TABLE_ID)
 @Serializable
 open class Role() {
 
@@ -33,6 +31,7 @@ open class Role() {
     var roleLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var roleLct: Long = 0
 
     //bit flags made of up PERMISSION_ constants

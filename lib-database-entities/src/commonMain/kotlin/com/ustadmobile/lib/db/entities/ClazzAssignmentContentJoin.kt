@@ -7,40 +7,22 @@ import com.ustadmobile.lib.db.entities.ClazzAssignmentContentJoin.Companion.TABL
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID,
-        notifyOnUpdate =  [
-        """
-             SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-                  $TABLE_ID AS tableId 
-            FROM ChangeLog
-                 JOIN ClazzAssignmentContentJoin 
-                       ON ChangeLog.chTableId = $TABLE_ID 
-                       AND ClazzAssignmentContentJoin.cacjUid = ChangeLog.chEntityPk
-                 JOIN ClazzAssignment
-                      ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
-                 JOIN Clazz 
-                    ON Clazz.clazzUid = ClazzAssignment.caClazzUid 
-               ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_ASSIGNMENT_SELECT}
-                    ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}  
-            
-        """
-        ],
-        syncFindAllQuery = """
-             SELECT ClazzAssignmentContentJoin.* 
-          FROM UserSession
-               JOIN PersonGroupMember 
-                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-               ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_ASSIGNMENT_SELECT} 
-                    ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2} 
-               JOIN ClazzAssignment
-                    ON ClazzAssignment.caClazzUid = Clazz.clazzUid
-               JOIN ClazzAssignmentContentJoin
-                    ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid       
-          WHERE UserSession.usClientNodeId = :clientId
-               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-        """)
+@ReplicateEntity(tableId = TABLE_ID, tracker = ClazzAssignmentContentJoinReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "clazzassignmentcontentjoin_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO ClazzAssignmentContentJoin(cacjUid, cacjContentUid, cacjAssignmentUid, cacjActive, cacjMCSN, cacjLCSN, cacjLCB, cacjLct) 
+         VALUES (NEW.cacjUid, NEW.cacjContentUid, NEW.cacjAssignmentUid, NEW.cacjActive, NEW.cacjMCSN, NEW.cacjLCSN, NEW.cacjLCB, NEW.cacjLct) 
+         /*psql ON CONFLICT (cacjUid) DO UPDATE 
+         SET cacjContentUid = EXCLUDED.cacjContentUid, cacjAssignmentUid = EXCLUDED.cacjAssignmentUid, cacjActive = EXCLUDED.cacjActive, cacjMCSN = EXCLUDED.cacjMCSN, cacjLCSN = EXCLUDED.cacjLCSN, cacjLCB = EXCLUDED.cacjLCB, cacjLct = EXCLUDED.cacjLct
+         */"""
+     ]
+ )
+))
 @Serializable
 class ClazzAssignmentContentJoin {
 
@@ -65,6 +47,7 @@ class ClazzAssignmentContentJoin {
     var cacjLCB: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var cacjLct: Long = 0
 
     companion object {

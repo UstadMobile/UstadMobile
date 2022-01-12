@@ -189,7 +189,8 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val navController = findNavController(R.id.activity_main_navhost_fragment)
         val currentFrag = navController.currentDestination?.id ?: 0
         val mainScreenItemsVisible = BOTTOM_NAV_DEST.contains(currentFrag)
-        menu.findItem(R.id.menu_main_settings).isVisible = (mainScreenItemsVisible && mIsAdmin == true)
+        menu.findItem(R.id.menu_main_settings).isVisible = mainScreenItemsVisible
+        //menu.findItem(R.id.menu_main_settings).isVisible = (mainScreenItemsVisible && mIsAdmin == true)
 
         //Should be hidden when they are on the accounts page (only)
         val currentDestination = destinationProvider.lookupDestinationById(currentFrag)

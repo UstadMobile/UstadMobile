@@ -8,11 +8,12 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.annotation.QueryLiveTables
-import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Person.Companion.FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
+import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
+import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
 import com.ustadmobile.lib.util.encryptPassword
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.serialization.Serializable
@@ -22,6 +23,60 @@ import kotlin.js.JsName
 @Dao
 @Repository
 abstract class PersonDao : BaseDao<Person> {
+
+    @Query("""
+     REPLACE INTO PersonReplicate(personPk, personDestination)
+      SELECT Person.personUid AS personUid,
+             :newNodeId AS personDestination
+        FROM UserSession
+             JOIN PersonGroupMember
+                ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+                   $JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
+                   ${Role.PERMISSION_PERSON_SELECT}
+                   $JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
+       WHERE Person.personType = ${Person.TYPE_NORMAL_PERSON}
+         AND UserSession.usClientNodeId = :newNodeId
+         AND Person.personLct != COALESCE(
+             (SELECT personVersionId
+                FROM PersonReplicate
+               WHERE personPk = Person.personUid
+                 AND personDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(personPk, personDestination) DO UPDATE
+             SET personPending = true
+      */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([Person::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+     @Query("""
+ REPLACE INTO PersonReplicate(personPk, personDestination)
+  SELECT Person.personUid AS personUid,
+         UserSession.usClientNodeId AS personDestination
+    FROM ChangeLog
+         JOIN Person
+             ON ChangeLog.chTableId = 9
+                AND ChangeLog.chEntityPk = Person.personUid
+         ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+            ${Role.PERMISSION_PERSON_SELECT}
+            ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
+   WHERE Person.personType = ${Person.TYPE_NORMAL_PERSON}
+     AND UserSession.usClientNodeId != (
+         SELECT nodeClientId 
+           FROM SyncNode
+          LIMIT 1)
+     AND Person.personLct != COALESCE(
+         (SELECT personVersionId
+            FROM PersonReplicate
+           WHERE personPk = Person.personUid
+             AND personDestination = UserSession.usClientNodeId), 0)
+ /*psql ON CONFLICT(personPk, personDestination) DO UPDATE
+     SET personPending = true
+  */               
+ """)
+    @ReplicationRunOnChange([Person::class])
+    @ReplicationCheckPendingNotificationsFor([Person::class])
+    abstract suspend fun replicateOnChange()
 
     @JsName("insertListAsync")
     @Insert
@@ -46,65 +101,6 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT COUNT(*) FROM Person where Person.username = :username")
     abstract suspend fun findByUsernameCount(username: String): Int
 
-    @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
-    suspend fun registerAsync(newPerson: Person, password: String): UmAccount? {
-        if (newPerson.username.isNullOrBlank())
-            throw IllegalArgumentException("New person to be registered has null or blank username")
-
-        val person = findUidAndPasswordHashAsync(newPerson.username ?: "")
-        if (person == null) {
-            //OK to go ahead and create
-            newPerson.personUid = insert(newPerson)
-            val newPersonAuth = PersonAuth(newPerson.personUid,
-                    ENCRYPTED_PASS_PREFIX + encryptPassword(password))
-            insertPersonAuth(newPersonAuth)
-            return createAndInsertAccessToken(newPerson.personUid, newPerson.username!!)
-        } else {
-            throw IllegalArgumentException("Username already exists")
-        }
-    }
-
-    @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
-    open suspend fun registerUser(firstName: String, lastName: String, email:String,
-                                  username:String, password: String): Long {
-        val newPerson = Person()
-        newPerson.firstNames = firstName
-        newPerson.lastName = lastName
-        newPerson.emailAddr = email
-        newPerson.username = username
-
-        if (newPerson.username.isNullOrBlank()) {
-            print("New person to be registered has null or blank username")
-            return 0
-
-        }else {
-
-            val person = findUidAndPasswordHashAsync(newPerson.username ?: "")
-            if (person == null) {
-                //OK to go ahead and create
-                newPerson.personUid = insert(newPerson)
-                val newPersonAuth = PersonAuth(newPerson.personUid,
-                        ENCRYPTED_PASS_PREFIX + encryptPassword(password))
-                insertPersonAuth(newPersonAuth)
-                println("New Person uid: " + newPerson.personUid)
-
-                return newPerson.personUid
-            } else {
-                print("Username already exists")
-                return 0
-            }
-        }
-    }
-
-
-    private fun createAndInsertAccessToken(personUid: Long, username: String): UmAccount {
-        val accessToken = AccessToken(personUid,
-                getSystemTimeInMillis() + SESSION_LENGTH)
-        accessToken.token = randomUuid().toString()
-
-        insertAccessToken(accessToken)
-        return UmAccount(personUid, username, accessToken.token, "")
-    }
 
     fun authenticate(token: String, personUid: Long): Boolean {
         return isValidToken(token, personUid)
@@ -174,6 +170,14 @@ abstract class PersonDao : BaseDao<Person> {
 
     @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
     abstract fun findByUsername(username: String?): Person?
+
+    @Query("""
+        SELECT Person.*
+          FROM Person
+         WHERE Person.dateOfBirth = :nodeId
+           AND Person.personType = ${Person.TYPE_SYSTEM}
+    """)
+    abstract suspend fun findSystemAccount(nodeId: Long): Person?
 
     @JsName("findByUid")
     @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")

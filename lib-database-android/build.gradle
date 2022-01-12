@@ -80,6 +80,8 @@ tasks.whenTaskAdded { task ->
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
+    implementation "com.ustadmobile.door:door-room-jdbc:$version_door"
+
     implementation project(":lib-database-entities")
     implementation "com.ustadmobile.door:door-runtime:$version_door"
     implementation project(':lib-util')

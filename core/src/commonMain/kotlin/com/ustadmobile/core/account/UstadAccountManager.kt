@@ -8,10 +8,7 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.door.*
-import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.concurrentSafeListOf
-import com.ustadmobile.door.ext.onRepoWithFallbackToDb
-import com.ustadmobile.door.ext.toHexString
+import com.ustadmobile.door.ext.*
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_GUESTPERSON
@@ -222,7 +219,7 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
 
 
         val userSession = UserSession().apply {
-            usClientNodeId = (endpointRepo as DoorDatabaseSyncRepository).clientId
+            usClientNodeId = (endpointRepo as DoorDatabaseRepository).config.nodeId
             usPersonUid = person.personUid
             usStartTime = systemTimeInMillis()
             usSessionType = UserSession.TYPE_STANDARD
@@ -304,7 +301,9 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
     suspend fun login(username: String, password: String, endpointUrl: String,
         maxDateOfBirth: Long = 0L): UmAccount = withContext(Dispatchers.Default){
         val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_REPO)
-        val nodeId = (repo as? DoorDatabaseSyncRepository)?.clientId
+        val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_DB)
+
+        val nodeId = (repo as? DoorDatabaseRepository)?.config?.nodeId
                 ?: throw IllegalStateException("Could not open repo for endpoint $endpointUrl")
 
         val loginResponse = httpClient.post<HttpResponse> {
@@ -330,9 +329,36 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
         val responseAccount = loginResponse.receive<UmAccount>()
 
         responseAccount.endpointUrl = endpointUrl
-        val person = repo.personDao.findByUid(responseAccount.personUid)
-            ?: throw IllegalStateException("Internal error: could not get person object")
-        val newSession = addSession(person, endpointUrl, password)
+        var personInDb = db.personDao.findByUid(responseAccount.personUid)
+        if(personInDb == null) {
+            val personOnServerResponse = httpClient.get<HttpResponse> {
+                url("${endpointUrl.removeSuffix("/")}/auth/person")
+                parameter("personUid", responseAccount.personUid)
+            }
+            if(personOnServerResponse.status.value == 200) {
+                val personObj = personOnServerResponse.receive<Person>()
+                repo.personDao.insert(personObj)
+                personInDb = personObj
+            }else {
+                throw IllegalStateException("Internal error: could not get person object")
+            }
+        }
+
+        val siteInDb = db.siteDao.getSiteAsync()
+        if(siteInDb == null) {
+            val siteResponse = httpClient.get<HttpResponse> {
+                doorNodeAndVersionHeaders(repo as DoorDatabaseRepository)
+                url("${endpointUrl.removeSuffix("/")}/UmAppDatabase/SiteDao/getSiteAsync")
+            }
+            if(siteResponse.status.value == 200) {
+                val siteObj = siteResponse.receive<Site>()
+                repo.siteDao.replaceAsync(siteObj)
+            }else {
+                throw IllegalStateException("Internal error: no Site in database and could not fetch it from server")
+            }
+        }
+
+        val newSession = addSession(personInDb, endpointUrl, password)
 
         activeEndpoint = Endpoint(endpointUrl)
         activeSession = newSession

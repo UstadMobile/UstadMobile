@@ -5,9 +5,12 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.annotation.QueryLiveTables
-import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
+import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
+import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1
+import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2
 import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_TEACHER
@@ -15,6 +18,59 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_TEACHER
 @Repository
 @Dao
 abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
+
+    @Query("""
+     REPLACE INTO ClazzReplicate(clazzPk, clazzDestination)
+      SELECT Clazz.clazzUid AS clazzUid,
+             :newNodeId AS clazzDestination
+        FROM UserSession
+               JOIN PersonGroupMember 
+                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+               $JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1
+                    ${Role.PERMISSION_CLAZZ_SELECT} 
+                    $JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2
+       WHERE UserSession.usClientNodeId = :newNodeId 
+         AND Clazz.clazzLct != COALESCE(
+             (SELECT clazzVersionId
+                FROM ClazzReplicate
+               WHERE clazzPk = Clazz.clazzUid
+                 AND clazzDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(clazzPk, clazzDestination) DO UPDATE
+             SET clazzPending = true
+      */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([Clazz::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+     @Query("""
+ REPLACE INTO ClazzReplicate(clazzPk, clazzDestination)
+  SELECT Clazz.clazzUid AS clazzUid,
+         UserSession.usClientNodeId AS clazzDestination
+    FROM ChangeLog
+         JOIN Clazz
+             ON ChangeLog.chTableId = 6
+                AND ChangeLog.chEntityPk = Clazz.clazzUid
+         $JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
+                    ${Role.PERMISSION_CLAZZ_SELECT}
+                    $JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
+   WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId 
+           FROM SyncNode
+          LIMIT 1)
+     AND Clazz.clazzLct != COALESCE(
+         (SELECT clazzVersionId
+            FROM ClazzReplicate
+           WHERE clazzPk = Clazz.clazzUid
+             AND clazzDestination = UserSession.usClientNodeId), 0)
+  /*psql ON CONFLICT(clazzPk, clazzDestination) DO UPDATE
+      SET clazzPending = true
+   */               
+ """)
+    @ReplicationRunOnChange([Clazz::class])
+    @ReplicationCheckPendingNotificationsFor([Clazz::class])
+    abstract suspend fun replicateOnChange()
+
 
     @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
     abstract fun findByUid(uid: Long): Clazz?
@@ -54,8 +110,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
             : DoorDataSourceFactory<Int,Clazz>
 
 
-    @Query("UPDATE Clazz SET clazzSchoolUid = :schoolUid, " +
-            " clazzLastChangedBy = (SELECT nodeClientId FROM SyncNode) WHERE clazzUid = :clazzUid ")
+    @Query("UPDATE Clazz SET clazzSchoolUid = :schoolUid WHERE clazzUid = :clazzUid ")
     abstract suspend fun updateSchoolOnClazzUid(clazzUid: Long, schoolUid: Long)
 
     /**
@@ -143,11 +198,19 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     abstract fun findByClazzName(name: String): List<Clazz>
 
     @Query("""
-        UPDATE Clazz SET attendanceAverage = 
-        CAST((SELECT SUM(clazzLogNumPresent) FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid AND clazzLogStatusFlag = 4) AS REAL) /
-        CAST(MAX(1.0, (SELECT SUM(clazzLogNumPresent) + SUM(clazzLogNumPartial) + SUM(clazzLogNumAbsent)
-        FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid AND clazzLogStatusFlag = $STATUS_RECORDED)) AS REAL),
-        clazzLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1)
+        UPDATE Clazz 
+           SET attendanceAverage = 
+               COALESCE(CAST(
+                    (SELECT SUM(clazzLogNumPresent) 
+                       FROM ClazzLog 
+                      WHERE clazzLogClazzUid = :clazzUid
+                       AND clazzLogStatusFlag = 4) AS REAL) /
+                    
+                    CAST(MAX(1.0, 
+                        (SELECT SUM(clazzLogNumPresent) + SUM(clazzLogNumPartial) + SUM(clazzLogNumAbsent)
+                        FROM ClazzLog 
+                       WHERE clazzLogClazzUid = :clazzUid 
+                        AND clazzLogStatusFlag = $STATUS_RECORDED)) AS REAL), 0)
         WHERE clazzUid = :clazzUid
     """)
     abstract suspend fun updateClazzAttendanceAverageAsync(clazzUid: Long)
