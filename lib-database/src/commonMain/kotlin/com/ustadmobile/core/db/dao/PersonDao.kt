@@ -26,7 +26,7 @@ abstract class PersonDao : BaseDao<Person> {
 
     @Query("""
      REPLACE INTO PersonReplicate(personPk, personDestination)
-      SELECT Person.personUid AS personUid,
+      SELECT DISTINCT Person.personUid AS personUid,
              :newNodeId AS personDestination
         FROM UserSession
              JOIN PersonGroupMember
@@ -40,7 +40,7 @@ abstract class PersonDao : BaseDao<Person> {
              (SELECT personVersionId
                 FROM PersonReplicate
                WHERE personPk = Person.personUid
-                 AND personDestination = :newNodeId), 0) 
+                 AND personDestination = :newNodeId), 0)              
       /*psql ON CONFLICT(personPk, personDestination) DO UPDATE
              SET personPending = true
       */       
@@ -51,7 +51,7 @@ abstract class PersonDao : BaseDao<Person> {
 
      @Query("""
  REPLACE INTO PersonReplicate(personPk, personDestination)
-  SELECT Person.personUid AS personUid,
+  SELECT DISTINCT Person.personUid AS personUid,
          UserSession.usClientNodeId AS personDestination
     FROM ChangeLog
          JOIN Person

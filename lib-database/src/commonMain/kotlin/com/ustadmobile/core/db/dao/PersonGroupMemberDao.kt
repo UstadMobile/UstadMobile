@@ -19,7 +19,7 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
 
     @Query("""
      REPLACE INTO PersonGroupMemberReplicate(pgmPk, pgmDestination)
-      SELECT PersonGroupMember.groupMemberUid AS pgmUid,
+      SELECT DISTINCT PersonGroupMember.groupMemberUid AS pgmUid,
              :newNodeId AS pgmDestination
         FROM UserSession
              JOIN PersonGroupMember
@@ -46,7 +46,7 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
 
     @Query("""
  REPLACE INTO PersonGroupMemberReplicate(pgmPk, pgmDestination)
-  SELECT PersonGroupMember.groupMemberUid AS pgmUid,
+  SELECT DISTINCT PersonGroupMember.groupMemberUid AS pgmUid,
          UserSession.usClientNodeId AS pgmDestination
     FROM ChangeLog
          JOIN PersonGroupMember
@@ -76,7 +76,7 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
 
     @Query("""
  REPLACE INTO PersonGroupMemberReplicate(pgmPk, pgmDestination)
-  SELECT PersonGroupMember.groupMemberUid AS pgmUid,
+  SELECT DISTINCT PersonGroupMember.groupMemberUid AS pgmUid,
          UserSession.usClientNodeId AS pgmDestination
     FROM ChangeLog
          JOIN PersonGroupMember
@@ -99,8 +99,8 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
                  FROM PersonGroupMemberReplicate
                 WHERE pgmPk = PersonGroupMember.groupMemberUid
                   AND pgmDestination = UserSession.usClientNodeId), 0)
-  /*psql ON CONFLICT(pgPk, pgDestination) DO UPDATE
-     SET sgPending = true
+  /*psql ON CONFLICT(pgmPk, pgmDestination) DO UPDATE
+     SET pgmPending = true
     */                   
     """)
     @ReplicationRunOnChange([PersonGroupMember::class])
@@ -109,7 +109,7 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
 
     @Query("""
  REPLACE INTO PersonGroupMemberReplicate(pgmPk, pgmDestination)
-      SELECT PersonGroupMember.groupMemberUid AS pgmUid,
+      SELECT DISTINCT PersonGroupMember.groupMemberUid AS pgmUid,
              :newNodeId AS pgmDestination
         FROM UserSession
              JOIN PersonGroupMember

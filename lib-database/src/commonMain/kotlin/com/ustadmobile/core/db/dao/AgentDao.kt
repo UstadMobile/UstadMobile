@@ -15,7 +15,7 @@ abstract class AgentDao :BaseDao<AgentEntity> {
 
     @Query("""
      REPLACE INTO AgentEntityReplicate(aePk, aeDestination)
-      SELECT AgentEntity.agentUid AS aeUid,
+      SELECT DISTINCT AgentEntity.agentUid AS aeUid,
              :newNodeId AS aeDestination
         FROM UserSession
         JOIN PersonGroupMember 
@@ -41,7 +41,7 @@ abstract class AgentDao :BaseDao<AgentEntity> {
 
     @Query("""
      REPLACE INTO AgentEntityReplicate(aePk, aeDestination)
-      SELECT AgentEntity.agentUid AS aeUid,
+      SELECT DISTINCT AgentEntity.agentUid AS aeUid,
              UserSession.usClientNodeId AS aeDestination
         FROM ChangeLog
              JOIN AgentEntity

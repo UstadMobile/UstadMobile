@@ -22,7 +22,7 @@ abstract class ScopedGrantDao {
 
     @Query("""
      REPLACE INTO ScopedGrantReplicate(sgPk, sgDestination)
-      SELECT ScopedGrantWithPerm.sgUid AS sgPk,
+      SELECT DISTINCT ScopedGrantWithPerm.sgUid AS sgPk,
              :newNodeId AS sgDestination
         FROM UserSession
              JOIN PersonGroupMember
@@ -51,7 +51,7 @@ abstract class ScopedGrantDao {
 
     @Query("""
  REPLACE INTO ScopedGrantReplicate(sgPk, sgDestination)
-  SELECT ScopedGrantEntity.sgUid AS sgPk,
+  SELECT DISTINCT ScopedGrantEntity.sgUid AS sgPk,
          UserSession.usClientNodeId AS sgDestination
     FROM ChangeLog
          JOIN ScopedGrant ScopedGrantEntity
@@ -64,8 +64,7 @@ abstract class ScopedGrantDao {
          ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
               ${Role.PERMISSION_PERSON_SELECT}
               ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
-   WHERE ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
-     AND UserSession.usClientNodeId != (
+   WHERE UserSession.usClientNodeId != (
          SELECT nodeClientId 
            FROM SyncNode
           LIMIT 1)
@@ -84,7 +83,7 @@ abstract class ScopedGrantDao {
 
     @Query("""
  REPLACE INTO ScopedGrantReplicate(sgPk, sgDestination)
-  SELECT ScopedGrantEntity.sgUid AS sgPk,
+  SELECT DISTINCT ScopedGrantEntity.sgUid AS sgPk,
          UserSession.usClientNodeId AS sgDestination
     FROM ChangeLog
          JOIN ScopedGrant ScopedGrantEntity
@@ -115,7 +114,7 @@ abstract class ScopedGrantDao {
 
     @Query("""
      REPLACE INTO ScopedGrantReplicate(sgPk, sgDestination)
-      SELECT ScopedGrantEntity.sgUid AS sgPk,
+      SELECT DISTINCT ScopedGrantEntity.sgUid AS sgPk,
              :newNodeId AS sgDestination
         FROM UserSession
                JOIN PersonGroupMember 
@@ -125,7 +124,7 @@ abstract class ScopedGrantDao {
                     ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
                JOIN ScopedGrant ScopedGrantEntity
                     ON Clazz.clazzUid = ScopedGrant.sgEntityUid
-                       AND ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+                       AND ScopedGrantEntity.sgTableId = ${Clazz.TABLE_ID}
        WHERE UserSession.usClientNodeId = :newNodeId
          AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
          AND ScopedGrantEntity.sgLct != COALESCE(
@@ -143,7 +142,7 @@ abstract class ScopedGrantDao {
 
     @Query("""
  REPLACE INTO ScopedGrantReplicate(sgPk, sgDestination)
-  SELECT ScopedGrantEntity.sgUid AS sgPk,
+  SELECT DISTINCT ScopedGrantEntity.sgUid AS sgPk,
          UserSession.usClientNodeId AS sgDestination
     FROM ChangeLog
          JOIN ScopedGrant ScopedGrantEntity
@@ -175,7 +174,7 @@ abstract class ScopedGrantDao {
 
     @Query("""
  REPLACE INTO ScopedGrantReplicate(sgPk, sgDestination)
-      SELECT ScopedGrantEntity.sgUid AS sgPk,
+      SELECT DISTINCT ScopedGrantEntity.sgUid AS sgPk,
              :newNodeId AS sgDestination
         FROM UserSession
                JOIN PersonGroupMember 
@@ -203,15 +202,15 @@ abstract class ScopedGrantDao {
 
     @Query("""
  REPLACE INTO ScopedGrantReplicate(sgPk, sgDestination)
-  SELECT ScopedGrantEntity.sgUid AS sgPk,
+  SELECT DISTINCT ScopedGrantEntity.sgUid AS sgPk,
          UserSession.usClientNodeId AS sgDestination
     FROM ChangeLog
          JOIN ScopedGrant ScopedGrantEntity
               ON ChangeLog.chTableId = ${ScopedGrant.TABLE_ID}
                  AND ChangeLog.chEntityPk = ScopedGrantEntity.sgUid
          JOIN School
-              ON ScopedGrant.sgTableId = ${School.TABLE_ID}
-                 AND ScopedGrant.sgEntityUid = School.schoolUid
+              ON ScopedGrantEntity.sgTableId = ${School.TABLE_ID}
+                 AND ScopedGrantEntity.sgEntityUid = School.schoolUid
          ${School.JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
                   ${Role.PERMISSION_SCHOOL_SELECT}
                   ${School.JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}      
@@ -234,7 +233,7 @@ abstract class ScopedGrantDao {
 
     @Query("""
  REPLACE INTO ScopedGrantReplicate(sgPk, sgDestination)
-      SELECT ScopedGrantEntity.sgUid AS sgPk,
+      SELECT DISTINCT ScopedGrantEntity.sgUid AS sgPk,
              :newNodeId AS sgDestination
         FROM UserSession
                JOIN PersonGroupMember
@@ -244,7 +243,7 @@ abstract class ScopedGrantDao {
                     ${School.JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT2}
                JOIN ScopedGrant ScopedGrantEntity
                     ON ScopedGrantEntity.sgTableId = ${School.TABLE_ID}
-                       AND ScopedGrant.sgEntityUid = School.schoolUid
+                       AND ScopedGrantEntity.sgEntityUid = School.schoolUid
        WHERE UserSession.usClientNodeId = :newNodeId
          AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE} 
          AND ScopedGrantEntity.sgLct != COALESCE(

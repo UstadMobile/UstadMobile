@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.room.*
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Site
+import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
@@ -51,7 +52,7 @@ abstract class SiteDao {
                 JOIN Site 
                     ON ChangeLog.chTableId = 189 
                        AND ChangeLog.chEntityPk = Site.siteUid
-                JOIN UserSession
+                JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
           WHERE UserSession.usClientNodeId != (
                 SELECT nodeClientId 
                   FROM SyncNode
