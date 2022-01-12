@@ -55,6 +55,9 @@
         <variable name="dateTimeMode"
             type="Integer"/>
 
+        <variable name="dateTimeModeEnd"
+            type="Integer"/>
+
         <variable
             name="timeZoneId"
             type="String" />
@@ -140,14 +143,14 @@
                 android:hint="@string/end_date">
 
             <com.google.android.material.textfield.TextInputEditText
+                app:dateTimeInMillis="@={clazzEnrolment.clazzEnrolmentDateLeft}"
+                app:timeZoneId="@{timeZoneId}"
+                app:dateTimeInMillisMode="@{dateTimeModeEnd}"
                 android:id="@+id/clazz_enrolment_edit_toDate_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:cursorVisible="false"
                 android:inputType="@{InputType.TYPE_NULL}"
-                app:dateTimeInMillis="@={clazzEnrolment.clazzEnrolmentDateLeft}"
-                app:timeZoneId="@{timeZoneId}"
-                app:dateTimeInMillisMode="@{dateTimeMode}"
                 app:runOnClickWhenFocused="@{true}" />
             </com.google.android.material.textfield.TextInputLayout>
 
