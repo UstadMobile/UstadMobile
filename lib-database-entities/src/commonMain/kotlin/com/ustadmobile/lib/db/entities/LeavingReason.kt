@@ -6,8 +6,23 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = LeavingReason.TABLE_ID)
+@ReplicateEntity(tableId = LeavingReason.TABLE_ID, tracker = LeavingReasonReplicate::class)
 @Serializable
+@Triggers(arrayOf(
+ Trigger(
+     name = "leavingreason_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO LeavingReason(leavingReasonUid, leavingReasonTitle, leavingReasonMCSN, leavingReasonCSN, leavingReasonLCB, leavingReasonLct) 
+         VALUES (NEW.leavingReasonUid, NEW.leavingReasonTitle, NEW.leavingReasonMCSN, NEW.leavingReasonCSN, NEW.leavingReasonLCB, NEW.leavingReasonLct) 
+         /*psql ON CONFLICT (leavingReasonUid) DO UPDATE 
+         SET leavingReasonTitle = EXCLUDED.leavingReasonTitle, leavingReasonMCSN = EXCLUDED.leavingReasonMCSN, leavingReasonCSN = EXCLUDED.leavingReasonCSN, leavingReasonLCB = EXCLUDED.leavingReasonLCB, leavingReasonLct = EXCLUDED.leavingReasonLct
+         */"""
+     ]
+ )
+))
 class LeavingReason() {
 
     constructor(uid: Long, title: String?) : this(){
@@ -30,6 +45,7 @@ class LeavingReason() {
     var leavingReasonLCB: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var leavingReasonLct: Long = 0
 
     companion object {

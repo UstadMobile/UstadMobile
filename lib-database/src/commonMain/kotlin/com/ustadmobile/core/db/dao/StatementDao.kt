@@ -4,12 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.RawQuery
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorQuery
-import com.ustadmobile.door.SimpleDoorQuery
-import com.ustadmobile.door.annotation.QueryLiveTables
-import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.*
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.serialization.Serializable
 import kotlin.js.JsName
@@ -17,6 +13,66 @@ import kotlin.js.JsName
 @Dao
 @Repository
 abstract class StatementDao : BaseDao<StatementEntity> {
+
+    @Query("""
+     REPLACE INTO StatementEntityReplicate(sePk, seDestination)
+      SELECT StatementEntity.statementUid AS sePk,
+             :newNodeId AS seDestination
+        FROM UserSession
+             JOIN PersonGroupMember
+                  ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+             JOIN ScopedGrant
+                  ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+                     AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
+             JOIN StatementEntity
+                 ON ${StatementEntity.FROM_SCOPEDGRANT_TO_STATEMENT_JOIN_ON_CLAUSE}
+       WHERE UserSession.usClientNodeId = :newNodeId
+         AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+         AND StatementEntity.statementLct != COALESCE(
+             (SELECT seVersionId
+                FROM StatementEntityReplicate
+               WHERE sePk = StatementEntity.statementUid
+                 AND seDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(sePk, seDestination) DO UPDATE
+             SET sePending = true
+      */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([StatementEntity::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+    @Query("""
+ REPLACE INTO StatementEntityReplicate(sePk, seDestination)
+  SELECT StatementEntity.statementUid AS seUid,
+         UserSession.usClientNodeId AS seDestination
+    FROM ChangeLog
+         JOIN StatementEntity
+               ON ChangeLog.chTableId = ${StatementEntity.TABLE_ID}
+                  AND ChangeLog.chEntityPk = StatementEntity.statementUid
+         JOIN ScopedGrant
+              ON ${StatementEntity.FROM_STATEMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE}
+                 AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
+         JOIN PersonGroupMember
+              ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+         JOIN UserSession
+              ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+                 AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+   WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId
+           FROM SyncNode
+          LIMIT 1)
+     AND StatementEntity.statementLct != COALESCE(
+         (SELECT seVersionId
+            FROM StatementEntityReplicate
+           WHERE sePk = StatementEntity.statementUid
+             AND seDestination = UserSession.usClientNodeId), 0)
+ /*psql ON CONFLICT(sePk, seDestination) DO UPDATE
+     SET sePending = true
+  */
+    """)
+    @ReplicationRunOnChange([StatementEntity::class])
+    @ReplicationCheckPendingNotificationsFor([StatementEntity::class])
+    abstract suspend fun replicateOnChange()
 
     @JsName("insertListAsync")
     @Insert
@@ -52,7 +108,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
 
 
     @Query("""UPDATE StatementEntity SET extensionProgress = :progress,
-            statementLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            statementLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL} 
             WHERE statementUid = :uid""")
     abstract fun updateProgress(uid: Long, progress: Int)
 

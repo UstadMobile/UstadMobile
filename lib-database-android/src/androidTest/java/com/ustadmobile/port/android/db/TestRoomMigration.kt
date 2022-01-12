@@ -1,9 +1,9 @@
-package com.ustadmobile.port.android.db
+ package com.ustadmobile.port.android.db
 
 import androidx.room.testing.MigrationTestHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.platform.app.InstrumentationRegistry
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.*
 import com.ustadmobile.door.asRoomMigration
 import org.junit.Rule
 import org.junit.Test
@@ -602,6 +602,8 @@ class TestRoomMigration {
             UmAppDatabase.MIGRATION_88_89.asRoomMigration())
     }
 
+
+
     @Test
     fun migrate89to90(){
         helper.createDatabase(TEST_DB, 89).apply {
@@ -621,6 +623,19 @@ class TestRoomMigration {
         helper.runMigrationsAndValidate(TEST_DB, 91, true,
                 UmAppDatabase.MIGRATION_90_91.asRoomMigration())
     }
+
+    @Test
+    fun migrate91to92() {
+        helper.createDatabase(TEST_DB, 91).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 92, true,
+            UmAppDatabaseReplicationMigration91_92.asRoomMigration())
+    }
+
+
+
 
     companion object {
         const val TEST_DB = "migration-test"

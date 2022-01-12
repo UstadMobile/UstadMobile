@@ -6,14 +6,12 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.door.DoorSyncableDatabaseCallback2
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.clearAllTablesAndResetSync
-import com.ustadmobile.door.ext.syncableTableIdMap
 import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
@@ -75,13 +73,11 @@ class TestContainerDownloadRoute {
 
         singletonDataDir.takeIf { !it.exists() }?.mkdirs()
 
-        nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
+        nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
 
         db = DatabaseBuilder.databaseBuilder(Any() ,UmAppDatabase::class, "UmAppDatabase")
-            .addCallback(DoorSyncableDatabaseCallback2(nodeIdAndAuth.nodeId,
-                UmAppDatabase::class.syncableTableIdMap, primary = true))
             .build()
-        db.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
+        db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
         val attachmentsDir = temporaryFolder.newFolder()
 
         okHttpClient = OkHttpClient()

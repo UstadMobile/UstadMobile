@@ -8,9 +8,9 @@ import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Container
@@ -76,13 +76,13 @@ class TestContainerMountRoute {
                 preconfigured = okHttpClient
             }
         }
-        nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE),
+        nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE),
             randomUuid().toString())
 
         db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
-            .addSyncCallback(nodeIdAndAuth, true)
+            .addSyncCallback(nodeIdAndAuth)
             .build()
-            .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true)
+            .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
 
         repo = db.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
             nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))

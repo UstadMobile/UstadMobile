@@ -20,7 +20,7 @@ import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_FAILED_NOCONNE
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_NODATA
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_WITHDATA
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_CLOUD
-import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_MIRROR
+
 
 /**
  * This RecyclerViewAdapter is intended to be placed in a MergeAdapter at the end. It
@@ -150,14 +150,12 @@ class ListStatusRecyclerViewAdapter<T>(var lifecycleOwner: LifecycleOwner?,
         @JvmField
         val MAP_STATUS_STRINGS = mapOf(
                 STATUS_LOADING_CLOUD to MessageID.repo_loading_status_loading_cloud,
-                STATUS_LOADING_MIRROR to MessageID.repo_loading_status_loading_mirror,
                 STATUS_FAILED_CONNECTION_ERR to MessageID.repo_loading_status_failed_connection_error,
                 STATUS_FAILED_NOCONNECTIVITYORPEERS to MessageID.repo_loading_status_failed_noconnection)
 
         @JvmField
         val MAP_ICON_IMAGEIDS = mapOf(
                 STATUS_LOADING_CLOUD to R.drawable.ic_cloud_download_black_24dp,
-                STATUS_LOADING_MIRROR to R.drawable.ic_loading_from_nearby_device,
                 STATUS_FAILED_CONNECTION_ERR to R.drawable.ic_error_black_24dp,
                 STATUS_FAILED_NOCONNECTIVITYORPEERS to R.drawable.ic_signal_cellular_connected_no_internet_4_bar_black_24dp)
 

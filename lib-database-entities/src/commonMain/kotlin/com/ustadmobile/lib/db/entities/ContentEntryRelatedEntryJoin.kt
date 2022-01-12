@@ -14,13 +14,23 @@ import kotlinx.serialization.Serializable
  */
 //shortcode cerej
 @Entity
-@SyncableEntity(tableId = TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-               $TABLE_ID AS tableId 
-          FROM UserSession 
-    """])
+@ReplicateEntity(tableId = TABLE_ID, tracker = ContentEntryRelatedEntryJoinReplicate::class)
 @Serializable
+@Triggers(arrayOf(
+     Trigger(
+         name = "contententryrelatedentryjoin_remote_insert",
+         order = Trigger.Order.INSTEAD_OF,
+         on = Trigger.On.RECEIVEVIEW,
+         events = [Trigger.Event.INSERT],
+         sqlStatements = [
+             """REPLACE INTO ContentEntryRelatedEntryJoin(cerejUid, cerejContentEntryUid, cerejRelatedEntryUid, cerejLastChangedBy, relType, comment, cerejRelLanguageUid, cerejLocalChangeSeqNum, cerejMasterChangeSeqNum, cerejLct) 
+             VALUES (NEW.cerejUid, NEW.cerejContentEntryUid, NEW.cerejRelatedEntryUid, NEW.cerejLastChangedBy, NEW.relType, NEW.comment, NEW.cerejRelLanguageUid, NEW.cerejLocalChangeSeqNum, NEW.cerejMasterChangeSeqNum, NEW.cerejLct) 
+             /*psql ON CONFLICT (cerejUid) DO UPDATE 
+             SET cerejContentEntryUid = EXCLUDED.cerejContentEntryUid, cerejRelatedEntryUid = EXCLUDED.cerejRelatedEntryUid, cerejLastChangedBy = EXCLUDED.cerejLastChangedBy, relType = EXCLUDED.relType, comment = EXCLUDED.comment, cerejRelLanguageUid = EXCLUDED.cerejRelLanguageUid, cerejLocalChangeSeqNum = EXCLUDED.cerejLocalChangeSeqNum, cerejMasterChangeSeqNum = EXCLUDED.cerejMasterChangeSeqNum, cerejLct = EXCLUDED.cerejLct
+             */"""
+         ]
+     )
+))
 open class ContentEntryRelatedEntryJoin() {
 
 
@@ -47,6 +57,7 @@ open class ContentEntryRelatedEntryJoin() {
     var cerejMasterChangeSeqNum: Long = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var cerejLct: Long = 0
 
     override fun equals(other: Any?): Boolean {

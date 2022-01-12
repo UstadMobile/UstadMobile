@@ -6,20 +6,62 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerUidAndMimeType
 import com.ustadmobile.lib.db.entities.ContainerWithContentEntry
+import com.ustadmobile.door.SyncNode
 
 @Dao
 @Repository
 abstract class ContainerDao : BaseDao<Container> {
 
-    @Insert
-    abstract suspend fun insertListAsync(containerList: List<Container>)
+    @Query("""
+         REPLACE INTO ContainerReplicate(containerPk, containerDestination)
+          SELECT Container.containerUid AS containerPk,
+                 :newNodeId AS containerDestination
+            FROM Container
+           WHERE Container.cntLct != COALESCE(
+                 (SELECT containerVersionId
+                    FROM ContainerReplicate
+                   WHERE containerPk = Container.containerUid
+                     AND containerDestination = :newNodeId), 0) 
+          /*psql ON CONFLICT(containerPk, containerDestination) DO UPDATE
+                 SET containerPending = true
+          */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([Container::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+    @Query("""
+ REPLACE INTO ContainerReplicate(containerPk, containerDestination)
+  SELECT Container.containerUid AS containerUid,
+         UserSession.usClientNodeId AS containerDestination
+    FROM ChangeLog
+         JOIN Container
+             ON ChangeLog.chTableId = ${Container.TABLE_ID}
+                AND ChangeLog.chEntityPk = Container.containerUid
+         JOIN UserSession
+   WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId 
+           FROM SyncNode
+          LIMIT 1)
+     AND Container.cntLct != COALESCE(
+         (SELECT containerVersionId
+            FROM ContainerReplicate
+           WHERE containerPk = Container.containerUid
+             AND containerDestination = UserSession.usClientNodeId), 0)
+ /*psql ON CONFLICT(containerPk, containerDestination) DO UPDATE
+     SET containerPending = true
+  */               
+    """)
+    @ReplicationRunOnChange([Container::class])
+    @ReplicationCheckPendingNotificationsFor([Container::class])
+    abstract suspend fun replicateOnChange()
 
     @Insert
-    abstract fun insertListAndReturnIds(containerList: List<Container>): Array<Long>
+    abstract suspend fun insertListAsync(containerList: List<Container>)
 
     @Query("Select Container.* FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntry " +
@@ -153,13 +195,6 @@ abstract class ContainerDao : BaseDao<Container> {
     @Query(UPDATE_SIZE_AND_NUM_ENTRIES_SQL)
     abstract suspend fun updateContainerSizeAndNumEntriesAsync(containerUid: Long)
 
-    @Query("UPDATE Container SET fileSize = " +
-            "(SELECT SUM(ContainerEntryFile.ceCompressedSize) AS totalSize " +
-            "FROM ContainerEntry JOIN ContainerEntryFile ON " +
-            "ContainerEntry.ceCefUid = ContainerEntryFile.cefUid " +
-            "WHERE ContainerEntry.ceContainerUid = Container.containerUid)")
-    abstract suspend fun updateFileSizeForAllContainers()
-
     @Query("SELECT Container.containerUid FROM Container " +
             "WHERE Container.containerUid = :containerUid " +
             "AND (SELECT COUNT(*) FROM ContainerEntry WHERE ceContainerUid = Container.containerUid) = Container.cntNumEntries")
@@ -217,10 +252,7 @@ abstract class ContainerDao : BaseDao<Container> {
                       FROM ContainerEntry
                       JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid
                      WHERE ContainerEntry.ceContainerUid = Container.containerUid), 0),
-                   cntLastModBy = 
-                   (SELECT nodeClientId 
-                      FROM SyncNode 
-                     LIMIT 1)
+                   cntLastModBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL} 
                      
              WHERE containerUid = :containerUid
         """

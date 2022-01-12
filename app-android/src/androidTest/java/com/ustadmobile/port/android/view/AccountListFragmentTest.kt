@@ -25,7 +25,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.AboutView
-import com.ustadmobile.door.DoorDatabaseSyncRepository
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
@@ -120,7 +120,7 @@ class AccountListFragmentTest : TestCase() {
                 usPersonUid = person.personUid
                 usStatus = UserSession.STATUS_ACTIVE
                 usStartTime = systemTimeInMillis()
-                usClientNodeId = (repo as DoorDatabaseSyncRepository).clientId
+                usClientNodeId = (repo as DoorDatabaseRepository).config.nodeId
                 usUid = runBlocking { repo.userSessionDao.insertSession(this@apply) }
             }
 
@@ -147,7 +147,7 @@ class AccountListFragmentTest : TestCase() {
                 usPersonUid  = guestPerson.personUid
                 usStartTime = systemTimeInMillis()
                 usStatus = UserSession.STATUS_ACTIVE
-                usClientNodeId = (repo as DoorDatabaseSyncRepository).clientId
+                usClientNodeId = (repo as DoorDatabaseRepository).config.nodeId
                 usUid = runBlocking { repo.userSessionDao.insertSession(this@apply) }
             }
 

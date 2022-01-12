@@ -6,35 +6,24 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = PersonPicture.TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-               ${PersonPicture.TABLE_ID} AS tableId 
-          FROM ChangeLog
-               JOIN PersonPicture 
-                    ON ChangeLog.chTableId = ${PersonPicture.TABLE_ID} 
-                       AND ChangeLog.chEntityPk = PersonPicture.personPictureUid
-               JOIN Person 
-                    ON Person.personUid = PersonPicture.personPicturePersonUid
-               ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_PERSON_PICTURE_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}"""],
-    syncFindAllQuery = """
-        SELECT PersonPicture.*
-          FROM UserSession
-                   JOIN PersonGroupMember 
-                        ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-                   ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
-                        ${Role.PERMISSION_PERSON_PICTURE_SELECT}
-                        ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
-                   JOIN PersonPicture
-                        ON PersonPicture.personPicturePersonUid = Person.personUid
-         WHERE UserSession.usClientNodeId = :clientId
-               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-        """
-)
 @Serializable
 @EntityWithAttachment
+@ReplicateEntity(tableId = PersonPicture.TABLE_ID, tracker = PersonPictureReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "personpicture_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO PersonPicture(personPictureUid, personPicturePersonUid, personPictureMasterCsn, personPictureLocalCsn, personPictureLastChangedBy, personPictureLct, personPictureUri, personPictureMd5, fileSize, picTimestamp, mimeType, personPictureActive) 
+         VALUES (NEW.personPictureUid, NEW.personPicturePersonUid, NEW.personPictureMasterCsn, NEW.personPictureLocalCsn, NEW.personPictureLastChangedBy, NEW.personPictureLct, NEW.personPictureUri, NEW.personPictureMd5, NEW.fileSize, NEW.picTimestamp, NEW.mimeType, NEW.personPictureActive) 
+         /*psql ON CONFLICT (personPictureUid) DO UPDATE 
+         SET personPicturePersonUid = EXCLUDED.personPicturePersonUid, personPictureMasterCsn = EXCLUDED.personPictureMasterCsn, personPictureLocalCsn = EXCLUDED.personPictureLocalCsn, personPictureLastChangedBy = EXCLUDED.personPictureLastChangedBy, personPictureLct = EXCLUDED.personPictureLct, personPictureUri = EXCLUDED.personPictureUri, personPictureMd5 = EXCLUDED.personPictureMd5, fileSize = EXCLUDED.fileSize, picTimestamp = EXCLUDED.picTimestamp, mimeType = EXCLUDED.mimeType, personPictureActive = EXCLUDED.personPictureActive
+         */"""
+     ]
+ )
+))
 open class PersonPicture() {
 
     @PrimaryKey(autoGenerate = true)
@@ -52,6 +41,7 @@ open class PersonPicture() {
     var personPictureLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var personPictureLct: Long = 0
 
     @AttachmentUri

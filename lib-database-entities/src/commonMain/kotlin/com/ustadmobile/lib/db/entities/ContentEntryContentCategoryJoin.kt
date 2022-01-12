@@ -12,12 +12,24 @@ import kotlinx.serialization.Serializable
  * Join entity to link ContentEntry many:many with ContentCategory
  */
 @Entity
-@SyncableEntity(tableId = TABLE_ID,
-        notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, $TABLE_ID AS tableId
-        FROM UserSession
-    """])
+/*
+@ReplicateEntity(tableId = TABLE_ID, tracker = ContentEntryContentCategoryJoinReplicate::class)
 @Serializable
+@Triggers(arrayOf(
+ Trigger(
+     name = "contententrycontentcategoryjoin_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO ContentEntryContentCategoryJoin(ceccjUid, ceccjContentEntryUid, ceccjContentCategoryUid, ceccjLocalChangeSeqNum, ceccjMasterChangeSeqNum, ceccjLastChangedBy, ceccjLct) 
+         VALUES (NEW.ceccjUid, NEW.ceccjContentEntryUid, NEW.ceccjContentCategoryUid, NEW.ceccjLocalChangeSeqNum, NEW.ceccjMasterChangeSeqNum, NEW.ceccjLastChangedBy, NEW.ceccjLct) 
+         /*psql ON CONFLICT (ceccjUid) DO UPDATE 
+         SET ceccjContentEntryUid = EXCLUDED.ceccjContentEntryUid, ceccjContentCategoryUid = EXCLUDED.ceccjContentCategoryUid, ceccjLocalChangeSeqNum = EXCLUDED.ceccjLocalChangeSeqNum, ceccjMasterChangeSeqNum = EXCLUDED.ceccjMasterChangeSeqNum, ceccjLastChangedBy = EXCLUDED.ceccjLastChangedBy, ceccjLct = EXCLUDED.ceccjLct
+         */"""
+     ]
+ )
+))
 class ContentEntryContentCategoryJoin() {
 
     @PrimaryKey(autoGenerate = true)
@@ -38,6 +50,7 @@ class ContentEntryContentCategoryJoin() {
     var ceccjLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var ceccjLct: Long = 0
 
     override fun equals(other: Any?): Boolean {

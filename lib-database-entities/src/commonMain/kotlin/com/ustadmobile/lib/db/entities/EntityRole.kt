@@ -4,7 +4,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.ClientSyncManager
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
@@ -13,8 +12,8 @@ import kotlinx.serialization.Serializable
     //Index to provide fields required in permission queries
     Index(value = ["erGroupUid", "erRoleUid", "erTableId"])
 ])
-@SyncableEntity(tableId = EntityRole.TABLE_ID)
 @Serializable
+@Deprecated("Replaced with ScopedGrant")
 open class EntityRole() {
 
     @PrimaryKey(autoGenerate = true)
