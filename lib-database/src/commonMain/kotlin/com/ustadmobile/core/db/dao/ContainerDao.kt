@@ -252,8 +252,7 @@ abstract class ContainerDao : BaseDao<Container> {
                    (SELECT SUM(ContainerEntryFile.ceCompressedSize) AS totalSize 
                       FROM ContainerEntry
                       JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid
-                     WHERE ContainerEntry.ceContainerUid = Container.containerUid), 0),
-                   cntLastModBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL} 
+                     WHERE ContainerEntry.ceContainerUid = Container.containerUid), 0) 
                      
              WHERE containerUid = :containerUid
         """
