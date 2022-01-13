@@ -275,7 +275,8 @@ abstract class PersonDao : BaseDao<Person> {
                       FROM SchoolMember 
                      WHERE schoolMemberPersonUid = Person.personUid 
                        AND :timestamp BETWEEN SchoolMember.schoolMemberJoinDate
-                            AND SchoolMember.schoolMemberLeftDate )) 
+                            AND SchoolMember.schoolMemberLeftDate ))
+           AND Person.personType = ${Person.TYPE_NORMAL_PERSON}                  
            AND (Person.personUid NOT IN (:excludeSelected))
            AND (:searchText = '%' 
                OR Person.firstNames || ' ' || Person.lastName LIKE :searchText)
