@@ -191,10 +191,10 @@ abstract class ContainerDao : BaseDao<Container> {
     abstract suspend fun findByUidAsync(containerUid: Long): Container?
 
     @Query(UPDATE_SIZE_AND_NUM_ENTRIES_SQL)
-    abstract fun updateContainerSizeAndNumEntries(containerUid: Long)
+    abstract fun updateContainerSizeAndNumEntries(containerUid: Long, changeTime: Long)
 
     @Query(UPDATE_SIZE_AND_NUM_ENTRIES_SQL)
-    abstract suspend fun updateContainerSizeAndNumEntriesAsync(containerUid: Long)
+    abstract suspend fun updateContainerSizeAndNumEntriesAsync(containerUid: Long, changeTime: Long)
 
     @Query("SELECT Container.containerUid FROM Container " +
             "WHERE Container.containerUid = :containerUid " +
@@ -252,7 +252,8 @@ abstract class ContainerDao : BaseDao<Container> {
                    (SELECT SUM(ContainerEntryFile.ceCompressedSize) AS totalSize 
                       FROM ContainerEntry
                       JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid
-                     WHERE ContainerEntry.ceContainerUid = Container.containerUid), 0) 
+                     WHERE ContainerEntry.ceContainerUid = Container.containerUid), 0),
+                   cntLct = :changeTime   
                      
              WHERE containerUid = :containerUid
         """
