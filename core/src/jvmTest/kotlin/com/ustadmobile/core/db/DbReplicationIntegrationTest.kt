@@ -634,6 +634,174 @@ class DbReplicationIntegrationTest {
         }
     }
 
+    @Test
+    fun givenSchoolCreatedOnLocal1ByAdmin_whenTeacherAddedAndLogsInOnRemote2_thenShouldReplicateAllRelatedEntities() {
+        val accountManager1: UstadAccountManager by localDi1.instance()
+        val accountManager2: UstadAccountManager by localDi2.instance()
+
+        val adminPerson = remoteDb.personDao.findByUsername("admin") !!
+
+        //put the person who just "logged in" in the local database
+        localDb1.personDao.insert(adminPerson)
+
+        runBlocking {
+            accountManager1.addSession(adminPerson, TEST_SERVER_HOST, "secret")
+        }
+
+        val teacherPerson = runBlocking {
+            localDb1.insertPersonAndGroup(Person().apply {
+                firstNames = "Edna"
+                lastName = "K"
+                username = "edna"
+            })
+        }
+
+
+        val newSchool = School().apply {
+            schoolName = "Springfield Elementary"
+            schoolActive = true
+        }
+
+        runBlocking {
+            localDb1.createNewSchoolAndGroups(newSchool, localDi1.direct.instance(),
+                Any())
+            localDb1.grantScopedPermission(newSchool.schoolTeachersPersonGroupUid,
+                Role.ROLE_SCHOOL_STAFF_PERMISSIONS_DEFAULT, School.TABLE_ID,
+                newSchool.schoolUid)
+            localDb1.grantScopedPermission(newSchool.schoolStudentsPersonGroupUid,
+                Role.ROLE_SCHOOL_STUDENT_PERMISSION_DEFAULT, School.TABLE_ID,
+                newSchool.schoolUid)
+        }
+
+        println("Created school UID ${newSchool.schoolUid}")
+
+        runBlocking {
+            localDb1.enrolPersonIntoSchoolAtLocalTimezone(teacherPerson, newSchool.schoolUid,
+                Role.ROLE_SCHOOL_STAFF_UID)
+        }
+
+
+        //wait for the server to receive everything created by local1
+        //Thread.sleep(5000)
+
+        //Now login as teacher on local2 as would happen when they login
+        localDb2.personDao.insert(teacherPerson)
+
+        runBlocking {
+            accountManager2.addSession(teacherPerson, TEST_SERVER_HOST, "secret2")
+        }
+
+        runBlocking {
+            localDb2.waitUntilAsyncOrTimeout(10078, listOf("School")) {
+                localDb2.schoolDao.findByUidAsync(newSchool.schoolUid) != null
+            }
+        }
+
+        Assert.assertEquals("Got school into Localdb2",
+            runBlocking { localDb1.schoolDao.findByUidAsync(newSchool.schoolUid)},
+            runBlocking { localDb2.schoolDao.findByUidAsync(newSchool.schoolUid)})
+
+
+        runBlocking {
+            localDb2.waitUntil(10079, listOf("PersonGroupMember")) {
+                runBlocking {
+                    localDb2.personGroupMemberDao.findByPersonUidAndGroupUid(teacherPerson.personUid,
+                        newSchool.schoolTeachersPersonGroupUid) != null
+                }
+            }
+        }
+
+        runBlocking {
+            localDb2.waitUntilAsyncOrTimeout(10080,
+                listOf("School", "ScopedGrant", "PersonGroup", "PersonGroupMember", "SchoolMember")) {
+                localDb2.schoolDao.personHasPermissionWithSchool(teacherPerson.personUid,
+                    newSchool.schoolUid, Role.PERMISSION_SCHOOL_SELECT)
+            }
+        }
+    }
+
+    @Test
+    fun givenAdminLoggedIntoLocal1AndTeacherLoggedIntoLocal2_whenSchoolAddedByAdmin_thenShoudlReplicateToLocal2() {
+        val accountManager1: UstadAccountManager by localDi1.instance()
+        val accountManager2: UstadAccountManager by localDi2.instance()
+
+        val adminPerson = remoteDb.personDao.findByUsername("admin") !!
+
+        //put the person who just "logged in" in the local database
+        localDb1.personDao.insert(adminPerson)
+
+        runBlocking {
+            accountManager1.addSession(adminPerson, TEST_SERVER_HOST, "secret")
+        }
+
+        val teacherPerson = runBlocking {
+            localDb1.insertPersonAndGroup(Person().apply {
+                firstNames = "Edna"
+                lastName = "K"
+                username = "edna"
+            })
+        }
+
+        //Now login as teacher on local2 as would happen when they login
+        localDb2.personDao.insert(teacherPerson)
+
+        runBlocking {
+            accountManager2.addSession(teacherPerson, TEST_SERVER_HOST, "secret2")
+        }
+
+        val newSchool = School().apply {
+            schoolName = "Springfield Elementary"
+            schoolActive = true
+        }
+
+        runBlocking {
+            localDb1.createNewSchoolAndGroups(newSchool, localDi1.direct.instance(),
+                Any())
+            localDb1.grantScopedPermission(newSchool.schoolTeachersPersonGroupUid,
+                Role.ROLE_SCHOOL_STAFF_PERMISSIONS_DEFAULT, School.TABLE_ID,
+                newSchool.schoolUid)
+            localDb1.grantScopedPermission(newSchool.schoolStudentsPersonGroupUid,
+                Role.ROLE_SCHOOL_STUDENT_PERMISSION_DEFAULT, School.TABLE_ID,
+                newSchool.schoolUid)
+        }
+
+        println("Created school UID ${newSchool.schoolUid}")
+
+        runBlocking {
+            localDb1.enrolPersonIntoSchoolAtLocalTimezone(teacherPerson, newSchool.schoolUid,
+                Role.ROLE_SCHOOL_STAFF_UID)
+        }
+
+        runBlocking {
+            localDb2.waitUntilAsyncOrTimeout(10078, listOf("School")) {
+                localDb2.schoolDao.findByUidAsync(newSchool.schoolUid) != null
+            }
+        }
+
+        Assert.assertEquals("Got school into Localdb2",
+            runBlocking { localDb1.schoolDao.findByUidAsync(newSchool.schoolUid)},
+            runBlocking { localDb2.schoolDao.findByUidAsync(newSchool.schoolUid)})
+
+
+        runBlocking {
+            localDb2.waitUntil(10079, listOf("PersonGroupMember")) {
+                runBlocking {
+                    localDb2.personGroupMemberDao.findByPersonUidAndGroupUid(teacherPerson.personUid,
+                        newSchool.schoolTeachersPersonGroupUid) != null
+                }
+            }
+        }
+
+        runBlocking {
+            localDb2.waitUntilAsyncOrTimeout(10080,
+                listOf("School", "ScopedGrant", "PersonGroup", "PersonGroupMember", "SchoolMember")) {
+                localDb2.schoolDao.personHasPermissionWithSchool(teacherPerson.personUid,
+                    newSchool.schoolUid, Role.PERMISSION_SCHOOL_SELECT)
+            }
+        }
+    }
+
+
     companion object {
 
         @JvmStatic

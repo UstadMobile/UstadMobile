@@ -137,6 +137,70 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
     @ReplicationCheckPendingNotificationsFor([PersonGroupMember::class])
     abstract suspend fun replicateOnNewNodeClazzBased(@NewNodeIdParam newNodeId: Long)
 
+    @Query("""
+ REPLACE INTO PersonGroupMemberReplicate(pgmPk, pgmDestination)
+  SELECT DISTINCT PersonGroupMember.groupMemberUid AS pgmUid,
+         UserSession.usClientNodeId AS pgmDestination
+    FROM ChangeLog
+         JOIN PersonGroupMember
+             ON ChangeLog.chTableId = ${PersonGroupMember.TABLE_ID}
+                AND ChangeLog.chEntityPk = PersonGroupMember.groupMemberUid
+         JOIN ScopedGrant ScopedGrantEntity
+              ON PersonGroupMember.groupMemberUid = ScopedGrantEntity.sgGroupUid
+         JOIN School 
+              ON ScopedGrantEntity.sgTableId = ${School.TABLE_ID}
+                 AND ScopedGrantEntity.sgEntityUid = School.schoolUid
+         ${School.JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+              ${Role.PERMISSION_SCHOOL_SELECT}
+              ${School.JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
+   WHERE UserSession.usClientNodeId != (
+                SELECT nodeClientId 
+                  FROM SyncNode
+                 LIMIT 1)
+     AND PersonGroupMember.groupMemberLct != COALESCE(
+              (SELECT pgmVersionId
+                 FROM PersonGroupMemberReplicate
+                WHERE pgmPk = PersonGroupMember.groupMemberUid
+                  AND pgmDestination = UserSession.usClientNodeId), 0)
+  /*psql ON CONFLICT(pgmPk, pgmDestination) DO UPDATE
+     SET pgmPending = true
+    */                   
+    """)
+    @ReplicationRunOnChange([PersonGroupMember::class])
+    @ReplicationCheckPendingNotificationsFor([PersonGroupMember::class])
+    abstract suspend fun replicateOnChangeSchoolBased()
+
+    @Query("""
+ REPLACE INTO PersonGroupMemberReplicate(pgmPk, pgmDestination)
+      SELECT DISTINCT PersonGroupMember.groupMemberUid AS pgmUid,
+             :newNodeId AS pgmDestination
+        FROM UserSession
+             JOIN PersonGroupMember
+                  ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+             ${School.JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT1}
+                  ${Role.PERMISSION_SCHOOL_SELECT}
+                  ${School.JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT2}
+             JOIN ScopedGrant ScopedGrantEntity
+                  ON School.schoolUid = ScopedGrantEntity.sgEntityUid
+                     AND ScopedGrantEntity.sgTableId = ${School.TABLE_ID}
+             JOIN PersonGroupMember PersonGroupMemberEntity
+                  ON PersonGroupMemberEntity.groupMemberGroupUid = ScopedGrantEntity.sgGroupUid
+       WHERE UserSession.usClientNodeId = :newNodeId
+         AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}  
+         AND PersonGroupMember.groupMemberLct != COALESCE(
+             (SELECT pgmVersionId
+                FROM PersonGroupMemberReplicate
+               WHERE pgmPk = PersonGroupMember.groupMemberUid
+                 AND pgmDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(pgmPk, pgmDestination) DO UPDATE
+             SET pgmPending = true
+      */                
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([PersonGroupMember::class])
+    abstract suspend fun replicateOnNewNodeSchoolBased(@NewNodeIdParam newNodeId: Long)
+
+
     @Query("SELECT * FROM PersonGroupMember WHERE groupMemberPersonUid = :personUid " +
             "AND PersonGroupMember.groupMemberActive")
     abstract suspend fun findAllGroupWherePersonIsIn(personUid: Long) : List<PersonGroupMember>

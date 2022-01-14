@@ -412,9 +412,11 @@ data class SeriesData(val dataList: List<StatementDao.ReportData>,
 /**
  * Insert a new school
  */
-suspend fun UmAppDatabase.createNewSchoolAndGroups(school: School,
-                                                   impl: UstadMobileSystemImpl, context: Any)
-                                                    :Long {
+suspend fun UmAppDatabase.createNewSchoolAndGroups(
+    school: School,
+    impl: UstadMobileSystemImpl,
+    context: Any
+) :Long {
     school.schoolTeachersPersonGroupUid = personGroupDao.insertAsync(
             PersonGroup("${school.schoolName} - " +
                     impl.getString(MessageID.teachers_literal, context)))
@@ -431,13 +433,6 @@ suspend fun UmAppDatabase.createNewSchoolAndGroups(school: School,
     school.takeIf { it.schoolCode == null }?.schoolCode = randomString(Clazz.CLAZZ_CODE_DEFAULT_LENGTH)
 
     school.schoolUid = schoolDao.insertAsync(school)
-
-//    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
-//            school.schoolTeachersPersonGroupUid, Role.ROLE_SCHOOL_STAFF_UID.toLong()))
-//    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
-//            school.schoolStudentsPersonGroupUid, Role.ROLE_SCHOOL_STUDENT_UID.toLong()))
-//    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
-//            school.schoolPendingStudentsPersonGroupUid, Role.ROLE_SCHOOL_STUDENT_PENDING_UID.toLong()))
 
     return school.schoolUid
 }
