@@ -177,7 +177,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 defaultUrl = "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
             InitialContext().bindDataSourceIfNotExisting(dbHostName, dbProperties)
             val nodeIdAndAuth: NodeIdAndAuth = instance()
-            val db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbHostName)
+            val attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT),
+                UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
+            val db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbHostName,
+                    attachmentsDir)
                 .addSyncCallback(nodeIdAndAuth)
                     .addCallback(ContentJobItemTriggersCallback())
                     .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
@@ -226,8 +229,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             val repo: UmAppDatabase = db.asRepository(repositoryConfig(Any(), "http://localhost/",
                     doorNode.nodeId, doorNode.auth, instance(), instance()) {
                 useReplicationSubscription = false
-                attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT),
-                    UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME).absolutePath
             })
 
             //Add listener that will end sessions when authentication has been updated

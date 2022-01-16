@@ -90,7 +90,11 @@ open class UstadApp : Application(), DIAware {
         bind<UmAppDatabase>(tag = TAG_DB) with scoped(EndpointScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
             val nodeIdAndAuth: NodeIdAndAuth = instance()
-            DatabaseBuilder.databaseBuilder(applicationContext, UmAppDatabase::class, dbName)
+            val attachmentsDir = File(applicationContext.filesDir.siteDataSubDir(this@singleton.context),
+                UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
+            val attachmentFilters = listOf(ImageResizeAttachmentFilter("PersonPicture", 1280, 1280))
+            DatabaseBuilder.databaseBuilder(applicationContext, UmAppDatabase::class, dbName,
+                    attachmentsDir, attachmentFilters)
                 .addSyncCallback(nodeIdAndAuth)
                     .addCallback(ContentJobItemTriggersCallback())
                 .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
@@ -114,10 +118,8 @@ open class UstadApp : Application(), DIAware {
                 "${context.url}UmAppDatabase/", nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
                     instance(), instance()
             ) {
-                attachmentsDir = File(applicationContext.filesDir.siteDataSubDir(this@singleton.context),
-                    UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME).absolutePath
+                
                 useReplicationSubscription = true
-                attachmentFilters += ImageResizeAttachmentFilter("PersonPicture", 1280, 1280)
                 replicationSubscriptionInitListener = RepSubscriptionInitListener()
             }).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
