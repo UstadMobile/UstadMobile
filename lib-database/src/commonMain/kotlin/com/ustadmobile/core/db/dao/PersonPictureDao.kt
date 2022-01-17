@@ -17,7 +17,7 @@ abstract class PersonPictureDao : BaseDao<PersonPicture> {
 
     @Query("""
      REPLACE INTO PersonPictureReplicate(ppPk, ppDestination)
-      SELECT PersonPicture.personPictureUid AS ppPk,
+      SELECT DISTINCT PersonPicture.personPictureUid AS ppPk,
              :newNodeId AS ppDestination
         FROM UserSession
              JOIN PersonGroupMember
@@ -44,7 +44,7 @@ abstract class PersonPictureDao : BaseDao<PersonPicture> {
 
     @Query("""
  REPLACE INTO PersonPictureReplicate(ppPk, ppDestination)
-  SELECT PersonPicture.personPictureUid AS ppUid,
+  SELECT DISTINCT PersonPicture.personPictureUid AS ppUid,
          UserSession.usClientNodeId AS ppDestination
     FROM ChangeLog
          JOIN PersonPicture

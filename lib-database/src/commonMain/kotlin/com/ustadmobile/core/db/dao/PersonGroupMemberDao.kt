@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 
@@ -19,7 +20,7 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
 
     @Query("""
      REPLACE INTO PersonGroupMemberReplicate(pgmPk, pgmDestination)
-      SELECT PersonGroupMember.groupMemberUid AS pgmUid,
+      SELECT DISTINCT PersonGroupMember.groupMemberUid AS pgmUid,
              :newNodeId AS pgmDestination
         FROM UserSession
              JOIN PersonGroupMember
@@ -46,7 +47,7 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
 
     @Query("""
  REPLACE INTO PersonGroupMemberReplicate(pgmPk, pgmDestination)
-  SELECT PersonGroupMember.groupMemberUid AS pgmUid,
+  SELECT DISTINCT PersonGroupMember.groupMemberUid AS pgmUid,
          UserSession.usClientNodeId AS pgmDestination
     FROM ChangeLog
          JOIN PersonGroupMember
@@ -76,7 +77,7 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
 
     @Query("""
  REPLACE INTO PersonGroupMemberReplicate(pgmPk, pgmDestination)
-  SELECT PersonGroupMember.groupMemberUid AS pgmUid,
+  SELECT DISTINCT PersonGroupMember.groupMemberUid AS pgmUid,
          UserSession.usClientNodeId AS pgmDestination
     FROM ChangeLog
          JOIN PersonGroupMember
@@ -99,8 +100,8 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
                  FROM PersonGroupMemberReplicate
                 WHERE pgmPk = PersonGroupMember.groupMemberUid
                   AND pgmDestination = UserSession.usClientNodeId), 0)
-  /*psql ON CONFLICT(pgPk, pgDestination) DO UPDATE
-     SET sgPending = true
+  /*psql ON CONFLICT(pgmPk, pgmDestination) DO UPDATE
+     SET pgmPending = true
     */                   
     """)
     @ReplicationRunOnChange([PersonGroupMember::class])
@@ -109,7 +110,7 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
 
     @Query("""
  REPLACE INTO PersonGroupMemberReplicate(pgmPk, pgmDestination)
-      SELECT PersonGroupMember.groupMemberUid AS pgmUid,
+      SELECT DISTINCT PersonGroupMember.groupMemberUid AS pgmUid,
              :newNodeId AS pgmDestination
         FROM UserSession
              JOIN PersonGroupMember
@@ -137,6 +138,70 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
     @ReplicationCheckPendingNotificationsFor([PersonGroupMember::class])
     abstract suspend fun replicateOnNewNodeClazzBased(@NewNodeIdParam newNodeId: Long)
 
+    @Query("""
+ REPLACE INTO PersonGroupMemberReplicate(pgmPk, pgmDestination)
+  SELECT DISTINCT PersonGroupMember.groupMemberUid AS pgmUid,
+         UserSession.usClientNodeId AS pgmDestination
+    FROM ChangeLog
+         JOIN PersonGroupMember
+             ON ChangeLog.chTableId = ${PersonGroupMember.TABLE_ID}
+                AND ChangeLog.chEntityPk = PersonGroupMember.groupMemberUid
+         JOIN ScopedGrant ScopedGrantEntity
+              ON PersonGroupMember.groupMemberUid = ScopedGrantEntity.sgGroupUid
+         JOIN School 
+              ON ScopedGrantEntity.sgTableId = ${School.TABLE_ID}
+                 AND ScopedGrantEntity.sgEntityUid = School.schoolUid
+         ${School.JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+              ${Role.PERMISSION_SCHOOL_SELECT}
+              ${School.JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
+   WHERE UserSession.usClientNodeId != (
+                SELECT nodeClientId 
+                  FROM SyncNode
+                 LIMIT 1)
+     AND PersonGroupMember.groupMemberLct != COALESCE(
+              (SELECT pgmVersionId
+                 FROM PersonGroupMemberReplicate
+                WHERE pgmPk = PersonGroupMember.groupMemberUid
+                  AND pgmDestination = UserSession.usClientNodeId), 0)
+  /*psql ON CONFLICT(pgmPk, pgmDestination) DO UPDATE
+     SET pgmPending = true
+    */                   
+    """)
+    @ReplicationRunOnChange([PersonGroupMember::class])
+    @ReplicationCheckPendingNotificationsFor([PersonGroupMember::class])
+    abstract suspend fun replicateOnChangeSchoolBased()
+
+    @Query("""
+ REPLACE INTO PersonGroupMemberReplicate(pgmPk, pgmDestination)
+      SELECT DISTINCT PersonGroupMember.groupMemberUid AS pgmUid,
+             :newNodeId AS pgmDestination
+        FROM UserSession
+             JOIN PersonGroupMember
+                  ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+             ${School.JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT1}
+                  ${Role.PERMISSION_SCHOOL_SELECT}
+                  ${School.JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT2}
+             JOIN ScopedGrant ScopedGrantEntity
+                  ON School.schoolUid = ScopedGrantEntity.sgEntityUid
+                     AND ScopedGrantEntity.sgTableId = ${School.TABLE_ID}
+             JOIN PersonGroupMember PersonGroupMemberEntity
+                  ON PersonGroupMemberEntity.groupMemberGroupUid = ScopedGrantEntity.sgGroupUid
+       WHERE UserSession.usClientNodeId = :newNodeId
+         AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}  
+         AND PersonGroupMember.groupMemberLct != COALESCE(
+             (SELECT pgmVersionId
+                FROM PersonGroupMemberReplicate
+               WHERE pgmPk = PersonGroupMember.groupMemberUid
+                 AND pgmDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(pgmPk, pgmDestination) DO UPDATE
+             SET pgmPending = true
+      */                
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([PersonGroupMember::class])
+    abstract suspend fun replicateOnNewNodeSchoolBased(@NewNodeIdParam newNodeId: Long)
+
+
     @Query("SELECT * FROM PersonGroupMember WHERE groupMemberPersonUid = :personUid " +
             "AND PersonGroupMember.groupMemberActive")
     abstract suspend fun findAllGroupWherePersonIsIn(personUid: Long) : List<PersonGroupMember>
@@ -148,17 +213,35 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
     /**
      * Updates an existing group membership to a new group
      */
-    @Query("""UPDATE PersonGroupMember SET groupMemberGroupUid = :newGroup,
-            groupMemberLastChangedBy = COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0)
-            WHERE groupMemberPersonUid = :personUid AND groupMemberGroupUid = :oldGroup 
-            AND PersonGroupMember.groupMemberActive""")
-    abstract suspend fun moveGroupAsync(personUid: Long, newGroup: Long, oldGroup: Long): Int
+    @Query("""
+        UPDATE PersonGroupMember 
+           SET groupMemberGroupUid = :newGroup,
+               groupMemberLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL},
+               groupMemberLct = :changeTime
+         WHERE groupMemberPersonUid = :personUid 
+           AND groupMemberGroupUid = :oldGroup 
+           AND PersonGroupMember.groupMemberActive""")
+    abstract suspend fun moveGroupAsync(
+        personUid: Long,
+        newGroup: Long,
+        oldGroup: Long,
+        changeTime: Long
+    ): Int
 
-    @Query("""UPDATE PersonGroupMember SET groupMemberActive = 0, 
-        groupMemberLastChangedBy = COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
-        WHERE groupMemberPersonUid = :personUid AND groupMemberGroupUid = :groupUid 
-        AND PersonGroupMember.groupMemberActive""")
-    abstract suspend fun setGroupMemberToInActive(personUid: Long, groupUid: Long)
+    @Query("""
+        UPDATE PersonGroupMember 
+           SET groupMemberActive = :activeStatus, 
+               groupMemberLastChangedBy = COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0),
+               groupMemberLct = :updateTime
+        WHERE groupMemberPersonUid = :personUid 
+          AND groupMemberGroupUid = :groupUid 
+          AND PersonGroupMember.groupMemberActive""")
+    abstract suspend fun updateGroupMemberActive(
+        activeStatus: Boolean,
+        personUid: Long,
+        groupUid: Long,
+        updateTime: Long
+    )
 
     @Query("""
         SELECT PersonGroupMember.*

@@ -12,7 +12,7 @@ abstract class LanguageVariantDao : BaseDao<LanguageVariant> {
 
     @Query("""
      REPLACE INTO LanguageVariantReplicate(lvPk, lvDestination)
-      SELECT LanguageVariant.langVariantUid AS lvPk,
+      SELECT DISTINCT LanguageVariant.langVariantUid AS lvPk,
              :newNodeId AS lvDestination
         FROM LanguageVariant
        WHERE LanguageVariant.langVariantLct != COALESCE(
@@ -30,7 +30,7 @@ abstract class LanguageVariantDao : BaseDao<LanguageVariant> {
 
     @Query("""
  REPLACE INTO LanguageVariantReplicate(lvPk, lvDestination)
-  SELECT LanguageVariant.langVariantUid AS lvUid,
+  SELECT DISTINCT LanguageVariant.langVariantUid AS lvUid,
          UserSession.usClientNodeId AS lvDestination
     FROM ChangeLog
          JOIN LanguageVariant

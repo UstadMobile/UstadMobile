@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.room.*
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Site
+import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
@@ -26,7 +27,7 @@ abstract class SiteDao {
 
     @Query("""
         REPLACE INTO SiteReplicate(sitePk, siteDestination)
-         SELECT Site.siteUid AS sitePk,
+         SELECT DISTINCT Site.siteUid AS sitePk,
                 :newNodeId AS siteDestination
            FROM Site
           WHERE Site.siteLct != COALESCE(
@@ -45,13 +46,13 @@ abstract class SiteDao {
 
     @Query("""
         REPLACE INTO SiteReplicate(sitePk, siteDestination)
-         SELECT Site.siteUid AS sitePk,
+         SELECT DISTINCT Site.siteUid AS sitePk,
                 UserSession.usClientNodeId AS siteDestination
            FROM ChangeLog
                 JOIN Site 
                     ON ChangeLog.chTableId = 189 
                        AND ChangeLog.chEntityPk = Site.siteUid
-                JOIN UserSession
+                JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
           WHERE UserSession.usClientNodeId != (
                 SELECT nodeClientId 
                   FROM SyncNode

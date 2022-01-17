@@ -13,7 +13,7 @@ abstract class ErrorReportDao {
 
     @Query("""
  REPLACE INTO ErrorReportReplicate(erPk, erDestination)
-  SELECT ErrorReport.errUid AS erUid,
+  SELECT DISTINCT ErrorReport.errUid AS erUid,
            UserSession.usClientNodeId AS erDestination
     FROM ChangeLog
          JOIN ErrorReport

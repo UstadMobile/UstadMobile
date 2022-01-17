@@ -12,7 +12,7 @@ abstract class ContextXObjectStatementJoinDao : BaseDao<ContextXObjectStatementJ
 
     @Query("""
     REPLACE INTO ContextXObjectStatementJoinReplicate(cxosjPk, cxosjDestination)
-    SELECT ContextXObjectStatementJoin.contextXObjectStatementJoinUid AS cxosjPk,
+    SELECT DISTINCT ContextXObjectStatementJoin.contextXObjectStatementJoinUid AS cxosjPk,
          :newNodeId AS cxosjDestination
     FROM ContextXObjectStatementJoin
     WHERE ContextXObjectStatementJoin.contextXObjectLct != COALESCE(
@@ -30,7 +30,7 @@ abstract class ContextXObjectStatementJoinDao : BaseDao<ContextXObjectStatementJ
 
     @Query("""
     REPLACE INTO ContextXObjectStatementJoinReplicate(cxosjPk, cxosjDestination)
-    SELECT ContextXObjectStatementJoin.contextXObjectStatementJoinUid AS cxosjUid,
+    SELECT DISTINCT ContextXObjectStatementJoin.contextXObjectStatementJoinUid AS cxosjUid,
          UserSession.usClientNodeId AS cxosjDestination
     FROM ChangeLog
          JOIN ContextXObjectStatementJoin

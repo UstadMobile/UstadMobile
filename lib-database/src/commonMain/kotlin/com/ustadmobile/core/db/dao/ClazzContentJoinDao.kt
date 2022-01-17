@@ -15,7 +15,7 @@ abstract class ClazzContentJoinDao: BaseDao<ClazzContentJoin> {
 
     @Query("""
      REPLACE INTO ClazzContentJoinReplicate(ccjPk, ccjDestination)
-      SELECT ClazzContentJoin.ccjUid AS ccjUid,
+      SELECT DISTINCT ClazzContentJoin.ccjUid AS ccjUid,
              :newNodeId AS ccjDestination
         FROM UserSession
                JOIN PersonGroupMember 
@@ -42,7 +42,7 @@ abstract class ClazzContentJoinDao: BaseDao<ClazzContentJoin> {
 
     @Query("""
  REPLACE INTO ClazzContentJoinReplicate(ccjPk, ccjDestination)
-  SELECT ClazzContentJoin.ccjUid AS ccjUid,
+  SELECT DISTINCT ClazzContentJoin.ccjUid AS ccjUid,
          UserSession.usClientNodeId AS ccjDestination
     FROM ChangeLog
          JOIN ClazzContentJoin

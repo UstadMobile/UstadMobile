@@ -18,13 +18,12 @@ abstract class ReportDao : BaseDao<Report> {
 
     @Query("""
      REPLACE INTO ReportReplicate(reportPk, reportDestination)
-      SELECT Report.reportUid AS reportPk,
+      SELECT DISTINCT Report.reportUid AS reportPk,
              :newNodeId AS reportDestination
         FROM Report
              JOIN UserSession
-                  ON Report.reportOwnerUid = UserSession.usPersonUid
-                     AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-                     AND UserSession.usClientNodeId = :newNodeId
+                  ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+                     AND CAST(Report.isTemplate AS INTEGER) = 1
        WHERE Report.reportLct != COALESCE(
              (SELECT reportVersionId
                 FROM ReportReplicate
@@ -36,19 +35,19 @@ abstract class ReportDao : BaseDao<Report> {
     """)
     @ReplicationRunOnNewNode
     @ReplicationCheckPendingNotificationsFor([Report::class])
-    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+    abstract suspend fun replicateOnNewNodeTemplates(@NewNodeIdParam newNodeId: Long)
 
     @Query("""
  REPLACE INTO ReportReplicate(reportPk, reportDestination)
-  SELECT Report.reportUid AS reportUid,
+  SELECT DISTINCT Report.reportUid AS reportUid,
          UserSession.usClientNodeId AS reportDestination
     FROM ChangeLog
          JOIN Report
               ON ChangeLog.chTableId = ${Report.TABLE_ID} 
                  AND ChangeLog.chEntityPk = Report.reportUid
          JOIN UserSession
-              ON Report.reportOwnerUid = UserSession.usPersonUid
-                 AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+              ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+                 AND CAST(Report.isTemplate AS INTEGER) = 1
    WHERE UserSession.usClientNodeId != (
          SELECT nodeClientId 
            FROM SyncNode
@@ -64,7 +63,7 @@ abstract class ReportDao : BaseDao<Report> {
  """)
     @ReplicationRunOnChange([Report::class])
     @ReplicationCheckPendingNotificationsFor([Report::class])
-    abstract suspend fun replicateOnChange()
+    abstract suspend fun replicateOnChangeTemplates()
 
     @RawQuery
     abstract fun getResults(query: DoorQuery): List<Report>

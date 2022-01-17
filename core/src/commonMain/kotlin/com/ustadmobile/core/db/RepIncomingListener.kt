@@ -27,9 +27,7 @@ class RepIncomingListener(private val db: UmAppDatabase) : IncomingReplicationLi
 
         when(incomingReplicationEvent.tableId) {
             UserSession.TABLE_ID -> {
-                val affectedNodes = jsonArray.mapNotNull {
-                    it.jsonObject.get("usClientNodeId")?.jsonPrimitive?.longOrNull
-                }
+                val affectedNodes = jsonArray.mapLongPropertyOrThrow("usClientNodeId")
 
                 affectedNodes.forEach {
                     db.replicationNotificationDispatcher.onNewDoorNode(it, "")
@@ -37,10 +35,7 @@ class RepIncomingListener(private val db: UmAppDatabase) : IncomingReplicationLi
             }
 
             ScopedGrant.TABLE_ID -> {
-                val affectedGroups = jsonArray.map {
-                    it.jsonObject.get("sgGroupUid")?.jsonPrimitive?.longOrNull
-                        ?: throw IllegalArgumentException("RepIncomingListener: invalid ScopedGrant.sgGroupUid")
-                }
+                val affectedGroups =  jsonArray.mapLongPropertyOrThrow("sgGroupUid")
 
                 val affectedNodes = affectedGroups.chunked(100).flatMap {
                     db.userSessionDao.findActiveNodesIdsByGroupUids(it)
@@ -76,11 +71,19 @@ class RepIncomingListener(private val db: UmAppDatabase) : IncomingReplicationLi
                 }
             }
 
+            School.TABLE_ID -> {
+                val schoolUids = jsonArray.mapLongPropertyOrThrow("schoolUid")
+                val affectedNodes = schoolUids.chunked(100).flatMap {
+                    db.userSessionDao.findAllActiveNodeIdsWithSchoolBasedPermission(schoolUids)
+                }
+
+                affectedNodes.forEach {
+                    db.replicationNotificationDispatcher.onNewDoorNode(it, "")
+                }
+            }
+
             ClazzEnrolment.TABLE_ID -> {
-                val clazzUids = jsonArray.mapNotNull {
-                    it.jsonObject.get("clazzEnrolmentClazzUid")?.jsonPrimitive?.longOrNull
-                        ?: throw IllegalArgumentException("ClazzEnrolment has invalid clazz uid!")
-                }.toSet().toList()
+                val clazzUids = jsonArray.mapLongPropertyOrThrow("clazzEnrolmentClazzUid")
 
                 val affectedNodes = db.userSessionDao.findAllActiveNodeIdsWithClazzBasedPermission(
                     clazzUids)
@@ -90,9 +93,7 @@ class RepIncomingListener(private val db: UmAppDatabase) : IncomingReplicationLi
             }
 
             SchoolMember.TABLE_ID -> {
-                val schoolUids = jsonArray.mapNotNull {
-                    it.jsonObject.get("schoolUid")?.jsonPrimitive?.longOrNull
-                }.toSet().toList()
+                val schoolUids = jsonArray.mapLongPropertyOrThrow("schoolMemberSchoolUid")
 
                 val affectedNodes = db.userSessionDao.findAllActiveNodeIdsWithSchoolBasedPermission(
                     schoolUids)

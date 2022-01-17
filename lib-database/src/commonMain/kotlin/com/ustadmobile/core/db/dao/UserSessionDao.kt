@@ -19,7 +19,7 @@ abstract class UserSessionDao {
      */
     @Query("""
         REPLACE INTO UserSessionReplicate(usPk, usDestination)
-         SELECT UserSessionSubject.usUid AS usPk,
+         SELECT DISTINCT UserSessionSubject.usUid AS usPk,
                 UserSession.usClientNodeId AS usDestination
            FROM ChangeLog
                 JOIN UserSession UserSessionSubject
@@ -36,7 +36,7 @@ abstract class UserSessionDao {
                 (SELECT usVersionId
                    FROM UserSessionReplicate
                   WHERE UserSessionReplicate.usPk = UserSessionSubject.usUid
-                    AND UserSessionReplicate.usDestination = UserSession.usClientNodeId), 0)
+                    AND UserSessionReplicate.usDestination = UserSession.usClientNodeId), 0)             
         /*psql ON CONFLICT(usPk, usDestination) DO UPDATE
                 SET usPending = true
          */           
@@ -52,7 +52,7 @@ abstract class UserSessionDao {
      */
     @Query("""
         REPLACE INTO UserSessionReplicate(usPk, usDestination)
-         SELECT UserSessionSubject.usUid AS usPk,
+         SELECT DISTINCT UserSessionSubject.usUid AS usPk,
                 UserSession.usClientNodeId AS usDestination
            FROM UserSession 
                 JOIN PersonGroupMember

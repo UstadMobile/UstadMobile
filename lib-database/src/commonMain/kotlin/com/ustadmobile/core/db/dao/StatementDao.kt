@@ -16,7 +16,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
 
     @Query("""
      REPLACE INTO StatementEntityReplicate(sePk, seDestination)
-      SELECT StatementEntity.statementUid AS sePk,
+      SELECT DISTINCT StatementEntity.statementUid AS sePk,
              :newNodeId AS seDestination
         FROM UserSession
              JOIN PersonGroupMember
@@ -43,7 +43,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
 
     @Query("""
  REPLACE INTO StatementEntityReplicate(sePk, seDestination)
-  SELECT StatementEntity.statementUid AS seUid,
+  SELECT DISTINCT StatementEntity.statementUid AS seUid,
          UserSession.usClientNodeId AS seDestination
     FROM ChangeLog
          JOIN StatementEntity

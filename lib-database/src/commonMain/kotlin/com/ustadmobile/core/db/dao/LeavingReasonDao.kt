@@ -13,7 +13,7 @@ abstract class LeavingReasonDao : BaseDao<LeavingReason> {
 
     @Query("""
          REPLACE INTO LeavingReasonReplicate(lrPk, lrDestination)
-          SELECT LeavingReason.leavingReasonUid AS lrPk,
+          SELECT DISTINCT LeavingReason.leavingReasonUid AS lrPk,
                  :newNodeId AS lrDestination
             FROM LeavingReason
            WHERE LeavingReason.leavingReasonLct != COALESCE(
@@ -31,7 +31,7 @@ abstract class LeavingReasonDao : BaseDao<LeavingReason> {
 
     @Query("""
  REPLACE INTO LeavingReasonReplicate(lrPk, lrDestination)
-  SELECT LeavingReason.leavingReasonUid AS lrUid,
+  SELECT DISTINCT LeavingReason.leavingReasonUid AS lrUid,
          UserSession.usClientNodeId AS lrDestination
     FROM ChangeLog
          JOIN LeavingReason

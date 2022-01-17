@@ -25,8 +25,7 @@ class SettingsPresenter(context: Any, arguments: Map<String, String>, view: Sett
         super.onCreate(savedState)
         GlobalScope.launch(doorMainDispatcher()){
             val isAdmin = repo.personDao.personIsAdmin(accountManager.activeAccount.personUid)
-            view.workspaceSettingsVisible = true
-            //view.workspaceSettingsVisible = isAdmin
+            view.workspaceSettingsVisible = isAdmin
             // TODO check permission
             view.holidayCalendarVisible = true
             view.reasonLeavingVisible = true

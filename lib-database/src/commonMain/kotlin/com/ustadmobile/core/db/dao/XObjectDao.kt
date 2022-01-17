@@ -13,7 +13,7 @@ abstract class XObjectDao : BaseDao<XObjectEntity> {
 
     @Query("""
      REPLACE INTO XObjectEntityReplicate(xoePk, xoeDestination)
-      SELECT XObjectEntity.xObjectUid AS xoePk,
+      SELECT DISTINCT XObjectEntity.xObjectUid AS xoePk,
              :newNodeId AS xoeDestination
         FROM XObjectEntity
        WHERE XObjectEntity.xObjectLct != COALESCE(
@@ -31,7 +31,7 @@ abstract class XObjectDao : BaseDao<XObjectEntity> {
 
     @Query("""
  REPLACE INTO XObjectEntityReplicate(xoePk, xoeDestination)
-  SELECT XObjectEntity.xObjectUid AS xoeUid,
+  SELECT DISTINCT XObjectEntity.xObjectUid AS xoeUid,
          UserSession.usClientNodeId AS xoeDestination
     FROM ChangeLog
          JOIN XObjectEntity

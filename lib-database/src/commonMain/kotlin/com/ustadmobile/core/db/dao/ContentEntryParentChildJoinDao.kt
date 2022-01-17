@@ -15,7 +15,7 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
 
     @Query("""
      REPLACE INTO ContentEntryParentChildJoinReplicate(cepcjPk, cepcjDestination)
-      SELECT ContentEntryParentChildJoin.cepcjUid AS cepcjUid,
+      SELECT DISTINCT ContentEntryParentChildJoin.cepcjUid AS cepcjUid,
              :newNodeId AS cepcjDestination
         FROM ContentEntryParentChildJoin
        WHERE ContentEntryParentChildJoin.cepcjLct != COALESCE(
@@ -33,7 +33,7 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
 
     @Query("""
     REPLACE INTO ContentEntryParentChildJoinReplicate(cepcjPk, cepcjDestination)
-    SELECT ContentEntryParentChildJoin.cepcjUid AS cepcjUid,
+    SELECT DISTINCT ContentEntryParentChildJoin.cepcjUid AS cepcjUid,
          UserSession.usClientNodeId AS cepcjDestination
     FROM ChangeLog
          JOIN ContentEntryParentChildJoin

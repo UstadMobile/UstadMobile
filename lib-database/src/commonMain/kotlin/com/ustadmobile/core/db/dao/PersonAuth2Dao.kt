@@ -15,7 +15,7 @@ abstract class PersonAuth2Dao {
 
     @Query("""
      REPLACE INTO PersonAuth2Replicate(paPk, paDestination)
-      SELECT PersonAuth2.pauthUid AS paUid,
+      SELECT DISTINCT PersonAuth2.pauthUid AS paUid,
              :newNodeId AS paDestination
         FROM UserSession
         JOIN PersonGroupMember
@@ -41,7 +41,7 @@ abstract class PersonAuth2Dao {
 
      @Query("""
  REPLACE INTO PersonAuth2Replicate(paPk, paDestination)
-  SELECT PersonAuth2.pauthUid AS paUid,
+  SELECT DISTINCT PersonAuth2.pauthUid AS paUid,
          UserSession.usClientNodeId AS paDestination
     FROM ChangeLog
          JOIN PersonAuth2

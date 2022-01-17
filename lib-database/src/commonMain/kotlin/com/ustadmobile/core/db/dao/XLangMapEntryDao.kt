@@ -14,7 +14,7 @@ abstract class XLangMapEntryDao : BaseDao<XLangMapEntry> {
 
     @Query("""
          REPLACE INTO XLangMapEntryReplicate(xlmePk, xlmeDestination)
-          SELECT XLangMapEntry.statementLangMapUid AS xlmePk,
+          SELECT DISTINCT XLangMapEntry.statementLangMapUid AS xlmePk,
                  :newNodeId AS xlmeDestination
             FROM XLangMapEntry
            WHERE XLangMapEntry.statementLangMapLct != COALESCE(
@@ -32,7 +32,7 @@ abstract class XLangMapEntryDao : BaseDao<XLangMapEntry> {
 
     @Query("""
  REPLACE INTO XLangMapEntryReplicate(xlmePk, xlmeDestination)
-  SELECT XLangMapEntry.statementLangMapUid AS xlmeUid,
+  SELECT DISTINCT XLangMapEntry.statementLangMapUid AS xlmeUid,
          UserSession.usClientNodeId AS xlmeDestination
     FROM ChangeLog
          JOIN XLangMapEntry

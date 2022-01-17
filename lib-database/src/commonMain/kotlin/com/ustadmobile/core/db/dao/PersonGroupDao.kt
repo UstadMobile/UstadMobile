@@ -16,7 +16,7 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
 
     @Query("""
      REPLACE INTO PersonGroupReplicate(pgPk, pgDestination)
-      SELECT $SELECT_PERSONGROUP_REPLICATE_FIELDS_SQL,
+      SELECT DISTINCT $SELECT_PERSONGROUP_REPLICATE_FIELDS_SQL,
              :newNodeId AS pgDestination
         FROM UserSession
              JOIN PersonGroupMember
@@ -41,7 +41,7 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
 
     @Query("""
  REPLACE INTO PersonGroupReplicate(pgPk, pgDestination)
-  SELECT $SELECT_PERSONGROUP_REPLICATE_FIELDS_SQL ,
+  SELECT DISTINCT $SELECT_PERSONGROUP_REPLICATE_FIELDS_SQL ,
          UserSession.usClientNodeId AS pgDestination
     FROM ChangeLog
          JOIN PersonGroup
@@ -66,7 +66,7 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
 
     @Query("""
  REPLACE INTO PersonGroupReplicate(pgPk, pgDestination)
-       SELECT PersonGroup.groupUid AS pgUid,
+       SELECT DISTINCT PersonGroup.groupUid AS pgUid,
               UserSession.usClientNodeId AS pgDestination
          FROM ChangeLog
               JOIN PersonGroup
@@ -90,7 +90,7 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
                 WHERE pgPk = PersonGroup.groupUid
                   AND pgDestination = UserSession.usClientNodeId), 0)
     /*psql ON CONFLICT(pgPk, pgDestination) DO UPDATE
-     SET sgPending = true
+     SET pgPending = true
     */               
     """)
     @ReplicationRunOnChange([PersonGroup::class])
@@ -100,7 +100,7 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
 
     @Query("""
  REPLACE INTO PersonGroupReplicate(pgPk, pgDestination)
-  SELECT $SELECT_PERSONGROUP_REPLICATE_FIELDS_SQL ,
+  SELECT DISTINCT $SELECT_PERSONGROUP_REPLICATE_FIELDS_SQL ,
          UserSession.usClientNodeId AS pgDestination
     FROM UserSession
          JOIN PersonGroupMember 
@@ -120,8 +120,8 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
                  FROM PersonGroupReplicate
                 WHERE pgPk = PersonGroup.groupUid
                   AND pgDestination = UserSession.usClientNodeId), 0) 
-      /*psql ON CONFLICT(sgPk, sgDestination) DO UPDATE
-             SET sgPending = true
+      /*psql ON CONFLICT(pgPk, pgDestination) DO UPDATE
+             SET pgPending = true
       */      
     """)
     @ReplicationRunOnNewNode
@@ -130,7 +130,7 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
 
     @Query("""
  REPLACE INTO PersonGroupReplicate(pgPk, pgDestination)
-       SELECT PersonGroup.groupUid AS pgUid,
+       SELECT DISTINCT PersonGroup.groupUid AS pgUid,
               UserSession.usClientNodeId AS pgDestination
          FROM ChangeLog
               JOIN PersonGroup
@@ -154,7 +154,7 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
                 WHERE pgPk = PersonGroup.groupUid
                   AND pgDestination = UserSession.usClientNodeId), 0)
     /*psql ON CONFLICT(pgPk, pgDestination) DO UPDATE
-     SET sgPending = true
+     SET pgPending = true
     */                     
     """)
     @ReplicationRunOnChange([PersonGroup::class])
@@ -163,7 +163,7 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
 
     @Query("""
  REPLACE INTO PersonGroupReplicate(pgPk, pgDestination)
-  SELECT $SELECT_PERSONGROUP_REPLICATE_FIELDS_SQL ,
+  SELECT DISTINCT $SELECT_PERSONGROUP_REPLICATE_FIELDS_SQL ,
          UserSession.usClientNodeId AS pgDestination
     FROM UserSession
          JOIN PersonGroupMember 
@@ -183,8 +183,8 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
                  FROM PersonGroupReplicate
                 WHERE pgPk = PersonGroup.groupUid
                   AND pgDestination = UserSession.usClientNodeId), 0) 
-      /*psql ON CONFLICT(sgPk, sgDestination) DO UPDATE
-             SET sgPending = true
+      /*psql ON CONFLICT(pgPk, pgDestination) DO UPDATE
+             SET pgPending = true
       */      
     """)
     @ReplicationRunOnNewNode
@@ -193,7 +193,7 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
 
     @Query("""
  REPLACE INTO PersonGroupReplicate(pgPk, pgDestination)
-       SELECT PersonGroup.groupUid AS pgUid,
+       SELECT DISTINCT PersonGroup.groupUid AS pgUid,
               UserSession.usClientNodeId AS pgDestination
          FROM ChangeLog
               JOIN PersonGroup
@@ -217,7 +217,7 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
                 WHERE pgPk = PersonGroup.groupUid
                   AND pgDestination = UserSession.usClientNodeId), 0)
     /*psql ON CONFLICT(pgPk, pgDestination) DO UPDATE
-     SET sgPending = true
+     SET pgPending = true
     */                     
     """)
     @ReplicationRunOnChange([PersonGroup::class])
@@ -226,7 +226,7 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
 
     @Query("""
  REPLACE INTO PersonGroupReplicate(pgPk, pgDestination)
-  SELECT $SELECT_PERSONGROUP_REPLICATE_FIELDS_SQL ,
+  SELECT DISTINCT $SELECT_PERSONGROUP_REPLICATE_FIELDS_SQL ,
          UserSession.usClientNodeId AS pgDestination
     FROM UserSession
          JOIN PersonGroupMember 
@@ -246,8 +246,8 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
                  FROM PersonGroupReplicate
                 WHERE pgPk = PersonGroup.groupUid
                   AND pgDestination = UserSession.usClientNodeId), 0) 
-      /*psql ON CONFLICT(sgPk, sgDestination) DO UPDATE
-             SET sgPending = true
+      /*psql ON CONFLICT(pgPk, pgDestination) DO UPDATE
+             SET pgPending = true
       */      
     """)
     @ReplicationRunOnNewNode

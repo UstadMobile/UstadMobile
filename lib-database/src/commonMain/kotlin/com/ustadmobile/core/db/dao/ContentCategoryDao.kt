@@ -12,7 +12,7 @@ abstract class ContentCategoryDao : BaseDao<ContentCategory> {
 
     @Query("""
      REPLACE INTO ContentCategoryReplicate(ccPk, ccDestination)
-      SELECT ContentCategory.contentCategoryUid AS ccPk,
+      SELECT DISTINCT ContentCategory.contentCategoryUid AS ccPk,
              :newNodeId AS ccDestination
         FROM ContentCategory
        WHERE ContentCategory.contentCategoryLct != COALESCE(
@@ -30,7 +30,7 @@ abstract class ContentCategoryDao : BaseDao<ContentCategory> {
 
     @Query("""
  REPLACE INTO ContentCategoryReplicate(ccPk, ccDestination)
-  SELECT ContentCategory.contentCategoryUid AS ccUid,
+  SELECT DISTINCT ContentCategory.contentCategoryUid AS ccUid,
          UserSession.usClientNodeId AS ccDestination
     FROM ChangeLog
          JOIN ContentCategory

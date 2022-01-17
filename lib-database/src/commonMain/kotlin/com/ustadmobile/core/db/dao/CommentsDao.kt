@@ -14,7 +14,7 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
 
     @Query("""
      REPLACE INTO CommentsReplicate(commentsPk, commentsDestination)
-      SELECT Comments.commentsUid AS commentsPk,
+      SELECT DISTINCT Comments.commentsUid AS commentsPk,
              :newNodeId AS commentsDestination
         FROM Comments
        WHERE Comments.commentsLct != COALESCE(
@@ -32,7 +32,7 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
 
     @Query("""
      REPLACE INTO CommentsReplicate(commentsPk, commentsDestination)
-      SELECT Comments.commentsUid AS commentsPk,
+      SELECT DISTINCT Comments.commentsUid AS commentsPk,
              UserSession.usClientNodeId AS commentsDestination
         FROM ChangeLog
              JOIN Comments

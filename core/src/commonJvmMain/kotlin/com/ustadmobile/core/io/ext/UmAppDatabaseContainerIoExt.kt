@@ -23,6 +23,7 @@ import com.ustadmobile.core.contentformats.har.HarEntry
 import java.util.Base64
 import kotlinx.coroutines.NonCancellable
 import kotlin.coroutines.cancellation.CancellationException
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 
 actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: DoorUri,
                                                    recursive: Boolean, context:Any, di: DI,
@@ -39,7 +40,8 @@ actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: D
         }
     }
 
-    containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
+    containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(
+        containerUid, getSystemTimeInMillis())
 }
 
 actual suspend fun UmAppDatabase.addFileToContainer(containerUid: Long, fileUri: DoorUri,
@@ -201,7 +203,8 @@ suspend fun UmAppDatabase.addContainerFromUri(containerUid: Long, uri: com.ustad
         this.ceUid = db.containerEntryDao.insert(this)
     }
 
-    containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
+    containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(
+        containerUid, getSystemTimeInMillis())
 }
 
 suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
@@ -234,7 +237,8 @@ suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
 
         db.containerEntryDao.insertListAsync(containerEntriesToAdd)
 
-        repo.containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
+        repo.containerDao.takeIf { addOptions.updateContainer }
+            ?.updateContainerSizeAndNumEntriesAsync(containerUid, getSystemTimeInMillis())
     }
 }
 
@@ -307,6 +311,6 @@ suspend fun UmAppDatabase.addHarEntryToContainer(containerUid: Long, harEntry: H
     }
 
     containerDao.takeIf { addOptions.updateContainer }
-            ?.updateContainerSizeAndNumEntriesAsync(containerUid)
+            ?.updateContainerSizeAndNumEntriesAsync(containerUid, getSystemTimeInMillis())
 
 }

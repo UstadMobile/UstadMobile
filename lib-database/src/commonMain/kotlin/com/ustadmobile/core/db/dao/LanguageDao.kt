@@ -13,7 +13,7 @@ abstract class LanguageDao : BaseDao<Language> {
 
     @Query("""
      REPLACE INTO LanguageReplicate(languagePk, languageDestination)
-      SELECT Language.langUid AS languagePk,
+      SELECT DISTINCT Language.langUid AS languagePk,
              :newNodeId AS languageDestination
         FROM Language
        WHERE Language.langLct != COALESCE(
@@ -31,7 +31,7 @@ abstract class LanguageDao : BaseDao<Language> {
 
     @Query("""
  REPLACE INTO LanguageReplicate(languagePk, languageDestination)
-  SELECT Language.langUid AS languageUid,
+  SELECT DISTINCT Language.langUid AS languageUid,
          UserSession.usClientNodeId AS languageDestination
     FROM ChangeLog
          JOIN Language

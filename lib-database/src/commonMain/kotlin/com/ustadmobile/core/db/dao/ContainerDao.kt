@@ -11,6 +11,7 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerUidAndMimeType
 import com.ustadmobile.lib.db.entities.ContainerWithContentEntry
 import com.ustadmobile.door.SyncNode
+import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
@@ -18,7 +19,7 @@ abstract class ContainerDao : BaseDao<Container> {
 
     @Query("""
          REPLACE INTO ContainerReplicate(containerPk, containerDestination)
-          SELECT Container.containerUid AS containerPk,
+          SELECT DISTINCT Container.containerUid AS containerPk,
                  :newNodeId AS containerDestination
             FROM Container
            WHERE Container.cntLct != COALESCE(
@@ -36,13 +37,13 @@ abstract class ContainerDao : BaseDao<Container> {
 
     @Query("""
  REPLACE INTO ContainerReplicate(containerPk, containerDestination)
-  SELECT Container.containerUid AS containerUid,
+  SELECT DISTINCT Container.containerUid AS containerUid,
          UserSession.usClientNodeId AS containerDestination
     FROM ChangeLog
          JOIN Container
              ON ChangeLog.chTableId = ${Container.TABLE_ID}
                 AND ChangeLog.chEntityPk = Container.containerUid
-         JOIN UserSession
+         JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
    WHERE UserSession.usClientNodeId != (
          SELECT nodeClientId 
            FROM SyncNode
@@ -190,10 +191,10 @@ abstract class ContainerDao : BaseDao<Container> {
     abstract suspend fun findByUidAsync(containerUid: Long): Container?
 
     @Query(UPDATE_SIZE_AND_NUM_ENTRIES_SQL)
-    abstract fun updateContainerSizeAndNumEntries(containerUid: Long)
+    abstract fun updateContainerSizeAndNumEntries(containerUid: Long, changeTime: Long)
 
     @Query(UPDATE_SIZE_AND_NUM_ENTRIES_SQL)
-    abstract suspend fun updateContainerSizeAndNumEntriesAsync(containerUid: Long)
+    abstract suspend fun updateContainerSizeAndNumEntriesAsync(containerUid: Long, changeTime: Long)
 
     @Query("SELECT Container.containerUid FROM Container " +
             "WHERE Container.containerUid = :containerUid " +
@@ -252,7 +253,7 @@ abstract class ContainerDao : BaseDao<Container> {
                       FROM ContainerEntry
                       JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid
                      WHERE ContainerEntry.ceContainerUid = Container.containerUid), 0),
-                   cntLastModBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL} 
+                   cntLct = :changeTime   
                      
              WHERE containerUid = :containerUid
         """

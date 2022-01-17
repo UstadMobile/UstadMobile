@@ -17,7 +17,7 @@ abstract class VerbDao : BaseDao<VerbEntity> {
 
     @Query("""
      REPLACE INTO VerbEntityReplicate(vePk, veDestination)
-      SELECT VerbEntity.verbUid AS vePk,
+      SELECT DISTINCT VerbEntity.verbUid AS vePk,
              :newNodeId AS veDestination
         FROM VerbEntity
        WHERE VerbEntity.verbLct != COALESCE(
@@ -35,7 +35,7 @@ abstract class VerbDao : BaseDao<VerbEntity> {
 
     @Query("""
     REPLACE INTO VerbEntityReplicate(vePk, veDestination)
-    SELECT VerbEntity.verbUid AS veUid,
+    SELECT DISTINCT VerbEntity.verbUid AS veUid,
          UserSession.usClientNodeId AS veDestination
     FROM ChangeLog
          JOIN VerbEntity

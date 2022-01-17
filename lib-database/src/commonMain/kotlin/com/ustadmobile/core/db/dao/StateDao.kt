@@ -12,7 +12,7 @@ abstract class StateDao : BaseDao<StateEntity> {
 
     @Query("""
      REPLACE INTO StateEntityReplicate(sePk, seDestination)
-      SELECT StateEntity.stateUid AS sePk,
+      SELECT DISTINCT StateEntity.stateUid AS sePk,
              :newNodeId AS seDestination
         FROM StateEntity
              JOIN AgentEntity
@@ -36,7 +36,7 @@ abstract class StateDao : BaseDao<StateEntity> {
 
     @Query("""
  REPLACE INTO StateEntityReplicate(sePk, seDestination)
-  SELECT StateEntity.stateUid AS seUid,
+  SELECT DISTINCT StateEntity.stateUid AS seUid,
          UserSession.usClientNodeId AS seDestination
     FROM ChangeLog
          JOIN StateEntity
