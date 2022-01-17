@@ -80,6 +80,9 @@ abstract class SchoolDao : BaseDao<School> {
     @Query("SELECT * FROM School WHERE schoolCode = :code")
     abstract suspend fun findBySchoolCode(code: String): School?
 
+    @Query("SELECT * FROM School WHERE schoolCode = :code")
+    abstract suspend fun findBySchoolCodeFromWeb(code: String): School?
+
 
     /** Check if a permission is present on a specific entity e.g. updateState/modify etc */
     @Query("""

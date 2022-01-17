@@ -200,7 +200,7 @@ suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: PersonWithClaz
     //find the group member and update that
     val numGroupUpdates = personGroupMemberDao.moveGroupAsync(enrolment.personUid,
         effectiveClazz.clazzStudentsPersonGroupUid,
-        effectiveClazz.clazzPendingStudentsPersonGroupUid)
+        effectiveClazz.clazzPendingStudentsPersonGroupUid, systemTimeInMillis())
 
     if(numGroupUpdates != 1) {
         throw IllegalStateException("Approve pending clazz member - no membership of clazz's pending group!")
@@ -208,7 +208,8 @@ suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: PersonWithClaz
 
     //change the role
     val enrolmentUpdateCount = clazzEnrolmentDao.updateClazzEnrolmentRole(enrolment.personUid, clazzUid,
-        newRole = ClazzEnrolment.ROLE_STUDENT, oldRole = ClazzEnrolment.ROLE_STUDENT_PENDING)
+        newRole = ClazzEnrolment.ROLE_STUDENT, oldRole = ClazzEnrolment.ROLE_STUDENT_PENDING,
+        systemTimeInMillis())
     if(enrolmentUpdateCount != 1) {
         throw IllegalStateException("Approve pending clazz member - no update of enrolment!")
     }
@@ -219,10 +220,10 @@ suspend fun UmAppDatabase.declinePendingClazzEnrolment(enrolment: PersonWithClaz
         ?: throw IllegalStateException("Class does not exist")
 
         clazzEnrolmentDao.updateClazzEnrolmentActiveForPersonAndClazz(enrolment.personUid,
-            clazzUid, ClazzEnrolment.ROLE_STUDENT_PENDING, false)
+            clazzUid, ClazzEnrolment.ROLE_STUDENT_PENDING, false, systemTimeInMillis())
 
-        personGroupMemberDao.setGroupMemberToInActive(enrolment.personUid,
-            effectiveClazz.clazzPendingStudentsPersonGroupUid)
+        personGroupMemberDao.updateGroupMemberActive(false, enrolment.personUid,
+            effectiveClazz.clazzPendingStudentsPersonGroupUid, systemTimeInMillis())
 
 }
 
@@ -238,7 +239,7 @@ suspend fun UmAppDatabase.approvePendingSchoolMember(member: SchoolMember, schoo
     //find the group member and update that
     val numGroupUpdates = personGroupMemberDao.moveGroupAsync(member.schoolMemberPersonUid,
             effectiveClazz.schoolStudentsPersonGroupUid,
-            effectiveClazz.schoolPendingStudentsPersonGroupUid)
+            effectiveClazz.schoolPendingStudentsPersonGroupUid, systemTimeInMillis())
     if(numGroupUpdates != 1) {
         println("No group update?")
     }
