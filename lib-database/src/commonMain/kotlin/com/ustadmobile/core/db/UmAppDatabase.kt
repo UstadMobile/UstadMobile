@@ -4,10 +4,10 @@ import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.*
 import com.ustadmobile.door.annotation.MinReplicationVersion
-import com.ustadmobile.door.migration.*
 import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
+import com.ustadmobile.door.migration.*
 import com.ustadmobile.door.util.DoorSqlGenerator
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -46,7 +46,7 @@ import kotlin.jvm.JvmField
     PersonParentJoin::class,
     ScopedGrant::class,
     ErrorReport::class,
-    ClazzAssignment::class, ClazzAssignmentContentJoin::class,
+    ClazzAssignment::class, ClazzAssignmentContentJoin::class, AssignmentFileSubmission::class,
     ClazzAssignmentRollUp::class,
     PersonAuth2::class,
     UserSession::class,
@@ -62,6 +62,7 @@ import kotlin.jvm.JvmField
 
     ClazzLogReplicate::class,
     ClazzLogAttendanceRecordReplicate::class,
+    AssignmentFileSubmissionReplicate::class,
     ScheduleReplicate::class,
     HolidayCalendarReplicate::class,
     HolidayReplicate::class,
@@ -293,6 +294,9 @@ abstract class UmAppDatabase : DoorDatabase() {
 
     @JsName("cacheClazzAssignmentDao")
     abstract val clazzAssignmentRollUpDao: ClazzAssignmentRollUpDao
+
+    @JsName("assignmentFileSubmissionDao")
+    abstract val assignmentFileSubmissionDao: AssignmentFileSubmissionDao
 
     @JsName("commentsDao")
     abstract val commentsDao: CommentsDao

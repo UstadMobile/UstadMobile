@@ -23,6 +23,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
@@ -35,10 +36,15 @@ import org.kodein.di.on
 
 interface ClazzAssignmentDetailOverviewFragmentEventHandler {
 
+    fun onFileSubmissionDelete(fileSubmission: AssignmentFileSubmission)
+
+    fun onSubmitButtonClicked()
+
+    fun onAddFileClicked()
 }
 
 class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignment>(),
-        ClazzAssignmentDetailOverviewView, ClazzAssignmentDetailFragmentEventHandler,
+        ClazzAssignmentDetailOverviewView, ClazzAssignmentDetailOverviewFragmentEventHandler,
         OpenSheetListener {
 
 
@@ -55,6 +61,9 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
     private var detailMergerRecyclerView: RecyclerView? = null
     private var detailMergerRecyclerAdapter: ConcatAdapter? = null
     private var detailRecyclerAdapter: ClazzAssignmentBasicDetailRecyclerAdapter? = null
+
+    private var fileSubmissionHeaderAdapter: FileSubmissionHeaderAdapter? = null
+    private var fileSubmissionBottomAdapter: FileSubmissionBottomAdapter? = null
 
     private var scoreRecyclerAdapter: ScoreRecyclerAdapter? = null
 
@@ -75,6 +84,8 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
     private var contentHeaderAdapter: SimpleHeadingRecyclerAdapter? = null
     private var contentRecyclerAdapter: ContentEntryListRecyclerAdapter? = null
 
+    private var fileSubmissionAdapter: FileSubmissionAdapter? = null
+
     private var contentLiveData: LiveData<PagedList<
             ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>? = null
     private val contentObserver = Observer<PagedList<
@@ -82,6 +93,15 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         run {
             contentHeaderAdapter?.visible = t?.size ?: 0 > 0
             contentRecyclerAdapter?.submitList(t)
+        }
+    }
+
+    private var fileSubmissionLiveData: LiveData<PagedList<AssignmentFileSubmission>>? = null
+    private val fileSubmissionObserver = Observer<PagedList<AssignmentFileSubmission>?> {
+        t -> run{
+            fileSubmissionBottomAdapter?.showSubmitButton = t.any { !it.afsSubmitted }
+            fileSubmissionBottomAdapter?.maxFilesReached = t.size == maxNumberOfFilesSubmission
+            fileSubmissionAdapter?.submitList(t)
         }
     }
 
@@ -111,43 +131,52 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
                         clazzUid = arguments.toStringMap()[UstadView.ARG_CLAZZUID]?.toLong() ?: 0L),
                 ListViewMode.BROWSER.toString(), false, viewLifecycleOwner, di)
 
-        // 4 score
+        // 4 file submission header
+        fileSubmissionHeaderAdapter = FileSubmissionHeaderAdapter(getText(R.string.file_submission).toString())
+
+        // 5 file submissions
+        fileSubmissionAdapter = FileSubmissionAdapter(this)
+
+        // 6 file submissions bottom
+        fileSubmissionBottomAdapter = FileSubmissionBottomAdapter(this)
+
+        // 7 score
         scoreRecyclerAdapter = ScoreRecyclerAdapter()
 
 
-        // 5 class
+        // 8 class
         classCommentsHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.class_comments).toString()
         ).apply {
             visible = false
         }
 
-        // 6 new class comment
+        // 9 new class comment
         newClassCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_class_comment),
                 true).apply {
             visible = false
         }
 
-        //7 - Class comments list
+        // 10 Class comments list
         classCommentsRecyclerAdapter = CommentsRecyclerAdapter().also {
             this.classCommentsObserver = PagedListSubmitObserver(it)
         }
 
-        // 8 - Private
+        // 11 - Private
         privateCommentsHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.private_comments).toString()
         ).apply {
             visible = false
         }
 
-        //9 - New Private comments section:
+        // 12 - New Private comments section:
         newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_private_comment), false).apply{
             visible = false
         }
 
-        //10 - Private comments list
+        // 13 - Private comments list
         privateCommentsRecyclerAdapter = CommentsRecyclerAdapter().also{
             privateCommentsObserver = PagedListSubmitObserver(it)
         }
@@ -157,7 +186,8 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
                 arguments.toStringMap(), this, viewLifecycleOwner, di)
 
         detailMergerRecyclerAdapter = ConcatAdapter(detailRecyclerAdapter, contentHeaderAdapter,
-            contentRecyclerAdapter, scoreRecyclerAdapter, classCommentsHeadingRecyclerAdapter,
+            contentRecyclerAdapter, fileSubmissionHeaderAdapter, fileSubmissionAdapter,
+                fileSubmissionBottomAdapter, scoreRecyclerAdapter, classCommentsHeadingRecyclerAdapter,
                 newClassCommentRecyclerAdapter, classCommentsRecyclerAdapter, privateCommentsHeadingRecyclerAdapter,
                 newPrivateCommentRecyclerAdapter, privateCommentsRecyclerAdapter)
         detailMergerRecyclerView?.adapter = detailMergerRecyclerAdapter
@@ -197,6 +227,10 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         classCommentsHeadingRecyclerAdapter = null
         privateCommentsHeadingRecyclerAdapter = null
 
+        fileSubmissionBottomAdapter = null
+        fileSubmissionAdapter = null
+        fileSubmissionHeaderAdapter = null
+
     }
 
     override var clazzMetrics: ContentEntryStatementScoreProgress? = null
@@ -213,6 +247,15 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
             contentLiveData = value?.asRepositoryLiveData(dvRepoVal.clazzAssignmentDao)
             field = value
             contentLiveData?.observeIfFragmentViewIsReady(this, contentObserver)
+        }
+
+    override var clazzAssignmentFileSubmission: DoorDataSourceFactory<Int, AssignmentFileSubmission>? = null
+        set(value) {
+            val dvRepoVal = dbRepo?: return
+            fileSubmissionLiveData?.removeObserver(fileSubmissionObserver)
+            fileSubmissionLiveData = value?.asRepositoryLiveData(dvRepoVal.clazzAssignmentDao)
+            field = value
+            fileSubmissionLiveData?.observeIfFragmentViewIsReady(this, fileSubmissionObserver)
         }
 
 
@@ -245,21 +288,57 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
     override var showPrivateComments: Boolean = false
 
+    override var showFileSubmission: Boolean = false
+
+    override var showAddFileButton: Boolean = false
+        set(value){
+            field = value
+            fileSubmissionBottomAdapter?.showAddFileButton = value
+        }
+
+    override var canEditAfterSubmit: Boolean = false
+        set(value) {
+            field = value
+            fileSubmissionAdapter?.hasPassedDeadline = !canEditAfterSubmit
+        }
+
+    override var maxNumberOfFilesSubmission: Int = 0
+        set(value) {
+            field = value
+        }
+
     override var entity: ClazzAssignment? = null
         get() = field
         set(value) {
             field = value
             detailRecyclerAdapter?.clazzAssignment = value
+
             detailRecyclerAdapter?.visible = true
 
             newPrivateCommentRecyclerAdapter?.visible = showPrivateComments
             privateCommentsHeadingRecyclerAdapter?.visible = showPrivateComments
 
+            fileSubmissionHeaderAdapter?.visible = showFileSubmission
+            fileSubmissionBottomAdapter?.visible = showFileSubmission
+
             newClassCommentRecyclerAdapter?.visible = value?.caClassCommentEnabled ?: false
             classCommentsHeadingRecyclerAdapter?.visible = value?.caClassCommentEnabled ?: false
 
+            fileSubmissionHeaderAdapter?.assignment = value
+
         }
 
+    override fun onFileSubmissionDelete(fileSubmission: AssignmentFileSubmission){
+        mPresenter?.handleDeleteFileSubmission(fileSubmission)
+    }
+
+    override fun onSubmitButtonClicked() {
+        mPresenter?.handleSubmitButtonClicked()
+    }
+
+    override fun onAddFileClicked() {
+        mPresenter?.handleAddFileClicked()
+    }
 
     override fun open(publicComment: Boolean) {
         val hintText =   if(publicComment)  requireContext().getString(R.string.add_class_comment)

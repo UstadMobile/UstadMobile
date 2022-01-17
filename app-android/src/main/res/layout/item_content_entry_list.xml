@@ -190,6 +190,20 @@
             app:textMessageIdLookupKey="@{contentEntry.contentTypeFlag}"
             app:textMessageIdLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_LABEL_MAP}" />
 
+
+        <TextView
+            android:id="@+id/content_entry_item_weight"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:textAppearance="@style/UmTheme.TextAppearance.Caption"
+            app:layout_constraintStart_toStartOf="@id/content_entry_item_mimetype_text"
+            app:layout_constraintTop_toBottomOf="@id/content_entry_item_mimetype_text"
+            tools:text="Weight: 10%"
+            android:text="@{@string/weight_percentage(contentEntry.assignmentContentWeight)}"
+            android:visibility="@{contentEntry.assignmentContentWeight > 0 ? View.VISIBLE : View.GONE}"
+            />
+
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/content_type_barrier"
             android:layout_width="wrap_content"

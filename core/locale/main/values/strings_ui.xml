@@ -721,6 +721,19 @@
 
     <string name="file_type">File type</string>
 
+    <string name="file_type_chosen">Type: %1$s</string>
+
+    <string name="max_number_of_files">Maximum number of files: %1$s</string>
+
+    <!-- Used to show what marking percentage each content has in an assignment. The %1$s will be
+      replaced with the percentage  e.g. "75% complete"-->
+    <string name="weight_percentage">Weight: %1$s%%</string>
+
+    <string name="submit_grade">Submit grade</string>
+    <string name="submit_grade_and_mark_next">Submit grade and mark next</string>
+
+    <string name="mark_for_file_submission">Mark for file submissions</string>
+
 
 
 

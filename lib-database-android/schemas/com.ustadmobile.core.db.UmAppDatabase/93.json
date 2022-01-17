@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 93,
-    "identityHash": "ef1928c76712a65c7053689f7b3cca4e",
+    "identityHash": "4c9afa295a3fb43308cb65ddef492fc6",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5465,6 +5465,104 @@
         "foreignKeys": []
       },
       {
+        "tableName": "AssignmentFileSubmission",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`afsUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `afsAssignmentUid` INTEGER NOT NULL, `afsStudentUid` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `afsTitle` TEXT, `afsSubmitted` INTEGER NOT NULL, `afsActive` INTEGER NOT NULL, `afsUri` TEXT, `afsMd5` TEXT, `afsSize` INTEGER NOT NULL, `afsMasterCsn` INTEGER NOT NULL, `afsLocalCsn` INTEGER NOT NULL, `afsLastChangedBy` INTEGER NOT NULL, `afsLct` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "afsUid",
+            "columnName": "afsUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsAssignmentUid",
+            "columnName": "afsAssignmentUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsStudentUid",
+            "columnName": "afsStudentUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsTitle",
+            "columnName": "afsTitle",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "afsSubmitted",
+            "columnName": "afsSubmitted",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsActive",
+            "columnName": "afsActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsUri",
+            "columnName": "afsUri",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "afsMd5",
+            "columnName": "afsMd5",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "afsSize",
+            "columnName": "afsSize",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsMasterCsn",
+            "columnName": "afsMasterCsn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsLocalCsn",
+            "columnName": "afsLocalCsn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsLastChangedBy",
+            "columnName": "afsLastChangedBy",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsLct",
+            "columnName": "afsLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "afsUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "ClazzAssignmentRollUp",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cacheUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cachePersonUid` INTEGER NOT NULL, `cacheContentEntryUid` INTEGER NOT NULL, `cacheClazzAssignmentUid` INTEGER NOT NULL, `cacheStudentScore` INTEGER NOT NULL, `cacheMaxScore` INTEGER NOT NULL, `cacheProgress` INTEGER NOT NULL, `cacheContentComplete` INTEGER NOT NULL, `cacheSuccess` INTEGER NOT NULL, `cachePenalty` INTEGER NOT NULL, `lastCsnChecked` INTEGER NOT NULL)",
         "fields": [
@@ -6355,6 +6453,69 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzLogAttendanceRecordReplicate_clarDestination_clarPending` ON `${TABLE_NAME}` (`clarDestination`, `clarPending`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "AssignmentFileSubmissionReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`afsPk` INTEGER NOT NULL, `afsVersionId` INTEGER NOT NULL DEFAULT 0, `afsDestination` INTEGER NOT NULL, `afsPending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`afsPk`, `afsDestination`))",
+        "fields": [
+          {
+            "fieldPath": "afsPk",
+            "columnName": "afsPk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsVersionId",
+            "columnName": "afsVersionId",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "afsDestination",
+            "columnName": "afsDestination",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsPending",
+            "columnName": "afsPending",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "afsPk",
+            "afsDestination"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_AssignmentFileSubmissionReplicate_afsPk_afsVersionId_afsVersionId",
+            "unique": false,
+            "columnNames": [
+              "afsPk",
+              "afsVersionId",
+              "afsVersionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_AssignmentFileSubmissionReplicate_afsPk_afsVersionId_afsVersionId` ON `${TABLE_NAME}` (`afsPk`, `afsVersionId`, `afsVersionId`)"
+          },
+          {
+            "name": "index_AssignmentFileSubmissionReplicate_afsDestination_afsPending",
+            "unique": false,
+            "columnNames": [
+              "afsDestination",
+              "afsPending"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_AssignmentFileSubmissionReplicate_afsDestination_afsPending` ON `${TABLE_NAME}` (`afsDestination`, `afsPending`)"
           }
         ],
         "foreignKeys": []
@@ -9135,7 +9296,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ef1928c76712a65c7053689f7b3cca4e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4c9afa295a3fb43308cb65ddef492fc6')"
     ]
   }
 }

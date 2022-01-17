@@ -12,6 +12,14 @@ interface SelectFileView : UstadView {
 
         const val SELECTION_MODE_GALLERY = "video/*;audio/*"
 
+        const val SELECTION_MODE_VIDEO = "video/*"
+
+        const val SELECTION_MODE_AUDIO = "audio/*"
+
+        const val SELECTION_MODE_IMAGE = "image/*"
+
+        const val SELECTION_MODE_ANY = "*/*"
+
         val SELECTION_MODE_FILE =
                 (SupportedContent.EPUB_MIME_TYPES +
                 SupportedContent.XAPI_MIME_TYPES +

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View" />
+
+        <variable
+            name="assignment"
+            type="com.ustadmobile.lib.db.entities.ClazzAssignment" />
+
+        <variable
+            name="showAddFileButton"
+            type="Boolean" />
+
+        <variable
+            name="showSubmitButton"
+            type="Boolean" />
+
+        <variable
+            name="maxFilesReached"
+            type="Boolean" />
+
+        <variable
+            name="eventHandler"
+            type="com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragmentEventHandler" />
+
+
+    </data>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/dimen_10dp">
+
+
+        <Button
+            android:id="@+id/file_submission_add_file_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="@{!maxFilesReached ? View.VISIBLE : View.GONE}"
+            android:onClick="@{() -> eventHandler.onAddFileClicked()}"
+            android:text="@string/add_file"
+            />
+
+        <Button
+            android:id="@+id/file_submission_submit_file_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            android:text="@string/submit"
+            app:layout_constraintTop_toBottomOf="@id/file_submission_add_file_button"
+            android:onClick="@{() -> eventHandler.onSubmitButtonClicked() }"
+            android:visibility="@{showSubmitButton ? View.VISIBLE : View.GONE}"
+            />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</layout>

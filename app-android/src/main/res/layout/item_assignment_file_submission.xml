@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+
+        <import type="android.view.View" />
+
+        <variable
+            name="showFiles"
+            type="Boolean" />
+
+        <variable
+            name="fileSubmission"
+            type="com.ustadmobile.lib.db.entities.AssignmentFileSubmission" />
+
+        <variable
+            name="assignment"
+            type="com.ustadmobile.lib.db.entities.ClazzAssignment" />
+
+        <variable
+            name="hasPassedDeadline"
+            type="Boolean" />
+
+        <variable
+            name="eventHandler"
+            type="com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragmentEventHandler" />
+
+    </data>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/dimen_10dp"
+        android:visibility="@{showFiles ? View.VISIBLE : View.GONE}"
+        android:tag="@{fileSubmission.afsUid}">
+
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:scaleType="fitCenter"
+            android:id="@+id/file_thumbnail"
+            android:layout_width="@dimen/dimen_70dp"
+            android:layout_height="@dimen/dimen_70dp"
+            app:imageUri="@{fileSubmission.afsUri}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@drawable/book_24px" />
+
+
+        <TextView
+            android:id="@+id/file_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_10dp"
+            android:layout_marginEnd="@dimen/dimen_4dp"
+            android:layout_marginBottom="@dimen/dimen_4dp"
+            android:text="@{fileSubmission.afsTitle}"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/file_thumbnail"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Content Title" />
+
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/file_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/dimen_8dp"
+            android:tint="?colorOnIconTint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:srcCompat="@drawable/ic_delete_black_24dp"
+            android:visibility="@{fileSubmission.afsSubmitted || hasPassedDeadline ? View.GONE : View.VISIBLE}"
+            android:contentDescription="@string/delete"
+            android:onClick="@{() -> eventHandler.onFileSubmissionDelete(fileSubmission)}"/>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+</layout>

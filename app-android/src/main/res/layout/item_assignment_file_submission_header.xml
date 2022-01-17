@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="headingText"
+            type="String" />
+
+        <variable
+            name="assignment"
+            type="com.ustadmobile.lib.db.entities.ClazzAssignment" />
+
+    </data>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/item_simpl_heading_heading_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginVertical="@dimen/dimen_8dp"
+            android:text="@{headingText}"
+            tools:text="Heading topic"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <TextView
+            android:id="@+id/item_file_type_set"
+            android:layout_width="@dimen/dimen_0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/dimen_8dp"
+            tools:text="Type: Any"
+            app:layout_constraintStart_toStartOf="@id/item_simpl_heading_heading_tv"
+            app:layout_constraintTop_toBottomOf="@id/item_simpl_heading_heading_tv"
+           />
+
+        <TextView
+            android:id="@+id/item_file_max_number"
+            android:layout_width="@dimen/dimen_0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/dimen_8dp"
+            tools:text="Max Files: 2"
+            app:layout_constraintStart_toStartOf="@id/item_simpl_heading_heading_tv"
+            app:layout_constraintTop_toBottomOf="@id/item_file_type_set"
+            />
+
+        <TextView
+            android:paddingStart="@dimen/dimen_5dp"
+            tools:text="100%"
+            app:drawableStartCompat="@drawable/ic_baseline_emoji_events_24"
+            android:drawablePadding="@dimen/dimen_4dp"
+            android:layout_marginVertical="@dimen/dimen_8dp"
+            android:id="@+id/file_mark_score"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/UmTheme.TextAppearance.Caption"
+            app:layout_constraintStart_toStartOf="@+id/item_file_max_number"
+            app:layout_constraintTop_toBottomOf="@+id/item_file_max_number"
+            android:layout_marginBottom="@dimen/dimen_16dp" />
+
+
+        <TextView
+            android:paddingStart="@dimen/dimen_5dp"
+            android:layout_marginVertical="@dimen/dimen_8dp"
+            tools:text="(4/4)"
+            android:textAppearance="@style/UmTheme.TextAppearance.Caption"
+            android:id="@+id/file_mark_results"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text='@{"(" + 0 + &quot;/&quot; + assignment.caMaxScore + ")"}'
+            app:layout_constraintStart_toEndOf="@+id/file_mark_score"
+            app:layout_constraintTop_toBottomOf="@+id/item_file_max_number"
+            android:layout_marginBottom="@dimen/dimen_16dp" />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+</layout>

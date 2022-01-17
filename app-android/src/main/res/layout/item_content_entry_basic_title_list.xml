@@ -69,7 +69,6 @@
             android:id="@+id/item_clazz_simple_secondary_menu_imageview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dimen_16dp"
             android:layout_marginEnd="@dimen/dimen_8dp"
             android:tint="?colorOnIconTint"
             app:layout_constraintEnd_toEndOf="parent"
