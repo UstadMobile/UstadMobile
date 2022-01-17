@@ -81,6 +81,8 @@ abstract class SchoolDao : BaseDao<School> {
     abstract suspend fun findBySchoolCode(code: String): School?
 
     @Query("SELECT * FROM School WHERE schoolCode = :code")
+    @Repository(Repository.METHOD_DELEGATE_TO_WEB)
+    @RepoHttpAccessible
     abstract suspend fun findBySchoolCodeFromWeb(code: String): School?
 
 

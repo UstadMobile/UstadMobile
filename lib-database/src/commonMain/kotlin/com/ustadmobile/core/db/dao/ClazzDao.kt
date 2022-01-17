@@ -83,6 +83,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
 
     @Query("SELECT * FROM Clazz WHERE clazzCode = :code")
     @RepoHttpAccessible
+    @Repository(Repository.METHOD_DELEGATE_TO_WEB)
     abstract suspend fun findByClazzCodeFromWeb(code: String): Clazz?
 
     @Query(SELECT_ACTIVE_CLAZZES)
