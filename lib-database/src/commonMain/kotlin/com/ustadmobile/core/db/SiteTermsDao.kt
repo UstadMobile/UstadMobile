@@ -18,7 +18,7 @@ abstract class SiteTermsDao : OneToManyJoinDao<SiteTerms> {
 
     @Query("""
      REPLACE INTO SiteTermsReplicate(stPk, stDestination)
-      SELECT SiteTerms.sTermsUid AS stPk,
+      SELECT DISTINCT SiteTerms.sTermsUid AS stPk,
              :newNodeId AS stDestination
         FROM SiteTerms
        WHERE SiteTerms.sTermsLct != COALESCE(
@@ -36,7 +36,7 @@ abstract class SiteTermsDao : OneToManyJoinDao<SiteTerms> {
 
     @Query("""
  REPLACE INTO SiteTermsReplicate(stPk, stDestination)
-  SELECT SiteTerms.sTermsUid AS stUid,
+  SELECT DISTINCT SiteTerms.sTermsUid AS stUid,
          UserSession.usClientNodeId AS stDestination
     FROM ChangeLog
          JOIN SiteTerms

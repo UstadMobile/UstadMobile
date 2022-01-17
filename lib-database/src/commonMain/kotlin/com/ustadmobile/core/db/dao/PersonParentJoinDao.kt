@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.annotation.Repository.Companion.METHOD_DELEGATE_TO_WEB
 import com.ustadmobile.lib.db.entities.*
 
 @Dao
@@ -77,6 +78,16 @@ abstract class PersonParentJoinDao {
          WHERE PersonParentJoin.ppjUid = :uid
     """)
     abstract suspend fun findByUidWithMinorAsync(uid: Long): PersonParentJoinWithMinorPerson?
+
+    @Query("""
+        SELECT PersonParentJoin.*, Person.*
+          FROM PersonParentJoin
+     LEFT JOIN Person ON Person.personUid = PersonParentJoin.ppjMinorPersonUid    
+         WHERE PersonParentJoin.ppjUid = :uid
+    """)
+    @RepoHttpAccessible
+    @Repository(METHOD_DELEGATE_TO_WEB)
+    abstract suspend fun findByUidWithMinorAsyncFromWeb(uid: Long): PersonParentJoinWithMinorPerson?
 
     @Query("""
         SELECT PersonParentJoin.*
