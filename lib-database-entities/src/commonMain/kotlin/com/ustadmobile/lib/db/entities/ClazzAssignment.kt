@@ -65,8 +65,8 @@ open class ClazzAssignment {
     @ColumnInfo(defaultValue = "50")
     var caSizeLimit: Int = 50
 
-    @ColumnInfo(defaultValue = "0")
-    var caNumberOfFiles: Int = 0
+    @ColumnInfo(defaultValue = "1")
+    var caNumberOfFiles: Int = 1
 
     @ColumnInfo(defaultValue = "0")
     var caEditAfterSubmissionType: Int = 0

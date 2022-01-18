@@ -6,6 +6,9 @@
     <data>
         <import type="com.ustadmobile.core.controller.AssignmentFileTypeConstants"/>
 
+        <import type="android.view.View" />
+
+
         <variable
             name="headingText"
             type="String" />
@@ -40,7 +43,6 @@
             android:layout_width="@dimen/dimen_0dp"
             android:layout_height="wrap_content"
             android:layout_marginVertical="@dimen/dimen_8dp"
-            android:text="@string/file_type_chosen"
             tools:text="Type:"
             app:layout_constraintStart_toStartOf="@id/item_simpl_heading_heading_tv"
             app:layout_constraintTop_toBottomOf="@id/item_simpl_heading_heading_tv"
@@ -72,6 +74,20 @@
             />
 
         <TextView
+            android:id="@+id/file_submission_weight"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginVertical="@dimen/dimen_8dp"
+            android:textAppearance="@style/UmTheme.TextAppearance.Caption"
+            app:layout_constraintStart_toStartOf="@id/item_simpl_heading_heading_tv"
+            app:layout_constraintTop_toBottomOf="@id/item_file_max_number"
+            tools:text="Weight: 10%"
+            android:text="@{@string/weight_percentage(assignment.caFileSubmissionWeight)}"
+            android:visibility="@{assignment.caFileSubmissionWeight > 0 ? View.VISIBLE : View.GONE}"
+            />
+
+
+        <TextView
             android:paddingStart="@dimen/dimen_5dp"
             tools:text="100%"
             app:drawableStartCompat="@drawable/ic_baseline_emoji_events_24"
@@ -81,8 +97,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="@style/UmTheme.TextAppearance.Caption"
-            app:layout_constraintStart_toStartOf="@+id/item_file_max_number"
-            app:layout_constraintTop_toBottomOf="@+id/item_file_max_number"
+            app:layout_constraintStart_toStartOf="@+id/file_submission_weight"
+            app:layout_constraintTop_toBottomOf="@+id/file_submission_weight"
             android:layout_marginBottom="@dimen/dimen_16dp" />
 
 
@@ -96,8 +112,7 @@
             android:layout_height="wrap_content"
             android:text='@{"(" + 0 + &quot;/&quot; + assignment.caMaxScore + ")"}'
             app:layout_constraintStart_toEndOf="@+id/file_mark_score"
-            app:layout_constraintTop_toBottomOf="@+id/item_file_max_number"
-            android:layout_marginBottom="@dimen/dimen_16dp" />
+            app:layout_constraintTop_toBottomOf="@+id/file_submission_weight" />
 
 
 
