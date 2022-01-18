@@ -700,10 +700,6 @@
 
     <string name="file_submission">File submissions</string>
 
-    <string name="file_type_any">Any</string>
-    <string name="file_document">Document (pdf, docx, odt)</string>
-    <string name="file_image">Image</string>
-
     <!-- used to display the size limit of a file a user can upload -->
     <string name="size_limit">Size limit (MB)</string>
 
@@ -721,7 +717,14 @@
 
     <string name="file_type">File type</string>
 
-    <string name="file_type_chosen">Type: %1$s</string>
+    <!-- used to display what type of file a user can upload, options would be Doc, Video, Audio, Document
+        Type: Document (pdf, docx, odt)
+     -->
+    <string name="file_type_chosen">Type:</string>
+
+    <string name="file_type_any">Any</string>
+    <string name="file_document">Document (pdf, docx, odt)</string>
+    <string name="file_image">Image</string>
 
     <string name="max_number_of_files">Maximum number of files: %1$s</string>
 

@@ -141,6 +141,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                     afsStudentUid = accountManager.activeAccount.personUid
                     afsTitle = DoorUri.parse(uri).getFileName(context)
                     afsUri = uri
+                    timestamp = systemTimeInMillis()
                 }
             }
             requireSavedStateHandle()[ContentEntryEdit2Presenter.SAVED_STATE_KEY_URI] = null
