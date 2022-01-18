@@ -11,7 +11,7 @@
             type="com.ustadmobile.lib.db.entities.ClazzAssignment" />
 
         <variable
-            name="showAddFileButton"
+            name="deadlinePassed"
             type="Boolean" />
 
         <variable
@@ -43,7 +43,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:visibility="@{!maxFilesReached ? View.VISIBLE : View.GONE}"
+            android:visibility="@{maxFilesReached || deadlinePassed ? View.GONE : View.VISIBLE}"
             android:onClick="@{() -> eventHandler.onAddFileClicked()}"
             android:text="@string/add_file"
             />

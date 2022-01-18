@@ -40,6 +40,7 @@ class FileSubmissionHeaderAdapter(heading: String): SingleItemRecyclerViewAdapte
                         parent, false).also {
                     it.headingText = headingText
                     it.assignment = assignment
+                    it.headingText = headingText
                 })
     }
 

@@ -289,17 +289,21 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
     override var showPrivateComments: Boolean = false
 
     override var showFileSubmission: Boolean = false
+        set(value){
+            field = value
+            fileSubmissionAdapter?.visible = value
+        }
 
     override var showAddFileButton: Boolean = false
         set(value){
             field = value
-            fileSubmissionBottomAdapter?.showAddFileButton = value
+            fileSubmissionBottomAdapter?.deadlinePassed = value
         }
 
-    override var canEditAfterSubmit: Boolean = false
+    override var hasPassedDeadline: Boolean = false
         set(value) {
             field = value
-            fileSubmissionAdapter?.hasPassedDeadline = !canEditAfterSubmit
+            fileSubmissionAdapter?.hasPassedDeadline = hasPassedDeadline
         }
 
     override var maxNumberOfFilesSubmission: Int = 0

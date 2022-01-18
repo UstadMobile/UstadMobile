@@ -13,18 +13,24 @@ class FileSubmissionBottomAdapter(val eventHandler: ClazzAssignmentDetailOvervie
 
     var maxFilesReached: Boolean = false
         set(value){
+            if(field == value)
+                return
             field = value
             viewHolder?.itemBinding?.maxFilesReached = value
         }
 
-    var showAddFileButton: Boolean = false
+    var deadlinePassed: Boolean = false
         set(value){
+            if(field == value)
+                return
             field = value
-            viewHolder?.itemBinding?.showAddFileButton = value
+            viewHolder?.itemBinding?.deadlinePassed = value
         }
 
     var showSubmitButton: Boolean = false
         set(value){
+            if(field == value)
+                return
             field = value
             viewHolder?.itemBinding?.showSubmitButton = value
         }
@@ -45,12 +51,16 @@ class FileSubmissionBottomAdapter(val eventHandler: ClazzAssignmentDetailOvervie
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileSubmissionBottomViewHolder {
-        return FileSubmissionBottomViewHolder(
+        viewHolder = FileSubmissionBottomViewHolder(
                 ItemAssignmentFileSubmissionBottomBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
                     it.assignment = assignment
                     it.eventHandler = eventHandler
+                    it.maxFilesReached = maxFilesReached
+                    it.showSubmitButton = showSubmitButton
+                    it.showAddFileButton = deadlinePassed
                 })
+        return viewHolder as FileSubmissionBottomViewHolder
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {

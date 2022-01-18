@@ -7,6 +7,7 @@
 
 
         <import type="android.view.View" />
+        <import type="com.ustadmobile.lib.db.entities.ClazzAssignment"/>
 
         <variable
             name="showFiles"
@@ -18,7 +19,7 @@
 
         <variable
             name="assignment"
-            type="com.ustadmobile.lib.db.entities.ClazzAssignment" />
+            type="ClazzAssignment" />
 
         <variable
             name="hasPassedDeadline"
@@ -45,6 +46,7 @@
             android:layout_width="@dimen/dimen_70dp"
             android:layout_height="@dimen/dimen_70dp"
             app:imageUri="@{fileSubmission.afsUri}"
+            app:fallbackDrawable="@{@drawable/book_24px}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@drawable/book_24px" />
@@ -61,6 +63,7 @@
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:textStyle="bold"
             app:layout_constraintStart_toEndOf="@id/file_thumbnail"
+            app:layout_constraintEnd_toStartOf="@+id/file_delete"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Content Title" />
@@ -76,7 +79,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:srcCompat="@drawable/ic_delete_black_24dp"
-            android:visibility="@{fileSubmission.afsSubmitted || hasPassedDeadline ? View.GONE : View.VISIBLE}"
+            android:visibility="@{!hasPassedDeadline &amp; (!fileSubmission.afsSubmitted || assignment.caEditAfterSubmissionType != ClazzAssignment.EDIT_AFTER_SUBMISSION_TYPE_NOT_ALLOWED) ? View.VISIBLE : View.GONE}"
             android:contentDescription="@string/delete"
             android:onClick="@{() -> eventHandler.onFileSubmissionDelete(fileSubmission)}"/>
 

@@ -86,15 +86,14 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
             view.maxNumberOfFilesSubmission = clazzAssignment.caNumberOfFiles
             if(clazzAssignment.caRequireFileSubmission) {
                 val currentTime = systemTimeInMillis()
-                view.canEditAfterSubmit = when (clazzAssignment.caEditAfterSubmissionType) {
+                view.hasPassedDeadline = when (clazzAssignment.caEditAfterSubmissionType) {
                     ClazzAssignment.EDIT_AFTER_SUBMISSION_TYPE_ALLOWED_DEADLINE -> {
-                        currentTime < clazzAssignment.caDeadlineDate
+                        currentTime > clazzAssignment.caDeadlineDate
                     }
                     ClazzAssignment.EDIT_AFTER_SUBMISSION_TYPE_ALLOWED_GRACE -> {
-                        currentTime < clazzAssignment.caGracePeriodDate
+                        currentTime > clazzAssignment.caGracePeriodDate
                     }
-                    else ->
-                        false
+                    else -> currentTime > clazzAssignment.caDeadlineDate
                 }
 
                 view.clazzAssignmentFileSubmission = db.onRepoWithFallbackToDb(2000){
@@ -136,13 +135,12 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                 String::class) {
             val uri = it.firstOrNull() ?: return@observeSavedStateResult
             presenterScope.launch(doorMainDispatcher()) {
-                AssignmentFileSubmission().apply {
+                repo.assignmentFileSubmissionDao.insertAsync(AssignmentFileSubmission().apply {
                     afsAssignmentUid = entity?.caUid ?: 0
                     afsStudentUid = accountManager.activeAccount.personUid
                     afsTitle = DoorUri.parse(uri).getFileName(context)
                     afsUri = uri
-                    timestamp = systemTimeInMillis()
-                }
+                })
             }
             requireSavedStateHandle()[ContentEntryEdit2Presenter.SAVED_STATE_KEY_URI] = null
         }
@@ -153,6 +151,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         presenterScope.launch {
             fileSubmission.afsActive = false
             fileSubmission.afsUri = null
+            fileSubmission.afsTimestamp = systemTimeInMillis()
             repo.assignmentFileSubmissionDao.updateAsync(fileSubmission)
         }
     }

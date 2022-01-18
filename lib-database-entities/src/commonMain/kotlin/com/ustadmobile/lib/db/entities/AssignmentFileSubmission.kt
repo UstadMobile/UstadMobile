@@ -33,7 +33,7 @@ class AssignmentFileSubmission {
 
     var afsStudentUid: Long = 0
 
-    var timestamp: Long = 0
+    var afsTimestamp: Long = 0
 
     var afsTitle: String? = null
 

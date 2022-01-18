@@ -25,6 +25,8 @@ class FileSubmissionAdapter(
 
     var visible: Boolean = false
         set(value) {
+            if(field == value)
+                return
             field = value
             viewHolder?.binding?.showFiles = value
         }
@@ -40,6 +42,8 @@ class FileSubmissionAdapter(
 
     var hasPassedDeadline: Boolean = false
         set(value){
+            if(field == value)
+                return
             field = value
             viewHolder?.binding?.hasPassedDeadline = value
         }
@@ -51,16 +55,19 @@ class FileSubmissionAdapter(
     private var viewHolder: FileSubmissionViewHolder? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileSubmissionViewHolder {
-        return FileSubmissionViewHolder(
+        viewHolder = FileSubmissionViewHolder(
                 ItemAssignmentFileSubmissionBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
-                            it.assignment = assignment
-                            it.eventHandler = eventHandler
+                    it.assignment = assignment
+                    it.eventHandler = eventHandler
+                    it.showFiles = visible
+                    it.hasPassedDeadline = hasPassedDeadline
                 })
+        return viewHolder as FileSubmissionViewHolder
     }
 
     override fun onBindViewHolder(holder: FileSubmissionViewHolder, position: Int) {
-
+        holder.binding.fileSubmission = getItem(position)
     }
 
     companion object{
