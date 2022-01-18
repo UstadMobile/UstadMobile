@@ -294,28 +294,23 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
             fileSubmissionAdapter?.visible = value
         }
 
-    override var showAddFileButton: Boolean = false
-        set(value){
-            field = value
-            fileSubmissionBottomAdapter?.deadlinePassed = value
-        }
-
     override var hasPassedDeadline: Boolean = false
         set(value) {
             field = value
-            fileSubmissionAdapter?.hasPassedDeadline = hasPassedDeadline
+            fileSubmissionAdapter?.hasPassedDeadline = value
+            fileSubmissionBottomAdapter?.deadlinePassed = value
         }
 
     override var maxNumberOfFilesSubmission: Int = 0
-        set(value) {
-            field = value
-        }
 
     override var entity: ClazzAssignment? = null
         get() = field
         set(value) {
             field = value
             detailRecyclerAdapter?.clazzAssignment = value
+            fileSubmissionHeaderAdapter?.assignment = value
+            fileSubmissionAdapter?.assignment = value
+            fileSubmissionBottomAdapter?.assignment = value
 
             detailRecyclerAdapter?.visible = true
 
@@ -327,8 +322,6 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
             newClassCommentRecyclerAdapter?.visible = value?.caClassCommentEnabled ?: false
             classCommentsHeadingRecyclerAdapter?.visible = value?.caClassCommentEnabled ?: false
-
-            fileSubmissionHeaderAdapter?.assignment = value
 
         }
 

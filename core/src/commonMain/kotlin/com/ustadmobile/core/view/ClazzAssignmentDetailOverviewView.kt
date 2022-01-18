@@ -22,8 +22,6 @@ interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignment> {
 
     var showFileSubmission: Boolean
 
-    var showAddFileButton: Boolean
-
     var hasPassedDeadline: Boolean
 
     var maxNumberOfFilesSubmission: Int
