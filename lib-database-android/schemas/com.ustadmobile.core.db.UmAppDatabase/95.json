@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 95,
-    "identityHash": "b129bd2e603d55adf884ea470da01f6a",
+    "identityHash": "4d47907f0acc5018a41e489b0586e603",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5460,7 +5460,7 @@
       },
       {
         "tableName": "AssignmentFileSubmission",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`afsUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `afsAssignmentUid` INTEGER NOT NULL, `afsStudentUid` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `afsTitle` TEXT, `afsSubmitted` INTEGER NOT NULL, `afsActive` INTEGER NOT NULL, `afsUri` TEXT, `afsMd5` TEXT, `afsSize` INTEGER NOT NULL, `afsMasterCsn` INTEGER NOT NULL, `afsLocalCsn` INTEGER NOT NULL, `afsLastChangedBy` INTEGER NOT NULL, `afsLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`afsUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `afsAssignmentUid` INTEGER NOT NULL, `afsStudentUid` INTEGER NOT NULL, `afsTimestamp` INTEGER NOT NULL, `afsTitle` TEXT, `afsSubmitted` INTEGER NOT NULL, `afsActive` INTEGER NOT NULL, `afsUri` TEXT, `afsMd5` TEXT, `afsSize` INTEGER NOT NULL, `afsMasterCsn` INTEGER NOT NULL, `afsLocalCsn` INTEGER NOT NULL, `afsLastChangedBy` INTEGER NOT NULL, `afsLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "afsUid",
@@ -5481,8 +5481,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "timestamp",
-            "columnName": "timestamp",
+            "fieldPath": "afsTimestamp",
+            "columnName": "afsTimestamp",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -9290,7 +9290,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b129bd2e603d55adf884ea470da01f6a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4d47907f0acc5018a41e489b0586e603')"
     ]
   }
 }

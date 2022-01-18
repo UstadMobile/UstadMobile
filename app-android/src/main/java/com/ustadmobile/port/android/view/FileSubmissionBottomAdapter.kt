@@ -58,7 +58,7 @@ class FileSubmissionBottomAdapter(val eventHandler: ClazzAssignmentDetailOvervie
                     it.eventHandler = eventHandler
                     it.maxFilesReached = maxFilesReached
                     it.showSubmitButton = showSubmitButton
-                    it.showAddFileButton = deadlinePassed
+                    it.deadlinePassed = deadlinePassed
                 })
         return viewHolder as FileSubmissionBottomViewHolder
     }

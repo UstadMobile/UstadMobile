@@ -15,10 +15,10 @@ import kotlinx.serialization.Serializable
                 on = Trigger.On.RECEIVEVIEW,
                 events = [Trigger.Event.INSERT],
                 sqlStatements = [
-                    """REPLACE INTO AssignmentFileSubmission(afsUid, afsAssignmentUid, afsStudentUid, timestamp, afsTitle, afsSubmitted, afsActive, afsUri, afsMd5, afsSize, afsMasterCsn, afsLocalCsn, afsLastChangedBy, afsLct) 
-         VALUES (NEW.afsUid, NEW.afsAssignmentUid, NEW.afsStudentUid, NEW.timestamp, NEW.afsTitle, NEW.afsSubmitted, NEW.afsActive, NEW.afsUri, NEW.afsMd5, NEW.afsSize, NEW.afsMasterCsn, NEW.afsLocalCsn, NEW.afsLastChangedBy, NEW.afsLct) 
+                    """REPLACE INTO AssignmentFileSubmission(afsUid, afsAssignmentUid, afsStudentUid, afsTimestamp, afsTitle, afsSubmitted, afsActive, afsUri, afsMd5, afsSize, afsMasterCsn, afsLocalCsn, afsLastChangedBy, afsLct) 
+         VALUES (NEW.afsUid, NEW.afsAssignmentUid, NEW.afsStudentUid, NEW.afsTimestamp, NEW.afsTitle, NEW.afsSubmitted, NEW.afsActive, NEW.afsUri, NEW.afsMd5, NEW.afsSize, NEW.afsMasterCsn, NEW.afsLocalCsn, NEW.afsLastChangedBy, NEW.afsLct) 
          /*psql ON CONFLICT (caUid) DO UPDATE 
-         SET afsUid = EXCLUDED.afsUid, afsAssignmentUid = EXCLUDED.afsAssignmentUid, afsStudentUid = EXCLUDED.afsStudentUid, timestamp = EXCLUDED.timestamp, afsTitle = EXCLUDED.afsTitle, afsSubmitted = EXCLUDED.afsSubmitted, afsActive = EXCLUDED.afsActive, afsUri = EXCLUDED.afsUri, afsMd5 = EXCLUDED.afsMd5, afsSize = EXCLUDED.afsSize, afsMasterCsn = EXCLUDED.afsMasterCsn, afsLocalCsn = EXCLUDED.afsLocalCsn, afsLastChangedBy =  EXCLUDED.afsLastChangedBy, afsLct = EXCLUDED.afsLct
+         SET afsUid = EXCLUDED.afsUid, afsAssignmentUid = EXCLUDED.afsAssignmentUid, afsStudentUid = EXCLUDED.afsStudentUid, afsTimestamp = EXCLUDED.afsTimestamp, afsTitle = EXCLUDED.afsTitle, afsSubmitted = EXCLUDED.afsSubmitted, afsActive = EXCLUDED.afsActive, afsUri = EXCLUDED.afsUri, afsMd5 = EXCLUDED.afsMd5, afsSize = EXCLUDED.afsSize, afsMasterCsn = EXCLUDED.afsMasterCsn, afsLocalCsn = EXCLUDED.afsLocalCsn, afsLastChangedBy =  EXCLUDED.afsLastChangedBy, afsLct = EXCLUDED.afsLct
          */"""
                     ])
     )
