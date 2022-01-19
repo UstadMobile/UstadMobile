@@ -737,6 +737,9 @@
 
     <string name="mark_for_file_submission">Mark for file submissions</string>
 
+    <!-- Used to display the date a file was submitted for marking -->
+    <string name="submitted_date">Submitted:  %1$s</string>
+
 
 
 

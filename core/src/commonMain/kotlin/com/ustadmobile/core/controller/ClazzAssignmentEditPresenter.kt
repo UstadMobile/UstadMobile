@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.ListSerializer
@@ -231,9 +232,11 @@ class ClazzAssignmentEditPresenter(context: Any,
                     cacjWeight = it.assignmentContentWeight
                 }
             })
-            // need to run in transaction to update the weight of each 1
-            contentToUpdate.forEach {
-                repo.clazzAssignmentContentJoinDao.updateWeightForAssignmentAndContent(it.contentEntryUid, entity.caUid, it.assignmentContentWeight)
+            // run in transaction
+            repo.withDoorTransactionAsync(UmAppDatabase::class) { db ->
+                contentToUpdate.forEach {
+                    db.clazzAssignmentContentJoinDao.updateWeightForAssignmentAndContent(it.contentEntryUid, entity.caUid, it.assignmentContentWeight)
+                }
             }
 
             repo.clazzAssignmentContentJoinDao.deactivateByUids(contentToDelete, entity.caUid)

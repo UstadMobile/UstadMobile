@@ -1,18 +1,19 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
+import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ContentWithAttemptSummary
+import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
 
 class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map<String, String>, view: ClazzAssignmentDetailStudentProgressView,
                                                     di: DI, lifecycleOwner: DoorLifecycleOwner,
@@ -68,6 +69,19 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
                             clazzAssignment.caUid, selectedPersonUid, mLoggedInPersonUid)
                 }
 
+
+        if(clazzAssignment.caRequireFileSubmission){
+
+            view.clazzAssignmentFileSubmission = db.onRepoWithFallbackToDb(2000){
+                it.assignmentFileSubmissionDao.getAllSubmittedFileSubmissionsFromStudent(
+                        clazzAssignment.caUid,
+                        selectedPersonUid
+                )
+            }
+
+        }
+        view.hasFileSubmission = clazzAssignment.caRequireFileSubmission
+
         view.studentScore = db.clazzAssignmentDao.getStatementScoreProgressForAssignment(
                 clazzAssignment.caUid, selectedPersonUid)
 
@@ -78,6 +92,19 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
         }
 
         return clazzAssignment
+    }
+
+    fun onDownloadFileClicked(){
+
+    }
+
+    fun onClickSubmitGrade(){
+        // TODO create statement with grade
+    }
+
+    fun onClickSubmitGradeAndMarkNext(){
+        onClickSubmitGrade()
+        // TODO navigate
     }
 
     override fun onClickContentWithAttempt(contentWithAttemptSummary: ContentWithAttemptSummary) {

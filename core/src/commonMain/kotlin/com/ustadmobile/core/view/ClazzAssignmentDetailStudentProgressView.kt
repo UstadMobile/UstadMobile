@@ -12,7 +12,11 @@ interface ClazzAssignmentDetailStudentProgressView: UstadDetailView<ClazzAssignm
     var clazzAssignmentContent
             : DoorDataSourceFactory<Int, ContentWithAttemptSummary>?
 
+    var clazzAssignmentFileSubmission: DoorDataSourceFactory<Int, AssignmentFileSubmission>?
+
     var clazzAssignmentPrivateComments: DoorDataSourceFactory<Int, CommentsWithPerson>?
+
+    var hasFileSubmission: Boolean
 
     companion object {
         const val VIEW_NAME = "ClazzAssignmentDetailStudentProgressListView"

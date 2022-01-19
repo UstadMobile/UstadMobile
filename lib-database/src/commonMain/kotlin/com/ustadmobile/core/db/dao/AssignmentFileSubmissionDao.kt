@@ -22,6 +22,18 @@ abstract class AssignmentFileSubmissionDao : BaseDao<AssignmentFileSubmission> {
     abstract fun getAllFileSubmissionsFromStudent(assignmentUid: Long, studentUid: Long)
             : DoorDataSourceFactory<Int, AssignmentFileSubmission>
 
+    @Query("""
+        SELECT * 
+          FROM AssignmentFileSubmission
+         WHERE afsAssignmentUid = :assignmentUid
+           AND afsStudentUid = :studentUid
+           AND afsActive
+           AND afsSubmitted
+    """)
+    abstract fun getAllSubmittedFileSubmissionsFromStudent(assignmentUid: Long, studentUid: Long)
+            : DoorDataSourceFactory<Int, AssignmentFileSubmission>
+
+
     @Update
     abstract suspend fun updateAsync(entity: AssignmentFileSubmission): Int
 

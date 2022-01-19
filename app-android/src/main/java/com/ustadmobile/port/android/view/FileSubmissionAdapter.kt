@@ -5,6 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemAssignmentFileSubmissionBinding
+import com.ustadmobile.core.controller.ContentEntryListItemListener
+import com.ustadmobile.core.controller.FileSubmissionListItemListener
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.attachments.retrieveAttachment
@@ -18,7 +20,7 @@ import org.kodein.di.direct
 import org.kodein.di.on
 
 class FileSubmissionAdapter(
-        val eventHandler: ClazzAssignmentDetailOverviewFragmentEventHandler)
+        var itemListener: FileSubmissionListItemListener?)
     : SelectablePagedListAdapter<AssignmentFileSubmission,
         FileSubmissionAdapter.FileSubmissionViewHolder>(DIFF_CALLBACK_FILE_SUBMISSION){
 
@@ -48,6 +50,14 @@ class FileSubmissionAdapter(
             viewHolder?.binding?.hasPassedDeadline = value
         }
 
+    var showDownload: Boolean = false
+        set(value){
+            if(field == value)
+                return
+            field = value
+            viewHolder?.binding?.showDownload = value
+        }
+
 
     class FileSubmissionViewHolder(val binding: ItemAssignmentFileSubmissionBinding)
         : RecyclerView.ViewHolder(binding.root)
@@ -59,7 +69,7 @@ class FileSubmissionAdapter(
                 ItemAssignmentFileSubmissionBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
                     it.assignment = assignment
-                    it.eventHandler = eventHandler
+                    it.eventHandler = itemListener
                     it.showFiles = visible
                     it.hasPassedDeadline = hasPassedDeadline
                 })
@@ -68,6 +78,12 @@ class FileSubmissionAdapter(
 
     override fun onBindViewHolder(holder: FileSubmissionViewHolder, position: Int) {
         holder.binding.fileSubmission = getItem(position)
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        itemListener = null
+        viewHolder = null
     }
 
     companion object{

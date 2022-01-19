@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View" />
+
+        <variable
+            name="assignment"
+            type="com.ustadmobile.lib.db.entities.ClazzAssignment" />
+
+        <variable
+            name="eventHandler"
+            type="com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragmentEventHandler" />
+
+
+    </data>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/dimen_10dp">
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_marginTop="@dimen/dimen_20dp"
+            android:id="@+id/mark_file_submission_text_input"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:hint="@string/mark_for_file_submission"
+            app:suffixText="@{'/' + assignment.caMaxScore}"
+            app:suffixTextAppearance="@style/UmTheme.TextAppearance.Body2"
+            app:hintEnabled="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                android:id="@+id/ca_title_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@={clazzAssignment.caTitle}" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <Button
+            android:id="@+id/mark_file_submission_submit_grade"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            app:layout_constraintTop_toBottomOf="@id/mark_file_submission_text_input"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:onClick="@{() -> eventHandler.onAddFileClicked()}"
+            android:text="@string/submit_grade"
+            />
+
+        <Button
+            android:id="@+id/mark_file_submission_submit_grade_and_next"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            android:text="@string/submit_grade_and_mark_next"
+            app:layout_constraintTop_toBottomOf="@id/mark_file_submission_submit_grade"
+            android:onClick="@{() -> eventHandler.onSubmitButtonClicked() }"
+            android:visibility="@{showSubmitButton ? View.VISIBLE : View.GONE}"
+            />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</layout>

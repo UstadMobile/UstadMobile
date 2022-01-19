@@ -17,6 +17,7 @@ import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentDetailOverview
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzAssignmentDetailOverviewPresenter
 import com.ustadmobile.core.controller.DefaultContentEntryListItemListener
+import com.ustadmobile.core.controller.FileSubmissionListItemListener
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.toStringMap
@@ -36,16 +37,15 @@ import org.kodein.di.on
 
 interface ClazzAssignmentDetailOverviewFragmentEventHandler {
 
-    fun onFileSubmissionDelete(fileSubmission: AssignmentFileSubmission)
-
     fun onSubmitButtonClicked()
 
     fun onAddFileClicked()
+
 }
 
 class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignment>(),
         ClazzAssignmentDetailOverviewView, ClazzAssignmentDetailOverviewFragmentEventHandler,
-        OpenSheetListener {
+        OpenSheetListener, FileSubmissionListItemListener {
 
 
     private var dbRepo: UmAppDatabase? = null
@@ -135,7 +135,9 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         fileSubmissionHeaderAdapter = FileSubmissionHeaderAdapter(getText(R.string.file_submission).toString())
 
         // 5 file submissions
-        fileSubmissionAdapter = FileSubmissionAdapter(this)
+        fileSubmissionAdapter = FileSubmissionAdapter(this).also {
+            it.showDownload = false
+        }
 
         // 6 file submissions bottom
         fileSubmissionBottomAdapter = FileSubmissionBottomAdapter(this)
@@ -325,10 +327,6 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
         }
 
-    override fun onFileSubmissionDelete(fileSubmission: AssignmentFileSubmission){
-        mPresenter?.handleDeleteFileSubmission(fileSubmission)
-    }
-
     override fun onSubmitButtonClicked() {
         mPresenter?.handleSubmitButtonClicked()
     }
@@ -344,6 +342,14 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         val sendCommentSheet = CommentsBottomSheet(publicComment, hintText,
                 accountManager.activeAccount.personUid, listener)
         sendCommentSheet.show(childFragmentManager, sendCommentSheet.tag)
+    }
+
+    override fun onClickDeleteFileSubmission(fileSubmission: AssignmentFileSubmission) {
+        mPresenter?.handleDeleteFileSubmission(fileSubmission)
+    }
+
+    override fun onClickDownloadFileSubmission(fileSubmission: AssignmentFileSubmission) {
+        // should not download
     }
 
 }

@@ -16,11 +16,13 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentDetailOverviewBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzAssignmentDetailStudentProgressPresenter
+import com.ustadmobile.core.controller.FileSubmissionListItemListener
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
@@ -31,9 +33,17 @@ import org.kodein.di.instance
 import org.kodein.di.on
 
 
+interface ClazzAssignmentDetailStudentProgressFragmentEventHandler {
+
+    fun onSubmitGradeClicked()
+
+    fun onSubmitGradeAndMarkNextClicked()
+
+}
+
 class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzAssignment>(),
-        ClazzAssignmentDetailStudentProgressView,
-       OpenSheetListener {
+        ClazzAssignmentDetailStudentProgressView, ClazzAssignmentDetailStudentProgressFragmentEventHandler,
+        OpenSheetListener, FileSubmissionListItemListener {
 
     private var dbRepo: UmAppDatabase? = null
 
@@ -59,11 +69,27 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         }
     }
 
+
+    private var fileSubmissionAdapter: FileSubmissionAdapter? = null
+
+    private var fileSubmissionLiveData: LiveData<PagedList<AssignmentFileSubmission>>? = null
+    private val fileSubmissionObserver = Observer<PagedList<AssignmentFileSubmission>?> {
+        t -> run {
+        fileSubmissionAdapter?.submitList(t)
+    }
+    }
+
+
+    private var markSubmissionAdapter: MarkFileSubmissionAdapter? = null
+
+
     private var privateCommentsHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter? = null
     private var privateCommentsRecyclerAdapter: CommentsRecyclerAdapter? = null
     private var privateCommentsObserver: Observer<PagedList<CommentsWithPerson>>? = null
     private var newPrivateCommentRecyclerAdapter: NewCommentRecyclerViewAdapter? = null
     private var privateCommentsLiveData: LiveData<PagedList<CommentsWithPerson>>? = null
+
+
 
 
     private var scoreRecyclerAdapter: ScoreRecyclerAdapter? = null
@@ -95,7 +121,15 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         // 2
         contentRecyclerAdapter = ContentWithAttemptRecyclerAdapter(mPresenter)
 
-        // 3
+        // 3 file submission for student
+        fileSubmissionAdapter = FileSubmissionAdapter(this).also{
+            it.showDownload = true
+        }
+
+        // 4 mark grade
+        markSubmissionAdapter = MarkFileSubmissionAdapter()
+
+        // 5
         scoreRecyclerAdapter = ScoreRecyclerAdapter()
 
 
@@ -168,6 +202,16 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             contentLiveData?.observeIfFragmentViewIsReady(this, contentObserver)
         }
 
+
+    override var clazzAssignmentFileSubmission: DoorDataSourceFactory<Int, AssignmentFileSubmission>? = null
+        set(value) {
+            val dbRepoVal = dbRepo?: return
+            fileSubmissionLiveData?.removeObserver(fileSubmissionObserver)
+            fileSubmissionLiveData = value?.asRepositoryLiveData(dbRepoVal.assignmentFileSubmissionDao)
+            field = value
+            fileSubmissionLiveData?.observeIfFragmentViewIsReady(this, fileSubmissionObserver)
+        }
+
     override var clazzAssignmentPrivateComments: DataSource.Factory<Int, CommentsWithPerson>? = null
         set(value) {
             val dbRepoVal = dbRepo?: return
@@ -176,6 +220,13 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             privateCommentsLiveData = value?.asRepositoryLiveData(dbRepoVal.commentsDao)
             privateCommentsLiveData?.observeIfFragmentViewIsReady(this, privateCommentsObserverVal)
             field = value
+        }
+
+    override var hasFileSubmission: Boolean = false
+        set(value) {
+            field = value
+            fileSubmissionAdapter?.visible = value
+            markSubmissionAdapter?.visible = value
         }
 
     override var person: Person? = null
@@ -200,6 +251,24 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             field = value
             newPrivateCommentRecyclerAdapter?.visible = value?.caPrivateCommentsEnabled ?: false
             privateCommentsHeadingRecyclerAdapter?.visible = value?.caPrivateCommentsEnabled ?: false
+            markSubmissionAdapter?.assignment = value
+            fileSubmissionAdapter?.assignment = value
         }
+
+    override fun onSubmitGradeClicked() {
+        mPresenter?.onClickSubmitGrade()
+    }
+
+    override fun onSubmitGradeAndMarkNextClicked() {
+        mPresenter?.onClickSubmitGradeAndMarkNext()
+    }
+
+    override fun onClickDeleteFileSubmission(fileSubmission: AssignmentFileSubmission) {
+        // cant delete here
+    }
+
+    override fun onClickDownloadFileSubmission(fileSubmission: AssignmentFileSubmission) {
+        mPresenter?.onDownloadFileClicked()
+    }
 
 }
