@@ -5,10 +5,15 @@
 
     <data>
         <import type="android.view.View" />
+        <import type="com.toughra.ustadmobile.R" />
 
         <variable
             name="assignment"
             type="com.ustadmobile.lib.db.entities.ClazzAssignment" />
+
+        <variable
+            name="errorText"
+            type="String" />
 
         <variable
             name="eventHandler"
@@ -34,6 +39,8 @@
             app:suffixText="@{&quot;/&quot; + assignment.caMaxScore}"
             app:suffixTextAppearance="@style/UmTheme.TextAppearance.Body2"
             app:hintEnabled="true"
+            app:errorText="@{errorText}"
+            app:errorEnabled="@{errorText != null}"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">

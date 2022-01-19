@@ -108,7 +108,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
 
     fun onClickSubmitGrade(grade: Int): Boolean {
         if(grade < 0 || (grade > entity?.caMaxScore ?: 0)){
-            // TODO highlight error on text
+            view.showSubmitMarkError = true
             return false
         }
         statementEndpoint.storeMarkedStatement(

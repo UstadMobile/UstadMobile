@@ -6,6 +6,8 @@ import com.ustadmobile.lib.db.entities.*
 
 interface ClazzAssignmentDetailStudentProgressView: UstadDetailView<ClazzAssignment> {
 
+    var showSubmitMarkError: Boolean
+
     var person: Person?
     var studentScore: ContentEntryStatementScoreProgress?
 

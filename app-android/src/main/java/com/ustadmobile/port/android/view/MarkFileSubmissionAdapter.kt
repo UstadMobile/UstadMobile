@@ -7,7 +7,7 @@ import com.toughra.ustadmobile.databinding.ItemMarkFileSubmissionBinding
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
-class MarkFileSubmissionAdapter: SingleItemRecyclerViewAdapter<
+class MarkFileSubmissionAdapter(val eventHandler: ClazzAssignmentDetailStudentProgressFragmentEventHandler): SingleItemRecyclerViewAdapter<
         MarkFileSubmissionAdapter.MarkFileSubmissionViewHolder>() {
 
     class MarkFileSubmissionViewHolder(var itemBinding: ItemMarkFileSubmissionBinding)
@@ -23,12 +23,29 @@ class MarkFileSubmissionAdapter: SingleItemRecyclerViewAdapter<
             viewHolder?.itemBinding?.assignment = value
         }
 
-    var grade: Int? = viewHolder?.itemBinding?.markFileSubmissionTextInput?.editText?.text.toString().toIntOrNull()
+    var showSubmitMarkError: Boolean = false
+        set(value){
+            if(field == value)
+                return
+            field = value
+            viewHolder?.itemBinding?.errorText = if(value){
+                " "
+            }else{
+                null
+            }
+        }
+
+    var grade: Int? = null
+        get() = viewHolder?.itemBinding?.markFileSubmissionTextInput?.editText?.text.toString().toIntOrNull()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MarkFileSubmissionViewHolder {
         viewHolder = MarkFileSubmissionViewHolder(
                 ItemMarkFileSubmissionBinding.inflate(LayoutInflater.from(parent.context),
-                        parent, false))
+                        parent, false)).also {
+            it.itemBinding.errorText = null
+            it.itemBinding.eventHandler = eventHandler
+            it.itemBinding.assignment = assignment
+        }
         return viewHolder as MarkFileSubmissionViewHolder
     }
 

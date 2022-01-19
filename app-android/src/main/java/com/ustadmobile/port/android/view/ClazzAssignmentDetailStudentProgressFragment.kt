@@ -133,7 +133,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         }
 
         // 4 mark grade
-        markSubmissionAdapter = MarkFileSubmissionAdapter()
+        markSubmissionAdapter = MarkFileSubmissionAdapter(this)
 
         // 5
         scoreRecyclerAdapter = ScoreRecyclerAdapter()
@@ -235,6 +235,11 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             fileSubmissionAdapter?.visible = value
             markSubmissionAdapter?.visible = value
             fileSubmissionHeaderAdapter?.visible = value
+        }
+    override var showSubmitMarkError: Boolean = false
+        set(value) {
+            field = value
+            markSubmissionAdapter?.showSubmitMarkError = value
         }
 
     override var person: Person? = null
