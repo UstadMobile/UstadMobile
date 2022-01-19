@@ -40,7 +40,8 @@ abstract class AssignmentFileSubmissionDao : BaseDao<AssignmentFileSubmission> {
 
     @Query("""
         UPDATE AssignmentFileSubmission
-           SET afsSubmitted = :submit, afsLct = :currentTime
+           SET afsSubmitted = :submit, afsLct = :currentTime,
+               afsTimestamp = :currentTime
          WHERE afsAssignmentUid = :assignmentUid
            AND afsStudentUid = :studentUid
            AND afsActive 

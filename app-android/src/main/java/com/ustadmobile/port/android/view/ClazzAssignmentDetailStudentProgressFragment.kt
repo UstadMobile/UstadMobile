@@ -57,6 +57,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
 
 
     private var contentHeaderAdapter: SimpleHeadingRecyclerAdapter? = null
+    private var fileSubmissionHeaderAdapter: SimpleHeadingRecyclerAdapter? = null
     private var contentRecyclerAdapter: ContentWithAttemptRecyclerAdapter? = null
 
     private var contentLiveData: LiveData<PagedList<
@@ -121,6 +122,11 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         // 2
         contentRecyclerAdapter = ContentWithAttemptRecyclerAdapter(mPresenter)
 
+
+        fileSubmissionHeaderAdapter = SimpleHeadingRecyclerAdapter(getText(R.string.file_submission).toString()).apply {
+            visible = false
+        }
+
         // 3 file submission for student
         fileSubmissionAdapter = FileSubmissionAdapter(this).also{
             it.showDownload = true
@@ -152,7 +158,8 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         }
 
         detailMergerRecyclerAdapter = ConcatAdapter(contentHeaderAdapter,
-                contentRecyclerAdapter, scoreRecyclerAdapter, privateCommentsHeadingRecyclerAdapter,
+                contentRecyclerAdapter, fileSubmissionHeaderAdapter, fileSubmissionAdapter,
+                markSubmissionAdapter, scoreRecyclerAdapter, privateCommentsHeadingRecyclerAdapter,
                 newPrivateCommentRecyclerAdapter, privateCommentsRecyclerAdapter)
         detailMergerRecyclerView?.adapter = detailMergerRecyclerAdapter
         detailMergerRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
@@ -227,6 +234,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             field = value
             fileSubmissionAdapter?.visible = value
             markSubmissionAdapter?.visible = value
+            fileSubmissionHeaderAdapter?.visible = value
         }
 
     override var person: Person? = null
@@ -256,11 +264,13 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         }
 
     override fun onSubmitGradeClicked() {
-        mPresenter?.onClickSubmitGrade()
+        val grade = markSubmissionAdapter?.grade ?: return
+        mPresenter?.onClickSubmitGrade(grade)
     }
 
     override fun onSubmitGradeAndMarkNextClicked() {
-        mPresenter?.onClickSubmitGradeAndMarkNext()
+        val grade = markSubmissionAdapter?.grade ?: return
+        mPresenter?.onClickSubmitGradeAndMarkNext(grade)
     }
 
     override fun onClickDeleteFileSubmission(fileSubmission: AssignmentFileSubmission) {

@@ -29,6 +29,13 @@
             name="hasPassedDeadline"
             type="Boolean" />
 
+        <variable name="dateTimeMode"
+            type="Integer"/>
+
+        <variable
+            name="timeZoneId"
+            type="String" />
+
         <variable
             name="eventHandler"
             type="com.ustadmobile.core.controller.FileSubmissionListItemListener" />
@@ -74,6 +81,21 @@
 
 
         <TextView
+            android:id="@+id/file_submission_date_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_10dp"
+            android:layout_marginEnd="@dimen/dimen_4dp"
+            android:layout_marginBottom="@dimen/dimen_4dp"
+            android:visibility="@{showDownload ? View.VISIBLE : View.GONE}"
+            android:text="@{@string/submitted_cap + ':'}"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+            app:layout_constraintStart_toEndOf="@id/file_thumbnail"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/file_name"
+            tools:text="Submitted" />
+
+        <TextView
             android:id="@+id/file_submission_date"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -81,13 +103,15 @@
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
             android:visibility="@{showDownload ? View.VISIBLE : View.GONE}"
-            android:text="@{@string/submitted_date(fileSubmission.afsTimestamp)}"
+            app:dateTimeInMillis="@{fileSubmission.afsTimestamp}"
+            app:timeZoneId="@{timeZoneId}"
+            app:dateTimeInMillisMode="@{dateTimeMode}"
             android:textAppearance="@style/UmTheme.TextAppearance.Body2"
-            app:layout_constraintStart_toEndOf="@id/file_thumbnail"
-            app:layout_constraintEnd_toStartOf="@+id/barrier_end"
+            app:layout_constraintStart_toEndOf="@id/file_submission_date_label"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/barrier_end"
             app:layout_constraintTop_toBottomOf="@id/file_name"
-            tools:text="Submitted: 15th Jan" />
+            tools:text="11 / 1 / 2022" />
 
 
         <androidx.constraintlayout.widget.Barrier

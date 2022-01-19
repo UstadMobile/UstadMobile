@@ -23,13 +23,12 @@ class MarkFileSubmissionAdapter: SingleItemRecyclerViewAdapter<
             viewHolder?.itemBinding?.assignment = value
         }
 
+    var grade: Int? = viewHolder?.itemBinding?.markFileSubmissionTextInput?.editText?.text.toString().toIntOrNull()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MarkFileSubmissionViewHolder {
         viewHolder = MarkFileSubmissionViewHolder(
                 ItemMarkFileSubmissionBinding.inflate(LayoutInflater.from(parent.context),
-                        parent, false).also {
-
-                })
+                        parent, false))
         return viewHolder as MarkFileSubmissionViewHolder
     }
 

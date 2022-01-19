@@ -151,7 +151,6 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         presenterScope.launch {
             fileSubmission.afsActive = false
             fileSubmission.afsUri = null
-            fileSubmission.afsTimestamp = systemTimeInMillis()
             repo.assignmentFileSubmissionDao.updateAsync(fileSubmission)
         }
     }

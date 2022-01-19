@@ -1,5 +1,7 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
+import com.ustadmobile.core.contentformats.xapi.endpoints.storeMarkedStatement
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.SessionListView
@@ -9,11 +11,14 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentWithAttemptSummary
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 
 class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map<String, String>, view: ClazzAssignmentDetailStudentProgressView,
                                                     di: DI, lifecycleOwner: DoorLifecycleOwner,
@@ -25,6 +30,8 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
     : UstadDetailPresenter<ClazzAssignmentDetailStudentProgressView, ClazzAssignment>(context, arguments, view, di, lifecycleOwner),
         NewCommentItemListener by newPrivateCommentListener, ContentWithAttemptListener {
 
+
+    val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
         return false
@@ -98,12 +105,24 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
 
     }
 
-    fun onClickSubmitGrade(){
-        // TODO create statement with grade
+
+    fun onClickSubmitGrade(grade: Int): Boolean {
+        if(grade < 0 || (grade > entity?.caMaxScore ?: 0)){
+            // TODO highlight error on text
+            return false
+        }
+        statementEndpoint.storeMarkedStatement(
+                accountManager.activeAccount, randomUuid().toString(), grade,
+                entity?.caMaxScore ?: 0, entity?.caClazzUid ?: 0
+        )
+        return true
     }
 
-    fun onClickSubmitGradeAndMarkNext(){
-        onClickSubmitGrade()
+    fun onClickSubmitGradeAndMarkNext(grade: Int) {
+        val isValid = onClickSubmitGrade(grade)
+        if(!isValid){
+            return
+        }
         // TODO navigate
     }
 

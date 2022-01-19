@@ -12,8 +12,7 @@
 
         <variable
             name="eventHandler"
-            type="com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragmentEventHandler" />
-
+            type="com.ustadmobile.port.android.view.ClazzAssignmentDetailStudentProgressFragmentEventHandler" />
 
     </data>
 
@@ -32,7 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
             android:hint="@string/mark_for_file_submission"
-            app:suffixText="@{'/' + assignment.caMaxScore}"
+            app:suffixText="@{&quot;/&quot; + assignment.caMaxScore}"
             app:suffixTextAppearance="@style/UmTheme.TextAppearance.Body2"
             app:hintEnabled="true"
             app:layout_constraintTop_toTopOf="parent"
@@ -41,10 +40,11 @@
 
             <com.google.android.material.textfield.TextInputEditText
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-                android:id="@+id/ca_title_text"
+                android:id="@+id/mark_file_submission_mark"
+                android:digits="0123456789"
+                android:inputType="number"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@={clazzAssignment.caTitle}" />
+                android:layout_height="wrap_content" />
         </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -56,7 +56,7 @@
             app:layout_constraintTop_toBottomOf="@id/mark_file_submission_text_input"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:onClick="@{() -> eventHandler.onAddFileClicked()}"
+            android:onClick="@{() -> eventHandler.onSubmitGradeClicked()}"
             android:text="@string/submit_grade"
             />
 
@@ -67,8 +67,7 @@
             android:layout_marginTop="@dimen/dimen_8dp"
             android:text="@string/submit_grade_and_mark_next"
             app:layout_constraintTop_toBottomOf="@id/mark_file_submission_submit_grade"
-            android:onClick="@{() -> eventHandler.onSubmitButtonClicked() }"
-            android:visibility="@{showSubmitButton ? View.VISIBLE : View.GONE}"
+            android:onClick="@{() -> eventHandler.onSubmitGradeAndMarkNextClicked() }"
             />
 
 

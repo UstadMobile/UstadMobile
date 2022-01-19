@@ -12,6 +12,7 @@ import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.attachments.retrieveAttachment
 import com.ustadmobile.lib.db.entities.AssignmentFileSubmission
 import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -71,7 +72,10 @@ class FileSubmissionAdapter(
                     it.assignment = assignment
                     it.eventHandler = itemListener
                     it.showFiles = visible
+                    it.showDownload = showDownload
                     it.hasPassedDeadline = hasPassedDeadline
+                    it.dateTimeMode = MODE_START_OF_DAY
+                    it.timeZoneId = "UTC"
                 })
         return viewHolder as FileSubmissionViewHolder
     }
