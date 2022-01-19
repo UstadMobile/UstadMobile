@@ -91,3 +91,31 @@ fun XapiStatementEndpoint.storeCompletedStatement(account: UmAccount, entry: Con
 
     storeStatements(listOf(statement), "", entry.contentEntryUid, clazzUid)
 }
+
+fun XapiStatementEndpoint.storeMarkedStatement(
+        account: UmAccount, contextRegistration: String, grade:Int, maxScore: Int, clazzUid: Long){
+
+    val statement = Statement().apply {
+        this.actor = Actor().apply {
+            this.account = Account().apply {
+                this.homePage = account.endpointUrl
+                this.name = account.username
+            }
+        }
+        this.context = XContext().apply {
+            registration = contextRegistration
+        }
+        this.result = Result().apply {
+            this.completion = true
+            this.extensions = mapOf("https://w3id.org/xapi/cmi5/result/extensions/progress" to 100)
+                success = true
+                score = Score().apply {
+                    raw = grade.toLong()
+                    max = maxScore.toLong()
+                    scaled = (grade.toFloat() / maxScore)
+                }
+        }
+    }
+
+    storeStatements(listOf(statement), "", 0, clazzUid)
+}
