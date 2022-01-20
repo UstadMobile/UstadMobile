@@ -49,4 +49,15 @@ abstract class AssignmentFileSubmissionDao : BaseDao<AssignmentFileSubmission> {
     """)
     abstract suspend fun setFilesAsSubmittedForStudent(assignmentUid: Long, studentUid: Long,
                                                        submit: Boolean, currentTime: Long)
+
+
+    @Query("""
+        SELECT afsStudentUid
+          FROM AssignmentFileSubmission
+         WHERE afsAssignmentUid = :assignmentUid
+           AND afsSubmitted 
+           AND afsActive
+         LIMIT 1
+    """)
+    abstract suspend fun findNextStudentToGrade(assignmentUid: Long): Long
 }
