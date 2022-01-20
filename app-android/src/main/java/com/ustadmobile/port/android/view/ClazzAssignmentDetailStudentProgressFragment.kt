@@ -90,9 +90,6 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
     private var newPrivateCommentRecyclerAdapter: NewCommentRecyclerViewAdapter? = null
     private var privateCommentsLiveData: LiveData<PagedList<CommentsWithPerson>>? = null
 
-
-
-
     private var scoreRecyclerAdapter: ScoreRecyclerAdapter? = null
 
     private var detailMergerRecyclerView: RecyclerView? = null
@@ -236,6 +233,13 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             markSubmissionAdapter?.visible = value
             fileSubmissionHeaderAdapter?.visible = value
         }
+
+    override var markNextStudentEnabled: Boolean = false
+        set(value) {
+            field = value
+            markSubmissionAdapter?.markNextStudentEnabled = value
+        }
+
     override var submitMarkError: String? = null
         set(value) {
             field = value

@@ -20,6 +20,8 @@ interface ClazzAssignmentDetailStudentProgressView: UstadDetailView<ClazzAssignm
 
     var hasFileSubmission: Boolean
 
+    var markNextStudentEnabled: Boolean
+
     companion object {
         const val VIEW_NAME = "ClazzAssignmentDetailStudentProgressListView"
     }

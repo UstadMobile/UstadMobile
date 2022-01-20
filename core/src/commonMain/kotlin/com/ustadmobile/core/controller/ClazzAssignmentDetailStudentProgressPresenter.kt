@@ -5,6 +5,7 @@ import com.ustadmobile.core.contentformats.xapi.endpoints.storeMarkedStatement
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NoAppFoundException
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
@@ -19,7 +20,9 @@ import com.ustadmobile.lib.db.entities.AssignmentFileSubmission
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentWithAttemptSummary
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -50,6 +53,8 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
 
     private var selectedClazzUid: Long = 0
 
+    private var nextStudentToMark: Long = 0L
+
     override fun onCreate(savedState: Map<String, String>?) {
         selectedPersonUid = arguments[ARG_PERSON_UID]?.toLong() ?: 0
         selectedClazzAssignmentUid = arguments[ARG_CLAZZ_ASSIGNMENT_UID]?.toLong() ?: 0
@@ -59,6 +64,11 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
             repo.clazzAssignmentRollUpDao.cacheBestStatements(
                     selectedClazzUid, selectedClazzAssignmentUid,
                     selectedPersonUid)
+            val clazzAssignmentObjectId = UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
+                    "/clazzAssignment/${selectedClazzAssignmentUid}")
+            nextStudentToMark = repo.clazzEnrolmentDao.findNextStudentNotMarkedForAssignment(clazzAssignmentObjectId,
+                    selectedClazzAssignmentUid, selectedPersonUid)
+            view.markNextStudentEnabled = nextStudentToMark != 0L
         }
 
     }
@@ -131,10 +141,14 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
             view.submitMarkError = " "
             return false
         }
-        statementEndpoint.storeMarkedStatement(
-                accountManager.activeAccount, randomUuid().toString(), grade,
-                entity?.caMaxScore ?: 0, entity?.caClazzUid ?: 0
-        )
+        val person = view.person ?: return false
+        val assignment = view.entity ?: return false
+        presenterScope.launch {
+            withContext(Dispatchers.Default) {
+                statementEndpoint.storeMarkedStatement(
+                    accountManager.activeAccount, person, randomUuid().toString(), grade, assignment)
+            }
+        }
         return true
     }
 
@@ -143,10 +157,10 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
         if(!isValid){
             return
         }
-        presenterScope.launch{
-            repo.assignmentFileSubmissionDao.findNextStudentToGrade(entity?.caUid?: 0L)
-        }
-        // TODO navigate
+        systemImpl.go(ClazzAssignmentDetailStudentProgressView.VIEW_NAME,
+                mapOf(ARG_PERSON_UID to nextStudentToMark.toString(),
+                        ARG_CLAZZ_ASSIGNMENT_UID to selectedClazzAssignmentUid.toString(),
+                        ARG_CLAZZUID to selectedClazzUid.toString()), context)
     }
 
     override fun onClickContentWithAttempt(contentWithAttemptSummary: ContentWithAttemptSummary) {

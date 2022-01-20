@@ -31,6 +31,14 @@ class MarkFileSubmissionAdapter(val eventHandler: ClazzAssignmentDetailStudentPr
             viewHolder?.itemBinding?.errorText = value
         }
 
+    var markNextStudentEnabled = false
+        set(value){
+            if(field == value)
+                return
+            field = value
+            viewHolder?.itemBinding?.markNextStudentEnabled = value
+        }
+
     var grade: Int? = null
         get() = viewHolder?.itemBinding?.markFileSubmissionTextInput?.editText?.text.toString().toIntOrNull()
 
@@ -41,6 +49,7 @@ class MarkFileSubmissionAdapter(val eventHandler: ClazzAssignmentDetailStudentPr
             it.itemBinding.errorText = submitMarkError
             it.itemBinding.eventHandler = eventHandler
             it.itemBinding.assignment = assignment
+            it.itemBinding.markNextStudentEnabled = markNextStudentEnabled
         }
         return viewHolder as MarkFileSubmissionViewHolder
     }

@@ -3,9 +3,7 @@ package com.ustadmobile.core.contentformats.xapi.endpoints
 import com.ustadmobile.core.contentformats.xapi.*
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMTinCanUtil
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 
 fun XapiStatementEndpoint.storeProgressStatement(account: UmAccount, entry: ContentEntry,
                                                  progress: Int, duration: Long, contextRegistration: String,
@@ -93,17 +91,28 @@ fun XapiStatementEndpoint.storeCompletedStatement(account: UmAccount, entry: Con
 }
 
 fun XapiStatementEndpoint.storeMarkedStatement(
-        account: UmAccount, contextRegistration: String, grade:Int, maxScore: Int, clazzUid: Long){
+        account: UmAccount, student: Person, contextRegistration: String,
+        grade:Int, assignment: ClazzAssignment){
 
     val statement = Statement().apply {
         this.actor = Actor().apply {
             this.account = Account().apply {
                 this.homePage = account.endpointUrl
-                this.name = account.username
+                this.name = student.username
             }
+        }
+        this.verb = Verb().apply {
+            this.id = "http://adlnet.gov/expapi/verbs/scored"
+            this.display = mapOf("en-US" to "scored")
         }
         this.context = XContext().apply {
             registration = contextRegistration
+            instructor = Actor().apply {
+                this.account = Account().apply {
+                    this.homePage = account.endpointUrl
+                    this.name = account.username
+                }
+            }
         }
         this.result = Result().apply {
             this.completion = true
@@ -111,11 +120,20 @@ fun XapiStatementEndpoint.storeMarkedStatement(
                 success = true
                 score = Score().apply {
                     raw = grade.toLong()
-                    max = maxScore.toLong()
-                    scaled = (grade.toFloat() / maxScore)
+                    max = assignment.caMaxScore.toLong()
+                    scaled = (grade.toFloat() / assignment.caMaxScore)
                 }
+        }
+        this.`object` = XObject().apply {
+            this.id = UMFileUtil.joinPaths(account.endpointUrl,
+                    "/clazzAssignment/${assignment.caUid}")
+            this.objectType = "Activity"
+            this.definition = Definition().apply {
+                this.name = mapOf("en-US" to (assignment.caTitle ?: ""))
+                this.description = mapOf("en-US" to (assignment.caDescription ?: ""))
+            }
         }
     }
 
-    storeStatements(listOf(statement), "", 0, clazzUid)
+    storeStatements(listOf(statement), "", 0, assignment.caClazzUid)
 }

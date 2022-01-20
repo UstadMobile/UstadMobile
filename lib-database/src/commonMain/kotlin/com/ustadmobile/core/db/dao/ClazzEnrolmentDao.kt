@@ -1,18 +1,15 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.FROM_SCOPEDGRANT_TO_CLAZZENROLMENT_JOIN__ON_CLAUSE
-import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
-import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
 
 @Repository
@@ -265,6 +262,27 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int, sortOrder: Int, searchText: String? = "%",
                                        filter: Int, accountPersonUid: Long, currentTime: Long): DoorDataSourceFactory<Int, PersonWithClazzEnrolmentDetails>
 
+    @Query("""
+        SELECT COALESCE((SELECT clazzEnrolmentPersonUid 
+          FROM ClazzEnrolment 
+               LEFT JOIN ClazzAssignment
+                      ON ClazzAssignment.caClazzUid = ClazzEnrolment.clazzEnrolmentClazzUid 
+                     AND ClazzAssignment.caUid = :assignmentUid 
+          WHERE ClazzEnrolment.clazzEnrolmentActive
+            AND ClazzEnrolment.clazzEnrolmentRole = 1000
+            AND ClazzEnrolment.clazzEnrolmentPersonUid != :currentStudentUid
+            AND NOT EXISTS (SELECT statementUid 
+                              FROM StatementEntity 
+                                   LEFT JOIN XObjectEntity 
+                                          ON StatementEntity.xObjectUid = XObjectEntity.xObjectUid 
+                             WHERE XObjectEntity.objectId = :objectId 
+                             LIMIT 1) 
+                               
+          LIMIT 1),0)
+    """)
+    abstract suspend fun findNextStudentNotMarkedForAssignment(objectId: String,
+                                                               assignmentUid: Long,
+                                                               currentStudentUid: Long): Long
 
     @Query("""
         UPDATE ClazzEnrolment 
