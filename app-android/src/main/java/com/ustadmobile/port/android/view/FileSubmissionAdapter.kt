@@ -13,6 +13,7 @@ import com.ustadmobile.door.attachments.retrieveAttachment
 import com.ustadmobile.lib.db.entities.AssignmentFileSubmission
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
+import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -81,7 +82,9 @@ class FileSubmissionAdapter(
     }
 
     override fun onBindViewHolder(holder: FileSubmissionViewHolder, position: Int) {
-        holder.binding.fileSubmission = getItem(position)
+        val item =  getItem(position)
+        holder.binding.fileSubmission = item
+        holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK_FILE_SUBMISSION)
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {

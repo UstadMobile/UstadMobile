@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 95,
-    "identityHash": "4ccef51868b42a8c8c54dc935558c597",
+    "identityHash": "2c1fa757c5f0cc10f64528df950b94d8",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5460,7 +5460,7 @@
       },
       {
         "tableName": "AssignmentFileSubmission",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`afsUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `afsAssignmentUid` INTEGER NOT NULL, `afsStudentUid` INTEGER NOT NULL, `afsTimestamp` INTEGER NOT NULL, `afsTitle` TEXT, `afsSubmitted` INTEGER NOT NULL, `afsActive` INTEGER NOT NULL, `afsUri` TEXT, `afsMd5` TEXT, `afsSize` INTEGER NOT NULL, `afsMasterCsn` INTEGER NOT NULL, `afsLocalCsn` INTEGER NOT NULL, `afsLastChangedBy` INTEGER NOT NULL, `afsLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`afsUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `afsAssignmentUid` INTEGER NOT NULL, `afsStudentUid` INTEGER NOT NULL, `afsTimestamp` INTEGER NOT NULL, `afsMimeType` TEXT, `afsTitle` TEXT, `afsSubmitted` INTEGER NOT NULL, `afsActive` INTEGER NOT NULL, `afsUri` TEXT, `afsMd5` TEXT, `afsSize` INTEGER NOT NULL, `afsMasterCsn` INTEGER NOT NULL, `afsLocalCsn` INTEGER NOT NULL, `afsLastChangedBy` INTEGER NOT NULL, `afsLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "afsUid",
@@ -5485,6 +5485,12 @@
             "columnName": "afsTimestamp",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "afsMimeType",
+            "columnName": "afsMimeType",
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "afsTitle",
@@ -9290,7 +9296,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4ccef51868b42a8c8c54dc935558c597')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2c1fa757c5f0cc10f64528df950b94d8')"
     ]
   }
 }

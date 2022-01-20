@@ -35,6 +35,8 @@ class AssignmentFileSubmission {
 
     var afsTimestamp: Long = 0
 
+    var afsMimeType: String? = null
+
     var afsTitle: String? = null
 
     var afsSubmitted: Boolean = false

@@ -236,10 +236,10 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             markSubmissionAdapter?.visible = value
             fileSubmissionHeaderAdapter?.visible = value
         }
-    override var showSubmitMarkError: Boolean = false
+    override var submitMarkError: String? = null
         set(value) {
             field = value
-            markSubmissionAdapter?.showSubmitMarkError = value
+            markSubmissionAdapter?.submitMarkError = value
         }
 
     override var person: Person? = null
@@ -282,8 +282,8 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         // cant delete here
     }
 
-    override fun onClickDownloadFileSubmission(fileSubmission: AssignmentFileSubmission) {
-        mPresenter?.onDownloadFileClicked()
+    override fun onClickOpenFileSubmission(fileSubmission: AssignmentFileSubmission) {
+        mPresenter?.onClickOpenFileSubmission(fileSubmission)
     }
 
 }

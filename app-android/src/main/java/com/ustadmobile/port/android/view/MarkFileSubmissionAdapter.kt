@@ -23,16 +23,12 @@ class MarkFileSubmissionAdapter(val eventHandler: ClazzAssignmentDetailStudentPr
             viewHolder?.itemBinding?.assignment = value
         }
 
-    var showSubmitMarkError: Boolean = false
+    var submitMarkError: String? = null
         set(value){
             if(field == value)
                 return
             field = value
-            viewHolder?.itemBinding?.errorText = if(value){
-                " "
-            }else{
-                null
-            }
+            viewHolder?.itemBinding?.errorText = value
         }
 
     var grade: Int? = null
@@ -42,7 +38,7 @@ class MarkFileSubmissionAdapter(val eventHandler: ClazzAssignmentDetailStudentPr
         viewHolder = MarkFileSubmissionViewHolder(
                 ItemMarkFileSubmissionBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false)).also {
-            it.itemBinding.errorText = null
+            it.itemBinding.errorText = submitMarkError
             it.itemBinding.eventHandler = eventHandler
             it.itemBinding.assignment = assignment
         }

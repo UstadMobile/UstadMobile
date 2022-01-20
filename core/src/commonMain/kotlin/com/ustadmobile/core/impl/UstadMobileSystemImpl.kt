@@ -30,6 +30,7 @@
  */
 
 package com.ustadmobile.core.impl
+import com.ustadmobile.door.DoorUri
 import kotlin.jvm.JvmStatic
 
 
@@ -127,7 +128,7 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
     override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?
 
 
-    fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?)
+    fun openFileInDefaultViewer(context: Any, doorUri: DoorUri, mimeType: String?)
 
 
     /**

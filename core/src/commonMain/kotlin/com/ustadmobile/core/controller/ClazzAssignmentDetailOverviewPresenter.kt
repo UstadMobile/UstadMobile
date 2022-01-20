@@ -1,7 +1,10 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
+import com.ustadmobile.core.impl.NoAppFoundException
+import com.ustadmobile.core.io.ext.guessMimeType
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ClazzAssignmentEditView
@@ -9,6 +12,7 @@ import com.ustadmobile.core.view.SelectFileView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.attachments.retrieveAttachment
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -135,11 +139,13 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                 String::class) {
             val uri = it.firstOrNull() ?: return@observeSavedStateResult
             presenterScope.launch(doorMainDispatcher()) {
+                val doorUri = DoorUri.parse(uri)
                 repo.assignmentFileSubmissionDao.insertAsync(AssignmentFileSubmission().apply {
                     afsAssignmentUid = entity?.caUid ?: 0
                     afsStudentUid = accountManager.activeAccount.personUid
-                    afsTitle = DoorUri.parse(uri).getFileName(context)
+                    afsTitle = doorUri.getFileName(context)
                     afsUri = uri
+                    afsMimeType = doorUri.guessMimeType(context, di)
                 })
             }
             requireSavedStateHandle()[ContentEntryEdit2Presenter.SAVED_STATE_KEY_URI] = null
@@ -152,6 +158,25 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
             fileSubmission.afsActive = false
             fileSubmission.afsUri = null
             repo.assignmentFileSubmissionDao.updateAsync(fileSubmission)
+        }
+    }
+
+    fun handleOpenFileSubmission(fileSubmission: AssignmentFileSubmission){
+        presenterScope.launch {
+            val uri = fileSubmission.afsUri ?: return@launch
+            val doorUri = repo.retrieveAttachment(uri)
+            try{
+                systemImpl.openFileInDefaultViewer(context, doorUri, fileSubmission.afsMimeType)
+            }catch (e: Exception){
+                if (e is NoAppFoundException) {
+                    view.showSnackBar(systemImpl.getString(MessageID.no_app_found, context))
+                }else{
+                    val message = e.message
+                    if (message != null) {
+                        view.showSnackBar(message)
+                    }
+                }
+            }
         }
     }
 

@@ -31,7 +31,6 @@
 
 package com.ustadmobile.core.impl
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -43,21 +42,16 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.net.toUri
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.*
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.nav.toNavOptions
 import com.ustadmobile.core.io.ext.isGzipped
-import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.toFile
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import org.kodein.di.android.di
@@ -450,20 +444,20 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
 
-    actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?) {
+    actual fun openFileInDefaultViewer(context: Any, doorUri: DoorUri, mimeType: String?) {
         var mMimeType = mimeType
         val ctx = context as Context
         val intent = Intent(Intent.ACTION_VIEW)
         intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-        var file = File(path)
+        var file = doorUri.toFile()
 
         if (file.isGzipped()) {
 
             var gzipIn: GZIPInputStream? = null
             var destOut: FileOutputStream? = null
             try {
-                gzipIn = GZIPInputStream(FileInputStream(File(path)))
-                var destFile = File(file.parentFile, file.name + "unzip")
+                gzipIn = GZIPInputStream(FileInputStream(file))
+                val destFile = File(file.parentFile, file.name + "unzip")
                 destOut = FileOutputStream(destFile)
                 gzipIn.copyTo(destOut)
                 file = destFile

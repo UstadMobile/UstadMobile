@@ -6,6 +6,6 @@ interface FileSubmissionListItemListener {
 
     fun onClickDeleteFileSubmission(fileSubmission: AssignmentFileSubmission)
 
-    fun onClickDownloadFileSubmission(fileSubmission: AssignmentFileSubmission)
+    fun onClickOpenFileSubmission(fileSubmission: AssignmentFileSubmission)
 
 }

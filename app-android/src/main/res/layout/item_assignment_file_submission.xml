@@ -8,6 +8,7 @@
 
         <import type="android.view.View" />
         <import type="com.ustadmobile.lib.db.entities.ClazzAssignment"/>
+        <import type="com.ustadmobile.port.android.view.FileSubmissionAdapter"/>
 
         <variable
             name="showFiles"
@@ -37,6 +38,10 @@
             type="String" />
 
         <variable
+            name="selectablePagedListAdapter"
+            type="FileSubmissionAdapter" />
+
+        <variable
             name="eventHandler"
             type="com.ustadmobile.core.controller.FileSubmissionListItemListener" />
 
@@ -47,6 +52,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/dimen_10dp"
+        app:selectableViewHelper="@{selectablePagedListAdapter}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, fileSubmission)}"
+        app:onSelectableItemClicked="@{() -> eventHandler.onClickOpenFileSubmission(fileSubmission)}"
         android:visibility="@{showFiles ? View.VISIBLE : View.GONE}"
         android:tag="@{fileSubmission.afsUid}">
 
@@ -119,7 +127,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:barrierDirection="start"
-            app:constraint_referenced_ids="file_delete,file_submission_download"/>
+            app:constraint_referenced_ids="file_delete"/>
 
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -130,28 +138,12 @@
             android:tint="?colorOnIconTint"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            android:padding="@dimen/dimen_8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:srcCompat="@drawable/ic_delete_black_24dp"
             android:visibility="@{!showDownload &amp; !hasPassedDeadline &amp; (!fileSubmission.afsSubmitted || assignment.caEditAfterSubmissionType != ClazzAssignment.EDIT_AFTER_SUBMISSION_TYPE_NOT_ALLOWED) ? View.VISIBLE : View.GONE}"
             android:contentDescription="@string/delete"
             android:onClick="@{() -> eventHandler.onClickDeleteFileSubmission(fileSubmission)}"/>
-
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/file_submission_download"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/dimen_8dp"
-            android:tint="?colorOnIconTint"
-            android:visibility="@{showDownload ? View.VISIBLE : View.GONE}"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:srcCompat="@drawable/ic_file_download_white_24dp"
-            android:contentDescription="@string/download"
-            android:onClick="@{() -> eventHandler.onClickDownloadFileSubmission(fileSubmission)}"/>
-
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

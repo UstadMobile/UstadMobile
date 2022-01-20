@@ -3,6 +3,8 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.storeMarkedStatement
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
@@ -10,8 +12,10 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.attachments.retrieveAttachment
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.util.randomUuid
+import com.ustadmobile.lib.db.entities.AssignmentFileSubmission
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentWithAttemptSummary
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -101,14 +105,30 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
         return clazzAssignment
     }
 
-    fun onDownloadFileClicked(){
-
+    fun onClickOpenFileSubmission(fileSubmission: AssignmentFileSubmission){
+        presenterScope.launch {
+            val uri = fileSubmission.afsUri ?: return@launch
+            val doorUri = repo.retrieveAttachment(uri)
+            try{
+                systemImpl.openFileInDefaultViewer(context, doorUri, fileSubmission.afsMimeType)
+            }catch (e: Exception){
+                if (e is NoAppFoundException) {
+                    view.showSnackBar(systemImpl.getString(MessageID.no_app_found, context))
+                }else{
+                    val message = e.message
+                    if (message != null) {
+                        view.showSnackBar(message)
+                    }
+                }
+            }
+        }
     }
 
 
     fun onClickSubmitGrade(grade: Int): Boolean {
         if(grade < 0 || (grade > entity?.caMaxScore ?: 0)){
-            view.showSubmitMarkError = true
+           // to highlight the textfield to show error
+            view.submitMarkError = " "
             return false
         }
         statementEndpoint.storeMarkedStatement(
@@ -122,6 +142,9 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
         val isValid = onClickSubmitGrade(grade)
         if(!isValid){
             return
+        }
+        presenterScope.launch{
+            repo.assignmentFileSubmissionDao.findNextStudentToGrade(entity?.caUid?: 0L)
         }
         // TODO navigate
     }

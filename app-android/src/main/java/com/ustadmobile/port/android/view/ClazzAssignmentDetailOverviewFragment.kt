@@ -348,8 +348,8 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         mPresenter?.handleDeleteFileSubmission(fileSubmission)
     }
 
-    override fun onClickDownloadFileSubmission(fileSubmission: AssignmentFileSubmission) {
-        // should not download
+    override fun onClickOpenFileSubmission(fileSubmission: AssignmentFileSubmission) {
+        mPresenter?.handleOpenFileSubmission(fileSubmission)
     }
 
 }

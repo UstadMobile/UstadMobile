@@ -24,7 +24,8 @@ interface SelectFileView : UstadView {
                 (SupportedContent.EPUB_MIME_TYPES +
                 SupportedContent.XAPI_MIME_TYPES +
                 SupportedContent.H5P_EXTENSIONS +
-                        "application/octet-stream").joinToString(";")
+                        "application/octet-stream" +
+                        "application/pdf").joinToString(";")
 
     }
 }
