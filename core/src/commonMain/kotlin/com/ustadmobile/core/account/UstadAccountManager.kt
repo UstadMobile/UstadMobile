@@ -238,8 +238,8 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
 
         withContext(doorMainDispatcher()) {
             val repo: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
-            (repo as DoorDatabaseRepository).addSyncListener(UserSession::class,
-                this@UstadAccountManager)
+//            (repo as DoorDatabaseRepository).addSyncListener(UserSession::class,
+//                this@UstadAccountManager)
             userSessionLiveDataMediator.addEndpoint(endpoint)
         }
     }
@@ -251,8 +251,8 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
 
         withContext(doorMainDispatcher()) {
             val repo: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
-            (repo as DoorDatabaseRepository).removeSyncListener(UserSession::class,
-                this@UstadAccountManager)
+//            (repo as DoorDatabaseRepository).removeSyncListener(UserSession::class,
+//                this@UstadAccountManager)
             userSessionLiveDataMediator.removeEndpoint(endpoint)
         }
     }
