@@ -44,7 +44,6 @@ android {
         minSdkVersion 21
         targetSdkVersion 31
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        missingDimensionStrategy 'api', 'api18'
     }
 
     compileOptions {

@@ -5,7 +5,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.lib.db.entities.VerbDisplay
 import com.ustadmobile.lib.db.entities.VerbEntity
 import kotlin.js.JsName
@@ -13,6 +14,50 @@ import kotlin.js.JsName
 @Dao
 @Repository
 abstract class VerbDao : BaseDao<VerbEntity> {
+
+    @Query("""
+     REPLACE INTO VerbEntityReplicate(vePk, veDestination)
+      SELECT DISTINCT VerbEntity.verbUid AS vePk,
+             :newNodeId AS veDestination
+        FROM VerbEntity
+       WHERE VerbEntity.verbLct != COALESCE(
+             (SELECT veVersionId
+                FROM VerbEntityReplicate
+               WHERE vePk = VerbEntity.verbUid
+                 AND veDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(vePk, veDestination) DO UPDATE
+             SET vePending = true
+      */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([VerbEntity::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+    @Query("""
+    REPLACE INTO VerbEntityReplicate(vePk, veDestination)
+    SELECT DISTINCT VerbEntity.verbUid AS veUid,
+         UserSession.usClientNodeId AS veDestination
+    FROM ChangeLog
+         JOIN VerbEntity
+             ON ChangeLog.chTableId = ${VerbEntity.TABLE_ID}
+                AND ChangeLog.chEntityPk = VerbEntity.verbUid
+         JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+    WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId 
+           FROM SyncNode
+          LIMIT 1)
+     AND VerbEntity.verbLct != COALESCE(
+         (SELECT veVersionId
+            FROM VerbEntityReplicate
+           WHERE vePk = VerbEntity.verbUid
+             AND veDestination = UserSession.usClientNodeId), 0)
+    /*psql ON CONFLICT(vePk, veDestination) DO UPDATE
+     SET vePending = true
+    */               
+    """)
+    @ReplicationRunOnChange([VerbEntity::class])
+    @ReplicationCheckPendingNotificationsFor([VerbEntity::class])
+    abstract suspend fun replicateOnChange()
 
     @Query("SELECT * FROM VerbEntity WHERE urlId = :urlId")
     abstract fun findByUrl(urlId: String?): VerbEntity?

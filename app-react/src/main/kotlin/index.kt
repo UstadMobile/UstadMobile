@@ -10,10 +10,7 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.defaultJsonSerializer
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.view.ContainerMounter
-import com.ustadmobile.door.DoorDatabaseRepository
-import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.jsExt.DoorDatabaseRepositoryJs
 import com.ustadmobile.jsExt.container.ContainerMounterJs
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
@@ -76,7 +73,8 @@ private val diModule = DI.Module("UstadApp-React"){
     }
 
     bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(EndpointScope.Default).singleton {
-        getCurrentState().db.instance ?: throw IllegalArgumentException("Database was not built, make sure it is built before proceeding")
+        getCurrentState().dbInstances.db ?:
+        throw IllegalStateException("Database was not built, make sure it is built before proceeding")
     }
 
     bind<CoroutineScope>(DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with provider {
@@ -84,24 +82,11 @@ private val diModule = DI.Module("UstadApp-React"){
     }
 
     bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(EndpointScope.Default).singleton {
-        val repo: UmAppDatabase by di.on(Endpoint(context.url)).instance(tag = UmAppDatabase.TAG_DB)
-        repo
-    }
-
-    bind<DoorDatabaseRepository>(tag = UmAppDatabase.TAG_REPO) with scoped(EndpointScope.Default).singleton {
-        val nodeIdAndAuth: NodeIdAndAuth = instance()
-        val config =  RepositoryConfig.repositoryConfig(
-            this,context.url,  nodeIdAndAuth.auth, nodeIdAndAuth.nodeId, instance())
-        val db: UmAppDatabase by di.on(Endpoint(context.url)).instance(tag = UmAppDatabase.TAG_DB)
-        DoorDatabaseRepositoryJs(db, config)
+        getCurrentState().dbInstances.repo ?:
+        throw IllegalStateException("Repository was not built, make sure it is built before proceeding")
     }
 
     constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with false
-
-    bind<ClientId>(tag = UstadMobileSystemCommon.TAG_CLIENT_ID) with scoped(EndpointScope.Default).singleton {
-        val nodeIdAndAuth: NodeIdAndAuth = instance()
-        ClientId(nodeIdAndAuth.nodeId)
-    }
 
     bind<ReduxThemeState>() with singleton{
         ReduxThemeState(getCurrentState().appTheme?.theme)

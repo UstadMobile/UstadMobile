@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
@@ -13,30 +14,22 @@ import kotlinx.serialization.Serializable
  */
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID,
-
-    notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-               ${TABLE_ID} AS tableId 
-          FROM ChangeLog
-               JOIN Person 
-                    ON ChangeLog.chTableId = $TABLE_ID 
-                       AND ChangeLog.chEntityPk = Person.personUid
-               ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
-        """],
-        syncFindAllQuery ="""
-            SELECT Person.*
-              FROM UserSession
-                   JOIN PersonGroupMember 
-                        ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-                   $JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1 
-                        ${Role.PERMISSION_PERSON_SELECT}
-                        $JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
-             WHERE UserSession.usClientNodeId = :clientId
-        """
-    )
+@ReplicateEntity(tableId = TABLE_ID, tracker = PersonReplicate::class)
+ @Triggers(arrayOf(
+     Trigger(
+         name = "person_remote_insert",
+         order = Trigger.Order.INSTEAD_OF,
+         on = Trigger.On.RECEIVEVIEW,
+         events = [Trigger.Event.INSERT],
+         sqlStatements = [
+             """REPLACE INTO Person(personUid, username, firstNames, lastName, emailAddr, phoneNum, gender, active, admin, personNotes, fatherName, fatherNumber, motherName, motherNum, dateOfBirth, personAddress, personOrgId, personGroupUid, personMasterChangeSeqNum, personLocalChangeSeqNum, personLastChangedBy, personLct, personCountry, personType) 
+             VALUES (NEW.personUid, NEW.username, NEW.firstNames, NEW.lastName, NEW.emailAddr, NEW.phoneNum, NEW.gender, NEW.active, NEW.admin, NEW.personNotes, NEW.fatherName, NEW.fatherNumber, NEW.motherName, NEW.motherNum, NEW.dateOfBirth, NEW.personAddress, NEW.personOrgId, NEW.personGroupUid, NEW.personMasterChangeSeqNum, NEW.personLocalChangeSeqNum, NEW.personLastChangedBy, NEW.personLct, NEW.personCountry, NEW.personType) 
+             /*psql ON CONFLICT (personUid) DO UPDATE 
+             SET username = EXCLUDED.username, firstNames = EXCLUDED.firstNames, lastName = EXCLUDED.lastName, emailAddr = EXCLUDED.emailAddr, phoneNum = EXCLUDED.phoneNum, gender = EXCLUDED.gender, active = EXCLUDED.active, admin = EXCLUDED.admin, personNotes = EXCLUDED.personNotes, fatherName = EXCLUDED.fatherName, fatherNumber = EXCLUDED.fatherNumber, motherName = EXCLUDED.motherName, motherNum = EXCLUDED.motherNum, dateOfBirth = EXCLUDED.dateOfBirth, personAddress = EXCLUDED.personAddress, personOrgId = EXCLUDED.personOrgId, personGroupUid = EXCLUDED.personGroupUid, personMasterChangeSeqNum = EXCLUDED.personMasterChangeSeqNum, personLocalChangeSeqNum = EXCLUDED.personLocalChangeSeqNum, personLastChangedBy = EXCLUDED.personLastChangedBy, personLct = EXCLUDED.personLct, personCountry = EXCLUDED.personCountry, personType = EXCLUDED.personType
+             */"""
+         ]
+     )
+ ))
 @Serializable
 open class Person() {
 
@@ -91,9 +84,14 @@ open class Person() {
     var personLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var personLct: Long = 0
 
     var personCountry: String? = null
+
+    @ColumnInfo(defaultValue = "${TYPE_NORMAL_PERSON}")
+    var personType: Int = TYPE_NORMAL_PERSON
+
 
     fun fullName():String{
         var f = ""
@@ -183,6 +181,9 @@ open class Person() {
 
         const val GENDER_OTHER = 4
 
+        const val TYPE_NORMAL_PERSON = 0
+
+        const val TYPE_SYSTEM = 1
 
         const val JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1 = """
             JOIN ScopedGrant

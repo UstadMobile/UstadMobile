@@ -3,7 +3,7 @@ package com.ustadmobile.controller
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase_JdbcKt
+import com.ustadmobile.core.db.UmAppDatabaseJsImplementations
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.AppConfig.KEY_API_URL
@@ -11,8 +11,9 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DatabaseBuilderOptions
+import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.jsExt.initJsRepo
+import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
@@ -21,10 +22,12 @@ import com.ustadmobile.util.Util.loadAssetsAsText
 import com.ustadmobile.util.Util.loadFileContentAsMap
 import com.ustadmobile.util.urlSearchParamsToMap
 import com.ustadmobile.view.SplashView
+import io.ktor.client.*
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -48,25 +51,31 @@ class SplashPresenter(private val view: SplashView): DIAware {
      */
     private fun setUpResources() = GlobalScope.launch {
         val url = window.location.href
-        val apiUrl = urlSearchParamsToMap()[KEY_API_URL] ?:
-        url.substringBefore(if(url.indexOf("umapp/") != -1) "umapp/" else "#/")
+        val apiUrl = urlSearchParamsToMap()[KEY_API_URL]
+            ?: impl.getAppPref(KEY_API_URL,this)
+            ?: url.substringBefore(if(url.indexOf("umapp/") != -1) "umapp/" else "#/")
+
         val dbName = sanitizeDbNameFromUrl(window.location.origin)
+
+        val accountManager: UstadAccountManager by instance()
+        val httpClient: HttpClient by instance()
+        val nodeIdAndAuth:NodeIdAndAuth by di.on(accountManager.activeAccount).instance()
 
         val builderOptions = DatabaseBuilderOptions(
             UmAppDatabase::class,
-            UmAppDatabase_JdbcKt::class, dbName,"./worker.sql-wasm.js")
+            UmAppDatabaseJsImplementations, dbName,"./worker.sql-wasm.js")
 
-        val dbBuilder =  DatabaseBuilder.databaseBuilder<UmAppDatabase>(builderOptions)
+        val dbBuilder =  DatabaseBuilder.databaseBuilder(builderOptions)
         val umAppDatabase =  dbBuilder.build()
 
-        dispatch(ReduxDbState(umAppDatabase))
-
-        val accountManager: UstadAccountManager by instance()
-        val nodeIdAndAuth:NodeIdAndAuth by di.on(accountManager.activeAccount).instance()
         dbBuilder.addCallback(ContentJobItemTriggersCallback())
             .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
 
-        umAppDatabase.initJsRepo(impl)
+        val repositoryConfig =  RepositoryConfig.repositoryConfig(
+            this,apiUrl+"UmAppDatabase/",  nodeIdAndAuth.auth, nodeIdAndAuth.nodeId, httpClient,
+            Json { encodeDefaults = true }){}
+
+        dispatch(ReduxDbState(umAppDatabase, umAppDatabase.asRepository(repositoryConfig)))
 
         val localeCode = impl.getDisplayedLocale(this)
         val defaultLocale = impl.getAppPref(AppConfig.KEY_DEFAULT_LANGUAGE, this)
@@ -92,6 +101,7 @@ class SplashPresenter(private val view: SplashView): DIAware {
         }
         view.appName = impl.getString(MessageID.app_name,this)
         view.loading = false
+        impl.setAppPref(SplashView.TAG_LOADED,"true", this)
     }
 
     override val di: DI

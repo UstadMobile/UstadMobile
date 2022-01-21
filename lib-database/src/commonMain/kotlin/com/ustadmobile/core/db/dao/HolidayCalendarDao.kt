@@ -3,13 +3,58 @@ package com.ustadmobile.core.db.dao
 import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
+import com.ustadmobile.lib.db.entities.UserSession
 
 @Repository
 @Dao
 abstract class  HolidayCalendarDao : BaseDao<HolidayCalendar> {
+
+    @Query("""
+     REPLACE INTO HolidayCalendarReplicate(hcPk, hcDestination)
+      SELECT HolidayCalendar.umCalendarUid AS hcPk,
+             :newNodeId AS hcDestination
+        FROM HolidayCalendar
+       WHERE HolidayCalendar.umCalendarLct != COALESCE(
+             (SELECT hcVersionId
+                FROM HolidayCalendarReplicate
+               WHERE hcPk = HolidayCalendar.umCalendarUid
+                 AND hcDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(hcPk, hcDestination) DO UPDATE
+             SET hcPending = true
+      */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([HolidayCalendar::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+ @Query("""
+ REPLACE INTO HolidayCalendarReplicate(hcPk, hcDestination)
+  SELECT HolidayCalendar.umCalendarUid AS hcUid,
+         UserSession.usClientNodeId AS hcDestination
+    FROM ChangeLog
+         JOIN HolidayCalendar
+             ON ChangeLog.chTableId = ${HolidayCalendar.TABLE_ID}
+                AND ChangeLog.chEntityPk = HolidayCalendar.umCalendarUid
+         JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+   WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId 
+           FROM SyncNode
+          LIMIT 1)
+     AND HolidayCalendar.umCalendarLct != COALESCE(
+         (SELECT hcVersionId
+            FROM HolidayCalendarReplicate
+           WHERE hcPk = HolidayCalendar.umCalendarUid
+             AND hcDestination = UserSession.usClientNodeId), 0)
+ /*psql ON CONFLICT(hcPk, hcDestination) DO UPDATE
+     SET hcPending = true
+  */               
+    """)
+    @ReplicationRunOnChange([HolidayCalendar::class])
+    @ReplicationCheckPendingNotificationsFor([HolidayCalendar::class])
+    abstract suspend fun replicateOnChange()
 
     @Query("""SELECT HolidayCalendar.* ,
             (SELECT COUNT(*) FROM Holiday 

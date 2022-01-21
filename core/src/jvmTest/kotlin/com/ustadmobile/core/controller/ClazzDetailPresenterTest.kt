@@ -17,7 +17,6 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.util.test.ext.insertPersonWithRole
 import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -87,7 +86,7 @@ class ClazzDetailPresenterTest {
 
         presenter.onCreate(null)
 
-        verify(mockView, timeout(5000)).tabs = argWhere {
+        verify(mockView, timeout(5000).atLeastOnce()).tabs = argWhere {
             it.any { it.startsWith(ClazzLogListAttendanceView.VIEW_NAME) }
         }
     }
@@ -113,7 +112,7 @@ class ClazzDetailPresenterTest {
 
         presenter.onCreate(null)
 
-        verify(mockView, timeout(5000)).tabs = argWhere {
+        verify(mockView, timeout(5000).atLeastOnce()).tabs = argWhere {
             !it.any { it.startsWith(ClazzLogListAttendanceView.VIEW_NAME) }
         }
 

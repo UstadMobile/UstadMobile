@@ -106,7 +106,6 @@ class SchoolListFragment : UstadListViewFragment<School, SchoolWithMemberCountAn
     override fun onClick(v: View?) {
         if(v?.id == R.id.item_createnew_layout) {
            mPresenter?.handleClickAddNewItem()
-
         }else{
             super.onClick(v)
         }

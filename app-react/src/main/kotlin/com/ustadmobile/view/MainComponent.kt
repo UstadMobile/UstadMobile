@@ -43,7 +43,6 @@ import kotlinx.coroutines.launch
 import kotlinx.css.Display
 import kotlinx.css.display
 import kotlinx.css.padding
-import kotlinx.html.js.onClickFunction
 import mui.material.PaperProps
 import react.RBuilder
 import react.setState
@@ -118,11 +117,6 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
 
                 styledDiv {
                     css(mainComponentContainer)
-                    attrs.onClickFunction = {
-                       GlobalScope.launch {
-                           //appDatabase.exportDatabase()
-                       }
-                    }
 
                     umTopBar(appState,
                         currentDestination,
@@ -130,6 +124,9 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                                 "${getString(MessageID.search)} " +
                                 if(systemImpl.isRtlActive()) "" else "...",
                         activeAccount?.firstName){
+                        GlobalScope.launch {
+                            appDatabase.exportDatabase()
+                        }
                         systemImpl.go(AccountListView.VIEW_NAME, mapOf(), this)
                     }
 

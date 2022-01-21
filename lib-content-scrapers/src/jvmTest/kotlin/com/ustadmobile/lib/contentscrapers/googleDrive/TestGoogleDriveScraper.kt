@@ -8,7 +8,7 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
-import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.googledrive.GoogleDriveScraper
@@ -57,7 +57,7 @@ class TestGoogleDriveScraper {
 
         di = DI {
             bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
-                NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
+                NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
@@ -66,9 +66,9 @@ class TestGoogleDriveScraper {
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 spy(
                     DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
-                    .addSyncCallback(nodeIdAndAuth, true)
+                    .addSyncCallback(nodeIdAndAuth)
                     .build()
-                    .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true))
+                    .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId))
             }
             bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
                 containerDir

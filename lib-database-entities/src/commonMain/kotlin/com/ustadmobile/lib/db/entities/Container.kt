@@ -9,13 +9,22 @@ import kotlinx.serialization.Serializable
 
 @Entity(indices = arrayOf(Index(name = "cnt_uid_to_most_recent",
         value = ["containerContentEntryUid", "cntLastModified"])))
-@SyncableEntity(tableId = Container.TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId as deviceId, 
-               ${Container.TABLE_ID} AS tableId 
-          FROM UserSession
-    """]
-)
+@ReplicateEntity(tableId = Container.TABLE_ID, tracker = ContainerReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "container_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO Container(containerUid, cntLocalCsn, cntMasterCsn, cntLastModBy, cntLct, fileSize, containerContentEntryUid, cntLastModified, mimeType, remarks, mobileOptimized, cntNumEntries) 
+         VALUES (NEW.containerUid, NEW.cntLocalCsn, NEW.cntMasterCsn, NEW.cntLastModBy, NEW.cntLct, NEW.fileSize, NEW.containerContentEntryUid, NEW.cntLastModified, NEW.mimeType, NEW.remarks, NEW.mobileOptimized, NEW.cntNumEntries) 
+         /*psql ON CONFLICT (containerUid) DO UPDATE 
+         SET cntLocalCsn = EXCLUDED.cntLocalCsn, cntMasterCsn = EXCLUDED.cntMasterCsn, cntLastModBy = EXCLUDED.cntLastModBy, cntLct = EXCLUDED.cntLct, fileSize = EXCLUDED.fileSize, containerContentEntryUid = EXCLUDED.containerContentEntryUid, cntLastModified = EXCLUDED.cntLastModified, mimeType = EXCLUDED.mimeType, remarks = EXCLUDED.remarks, mobileOptimized = EXCLUDED.mobileOptimized, cntNumEntries = EXCLUDED.cntNumEntries
+         */"""
+     ]
+ )
+))
 @Serializable
 open class Container() {
 
@@ -32,6 +41,7 @@ open class Container() {
     var cntLastModBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var cntLct: Long = 0
 
     var fileSize: Long = 0

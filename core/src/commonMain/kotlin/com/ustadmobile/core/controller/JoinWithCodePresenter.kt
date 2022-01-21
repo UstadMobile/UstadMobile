@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SNACK_MESSAGE
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -76,7 +77,18 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
         view.loading = true
         presenterScope.launch {
             if(entityTableId == Clazz.TABLE_ID){
-                val clazzToJoin = dbRepo.clazzDao.findByClazzCode(code.trim())
+                var clazzToJoin = dbRepo.clazzDao.findByClazzCode(code.trim())
+                if(clazzToJoin == null) {
+                    try {
+                        clazzToJoin = dbRepo.clazzDao.findByClazzCodeFromWeb(code.trim())
+                        if(clazzToJoin != null)
+                            dbRepo.clazzDao.insertAsync(clazzToJoin)
+                    }catch(e: Exception) {
+                        Napier.w("Could not retrieve class using class code ${code.trim()} by http",
+                            e)
+                    }
+                }
+
                 val personToEnrol = dbRepo.takeIf { clazzToJoin != null }?.personDao
                         ?.findByUidAsync(accountManager.activeAccount.personUid)
                 try {
@@ -99,14 +111,24 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                         .replace("%1\$s", clazzToJoin?.clazzName ?: "")
                 }
             }else if(entityTableId == School.TABLE_ID){
-                val schoolToJoin = dbRepo.schoolDao.findBySchoolCode(code.trim())
+                var schoolToJoin = dbRepo.schoolDao.findBySchoolCode(code.trim())
+                if(schoolToJoin == null) {
+                    try {
+                        schoolToJoin = dbRepo.schoolDao.findBySchoolCodeFromWeb(code.trim())
+                        if(schoolToJoin != null)
+                            dbRepo.schoolDao.insertAsync(schoolToJoin)
+                    }catch(e: Exception) {
+                        Napier.w("Could not load school via http for code ${code.trim()}", e)
+                    }
+                }
                 val personToEnrol = dbRepo.takeIf { schoolToJoin != null }?.personDao
                         ?.findByUidAsync(accountManager.activeAccount.personUid)
                 try {
                     if(schoolToJoin  != null && personToEnrol != null) {
                         dbRepo.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol,
                             schoolToJoin.schoolUid, Role.ROLE_SCHOOL_STUDENT_PENDING_UID)
-                        val message = systemImpl.getString(MessageID.please_wait_for_approval, context)
+                        val message = systemImpl.getString(MessageID.please_wait_for_approval,
+                            context)
                         systemImpl.go(SchoolListView.VIEW_NAME,
                             mapOf(ARG_SNACK_MESSAGE to message), context,
                             UstadMobileSystemCommon.UstadGoOptions(popUpToViewName = UstadView.CURRENT_DEST,

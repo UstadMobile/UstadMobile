@@ -13,14 +13,22 @@ import kotlinx.serialization.Serializable
  * * with a dropdown list for each different schema.
  */
 @Entity
-@SyncableEntity(tableId = TABLE_ID,
-        notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-               ${TABLE_ID} AS tableId 
-          FROM UserSession
-    """]
-)
-//shortcode = ctnCat
+@ReplicateEntity(tableId = TABLE_ID, tracker = ContentCategoryReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "contentcategory_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO ContentCategory(contentCategoryUid, ctnCatContentCategorySchemaUid, name, contentCategoryLocalChangeSeqNum, contentCategoryMasterChangeSeqNum, contentCategoryLastChangedBy, contentCategoryLct) 
+         VALUES (NEW.contentCategoryUid, NEW.ctnCatContentCategorySchemaUid, NEW.name, NEW.contentCategoryLocalChangeSeqNum, NEW.contentCategoryMasterChangeSeqNum, NEW.contentCategoryLastChangedBy, NEW.contentCategoryLct) 
+         /*psql ON CONFLICT (contentCategoryUid) DO UPDATE 
+         SET ctnCatContentCategorySchemaUid = EXCLUDED.ctnCatContentCategorySchemaUid, name = EXCLUDED.name, contentCategoryLocalChangeSeqNum = EXCLUDED.contentCategoryLocalChangeSeqNum, contentCategoryMasterChangeSeqNum = EXCLUDED.contentCategoryMasterChangeSeqNum, contentCategoryLastChangedBy = EXCLUDED.contentCategoryLastChangedBy, contentCategoryLct = EXCLUDED.contentCategoryLct
+         */"""
+     ]
+ )
+))
 @Serializable
 class ContentCategory() {
 
@@ -41,6 +49,7 @@ class ContentCategory() {
     var contentCategoryLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var contentCategoryLct: Long = 0
 
     override fun equals(other: Any?): Boolean {

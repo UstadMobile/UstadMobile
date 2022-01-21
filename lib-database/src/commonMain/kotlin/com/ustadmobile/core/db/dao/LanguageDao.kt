@@ -1,15 +1,59 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.*
 import com.ustadmobile.door.DoorDataSourceFactory
+import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 
 @Dao
 @Repository
 abstract class LanguageDao : BaseDao<Language> {
+
+    @Query("""
+     REPLACE INTO LanguageReplicate(languagePk, languageDestination)
+      SELECT DISTINCT Language.langUid AS languagePk,
+             :newNodeId AS languageDestination
+        FROM Language
+       WHERE Language.langLct != COALESCE(
+             (SELECT languageVersionId
+                FROM LanguageReplicate
+               WHERE languagePk = Language.langUid
+                 AND languageDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(languagePk, languageDestination) DO UPDATE
+             SET languagePending = true
+      */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([Language::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+    @Query("""
+ REPLACE INTO LanguageReplicate(languagePk, languageDestination)
+  SELECT DISTINCT Language.langUid AS languageUid,
+         UserSession.usClientNodeId AS languageDestination
+    FROM ChangeLog
+         JOIN Language
+             ON ChangeLog.chTableId = ${Language.TABLE_ID}
+                AND ChangeLog.chEntityPk = Language.langUid
+         JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+   WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId 
+           FROM SyncNode
+          LIMIT 1)
+     AND Language.langLct != COALESCE(
+         (SELECT languageVersionId
+            FROM LanguageReplicate
+           WHERE languagePk = Language.langUid
+             AND languageDestination = UserSession.usClientNodeId), 0)
+ /*psql ON CONFLICT(languagePk, languageDestination) DO UPDATE
+     SET languagePending = true
+  */               
+    """)
+    @ReplicationRunOnChange([Language::class])
+    @ReplicationCheckPendingNotificationsFor([Language::class])
+    abstract suspend fun replicateOnChange()
 
     @JsName("insertListAsync")
     @Insert
@@ -69,19 +113,19 @@ abstract class LanguageDao : BaseDao<Language> {
 
     @JsName("findByUidList")
     @Query("SELECT langUid FROM LANGUAGE WHERE langUid IN (:uidList)")
-    abstract suspend fun findByUidList(uidList: List<Long>): List<Long>
+    abstract fun findByUidList(uidList: List<Long>): List<Long>
 
 
     @Query("""UPDATE Language SET languageActive = :toggleVisibility, 
-                langLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
+                langLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
                 WHERE langUid IN (:selectedItem)""")
     abstract suspend fun toggleVisibilityLanguage(toggleVisibility: Boolean, selectedItem: List<Long>)
 
     @JsName("replaceList")
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun replaceList(entityList: List<Language>)
+    abstract fun replaceList(entityList: List<Language>)
 
-    suspend fun initPreloadedLanguages() {
+    fun initPreloadedLanguages() {
         val uidsInserted = findByUidList(Language.FIXED_LANGUAGES.map { it.langUid })
         val templateListToInsert = Language.FIXED_LANGUAGES.filter { it.langUid !in uidsInserted }
         replaceList(templateListToInsert)

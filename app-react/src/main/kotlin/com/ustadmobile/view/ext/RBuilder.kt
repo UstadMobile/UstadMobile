@@ -1,14 +1,12 @@
 package com.ustadmobile.view.ext
 
 
-import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_SESSION_PREFKEY
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.isContentComplete
-import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.ext.toolbarJsCssToPartialCss
@@ -38,12 +36,10 @@ import com.ustadmobile.util.Util
 import com.ustadmobile.util.Util.ASSET_ACCOUNT
 import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.util.ext.*
-import com.ustadmobile.util.getViewNameFromUrl
 import com.ustadmobile.view.ChartOptions
 import com.ustadmobile.view.ChartType
 import com.ustadmobile.view.ContentEntryListComponent
 import com.ustadmobile.view.umChart
-import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
 import mui.material.GridProps
@@ -86,13 +82,13 @@ private fun guardRoute(
     component: KClass<out Component<UmProps, *>>,
     systemImpl: UstadMobileSystemImpl
 ): ReactElement?  = createElement {
-    val viewName = getViewNameFromUrl()
+    /*val viewName = getViewNameFromUrl()
     val activeSession = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
     if(activeSession == null && viewName != null && viewName != Login2View.VIEW_NAME){
         window.setTimeout({
-            window.location.href = "./"
+            //window.location.href = "./"
         }, 0)
-    }
+    }*/
     child(component){}
 }
 
@@ -1094,7 +1090,6 @@ fun RBuilder.drawChart(
     if(chartData != null){
         val dataTable = mutableListOf<MutableList<Any>>()
         val chartOption: ChartOptions = ChartOptions().apply {
-            seriesType = "bars"
             colors = arrayOf("#009999", "#FF9900", "#0099FF", "#FF3333", "#663399", "#669999",
                 "#FF3366", "#990099", "#996666", "#339933", "#FFCC00", "#9966CC", "#FFCC99",
                 "#99FFCC", "#0066CC", "#66CCFF", "#FF66FF", "#4D4D4D", "#0066FF", "#FF6600", "#33FFFF",
@@ -1119,12 +1114,20 @@ fun RBuilder.drawChart(
         val options: Json = json("" to "")
 
         val dataSet: MutableMap<String, MutableList<Any>> = mutableMapOf()
-        distinctXAxisSet.forEach { dataSet[it] = mutableListOf(it) }
+        distinctXAxisSet.forEach {
+            dataSet[it] = mutableListOf(chartData.xAxisValueFormatter?.format(it) ?: "")
+        }
 
         chartData.seriesData.forEachIndexed { index, data ->
             val seriesType = if(data.series.reportSeriesVisualType == ReportSeries.BAR_CHART)
                 "bars" else "line"
-            options[index.toString()] = json("type" to seriesType)
+            if(chartData.seriesData.size == 1 && index == 0){
+                chartOption.seriesType = seriesType
+            }
+
+            if(chartData.seriesData.size > 1){
+                options[index.toString()] = json("type" to seriesType)
+            }
             val groupedByXAxis = data.dataList.filter { it.xAxis != null }.groupBy { it.xAxis }
             val distinctSubgroups = data.dataList.mapNotNull { it.subgroup }.toSet()
             distinctXAxisSet.forEach { xAxisKey ->
