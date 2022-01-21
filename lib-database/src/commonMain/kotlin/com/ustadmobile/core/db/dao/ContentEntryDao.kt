@@ -21,7 +21,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                 (SELECT ceVersionId
                    FROM ContentEntryReplicate
                   WHERE cePk = ContentEntry.contentEntryUid
-                    AND ceDestination = :newNodeId), 0) 
+                    AND ceDestination = :newNodeId), -1) 
          /*psql ON CONFLICT(cePk, ceDestination) DO UPDATE
                 SET cePending = true
          */       
@@ -387,27 +387,27 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
     @Query("""
             UPDATE ContentEntry 
-               SET ceInactive = :ceInactive, 
-                   contentEntryLastChangedBy = 
-                        (SELECT COALESCE(
-                                (SELECT nodeClientId 
-                                  FROM SyncNode 
-                                 LIMIT 1), 0)) 
+               SET ceInactive = :ceInactive,
+                   contentEntryLct = :changedTime        
             WHERE ContentEntry.contentEntryUid = :contentEntryUid""")
     @JsName("updateContentEntryInActive")
-    abstract fun updateContentEntryInActive(contentEntryUid: Long, ceInactive: Boolean)
+    abstract fun updateContentEntryInActive(
+        contentEntryUid: Long,
+        ceInactive: Boolean,
+        changedTime: Long
+    )
 
     @Query("""
         UPDATE ContentEntry 
            SET contentTypeFlag = :contentFlag,
-               contentEntryLastChangedBy = 
-               (SELECT COALESCE(
-                                (SELECT nodeClientId 
-                                  FROM SyncNode 
-                                 LIMIT 1), 0))  
+               contentEntryLct = :changedTime 
          WHERE ContentEntry.contentEntryUid = :contentEntryUid""")
     @JsName("updateContentEntryContentFlag")
-    abstract fun updateContentEntryContentFlag(contentFlag: Int, contentEntryUid: Long)
+    abstract fun updateContentEntryContentFlag(
+        contentFlag: Int,
+        contentEntryUid: Long,
+        changedTime: Long
+    )
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entries: List<ContentEntry>)
@@ -431,19 +431,30 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
     @Query("""
         UPDATE ContentEntry
-           SET ceInactive = :inactive
+           SET ceInactive = :inactive,
+               contentEntryLct = :changedTime
          WHERE contentEntryUid IN (SELECT cjiContentEntryUid 
                                      FROM ContentJobItem
                                     WHERE cjiJobUid = :jobId
                                       AND CAST(ContentJobItem.cjiContentDeletedOnCancellation AS INTEGER) = 1)
     """)
-    abstract fun invalidateContentEntryCreatedByJob(jobId: Long, inactive: Boolean)
+    abstract fun invalidateContentEntryCreatedByJob(
+        jobId: Long,
+        inactive: Boolean,
+        changedTime: Long
+    )
 
 
-    @Query("""UPDATE ContentEntry SET ceInactive = :toggleVisibility, 
-                contentEntryLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
-                WHERE contentEntryUid IN (:selectedItem)""")
-    abstract suspend fun toggleVisibilityContentEntryItems(toggleVisibility: Boolean, selectedItem: List<Long>)
+    @Query("""
+        UPDATE ContentEntry 
+           SET ceInactive = :toggleVisibility, 
+               contentEntryLct = :changedTime 
+         WHERE contentEntryUid IN (:selectedItem)""")
+    abstract suspend fun toggleVisibilityContentEntryItems(
+        toggleVisibility: Boolean,
+        selectedItem: List<Long>,
+        changedTime: Long
+    )
 
     companion object {
 

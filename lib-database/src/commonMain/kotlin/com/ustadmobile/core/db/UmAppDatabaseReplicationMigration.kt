@@ -5,6 +5,7 @@ import com.ustadmobile.door.DoorSqlDatabase
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.ext.execSqlBatch
 import com.ustadmobile.door.migration.DoorMigrationSync
+import com.ustadmobile.door.util.systemTimeInMillis
 
 private fun DoorSqlDatabase.dropOldSqliteTriggers() {
     //Drop old triggers
@@ -238,6 +239,7 @@ private fun DoorSqlDatabase.dropOldPostgresTriggers() {
     WHERE trigger_name LIKE 'inc%';
      */
     val db = this
+    db.execSQL("DROP TRIGGER IF EXISTS inccsn_14_trig ON clazzlog")
     db.execSQL("DROP TRIGGER IF EXISTS inccsn_15_trig ON clazzlogattendancerecord")
     db.execSQL("DROP TRIGGER IF EXISTS inccsn_15_trig ON clazzlogattendancerecord")
     db.execSQL("DROP TRIGGER IF EXISTS inccsn_21_trig ON schedule")
@@ -433,6 +435,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ClazzLog_ReceiveView AS  SELECT ClazzLog.*, ClazzLogReplicate.* FROM ClazzLog LEFT JOIN ClazzLogReplicate ON ClazzLogReplicate.clPk = ClazzLog.clazzLogUid "
         _stmtList +=
+            " CREATE TRIGGER clazzlog_remote_insert_ins INSTEAD OF INSERT ON ClazzLog_ReceiveView FOR EACH ROW BEGIN REPLACE INTO ClazzLog(clazzLogUid, clazzLogClazzUid, logDate, timeRecorded, clazzLogDone, cancellationNote, clazzLogCancelled, clazzLogNumPresent, clazzLogNumAbsent, clazzLogNumPartial, clazzLogScheduleUid, clazzLogStatusFlag, clazzLogMSQN, clazzLogLCSN, clazzLogLCB, clazzLogLastChangedTime) VALUES (NEW.clazzLogUid, NEW.clazzLogClazzUid, NEW.logDate, NEW.timeRecorded, NEW.clazzLogDone, NEW.cancellationNote, NEW.clazzLogCancelled, NEW.clazzLogNumPresent, NEW.clazzLogNumAbsent, NEW.clazzLogNumPartial, NEW.clazzLogScheduleUid, NEW.clazzLogStatusFlag, NEW.clazzLogMSQN, NEW.clazzLogLCSN, NEW.clazzLogLCB, NEW.clazzLogLastChangedTime) /*psql ON CONFLICT (clazzLogUid) DO UPDATE SET clazzLogClazzUid = EXCLUDED.clazzLogClazzUid, logDate = EXCLUDED.logDate, timeRecorded = EXCLUDED.timeRecorded, clazzLogDone = EXCLUDED.clazzLogDone, cancellationNote = EXCLUDED.cancellationNote, clazzLogCancelled = EXCLUDED.clazzLogCancelled, clazzLogNumPresent = EXCLUDED.clazzLogNumPresent, clazzLogNumAbsent = EXCLUDED.clazzLogNumAbsent, clazzLogNumPartial = EXCLUDED.clazzLogNumPartial, clazzLogScheduleUid = EXCLUDED.clazzLogScheduleUid, clazzLogStatusFlag = EXCLUDED.clazzLogStatusFlag, clazzLogMSQN = EXCLUDED.clazzLogMSQN, clazzLogLCSN = EXCLUDED.clazzLogLCSN, clazzLogLCB = EXCLUDED.clazzLogLCB, clazzLogLastChangedTime = EXCLUDED.clazzLogLastChangedTime */; END "
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecordReplicate ( clarPk INTEGER NOT NULL, clarVersionId INTEGER NOT NULL DEFAULT 0, clarDestination INTEGER NOT NULL, clarPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (clarPk, clarDestination)) "
         _stmtList +=
             " CREATE INDEX index_ClazzLogAttendanceRecordReplicate_clarPk_clarDestination_clarVersionId ON ClazzLogAttendanceRecordReplicate (clarPk, clarDestination, clarVersionId) "
@@ -446,6 +450,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
             " CREATE TRIGGER ch_del_15 AFTER DELETE ON ClazzLogAttendanceRecord BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 15 AS chTableId, OLD.clazzLogAttendanceRecordUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 15 AND chEntityPk = OLD.clazzLogAttendanceRecordUid); END "
         _stmtList +=
             "CREATE VIEW ClazzLogAttendanceRecord_ReceiveView AS  SELECT ClazzLogAttendanceRecord.*, ClazzLogAttendanceRecordReplicate.* FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLogAttendanceRecordReplicate ON ClazzLogAttendanceRecordReplicate.clarPk = ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid "
+        _stmtList +=
+            " CREATE TRIGGER clazzlogattendancerecord_remote_insert_ins INSTEAD OF INSERT ON ClazzLogAttendanceRecord_ReceiveView FOR EACH ROW BEGIN REPLACE INTO ClazzLogAttendanceRecord(clazzLogAttendanceRecordUid, clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordPersonUid, attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy, clazzLogAttendanceRecordLastChangedTime) VALUES (NEW.clazzLogAttendanceRecordUid, NEW.clazzLogAttendanceRecordClazzLogUid, NEW.clazzLogAttendanceRecordPersonUid, NEW.attendanceStatus, NEW.clazzLogAttendanceRecordMasterChangeSeqNum, NEW.clazzLogAttendanceRecordLocalChangeSeqNum, NEW.clazzLogAttendanceRecordLastChangedBy, NEW.clazzLogAttendanceRecordLastChangedTime) /*psql ON CONFLICT (clazzLogAttendanceRecordUid) DO UPDATE SET clazzLogAttendanceRecordClazzLogUid = EXCLUDED.clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordPersonUid = EXCLUDED.clazzLogAttendanceRecordPersonUid, attendanceStatus = EXCLUDED.attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum = EXCLUDED.clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum = EXCLUDED.clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy = EXCLUDED.clazzLogAttendanceRecordLastChangedBy, clazzLogAttendanceRecordLastChangedTime = EXCLUDED.clazzLogAttendanceRecordLastChangedTime */; END "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS ScheduleReplicate ( schedulePk INTEGER NOT NULL, scheduleVersionId INTEGER NOT NULL DEFAULT 0, scheduleDestination INTEGER NOT NULL, schedulePending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (schedulePk, scheduleDestination)) "
         _stmtList +=
@@ -461,6 +467,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Schedule_ReceiveView AS  SELECT Schedule.*, ScheduleReplicate.* FROM Schedule LEFT JOIN ScheduleReplicate ON ScheduleReplicate.schedulePk = Schedule.scheduleUid "
         _stmtList +=
+            " CREATE TRIGGER schedule_remote_insert_ins INSTEAD OF INSERT ON Schedule_ReceiveView FOR EACH ROW BEGIN REPLACE INTO Schedule(scheduleUid, sceduleStartTime, scheduleEndTime, scheduleDay, scheduleMonth, scheduleFrequency, umCalendarUid, scheduleClazzUid, scheduleMasterChangeSeqNum, scheduleLocalChangeSeqNum, scheduleLastChangedBy, scheduleLastChangedTime, scheduleActive) VALUES (NEW.scheduleUid, NEW.sceduleStartTime, NEW.scheduleEndTime, NEW.scheduleDay, NEW.scheduleMonth, NEW.scheduleFrequency, NEW.umCalendarUid, NEW.scheduleClazzUid, NEW.scheduleMasterChangeSeqNum, NEW.scheduleLocalChangeSeqNum, NEW.scheduleLastChangedBy, NEW.scheduleLastChangedTime, NEW.scheduleActive) /*psql ON CONFLICT (scheduleUid) DO UPDATE SET sceduleStartTime = EXCLUDED.sceduleStartTime, scheduleEndTime = EXCLUDED.scheduleEndTime, scheduleDay = EXCLUDED.scheduleDay, scheduleMonth = EXCLUDED.scheduleMonth, scheduleFrequency = EXCLUDED.scheduleFrequency, umCalendarUid = EXCLUDED.umCalendarUid, scheduleClazzUid = EXCLUDED.scheduleClazzUid, scheduleMasterChangeSeqNum = EXCLUDED.scheduleMasterChangeSeqNum, scheduleLocalChangeSeqNum = EXCLUDED.scheduleLocalChangeSeqNum, scheduleLastChangedBy = EXCLUDED.scheduleLastChangedBy, scheduleLastChangedTime = EXCLUDED.scheduleLastChangedTime, scheduleActive = EXCLUDED.scheduleActive */; END "
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS HolidayCalendarReplicate ( hcPk INTEGER NOT NULL, hcVersionId INTEGER NOT NULL DEFAULT 0, hcDestination INTEGER NOT NULL, hcPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (hcPk, hcDestination)) "
         _stmtList +=
             " CREATE INDEX index_HolidayCalendarReplicate_hcPk_hcDestination_hcVersionId ON HolidayCalendarReplicate (hcPk, hcDestination, hcVersionId) "
@@ -475,6 +483,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW HolidayCalendar_ReceiveView AS  SELECT HolidayCalendar.*, HolidayCalendarReplicate.* FROM HolidayCalendar LEFT JOIN HolidayCalendarReplicate ON HolidayCalendarReplicate.hcPk = HolidayCalendar.umCalendarUid "
         _stmtList +=
+            " CREATE TRIGGER holidaycalendar_remote_insert_ins INSTEAD OF INSERT ON HolidayCalendar_ReceiveView FOR EACH ROW BEGIN REPLACE INTO HolidayCalendar(umCalendarUid, umCalendarName, umCalendarCategory, umCalendarActive, umCalendarMasterChangeSeqNum, umCalendarLocalChangeSeqNum, umCalendarLastChangedBy, umCalendarLct) VALUES (NEW.umCalendarUid, NEW.umCalendarName, NEW.umCalendarCategory, NEW.umCalendarActive, NEW.umCalendarMasterChangeSeqNum, NEW.umCalendarLocalChangeSeqNum, NEW.umCalendarLastChangedBy, NEW.umCalendarLct) /*psql ON CONFLICT (umCalendarUid) DO UPDATE SET umCalendarName = EXCLUDED.umCalendarName, umCalendarCategory = EXCLUDED.umCalendarCategory, umCalendarActive = EXCLUDED.umCalendarActive, umCalendarMasterChangeSeqNum = EXCLUDED.umCalendarMasterChangeSeqNum, umCalendarLocalChangeSeqNum = EXCLUDED.umCalendarLocalChangeSeqNum, umCalendarLastChangedBy = EXCLUDED.umCalendarLastChangedBy, umCalendarLct = EXCLUDED.umCalendarLct */; END "
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS HolidayReplicate ( holidayPk INTEGER NOT NULL, holidayVersionId INTEGER NOT NULL DEFAULT 0, holidayDestination INTEGER NOT NULL, holidayPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (holidayPk, holidayDestination)) "
         _stmtList +=
             " CREATE INDEX index_HolidayReplicate_holidayPk_holidayDestination_holidayVersionId ON HolidayReplicate (holidayPk, holidayDestination, holidayVersionId) "
@@ -488,6 +498,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
             " CREATE TRIGGER ch_del_99 AFTER DELETE ON Holiday BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 99 AS chTableId, OLD.holUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 99 AND chEntityPk = OLD.holUid); END "
         _stmtList +=
             "CREATE VIEW Holiday_ReceiveView AS  SELECT Holiday.*, HolidayReplicate.* FROM Holiday LEFT JOIN HolidayReplicate ON HolidayReplicate.holidayPk = Holiday.holUid "
+        _stmtList +=
+            " CREATE TRIGGER holiday_remote_insert_ins INSTEAD OF INSERT ON Holiday_ReceiveView FOR EACH ROW BEGIN REPLACE INTO Holiday(holUid, holMasterCsn, holLocalCsn, holLastModBy, holLct, holActive, holHolidayCalendarUid, holStartTime, holEndTime, holName) VALUES (NEW.holUid, NEW.holMasterCsn, NEW.holLocalCsn, NEW.holLastModBy, NEW.holLct, NEW.holActive, NEW.holHolidayCalendarUid, NEW.holStartTime, NEW.holEndTime, NEW.holName) /*psql ON CONFLICT (holUid) DO UPDATE SET holMasterCsn = EXCLUDED.holMasterCsn, holLocalCsn = EXCLUDED.holLocalCsn, holLastModBy = EXCLUDED.holLastModBy, holLct = EXCLUDED.holLct, holActive = EXCLUDED.holActive, holHolidayCalendarUid = EXCLUDED.holHolidayCalendarUid, holStartTime = EXCLUDED.holStartTime, holEndTime = EXCLUDED.holEndTime, holName = EXCLUDED.holName */; END "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS PersonReplicate ( personPk INTEGER NOT NULL, personVersionId INTEGER NOT NULL DEFAULT 0, personDestination INTEGER NOT NULL, personPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (personPk, personDestination)) "
         _stmtList +=
@@ -551,6 +563,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW LeavingReason_ReceiveView AS  SELECT LeavingReason.*, LeavingReasonReplicate.* FROM LeavingReason LEFT JOIN LeavingReasonReplicate ON LeavingReasonReplicate.lrPk = LeavingReason.leavingReasonUid "
         _stmtList +=
+            " CREATE TRIGGER leavingreason_remote_insert_ins INSTEAD OF INSERT ON LeavingReason_ReceiveView FOR EACH ROW BEGIN REPLACE INTO LeavingReason(leavingReasonUid, leavingReasonTitle, leavingReasonMCSN, leavingReasonCSN, leavingReasonLCB, leavingReasonLct) VALUES (NEW.leavingReasonUid, NEW.leavingReasonTitle, NEW.leavingReasonMCSN, NEW.leavingReasonCSN, NEW.leavingReasonLCB, NEW.leavingReasonLct) /*psql ON CONFLICT (leavingReasonUid) DO UPDATE SET leavingReasonTitle = EXCLUDED.leavingReasonTitle, leavingReasonMCSN = EXCLUDED.leavingReasonMCSN, leavingReasonCSN = EXCLUDED.leavingReasonCSN, leavingReasonLCB = EXCLUDED.leavingReasonLCB, leavingReasonLct = EXCLUDED.leavingReasonLct */; END "
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS ContentEntryReplicate ( cePk INTEGER NOT NULL, ceVersionId INTEGER NOT NULL DEFAULT 0, ceDestination INTEGER NOT NULL, cePending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (cePk, ceDestination)) "
         _stmtList +=
             " CREATE INDEX index_ContentEntryReplicate_cePk_ceDestination_ceVersionId ON ContentEntryReplicate (cePk, ceDestination, ceVersionId) "
@@ -580,6 +594,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
             " CREATE TRIGGER ch_del_3 AFTER DELETE ON ContentEntryContentCategoryJoin BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 3 AS chTableId, OLD.ceccjUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 3 AND chEntityPk = OLD.ceccjUid); END "
         _stmtList +=
             "CREATE VIEW ContentEntryContentCategoryJoin_ReceiveView AS  SELECT ContentEntryContentCategoryJoin.*, ContentEntryContentCategoryJoinReplicate.* FROM ContentEntryContentCategoryJoin LEFT JOIN ContentEntryContentCategoryJoinReplicate ON ContentEntryContentCategoryJoinReplicate.ceccjPk = ContentEntryContentCategoryJoin.ceccjUid "
+        _stmtList +=
+            " CREATE TRIGGER contententrycontentcategoryjoin_remote_insert_ins INSTEAD OF INSERT ON ContentEntryContentCategoryJoin_ReceiveView FOR EACH ROW BEGIN REPLACE INTO ContentEntryContentCategoryJoin(ceccjUid, ceccjContentEntryUid, ceccjContentCategoryUid, ceccjLocalChangeSeqNum, ceccjMasterChangeSeqNum, ceccjLastChangedBy, ceccjLct) VALUES (NEW.ceccjUid, NEW.ceccjContentEntryUid, NEW.ceccjContentCategoryUid, NEW.ceccjLocalChangeSeqNum, NEW.ceccjMasterChangeSeqNum, NEW.ceccjLastChangedBy, NEW.ceccjLct) /*psql ON CONFLICT (ceccjUid) DO UPDATE SET ceccjContentEntryUid = EXCLUDED.ceccjContentEntryUid, ceccjContentCategoryUid = EXCLUDED.ceccjContentCategoryUid, ceccjLocalChangeSeqNum = EXCLUDED.ceccjLocalChangeSeqNum, ceccjMasterChangeSeqNum = EXCLUDED.ceccjMasterChangeSeqNum, ceccjLastChangedBy = EXCLUDED.ceccjLastChangedBy, ceccjLct = EXCLUDED.ceccjLct */; END "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS ContentEntryParentChildJoinReplicate ( cepcjPk INTEGER NOT NULL, cepcjVersionId INTEGER NOT NULL DEFAULT 0, cepcjDestination INTEGER NOT NULL, cepcjPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (cepcjPk, cepcjDestination)) "
         _stmtList +=
@@ -611,6 +627,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ContentEntryRelatedEntryJoin_ReceiveView AS  SELECT ContentEntryRelatedEntryJoin.*, ContentEntryRelatedEntryJoinReplicate.* FROM ContentEntryRelatedEntryJoin LEFT JOIN ContentEntryRelatedEntryJoinReplicate ON ContentEntryRelatedEntryJoinReplicate.cerejPk = ContentEntryRelatedEntryJoin.cerejUid "
         _stmtList +=
+            " CREATE TRIGGER contententryrelatedentryjoin_remote_insert_ins INSTEAD OF INSERT ON ContentEntryRelatedEntryJoin_ReceiveView FOR EACH ROW BEGIN REPLACE INTO ContentEntryRelatedEntryJoin(cerejUid, cerejContentEntryUid, cerejRelatedEntryUid, cerejLastChangedBy, relType, comment, cerejRelLanguageUid, cerejLocalChangeSeqNum, cerejMasterChangeSeqNum, cerejLct) VALUES (NEW.cerejUid, NEW.cerejContentEntryUid, NEW.cerejRelatedEntryUid, NEW.cerejLastChangedBy, NEW.relType, NEW.comment, NEW.cerejRelLanguageUid, NEW.cerejLocalChangeSeqNum, NEW.cerejMasterChangeSeqNum, NEW.cerejLct) /*psql ON CONFLICT (cerejUid) DO UPDATE SET cerejContentEntryUid = EXCLUDED.cerejContentEntryUid, cerejRelatedEntryUid = EXCLUDED.cerejRelatedEntryUid, cerejLastChangedBy = EXCLUDED.cerejLastChangedBy, relType = EXCLUDED.relType, comment = EXCLUDED.comment, cerejRelLanguageUid = EXCLUDED.cerejRelLanguageUid, cerejLocalChangeSeqNum = EXCLUDED.cerejLocalChangeSeqNum, cerejMasterChangeSeqNum = EXCLUDED.cerejMasterChangeSeqNum, cerejLct = EXCLUDED.cerejLct */; END "
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS ContentCategorySchemaReplicate ( ccsPk INTEGER NOT NULL, ccsVersionId INTEGER NOT NULL DEFAULT 0, ccsDestination INTEGER NOT NULL, ccsPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (ccsPk, ccsDestination)) "
         _stmtList +=
             " CREATE INDEX index_ContentCategorySchemaReplicate_ccsPk_ccsDestination_ccsVersionId ON ContentCategorySchemaReplicate (ccsPk, ccsDestination, ccsVersionId) "
@@ -624,6 +642,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
             " CREATE TRIGGER ch_del_2 AFTER DELETE ON ContentCategorySchema BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 2 AS chTableId, OLD.contentCategorySchemaUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 2 AND chEntityPk = OLD.contentCategorySchemaUid); END "
         _stmtList +=
             "CREATE VIEW ContentCategorySchema_ReceiveView AS  SELECT ContentCategorySchema.*, ContentCategorySchemaReplicate.* FROM ContentCategorySchema LEFT JOIN ContentCategorySchemaReplicate ON ContentCategorySchemaReplicate.ccsPk = ContentCategorySchema.contentCategorySchemaUid "
+        _stmtList +=
+            " CREATE TRIGGER contentcategoryschema_remote_insert_ins INSTEAD OF INSERT ON ContentCategorySchema_ReceiveView FOR EACH ROW BEGIN REPLACE INTO ContentCategorySchema(contentCategorySchemaUid, schemaName, schemaUrl, contentCategorySchemaLocalChangeSeqNum, contentCategorySchemaMasterChangeSeqNum, contentCategorySchemaLastChangedBy, contentCategorySchemaLct) VALUES (NEW.contentCategorySchemaUid, NEW.schemaName, NEW.schemaUrl, NEW.contentCategorySchemaLocalChangeSeqNum, NEW.contentCategorySchemaMasterChangeSeqNum, NEW.contentCategorySchemaLastChangedBy, NEW.contentCategorySchemaLct) /*psql ON CONFLICT (contentCategorySchemaUid) DO UPDATE SET schemaName = EXCLUDED.schemaName, schemaUrl = EXCLUDED.schemaUrl, contentCategorySchemaLocalChangeSeqNum = EXCLUDED.contentCategorySchemaLocalChangeSeqNum, contentCategorySchemaMasterChangeSeqNum = EXCLUDED.contentCategorySchemaMasterChangeSeqNum, contentCategorySchemaLastChangedBy = EXCLUDED.contentCategorySchemaLastChangedBy, contentCategorySchemaLct = EXCLUDED.contentCategorySchemaLct */; END "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS ContentCategoryReplicate ( ccPk INTEGER NOT NULL, ccVersionId INTEGER NOT NULL DEFAULT 0, ccDestination INTEGER NOT NULL, ccPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (ccPk, ccDestination)) "
         _stmtList +=
@@ -639,6 +659,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ContentCategory_ReceiveView AS  SELECT ContentCategory.*, ContentCategoryReplicate.* FROM ContentCategory LEFT JOIN ContentCategoryReplicate ON ContentCategoryReplicate.ccPk = ContentCategory.contentCategoryUid "
         _stmtList +=
+            " CREATE TRIGGER contentcategory_remote_insert_ins INSTEAD OF INSERT ON ContentCategory_ReceiveView FOR EACH ROW BEGIN REPLACE INTO ContentCategory(contentCategoryUid, ctnCatContentCategorySchemaUid, name, contentCategoryLocalChangeSeqNum, contentCategoryMasterChangeSeqNum, contentCategoryLastChangedBy, contentCategoryLct) VALUES (NEW.contentCategoryUid, NEW.ctnCatContentCategorySchemaUid, NEW.name, NEW.contentCategoryLocalChangeSeqNum, NEW.contentCategoryMasterChangeSeqNum, NEW.contentCategoryLastChangedBy, NEW.contentCategoryLct) /*psql ON CONFLICT (contentCategoryUid) DO UPDATE SET ctnCatContentCategorySchemaUid = EXCLUDED.ctnCatContentCategorySchemaUid, name = EXCLUDED.name, contentCategoryLocalChangeSeqNum = EXCLUDED.contentCategoryLocalChangeSeqNum, contentCategoryMasterChangeSeqNum = EXCLUDED.contentCategoryMasterChangeSeqNum, contentCategoryLastChangedBy = EXCLUDED.contentCategoryLastChangedBy, contentCategoryLct = EXCLUDED.contentCategoryLct */; END "
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS LanguageReplicate ( languagePk INTEGER NOT NULL, languageVersionId INTEGER NOT NULL DEFAULT 0, languageDestination INTEGER NOT NULL, languagePending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (languagePk, languageDestination)) "
         _stmtList +=
             " CREATE INDEX index_LanguageReplicate_languagePk_languageDestination_languageVersionId ON LanguageReplicate (languagePk, languageDestination, languageVersionId) "
@@ -653,6 +675,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Language_ReceiveView AS  SELECT Language.*, LanguageReplicate.* FROM Language LEFT JOIN LanguageReplicate ON LanguageReplicate.languagePk = Language.langUid "
         _stmtList +=
+            " CREATE TRIGGER language_remote_insert_ins INSTEAD OF INSERT ON Language_ReceiveView FOR EACH ROW BEGIN REPLACE INTO Language(langUid, name, iso_639_1_standard, iso_639_2_standard, iso_639_3_standard, Language_Type, languageActive, langLocalChangeSeqNum, langMasterChangeSeqNum, langLastChangedBy, langLct) VALUES (NEW.langUid, NEW.name, NEW.iso_639_1_standard, NEW.iso_639_2_standard, NEW.iso_639_3_standard, NEW.Language_Type, NEW.languageActive, NEW.langLocalChangeSeqNum, NEW.langMasterChangeSeqNum, NEW.langLastChangedBy, NEW.langLct) /*psql ON CONFLICT (langUid) DO UPDATE SET name = EXCLUDED.name, iso_639_1_standard = EXCLUDED.iso_639_1_standard, iso_639_2_standard = EXCLUDED.iso_639_2_standard, iso_639_3_standard = EXCLUDED.iso_639_3_standard, Language_Type = EXCLUDED.Language_Type, languageActive = EXCLUDED.languageActive, langLocalChangeSeqNum = EXCLUDED.langLocalChangeSeqNum, langMasterChangeSeqNum = EXCLUDED.langMasterChangeSeqNum, langLastChangedBy = EXCLUDED.langLastChangedBy, langLct = EXCLUDED.langLct */; END "
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS LanguageVariantReplicate ( lvPk INTEGER NOT NULL, lvVersionId INTEGER NOT NULL DEFAULT 0, lvDestination INTEGER NOT NULL, lvPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (lvPk, lvDestination)) "
         _stmtList +=
             " CREATE INDEX index_LanguageVariantReplicate_lvPk_lvDestination_lvVersionId ON LanguageVariantReplicate (lvPk, lvDestination, lvVersionId) "
@@ -666,6 +690,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
             " CREATE TRIGGER ch_del_10 AFTER DELETE ON LanguageVariant BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 10 AS chTableId, OLD.langVariantUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 10 AND chEntityPk = OLD.langVariantUid); END "
         _stmtList +=
             "CREATE VIEW LanguageVariant_ReceiveView AS  SELECT LanguageVariant.*, LanguageVariantReplicate.* FROM LanguageVariant LEFT JOIN LanguageVariantReplicate ON LanguageVariantReplicate.lvPk = LanguageVariant.langVariantUid "
+        _stmtList +=
+            " CREATE TRIGGER languagevariant_remote_insert_ins INSTEAD OF INSERT ON LanguageVariant_ReceiveView FOR EACH ROW BEGIN REPLACE INTO LanguageVariant(langVariantUid, langUid, countryCode, name, langVariantLocalChangeSeqNum, langVariantMasterChangeSeqNum, langVariantLastChangedBy, langVariantLct) VALUES (NEW.langVariantUid, NEW.langUid, NEW.countryCode, NEW.name, NEW.langVariantLocalChangeSeqNum, NEW.langVariantMasterChangeSeqNum, NEW.langVariantLastChangedBy, NEW.langVariantLct) /*psql ON CONFLICT (langVariantUid) DO UPDATE SET langUid = EXCLUDED.langUid, countryCode = EXCLUDED.countryCode, name = EXCLUDED.name, langVariantLocalChangeSeqNum = EXCLUDED.langVariantLocalChangeSeqNum, langVariantMasterChangeSeqNum = EXCLUDED.langVariantMasterChangeSeqNum, langVariantLastChangedBy = EXCLUDED.langVariantLastChangedBy, langVariantLct = EXCLUDED.langVariantLct */; END "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS PersonGroupReplicate ( pgPk INTEGER NOT NULL, pgVersionId INTEGER NOT NULL DEFAULT 0, pgDestination INTEGER NOT NULL, pgPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (pgPk, pgDestination)) "
         _stmtList +=
@@ -713,6 +739,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW PersonPicture_ReceiveView AS  SELECT PersonPicture.*, PersonPictureReplicate.* FROM PersonPicture LEFT JOIN PersonPictureReplicate ON PersonPictureReplicate.ppPk = PersonPicture.personPictureUid "
         _stmtList +=
+            " CREATE TRIGGER personpicture_remote_insert_ins INSTEAD OF INSERT ON PersonPicture_ReceiveView FOR EACH ROW BEGIN REPLACE INTO PersonPicture(personPictureUid, personPicturePersonUid, personPictureMasterCsn, personPictureLocalCsn, personPictureLastChangedBy, personPictureLct, personPictureUri, personPictureMd5, fileSize, picTimestamp, mimeType, personPictureActive) VALUES (NEW.personPictureUid, NEW.personPicturePersonUid, NEW.personPictureMasterCsn, NEW.personPictureLocalCsn, NEW.personPictureLastChangedBy, NEW.personPictureLct, NEW.personPictureUri, NEW.personPictureMd5, NEW.fileSize, NEW.picTimestamp, NEW.mimeType, NEW.personPictureActive) /*psql ON CONFLICT (personPictureUid) DO UPDATE SET personPicturePersonUid = EXCLUDED.personPicturePersonUid, personPictureMasterCsn = EXCLUDED.personPictureMasterCsn, personPictureLocalCsn = EXCLUDED.personPictureLocalCsn, personPictureLastChangedBy = EXCLUDED.personPictureLastChangedBy, personPictureLct = EXCLUDED.personPictureLct, personPictureUri = EXCLUDED.personPictureUri, personPictureMd5 = EXCLUDED.personPictureMd5, fileSize = EXCLUDED.fileSize, picTimestamp = EXCLUDED.picTimestamp, mimeType = EXCLUDED.mimeType, personPictureActive = EXCLUDED.personPictureActive */; END "
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS ContainerReplicate ( containerPk INTEGER NOT NULL, containerVersionId INTEGER NOT NULL DEFAULT 0, containerDestination INTEGER NOT NULL, containerPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (containerPk, containerDestination)) "
         _stmtList +=
             " CREATE INDEX index_ContainerReplicate_containerPk_containerDestination_containerVersionId ON ContainerReplicate (containerPk, containerDestination, containerVersionId) "
@@ -726,6 +754,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
             " CREATE TRIGGER ch_del_51 AFTER DELETE ON Container BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 51 AS chTableId, OLD.containerUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 51 AND chEntityPk = OLD.containerUid); END "
         _stmtList +=
             "CREATE VIEW Container_ReceiveView AS  SELECT Container.*, ContainerReplicate.* FROM Container LEFT JOIN ContainerReplicate ON ContainerReplicate.containerPk = Container.containerUid "
+        _stmtList +=
+            " CREATE TRIGGER container_remote_insert_ins INSTEAD OF INSERT ON Container_ReceiveView FOR EACH ROW BEGIN REPLACE INTO Container(containerUid, cntLocalCsn, cntMasterCsn, cntLastModBy, cntLct, fileSize, containerContentEntryUid, cntLastModified, mimeType, remarks, mobileOptimized, cntNumEntries) VALUES (NEW.containerUid, NEW.cntLocalCsn, NEW.cntMasterCsn, NEW.cntLastModBy, NEW.cntLct, NEW.fileSize, NEW.containerContentEntryUid, NEW.cntLastModified, NEW.mimeType, NEW.remarks, NEW.mobileOptimized, NEW.cntNumEntries) /*psql ON CONFLICT (containerUid) DO UPDATE SET cntLocalCsn = EXCLUDED.cntLocalCsn, cntMasterCsn = EXCLUDED.cntMasterCsn, cntLastModBy = EXCLUDED.cntLastModBy, cntLct = EXCLUDED.cntLct, fileSize = EXCLUDED.fileSize, containerContentEntryUid = EXCLUDED.containerContentEntryUid, cntLastModified = EXCLUDED.cntLastModified, mimeType = EXCLUDED.mimeType, remarks = EXCLUDED.remarks, mobileOptimized = EXCLUDED.mobileOptimized, cntNumEntries = EXCLUDED.cntNumEntries */; END "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS VerbEntityReplicate ( vePk INTEGER NOT NULL, veVersionId INTEGER NOT NULL DEFAULT 0, veDestination INTEGER NOT NULL, vePending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (vePk, veDestination)) "
         _stmtList +=
@@ -741,6 +771,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW VerbEntity_ReceiveView AS  SELECT VerbEntity.*, VerbEntityReplicate.* FROM VerbEntity LEFT JOIN VerbEntityReplicate ON VerbEntityReplicate.vePk = VerbEntity.verbUid "
         _stmtList +=
+            " CREATE TRIGGER verbentity_remote_insert_ins INSTEAD OF INSERT ON VerbEntity_ReceiveView FOR EACH ROW BEGIN REPLACE INTO VerbEntity(verbUid, urlId, verbInActive, verbMasterChangeSeqNum, verbLocalChangeSeqNum, verbLastChangedBy, verbLct) VALUES (NEW.verbUid, NEW.urlId, NEW.verbInActive, NEW.verbMasterChangeSeqNum, NEW.verbLocalChangeSeqNum, NEW.verbLastChangedBy, NEW.verbLct) /*psql ON CONFLICT (verbUid) DO UPDATE SET urlId = EXCLUDED.urlId, verbInActive = EXCLUDED.verbInActive, verbMasterChangeSeqNum = EXCLUDED.verbMasterChangeSeqNum, verbLocalChangeSeqNum = EXCLUDED.verbLocalChangeSeqNum, verbLastChangedBy = EXCLUDED.verbLastChangedBy, verbLct = EXCLUDED.verbLct */; END "
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS XObjectEntityReplicate ( xoePk INTEGER NOT NULL, xoeVersionId INTEGER NOT NULL DEFAULT 0, xoeDestination INTEGER NOT NULL, xoePending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (xoePk, xoeDestination)) "
         _stmtList +=
             " CREATE INDEX index_XObjectEntityReplicate_xoePk_xoeDestination_xoeVersionId ON XObjectEntityReplicate (xoePk, xoeDestination, xoeVersionId) "
@@ -754,6 +786,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
             " CREATE TRIGGER ch_del_64 AFTER DELETE ON XObjectEntity BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 64 AS chTableId, OLD.xObjectUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 64 AND chEntityPk = OLD.xObjectUid); END "
         _stmtList +=
             "CREATE VIEW XObjectEntity_ReceiveView AS  SELECT XObjectEntity.*, XObjectEntityReplicate.* FROM XObjectEntity LEFT JOIN XObjectEntityReplicate ON XObjectEntityReplicate.xoePk = XObjectEntity.xObjectUid "
+        _stmtList +=
+            " CREATE TRIGGER xobjectentity_remote_insert_ins INSTEAD OF INSERT ON XObjectEntity_ReceiveView FOR EACH ROW BEGIN REPLACE INTO XObjectEntity(xObjectUid, objectType, objectId, definitionType, interactionType, correctResponsePattern, objectContentEntryUid, xObjectMasterChangeSeqNum, xObjectocalChangeSeqNum, xObjectLastChangedBy, xObjectLct) VALUES (NEW.xObjectUid, NEW.objectType, NEW.objectId, NEW.definitionType, NEW.interactionType, NEW.correctResponsePattern, NEW.objectContentEntryUid, NEW.xObjectMasterChangeSeqNum, NEW.xObjectocalChangeSeqNum, NEW.xObjectLastChangedBy, NEW.xObjectLct) /*psql ON CONFLICT (xObjectUid) DO UPDATE SET objectType = EXCLUDED.objectType, objectId = EXCLUDED.objectId, definitionType = EXCLUDED.definitionType, interactionType = EXCLUDED.interactionType, correctResponsePattern = EXCLUDED.correctResponsePattern, objectContentEntryUid = EXCLUDED.objectContentEntryUid, xObjectMasterChangeSeqNum = EXCLUDED.xObjectMasterChangeSeqNum, xObjectocalChangeSeqNum = EXCLUDED.xObjectocalChangeSeqNum, xObjectLastChangedBy = EXCLUDED.xObjectLastChangedBy, xObjectLct = EXCLUDED.xObjectLct */; END "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS StatementEntityReplicate ( sePk INTEGER NOT NULL, seVersionId INTEGER NOT NULL DEFAULT 0, seDestination INTEGER NOT NULL, sePending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (sePk, seDestination)) "
         _stmtList +=
@@ -769,6 +803,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW StatementEntity_ReceiveView AS  SELECT StatementEntity.*, StatementEntityReplicate.* FROM StatementEntity LEFT JOIN StatementEntityReplicate ON StatementEntityReplicate.sePk = StatementEntity.statementUid "
         _stmtList +=
+            " CREATE TRIGGER statemententity_remote_insert_ins INSTEAD OF INSERT ON StatementEntity_ReceiveView FOR EACH ROW BEGIN REPLACE INTO StatementEntity(statementUid, statementId, statementPersonUid, statementVerbUid, xObjectUid, subStatementActorUid, substatementVerbUid, subStatementObjectUid, agentUid, instructorUid, authorityUid, teamUid, resultCompletion, resultSuccess, resultScoreScaled, resultScoreRaw, resultScoreMin, resultScoreMax, resultDuration, resultResponse, timestamp, stored, contextRegistration, contextPlatform, contextStatementId, fullStatement, statementMasterChangeSeqNum, statementLocalChangeSeqNum, statementLastChangedBy, statementLct, extensionProgress, contentEntryRoot, statementContentEntryUid, statementLearnerGroupUid, statementClazzUid) VALUES (NEW.statementUid, NEW.statementId, NEW.statementPersonUid, NEW.statementVerbUid, NEW.xObjectUid, NEW.subStatementActorUid, NEW.substatementVerbUid, NEW.subStatementObjectUid, NEW.agentUid, NEW.instructorUid, NEW.authorityUid, NEW.teamUid, NEW.resultCompletion, NEW.resultSuccess, NEW.resultScoreScaled, NEW.resultScoreRaw, NEW.resultScoreMin, NEW.resultScoreMax, NEW.resultDuration, NEW.resultResponse, NEW.timestamp, NEW.stored, NEW.contextRegistration, NEW.contextPlatform, NEW.contextStatementId, NEW.fullStatement, NEW.statementMasterChangeSeqNum, NEW.statementLocalChangeSeqNum, NEW.statementLastChangedBy, NEW.statementLct, NEW.extensionProgress, NEW.contentEntryRoot, NEW.statementContentEntryUid, NEW.statementLearnerGroupUid, NEW.statementClazzUid) /*psql ON CONFLICT (statementUid) DO UPDATE SET statementId = EXCLUDED.statementId, statementPersonUid = EXCLUDED.statementPersonUid, statementVerbUid = EXCLUDED.statementVerbUid, xObjectUid = EXCLUDED.xObjectUid, subStatementActorUid = EXCLUDED.subStatementActorUid, substatementVerbUid = EXCLUDED.substatementVerbUid, subStatementObjectUid = EXCLUDED.subStatementObjectUid, agentUid = EXCLUDED.agentUid, instructorUid = EXCLUDED.instructorUid, authorityUid = EXCLUDED.authorityUid, teamUid = EXCLUDED.teamUid, resultCompletion = EXCLUDED.resultCompletion, resultSuccess = EXCLUDED.resultSuccess, resultScoreScaled = EXCLUDED.resultScoreScaled, resultScoreRaw = EXCLUDED.resultScoreRaw, resultScoreMin = EXCLUDED.resultScoreMin, resultScoreMax = EXCLUDED.resultScoreMax, resultDuration = EXCLUDED.resultDuration, resultResponse = EXCLUDED.resultResponse, timestamp = EXCLUDED.timestamp, stored = EXCLUDED.stored, contextRegistration = EXCLUDED.contextRegistration, contextPlatform = EXCLUDED.contextPlatform, contextStatementId = EXCLUDED.contextStatementId, fullStatement = EXCLUDED.fullStatement, statementMasterChangeSeqNum = EXCLUDED.statementMasterChangeSeqNum, statementLocalChangeSeqNum = EXCLUDED.statementLocalChangeSeqNum, statementLastChangedBy = EXCLUDED.statementLastChangedBy, statementLct = EXCLUDED.statementLct, extensionProgress = EXCLUDED.extensionProgress, contentEntryRoot = EXCLUDED.contentEntryRoot, statementContentEntryUid = EXCLUDED.statementContentEntryUid, statementLearnerGroupUid = EXCLUDED.statementLearnerGroupUid, statementClazzUid = EXCLUDED.statementClazzUid */; END "
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoinReplicate ( cxosjPk INTEGER NOT NULL, cxosjVersionId INTEGER NOT NULL DEFAULT 0, cxosjDestination INTEGER NOT NULL, cxosjPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (cxosjPk, cxosjDestination)) "
         _stmtList +=
             " CREATE INDEX index_ContextXObjectStatementJoinReplicate_cxosjPk_cxosjDestination_cxosjVersionId ON ContextXObjectStatementJoinReplicate (cxosjPk, cxosjDestination, cxosjVersionId) "
@@ -782,6 +818,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
             " CREATE TRIGGER ch_del_66 AFTER DELETE ON ContextXObjectStatementJoin BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 66 AS chTableId, OLD.contextXObjectStatementJoinUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 66 AND chEntityPk = OLD.contextXObjectStatementJoinUid); END "
         _stmtList +=
             "CREATE VIEW ContextXObjectStatementJoin_ReceiveView AS  SELECT ContextXObjectStatementJoin.*, ContextXObjectStatementJoinReplicate.* FROM ContextXObjectStatementJoin LEFT JOIN ContextXObjectStatementJoinReplicate ON ContextXObjectStatementJoinReplicate.cxosjPk = ContextXObjectStatementJoin.contextXObjectStatementJoinUid "
+        _stmtList +=
+            " CREATE TRIGGER contextxobjectstatementjoin_remote_insert_ins INSTEAD OF INSERT ON ContextXObjectStatementJoin_ReceiveView FOR EACH ROW BEGIN REPLACE INTO ContextXObjectStatementJoin(contextXObjectStatementJoinUid, contextActivityFlag, contextStatementUid, contextXObjectUid, verbMasterChangeSeqNum, verbLocalChangeSeqNum, verbLastChangedBy, contextXObjectLct) VALUES (NEW.contextXObjectStatementJoinUid, NEW.contextActivityFlag, NEW.contextStatementUid, NEW.contextXObjectUid, NEW.verbMasterChangeSeqNum, NEW.verbLocalChangeSeqNum, NEW.verbLastChangedBy, NEW.contextXObjectLct) /*psql ON CONFLICT (contextXObjectStatementJoinUid) DO UPDATE SET contextActivityFlag = EXCLUDED.contextActivityFlag, contextStatementUid = EXCLUDED.contextStatementUid, contextXObjectUid = EXCLUDED.contextXObjectUid, verbMasterChangeSeqNum = EXCLUDED.verbMasterChangeSeqNum, verbLocalChangeSeqNum = EXCLUDED.verbLocalChangeSeqNum, verbLastChangedBy = EXCLUDED.verbLastChangedBy, contextXObjectLct = EXCLUDED.contextXObjectLct */; END "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS AgentEntityReplicate ( aePk INTEGER NOT NULL, aeVersionId INTEGER NOT NULL DEFAULT 0, aeDestination INTEGER NOT NULL, aePending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (aePk, aeDestination)) "
         _stmtList +=
@@ -813,6 +851,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW StateEntity_ReceiveView AS  SELECT StateEntity.*, StateEntityReplicate.* FROM StateEntity LEFT JOIN StateEntityReplicate ON StateEntityReplicate.sePk = StateEntity.stateUid "
         _stmtList +=
+            " CREATE TRIGGER stateentity_remote_insert_ins INSTEAD OF INSERT ON StateEntity_ReceiveView FOR EACH ROW BEGIN REPLACE INTO StateEntity(stateUid, stateId, agentUid, activityId, registration, isIsactive, timestamp, stateMasterChangeSeqNum, stateLocalChangeSeqNum, stateLastChangedBy, stateLct) VALUES (NEW.stateUid, NEW.stateId, NEW.agentUid, NEW.activityId, NEW.registration, NEW.isIsactive, NEW.timestamp, NEW.stateMasterChangeSeqNum, NEW.stateLocalChangeSeqNum, NEW.stateLastChangedBy, NEW.stateLct) /*psql ON CONFLICT (stateUid) DO UPDATE SET stateId = EXCLUDED.stateId, agentUid = EXCLUDED.agentUid, activityId = EXCLUDED.activityId, registration = EXCLUDED.registration, isIsactive = EXCLUDED.isIsactive, timestamp = EXCLUDED.timestamp, stateMasterChangeSeqNum = EXCLUDED.stateMasterChangeSeqNum, stateLocalChangeSeqNum = EXCLUDED.stateLocalChangeSeqNum, stateLastChangedBy = EXCLUDED.stateLastChangedBy, stateLct = EXCLUDED.stateLct */; END "
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS StateContentEntityReplicate ( scePk INTEGER NOT NULL, sceVersionId INTEGER NOT NULL DEFAULT 0, sceDestination INTEGER NOT NULL, scePending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (scePk, sceDestination)) "
         _stmtList +=
             " CREATE INDEX index_StateContentEntityReplicate_scePk_sceDestination_sceVersionId ON StateContentEntityReplicate (scePk, sceDestination, sceVersionId) "
@@ -826,6 +866,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
             " CREATE TRIGGER ch_del_72 AFTER DELETE ON StateContentEntity BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 72 AS chTableId, OLD.stateContentUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 72 AND chEntityPk = OLD.stateContentUid); END "
         _stmtList +=
             "CREATE VIEW StateContentEntity_ReceiveView AS  SELECT StateContentEntity.*, StateContentEntityReplicate.* FROM StateContentEntity LEFT JOIN StateContentEntityReplicate ON StateContentEntityReplicate.scePk = StateContentEntity.stateContentUid "
+        _stmtList +=
+            " CREATE TRIGGER statecontententity_remote_insert_ins INSTEAD OF INSERT ON StateContentEntity_ReceiveView FOR EACH ROW BEGIN REPLACE INTO StateContentEntity(stateContentUid, stateContentStateUid, stateContentKey, stateContentValue, isIsactive, stateContentMasterChangeSeqNum, stateContentLocalChangeSeqNum, stateContentLastChangedBy, stateContentLct) VALUES (NEW.stateContentUid, NEW.stateContentStateUid, NEW.stateContentKey, NEW.stateContentValue, NEW.isIsactive, NEW.stateContentMasterChangeSeqNum, NEW.stateContentLocalChangeSeqNum, NEW.stateContentLastChangedBy, NEW.stateContentLct) /*psql ON CONFLICT (stateContentUid) DO UPDATE SET stateContentStateUid = EXCLUDED.stateContentStateUid, stateContentKey = EXCLUDED.stateContentKey, stateContentValue = EXCLUDED.stateContentValue, isIsactive = EXCLUDED.isIsactive, stateContentMasterChangeSeqNum = EXCLUDED.stateContentMasterChangeSeqNum, stateContentLocalChangeSeqNum = EXCLUDED.stateContentLocalChangeSeqNum, stateContentLastChangedBy = EXCLUDED.stateContentLastChangedBy, stateContentLct = EXCLUDED.stateContentLct */; END "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS XLangMapEntryReplicate ( xlmePk INTEGER NOT NULL, xlmeVersionId INTEGER NOT NULL DEFAULT 0, xlmeDestination INTEGER NOT NULL, xlmePending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (xlmePk, xlmeDestination)) "
         _stmtList +=
@@ -841,6 +883,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW XLangMapEntry_ReceiveView AS  SELECT XLangMapEntry.*, XLangMapEntryReplicate.* FROM XLangMapEntry LEFT JOIN XLangMapEntryReplicate ON XLangMapEntryReplicate.xlmePk = XLangMapEntry.statementLangMapUid "
         _stmtList +=
+            " CREATE TRIGGER xlangmapentry_remote_insert_ins INSTEAD OF INSERT ON XLangMapEntry_ReceiveView FOR EACH ROW BEGIN REPLACE INTO XLangMapEntry(verbLangMapUid, objectLangMapUid, languageLangMapUid, languageVariantLangMapUid, valueLangMap, statementLangMapMasterCsn, statementLangMapLocalCsn, statementLangMapLcb, statementLangMapLct, statementLangMapUid) VALUES (NEW.verbLangMapUid, NEW.objectLangMapUid, NEW.languageLangMapUid, NEW.languageVariantLangMapUid, NEW.valueLangMap, NEW.statementLangMapMasterCsn, NEW.statementLangMapLocalCsn, NEW.statementLangMapLcb, NEW.statementLangMapLct, NEW.statementLangMapUid) /*psql ON CONFLICT (statementLangMapUid) DO UPDATE SET verbLangMapUid = EXCLUDED.verbLangMapUid, objectLangMapUid = EXCLUDED.objectLangMapUid, languageLangMapUid = EXCLUDED.languageLangMapUid, languageVariantLangMapUid = EXCLUDED.languageVariantLangMapUid, valueLangMap = EXCLUDED.valueLangMap, statementLangMapMasterCsn = EXCLUDED.statementLangMapMasterCsn, statementLangMapLocalCsn = EXCLUDED.statementLangMapLocalCsn, statementLangMapLcb = EXCLUDED.statementLangMapLcb, statementLangMapLct = EXCLUDED.statementLangMapLct */; END "
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS SchoolReplicate ( schoolPk INTEGER NOT NULL, schoolVersionId INTEGER NOT NULL DEFAULT 0, schoolDestination INTEGER NOT NULL, schoolPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (schoolPk, schoolDestination)) "
         _stmtList +=
             " CREATE INDEX index_SchoolReplicate_schoolPk_schoolDestination_schoolVersionId ON SchoolReplicate (schoolPk, schoolDestination, schoolVersionId) "
@@ -854,6 +898,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
             " CREATE TRIGGER ch_del_164 AFTER DELETE ON School BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 164 AS chTableId, OLD.schoolUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 164 AND chEntityPk = OLD.schoolUid); END "
         _stmtList +=
             "CREATE VIEW School_ReceiveView AS  SELECT School.*, SchoolReplicate.* FROM School LEFT JOIN SchoolReplicate ON SchoolReplicate.schoolPk = School.schoolUid "
+        _stmtList +=
+            " CREATE TRIGGER school_remote_insert_ins INSTEAD OF INSERT ON School_ReceiveView FOR EACH ROW BEGIN REPLACE INTO School(schoolUid, schoolName, schoolDesc, schoolAddress, schoolActive, schoolPhoneNumber, schoolGender, schoolHolidayCalendarUid, schoolFeatures, schoolLocationLong, schoolLocationLatt, schoolEmailAddress, schoolTeachersPersonGroupUid, schoolStudentsPersonGroupUid, schoolPendingStudentsPersonGroupUid, schoolCode, schoolMasterChangeSeqNum, schoolLocalChangeSeqNum, schoolLastChangedBy, schoolLct, schoolTimeZone) VALUES (NEW.schoolUid, NEW.schoolName, NEW.schoolDesc, NEW.schoolAddress, NEW.schoolActive, NEW.schoolPhoneNumber, NEW.schoolGender, NEW.schoolHolidayCalendarUid, NEW.schoolFeatures, NEW.schoolLocationLong, NEW.schoolLocationLatt, NEW.schoolEmailAddress, NEW.schoolTeachersPersonGroupUid, NEW.schoolStudentsPersonGroupUid, NEW.schoolPendingStudentsPersonGroupUid, NEW.schoolCode, NEW.schoolMasterChangeSeqNum, NEW.schoolLocalChangeSeqNum, NEW.schoolLastChangedBy, NEW.schoolLct, NEW.schoolTimeZone) /*psql ON CONFLICT (schoolUid) DO UPDATE SET schoolName = EXCLUDED.schoolName, schoolDesc = EXCLUDED.schoolDesc, schoolAddress = EXCLUDED.schoolAddress, schoolActive = EXCLUDED.schoolActive, schoolPhoneNumber = EXCLUDED.schoolPhoneNumber, schoolGender = EXCLUDED.schoolGender, schoolHolidayCalendarUid = EXCLUDED.schoolHolidayCalendarUid, schoolFeatures = EXCLUDED.schoolFeatures, schoolLocationLong = EXCLUDED.schoolLocationLong, schoolLocationLatt = EXCLUDED.schoolLocationLatt, schoolEmailAddress = EXCLUDED.schoolEmailAddress, schoolTeachersPersonGroupUid = EXCLUDED.schoolTeachersPersonGroupUid, schoolStudentsPersonGroupUid = EXCLUDED.schoolStudentsPersonGroupUid, schoolPendingStudentsPersonGroupUid = EXCLUDED.schoolPendingStudentsPersonGroupUid, schoolCode = EXCLUDED.schoolCode, schoolMasterChangeSeqNum = EXCLUDED.schoolMasterChangeSeqNum, schoolLocalChangeSeqNum = EXCLUDED.schoolLocalChangeSeqNum, schoolLastChangedBy = EXCLUDED.schoolLastChangedBy, schoolLct = EXCLUDED.schoolLct, schoolTimeZone = EXCLUDED.schoolTimeZone */; END "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS SchoolMemberReplicate ( smPk INTEGER NOT NULL, smVersionId INTEGER NOT NULL DEFAULT 0, smDestination INTEGER NOT NULL, smPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (smPk, smDestination)) "
         _stmtList +=
@@ -869,6 +915,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW SchoolMember_ReceiveView AS  SELECT SchoolMember.*, SchoolMemberReplicate.* FROM SchoolMember LEFT JOIN SchoolMemberReplicate ON SchoolMemberReplicate.smPk = SchoolMember.schoolMemberUid "
         _stmtList +=
+            " CREATE TRIGGER schoolmember_remote_insert_ins INSTEAD OF INSERT ON SchoolMember_ReceiveView FOR EACH ROW BEGIN REPLACE INTO SchoolMember(schoolMemberUid, schoolMemberPersonUid, schoolMemberSchoolUid, schoolMemberJoinDate, schoolMemberLeftDate, schoolMemberRole, schoolMemberActive, schoolMemberLocalChangeSeqNum, schoolMemberMasterChangeSeqNum, schoolMemberLastChangedBy, schoolMemberLct) VALUES (NEW.schoolMemberUid, NEW.schoolMemberPersonUid, NEW.schoolMemberSchoolUid, NEW.schoolMemberJoinDate, NEW.schoolMemberLeftDate, NEW.schoolMemberRole, NEW.schoolMemberActive, NEW.schoolMemberLocalChangeSeqNum, NEW.schoolMemberMasterChangeSeqNum, NEW.schoolMemberLastChangedBy, NEW.schoolMemberLct) /*psql ON CONFLICT (schoolMemberUid) DO UPDATE SET schoolMemberPersonUid = EXCLUDED.schoolMemberPersonUid, schoolMemberSchoolUid = EXCLUDED.schoolMemberSchoolUid, schoolMemberJoinDate = EXCLUDED.schoolMemberJoinDate, schoolMemberLeftDate = EXCLUDED.schoolMemberLeftDate, schoolMemberRole = EXCLUDED.schoolMemberRole, schoolMemberActive = EXCLUDED.schoolMemberActive, schoolMemberLocalChangeSeqNum = EXCLUDED.schoolMemberLocalChangeSeqNum, schoolMemberMasterChangeSeqNum = EXCLUDED.schoolMemberMasterChangeSeqNum, schoolMemberLastChangedBy = EXCLUDED.schoolMemberLastChangedBy, schoolMemberLct = EXCLUDED.schoolMemberLct */; END "
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS CommentsReplicate ( commentsPk INTEGER NOT NULL, commentsVersionId INTEGER NOT NULL DEFAULT 0, commentsDestination INTEGER NOT NULL, commentsPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (commentsPk, commentsDestination)) "
         _stmtList +=
             " CREATE INDEX index_CommentsReplicate_commentsPk_commentsDestination_commentsVersionId ON CommentsReplicate (commentsPk, commentsDestination, commentsVersionId) "
@@ -883,6 +931,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW Comments_ReceiveView AS  SELECT Comments.*, CommentsReplicate.* FROM Comments LEFT JOIN CommentsReplicate ON CommentsReplicate.commentsPk = Comments.commentsUid "
         _stmtList +=
+            " CREATE TRIGGER comments_remote_insert_ins INSTEAD OF INSERT ON Comments_ReceiveView FOR EACH ROW BEGIN REPLACE INTO Comments(commentsUid, commentsText, commentsEntityType, commentsEntityUid, commentsPublic, commentsStatus, commentsPersonUid, commentsToPersonUid, commentsFlagged, commentsInActive, commentsDateTimeAdded, commentsDateTimeUpdated, commentsMCSN, commentsLCSN, commentsLCB, commentsLct) VALUES (NEW.commentsUid, NEW.commentsText, NEW.commentsEntityType, NEW.commentsEntityUid, NEW.commentsPublic, NEW.commentsStatus, NEW.commentsPersonUid, NEW.commentsToPersonUid, NEW.commentsFlagged, NEW.commentsInActive, NEW.commentsDateTimeAdded, NEW.commentsDateTimeUpdated, NEW.commentsMCSN, NEW.commentsLCSN, NEW.commentsLCB, NEW.commentsLct) /*psql ON CONFLICT (commentsUid) DO UPDATE SET commentsText = EXCLUDED.commentsText, commentsEntityType = EXCLUDED.commentsEntityType, commentsEntityUid = EXCLUDED.commentsEntityUid, commentsPublic = EXCLUDED.commentsPublic, commentsStatus = EXCLUDED.commentsStatus, commentsPersonUid = EXCLUDED.commentsPersonUid, commentsToPersonUid = EXCLUDED.commentsToPersonUid, commentsFlagged = EXCLUDED.commentsFlagged, commentsInActive = EXCLUDED.commentsInActive, commentsDateTimeAdded = EXCLUDED.commentsDateTimeAdded, commentsDateTimeUpdated = EXCLUDED.commentsDateTimeUpdated, commentsMCSN = EXCLUDED.commentsMCSN, commentsLCSN = EXCLUDED.commentsLCSN, commentsLCB = EXCLUDED.commentsLCB, commentsLct = EXCLUDED.commentsLct */; END "
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS ReportReplicate ( reportPk INTEGER NOT NULL, reportVersionId INTEGER NOT NULL DEFAULT 0, reportDestination INTEGER NOT NULL, reportPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (reportPk, reportDestination)) "
         _stmtList +=
             " CREATE INDEX index_ReportReplicate_reportPk_reportDestination_reportVersionId ON ReportReplicate (reportPk, reportDestination, reportVersionId) "
@@ -896,6 +946,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
             " CREATE TRIGGER ch_del_101 AFTER DELETE ON Report BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 101 AS chTableId, OLD.reportUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 101 AND chEntityPk = OLD.reportUid); END "
         _stmtList +=
             "CREATE VIEW Report_ReceiveView AS  SELECT Report.*, ReportReplicate.* FROM Report LEFT JOIN ReportReplicate ON ReportReplicate.reportPk = Report.reportUid "
+        _stmtList +=
+            " CREATE TRIGGER report_remote_insert_ins INSTEAD OF INSERT ON Report_ReceiveView FOR EACH ROW BEGIN REPLACE INTO Report(reportUid, reportOwnerUid, xAxis, reportDateRangeSelection, fromDate, fromRelTo, fromRelOffSet, fromRelUnit, toDate, toRelTo, toRelOffSet, toRelUnit, reportTitle, reportDescription, reportSeries, reportInactive, isTemplate, priority, reportTitleId, reportDescId, reportMasterChangeSeqNum, reportLocalChangeSeqNum, reportLastChangedBy, reportLct) VALUES (NEW.reportUid, NEW.reportOwnerUid, NEW.xAxis, NEW.reportDateRangeSelection, NEW.fromDate, NEW.fromRelTo, NEW.fromRelOffSet, NEW.fromRelUnit, NEW.toDate, NEW.toRelTo, NEW.toRelOffSet, NEW.toRelUnit, NEW.reportTitle, NEW.reportDescription, NEW.reportSeries, NEW.reportInactive, NEW.isTemplate, NEW.priority, NEW.reportTitleId, NEW.reportDescId, NEW.reportMasterChangeSeqNum, NEW.reportLocalChangeSeqNum, NEW.reportLastChangedBy, NEW.reportLct) /*psql ON CONFLICT (reportUid) DO UPDATE SET reportOwnerUid = EXCLUDED.reportOwnerUid, xAxis = EXCLUDED.xAxis, reportDateRangeSelection = EXCLUDED.reportDateRangeSelection, fromDate = EXCLUDED.fromDate, fromRelTo = EXCLUDED.fromRelTo, fromRelOffSet = EXCLUDED.fromRelOffSet, fromRelUnit = EXCLUDED.fromRelUnit, toDate = EXCLUDED.toDate, toRelTo = EXCLUDED.toRelTo, toRelOffSet = EXCLUDED.toRelOffSet, toRelUnit = EXCLUDED.toRelUnit, reportTitle = EXCLUDED.reportTitle, reportDescription = EXCLUDED.reportDescription, reportSeries = EXCLUDED.reportSeries, reportInactive = EXCLUDED.reportInactive, isTemplate = EXCLUDED.isTemplate, priority = EXCLUDED.priority, reportTitleId = EXCLUDED.reportTitleId, reportDescId = EXCLUDED.reportDescId, reportMasterChangeSeqNum = EXCLUDED.reportMasterChangeSeqNum, reportLocalChangeSeqNum = EXCLUDED.reportLocalChangeSeqNum, reportLastChangedBy = EXCLUDED.reportLastChangedBy, reportLct = EXCLUDED.reportLct */; END "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS SiteReplicate ( sitePk INTEGER NOT NULL, siteVersionId INTEGER NOT NULL DEFAULT 0, siteDestination INTEGER NOT NULL, sitePending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (sitePk, siteDestination)) "
         _stmtList +=
@@ -927,6 +979,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW LearnerGroup_ReceiveView AS  SELECT LearnerGroup.*, LearnerGroupReplicate.* FROM LearnerGroup LEFT JOIN LearnerGroupReplicate ON LearnerGroupReplicate.lgPk = LearnerGroup.learnerGroupUid "
         _stmtList +=
+            " CREATE TRIGGER learnergroup_remote_insert_ins INSTEAD OF INSERT ON LearnerGroup_ReceiveView FOR EACH ROW BEGIN REPLACE INTO LearnerGroup(learnerGroupUid, learnerGroupName, learnerGroupDescription, learnerGroupActive, learnerGroupMCSN, learnerGroupCSN, learnerGroupLCB, learnerGroupLct) VALUES (NEW.learnerGroupUid, NEW.learnerGroupName, NEW.learnerGroupDescription, NEW.learnerGroupActive, NEW.learnerGroupMCSN, NEW.learnerGroupCSN, NEW.learnerGroupLCB, NEW.learnerGroupLct) /*psql ON CONFLICT (learnerGroupUid) DO UPDATE SET learnerGroupName = EXCLUDED.learnerGroupName, learnerGroupDescription = EXCLUDED.learnerGroupDescription, learnerGroupActive = EXCLUDED.learnerGroupActive, learnerGroupMCSN = EXCLUDED.learnerGroupMCSN, learnerGroupCSN = EXCLUDED.learnerGroupCSN, learnerGroupLCB = EXCLUDED.learnerGroupLCB, learnerGroupLct = EXCLUDED.learnerGroupLct */; END "
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS LearnerGroupMemberReplicate ( lgmPk INTEGER NOT NULL, lgmVersionId INTEGER NOT NULL DEFAULT 0, lgmDestination INTEGER NOT NULL, lgmPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (lgmPk, lgmDestination)) "
         _stmtList +=
             " CREATE INDEX index_LearnerGroupMemberReplicate_lgmPk_lgmDestination_lgmVersionId ON LearnerGroupMemberReplicate (lgmPk, lgmDestination, lgmVersionId) "
@@ -940,6 +994,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
             " CREATE TRIGGER ch_del_300 AFTER DELETE ON LearnerGroupMember BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 300 AS chTableId, OLD.learnerGroupMemberUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 300 AND chEntityPk = OLD.learnerGroupMemberUid); END "
         _stmtList +=
             "CREATE VIEW LearnerGroupMember_ReceiveView AS  SELECT LearnerGroupMember.*, LearnerGroupMemberReplicate.* FROM LearnerGroupMember LEFT JOIN LearnerGroupMemberReplicate ON LearnerGroupMemberReplicate.lgmPk = LearnerGroupMember.learnerGroupMemberUid "
+        _stmtList +=
+            " CREATE TRIGGER learnergroupmember_remote_insert_ins INSTEAD OF INSERT ON LearnerGroupMember_ReceiveView FOR EACH ROW BEGIN REPLACE INTO LearnerGroupMember(learnerGroupMemberUid, learnerGroupMemberPersonUid, learnerGroupMemberLgUid, learnerGroupMemberRole, learnerGroupMemberActive, learnerGroupMemberMCSN, learnerGroupMemberCSN, learnerGroupMemberLCB, learnerGroupMemberLct) VALUES (NEW.learnerGroupMemberUid, NEW.learnerGroupMemberPersonUid, NEW.learnerGroupMemberLgUid, NEW.learnerGroupMemberRole, NEW.learnerGroupMemberActive, NEW.learnerGroupMemberMCSN, NEW.learnerGroupMemberCSN, NEW.learnerGroupMemberLCB, NEW.learnerGroupMemberLct) /*psql ON CONFLICT (learnerGroupMemberUid) DO UPDATE SET learnerGroupMemberPersonUid = EXCLUDED.learnerGroupMemberPersonUid, learnerGroupMemberLgUid = EXCLUDED.learnerGroupMemberLgUid, learnerGroupMemberRole = EXCLUDED.learnerGroupMemberRole, learnerGroupMemberActive = EXCLUDED.learnerGroupMemberActive, learnerGroupMemberMCSN = EXCLUDED.learnerGroupMemberMCSN, learnerGroupMemberCSN = EXCLUDED.learnerGroupMemberCSN, learnerGroupMemberLCB = EXCLUDED.learnerGroupMemberLCB, learnerGroupMemberLct = EXCLUDED.learnerGroupMemberLct */; END "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS GroupLearningSessionReplicate ( glsPk INTEGER NOT NULL, glsVersionId INTEGER NOT NULL DEFAULT 0, glsDestination INTEGER NOT NULL, glsPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (glsPk, glsDestination)) "
         _stmtList +=
@@ -955,6 +1011,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW GroupLearningSession_ReceiveView AS  SELECT GroupLearningSession.*, GroupLearningSessionReplicate.* FROM GroupLearningSession LEFT JOIN GroupLearningSessionReplicate ON GroupLearningSessionReplicate.glsPk = GroupLearningSession.groupLearningSessionUid "
         _stmtList +=
+            " CREATE TRIGGER grouplearningsession_remote_insert_ins INSTEAD OF INSERT ON GroupLearningSession_ReceiveView FOR EACH ROW BEGIN REPLACE INTO GroupLearningSession(groupLearningSessionUid, groupLearningSessionContentUid, groupLearningSessionLearnerGroupUid, groupLearningSessionInactive, groupLearningSessionMCSN, groupLearningSessionCSN, groupLearningSessionLCB, groupLearningSessionLct) VALUES (NEW.groupLearningSessionUid, NEW.groupLearningSessionContentUid, NEW.groupLearningSessionLearnerGroupUid, NEW.groupLearningSessionInactive, NEW.groupLearningSessionMCSN, NEW.groupLearningSessionCSN, NEW.groupLearningSessionLCB, NEW.groupLearningSessionLct) /*psql ON CONFLICT (groupLearningSessionUid) DO UPDATE SET groupLearningSessionContentUid = EXCLUDED.groupLearningSessionContentUid, groupLearningSessionLearnerGroupUid = EXCLUDED.groupLearningSessionLearnerGroupUid, groupLearningSessionInactive = EXCLUDED.groupLearningSessionInactive, groupLearningSessionMCSN = EXCLUDED.groupLearningSessionMCSN, groupLearningSessionCSN = EXCLUDED.groupLearningSessionCSN, groupLearningSessionLCB = EXCLUDED.groupLearningSessionLCB, groupLearningSessionLct = EXCLUDED.groupLearningSessionLct */; END "
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS SiteTermsReplicate ( stPk INTEGER NOT NULL, stVersionId INTEGER NOT NULL DEFAULT 0, stDestination INTEGER NOT NULL, stPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (stPk, stDestination)) "
         _stmtList +=
             " CREATE INDEX index_SiteTermsReplicate_stPk_stDestination_stVersionId ON SiteTermsReplicate (stPk, stDestination, stVersionId) "
@@ -968,6 +1026,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
             " CREATE TRIGGER ch_del_272 AFTER DELETE ON SiteTerms BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 272 AS chTableId, OLD.sTermsUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 272 AND chEntityPk = OLD.sTermsUid); END "
         _stmtList +=
             "CREATE VIEW SiteTerms_ReceiveView AS  SELECT SiteTerms.*, SiteTermsReplicate.* FROM SiteTerms LEFT JOIN SiteTermsReplicate ON SiteTermsReplicate.stPk = SiteTerms.sTermsUid "
+        _stmtList +=
+            " CREATE TRIGGER siteterms_remote_insert_ins INSTEAD OF INSERT ON SiteTerms_ReceiveView FOR EACH ROW BEGIN REPLACE INTO SiteTerms(sTermsUid, termsHtml, sTermsLang, sTermsLangUid, sTermsActive, sTermsLastChangedBy, sTermsPrimaryCsn, sTermsLocalCsn, sTermsLct) VALUES (NEW.sTermsUid, NEW.termsHtml, NEW.sTermsLang, NEW.sTermsLangUid, NEW.sTermsActive, NEW.sTermsLastChangedBy, NEW.sTermsPrimaryCsn, NEW.sTermsLocalCsn, NEW.sTermsLct) /*psql ON CONFLICT (sTermsUid) DO UPDATE SET termsHtml = EXCLUDED.termsHtml, sTermsLang = EXCLUDED.sTermsLang, sTermsLangUid = EXCLUDED.sTermsLangUid, sTermsActive = EXCLUDED.sTermsActive, sTermsLastChangedBy = EXCLUDED.sTermsLastChangedBy, sTermsPrimaryCsn = EXCLUDED.sTermsPrimaryCsn, sTermsLocalCsn = EXCLUDED.sTermsLocalCsn, sTermsLct = EXCLUDED.sTermsLct */; END "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS ClazzContentJoinReplicate ( ccjPk INTEGER NOT NULL, ccjVersionId INTEGER NOT NULL DEFAULT 0, ccjDestination INTEGER NOT NULL, ccjPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (ccjPk, ccjDestination)) "
         _stmtList +=
@@ -983,6 +1043,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ClazzContentJoin_ReceiveView AS  SELECT ClazzContentJoin.*, ClazzContentJoinReplicate.* FROM ClazzContentJoin LEFT JOIN ClazzContentJoinReplicate ON ClazzContentJoinReplicate.ccjPk = ClazzContentJoin.ccjUid "
         _stmtList +=
+            " CREATE TRIGGER clazzcontentjoin_remote_insert_ins INSTEAD OF INSERT ON ClazzContentJoin_ReceiveView FOR EACH ROW BEGIN REPLACE INTO ClazzContentJoin(ccjUid, ccjContentEntryUid, ccjClazzUid, ccjActive, ccjLocalChangeSeqNum, ccjMasterChangeSeqNum, ccjLastChangedBy, ccjLct) VALUES (NEW.ccjUid, NEW.ccjContentEntryUid, NEW.ccjClazzUid, NEW.ccjActive, NEW.ccjLocalChangeSeqNum, NEW.ccjMasterChangeSeqNum, NEW.ccjLastChangedBy, NEW.ccjLct) /*psql ON CONFLICT (ccjUid) DO UPDATE SET ccjContentEntryUid = EXCLUDED.ccjContentEntryUid, ccjClazzUid = EXCLUDED.ccjClazzUid, ccjActive = EXCLUDED.ccjActive, ccjLocalChangeSeqNum = EXCLUDED.ccjLocalChangeSeqNum, ccjMasterChangeSeqNum = EXCLUDED.ccjMasterChangeSeqNum, ccjLastChangedBy = EXCLUDED.ccjLastChangedBy, ccjLct = EXCLUDED.ccjLct */; END "
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS PersonParentJoinReplicate ( ppjPk INTEGER NOT NULL, ppjVersionId INTEGER NOT NULL DEFAULT 0, ppjDestination INTEGER NOT NULL, ppjPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (ppjPk, ppjDestination)) "
         _stmtList +=
             " CREATE INDEX index_PersonParentJoinReplicate_ppjPk_ppjDestination_ppjVersionId ON PersonParentJoinReplicate (ppjPk, ppjDestination, ppjVersionId) "
@@ -996,6 +1058,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
             " CREATE TRIGGER ch_del_512 AFTER DELETE ON PersonParentJoin BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 512 AS chTableId, OLD.ppjUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 512 AND chEntityPk = OLD.ppjUid); END "
         _stmtList +=
             "CREATE VIEW PersonParentJoin_ReceiveView AS  SELECT PersonParentJoin.*, PersonParentJoinReplicate.* FROM PersonParentJoin LEFT JOIN PersonParentJoinReplicate ON PersonParentJoinReplicate.ppjPk = PersonParentJoin.ppjUid "
+        _stmtList +=
+            " CREATE TRIGGER personparentjoin_remote_insert_ins INSTEAD OF INSERT ON PersonParentJoin_ReceiveView FOR EACH ROW BEGIN REPLACE INTO PersonParentJoin(ppjUid, ppjPcsn, ppjLcsn, ppjLcb, ppjLct, ppjParentPersonUid, ppjMinorPersonUid, ppjRelationship, ppjEmail, ppjPhone, ppjInactive, ppjStatus, ppjApprovalTiemstamp, ppjApprovalIpAddr) VALUES (NEW.ppjUid, NEW.ppjPcsn, NEW.ppjLcsn, NEW.ppjLcb, NEW.ppjLct, NEW.ppjParentPersonUid, NEW.ppjMinorPersonUid, NEW.ppjRelationship, NEW.ppjEmail, NEW.ppjPhone, NEW.ppjInactive, NEW.ppjStatus, NEW.ppjApprovalTiemstamp, NEW.ppjApprovalIpAddr) /*psql ON CONFLICT (ppjUid) DO UPDATE SET ppjPcsn = EXCLUDED.ppjPcsn, ppjLcsn = EXCLUDED.ppjLcsn, ppjLcb = EXCLUDED.ppjLcb, ppjLct = EXCLUDED.ppjLct, ppjParentPersonUid = EXCLUDED.ppjParentPersonUid, ppjMinorPersonUid = EXCLUDED.ppjMinorPersonUid, ppjRelationship = EXCLUDED.ppjRelationship, ppjEmail = EXCLUDED.ppjEmail, ppjPhone = EXCLUDED.ppjPhone, ppjInactive = EXCLUDED.ppjInactive, ppjStatus = EXCLUDED.ppjStatus, ppjApprovalTiemstamp = EXCLUDED.ppjApprovalTiemstamp, ppjApprovalIpAddr = EXCLUDED.ppjApprovalIpAddr */; END "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS ScopedGrantReplicate ( sgPk INTEGER NOT NULL, sgVersionId INTEGER NOT NULL DEFAULT 0, sgDestination INTEGER NOT NULL, sgPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (sgPk, sgDestination)) "
         _stmtList +=
@@ -1027,6 +1091,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ErrorReport_ReceiveView AS  SELECT ErrorReport.*, ErrorReportReplicate.* FROM ErrorReport LEFT JOIN ErrorReportReplicate ON ErrorReportReplicate.erPk = ErrorReport.errUid "
         _stmtList +=
+            " CREATE TRIGGER errorreport_remote_insert_ins INSTEAD OF INSERT ON ErrorReport_ReceiveView FOR EACH ROW BEGIN REPLACE INTO ErrorReport(errUid, errPcsn, errLcsn, errLcb, errLct, severity, timestamp, presenterUri, appVersion, versionCode, errorCode, operatingSys, osVersion, stackTrace, message) VALUES (NEW.errUid, NEW.errPcsn, NEW.errLcsn, NEW.errLcb, NEW.errLct, NEW.severity, NEW.timestamp, NEW.presenterUri, NEW.appVersion, NEW.versionCode, NEW.errorCode, NEW.operatingSys, NEW.osVersion, NEW.stackTrace, NEW.message) /*psql ON CONFLICT (errUid) DO UPDATE SET errPcsn = EXCLUDED.errPcsn, errLcsn = EXCLUDED.errLcsn, errLcb = EXCLUDED.errLcb, errLct = EXCLUDED.errLct, severity = EXCLUDED.severity, timestamp = EXCLUDED.timestamp, presenterUri = EXCLUDED.presenterUri, appVersion = EXCLUDED.appVersion, versionCode = EXCLUDED.versionCode, errorCode = EXCLUDED.errorCode, operatingSys = EXCLUDED.operatingSys, osVersion = EXCLUDED.osVersion, stackTrace = EXCLUDED.stackTrace, message = EXCLUDED.message */; END "
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS ClazzAssignmentReplicate ( caPk INTEGER NOT NULL, caVersionId INTEGER NOT NULL DEFAULT 0, caDestination INTEGER NOT NULL, caPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (caPk, caDestination)) "
         _stmtList +=
             " CREATE INDEX index_ClazzAssignmentReplicate_caPk_caDestination_caVersionId ON ClazzAssignmentReplicate (caPk, caDestination, caVersionId) "
@@ -1041,6 +1107,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             "CREATE VIEW ClazzAssignment_ReceiveView AS  SELECT ClazzAssignment.*, ClazzAssignmentReplicate.* FROM ClazzAssignment LEFT JOIN ClazzAssignmentReplicate ON ClazzAssignmentReplicate.caPk = ClazzAssignment.caUid "
         _stmtList +=
+            " CREATE TRIGGER clazzassignment_remote_insert_ins INSTEAD OF INSERT ON ClazzAssignment_ReceiveView FOR EACH ROW BEGIN REPLACE INTO ClazzAssignment(caUid, caTitle, caDescription, caDeadlineDate, caStartDate, caLateSubmissionType, caLateSubmissionPenalty, caGracePeriodDate, caActive, caClassCommentEnabled, caPrivateCommentsEnabled, caClazzUid, caLocalChangeSeqNum, caMasterChangeSeqNum, caLastChangedBy, caLct) VALUES (NEW.caUid, NEW.caTitle, NEW.caDescription, NEW.caDeadlineDate, NEW.caStartDate, NEW.caLateSubmissionType, NEW.caLateSubmissionPenalty, NEW.caGracePeriodDate, NEW.caActive, NEW.caClassCommentEnabled, NEW.caPrivateCommentsEnabled, NEW.caClazzUid, NEW.caLocalChangeSeqNum, NEW.caMasterChangeSeqNum, NEW.caLastChangedBy, NEW.caLct) /*psql ON CONFLICT (caUid) DO UPDATE SET caTitle = EXCLUDED.caTitle, caDescription = EXCLUDED.caDescription, caDeadlineDate = EXCLUDED.caDeadlineDate, caStartDate = EXCLUDED.caStartDate, caLateSubmissionType = EXCLUDED.caLateSubmissionType, caLateSubmissionPenalty = EXCLUDED.caLateSubmissionPenalty, caGracePeriodDate = EXCLUDED.caGracePeriodDate, caActive = EXCLUDED.caActive, caClassCommentEnabled = EXCLUDED.caClassCommentEnabled, caPrivateCommentsEnabled = EXCLUDED.caPrivateCommentsEnabled, caClazzUid = EXCLUDED.caClazzUid, caLocalChangeSeqNum = EXCLUDED.caLocalChangeSeqNum, caMasterChangeSeqNum = EXCLUDED.caMasterChangeSeqNum, caLastChangedBy = EXCLUDED.caLastChangedBy, caLct = EXCLUDED.caLct */; END "
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoinReplicate ( cacjPk INTEGER NOT NULL, cacjVersionId INTEGER NOT NULL DEFAULT 0, cacjDestination INTEGER NOT NULL, cacjPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (cacjPk, cacjDestination)) "
         _stmtList +=
             " CREATE INDEX index_ClazzAssignmentContentJoinReplicate_cacjPk_cacjDestination_cacjVersionId ON ClazzAssignmentContentJoinReplicate (cacjPk, cacjDestination, cacjVersionId) "
@@ -1054,6 +1122,8 @@ private fun DoorSqlDatabase.addReplicationEntities() {
             " CREATE TRIGGER ch_del_521 AFTER DELETE ON ClazzAssignmentContentJoin BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 521 AS chTableId, OLD.cacjUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 521 AND chEntityPk = OLD.cacjUid); END "
         _stmtList +=
             "CREATE VIEW ClazzAssignmentContentJoin_ReceiveView AS  SELECT ClazzAssignmentContentJoin.*, ClazzAssignmentContentJoinReplicate.* FROM ClazzAssignmentContentJoin LEFT JOIN ClazzAssignmentContentJoinReplicate ON ClazzAssignmentContentJoinReplicate.cacjPk = ClazzAssignmentContentJoin.cacjUid "
+        _stmtList +=
+            " CREATE TRIGGER clazzassignmentcontentjoin_remote_insert_ins INSTEAD OF INSERT ON ClazzAssignmentContentJoin_ReceiveView FOR EACH ROW BEGIN REPLACE INTO ClazzAssignmentContentJoin(cacjUid, cacjContentUid, cacjAssignmentUid, cacjActive, cacjMCSN, cacjLCSN, cacjLCB, cacjLct) VALUES (NEW.cacjUid, NEW.cacjContentUid, NEW.cacjAssignmentUid, NEW.cacjActive, NEW.cacjMCSN, NEW.cacjLCSN, NEW.cacjLCB, NEW.cacjLct) /*psql ON CONFLICT (cacjUid) DO UPDATE SET cacjContentUid = EXCLUDED.cacjContentUid, cacjAssignmentUid = EXCLUDED.cacjAssignmentUid, cacjActive = EXCLUDED.cacjActive, cacjMCSN = EXCLUDED.cacjMCSN, cacjLCSN = EXCLUDED.cacjLCSN, cacjLCB = EXCLUDED.cacjLCB, cacjLct = EXCLUDED.cacjLct */; END "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS PersonAuth2Replicate ( paPk INTEGER NOT NULL, paVersionId INTEGER NOT NULL DEFAULT 0, paDestination INTEGER NOT NULL, paPending INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (paPk, paDestination)) "
         _stmtList +=
@@ -1088,6 +1158,78 @@ private fun DoorSqlDatabase.addReplicationEntities() {
             " CREATE TRIGGER usersession_remote_ins_ins INSTEAD OF INSERT ON UserSession_ReceiveView FOR EACH ROW BEGIN REPLACE INTO UserSession(usUid, usPcsn, usLcsn, usLcb, usLct, usPersonUid, usClientNodeId, usStartTime, usEndTime, usStatus, usReason, usAuth, usSessionType) VALUES (NEW.usUid, NEW.usPcsn, NEW.usLcsn, NEW.usLcb, NEW.usLct, NEW.usPersonUid, NEW.usClientNodeId, NEW.usStartTime, NEW.usEndTime, NEW.usStatus, NEW.usReason, NEW.usAuth, NEW.usSessionType) /*postgres ON CONFLICT (usUid) DO UPDATE SET usStatus = EXCLUDED.usStatus, usEndTime = EXCLUDED.usEndTime, usReason = EXCLUDED.usReason */ ; END "
     } else {
         _stmtList +=
+            "UPDATE ClazzLog SET clazzLogLastChangedTime = ${systemTimeInMillis()} WHERE clazzLogLastChangedTime = 0"
+        _stmtList +=
+            "UPDATE ClazzLogAttendanceRecord SET clazzLogAttendanceRecordLastChangedTime = ${systemTimeInMillis()} WHERE clazzLogAttendanceRecordLastChangedTime = 0"
+        _stmtList +=
+            "UPDATE Schedule SET scheduleLastChangedTime = ${systemTimeInMillis()} WHERE scheduleLastChangedTime = 0"
+        _stmtList +=
+            "UPDATE HolidayCalendar SET umCalendarLct = ${systemTimeInMillis()} WHERE umCalendarLct = 0"
+        _stmtList += "UPDATE Holiday SET holLct = ${systemTimeInMillis()} WHERE holLct = 0"
+        _stmtList += "UPDATE Person SET personLct = ${systemTimeInMillis()} WHERE personLct = 0"
+        _stmtList += "UPDATE Clazz SET clazzLct = ${systemTimeInMillis()} WHERE clazzLct = 0"
+        _stmtList +=
+            "UPDATE ClazzEnrolment SET clazzEnrolmentLct = ${systemTimeInMillis()} WHERE clazzEnrolmentLct = 0"
+        _stmtList +=
+            "UPDATE LeavingReason SET leavingReasonLct = ${systemTimeInMillis()} WHERE leavingReasonLct = 0"
+        _stmtList +=
+            "UPDATE ContentEntry SET contentEntryLct = ${systemTimeInMillis()} WHERE contentEntryLct = 0"
+        _stmtList +=
+            "UPDATE ContentEntryContentCategoryJoin SET ceccjLct = ${systemTimeInMillis()} WHERE ceccjLct = 0"
+        _stmtList +=
+            "UPDATE ContentEntryParentChildJoin SET cepcjLct = ${systemTimeInMillis()} WHERE cepcjLct = 0"
+        _stmtList +=
+            "UPDATE ContentEntryRelatedEntryJoin SET cerejLct = ${systemTimeInMillis()} WHERE cerejLct = 0"
+        _stmtList +=
+            "UPDATE ContentCategorySchema SET contentCategorySchemaLct = ${systemTimeInMillis()} WHERE contentCategorySchemaLct = 0"
+        _stmtList +=
+            "UPDATE ContentCategory SET contentCategoryLct = ${systemTimeInMillis()} WHERE contentCategoryLct = 0"
+        _stmtList += "UPDATE Language SET langLct = ${systemTimeInMillis()} WHERE langLct = 0"
+        _stmtList +=
+            "UPDATE LanguageVariant SET langVariantLct = ${systemTimeInMillis()} WHERE langVariantLct = 0"
+        _stmtList += "UPDATE PersonGroup SET groupLct = ${systemTimeInMillis()} WHERE groupLct = 0"
+        _stmtList +=
+            "UPDATE PersonGroupMember SET groupMemberLct = ${systemTimeInMillis()} WHERE groupMemberLct = 0"
+        _stmtList +=
+            "UPDATE PersonPicture SET personPictureLct = ${systemTimeInMillis()} WHERE personPictureLct = 0"
+        _stmtList += "UPDATE Container SET cntLct = ${systemTimeInMillis()} WHERE cntLct = 0"
+        _stmtList += "UPDATE VerbEntity SET verbLct = ${systemTimeInMillis()} WHERE verbLct = 0"
+        _stmtList +=
+            "UPDATE XObjectEntity SET xObjectLct = ${systemTimeInMillis()} WHERE xObjectLct = 0"
+        _stmtList +=
+            "UPDATE StatementEntity SET statementLct = ${systemTimeInMillis()} WHERE statementLct = 0"
+        _stmtList +=
+            "UPDATE ContextXObjectStatementJoin SET contextXObjectLct = ${systemTimeInMillis()} WHERE contextXObjectLct = 0"
+        _stmtList += "UPDATE AgentEntity SET agentLct = ${systemTimeInMillis()} WHERE agentLct = 0"
+        _stmtList += "UPDATE StateEntity SET stateLct = ${systemTimeInMillis()} WHERE stateLct = 0"
+        _stmtList +=
+            "UPDATE StateContentEntity SET stateContentLct = ${systemTimeInMillis()} WHERE stateContentLct = 0"
+        _stmtList +=
+            "UPDATE XLangMapEntry SET statementLangMapLct = ${systemTimeInMillis()} WHERE statementLangMapLct = 0"
+        _stmtList += "UPDATE School SET schoolLct = ${systemTimeInMillis()} WHERE schoolLct = 0"
+        _stmtList +=
+            "UPDATE SchoolMember SET schoolMemberLct = ${systemTimeInMillis()} WHERE schoolMemberLct = 0"
+        _stmtList +=
+            "UPDATE Comments SET commentsLct = ${systemTimeInMillis()} WHERE commentsLct = 0"
+        _stmtList += "UPDATE Report SET reportLct = ${systemTimeInMillis()} WHERE reportLct = 0"
+        _stmtList += "UPDATE Site SET siteLct = ${systemTimeInMillis()} WHERE siteLct = 0"
+        _stmtList +=
+            "UPDATE LearnerGroup SET learnerGroupLct = ${systemTimeInMillis()} WHERE learnerGroupLct = 0"
+        _stmtList +=
+            "UPDATE LearnerGroupMember SET learnerGroupMemberLct = ${systemTimeInMillis()} WHERE learnerGroupMemberLct = 0"
+        _stmtList +=
+            "UPDATE GroupLearningSession SET groupLearningSessionLct = ${systemTimeInMillis()} WHERE groupLearningSessionLct = 0"
+        _stmtList += "UPDATE SiteTerms SET sTermsLct = ${systemTimeInMillis()} WHERE sTermsLct = 0"
+        _stmtList += "UPDATE ClazzContentJoin SET ccjLct = ${systemTimeInMillis()} WHERE ccjLct = 0"
+        _stmtList += "UPDATE PersonParentJoin SET ppjLct = ${systemTimeInMillis()} WHERE ppjLct = 0"
+        _stmtList += "UPDATE ScopedGrant SET sgLct = ${systemTimeInMillis()} WHERE sgLct = 0"
+        _stmtList += "UPDATE ErrorReport SET errLct = ${systemTimeInMillis()} WHERE errLct = 0"
+        _stmtList += "UPDATE ClazzAssignment SET caLct = ${systemTimeInMillis()} WHERE caLct = 0"
+        _stmtList +=
+            "UPDATE ClazzAssignmentContentJoin SET cacjLct = ${systemTimeInMillis()} WHERE cacjLct = 0"
+        _stmtList += "UPDATE PersonAuth2 SET pauthLct = ${systemTimeInMillis()} WHERE pauthLct = 0"
+        _stmtList += "UPDATE UserSession SET usLct = ${systemTimeInMillis()} WHERE usLct = 0"
+        _stmtList +=
             " CREATE TABLE IF NOT EXISTS ClazzLogReplicate ( clPk BIGINT NOT NULL, clVersionId BIGINT NOT NULL DEFAULT 0, clDestination BIGINT NOT NULL, clPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (clPk, clDestination)) "
         _stmtList +=
             " CREATE INDEX index_ClazzLogReplicate_clPk_clDestination_clVersionId ON ClazzLogReplicate (clPk, clDestination, clVersionId) "
@@ -1096,13 +1238,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_14_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (14, NEW.clazzLogUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_14_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_14_fn(); "
+            " CREATE TRIGGER ch_upd_14_trig AFTER UPDATE OR INSERT ON ClazzLog FOR EACH ROW EXECUTE PROCEDURE ch_upd_14_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_14_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (14, OLD.clazzLogUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_14_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_14_fn(); "
+            " CREATE TRIGGER ch_del_14_trig AFTER DELETE ON ClazzLog FOR EACH ROW EXECUTE PROCEDURE ch_del_14_fn(); "
         _stmtList +=
             "CREATE VIEW ClazzLog_ReceiveView AS  SELECT ClazzLog.*, ClazzLogReplicate.* FROM ClazzLog LEFT JOIN ClazzLogReplicate ON ClazzLogReplicate.clPk = ClazzLog.clazzLogUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION clazzlog_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ClazzLog(clazzLogUid, clazzLogClazzUid, logDate, timeRecorded, clazzLogDone, cancellationNote, clazzLogCancelled, clazzLogNumPresent, clazzLogNumAbsent, clazzLogNumPartial, clazzLogScheduleUid, clazzLogStatusFlag, clazzLogMSQN, clazzLogLCSN, clazzLogLCB, clazzLogLastChangedTime) VALUES (NEW.clazzLogUid, NEW.clazzLogClazzUid, NEW.logDate, NEW.timeRecorded, NEW.clazzLogDone, NEW.cancellationNote, NEW.clazzLogCancelled, NEW.clazzLogNumPresent, NEW.clazzLogNumAbsent, NEW.clazzLogNumPartial, NEW.clazzLogScheduleUid, NEW.clazzLogStatusFlag, NEW.clazzLogMSQN, NEW.clazzLogLCSN, NEW.clazzLogLCB, NEW.clazzLogLastChangedTime) ON CONFLICT (clazzLogUid) DO UPDATE SET clazzLogClazzUid = EXCLUDED.clazzLogClazzUid, logDate = EXCLUDED.logDate, timeRecorded = EXCLUDED.timeRecorded, clazzLogDone = EXCLUDED.clazzLogDone, cancellationNote = EXCLUDED.cancellationNote, clazzLogCancelled = EXCLUDED.clazzLogCancelled, clazzLogNumPresent = EXCLUDED.clazzLogNumPresent, clazzLogNumAbsent = EXCLUDED.clazzLogNumAbsent, clazzLogNumPartial = EXCLUDED.clazzLogNumPartial, clazzLogScheduleUid = EXCLUDED.clazzLogScheduleUid, clazzLogStatusFlag = EXCLUDED.clazzLogStatusFlag, clazzLogMSQN = EXCLUDED.clazzLogMSQN, clazzLogLCSN = EXCLUDED.clazzLogLCSN, clazzLogLCB = EXCLUDED.clazzLogLCB, clazzLogLastChangedTime = EXCLUDED.clazzLogLastChangedTime ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER clazzlog_remote_insert_trig INSTEAD OF INSERT ON ClazzLog_ReceiveView FOR EACH ROW EXECUTE PROCEDURE clazzlog_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecordReplicate ( clarPk BIGINT NOT NULL, clarVersionId BIGINT NOT NULL DEFAULT 0, clarDestination BIGINT NOT NULL, clarPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (clarPk, clarDestination)) "
         _stmtList +=
@@ -1112,13 +1258,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_15_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (15, NEW.clazzLogAttendanceRecordUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_15_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_15_fn(); "
+            " CREATE TRIGGER ch_upd_15_trig AFTER UPDATE OR INSERT ON ClazzLogAttendanceRecord FOR EACH ROW EXECUTE PROCEDURE ch_upd_15_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_15_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (15, OLD.clazzLogAttendanceRecordUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_15_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_15_fn(); "
+            " CREATE TRIGGER ch_del_15_trig AFTER DELETE ON ClazzLogAttendanceRecord FOR EACH ROW EXECUTE PROCEDURE ch_del_15_fn(); "
         _stmtList +=
             "CREATE VIEW ClazzLogAttendanceRecord_ReceiveView AS  SELECT ClazzLogAttendanceRecord.*, ClazzLogAttendanceRecordReplicate.* FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLogAttendanceRecordReplicate ON ClazzLogAttendanceRecordReplicate.clarPk = ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION clazzlogattendancerecord_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ClazzLogAttendanceRecord(clazzLogAttendanceRecordUid, clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordPersonUid, attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy, clazzLogAttendanceRecordLastChangedTime) VALUES (NEW.clazzLogAttendanceRecordUid, NEW.clazzLogAttendanceRecordClazzLogUid, NEW.clazzLogAttendanceRecordPersonUid, NEW.attendanceStatus, NEW.clazzLogAttendanceRecordMasterChangeSeqNum, NEW.clazzLogAttendanceRecordLocalChangeSeqNum, NEW.clazzLogAttendanceRecordLastChangedBy, NEW.clazzLogAttendanceRecordLastChangedTime) ON CONFLICT (clazzLogAttendanceRecordUid) DO UPDATE SET clazzLogAttendanceRecordClazzLogUid = EXCLUDED.clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordPersonUid = EXCLUDED.clazzLogAttendanceRecordPersonUid, attendanceStatus = EXCLUDED.attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum = EXCLUDED.clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum = EXCLUDED.clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy = EXCLUDED.clazzLogAttendanceRecordLastChangedBy, clazzLogAttendanceRecordLastChangedTime = EXCLUDED.clazzLogAttendanceRecordLastChangedTime ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER clazzlogattendancerecord_remote_insert_trig INSTEAD OF INSERT ON ClazzLogAttendanceRecord_ReceiveView FOR EACH ROW EXECUTE PROCEDURE clazzlogattendancerecord_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS ScheduleReplicate ( schedulePk BIGINT NOT NULL, scheduleVersionId BIGINT NOT NULL DEFAULT 0, scheduleDestination BIGINT NOT NULL, schedulePending BOOL NOT NULL DEFAULT true, PRIMARY KEY (schedulePk, scheduleDestination)) "
         _stmtList +=
@@ -1128,13 +1278,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_21_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (21, NEW.scheduleUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_21_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_21_fn(); "
+            " CREATE TRIGGER ch_upd_21_trig AFTER UPDATE OR INSERT ON Schedule FOR EACH ROW EXECUTE PROCEDURE ch_upd_21_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_21_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (21, OLD.scheduleUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_21_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_21_fn(); "
+            " CREATE TRIGGER ch_del_21_trig AFTER DELETE ON Schedule FOR EACH ROW EXECUTE PROCEDURE ch_del_21_fn(); "
         _stmtList +=
             "CREATE VIEW Schedule_ReceiveView AS  SELECT Schedule.*, ScheduleReplicate.* FROM Schedule LEFT JOIN ScheduleReplicate ON ScheduleReplicate.schedulePk = Schedule.scheduleUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION schedule_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO Schedule(scheduleUid, sceduleStartTime, scheduleEndTime, scheduleDay, scheduleMonth, scheduleFrequency, umCalendarUid, scheduleClazzUid, scheduleMasterChangeSeqNum, scheduleLocalChangeSeqNum, scheduleLastChangedBy, scheduleLastChangedTime, scheduleActive) VALUES (NEW.scheduleUid, NEW.sceduleStartTime, NEW.scheduleEndTime, NEW.scheduleDay, NEW.scheduleMonth, NEW.scheduleFrequency, NEW.umCalendarUid, NEW.scheduleClazzUid, NEW.scheduleMasterChangeSeqNum, NEW.scheduleLocalChangeSeqNum, NEW.scheduleLastChangedBy, NEW.scheduleLastChangedTime, NEW.scheduleActive) ON CONFLICT (scheduleUid) DO UPDATE SET sceduleStartTime = EXCLUDED.sceduleStartTime, scheduleEndTime = EXCLUDED.scheduleEndTime, scheduleDay = EXCLUDED.scheduleDay, scheduleMonth = EXCLUDED.scheduleMonth, scheduleFrequency = EXCLUDED.scheduleFrequency, umCalendarUid = EXCLUDED.umCalendarUid, scheduleClazzUid = EXCLUDED.scheduleClazzUid, scheduleMasterChangeSeqNum = EXCLUDED.scheduleMasterChangeSeqNum, scheduleLocalChangeSeqNum = EXCLUDED.scheduleLocalChangeSeqNum, scheduleLastChangedBy = EXCLUDED.scheduleLastChangedBy, scheduleLastChangedTime = EXCLUDED.scheduleLastChangedTime, scheduleActive = EXCLUDED.scheduleActive ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER schedule_remote_insert_trig INSTEAD OF INSERT ON Schedule_ReceiveView FOR EACH ROW EXECUTE PROCEDURE schedule_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS HolidayCalendarReplicate ( hcPk BIGINT NOT NULL, hcVersionId BIGINT NOT NULL DEFAULT 0, hcDestination BIGINT NOT NULL, hcPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (hcPk, hcDestination)) "
         _stmtList +=
@@ -1144,13 +1298,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_28_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (28, NEW.umCalendarUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_28_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_28_fn(); "
+            " CREATE TRIGGER ch_upd_28_trig AFTER UPDATE OR INSERT ON HolidayCalendar FOR EACH ROW EXECUTE PROCEDURE ch_upd_28_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_28_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (28, OLD.umCalendarUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_28_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_28_fn(); "
+            " CREATE TRIGGER ch_del_28_trig AFTER DELETE ON HolidayCalendar FOR EACH ROW EXECUTE PROCEDURE ch_del_28_fn(); "
         _stmtList +=
             "CREATE VIEW HolidayCalendar_ReceiveView AS  SELECT HolidayCalendar.*, HolidayCalendarReplicate.* FROM HolidayCalendar LEFT JOIN HolidayCalendarReplicate ON HolidayCalendarReplicate.hcPk = HolidayCalendar.umCalendarUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION holidaycalendar_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO HolidayCalendar(umCalendarUid, umCalendarName, umCalendarCategory, umCalendarActive, umCalendarMasterChangeSeqNum, umCalendarLocalChangeSeqNum, umCalendarLastChangedBy, umCalendarLct) VALUES (NEW.umCalendarUid, NEW.umCalendarName, NEW.umCalendarCategory, NEW.umCalendarActive, NEW.umCalendarMasterChangeSeqNum, NEW.umCalendarLocalChangeSeqNum, NEW.umCalendarLastChangedBy, NEW.umCalendarLct) ON CONFLICT (umCalendarUid) DO UPDATE SET umCalendarName = EXCLUDED.umCalendarName, umCalendarCategory = EXCLUDED.umCalendarCategory, umCalendarActive = EXCLUDED.umCalendarActive, umCalendarMasterChangeSeqNum = EXCLUDED.umCalendarMasterChangeSeqNum, umCalendarLocalChangeSeqNum = EXCLUDED.umCalendarLocalChangeSeqNum, umCalendarLastChangedBy = EXCLUDED.umCalendarLastChangedBy, umCalendarLct = EXCLUDED.umCalendarLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER holidaycalendar_remote_insert_trig INSTEAD OF INSERT ON HolidayCalendar_ReceiveView FOR EACH ROW EXECUTE PROCEDURE holidaycalendar_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS HolidayReplicate ( holidayPk BIGINT NOT NULL, holidayVersionId BIGINT NOT NULL DEFAULT 0, holidayDestination BIGINT NOT NULL, holidayPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (holidayPk, holidayDestination)) "
         _stmtList +=
@@ -1160,13 +1318,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_99_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (99, NEW.holUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_99_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_99_fn(); "
+            " CREATE TRIGGER ch_upd_99_trig AFTER UPDATE OR INSERT ON Holiday FOR EACH ROW EXECUTE PROCEDURE ch_upd_99_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_99_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (99, OLD.holUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_99_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_99_fn(); "
+            " CREATE TRIGGER ch_del_99_trig AFTER DELETE ON Holiday FOR EACH ROW EXECUTE PROCEDURE ch_del_99_fn(); "
         _stmtList +=
             "CREATE VIEW Holiday_ReceiveView AS  SELECT Holiday.*, HolidayReplicate.* FROM Holiday LEFT JOIN HolidayReplicate ON HolidayReplicate.holidayPk = Holiday.holUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION holiday_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO Holiday(holUid, holMasterCsn, holLocalCsn, holLastModBy, holLct, holActive, holHolidayCalendarUid, holStartTime, holEndTime, holName) VALUES (NEW.holUid, NEW.holMasterCsn, NEW.holLocalCsn, NEW.holLastModBy, NEW.holLct, NEW.holActive, NEW.holHolidayCalendarUid, NEW.holStartTime, NEW.holEndTime, NEW.holName) ON CONFLICT (holUid) DO UPDATE SET holMasterCsn = EXCLUDED.holMasterCsn, holLocalCsn = EXCLUDED.holLocalCsn, holLastModBy = EXCLUDED.holLastModBy, holLct = EXCLUDED.holLct, holActive = EXCLUDED.holActive, holHolidayCalendarUid = EXCLUDED.holHolidayCalendarUid, holStartTime = EXCLUDED.holStartTime, holEndTime = EXCLUDED.holEndTime, holName = EXCLUDED.holName ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER holiday_remote_insert_trig INSTEAD OF INSERT ON Holiday_ReceiveView FOR EACH ROW EXECUTE PROCEDURE holiday_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS PersonReplicate ( personPk BIGINT NOT NULL, personVersionId BIGINT NOT NULL DEFAULT 0, personDestination BIGINT NOT NULL, personPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (personPk, personDestination)) "
         _stmtList +=
@@ -1176,11 +1338,11 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_9_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (9, NEW.personUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_9_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_9_fn(); "
+            " CREATE TRIGGER ch_upd_9_trig AFTER UPDATE OR INSERT ON Person FOR EACH ROW EXECUTE PROCEDURE ch_upd_9_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_9_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (9, OLD.personUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_9_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_9_fn(); "
+            " CREATE TRIGGER ch_del_9_trig AFTER DELETE ON Person FOR EACH ROW EXECUTE PROCEDURE ch_del_9_fn(); "
         _stmtList +=
             "CREATE VIEW Person_ReceiveView AS  SELECT Person.*, PersonReplicate.* FROM Person LEFT JOIN PersonReplicate ON PersonReplicate.personPk = Person.personUid "
         _stmtList +=
@@ -1196,11 +1358,11 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_6_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (6, NEW.clazzUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_6_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_6_fn(); "
+            " CREATE TRIGGER ch_upd_6_trig AFTER UPDATE OR INSERT ON Clazz FOR EACH ROW EXECUTE PROCEDURE ch_upd_6_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_6_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (6, OLD.clazzUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_6_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_6_fn(); "
+            " CREATE TRIGGER ch_del_6_trig AFTER DELETE ON Clazz FOR EACH ROW EXECUTE PROCEDURE ch_del_6_fn(); "
         _stmtList +=
             "CREATE VIEW Clazz_ReceiveView AS  SELECT Clazz.*, ClazzReplicate.* FROM Clazz LEFT JOIN ClazzReplicate ON ClazzReplicate.clazzPk = Clazz.clazzUid "
         _stmtList +=
@@ -1216,11 +1378,11 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_65_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (65, NEW.clazzEnrolmentUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_65_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_65_fn(); "
+            " CREATE TRIGGER ch_upd_65_trig AFTER UPDATE OR INSERT ON ClazzEnrolment FOR EACH ROW EXECUTE PROCEDURE ch_upd_65_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_65_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (65, OLD.clazzEnrolmentUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_65_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_65_fn(); "
+            " CREATE TRIGGER ch_del_65_trig AFTER DELETE ON ClazzEnrolment FOR EACH ROW EXECUTE PROCEDURE ch_del_65_fn(); "
         _stmtList +=
             "CREATE VIEW ClazzEnrolment_ReceiveView AS  SELECT ClazzEnrolment.*, ClazzEnrolmentReplicate.* FROM ClazzEnrolment LEFT JOIN ClazzEnrolmentReplicate ON ClazzEnrolmentReplicate.cePk = ClazzEnrolment.clazzEnrolmentUid "
         _stmtList +=
@@ -1236,13 +1398,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_410_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (410, NEW.leavingReasonUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_410_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_410_fn(); "
+            " CREATE TRIGGER ch_upd_410_trig AFTER UPDATE OR INSERT ON LeavingReason FOR EACH ROW EXECUTE PROCEDURE ch_upd_410_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_410_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (410, OLD.leavingReasonUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_410_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_410_fn(); "
+            " CREATE TRIGGER ch_del_410_trig AFTER DELETE ON LeavingReason FOR EACH ROW EXECUTE PROCEDURE ch_del_410_fn(); "
         _stmtList +=
             "CREATE VIEW LeavingReason_ReceiveView AS  SELECT LeavingReason.*, LeavingReasonReplicate.* FROM LeavingReason LEFT JOIN LeavingReasonReplicate ON LeavingReasonReplicate.lrPk = LeavingReason.leavingReasonUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION leavingreason_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO LeavingReason(leavingReasonUid, leavingReasonTitle, leavingReasonMCSN, leavingReasonCSN, leavingReasonLCB, leavingReasonLct) VALUES (NEW.leavingReasonUid, NEW.leavingReasonTitle, NEW.leavingReasonMCSN, NEW.leavingReasonCSN, NEW.leavingReasonLCB, NEW.leavingReasonLct) ON CONFLICT (leavingReasonUid) DO UPDATE SET leavingReasonTitle = EXCLUDED.leavingReasonTitle, leavingReasonMCSN = EXCLUDED.leavingReasonMCSN, leavingReasonCSN = EXCLUDED.leavingReasonCSN, leavingReasonLCB = EXCLUDED.leavingReasonLCB, leavingReasonLct = EXCLUDED.leavingReasonLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER leavingreason_remote_insert_trig INSTEAD OF INSERT ON LeavingReason_ReceiveView FOR EACH ROW EXECUTE PROCEDURE leavingreason_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS ContentEntryReplicate ( cePk BIGINT NOT NULL, ceVersionId BIGINT NOT NULL DEFAULT 0, ceDestination BIGINT NOT NULL, cePending BOOL NOT NULL DEFAULT true, PRIMARY KEY (cePk, ceDestination)) "
         _stmtList +=
@@ -1252,11 +1418,11 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_42_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (42, NEW.contentEntryUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_42_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_42_fn(); "
+            " CREATE TRIGGER ch_upd_42_trig AFTER UPDATE OR INSERT ON ContentEntry FOR EACH ROW EXECUTE PROCEDURE ch_upd_42_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_42_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (42, OLD.contentEntryUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_42_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_42_fn(); "
+            " CREATE TRIGGER ch_del_42_trig AFTER DELETE ON ContentEntry FOR EACH ROW EXECUTE PROCEDURE ch_del_42_fn(); "
         _stmtList +=
             "CREATE VIEW ContentEntry_ReceiveView AS  SELECT ContentEntry.*, ContentEntryReplicate.* FROM ContentEntry LEFT JOIN ContentEntryReplicate ON ContentEntryReplicate.cePk = ContentEntry.contentEntryUid "
         _stmtList +=
@@ -1272,13 +1438,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_3_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (3, NEW.ceccjUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_3_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_3_fn(); "
+            " CREATE TRIGGER ch_upd_3_trig AFTER UPDATE OR INSERT ON ContentEntryContentCategoryJoin FOR EACH ROW EXECUTE PROCEDURE ch_upd_3_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_3_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (3, OLD.ceccjUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_3_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_3_fn(); "
+            " CREATE TRIGGER ch_del_3_trig AFTER DELETE ON ContentEntryContentCategoryJoin FOR EACH ROW EXECUTE PROCEDURE ch_del_3_fn(); "
         _stmtList +=
             "CREATE VIEW ContentEntryContentCategoryJoin_ReceiveView AS  SELECT ContentEntryContentCategoryJoin.*, ContentEntryContentCategoryJoinReplicate.* FROM ContentEntryContentCategoryJoin LEFT JOIN ContentEntryContentCategoryJoinReplicate ON ContentEntryContentCategoryJoinReplicate.ceccjPk = ContentEntryContentCategoryJoin.ceccjUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION contententrycontentcategoryjoin_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ContentEntryContentCategoryJoin(ceccjUid, ceccjContentEntryUid, ceccjContentCategoryUid, ceccjLocalChangeSeqNum, ceccjMasterChangeSeqNum, ceccjLastChangedBy, ceccjLct) VALUES (NEW.ceccjUid, NEW.ceccjContentEntryUid, NEW.ceccjContentCategoryUid, NEW.ceccjLocalChangeSeqNum, NEW.ceccjMasterChangeSeqNum, NEW.ceccjLastChangedBy, NEW.ceccjLct) ON CONFLICT (ceccjUid) DO UPDATE SET ceccjContentEntryUid = EXCLUDED.ceccjContentEntryUid, ceccjContentCategoryUid = EXCLUDED.ceccjContentCategoryUid, ceccjLocalChangeSeqNum = EXCLUDED.ceccjLocalChangeSeqNum, ceccjMasterChangeSeqNum = EXCLUDED.ceccjMasterChangeSeqNum, ceccjLastChangedBy = EXCLUDED.ceccjLastChangedBy, ceccjLct = EXCLUDED.ceccjLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER contententrycontentcategoryjoin_remote_insert_trig INSTEAD OF INSERT ON ContentEntryContentCategoryJoin_ReceiveView FOR EACH ROW EXECUTE PROCEDURE contententrycontentcategoryjoin_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS ContentEntryParentChildJoinReplicate ( cepcjPk BIGINT NOT NULL, cepcjVersionId BIGINT NOT NULL DEFAULT 0, cepcjDestination BIGINT NOT NULL, cepcjPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (cepcjPk, cepcjDestination)) "
         _stmtList +=
@@ -1288,11 +1458,11 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_7_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (7, NEW.cepcjUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_7_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_7_fn(); "
+            " CREATE TRIGGER ch_upd_7_trig AFTER UPDATE OR INSERT ON ContentEntryParentChildJoin FOR EACH ROW EXECUTE PROCEDURE ch_upd_7_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_7_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (7, OLD.cepcjUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_7_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_7_fn(); "
+            " CREATE TRIGGER ch_del_7_trig AFTER DELETE ON ContentEntryParentChildJoin FOR EACH ROW EXECUTE PROCEDURE ch_del_7_fn(); "
         _stmtList +=
             "CREATE VIEW ContentEntryParentChildJoin_ReceiveView AS  SELECT ContentEntryParentChildJoin.*, ContentEntryParentChildJoinReplicate.* FROM ContentEntryParentChildJoin LEFT JOIN ContentEntryParentChildJoinReplicate ON ContentEntryParentChildJoinReplicate.cepcjPk = ContentEntryParentChildJoin.cepcjUid "
         _stmtList +=
@@ -1308,13 +1478,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_8_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (8, NEW.cerejUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_8_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_8_fn(); "
+            " CREATE TRIGGER ch_upd_8_trig AFTER UPDATE OR INSERT ON ContentEntryRelatedEntryJoin FOR EACH ROW EXECUTE PROCEDURE ch_upd_8_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_8_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (8, OLD.cerejUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_8_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_8_fn(); "
+            " CREATE TRIGGER ch_del_8_trig AFTER DELETE ON ContentEntryRelatedEntryJoin FOR EACH ROW EXECUTE PROCEDURE ch_del_8_fn(); "
         _stmtList +=
             "CREATE VIEW ContentEntryRelatedEntryJoin_ReceiveView AS  SELECT ContentEntryRelatedEntryJoin.*, ContentEntryRelatedEntryJoinReplicate.* FROM ContentEntryRelatedEntryJoin LEFT JOIN ContentEntryRelatedEntryJoinReplicate ON ContentEntryRelatedEntryJoinReplicate.cerejPk = ContentEntryRelatedEntryJoin.cerejUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION contententryrelatedentryjoin_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ContentEntryRelatedEntryJoin(cerejUid, cerejContentEntryUid, cerejRelatedEntryUid, cerejLastChangedBy, relType, comment, cerejRelLanguageUid, cerejLocalChangeSeqNum, cerejMasterChangeSeqNum, cerejLct) VALUES (NEW.cerejUid, NEW.cerejContentEntryUid, NEW.cerejRelatedEntryUid, NEW.cerejLastChangedBy, NEW.relType, NEW.comment, NEW.cerejRelLanguageUid, NEW.cerejLocalChangeSeqNum, NEW.cerejMasterChangeSeqNum, NEW.cerejLct) ON CONFLICT (cerejUid) DO UPDATE SET cerejContentEntryUid = EXCLUDED.cerejContentEntryUid, cerejRelatedEntryUid = EXCLUDED.cerejRelatedEntryUid, cerejLastChangedBy = EXCLUDED.cerejLastChangedBy, relType = EXCLUDED.relType, comment = EXCLUDED.comment, cerejRelLanguageUid = EXCLUDED.cerejRelLanguageUid, cerejLocalChangeSeqNum = EXCLUDED.cerejLocalChangeSeqNum, cerejMasterChangeSeqNum = EXCLUDED.cerejMasterChangeSeqNum, cerejLct = EXCLUDED.cerejLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER contententryrelatedentryjoin_remote_insert_trig INSTEAD OF INSERT ON ContentEntryRelatedEntryJoin_ReceiveView FOR EACH ROW EXECUTE PROCEDURE contententryrelatedentryjoin_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS ContentCategorySchemaReplicate ( ccsPk BIGINT NOT NULL, ccsVersionId BIGINT NOT NULL DEFAULT 0, ccsDestination BIGINT NOT NULL, ccsPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (ccsPk, ccsDestination)) "
         _stmtList +=
@@ -1324,13 +1498,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_2_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (2, NEW.contentCategorySchemaUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_2_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_2_fn(); "
+            " CREATE TRIGGER ch_upd_2_trig AFTER UPDATE OR INSERT ON ContentCategorySchema FOR EACH ROW EXECUTE PROCEDURE ch_upd_2_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_2_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (2, OLD.contentCategorySchemaUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_2_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_2_fn(); "
+            " CREATE TRIGGER ch_del_2_trig AFTER DELETE ON ContentCategorySchema FOR EACH ROW EXECUTE PROCEDURE ch_del_2_fn(); "
         _stmtList +=
             "CREATE VIEW ContentCategorySchema_ReceiveView AS  SELECT ContentCategorySchema.*, ContentCategorySchemaReplicate.* FROM ContentCategorySchema LEFT JOIN ContentCategorySchemaReplicate ON ContentCategorySchemaReplicate.ccsPk = ContentCategorySchema.contentCategorySchemaUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION contentcategoryschema_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ContentCategorySchema(contentCategorySchemaUid, schemaName, schemaUrl, contentCategorySchemaLocalChangeSeqNum, contentCategorySchemaMasterChangeSeqNum, contentCategorySchemaLastChangedBy, contentCategorySchemaLct) VALUES (NEW.contentCategorySchemaUid, NEW.schemaName, NEW.schemaUrl, NEW.contentCategorySchemaLocalChangeSeqNum, NEW.contentCategorySchemaMasterChangeSeqNum, NEW.contentCategorySchemaLastChangedBy, NEW.contentCategorySchemaLct) ON CONFLICT (contentCategorySchemaUid) DO UPDATE SET schemaName = EXCLUDED.schemaName, schemaUrl = EXCLUDED.schemaUrl, contentCategorySchemaLocalChangeSeqNum = EXCLUDED.contentCategorySchemaLocalChangeSeqNum, contentCategorySchemaMasterChangeSeqNum = EXCLUDED.contentCategorySchemaMasterChangeSeqNum, contentCategorySchemaLastChangedBy = EXCLUDED.contentCategorySchemaLastChangedBy, contentCategorySchemaLct = EXCLUDED.contentCategorySchemaLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER contentcategoryschema_remote_insert_trig INSTEAD OF INSERT ON ContentCategorySchema_ReceiveView FOR EACH ROW EXECUTE PROCEDURE contentcategoryschema_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS ContentCategoryReplicate ( ccPk BIGINT NOT NULL, ccVersionId BIGINT NOT NULL DEFAULT 0, ccDestination BIGINT NOT NULL, ccPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (ccPk, ccDestination)) "
         _stmtList +=
@@ -1340,13 +1518,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_1_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (1, NEW.contentCategoryUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_1_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_1_fn(); "
+            " CREATE TRIGGER ch_upd_1_trig AFTER UPDATE OR INSERT ON ContentCategory FOR EACH ROW EXECUTE PROCEDURE ch_upd_1_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_1_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (1, OLD.contentCategoryUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_1_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_1_fn(); "
+            " CREATE TRIGGER ch_del_1_trig AFTER DELETE ON ContentCategory FOR EACH ROW EXECUTE PROCEDURE ch_del_1_fn(); "
         _stmtList +=
             "CREATE VIEW ContentCategory_ReceiveView AS  SELECT ContentCategory.*, ContentCategoryReplicate.* FROM ContentCategory LEFT JOIN ContentCategoryReplicate ON ContentCategoryReplicate.ccPk = ContentCategory.contentCategoryUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION contentcategory_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ContentCategory(contentCategoryUid, ctnCatContentCategorySchemaUid, name, contentCategoryLocalChangeSeqNum, contentCategoryMasterChangeSeqNum, contentCategoryLastChangedBy, contentCategoryLct) VALUES (NEW.contentCategoryUid, NEW.ctnCatContentCategorySchemaUid, NEW.name, NEW.contentCategoryLocalChangeSeqNum, NEW.contentCategoryMasterChangeSeqNum, NEW.contentCategoryLastChangedBy, NEW.contentCategoryLct) ON CONFLICT (contentCategoryUid) DO UPDATE SET ctnCatContentCategorySchemaUid = EXCLUDED.ctnCatContentCategorySchemaUid, name = EXCLUDED.name, contentCategoryLocalChangeSeqNum = EXCLUDED.contentCategoryLocalChangeSeqNum, contentCategoryMasterChangeSeqNum = EXCLUDED.contentCategoryMasterChangeSeqNum, contentCategoryLastChangedBy = EXCLUDED.contentCategoryLastChangedBy, contentCategoryLct = EXCLUDED.contentCategoryLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER contentcategory_remote_insert_trig INSTEAD OF INSERT ON ContentCategory_ReceiveView FOR EACH ROW EXECUTE PROCEDURE contentcategory_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS LanguageReplicate ( languagePk BIGINT NOT NULL, languageVersionId BIGINT NOT NULL DEFAULT 0, languageDestination BIGINT NOT NULL, languagePending BOOL NOT NULL DEFAULT true, PRIMARY KEY (languagePk, languageDestination)) "
         _stmtList +=
@@ -1356,13 +1538,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_13_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (13, NEW.langUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_13_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_13_fn(); "
+            " CREATE TRIGGER ch_upd_13_trig AFTER UPDATE OR INSERT ON Language FOR EACH ROW EXECUTE PROCEDURE ch_upd_13_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_13_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (13, OLD.langUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_13_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_13_fn(); "
+            " CREATE TRIGGER ch_del_13_trig AFTER DELETE ON Language FOR EACH ROW EXECUTE PROCEDURE ch_del_13_fn(); "
         _stmtList +=
             "CREATE VIEW Language_ReceiveView AS  SELECT Language.*, LanguageReplicate.* FROM Language LEFT JOIN LanguageReplicate ON LanguageReplicate.languagePk = Language.langUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION language_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO Language(langUid, name, iso_639_1_standard, iso_639_2_standard, iso_639_3_standard, Language_Type, languageActive, langLocalChangeSeqNum, langMasterChangeSeqNum, langLastChangedBy, langLct) VALUES (NEW.langUid, NEW.name, NEW.iso_639_1_standard, NEW.iso_639_2_standard, NEW.iso_639_3_standard, NEW.Language_Type, NEW.languageActive, NEW.langLocalChangeSeqNum, NEW.langMasterChangeSeqNum, NEW.langLastChangedBy, NEW.langLct) ON CONFLICT (langUid) DO UPDATE SET name = EXCLUDED.name, iso_639_1_standard = EXCLUDED.iso_639_1_standard, iso_639_2_standard = EXCLUDED.iso_639_2_standard, iso_639_3_standard = EXCLUDED.iso_639_3_standard, Language_Type = EXCLUDED.Language_Type, languageActive = EXCLUDED.languageActive, langLocalChangeSeqNum = EXCLUDED.langLocalChangeSeqNum, langMasterChangeSeqNum = EXCLUDED.langMasterChangeSeqNum, langLastChangedBy = EXCLUDED.langLastChangedBy, langLct = EXCLUDED.langLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER language_remote_insert_trig INSTEAD OF INSERT ON Language_ReceiveView FOR EACH ROW EXECUTE PROCEDURE language_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS LanguageVariantReplicate ( lvPk BIGINT NOT NULL, lvVersionId BIGINT NOT NULL DEFAULT 0, lvDestination BIGINT NOT NULL, lvPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (lvPk, lvDestination)) "
         _stmtList +=
@@ -1372,13 +1558,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_10_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (10, NEW.langVariantUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_10_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_10_fn(); "
+            " CREATE TRIGGER ch_upd_10_trig AFTER UPDATE OR INSERT ON LanguageVariant FOR EACH ROW EXECUTE PROCEDURE ch_upd_10_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_10_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (10, OLD.langVariantUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_10_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_10_fn(); "
+            " CREATE TRIGGER ch_del_10_trig AFTER DELETE ON LanguageVariant FOR EACH ROW EXECUTE PROCEDURE ch_del_10_fn(); "
         _stmtList +=
             "CREATE VIEW LanguageVariant_ReceiveView AS  SELECT LanguageVariant.*, LanguageVariantReplicate.* FROM LanguageVariant LEFT JOIN LanguageVariantReplicate ON LanguageVariantReplicate.lvPk = LanguageVariant.langVariantUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION languagevariant_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO LanguageVariant(langVariantUid, langUid, countryCode, name, langVariantLocalChangeSeqNum, langVariantMasterChangeSeqNum, langVariantLastChangedBy, langVariantLct) VALUES (NEW.langVariantUid, NEW.langUid, NEW.countryCode, NEW.name, NEW.langVariantLocalChangeSeqNum, NEW.langVariantMasterChangeSeqNum, NEW.langVariantLastChangedBy, NEW.langVariantLct) ON CONFLICT (langVariantUid) DO UPDATE SET langUid = EXCLUDED.langUid, countryCode = EXCLUDED.countryCode, name = EXCLUDED.name, langVariantLocalChangeSeqNum = EXCLUDED.langVariantLocalChangeSeqNum, langVariantMasterChangeSeqNum = EXCLUDED.langVariantMasterChangeSeqNum, langVariantLastChangedBy = EXCLUDED.langVariantLastChangedBy, langVariantLct = EXCLUDED.langVariantLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER languagevariant_remote_insert_trig INSTEAD OF INSERT ON LanguageVariant_ReceiveView FOR EACH ROW EXECUTE PROCEDURE languagevariant_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS PersonGroupReplicate ( pgPk BIGINT NOT NULL, pgVersionId BIGINT NOT NULL DEFAULT 0, pgDestination BIGINT NOT NULL, pgPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (pgPk, pgDestination)) "
         _stmtList +=
@@ -1388,11 +1578,11 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_43_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (43, NEW.groupUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_43_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_43_fn(); "
+            " CREATE TRIGGER ch_upd_43_trig AFTER UPDATE OR INSERT ON PersonGroup FOR EACH ROW EXECUTE PROCEDURE ch_upd_43_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_43_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (43, OLD.groupUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_43_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_43_fn(); "
+            " CREATE TRIGGER ch_del_43_trig AFTER DELETE ON PersonGroup FOR EACH ROW EXECUTE PROCEDURE ch_del_43_fn(); "
         _stmtList +=
             "CREATE VIEW PersonGroup_ReceiveView AS  SELECT PersonGroup.*, PersonGroupReplicate.* FROM PersonGroup LEFT JOIN PersonGroupReplicate ON PersonGroupReplicate.pgPk = PersonGroup.groupUid "
         _stmtList +=
@@ -1408,11 +1598,11 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_44_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (44, NEW.groupMemberUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_44_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_44_fn(); "
+            " CREATE TRIGGER ch_upd_44_trig AFTER UPDATE OR INSERT ON PersonGroupMember FOR EACH ROW EXECUTE PROCEDURE ch_upd_44_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_44_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (44, OLD.groupMemberUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_44_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_44_fn(); "
+            " CREATE TRIGGER ch_del_44_trig AFTER DELETE ON PersonGroupMember FOR EACH ROW EXECUTE PROCEDURE ch_del_44_fn(); "
         _stmtList +=
             "CREATE VIEW PersonGroupMember_ReceiveView AS  SELECT PersonGroupMember.*, PersonGroupMemberReplicate.* FROM PersonGroupMember LEFT JOIN PersonGroupMemberReplicate ON PersonGroupMemberReplicate.pgmPk = PersonGroupMember.groupMemberUid "
         _stmtList +=
@@ -1428,13 +1618,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_50_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (50, NEW.personPictureUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_50_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_50_fn(); "
+            " CREATE TRIGGER ch_upd_50_trig AFTER UPDATE OR INSERT ON PersonPicture FOR EACH ROW EXECUTE PROCEDURE ch_upd_50_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_50_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (50, OLD.personPictureUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_50_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_50_fn(); "
+            " CREATE TRIGGER ch_del_50_trig AFTER DELETE ON PersonPicture FOR EACH ROW EXECUTE PROCEDURE ch_del_50_fn(); "
         _stmtList +=
             "CREATE VIEW PersonPicture_ReceiveView AS  SELECT PersonPicture.*, PersonPictureReplicate.* FROM PersonPicture LEFT JOIN PersonPictureReplicate ON PersonPictureReplicate.ppPk = PersonPicture.personPictureUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION personpicture_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO PersonPicture(personPictureUid, personPicturePersonUid, personPictureMasterCsn, personPictureLocalCsn, personPictureLastChangedBy, personPictureLct, personPictureUri, personPictureMd5, fileSize, picTimestamp, mimeType, personPictureActive) VALUES (NEW.personPictureUid, NEW.personPicturePersonUid, NEW.personPictureMasterCsn, NEW.personPictureLocalCsn, NEW.personPictureLastChangedBy, NEW.personPictureLct, NEW.personPictureUri, NEW.personPictureMd5, NEW.fileSize, NEW.picTimestamp, NEW.mimeType, NEW.personPictureActive) ON CONFLICT (personPictureUid) DO UPDATE SET personPicturePersonUid = EXCLUDED.personPicturePersonUid, personPictureMasterCsn = EXCLUDED.personPictureMasterCsn, personPictureLocalCsn = EXCLUDED.personPictureLocalCsn, personPictureLastChangedBy = EXCLUDED.personPictureLastChangedBy, personPictureLct = EXCLUDED.personPictureLct, personPictureUri = EXCLUDED.personPictureUri, personPictureMd5 = EXCLUDED.personPictureMd5, fileSize = EXCLUDED.fileSize, picTimestamp = EXCLUDED.picTimestamp, mimeType = EXCLUDED.mimeType, personPictureActive = EXCLUDED.personPictureActive ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER personpicture_remote_insert_trig INSTEAD OF INSERT ON PersonPicture_ReceiveView FOR EACH ROW EXECUTE PROCEDURE personpicture_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS ContainerReplicate ( containerPk BIGINT NOT NULL, containerVersionId BIGINT NOT NULL DEFAULT 0, containerDestination BIGINT NOT NULL, containerPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (containerPk, containerDestination)) "
         _stmtList +=
@@ -1444,13 +1638,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_51_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (51, NEW.containerUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_51_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_51_fn(); "
+            " CREATE TRIGGER ch_upd_51_trig AFTER UPDATE OR INSERT ON Container FOR EACH ROW EXECUTE PROCEDURE ch_upd_51_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_51_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (51, OLD.containerUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_51_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_51_fn(); "
+            " CREATE TRIGGER ch_del_51_trig AFTER DELETE ON Container FOR EACH ROW EXECUTE PROCEDURE ch_del_51_fn(); "
         _stmtList +=
             "CREATE VIEW Container_ReceiveView AS  SELECT Container.*, ContainerReplicate.* FROM Container LEFT JOIN ContainerReplicate ON ContainerReplicate.containerPk = Container.containerUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION container_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO Container(containerUid, cntLocalCsn, cntMasterCsn, cntLastModBy, cntLct, fileSize, containerContentEntryUid, cntLastModified, mimeType, remarks, mobileOptimized, cntNumEntries) VALUES (NEW.containerUid, NEW.cntLocalCsn, NEW.cntMasterCsn, NEW.cntLastModBy, NEW.cntLct, NEW.fileSize, NEW.containerContentEntryUid, NEW.cntLastModified, NEW.mimeType, NEW.remarks, NEW.mobileOptimized, NEW.cntNumEntries) ON CONFLICT (containerUid) DO UPDATE SET cntLocalCsn = EXCLUDED.cntLocalCsn, cntMasterCsn = EXCLUDED.cntMasterCsn, cntLastModBy = EXCLUDED.cntLastModBy, cntLct = EXCLUDED.cntLct, fileSize = EXCLUDED.fileSize, containerContentEntryUid = EXCLUDED.containerContentEntryUid, cntLastModified = EXCLUDED.cntLastModified, mimeType = EXCLUDED.mimeType, remarks = EXCLUDED.remarks, mobileOptimized = EXCLUDED.mobileOptimized, cntNumEntries = EXCLUDED.cntNumEntries ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER container_remote_insert_trig INSTEAD OF INSERT ON Container_ReceiveView FOR EACH ROW EXECUTE PROCEDURE container_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS VerbEntityReplicate ( vePk BIGINT NOT NULL, veVersionId BIGINT NOT NULL DEFAULT 0, veDestination BIGINT NOT NULL, vePending BOOL NOT NULL DEFAULT true, PRIMARY KEY (vePk, veDestination)) "
         _stmtList +=
@@ -1460,13 +1658,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_62_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (62, NEW.verbUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_62_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_62_fn(); "
+            " CREATE TRIGGER ch_upd_62_trig AFTER UPDATE OR INSERT ON VerbEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_62_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_62_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (62, OLD.verbUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_62_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_62_fn(); "
+            " CREATE TRIGGER ch_del_62_trig AFTER DELETE ON VerbEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_62_fn(); "
         _stmtList +=
             "CREATE VIEW VerbEntity_ReceiveView AS  SELECT VerbEntity.*, VerbEntityReplicate.* FROM VerbEntity LEFT JOIN VerbEntityReplicate ON VerbEntityReplicate.vePk = VerbEntity.verbUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION verbentity_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO VerbEntity(verbUid, urlId, verbInActive, verbMasterChangeSeqNum, verbLocalChangeSeqNum, verbLastChangedBy, verbLct) VALUES (NEW.verbUid, NEW.urlId, NEW.verbInActive, NEW.verbMasterChangeSeqNum, NEW.verbLocalChangeSeqNum, NEW.verbLastChangedBy, NEW.verbLct) ON CONFLICT (verbUid) DO UPDATE SET urlId = EXCLUDED.urlId, verbInActive = EXCLUDED.verbInActive, verbMasterChangeSeqNum = EXCLUDED.verbMasterChangeSeqNum, verbLocalChangeSeqNum = EXCLUDED.verbLocalChangeSeqNum, verbLastChangedBy = EXCLUDED.verbLastChangedBy, verbLct = EXCLUDED.verbLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER verbentity_remote_insert_trig INSTEAD OF INSERT ON VerbEntity_ReceiveView FOR EACH ROW EXECUTE PROCEDURE verbentity_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS XObjectEntityReplicate ( xoePk BIGINT NOT NULL, xoeVersionId BIGINT NOT NULL DEFAULT 0, xoeDestination BIGINT NOT NULL, xoePending BOOL NOT NULL DEFAULT true, PRIMARY KEY (xoePk, xoeDestination)) "
         _stmtList +=
@@ -1476,13 +1678,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_64_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (64, NEW.xObjectUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_64_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_64_fn(); "
+            " CREATE TRIGGER ch_upd_64_trig AFTER UPDATE OR INSERT ON XObjectEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_64_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_64_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (64, OLD.xObjectUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_64_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_64_fn(); "
+            " CREATE TRIGGER ch_del_64_trig AFTER DELETE ON XObjectEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_64_fn(); "
         _stmtList +=
             "CREATE VIEW XObjectEntity_ReceiveView AS  SELECT XObjectEntity.*, XObjectEntityReplicate.* FROM XObjectEntity LEFT JOIN XObjectEntityReplicate ON XObjectEntityReplicate.xoePk = XObjectEntity.xObjectUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION xobjectentity_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO XObjectEntity(xObjectUid, objectType, objectId, definitionType, interactionType, correctResponsePattern, objectContentEntryUid, xObjectMasterChangeSeqNum, xObjectocalChangeSeqNum, xObjectLastChangedBy, xObjectLct) VALUES (NEW.xObjectUid, NEW.objectType, NEW.objectId, NEW.definitionType, NEW.interactionType, NEW.correctResponsePattern, NEW.objectContentEntryUid, NEW.xObjectMasterChangeSeqNum, NEW.xObjectocalChangeSeqNum, NEW.xObjectLastChangedBy, NEW.xObjectLct) ON CONFLICT (xObjectUid) DO UPDATE SET objectType = EXCLUDED.objectType, objectId = EXCLUDED.objectId, definitionType = EXCLUDED.definitionType, interactionType = EXCLUDED.interactionType, correctResponsePattern = EXCLUDED.correctResponsePattern, objectContentEntryUid = EXCLUDED.objectContentEntryUid, xObjectMasterChangeSeqNum = EXCLUDED.xObjectMasterChangeSeqNum, xObjectocalChangeSeqNum = EXCLUDED.xObjectocalChangeSeqNum, xObjectLastChangedBy = EXCLUDED.xObjectLastChangedBy, xObjectLct = EXCLUDED.xObjectLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER xobjectentity_remote_insert_trig INSTEAD OF INSERT ON XObjectEntity_ReceiveView FOR EACH ROW EXECUTE PROCEDURE xobjectentity_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS StatementEntityReplicate ( sePk BIGINT NOT NULL, seVersionId BIGINT NOT NULL DEFAULT 0, seDestination BIGINT NOT NULL, sePending BOOL NOT NULL DEFAULT true, PRIMARY KEY (sePk, seDestination)) "
         _stmtList +=
@@ -1492,13 +1698,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_60_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (60, NEW.statementUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_60_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_60_fn(); "
+            " CREATE TRIGGER ch_upd_60_trig AFTER UPDATE OR INSERT ON StatementEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_60_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_60_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (60, OLD.statementUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_60_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_60_fn(); "
+            " CREATE TRIGGER ch_del_60_trig AFTER DELETE ON StatementEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_60_fn(); "
         _stmtList +=
             "CREATE VIEW StatementEntity_ReceiveView AS  SELECT StatementEntity.*, StatementEntityReplicate.* FROM StatementEntity LEFT JOIN StatementEntityReplicate ON StatementEntityReplicate.sePk = StatementEntity.statementUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION statemententity_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO StatementEntity(statementUid, statementId, statementPersonUid, statementVerbUid, xObjectUid, subStatementActorUid, substatementVerbUid, subStatementObjectUid, agentUid, instructorUid, authorityUid, teamUid, resultCompletion, resultSuccess, resultScoreScaled, resultScoreRaw, resultScoreMin, resultScoreMax, resultDuration, resultResponse, timestamp, stored, contextRegistration, contextPlatform, contextStatementId, fullStatement, statementMasterChangeSeqNum, statementLocalChangeSeqNum, statementLastChangedBy, statementLct, extensionProgress, contentEntryRoot, statementContentEntryUid, statementLearnerGroupUid, statementClazzUid) VALUES (NEW.statementUid, NEW.statementId, NEW.statementPersonUid, NEW.statementVerbUid, NEW.xObjectUid, NEW.subStatementActorUid, NEW.substatementVerbUid, NEW.subStatementObjectUid, NEW.agentUid, NEW.instructorUid, NEW.authorityUid, NEW.teamUid, NEW.resultCompletion, NEW.resultSuccess, NEW.resultScoreScaled, NEW.resultScoreRaw, NEW.resultScoreMin, NEW.resultScoreMax, NEW.resultDuration, NEW.resultResponse, NEW.timestamp, NEW.stored, NEW.contextRegistration, NEW.contextPlatform, NEW.contextStatementId, NEW.fullStatement, NEW.statementMasterChangeSeqNum, NEW.statementLocalChangeSeqNum, NEW.statementLastChangedBy, NEW.statementLct, NEW.extensionProgress, NEW.contentEntryRoot, NEW.statementContentEntryUid, NEW.statementLearnerGroupUid, NEW.statementClazzUid) ON CONFLICT (statementUid) DO UPDATE SET statementId = EXCLUDED.statementId, statementPersonUid = EXCLUDED.statementPersonUid, statementVerbUid = EXCLUDED.statementVerbUid, xObjectUid = EXCLUDED.xObjectUid, subStatementActorUid = EXCLUDED.subStatementActorUid, substatementVerbUid = EXCLUDED.substatementVerbUid, subStatementObjectUid = EXCLUDED.subStatementObjectUid, agentUid = EXCLUDED.agentUid, instructorUid = EXCLUDED.instructorUid, authorityUid = EXCLUDED.authorityUid, teamUid = EXCLUDED.teamUid, resultCompletion = EXCLUDED.resultCompletion, resultSuccess = EXCLUDED.resultSuccess, resultScoreScaled = EXCLUDED.resultScoreScaled, resultScoreRaw = EXCLUDED.resultScoreRaw, resultScoreMin = EXCLUDED.resultScoreMin, resultScoreMax = EXCLUDED.resultScoreMax, resultDuration = EXCLUDED.resultDuration, resultResponse = EXCLUDED.resultResponse, timestamp = EXCLUDED.timestamp, stored = EXCLUDED.stored, contextRegistration = EXCLUDED.contextRegistration, contextPlatform = EXCLUDED.contextPlatform, contextStatementId = EXCLUDED.contextStatementId, fullStatement = EXCLUDED.fullStatement, statementMasterChangeSeqNum = EXCLUDED.statementMasterChangeSeqNum, statementLocalChangeSeqNum = EXCLUDED.statementLocalChangeSeqNum, statementLastChangedBy = EXCLUDED.statementLastChangedBy, statementLct = EXCLUDED.statementLct, extensionProgress = EXCLUDED.extensionProgress, contentEntryRoot = EXCLUDED.contentEntryRoot, statementContentEntryUid = EXCLUDED.statementContentEntryUid, statementLearnerGroupUid = EXCLUDED.statementLearnerGroupUid, statementClazzUid = EXCLUDED.statementClazzUid ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER statemententity_remote_insert_trig INSTEAD OF INSERT ON StatementEntity_ReceiveView FOR EACH ROW EXECUTE PROCEDURE statemententity_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoinReplicate ( cxosjPk BIGINT NOT NULL, cxosjVersionId BIGINT NOT NULL DEFAULT 0, cxosjDestination BIGINT NOT NULL, cxosjPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (cxosjPk, cxosjDestination)) "
         _stmtList +=
@@ -1508,13 +1718,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_66_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (66, NEW.contextXObjectStatementJoinUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_66_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_66_fn(); "
+            " CREATE TRIGGER ch_upd_66_trig AFTER UPDATE OR INSERT ON ContextXObjectStatementJoin FOR EACH ROW EXECUTE PROCEDURE ch_upd_66_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_66_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (66, OLD.contextXObjectStatementJoinUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_66_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_66_fn(); "
+            " CREATE TRIGGER ch_del_66_trig AFTER DELETE ON ContextXObjectStatementJoin FOR EACH ROW EXECUTE PROCEDURE ch_del_66_fn(); "
         _stmtList +=
             "CREATE VIEW ContextXObjectStatementJoin_ReceiveView AS  SELECT ContextXObjectStatementJoin.*, ContextXObjectStatementJoinReplicate.* FROM ContextXObjectStatementJoin LEFT JOIN ContextXObjectStatementJoinReplicate ON ContextXObjectStatementJoinReplicate.cxosjPk = ContextXObjectStatementJoin.contextXObjectStatementJoinUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION contextxobjectstatementjoin_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ContextXObjectStatementJoin(contextXObjectStatementJoinUid, contextActivityFlag, contextStatementUid, contextXObjectUid, verbMasterChangeSeqNum, verbLocalChangeSeqNum, verbLastChangedBy, contextXObjectLct) VALUES (NEW.contextXObjectStatementJoinUid, NEW.contextActivityFlag, NEW.contextStatementUid, NEW.contextXObjectUid, NEW.verbMasterChangeSeqNum, NEW.verbLocalChangeSeqNum, NEW.verbLastChangedBy, NEW.contextXObjectLct) ON CONFLICT (contextXObjectStatementJoinUid) DO UPDATE SET contextActivityFlag = EXCLUDED.contextActivityFlag, contextStatementUid = EXCLUDED.contextStatementUid, contextXObjectUid = EXCLUDED.contextXObjectUid, verbMasterChangeSeqNum = EXCLUDED.verbMasterChangeSeqNum, verbLocalChangeSeqNum = EXCLUDED.verbLocalChangeSeqNum, verbLastChangedBy = EXCLUDED.verbLastChangedBy, contextXObjectLct = EXCLUDED.contextXObjectLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER contextxobjectstatementjoin_remote_insert_trig INSTEAD OF INSERT ON ContextXObjectStatementJoin_ReceiveView FOR EACH ROW EXECUTE PROCEDURE contextxobjectstatementjoin_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS AgentEntityReplicate ( aePk BIGINT NOT NULL, aeVersionId BIGINT NOT NULL DEFAULT 0, aeDestination BIGINT NOT NULL, aePending BOOL NOT NULL DEFAULT true, PRIMARY KEY (aePk, aeDestination)) "
         _stmtList +=
@@ -1524,11 +1738,11 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_68_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (68, NEW.agentUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_68_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_68_fn(); "
+            " CREATE TRIGGER ch_upd_68_trig AFTER UPDATE OR INSERT ON AgentEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_68_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_68_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (68, OLD.agentUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_68_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_68_fn(); "
+            " CREATE TRIGGER ch_del_68_trig AFTER DELETE ON AgentEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_68_fn(); "
         _stmtList +=
             "CREATE VIEW AgentEntity_ReceiveView AS  SELECT AgentEntity.*, AgentEntityReplicate.* FROM AgentEntity LEFT JOIN AgentEntityReplicate ON AgentEntityReplicate.aePk = AgentEntity.agentUid "
         _stmtList +=
@@ -1544,13 +1758,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_70_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (70, NEW.stateUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_70_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_70_fn(); "
+            " CREATE TRIGGER ch_upd_70_trig AFTER UPDATE OR INSERT ON StateEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_70_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_70_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (70, OLD.stateUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_70_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_70_fn(); "
+            " CREATE TRIGGER ch_del_70_trig AFTER DELETE ON StateEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_70_fn(); "
         _stmtList +=
             "CREATE VIEW StateEntity_ReceiveView AS  SELECT StateEntity.*, StateEntityReplicate.* FROM StateEntity LEFT JOIN StateEntityReplicate ON StateEntityReplicate.sePk = StateEntity.stateUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION stateentity_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO StateEntity(stateUid, stateId, agentUid, activityId, registration, isIsactive, timestamp, stateMasterChangeSeqNum, stateLocalChangeSeqNum, stateLastChangedBy, stateLct) VALUES (NEW.stateUid, NEW.stateId, NEW.agentUid, NEW.activityId, NEW.registration, NEW.isIsactive, NEW.timestamp, NEW.stateMasterChangeSeqNum, NEW.stateLocalChangeSeqNum, NEW.stateLastChangedBy, NEW.stateLct) ON CONFLICT (stateUid) DO UPDATE SET stateId = EXCLUDED.stateId, agentUid = EXCLUDED.agentUid, activityId = EXCLUDED.activityId, registration = EXCLUDED.registration, isIsactive = EXCLUDED.isIsactive, timestamp = EXCLUDED.timestamp, stateMasterChangeSeqNum = EXCLUDED.stateMasterChangeSeqNum, stateLocalChangeSeqNum = EXCLUDED.stateLocalChangeSeqNum, stateLastChangedBy = EXCLUDED.stateLastChangedBy, stateLct = EXCLUDED.stateLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER stateentity_remote_insert_trig INSTEAD OF INSERT ON StateEntity_ReceiveView FOR EACH ROW EXECUTE PROCEDURE stateentity_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS StateContentEntityReplicate ( scePk BIGINT NOT NULL, sceVersionId BIGINT NOT NULL DEFAULT 0, sceDestination BIGINT NOT NULL, scePending BOOL NOT NULL DEFAULT true, PRIMARY KEY (scePk, sceDestination)) "
         _stmtList +=
@@ -1560,13 +1778,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_72_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (72, NEW.stateContentUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_72_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_72_fn(); "
+            " CREATE TRIGGER ch_upd_72_trig AFTER UPDATE OR INSERT ON StateContentEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_72_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_72_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (72, OLD.stateContentUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_72_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_72_fn(); "
+            " CREATE TRIGGER ch_del_72_trig AFTER DELETE ON StateContentEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_72_fn(); "
         _stmtList +=
             "CREATE VIEW StateContentEntity_ReceiveView AS  SELECT StateContentEntity.*, StateContentEntityReplicate.* FROM StateContentEntity LEFT JOIN StateContentEntityReplicate ON StateContentEntityReplicate.scePk = StateContentEntity.stateContentUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION statecontententity_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO StateContentEntity(stateContentUid, stateContentStateUid, stateContentKey, stateContentValue, isIsactive, stateContentMasterChangeSeqNum, stateContentLocalChangeSeqNum, stateContentLastChangedBy, stateContentLct) VALUES (NEW.stateContentUid, NEW.stateContentStateUid, NEW.stateContentKey, NEW.stateContentValue, NEW.isIsactive, NEW.stateContentMasterChangeSeqNum, NEW.stateContentLocalChangeSeqNum, NEW.stateContentLastChangedBy, NEW.stateContentLct) ON CONFLICT (stateContentUid) DO UPDATE SET stateContentStateUid = EXCLUDED.stateContentStateUid, stateContentKey = EXCLUDED.stateContentKey, stateContentValue = EXCLUDED.stateContentValue, isIsactive = EXCLUDED.isIsactive, stateContentMasterChangeSeqNum = EXCLUDED.stateContentMasterChangeSeqNum, stateContentLocalChangeSeqNum = EXCLUDED.stateContentLocalChangeSeqNum, stateContentLastChangedBy = EXCLUDED.stateContentLastChangedBy, stateContentLct = EXCLUDED.stateContentLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER statecontententity_remote_insert_trig INSTEAD OF INSERT ON StateContentEntity_ReceiveView FOR EACH ROW EXECUTE PROCEDURE statecontententity_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS XLangMapEntryReplicate ( xlmePk BIGINT NOT NULL, xlmeVersionId BIGINT NOT NULL DEFAULT 0, xlmeDestination BIGINT NOT NULL, xlmePending BOOL NOT NULL DEFAULT true, PRIMARY KEY (xlmePk, xlmeDestination)) "
         _stmtList +=
@@ -1576,13 +1798,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_74_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (74, NEW.statementLangMapUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_74_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_74_fn(); "
+            " CREATE TRIGGER ch_upd_74_trig AFTER UPDATE OR INSERT ON XLangMapEntry FOR EACH ROW EXECUTE PROCEDURE ch_upd_74_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_74_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (74, OLD.statementLangMapUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_74_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_74_fn(); "
+            " CREATE TRIGGER ch_del_74_trig AFTER DELETE ON XLangMapEntry FOR EACH ROW EXECUTE PROCEDURE ch_del_74_fn(); "
         _stmtList +=
             "CREATE VIEW XLangMapEntry_ReceiveView AS  SELECT XLangMapEntry.*, XLangMapEntryReplicate.* FROM XLangMapEntry LEFT JOIN XLangMapEntryReplicate ON XLangMapEntryReplicate.xlmePk = XLangMapEntry.statementLangMapUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION xlangmapentry_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO XLangMapEntry(verbLangMapUid, objectLangMapUid, languageLangMapUid, languageVariantLangMapUid, valueLangMap, statementLangMapMasterCsn, statementLangMapLocalCsn, statementLangMapLcb, statementLangMapLct, statementLangMapUid) VALUES (NEW.verbLangMapUid, NEW.objectLangMapUid, NEW.languageLangMapUid, NEW.languageVariantLangMapUid, NEW.valueLangMap, NEW.statementLangMapMasterCsn, NEW.statementLangMapLocalCsn, NEW.statementLangMapLcb, NEW.statementLangMapLct, NEW.statementLangMapUid) ON CONFLICT (statementLangMapUid) DO UPDATE SET verbLangMapUid = EXCLUDED.verbLangMapUid, objectLangMapUid = EXCLUDED.objectLangMapUid, languageLangMapUid = EXCLUDED.languageLangMapUid, languageVariantLangMapUid = EXCLUDED.languageVariantLangMapUid, valueLangMap = EXCLUDED.valueLangMap, statementLangMapMasterCsn = EXCLUDED.statementLangMapMasterCsn, statementLangMapLocalCsn = EXCLUDED.statementLangMapLocalCsn, statementLangMapLcb = EXCLUDED.statementLangMapLcb, statementLangMapLct = EXCLUDED.statementLangMapLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER xlangmapentry_remote_insert_trig INSTEAD OF INSERT ON XLangMapEntry_ReceiveView FOR EACH ROW EXECUTE PROCEDURE xlangmapentry_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS SchoolReplicate ( schoolPk BIGINT NOT NULL, schoolVersionId BIGINT NOT NULL DEFAULT 0, schoolDestination BIGINT NOT NULL, schoolPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (schoolPk, schoolDestination)) "
         _stmtList +=
@@ -1592,13 +1818,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_164_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (164, NEW.schoolUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_164_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_164_fn(); "
+            " CREATE TRIGGER ch_upd_164_trig AFTER UPDATE OR INSERT ON School FOR EACH ROW EXECUTE PROCEDURE ch_upd_164_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_164_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (164, OLD.schoolUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_164_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_164_fn(); "
+            " CREATE TRIGGER ch_del_164_trig AFTER DELETE ON School FOR EACH ROW EXECUTE PROCEDURE ch_del_164_fn(); "
         _stmtList +=
             "CREATE VIEW School_ReceiveView AS  SELECT School.*, SchoolReplicate.* FROM School LEFT JOIN SchoolReplicate ON SchoolReplicate.schoolPk = School.schoolUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION school_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO School(schoolUid, schoolName, schoolDesc, schoolAddress, schoolActive, schoolPhoneNumber, schoolGender, schoolHolidayCalendarUid, schoolFeatures, schoolLocationLong, schoolLocationLatt, schoolEmailAddress, schoolTeachersPersonGroupUid, schoolStudentsPersonGroupUid, schoolPendingStudentsPersonGroupUid, schoolCode, schoolMasterChangeSeqNum, schoolLocalChangeSeqNum, schoolLastChangedBy, schoolLct, schoolTimeZone) VALUES (NEW.schoolUid, NEW.schoolName, NEW.schoolDesc, NEW.schoolAddress, NEW.schoolActive, NEW.schoolPhoneNumber, NEW.schoolGender, NEW.schoolHolidayCalendarUid, NEW.schoolFeatures, NEW.schoolLocationLong, NEW.schoolLocationLatt, NEW.schoolEmailAddress, NEW.schoolTeachersPersonGroupUid, NEW.schoolStudentsPersonGroupUid, NEW.schoolPendingStudentsPersonGroupUid, NEW.schoolCode, NEW.schoolMasterChangeSeqNum, NEW.schoolLocalChangeSeqNum, NEW.schoolLastChangedBy, NEW.schoolLct, NEW.schoolTimeZone) ON CONFLICT (schoolUid) DO UPDATE SET schoolName = EXCLUDED.schoolName, schoolDesc = EXCLUDED.schoolDesc, schoolAddress = EXCLUDED.schoolAddress, schoolActive = EXCLUDED.schoolActive, schoolPhoneNumber = EXCLUDED.schoolPhoneNumber, schoolGender = EXCLUDED.schoolGender, schoolHolidayCalendarUid = EXCLUDED.schoolHolidayCalendarUid, schoolFeatures = EXCLUDED.schoolFeatures, schoolLocationLong = EXCLUDED.schoolLocationLong, schoolLocationLatt = EXCLUDED.schoolLocationLatt, schoolEmailAddress = EXCLUDED.schoolEmailAddress, schoolTeachersPersonGroupUid = EXCLUDED.schoolTeachersPersonGroupUid, schoolStudentsPersonGroupUid = EXCLUDED.schoolStudentsPersonGroupUid, schoolPendingStudentsPersonGroupUid = EXCLUDED.schoolPendingStudentsPersonGroupUid, schoolCode = EXCLUDED.schoolCode, schoolMasterChangeSeqNum = EXCLUDED.schoolMasterChangeSeqNum, schoolLocalChangeSeqNum = EXCLUDED.schoolLocalChangeSeqNum, schoolLastChangedBy = EXCLUDED.schoolLastChangedBy, schoolLct = EXCLUDED.schoolLct, schoolTimeZone = EXCLUDED.schoolTimeZone ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER school_remote_insert_trig INSTEAD OF INSERT ON School_ReceiveView FOR EACH ROW EXECUTE PROCEDURE school_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS SchoolMemberReplicate ( smPk BIGINT NOT NULL, smVersionId BIGINT NOT NULL DEFAULT 0, smDestination BIGINT NOT NULL, smPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (smPk, smDestination)) "
         _stmtList +=
@@ -1608,13 +1838,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_200_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (200, NEW.schoolMemberUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_200_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_200_fn(); "
+            " CREATE TRIGGER ch_upd_200_trig AFTER UPDATE OR INSERT ON SchoolMember FOR EACH ROW EXECUTE PROCEDURE ch_upd_200_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_200_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (200, OLD.schoolMemberUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_200_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_200_fn(); "
+            " CREATE TRIGGER ch_del_200_trig AFTER DELETE ON SchoolMember FOR EACH ROW EXECUTE PROCEDURE ch_del_200_fn(); "
         _stmtList +=
             "CREATE VIEW SchoolMember_ReceiveView AS  SELECT SchoolMember.*, SchoolMemberReplicate.* FROM SchoolMember LEFT JOIN SchoolMemberReplicate ON SchoolMemberReplicate.smPk = SchoolMember.schoolMemberUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION schoolmember_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO SchoolMember(schoolMemberUid, schoolMemberPersonUid, schoolMemberSchoolUid, schoolMemberJoinDate, schoolMemberLeftDate, schoolMemberRole, schoolMemberActive, schoolMemberLocalChangeSeqNum, schoolMemberMasterChangeSeqNum, schoolMemberLastChangedBy, schoolMemberLct) VALUES (NEW.schoolMemberUid, NEW.schoolMemberPersonUid, NEW.schoolMemberSchoolUid, NEW.schoolMemberJoinDate, NEW.schoolMemberLeftDate, NEW.schoolMemberRole, NEW.schoolMemberActive, NEW.schoolMemberLocalChangeSeqNum, NEW.schoolMemberMasterChangeSeqNum, NEW.schoolMemberLastChangedBy, NEW.schoolMemberLct) ON CONFLICT (schoolMemberUid) DO UPDATE SET schoolMemberPersonUid = EXCLUDED.schoolMemberPersonUid, schoolMemberSchoolUid = EXCLUDED.schoolMemberSchoolUid, schoolMemberJoinDate = EXCLUDED.schoolMemberJoinDate, schoolMemberLeftDate = EXCLUDED.schoolMemberLeftDate, schoolMemberRole = EXCLUDED.schoolMemberRole, schoolMemberActive = EXCLUDED.schoolMemberActive, schoolMemberLocalChangeSeqNum = EXCLUDED.schoolMemberLocalChangeSeqNum, schoolMemberMasterChangeSeqNum = EXCLUDED.schoolMemberMasterChangeSeqNum, schoolMemberLastChangedBy = EXCLUDED.schoolMemberLastChangedBy, schoolMemberLct = EXCLUDED.schoolMemberLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER schoolmember_remote_insert_trig INSTEAD OF INSERT ON SchoolMember_ReceiveView FOR EACH ROW EXECUTE PROCEDURE schoolmember_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS CommentsReplicate ( commentsPk BIGINT NOT NULL, commentsVersionId BIGINT NOT NULL DEFAULT 0, commentsDestination BIGINT NOT NULL, commentsPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (commentsPk, commentsDestination)) "
         _stmtList +=
@@ -1624,13 +1858,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_208_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (208, NEW.commentsUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_208_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_208_fn(); "
+            " CREATE TRIGGER ch_upd_208_trig AFTER UPDATE OR INSERT ON Comments FOR EACH ROW EXECUTE PROCEDURE ch_upd_208_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_208_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (208, OLD.commentsUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_208_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_208_fn(); "
+            " CREATE TRIGGER ch_del_208_trig AFTER DELETE ON Comments FOR EACH ROW EXECUTE PROCEDURE ch_del_208_fn(); "
         _stmtList +=
             "CREATE VIEW Comments_ReceiveView AS  SELECT Comments.*, CommentsReplicate.* FROM Comments LEFT JOIN CommentsReplicate ON CommentsReplicate.commentsPk = Comments.commentsUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION comments_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO Comments(commentsUid, commentsText, commentsEntityType, commentsEntityUid, commentsPublic, commentsStatus, commentsPersonUid, commentsToPersonUid, commentsFlagged, commentsInActive, commentsDateTimeAdded, commentsDateTimeUpdated, commentsMCSN, commentsLCSN, commentsLCB, commentsLct) VALUES (NEW.commentsUid, NEW.commentsText, NEW.commentsEntityType, NEW.commentsEntityUid, NEW.commentsPublic, NEW.commentsStatus, NEW.commentsPersonUid, NEW.commentsToPersonUid, NEW.commentsFlagged, NEW.commentsInActive, NEW.commentsDateTimeAdded, NEW.commentsDateTimeUpdated, NEW.commentsMCSN, NEW.commentsLCSN, NEW.commentsLCB, NEW.commentsLct) ON CONFLICT (commentsUid) DO UPDATE SET commentsText = EXCLUDED.commentsText, commentsEntityType = EXCLUDED.commentsEntityType, commentsEntityUid = EXCLUDED.commentsEntityUid, commentsPublic = EXCLUDED.commentsPublic, commentsStatus = EXCLUDED.commentsStatus, commentsPersonUid = EXCLUDED.commentsPersonUid, commentsToPersonUid = EXCLUDED.commentsToPersonUid, commentsFlagged = EXCLUDED.commentsFlagged, commentsInActive = EXCLUDED.commentsInActive, commentsDateTimeAdded = EXCLUDED.commentsDateTimeAdded, commentsDateTimeUpdated = EXCLUDED.commentsDateTimeUpdated, commentsMCSN = EXCLUDED.commentsMCSN, commentsLCSN = EXCLUDED.commentsLCSN, commentsLCB = EXCLUDED.commentsLCB, commentsLct = EXCLUDED.commentsLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER comments_remote_insert_trig INSTEAD OF INSERT ON Comments_ReceiveView FOR EACH ROW EXECUTE PROCEDURE comments_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS ReportReplicate ( reportPk BIGINT NOT NULL, reportVersionId BIGINT NOT NULL DEFAULT 0, reportDestination BIGINT NOT NULL, reportPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (reportPk, reportDestination)) "
         _stmtList +=
@@ -1640,11 +1878,11 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_101_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (101, NEW.reportUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_101_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_101_fn(); "
+            " CREATE TRIGGER ch_upd_101_trig AFTER UPDATE OR INSERT ON Report FOR EACH ROW EXECUTE PROCEDURE ch_upd_101_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_101_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (101, OLD.reportUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_101_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_101_fn(); "
+            " CREATE TRIGGER ch_del_101_trig AFTER DELETE ON Report FOR EACH ROW EXECUTE PROCEDURE ch_del_101_fn(); "
         _stmtList +=
             "CREATE VIEW Report_ReceiveView AS  SELECT Report.*, ReportReplicate.* FROM Report LEFT JOIN ReportReplicate ON ReportReplicate.reportPk = Report.reportUid "
         _stmtList +=
@@ -1656,11 +1894,11 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_189_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (189, NEW.siteUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_189_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_189_fn(); "
+            " CREATE TRIGGER ch_upd_189_trig AFTER UPDATE OR INSERT ON Site FOR EACH ROW EXECUTE PROCEDURE ch_upd_189_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_189_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (189, OLD.siteUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_189_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_189_fn(); "
+            " CREATE TRIGGER ch_del_189_trig AFTER DELETE ON Site FOR EACH ROW EXECUTE PROCEDURE ch_del_189_fn(); "
         _stmtList +=
             "CREATE VIEW Site_ReceiveView AS  SELECT Site.*, SiteReplicate.* FROM Site LEFT JOIN SiteReplicate ON SiteReplicate.sitePk = Site.siteUid "
         _stmtList +=
@@ -1676,13 +1914,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_301_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (301, NEW.learnerGroupUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_301_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_301_fn(); "
+            " CREATE TRIGGER ch_upd_301_trig AFTER UPDATE OR INSERT ON LearnerGroup FOR EACH ROW EXECUTE PROCEDURE ch_upd_301_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_301_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (301, OLD.learnerGroupUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_301_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_301_fn(); "
+            " CREATE TRIGGER ch_del_301_trig AFTER DELETE ON LearnerGroup FOR EACH ROW EXECUTE PROCEDURE ch_del_301_fn(); "
         _stmtList +=
             "CREATE VIEW LearnerGroup_ReceiveView AS  SELECT LearnerGroup.*, LearnerGroupReplicate.* FROM LearnerGroup LEFT JOIN LearnerGroupReplicate ON LearnerGroupReplicate.lgPk = LearnerGroup.learnerGroupUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION learnergroup_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO LearnerGroup(learnerGroupUid, learnerGroupName, learnerGroupDescription, learnerGroupActive, learnerGroupMCSN, learnerGroupCSN, learnerGroupLCB, learnerGroupLct) VALUES (NEW.learnerGroupUid, NEW.learnerGroupName, NEW.learnerGroupDescription, NEW.learnerGroupActive, NEW.learnerGroupMCSN, NEW.learnerGroupCSN, NEW.learnerGroupLCB, NEW.learnerGroupLct) ON CONFLICT (learnerGroupUid) DO UPDATE SET learnerGroupName = EXCLUDED.learnerGroupName, learnerGroupDescription = EXCLUDED.learnerGroupDescription, learnerGroupActive = EXCLUDED.learnerGroupActive, learnerGroupMCSN = EXCLUDED.learnerGroupMCSN, learnerGroupCSN = EXCLUDED.learnerGroupCSN, learnerGroupLCB = EXCLUDED.learnerGroupLCB, learnerGroupLct = EXCLUDED.learnerGroupLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER learnergroup_remote_insert_trig INSTEAD OF INSERT ON LearnerGroup_ReceiveView FOR EACH ROW EXECUTE PROCEDURE learnergroup_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS LearnerGroupMemberReplicate ( lgmPk BIGINT NOT NULL, lgmVersionId BIGINT NOT NULL DEFAULT 0, lgmDestination BIGINT NOT NULL, lgmPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (lgmPk, lgmDestination)) "
         _stmtList +=
@@ -1692,13 +1934,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_300_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (300, NEW.learnerGroupMemberUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_300_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_300_fn(); "
+            " CREATE TRIGGER ch_upd_300_trig AFTER UPDATE OR INSERT ON LearnerGroupMember FOR EACH ROW EXECUTE PROCEDURE ch_upd_300_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_300_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (300, OLD.learnerGroupMemberUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_300_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_300_fn(); "
+            " CREATE TRIGGER ch_del_300_trig AFTER DELETE ON LearnerGroupMember FOR EACH ROW EXECUTE PROCEDURE ch_del_300_fn(); "
         _stmtList +=
             "CREATE VIEW LearnerGroupMember_ReceiveView AS  SELECT LearnerGroupMember.*, LearnerGroupMemberReplicate.* FROM LearnerGroupMember LEFT JOIN LearnerGroupMemberReplicate ON LearnerGroupMemberReplicate.lgmPk = LearnerGroupMember.learnerGroupMemberUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION learnergroupmember_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO LearnerGroupMember(learnerGroupMemberUid, learnerGroupMemberPersonUid, learnerGroupMemberLgUid, learnerGroupMemberRole, learnerGroupMemberActive, learnerGroupMemberMCSN, learnerGroupMemberCSN, learnerGroupMemberLCB, learnerGroupMemberLct) VALUES (NEW.learnerGroupMemberUid, NEW.learnerGroupMemberPersonUid, NEW.learnerGroupMemberLgUid, NEW.learnerGroupMemberRole, NEW.learnerGroupMemberActive, NEW.learnerGroupMemberMCSN, NEW.learnerGroupMemberCSN, NEW.learnerGroupMemberLCB, NEW.learnerGroupMemberLct) ON CONFLICT (learnerGroupMemberUid) DO UPDATE SET learnerGroupMemberPersonUid = EXCLUDED.learnerGroupMemberPersonUid, learnerGroupMemberLgUid = EXCLUDED.learnerGroupMemberLgUid, learnerGroupMemberRole = EXCLUDED.learnerGroupMemberRole, learnerGroupMemberActive = EXCLUDED.learnerGroupMemberActive, learnerGroupMemberMCSN = EXCLUDED.learnerGroupMemberMCSN, learnerGroupMemberCSN = EXCLUDED.learnerGroupMemberCSN, learnerGroupMemberLCB = EXCLUDED.learnerGroupMemberLCB, learnerGroupMemberLct = EXCLUDED.learnerGroupMemberLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER learnergroupmember_remote_insert_trig INSTEAD OF INSERT ON LearnerGroupMember_ReceiveView FOR EACH ROW EXECUTE PROCEDURE learnergroupmember_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS GroupLearningSessionReplicate ( glsPk BIGINT NOT NULL, glsVersionId BIGINT NOT NULL DEFAULT 0, glsDestination BIGINT NOT NULL, glsPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (glsPk, glsDestination)) "
         _stmtList +=
@@ -1708,13 +1954,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_302_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (302, NEW.groupLearningSessionUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_302_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_302_fn(); "
+            " CREATE TRIGGER ch_upd_302_trig AFTER UPDATE OR INSERT ON GroupLearningSession FOR EACH ROW EXECUTE PROCEDURE ch_upd_302_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_302_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (302, OLD.groupLearningSessionUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_302_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_302_fn(); "
+            " CREATE TRIGGER ch_del_302_trig AFTER DELETE ON GroupLearningSession FOR EACH ROW EXECUTE PROCEDURE ch_del_302_fn(); "
         _stmtList +=
             "CREATE VIEW GroupLearningSession_ReceiveView AS  SELECT GroupLearningSession.*, GroupLearningSessionReplicate.* FROM GroupLearningSession LEFT JOIN GroupLearningSessionReplicate ON GroupLearningSessionReplicate.glsPk = GroupLearningSession.groupLearningSessionUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION grouplearningsession_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO GroupLearningSession(groupLearningSessionUid, groupLearningSessionContentUid, groupLearningSessionLearnerGroupUid, groupLearningSessionInactive, groupLearningSessionMCSN, groupLearningSessionCSN, groupLearningSessionLCB, groupLearningSessionLct) VALUES (NEW.groupLearningSessionUid, NEW.groupLearningSessionContentUid, NEW.groupLearningSessionLearnerGroupUid, NEW.groupLearningSessionInactive, NEW.groupLearningSessionMCSN, NEW.groupLearningSessionCSN, NEW.groupLearningSessionLCB, NEW.groupLearningSessionLct) ON CONFLICT (groupLearningSessionUid) DO UPDATE SET groupLearningSessionContentUid = EXCLUDED.groupLearningSessionContentUid, groupLearningSessionLearnerGroupUid = EXCLUDED.groupLearningSessionLearnerGroupUid, groupLearningSessionInactive = EXCLUDED.groupLearningSessionInactive, groupLearningSessionMCSN = EXCLUDED.groupLearningSessionMCSN, groupLearningSessionCSN = EXCLUDED.groupLearningSessionCSN, groupLearningSessionLCB = EXCLUDED.groupLearningSessionLCB, groupLearningSessionLct = EXCLUDED.groupLearningSessionLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER grouplearningsession_remote_insert_trig INSTEAD OF INSERT ON GroupLearningSession_ReceiveView FOR EACH ROW EXECUTE PROCEDURE grouplearningsession_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS SiteTermsReplicate ( stPk BIGINT NOT NULL, stVersionId BIGINT NOT NULL DEFAULT 0, stDestination BIGINT NOT NULL, stPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (stPk, stDestination)) "
         _stmtList +=
@@ -1724,13 +1974,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_272_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (272, NEW.sTermsUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_272_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_272_fn(); "
+            " CREATE TRIGGER ch_upd_272_trig AFTER UPDATE OR INSERT ON SiteTerms FOR EACH ROW EXECUTE PROCEDURE ch_upd_272_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_272_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (272, OLD.sTermsUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_272_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_272_fn(); "
+            " CREATE TRIGGER ch_del_272_trig AFTER DELETE ON SiteTerms FOR EACH ROW EXECUTE PROCEDURE ch_del_272_fn(); "
         _stmtList +=
             "CREATE VIEW SiteTerms_ReceiveView AS  SELECT SiteTerms.*, SiteTermsReplicate.* FROM SiteTerms LEFT JOIN SiteTermsReplicate ON SiteTermsReplicate.stPk = SiteTerms.sTermsUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION siteterms_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO SiteTerms(sTermsUid, termsHtml, sTermsLang, sTermsLangUid, sTermsActive, sTermsLastChangedBy, sTermsPrimaryCsn, sTermsLocalCsn, sTermsLct) VALUES (NEW.sTermsUid, NEW.termsHtml, NEW.sTermsLang, NEW.sTermsLangUid, NEW.sTermsActive, NEW.sTermsLastChangedBy, NEW.sTermsPrimaryCsn, NEW.sTermsLocalCsn, NEW.sTermsLct) ON CONFLICT (sTermsUid) DO UPDATE SET termsHtml = EXCLUDED.termsHtml, sTermsLang = EXCLUDED.sTermsLang, sTermsLangUid = EXCLUDED.sTermsLangUid, sTermsActive = EXCLUDED.sTermsActive, sTermsLastChangedBy = EXCLUDED.sTermsLastChangedBy, sTermsPrimaryCsn = EXCLUDED.sTermsPrimaryCsn, sTermsLocalCsn = EXCLUDED.sTermsLocalCsn, sTermsLct = EXCLUDED.sTermsLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER siteterms_remote_insert_trig INSTEAD OF INSERT ON SiteTerms_ReceiveView FOR EACH ROW EXECUTE PROCEDURE siteterms_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS ClazzContentJoinReplicate ( ccjPk BIGINT NOT NULL, ccjVersionId BIGINT NOT NULL DEFAULT 0, ccjDestination BIGINT NOT NULL, ccjPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (ccjPk, ccjDestination)) "
         _stmtList +=
@@ -1740,13 +1994,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_134_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (134, NEW.ccjUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_134_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_134_fn(); "
+            " CREATE TRIGGER ch_upd_134_trig AFTER UPDATE OR INSERT ON ClazzContentJoin FOR EACH ROW EXECUTE PROCEDURE ch_upd_134_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_134_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (134, OLD.ccjUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_134_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_134_fn(); "
+            " CREATE TRIGGER ch_del_134_trig AFTER DELETE ON ClazzContentJoin FOR EACH ROW EXECUTE PROCEDURE ch_del_134_fn(); "
         _stmtList +=
             "CREATE VIEW ClazzContentJoin_ReceiveView AS  SELECT ClazzContentJoin.*, ClazzContentJoinReplicate.* FROM ClazzContentJoin LEFT JOIN ClazzContentJoinReplicate ON ClazzContentJoinReplicate.ccjPk = ClazzContentJoin.ccjUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION clazzcontentjoin_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ClazzContentJoin(ccjUid, ccjContentEntryUid, ccjClazzUid, ccjActive, ccjLocalChangeSeqNum, ccjMasterChangeSeqNum, ccjLastChangedBy, ccjLct) VALUES (NEW.ccjUid, NEW.ccjContentEntryUid, NEW.ccjClazzUid, NEW.ccjActive, NEW.ccjLocalChangeSeqNum, NEW.ccjMasterChangeSeqNum, NEW.ccjLastChangedBy, NEW.ccjLct) ON CONFLICT (ccjUid) DO UPDATE SET ccjContentEntryUid = EXCLUDED.ccjContentEntryUid, ccjClazzUid = EXCLUDED.ccjClazzUid, ccjActive = EXCLUDED.ccjActive, ccjLocalChangeSeqNum = EXCLUDED.ccjLocalChangeSeqNum, ccjMasterChangeSeqNum = EXCLUDED.ccjMasterChangeSeqNum, ccjLastChangedBy = EXCLUDED.ccjLastChangedBy, ccjLct = EXCLUDED.ccjLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER clazzcontentjoin_remote_insert_trig INSTEAD OF INSERT ON ClazzContentJoin_ReceiveView FOR EACH ROW EXECUTE PROCEDURE clazzcontentjoin_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS PersonParentJoinReplicate ( ppjPk BIGINT NOT NULL, ppjVersionId BIGINT NOT NULL DEFAULT 0, ppjDestination BIGINT NOT NULL, ppjPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (ppjPk, ppjDestination)) "
         _stmtList +=
@@ -1756,13 +2014,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_512_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (512, NEW.ppjUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_512_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_512_fn(); "
+            " CREATE TRIGGER ch_upd_512_trig AFTER UPDATE OR INSERT ON PersonParentJoin FOR EACH ROW EXECUTE PROCEDURE ch_upd_512_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_512_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (512, OLD.ppjUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_512_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_512_fn(); "
+            " CREATE TRIGGER ch_del_512_trig AFTER DELETE ON PersonParentJoin FOR EACH ROW EXECUTE PROCEDURE ch_del_512_fn(); "
         _stmtList +=
             "CREATE VIEW PersonParentJoin_ReceiveView AS  SELECT PersonParentJoin.*, PersonParentJoinReplicate.* FROM PersonParentJoin LEFT JOIN PersonParentJoinReplicate ON PersonParentJoinReplicate.ppjPk = PersonParentJoin.ppjUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION personparentjoin_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO PersonParentJoin(ppjUid, ppjPcsn, ppjLcsn, ppjLcb, ppjLct, ppjParentPersonUid, ppjMinorPersonUid, ppjRelationship, ppjEmail, ppjPhone, ppjInactive, ppjStatus, ppjApprovalTiemstamp, ppjApprovalIpAddr) VALUES (NEW.ppjUid, NEW.ppjPcsn, NEW.ppjLcsn, NEW.ppjLcb, NEW.ppjLct, NEW.ppjParentPersonUid, NEW.ppjMinorPersonUid, NEW.ppjRelationship, NEW.ppjEmail, NEW.ppjPhone, NEW.ppjInactive, NEW.ppjStatus, NEW.ppjApprovalTiemstamp, NEW.ppjApprovalIpAddr) ON CONFLICT (ppjUid) DO UPDATE SET ppjPcsn = EXCLUDED.ppjPcsn, ppjLcsn = EXCLUDED.ppjLcsn, ppjLcb = EXCLUDED.ppjLcb, ppjLct = EXCLUDED.ppjLct, ppjParentPersonUid = EXCLUDED.ppjParentPersonUid, ppjMinorPersonUid = EXCLUDED.ppjMinorPersonUid, ppjRelationship = EXCLUDED.ppjRelationship, ppjEmail = EXCLUDED.ppjEmail, ppjPhone = EXCLUDED.ppjPhone, ppjInactive = EXCLUDED.ppjInactive, ppjStatus = EXCLUDED.ppjStatus, ppjApprovalTiemstamp = EXCLUDED.ppjApprovalTiemstamp, ppjApprovalIpAddr = EXCLUDED.ppjApprovalIpAddr ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER personparentjoin_remote_insert_trig INSTEAD OF INSERT ON PersonParentJoin_ReceiveView FOR EACH ROW EXECUTE PROCEDURE personparentjoin_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS ScopedGrantReplicate ( sgPk BIGINT NOT NULL, sgVersionId BIGINT NOT NULL DEFAULT 0, sgDestination BIGINT NOT NULL, sgPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (sgPk, sgDestination)) "
         _stmtList +=
@@ -1772,11 +2034,11 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_48_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (48, NEW.sgUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_48_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_48_fn(); "
+            " CREATE TRIGGER ch_upd_48_trig AFTER UPDATE OR INSERT ON ScopedGrant FOR EACH ROW EXECUTE PROCEDURE ch_upd_48_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_48_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (48, OLD.sgUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_48_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_48_fn(); "
+            " CREATE TRIGGER ch_del_48_trig AFTER DELETE ON ScopedGrant FOR EACH ROW EXECUTE PROCEDURE ch_del_48_fn(); "
         _stmtList +=
             "CREATE VIEW ScopedGrant_ReceiveView AS  SELECT ScopedGrant.*, ScopedGrantReplicate.* FROM ScopedGrant LEFT JOIN ScopedGrantReplicate ON ScopedGrantReplicate.sgPk = ScopedGrant.sgUid "
         _stmtList +=
@@ -1792,13 +2054,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_419_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (419, NEW.errUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_419_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_419_fn(); "
+            " CREATE TRIGGER ch_upd_419_trig AFTER UPDATE OR INSERT ON ErrorReport FOR EACH ROW EXECUTE PROCEDURE ch_upd_419_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_419_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (419, OLD.errUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_419_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_419_fn(); "
+            " CREATE TRIGGER ch_del_419_trig AFTER DELETE ON ErrorReport FOR EACH ROW EXECUTE PROCEDURE ch_del_419_fn(); "
         _stmtList +=
             "CREATE VIEW ErrorReport_ReceiveView AS  SELECT ErrorReport.*, ErrorReportReplicate.* FROM ErrorReport LEFT JOIN ErrorReportReplicate ON ErrorReportReplicate.erPk = ErrorReport.errUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION errorreport_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ErrorReport(errUid, errPcsn, errLcsn, errLcb, errLct, severity, timestamp, presenterUri, appVersion, versionCode, errorCode, operatingSys, osVersion, stackTrace, message) VALUES (NEW.errUid, NEW.errPcsn, NEW.errLcsn, NEW.errLcb, NEW.errLct, NEW.severity, NEW.timestamp, NEW.presenterUri, NEW.appVersion, NEW.versionCode, NEW.errorCode, NEW.operatingSys, NEW.osVersion, NEW.stackTrace, NEW.message) ON CONFLICT (errUid) DO UPDATE SET errPcsn = EXCLUDED.errPcsn, errLcsn = EXCLUDED.errLcsn, errLcb = EXCLUDED.errLcb, errLct = EXCLUDED.errLct, severity = EXCLUDED.severity, timestamp = EXCLUDED.timestamp, presenterUri = EXCLUDED.presenterUri, appVersion = EXCLUDED.appVersion, versionCode = EXCLUDED.versionCode, errorCode = EXCLUDED.errorCode, operatingSys = EXCLUDED.operatingSys, osVersion = EXCLUDED.osVersion, stackTrace = EXCLUDED.stackTrace, message = EXCLUDED.message ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER errorreport_remote_insert_trig INSTEAD OF INSERT ON ErrorReport_ReceiveView FOR EACH ROW EXECUTE PROCEDURE errorreport_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS ClazzAssignmentReplicate ( caPk BIGINT NOT NULL, caVersionId BIGINT NOT NULL DEFAULT 0, caDestination BIGINT NOT NULL, caPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (caPk, caDestination)) "
         _stmtList +=
@@ -1808,13 +2074,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_520_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (520, NEW.caUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_520_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_520_fn(); "
+            " CREATE TRIGGER ch_upd_520_trig AFTER UPDATE OR INSERT ON ClazzAssignment FOR EACH ROW EXECUTE PROCEDURE ch_upd_520_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_520_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (520, OLD.caUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_520_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_520_fn(); "
+            " CREATE TRIGGER ch_del_520_trig AFTER DELETE ON ClazzAssignment FOR EACH ROW EXECUTE PROCEDURE ch_del_520_fn(); "
         _stmtList +=
             "CREATE VIEW ClazzAssignment_ReceiveView AS  SELECT ClazzAssignment.*, ClazzAssignmentReplicate.* FROM ClazzAssignment LEFT JOIN ClazzAssignmentReplicate ON ClazzAssignmentReplicate.caPk = ClazzAssignment.caUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION clazzassignment_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ClazzAssignment(caUid, caTitle, caDescription, caDeadlineDate, caStartDate, caLateSubmissionType, caLateSubmissionPenalty, caGracePeriodDate, caActive, caClassCommentEnabled, caPrivateCommentsEnabled, caClazzUid, caLocalChangeSeqNum, caMasterChangeSeqNum, caLastChangedBy, caLct) VALUES (NEW.caUid, NEW.caTitle, NEW.caDescription, NEW.caDeadlineDate, NEW.caStartDate, NEW.caLateSubmissionType, NEW.caLateSubmissionPenalty, NEW.caGracePeriodDate, NEW.caActive, NEW.caClassCommentEnabled, NEW.caPrivateCommentsEnabled, NEW.caClazzUid, NEW.caLocalChangeSeqNum, NEW.caMasterChangeSeqNum, NEW.caLastChangedBy, NEW.caLct) ON CONFLICT (caUid) DO UPDATE SET caTitle = EXCLUDED.caTitle, caDescription = EXCLUDED.caDescription, caDeadlineDate = EXCLUDED.caDeadlineDate, caStartDate = EXCLUDED.caStartDate, caLateSubmissionType = EXCLUDED.caLateSubmissionType, caLateSubmissionPenalty = EXCLUDED.caLateSubmissionPenalty, caGracePeriodDate = EXCLUDED.caGracePeriodDate, caActive = EXCLUDED.caActive, caClassCommentEnabled = EXCLUDED.caClassCommentEnabled, caPrivateCommentsEnabled = EXCLUDED.caPrivateCommentsEnabled, caClazzUid = EXCLUDED.caClazzUid, caLocalChangeSeqNum = EXCLUDED.caLocalChangeSeqNum, caMasterChangeSeqNum = EXCLUDED.caMasterChangeSeqNum, caLastChangedBy = EXCLUDED.caLastChangedBy, caLct = EXCLUDED.caLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER clazzassignment_remote_insert_trig INSTEAD OF INSERT ON ClazzAssignment_ReceiveView FOR EACH ROW EXECUTE PROCEDURE clazzassignment_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoinReplicate ( cacjPk BIGINT NOT NULL, cacjVersionId BIGINT NOT NULL DEFAULT 0, cacjDestination BIGINT NOT NULL, cacjPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (cacjPk, cacjDestination)) "
         _stmtList +=
@@ -1824,13 +2094,17 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_521_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (521, NEW.cacjUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_521_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_521_fn(); "
+            " CREATE TRIGGER ch_upd_521_trig AFTER UPDATE OR INSERT ON ClazzAssignmentContentJoin FOR EACH ROW EXECUTE PROCEDURE ch_upd_521_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_521_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (521, OLD.cacjUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_521_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_521_fn(); "
+            " CREATE TRIGGER ch_del_521_trig AFTER DELETE ON ClazzAssignmentContentJoin FOR EACH ROW EXECUTE PROCEDURE ch_del_521_fn(); "
         _stmtList +=
             "CREATE VIEW ClazzAssignmentContentJoin_ReceiveView AS  SELECT ClazzAssignmentContentJoin.*, ClazzAssignmentContentJoinReplicate.* FROM ClazzAssignmentContentJoin LEFT JOIN ClazzAssignmentContentJoinReplicate ON ClazzAssignmentContentJoinReplicate.cacjPk = ClazzAssignmentContentJoin.cacjUid "
+        _stmtList +=
+            "CREATE OR REPLACE FUNCTION clazzassignmentcontentjoin_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ClazzAssignmentContentJoin(cacjUid, cacjContentUid, cacjAssignmentUid, cacjActive, cacjMCSN, cacjLCSN, cacjLCB, cacjLct) VALUES (NEW.cacjUid, NEW.cacjContentUid, NEW.cacjAssignmentUid, NEW.cacjActive, NEW.cacjMCSN, NEW.cacjLCSN, NEW.cacjLCB, NEW.cacjLct) ON CONFLICT (cacjUid) DO UPDATE SET cacjContentUid = EXCLUDED.cacjContentUid, cacjAssignmentUid = EXCLUDED.cacjAssignmentUid, cacjActive = EXCLUDED.cacjActive, cacjMCSN = EXCLUDED.cacjMCSN, cacjLCSN = EXCLUDED.cacjLCSN, cacjLCB = EXCLUDED.cacjLCB, cacjLct = EXCLUDED.cacjLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+        _stmtList +=
+            " CREATE TRIGGER clazzassignmentcontentjoin_remote_insert_trig INSTEAD OF INSERT ON ClazzAssignmentContentJoin_ReceiveView FOR EACH ROW EXECUTE PROCEDURE clazzassignmentcontentjoin_remote_insert_fn() "
         _stmtList +=
             " CREATE TABLE IF NOT EXISTS PersonAuth2Replicate ( paPk BIGINT NOT NULL, paVersionId BIGINT NOT NULL DEFAULT 0, paDestination BIGINT NOT NULL, paPending BOOL NOT NULL DEFAULT true, PRIMARY KEY (paPk, paDestination)) "
         _stmtList +=
@@ -1840,11 +2114,11 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_678_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (678, NEW.pauthUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_678_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_678_fn(); "
+            " CREATE TRIGGER ch_upd_678_trig AFTER UPDATE OR INSERT ON PersonAuth2 FOR EACH ROW EXECUTE PROCEDURE ch_upd_678_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_678_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (678, OLD.pauthUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_678_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_678_fn(); "
+            " CREATE TRIGGER ch_del_678_trig AFTER DELETE ON PersonAuth2 FOR EACH ROW EXECUTE PROCEDURE ch_del_678_fn(); "
         _stmtList +=
             "CREATE VIEW PersonAuth2_ReceiveView AS  SELECT PersonAuth2.*, PersonAuth2Replicate.* FROM PersonAuth2 LEFT JOIN PersonAuth2Replicate ON PersonAuth2Replicate.paPk = PersonAuth2.pauthUid "
         _stmtList +=
@@ -1860,11 +2134,11 @@ private fun DoorSqlDatabase.addReplicationEntities() {
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_upd_679_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (679, NEW.usUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_upd_679_trig AFTER UPDATE OR INSERT ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_upd_679_fn(); "
+            " CREATE TRIGGER ch_upd_679_trig AFTER UPDATE OR INSERT ON UserSession FOR EACH ROW EXECUTE PROCEDURE ch_upd_679_fn(); "
         _stmtList +=
             " CREATE OR REPLACE FUNCTION ch_del_679_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (679, OLD.usUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
         _stmtList +=
-            " CREATE TRIGGER ch_del_679_trig AFTER DELETE ON RepEntity FOR EACH ROW EXECUTE PROCEDURE ch_del_679_fn(); "
+            " CREATE TRIGGER ch_del_679_trig AFTER DELETE ON UserSession FOR EACH ROW EXECUTE PROCEDURE ch_del_679_fn(); "
         _stmtList +=
             "CREATE VIEW UserSession_ReceiveView AS  SELECT UserSession.*, UserSessionReplicate.* FROM UserSession LEFT JOIN UserSessionReplicate ON UserSessionReplicate.usPk = UserSession.usUid "
         _stmtList +=
@@ -1955,10 +2229,14 @@ val UmAppDatabaseReplicationMigration91_92  = DoorMigrationSync(91, 92){ db ->
         db.dropOldPostgresTriggers()
         db.dropOldPostgresFunctions()
 
+
         db.execSQL("CREATE TABLE IF NOT EXISTS ChangeLog (  chTableId  INTEGER  NOT NULL , chEntityPk  BIGINT  NOT NULL , chType  INTEGER  NOT NULL , PRIMARY KEY (chTableId, chEntityPk) )")
 
         db.execSQL("CREATE TABLE IF NOT EXISTS ReplicationStatus (  tableId  INTEGER  NOT NULL , priority  INTEGER  NOT NULL , nodeId  BIGINT  NOT NULL , lastRemoteChangeTime  BIGINT  NOT NULL , lastFetchReplicationCompleteTime  BIGINT  NOT NULL , lastLocalChangeTime  BIGINT  NOT NULL , lastSendReplicationCompleteTime  BIGINT  NOT NULL , repStatusId  SERIAL  PRIMARY KEY  NOT NULL )")
         db.execSQL("CREATE UNIQUE INDEX table_node_idx ON ReplicationStatus (tableId, nodeId)")
+        db.execSQL("ALTER TABLE DoorNode ALTER COLUMN nodeId TYPE BIGINT")
+        db.execSQL("ALTER TABLE SyncNode ALTER COLUMN nodeClientId TYPE BIGINT")
+        db.execSQL("ALTER TABLE UserSession ALTER COLUMN usClientNodeId TYPE BIGINT")
     }
 
     db.addReplicationEntities()

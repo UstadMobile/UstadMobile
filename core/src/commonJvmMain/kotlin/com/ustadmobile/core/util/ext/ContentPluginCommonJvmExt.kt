@@ -14,6 +14,7 @@ import org.kodein.di.on
 import org.kodein.di.instance
 import org.kodein.di.direct
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.util.systemTimeInMillis
 
 actual suspend fun deleteFilesForContentJob(
         jobId: Long,
@@ -32,7 +33,8 @@ actual suspend fun deleteFilesForContentJob(
             db.containerEntryDao.deleteContainerEntriesCreatedByJobs(jobId)
             val contentJobItem = db.contentJobItemDao.findByJobId(jobId)
             if(contentJobItem?.cjiContentDeletedOnCancellation == true){
-                repo.contentEntryDao.invalidateContentEntryCreatedByJob(jobId, true)
+                repo.contentEntryDao.invalidateContentEntryCreatedByJob(jobId, true,
+                    systemTimeInMillis())
             }
 
 

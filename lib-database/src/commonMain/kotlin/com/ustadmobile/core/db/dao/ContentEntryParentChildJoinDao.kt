@@ -22,7 +22,7 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
              (SELECT cepcjVersionId
                 FROM ContentEntryParentChildJoinReplicate
                WHERE cepcjPk = ContentEntryParentChildJoin.cepcjUid
-                 AND cepcjDestination = :newNodeId), 0) 
+                 AND cepcjDestination = :newNodeId), -1) 
       /*psql ON CONFLICT(cepcjPk, cepcjDestination) DO UPDATE
              SET cepcjPending = true
       */       
