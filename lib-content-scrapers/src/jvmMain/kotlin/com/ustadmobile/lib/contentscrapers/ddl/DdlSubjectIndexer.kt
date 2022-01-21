@@ -2,6 +2,7 @@ package com.ustadmobile.lib.contentscrapers.ddl
 
 import ScraperTypes
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.SeleniumIndexer
@@ -43,7 +44,9 @@ class DdlSubjectIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, c
                     subjectUrl.toString(), IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, parentContentEntry!!.primaryLanguageUid, null,
                     "", false, "", "",
                     "", "", 0, repo.contentEntryDao)
-            repo.contentEntryDao.updateContentEntryInActive(subjectEntry.contentEntryUid, false)
+            repo.contentEntryDao.updateContentEntryInActive(subjectEntry.contentEntryUid,
+                false, systemTimeInMillis()
+            )
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, parentContentEntry!!, subjectEntry, i)
 
@@ -83,7 +86,8 @@ class DdlSubjectIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, c
                         subjectUrl.toString(), IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, parentContentEntry!!.primaryLanguageUid, null,
                         "", false, "", "",
                         "", "", 0, repo.contentEntryDao)
-                repo.contentEntryDao.updateContentEntryInActive(subjectEntry.contentEntryUid, false)
+                repo.contentEntryDao.updateContentEntryInActive(subjectEntry.contentEntryUid,
+                    false, systemTimeInMillis())
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, parentEntry!!, subjectEntry, i)
 

@@ -18,6 +18,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.lib.db.entities.Role
@@ -163,15 +164,18 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 SelectionOption.HIDE -> {
                     when(contentFilter){
                         ARG_DISPLAY_CONTENT_BY_PARENT ->{
-                            repo.contentEntryDao.toggleVisibilityContentEntryItems(true, selectedItem.map { it.contentEntryUid })
+                            repo.contentEntryDao.toggleVisibilityContentEntryItems(true,
+                                selectedItem.map { it.contentEntryUid }, systemTimeInMillis())
                         }
                         ARG_DISPLAY_CONTENT_BY_CLAZZ ->{
-                            repo.clazzContentJoinDao.toggleVisibilityClazzContent(false, selectedItem.map { it.contentEntryUid })
+                            repo.clazzContentJoinDao.toggleVisibilityClazzContent(false,
+                                selectedItem.map { it.contentEntryUid }, systemTimeInMillis())
                         }
                     }
                 }
                 SelectionOption.UNHIDE -> {
-                    repo.contentEntryDao.toggleVisibilityContentEntryItems(false, selectedItem.map { it.contentEntryUid })
+                    repo.contentEntryDao.toggleVisibilityContentEntryItems(false,
+                        selectedItem.map { it.contentEntryUid }, systemTimeInMillis())
                 }
             }
         }
