@@ -2568,10 +2568,6 @@ abstract class UmAppDatabase : DoorDatabase() {
             listOf("ALTER TABLE ContentJobItem ADD COLUMN cjiUploadSessionUid TEXT")
         }
 
-//        val MIGRATION_89_90 = DoorMigrationStatementList(89, 90) {
-//            listOf("DROP TABLE IF EXISTS PersonCustomFieldValue")
-//        }
-
         val MIGRATION_89_90 = DoorMigrationStatementList(89, 90) { db ->
             if(db.dbType() == DoorDbType.SQLITE) {
                 listOf(
@@ -2617,6 +2613,62 @@ abstract class UmAppDatabase : DoorDatabase() {
             }
         }
 
+        val MIGRATION_94_95 = DoorMigrationStatementList(94, 95) { db ->
+            if(db.dbType() == DoorDbType.SQLITE) {
+                listOf(
+                    "DROP TRIGGER IF EXISTS ATTUPD_PersonPicture",
+                    "DROP TABLE IF EXISTS ZombieAttachmentData",
+                    "CREATE TABLE IF NOT EXISTS ZombieAttachmentData (  zaTableId  INTEGER  NOT NULL , zaPrimaryKey  INTEGER  NOT NULL , zaMd5  TEXT , zaUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )",
+                    """
+        |
+        |        CREATE TRIGGER ATTUPD_PersonPicture
+        |        AFTER UPDATE ON PersonPicture FOR EACH ROW WHEN
+        |        OLD.personPictureMd5 IS NOT NULL
+        |        BEGIN
+        |        
+        |        INSERT INTO ZombieAttachmentData(zaTableId, zaPrimaryKey, zaMd5) 
+        |        SELECT 50 AS zaTableId, OLD.personPictureUid AS zaPrimaryKey, OLD.personPictureMd5 AS zaMd5
+        |          FROM PersonPicture   
+        |         WHERE PersonPicture.personPictureUid = OLD.personPictureUid
+        |           AND (SELECT COUNT(*) 
+        |                  FROM PersonPicture
+        |                 WHERE personPictureMd5 = OLD.personPictureMd5) = 0
+        |    ; 
+        |        END
+        |    
+        """.trimMargin()
+                )
+            }else {
+                listOf(
+                    "DROP TRIGGER IF EXISTS attach_PersonPicture_trig ON PersonPicture",
+                    "DROP TABLE IF EXISTS ZombieAttachmentData",
+                    "CREATE TABLE IF NOT EXISTS ZombieAttachmentData (  zaTableId  INTEGER  NOT NULL , zaPrimaryKey  BIGINT  NOT NULL , zaMd5  TEXT , zaUid  BIGSERIAL  PRIMARY KEY  NOT NULL )",
+                    """
+        |    CREATE OR REPLACE FUNCTION attach_PersonPicture_fn() RETURNS trigger AS ${'$'}${'$'}
+        |    BEGIN
+        |    
+        |    INSERT INTO ZombieAttachmentData(zaTableId, zaPrimaryKey, zaMd5) 
+        |    SELECT 50 AS zaTableId, OLD.personPictureUid AS zaPrimaryKey, OLD.personPictureMd5 AS zaMd5
+        |      FROM PersonPicture   
+        |     WHERE PersonPicture.personPictureUid = OLD.personPictureUid
+        |       AND (SELECT COUNT(*) 
+        |              FROM PersonPicture
+        |             WHERE personPictureMd5 = OLD.personPictureMd5) = 0
+        |;
+        |    RETURN NEW;
+        |    END ${'$'}${'$'}
+        |    LANGUAGE plpgsql
+        """.trimMargin(),
+
+                    """
+        |CREATE TRIGGER attach_PersonPicture_trig
+        |AFTER UPDATE ON PersonPicture
+        |FOR EACH ROW WHEN (OLD.personPictureMd5 IS NOT NULL)
+        |EXECUTE PROCEDURE attach_PersonPicture_fn();
+        """.trimMargin())
+            }
+        }
+
 
 
 fun migrationList(nodeId: Long) = listOf<DoorMigration>(
@@ -2632,7 +2684,7 @@ fun migrationList(nodeId: Long) = listOf<DoorMigration>(
     MIGRATION_79_80, MIGRATION_80_81, MIGRATION_81_82, MIGRATION_82_83, MIGRATION_83_84,
     MIGRATION_84_85, MIGRATION_85_86, MIGRATION_86_87, MIGRATION_87_88,
     MIGRATION_88_89, MIGRATION_89_90, MIGRATION_90_91,
-    UmAppDatabaseReplicationMigration91_92, MIGRATION_92_93, MIGRATION_93_94
+    UmAppDatabaseReplicationMigration91_92, MIGRATION_92_93, MIGRATION_93_94, MIGRATION_94_95
 )
 
         internal fun migrate67to68(nodeId: Long)= DoorMigrationSync(67, 68) { database ->
