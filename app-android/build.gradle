@@ -9,7 +9,6 @@ buildscript {
     }
 
     dependencies {
-        classpath "digital.wup:android-maven-publish:$version_android_maven_publish"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
     }
@@ -17,6 +16,7 @@ buildscript {
 
 plugins {
     id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha06"
+    id 'maven-publish'
 }
 
 apply plugin: 'com.android.library'
@@ -25,7 +25,6 @@ apply plugin: "kotlin-android"
 //Jacoco on Android is persistently getting stuck - see https://github.com/arturdm/jacoco-android-gradle-plugin/issues/60.
 // Should be disabled until this is fixed or excluded unless we are specifically running tests for coverage.
 //apply plugin: "jacoco"
-apply plugin: 'digital.wup.android-maven-publish'
 apply plugin: 'kotlinx-serialization'
 apply plugin: "kotlin-kapt"
 
@@ -127,7 +126,7 @@ android {
         //When using variables the build analyzer reports that major tasks reran because of a
         // 'chnage' in the value of minSdkVersion, hence hardcoding them here.
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
 
         multiDexEnabled true //required for all variants to use java library desugaring
         vectorDrawables.useSupportLibrary = true
@@ -144,18 +143,6 @@ android {
         }
 
         missingDimensionStrategy 'api', 'api18'
-    }
-
-    flavorDimensions "config"
-
-    productFlavors {
-        /**
-         * Used for day to day work in Android studio to avoid the need to use multidex when running tests
-         */
-        devMinApi21 {
-            dimension "config"
-            minSdkVersion 21
-        }
     }
 
     buildTypes {
@@ -459,23 +446,34 @@ task sourceJar(type: Jar) {
     classifier "source"
 }
 
-publishing {
-    publications {
-        //For the moment - publish only vanilla debug variant. Can publish others as per:
-        // https://github.com/wupdigital/android-maven-publish
-        mavenLocalconfigAar(MavenPublication) {
-            from components.findByName("androidVanillaDebug")
-            groupId rootProject.group
-            artifactId project.name
-            version rootProject.version
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                // Applies the component for the release build variant.
+                from components.release
+
+                // You can then customize attributes of the publication as shown below.
+                groupId = rootProject.group
+                artifactId = project.name
+                version = rootProject.version
+            }
+            // Creates a Maven publication called “debug”.
+            debug(MavenPublication) {
+                // Applies the component for the debug build variant.
+                from components.debug
+
+                groupId = rootProject.group
+                artifactId = project.name
+                version = rootProject.version
+            }
         }
 
-    }
 
-    repositories {
-        //Set this in projectdir/extrasettings.gradle
-        maven {
-            url rootProject.ext.buildConfigProperties['repo.dir']
+        repositories {
+            maven {
+                url rootProject.ext.buildConfigProperties['repo.dir']
+            }
         }
     }
 }

@@ -92,7 +92,8 @@ suspend fun UmAppDatabase.processEnrolmentIntoClass(
 ) : ClazzEnrolment {
 
     val clazzWithSchoolVal = clazzWithSchool ?: clazzDao.getClazzWithSchool(
-        enrolment.clazzEnrolmentClazzUid) ?: throw IllegalArgumentException("Class does not exist")
+        enrolment.clazzEnrolmentClazzUid)
+        ?: throw IllegalArgumentException("processEnrolmentIntoClass: Class does not exist")
     val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
 
     enrolment.clazzEnrolmentDateJoined = DateTime(enrolment.clazzEnrolmentDateJoined)
@@ -199,7 +200,7 @@ suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: PersonWithClaz
     //find the group member and update that
     val numGroupUpdates = personGroupMemberDao.moveGroupAsync(enrolment.personUid,
         effectiveClazz.clazzStudentsPersonGroupUid,
-        effectiveClazz.clazzPendingStudentsPersonGroupUid)
+        effectiveClazz.clazzPendingStudentsPersonGroupUid, systemTimeInMillis())
 
     if(numGroupUpdates != 1) {
         throw IllegalStateException("Approve pending clazz member - no membership of clazz's pending group!")
@@ -207,7 +208,8 @@ suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: PersonWithClaz
 
     //change the role
     val enrolmentUpdateCount = clazzEnrolmentDao.updateClazzEnrolmentRole(enrolment.personUid, clazzUid,
-        newRole = ClazzEnrolment.ROLE_STUDENT, oldRole = ClazzEnrolment.ROLE_STUDENT_PENDING)
+        newRole = ClazzEnrolment.ROLE_STUDENT, oldRole = ClazzEnrolment.ROLE_STUDENT_PENDING,
+        systemTimeInMillis())
     if(enrolmentUpdateCount != 1) {
         throw IllegalStateException("Approve pending clazz member - no update of enrolment!")
     }
@@ -218,10 +220,10 @@ suspend fun UmAppDatabase.declinePendingClazzEnrolment(enrolment: PersonWithClaz
         ?: throw IllegalStateException("Class does not exist")
 
         clazzEnrolmentDao.updateClazzEnrolmentActiveForPersonAndClazz(enrolment.personUid,
-            clazzUid, ClazzEnrolment.ROLE_STUDENT_PENDING, false)
+            clazzUid, ClazzEnrolment.ROLE_STUDENT_PENDING, false, systemTimeInMillis())
 
-        personGroupMemberDao.setGroupMemberToInActive(enrolment.personUid,
-            effectiveClazz.clazzPendingStudentsPersonGroupUid)
+        personGroupMemberDao.updateGroupMemberActive(false, enrolment.personUid,
+            effectiveClazz.clazzPendingStudentsPersonGroupUid, systemTimeInMillis())
 
 }
 
@@ -237,7 +239,7 @@ suspend fun UmAppDatabase.approvePendingSchoolMember(member: SchoolMember, schoo
     //find the group member and update that
     val numGroupUpdates = personGroupMemberDao.moveGroupAsync(member.schoolMemberPersonUid,
             effectiveClazz.schoolStudentsPersonGroupUid,
-            effectiveClazz.schoolPendingStudentsPersonGroupUid)
+            effectiveClazz.schoolPendingStudentsPersonGroupUid, systemTimeInMillis())
     if(numGroupUpdates != 1) {
         println("No group update?")
     }
@@ -246,8 +248,10 @@ suspend fun UmAppDatabase.approvePendingSchoolMember(member: SchoolMember, schoo
 /**
  * Inserts the person, sets its group and groupmember. Does not check if its an update
  */
-suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(entity: T,
-    groupFlag: Int = PersonGroup.PERSONGROUP_FLAG_PERSONGROUP): T{
+suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(
+    entity: T,
+    groupFlag: Int = PersonGroup.PERSONGROUP_FLAG_PERSONGROUP
+): T{
 
     val groupPerson = PersonGroup().apply {
         groupName = "Person individual group"
@@ -409,9 +413,11 @@ data class SeriesData(val dataList: List<StatementDao.ReportData>,
 /**
  * Insert a new school
  */
-suspend fun UmAppDatabase.createNewSchoolAndGroups(school: School,
-                                                   impl: UstadMobileSystemImpl, context: Any)
-                                                    :Long {
+suspend fun UmAppDatabase.createNewSchoolAndGroups(
+    school: School,
+    impl: UstadMobileSystemImpl,
+    context: Any
+) :Long {
     school.schoolTeachersPersonGroupUid = personGroupDao.insertAsync(
             PersonGroup("${school.schoolName} - " +
                     impl.getString(MessageID.teachers_literal, context)))
@@ -428,13 +434,6 @@ suspend fun UmAppDatabase.createNewSchoolAndGroups(school: School,
     school.takeIf { it.schoolCode == null }?.schoolCode = randomString(Clazz.CLAZZ_CODE_DEFAULT_LENGTH)
 
     school.schoolUid = schoolDao.insertAsync(school)
-
-//    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
-//            school.schoolTeachersPersonGroupUid, Role.ROLE_SCHOOL_STAFF_UID.toLong()))
-//    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
-//            school.schoolStudentsPersonGroupUid, Role.ROLE_SCHOOL_STUDENT_UID.toLong()))
-//    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
-//            school.schoolPendingStudentsPersonGroupUid, Role.ROLE_SCHOOL_STUDENT_PENDING_UID.toLong()))
 
     return school.schoolUid
 }

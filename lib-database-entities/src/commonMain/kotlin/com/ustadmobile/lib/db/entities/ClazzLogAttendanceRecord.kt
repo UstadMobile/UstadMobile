@@ -7,40 +7,25 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.FROM_C
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.FROM_SCOPEDGRANT_TO_CLAZZLOGATTENDANCERECORD_JOIN_ON_CLAUSE
 import kotlinx.serialization.Serializable
 
-@SyncableEntity(tableId = ClazzLogAttendanceRecord.TABLE_ID,
-    notifyOnUpdate = [
-        """
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-               ${ClazzLogAttendanceRecord.TABLE_ID} AS tableId 
-          FROM ChangeLog
-            JOIN ClazzLogAttendanceRecord 
-                 ON ChangeLog.chTableId = ${ClazzLogAttendanceRecord.TABLE_ID} 
-                    AND ChangeLog.chEntityPk = ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid
-            JOIN ScopedGrant 
-                 ON $FROM_CLAZZLOGATTENDANCERECORD_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
-                    AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT}) > 0
-            JOIN PersonGroupMember 
-                 ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-            JOIN UserSession
-                 ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-                    AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-        """
-    ],
-    syncFindAllQuery = """
-            SELECT ClazzLogAttendanceRecord.*
-              FROM UserSession
-                   JOIN PersonGroupMember 
-                        ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-                   JOIN ScopedGrant 
-                        ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                            AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT}) > 0
-                   JOIN ClazzLogAttendanceRecord 
-                        ON $FROM_SCOPEDGRANT_TO_CLAZZLOGATTENDANCERECORD_JOIN_ON_CLAUSE
-             WHERE UserSession.usClientNodeId = :clientId
-                   AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-        """)
+@ReplicateEntity(tableId = ClazzLogAttendanceRecord.TABLE_ID,
+    tracker = ClazzLogAttendanceRecordReplicate::class)
 @Entity
 @Serializable
+@Triggers(arrayOf(
+ Trigger(
+     name = "clazzlogattendancerecord_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO ClazzLogAttendanceRecord(clazzLogAttendanceRecordUid, clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordPersonUid, attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy, clazzLogAttendanceRecordLastChangedTime) 
+         VALUES (NEW.clazzLogAttendanceRecordUid, NEW.clazzLogAttendanceRecordClazzLogUid, NEW.clazzLogAttendanceRecordPersonUid, NEW.attendanceStatus, NEW.clazzLogAttendanceRecordMasterChangeSeqNum, NEW.clazzLogAttendanceRecordLocalChangeSeqNum, NEW.clazzLogAttendanceRecordLastChangedBy, NEW.clazzLogAttendanceRecordLastChangedTime) 
+         /*psql ON CONFLICT (clazzLogAttendanceRecordUid) DO UPDATE 
+         SET clazzLogAttendanceRecordClazzLogUid = EXCLUDED.clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordPersonUid = EXCLUDED.clazzLogAttendanceRecordPersonUid, attendanceStatus = EXCLUDED.attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum = EXCLUDED.clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum = EXCLUDED.clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy = EXCLUDED.clazzLogAttendanceRecordLastChangedBy, clazzLogAttendanceRecordLastChangedTime = EXCLUDED.clazzLogAttendanceRecordLastChangedTime
+         */"""
+     ]
+ )
+))
 open class ClazzLogAttendanceRecord {
 
     @PrimaryKey(autoGenerate = true)
@@ -62,6 +47,7 @@ open class ClazzLogAttendanceRecord {
     var clazzLogAttendanceRecordLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var clazzLogAttendanceRecordLastChangedTime: Long = 0
 
 

@@ -14,7 +14,6 @@ import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.io.ext.generateConcatenatedFilesResponse2
 import com.ustadmobile.core.io.ext.toContainerEntryWithMd5
 import com.ustadmobile.core.network.NetworkProgressListener
-import com.ustadmobile.core.network.containeruploader.ContainerUploaderRequest2
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.distinctMds5sSorted
 import com.ustadmobile.core.util.ext.encodeBase64
@@ -36,7 +35,10 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import org.mockito.kotlin.*
+import org.mockito.kotlin.any
+import org.mockito.kotlin.atLeastOnce
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.SequenceInputStream
@@ -92,7 +94,7 @@ class ContainerUploader2Test {
                     MockResponse().setResponseCode(204)
                 }
                 request.requestUrl.toString().endsWith("/close") -> {
-                    MockResponse().setResponseCode(200)
+                    MockResponse().setResponseCode(204)
                 }
 
                 else -> {

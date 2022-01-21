@@ -92,18 +92,10 @@ class ContentEntryEdit2Presenter(
         : MessageIdOption(day.messageId, context, day.optionVal)
 
 
-    data class UmStorageOptions(var messageId: Int, var label: String)
-
     private var parentEntryUid: Long = 0
 
     private var fromUri: String? = null
 
-
-    open class StorageOptions(context: Any, val storage: UmStorageOptions) : MessageIdOption(storage.messageId, context) {
-        override fun toString(): String {
-            return storage.label
-        }
-    }
 
     class LicenceMessageIdOptions(licence: LicenceOptions, context: Any)
         : MessageIdOption(licence.messageId, context, licence.optionVal)
@@ -213,6 +205,7 @@ class ContentEntryEdit2Presenter(
 
             if (canCreate) {
                 entity.licenseName = view.licenceOptions?.firstOrNull { it.code == entity.licenseType }.toString()
+                val isImport = entity.contentEntryUid == 0L
                 if (entity.contentEntryUid == 0L) {
                     entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
 
@@ -266,6 +259,7 @@ class ContentEntryEdit2Presenter(
                             cjiParentContentEntryUid = parentEntryUid
                             cjiConnectivityNeeded = false
                             cjiStatus = JobStatus.QUEUED
+                            cjiContentDeletedOnCancellation = isImport
                             cjiUid = db.contentJobItemDao.insertJobItem(this)
                         }
 
@@ -358,7 +352,6 @@ class ContentEntryEdit2Presenter(
             ContentJobProcessContext(doorUri, createTemporaryDir("content"),
                     mutableMapOf(), di).use { processContext ->
                 val metadata = pluginManager.extractMetadata(DoorUri.parse(uri), processContext)
-                    ?: throw IllegalArgumentException("no metadata found")
                 view.metadataResult = metadata
                 val plugin = pluginManager.getPluginById(metadata.pluginId)
                 entry = metadata.entry

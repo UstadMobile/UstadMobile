@@ -31,7 +31,7 @@ class SelectFolderFragment(private val registry: ActivityResultRegistry? = null)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        activityResultLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree(),
+        activityResultLauncher = registerForActivityResult<Uri?, Uri?>(ActivityResultContracts.OpenDocumentTree(),
                 registry ?: requireActivity().activityResultRegistry) {
 
             when {

@@ -59,7 +59,7 @@ android {
         applicationId "${baseAppId}.launcher"
         resConfigs "en","tg","ru"
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.ext.ustadVersion
         multiDexEnabled true //required for all variants to use java library desugaring

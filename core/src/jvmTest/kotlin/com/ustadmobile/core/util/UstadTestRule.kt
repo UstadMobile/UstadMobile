@@ -8,6 +8,7 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
+import com.ustadmobile.core.db.RepSubscriptionInitListener
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
@@ -17,11 +18,9 @@ import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
-import com.ustadmobile.door.ext.clearAllTablesAndResetSync
-import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -41,12 +40,11 @@ import org.junit.runner.Description
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
-import java.net.InetAddress
 import java.net.URL
 import java.nio.file.Files
-import java.util.concurrent.Executors
 import javax.naming.InitialContext
 import kotlin.random.Random
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 
 fun DI.onActiveAccount(): DI {
     val accountManager: UstadAccountManager by instance()
@@ -69,7 +67,10 @@ fun DI.directActiveRepoInstance() = onActiveAccountDirect().instance<UmAppDataba
  *
  * Simply override the built in bindings if required for specific tests
  */
-class UstadTestRule: TestWatcher() {
+class UstadTestRule(
+    val repoReplicationSubscriptionEnabled: Boolean = false,
+    val repSubscriptionInitListener: RepSubscriptionInitListener? = null
+): TestWatcher() {
 
     lateinit var coroutineDispatcher: ExecutorCoroutineDispatcher
 
@@ -116,7 +117,7 @@ class UstadTestRule: TestWatcher() {
             }
 
             bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
-                NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
+                NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
             }
 
             bind<UmAppDatabase>(tag = TAG_DB) with scoped(endpointScope).singleton {
@@ -125,19 +126,21 @@ class UstadTestRule: TestWatcher() {
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
                     .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
-                    .addSyncCallback(nodeIdAndAuth, primary = false)
-                        .addCallback(ContentJobItemTriggersCallback())
+                    .addSyncCallback(nodeIdAndAuth)
+                    .addCallback(ContentJobItemTriggersCallback())
                     .build()
-                    .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, isPrimary = false))
+                    .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId))
             }
 
             bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope).singleton {
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(
-                    Any(), context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
-                    instance(), instance()
+                    Any(), UMFileUtil.joinPaths(context.url, "UmAppDatabase/"), nodeIdAndAuth.nodeId,
+                    nodeIdAndAuth.auth, instance(), instance()
                 ) {
                     attachmentsDir = File(tempFolder, "attachments").absolutePath
+                    this.useReplicationSubscription = repoReplicationSubscriptionEnabled
+                    this.replicationSubscriptionInitListener = repSubscriptionInitListener
                 })
                 ).also {
                     it.siteDao.insert(Site().apply {

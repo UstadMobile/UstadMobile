@@ -13,6 +13,7 @@ import io.ktor.client.*
 import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import io.ktor.client.statement.HttpStatement
 import kotlinx.coroutines.*
 import org.kodein.di.*
 import java.io.IOException
@@ -25,6 +26,7 @@ import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.internal.closeQuietly
+import java.lang.IllegalStateException
 
 
 actual class ContainerUploader2 actual constructor(
@@ -47,7 +49,6 @@ actual class ContainerUploader2 actual constructor(
         var bytesUploaded: Long = 0
         var bytesToUpload: Long = -1
 
-        var exception: Exception? = null
         var response: Response? = null
 
         try {
@@ -99,32 +100,40 @@ actual class ContainerUploader2 actual constructor(
                     bytesUploaded += bytesRead
                     progressListener?.onProgress(
                         uploadSessionParams.startFrom + bytesUploaded, bytesToUpload)
+
                 }
+            }else{
+                bytesToUpload = 0
             }
+
+            val statement = httpClient.post<HttpStatement>("${endpoint.url}ContainerUpload2/${request.uploadUuid}/close"){
+                body = defaultSerializer().write(request.entriesToUpload,
+                        ContentType.Application.Json.withUtf8Charset())
+            }.execute()
+            if(statement.status.value != 204){
+                throw IllegalStateException(statement.status.description)
+            }
+
+            progressListener?.onProgress(bytesUploaded, bytesToUpload)
+
+
+
         }catch(e: Exception) {
-            exception = e
             e.printStackTrace()
+            throw e
         }finally {
             //if we are here because we got canceled, read anything remainder to null so that the
             //write job will not get stuck
             pipeIn?.copyTo(NullOutputStream())
             pipeIn?.close()
             response?.closeQuietly()
-
-            try {
-                httpClient.get<Unit>("${endpoint.url}ContainerUpload2/${request.uploadUuid}/close")
-            }catch(e: Exception){
-                //do nothing
-            }
         }
 
-        progressListener?.onProgress(bytesUploaded, bytesToUpload)
-        return@withContext if(bytesUploaded == bytesToUpload) {
+
+        return@withContext  if(bytesUploaded == bytesToUpload) {
             JobStatus.COMPLETE
-        }else if(exception != null){
-            JobStatus.FAILED
-        }else {
-            JobStatus.PAUSED
+        } else {
+            JobStatus.QUEUED
         }
     }
 

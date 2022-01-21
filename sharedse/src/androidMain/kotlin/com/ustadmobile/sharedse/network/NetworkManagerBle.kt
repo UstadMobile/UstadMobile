@@ -145,8 +145,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
             if (isBleCapable) {
                 UMLog.l(UMLog.DEBUG, 689, "Starting BLE scanning")
                 notifyStateChanged(STATE_STARTED)
-                gattClientCallbackManager = GattClientCallbackManager(context as Context,
-                        bluetoothAdapter!!, {nodeAddr: String, evtType: Int -> Unit})
                 bluetoothAdapter!!.startLeScan(arrayOf(parcelServiceUuid.uuid),
                         bleScanCallback as BluetoothAdapter.LeScanCallback?)
                 UMLog.l(UMLog.DEBUG, 689,
@@ -161,7 +159,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
         @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
         override fun stop() {
             bluetoothAdapter!!.stopLeScan(bleScanCallback as BluetoothAdapter.LeScanCallback?)
-            gattClientCallbackManager = null
             notifyStateChanged(STATE_STOPPED)
         }
     }

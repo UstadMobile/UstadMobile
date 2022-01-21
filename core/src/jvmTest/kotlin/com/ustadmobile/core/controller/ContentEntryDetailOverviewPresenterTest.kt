@@ -1,6 +1,8 @@
 
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
+import com.ustadmobile.core.db.JobStatus
 import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
@@ -15,10 +17,10 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -125,6 +127,47 @@ class ContentEntryDetailOverviewPresenterTest {
         verify(systemImpl).go(eq(ContentEntryEdit2View.VIEW_NAME),
                 eq(mapOf(ARG_ENTITY_UID to createdEntry?.contentEntryUid.toString(),
                 UstadView.ARG_LEAF to true.toString())), any())
+    }
+
+    @Test
+    fun givenContentEntryExists_whenContentJobItemInProgress_thenShouldSetProgressBarView() {
+        val db: UmAppDatabase by di.activeDbInstance()
+
+        val contentJob = ContentJob().apply {
+            cjUid = 1
+        }
+        val contentJobItem = ContentJobItem().apply {
+            cjiUid = 1
+            cjiJobUid = 1
+            cjiStatus = JobStatus.RUNNING
+            cjiRecursiveStatus = JobStatus.RUNNING
+            cjiItemProgress = 50
+            cjiItemTotal = 100
+            cjiContentEntryUid = createdEntry!!.contentEntryUid
+            cjiContainerUid = entryContainer.containerUid
+        }
+        runBlocking {
+            db.contentJobDao.insertAsync(contentJob)
+            db.contentJobItemDao.insertJobItem(contentJobItem)
+        }
+
+
+        val presenter = ContentEntryDetailOverviewPresenter(context,
+                presenterArgs!!, mockView, di, mockLifecycleOwner)
+
+        presenter.onCreate(null)
+
+        sleep(defaultTimeout)
+
+        argumentCaptor<List<ContentJobItemProgress>> {
+            verify(mockView).contentJobItemProgress = capture()
+            val contentJobItemCaptured = this.firstValue[0]
+            Assert.assertEquals("progress match",
+                    contentJobItem.cjiItemProgress.toInt(), contentJobItemCaptured.progress)
+            Assert.assertEquals("total match",
+                    contentJobItem.cjiItemTotal.toInt(), contentJobItemCaptured.total)
+        }
+
     }
 
 }

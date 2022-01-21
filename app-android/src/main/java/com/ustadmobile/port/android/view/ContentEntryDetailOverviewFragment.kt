@@ -3,27 +3,35 @@ package com.ustadmobile.port.android.view
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
-import androidx.lifecycle.*
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import io.github.aakira.napier.Napier
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntry2DetailBinding
+import com.toughra.ustadmobile.databinding.ItemContentEntryListBinding
+import com.toughra.ustadmobile.databinding.ItemContentJobItemProgressBinding
 import com.toughra.ustadmobile.databinding.ItemEntryTranslationBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ContentEntryDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.*
+import com.ustadmobile.core.util.ext.toNullableStringMap
+import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.direct
@@ -53,6 +61,8 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
     private var currentLiveData: LiveData<PagedList<ContentEntryRelatedEntryJoinWithLanguage>>? = null
 
     private var availableTranslationAdapter: AvailableTranslationRecyclerAdapter? = null
+
+    private var progressListAdapter: ContentJobItemProgressRecyclerAdapter? = null
 
     private val availableTranslationObserver = Observer<List<ContentEntryRelatedEntryJoinWithLanguage>?> {
         t -> run {
@@ -92,12 +102,17 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
             mBinding?.canUpdate = value
         }
 
-    override var hasContentToOpenOrDelete: Boolean = false
+    override var canDelete: Boolean = false
         set(value) {
             field = value
-            mBinding?.hasContentToOpenOrDelete = value
+            mBinding?.canDelete = value
         }
 
+    override var canOpen: Boolean = false
+        set(value) {
+            field = value
+            mBinding?.canOpen = value
+        }
 
     private inner class PresenterViewLifecycleObserver: DefaultLifecycleObserver {
         override fun onStart(owner: LifecycleOwner) {
@@ -156,21 +171,12 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
         systemImpl.go("DownloadDialog", args, requireContext())
     }
 
-    override var contentJobItemProgress: ContentJobItemProgress? = null
+    override var contentJobItemProgress: List<ContentJobItemProgress>? = null
         set(value){
             field = value
-            if(value != null) {
-                if(value.progressTitle != null){
-                    mBinding?.entryDetailProgress?.statusText = value.progressTitle.toString()
-                }
-                mBinding?.entryDetailProgress?.progress = if (value.total > 0) {
-                    (value.progress.toFloat()) / (value.total.toFloat())
-                } else {
-                    0f
-                }
-            }else{
-                mBinding?.entryDetailProgress?.progress = 0f
-            }
+            mBinding?.contentJobItemProgressList?.visibility = if(value != null && value.isNotEmpty())
+                View.VISIBLE else View.GONE
+            progressListAdapter?.submitList(value)
         }
 
     override var contentJobItemStatus: Int = 0
@@ -183,20 +189,15 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
                 when {
                     value == ContentJobItem.STATUS_COMPLETE -> {
                         mBinding?.entryDownloadOpenBtn?.visibility = View.VISIBLE
-                        mBinding?.entryDetailProgress?.visibility = View.GONE
                     }
 
                     value == ContentJobItem.STATUS_RUNNING -> {
                         mBinding?.entryDownloadOpenBtn?.visibility = View.GONE
-                        mBinding?.entryDetailProgress?.visibility = View.VISIBLE
                     }
-
                     else -> {
                         mBinding?.entryDownloadOpenBtn?.visibility = View.VISIBLE
-                        mBinding?.entryDetailProgress?.visibility = View.GONE
                     }
                 }
-
                 currentDownloadJobItemStatus = value
             }
             field = value
@@ -207,6 +208,35 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
             field = value
             mBinding?.scoreProgress = value
         }
+
+
+    class ContentJobItemProgressRecyclerAdapter():
+            ListAdapter<ContentJobItemProgress,
+            ContentJobItemProgressRecyclerAdapter.ProgressViewHolder>(DIFF_CALLBACK_CONTENT_JOB_PROGRESS){
+
+
+        class ProgressViewHolder(val binding: ItemContentJobItemProgressBinding): RecyclerView.ViewHolder(binding.root)
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProgressViewHolder {
+            return ProgressViewHolder(ItemContentJobItemProgressBinding
+                    .inflate(LayoutInflater.from(parent.context), parent, false))
+        }
+
+        override fun onBindViewHolder(holder: ProgressViewHolder, position: Int) {
+            val item = getItem(position)
+            if (item.progressTitle != null) {
+                holder.binding.entryDetailProgress.statusText = item.progressTitle.toString()
+            }
+            holder.binding.entryDetailProgress.progress = if (item.total > 0) {
+                (item.progress.toFloat()) / (item.total.toFloat())
+            } else {
+                0f
+            }
+        }
+
+    }
+
+
 
     class AvailableTranslationRecyclerAdapter(var activityEventHandler: ContentEntryDetailFragmentEventHandler?,
                                               var presenter: ContentEntryDetailOverviewPresenter?):
@@ -246,6 +276,11 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
         super.onViewCreated(view, savedInstanceState)
         mPresenter = ContentEntryDetailOverviewPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner).withViewLifecycle()
+
+
+        progressListAdapter = ContentJobItemProgressRecyclerAdapter()
+        mBinding?.contentJobItemProgressList?.adapter = progressListAdapter
+        mBinding?.contentJobItemProgressList?.layoutManager = LinearLayoutManager(requireContext())
 
         val flexboxLayoutManager = FlexboxLayoutManager(requireContext())
         flexboxLayoutManager.flexDirection = FlexDirection.ROW
@@ -293,8 +328,10 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
         mPresenter = null
         currentLiveData = null
         mBinding?.availableTranslationView?.adapter = null
+        mBinding?.contentJobItemProgressList?.adapter = null
         availableTranslationAdapter = null
         availableTranslationsList = null
+        progressListAdapter = null
         entity = null
         presenterLifecycleObserver?.also {
             viewLifecycleOwner.lifecycle.removeObserver(it)
@@ -308,6 +345,20 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
 
 
     companion object{
+
+        val DIFF_CALLBACK_CONTENT_JOB_PROGRESS: DiffUtil.ItemCallback<ContentJobItemProgress> =
+                object: DiffUtil.ItemCallback<ContentJobItemProgress>(){
+                    override fun areItemsTheSame(oldItem: ContentJobItemProgress,
+                                                 newItem: ContentJobItemProgress): Boolean {
+                      return oldItem.cjiUid == newItem.cjiUid
+                    }
+
+                    override fun areContentsTheSame(oldItem: ContentJobItemProgress, newItem: ContentJobItemProgress): Boolean {
+                        return oldItem == newItem
+                    }
+
+                }
+
 
         val DIFF_CALLBACK_ENTRY_LANGUAGE_JOIN: DiffUtil.ItemCallback<ContentEntryRelatedEntryJoinWithLanguage> =
                 object: DiffUtil.ItemCallback<ContentEntryRelatedEntryJoinWithLanguage>() {

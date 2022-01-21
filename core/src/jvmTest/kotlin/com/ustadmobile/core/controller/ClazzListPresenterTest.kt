@@ -11,13 +11,13 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.*
+import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.util.test.ext.insertPersonWithRole
 import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
@@ -123,13 +123,8 @@ class ClazzListPresenterTest {
         }
 
         runBlocking {
-            repo.insertPersonWithRole(activePerson,
-                    Role().apply {
-                        rolePermissions = Role.PERMISSION_CLAZZ_OPEN
-                    }, EntityRole().apply {
-                erTableId = Clazz.TABLE_ID
-                erEntityUid = testEntity.clazzUid
-            })
+            repo.grantScopedPermission(activePerson, Role.PERMISSION_CLAZZ_OPEN,
+                Clazz.TABLE_ID, testEntity.clazzUid)
         }
 
         val accountManager = di.direct.instance<UstadAccountManager>()

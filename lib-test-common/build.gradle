@@ -19,7 +19,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
         missingDimensionStrategy 'api', 'api18'
     }
 }
@@ -96,7 +96,6 @@ kotlin {
         jvmMain {
             dependsOn commonJvmMain
             dependencies {
-                compileOnly project(":app-ktor-server")
                 implementation "io.ktor:ktor-server-servlet:$version_ktor"
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
                 implementation "io.ktor:ktor-gson:$version_ktor"

@@ -172,6 +172,10 @@ class VideoTypePluginAndroid(
 
                             videoCompleted.await()
                         } catch (e: Exception) {
+                            if(e is CancellationException){
+                                mediaTransformer.cancel(contentJobItem.cjiContentEntryUid.toString())
+                                throw e
+                            }
                             Napier.e(tag = VIDEO_ANDROID, throwable = e, message = e.message ?: "")
                             throw FatalContentJobException("ContentJobItem #${jobItem.contentJobItem?.cjiUid}: cannot compress video")
                         } finally {
@@ -189,6 +193,10 @@ class VideoTypePluginAndroid(
                                 containerUid = repo.containerDao.insertAsync(this)
                             }
 
+                    contentJobItem.cjiContainerUid = container.containerUid
+                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                            container.containerUid)
+
                     val containerFolder = jobItem.contentJob?.toUri
                             ?: defaultContainerDir.toURI().toString()
                     val containerFolderUri = DoorUri.parse(containerFolder)
@@ -203,13 +211,11 @@ class VideoTypePluginAndroid(
                                 localUri.getFileName(context),
                                 ContainerAddOptions(containerFolderUri))
                     }
-                    videoTempDir.delete()
 
-                    contentJobItem.cjiContainerUid = container.containerUid
-                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
-                        container.containerUid)
                     contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
                         jobProgress)
+
+                    db.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
 
                     contentJobItem.cjiConnectivityNeeded = true
                     db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
@@ -217,22 +223,22 @@ class VideoTypePluginAndroid(
                     val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid
                             ?: 0)
                     if (!haveConnectivityToContinueJob) {
-                        return@withContext ProcessResult(JobStatus.QUEUED)
+                        return@withContext ProcessResult(JobStatus.WAITING_FOR_CONNECTION)
                     }
 
                 }
 
                 if(contentNeedUpload) {
-                    uploader.upload(contentJobItem,
+                    return@withContext ProcessResult(uploader.upload(contentJobItem,
                         NetworkProgressListenerAdapter(jobProgress, contentJobItem),
                         httpClient, endpoint)
+                    )
                 }
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)
             }catch(c: CancellationException){
 
                 withContext(NonCancellable){
-                    mediaTransformer.release()
                     newVideo.delete()
                     videoTempDir.deleteRecursively()
                     if(videoUri.isRemote()){
@@ -241,6 +247,9 @@ class VideoTypePluginAndroid(
                 }
 
                 throw c
+            }finally {
+                videoTempDir.deleteRecursively()
+                mediaTransformer.release()
             }
         }
     }

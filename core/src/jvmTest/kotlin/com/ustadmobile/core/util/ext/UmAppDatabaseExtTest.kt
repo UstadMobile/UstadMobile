@@ -7,9 +7,9 @@ import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
 import io.ktor.client.*
@@ -41,11 +41,11 @@ class UmAppDatabaseExtTest {
 
     @Before
     fun setup() {
-        val nodeIdAndAuth = NodeIdAndAuth(Random.nextInt(), randomUuid().toString())
+        val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(), randomUuid().toString())
         db = DatabaseBuilder.databaseBuilder(context, UmAppDatabase::class, "UmAppDatabase")
-            .addSyncCallback(nodeIdAndAuth, false)
+            .addSyncCallback(nodeIdAndAuth)
             .build()
-            .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, false)
+            .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
 
         okHttpClient = OkHttpClient()
 

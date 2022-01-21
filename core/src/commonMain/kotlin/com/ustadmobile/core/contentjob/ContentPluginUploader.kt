@@ -16,5 +16,5 @@ fun interface ContentPluginUploader {
             progress: NetworkProgressListener?,
             httpClient: HttpClient,
             endpoint: Endpoint
-    )
+    ): Int
 }

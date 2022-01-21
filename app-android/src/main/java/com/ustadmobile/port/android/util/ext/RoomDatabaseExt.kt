@@ -2,8 +2,8 @@ package com.ustadmobile.port.android.util.ext
 
 import androidx.room.InvalidationTracker
 import androidx.room.RoomDatabase
+import com.ustadmobile.door.DoorDatabaseReplicateWrapper
 import com.ustadmobile.door.DoorDatabaseRepository
-import com.ustadmobile.door.DoorDatabaseSyncableReadOnlyWrapper
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
@@ -19,7 +19,7 @@ suspend fun <R> RoomDatabase.waitUntil2(tableNames: Set<String>, timeout: Long,
         }
     }
 
-    val realDb = if(this is DoorDatabaseSyncableReadOnlyWrapper) {
+    val realDb = if(this is DoorDatabaseReplicateWrapper) {
         this.realDatabase
     }else if(this is DoorDatabaseRepository) {
         this.db

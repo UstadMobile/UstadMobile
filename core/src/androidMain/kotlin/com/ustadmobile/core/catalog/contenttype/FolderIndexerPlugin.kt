@@ -115,6 +115,7 @@ class FolderIndexerPlugin(
                         cjiPluginId = PLUGIN_ID
                         cjiContentEntryUid = 0
                         cjiIsLeaf = false
+                        cjiParentCjiUid = contentJobItem.cjiUid
                         cjiParentContentEntryUid = contentJobItem.cjiContentEntryUid
                         cjiConnectivityNeeded = false
                         cjiStatus = JobStatus.QUEUED
@@ -136,6 +137,7 @@ class FolderIndexerPlugin(
                             cjiContentEntryUid = 0
                             cjiIsLeaf = true
                             cjiPluginId = 0
+                            cjiParentCjiUid = contentJobItem.cjiUid
                             cjiParentContentEntryUid = contentJobItem.cjiContentEntryUid
                             cjiConnectivityNeeded = false
                             cjiStatus = JobStatus.QUEUED

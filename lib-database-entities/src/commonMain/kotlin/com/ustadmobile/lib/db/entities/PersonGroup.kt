@@ -5,39 +5,24 @@ import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
+@Triggers(arrayOf(
+     Trigger(
+         name = "persongroup_remote_insert",
+         order = Trigger.Order.INSTEAD_OF,
+         on = Trigger.On.RECEIVEVIEW,
+         events = [Trigger.Event.INSERT],
+         sqlStatements = [
+             """REPLACE INTO PersonGroup(groupUid, groupMasterCsn, groupLocalCsn, groupLastChangedBy, groupLct, groupName, groupActive, personGroupFlag) 
+             VALUES (NEW.groupUid, NEW.groupMasterCsn, NEW.groupLocalCsn, NEW.groupLastChangedBy, NEW.groupLct, NEW.groupName, NEW.groupActive, NEW.personGroupFlag) 
+             /*psql ON CONFLICT (groupUid) DO UPDATE 
+             SET groupMasterCsn = EXCLUDED.groupMasterCsn, groupLocalCsn = EXCLUDED.groupLocalCsn, groupLastChangedBy = EXCLUDED.groupLastChangedBy, groupLct = EXCLUDED.groupLct, groupName = EXCLUDED.groupName, groupActive = EXCLUDED.groupActive, personGroupFlag = EXCLUDED.personGroupFlag
+             */"""
+         ]
+     )
+))
 @Entity
-@SyncableEntity(tableId = PersonGroup.TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-               ${PersonGroup.TABLE_ID} AS tableId 
-          FROM ChangeLog
-               JOIN PersonGroup 
-                    ON ChangeLog.chTableId = ${PersonGroup.TABLE_ID} 
-                           AND ChangeLog.chEntityPk = PersonGroup.groupUid
-               JOIN PersonGroupMember 
-                    ON PersonGroupMember.groupMemberGroupUid = PersonGroup.groupUid
-               JOIN Person
-                    ON PersonGroupMember.groupMemberPersonUid = Person.personUid
-               ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}     
-        """],
-    syncFindAllQuery = """
-        SELECT PersonGroup.*
-          FROM UserSession
-               JOIN PersonGroupMember
-                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-               ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
-               JOIN PersonGroupMember PersonsWithPerm_GroupMember
-                    ON PersonsWithPerm_GroupMember.groupMemberPersonUid = Person.personUid
-               JOIN PersonGroup 
-                    ON PersonGroup.groupUid = PersonsWithPerm_GroupMember.groupMemberGroupUid
-         WHERE UserSession.usClientNodeId = :clientId
-           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-        """)
 @Serializable
+@ReplicateEntity(tableId = PersonGroup.TABLE_ID, tracker = PersonGroupReplicate::class)
 open class PersonGroup() {
 
     @PrimaryKey(autoGenerate = true)
@@ -53,6 +38,7 @@ open class PersonGroup() {
     var groupLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var groupLct: Long = 0
 
     var groupName: String? = null

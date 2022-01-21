@@ -113,7 +113,9 @@ class ClazzDetailPresenter(context: Any,
                 )
             }
 
-            view.tabs =  coreTabs + permissionAndFeatureBasedTabs
+            val desiredTabs = coreTabs + permissionAndFeatureBasedTabs
+            if(view.tabs != desiredTabs)
+                view.tabs =  coreTabs + permissionAndFeatureBasedTabs
         }
     }
 

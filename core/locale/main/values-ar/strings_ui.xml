@@ -363,9 +363,6 @@
     <string name="activity_change">تغيير النشاط</string>
     <string name="record_activity">تسجيل النشاط</string>
     <string name="last_month">الشهر الماضي</string>
-    <string name="attended_red">حضر أقل من 60% من الدروس</string>
-    <string name="attended_orange">حضر بين 60% الى 79 % من الدروس</string>
-    <string name="attended_green">حضر أكثر من 80% من الدروس</string>
     <string name="toC">الى</string>
     <string name="fromC">من</string>
     <string name="day">يوم</string>

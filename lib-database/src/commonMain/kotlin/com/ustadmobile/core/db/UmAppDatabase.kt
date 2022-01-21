@@ -3,11 +3,11 @@ package com.ustadmobile.core.db
 import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.*
-import com.ustadmobile.door.annotation.MinSyncVersion
+import com.ustadmobile.door.annotation.MinReplicationVersion
+import com.ustadmobile.door.migration.*
 import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
-import com.ustadmobile.door.migration.*
 import com.ustadmobile.door.util.DoorSqlGenerator
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -24,7 +24,7 @@ import kotlin.jvm.JvmField
     ScheduledCheck::class,
     AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
     Person::class,
-    Clazz::class, ClazzEnrolment::class, LeavingReason::class, PersonCustomFieldValue::class,
+    Clazz::class, ClazzEnrolment::class, LeavingReason::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
     ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
     Language::class, LanguageVariant::class, AccessToken::class, PersonAuth::class, Role::class,
@@ -36,7 +36,7 @@ import kotlin.jvm.JvmField
     ContextXObjectStatementJoin::class, AgentEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
     SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
-    SyncResult::class, School::class,
+    School::class,
     SchoolMember::class, Comments::class,
     Report::class,
     Site::class, ContainerImportJob::class,
@@ -55,17 +55,63 @@ import kotlin.jvm.JvmField
     //Door Helper entities
     SqliteChangeSeqNums::class,
     UpdateNotification::class,
-    TableSyncStatus::class,
     ChangeLog::class,
     ZombieAttachmentData::class,
-    DoorNode::class
+    DoorNode::class,
+    ReplicationStatus::class,
 
+    ClazzLogReplicate::class,
+    ClazzLogAttendanceRecordReplicate::class,
+    ScheduleReplicate::class,
+    HolidayCalendarReplicate::class,
+    HolidayReplicate::class,
+    PersonReplicate::class,
+    ClazzReplicate::class,
+    ClazzEnrolmentReplicate::class,
+    LeavingReasonReplicate::class,
+    ContentEntryReplicate::class,
+    ContentEntryContentCategoryJoinReplicate::class,
+    ContentEntryParentChildJoinReplicate::class,
+    ContentEntryRelatedEntryJoinReplicate::class,
+    ContentCategorySchemaReplicate::class,
+    ContentCategoryReplicate::class,
+    LanguageReplicate::class,
+    LanguageVariantReplicate::class,
+    PersonGroupReplicate::class,
+    PersonGroupMemberReplicate::class,
+    PersonPictureReplicate::class,
+    ContainerReplicate::class,
+    VerbEntityReplicate::class,
+    XObjectEntityReplicate::class,
+    StatementEntityReplicate::class,
+    ContextXObjectStatementJoinReplicate::class,
+    AgentEntityReplicate::class,
+    StateEntityReplicate::class,
+    StateContentEntityReplicate::class,
+    XLangMapEntryReplicate::class,
+    SchoolReplicate::class,
+    SchoolMemberReplicate::class,
+    CommentsReplicate::class,
+    ReportReplicate::class,
+    SiteReplicate::class,
+    LearnerGroupReplicate::class,
+    LearnerGroupMemberReplicate::class,
+    GroupLearningSessionReplicate::class,
+    SiteTermsReplicate::class,
+    ClazzContentJoinReplicate::class,
+    PersonParentJoinReplicate::class,
+    ScopedGrantReplicate::class,
+    ErrorReportReplicate::class,
+    ClazzAssignmentReplicate::class,
+    ClazzAssignmentContentJoinReplicate::class,
+    PersonAuth2Replicate::class,
+    UserSessionReplicate::class
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 89)
-@MinSyncVersion(88)
-abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
+], version = 94)
+@MinReplicationVersion(60)
+abstract class UmAppDatabase : DoorDatabase() {
 
     /*
         Changes from 38-39:
@@ -85,10 +131,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         Added School and Assignment based entities
         Updated Clazz : added clazzFeatures and removed individual feature bits
      */
-
-
-    override val master: Boolean
-        get() = false
 
 
     /**
@@ -155,9 +197,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("accessTokenDao")
     abstract val accessTokenDao: AccessTokenDao
 
-    @JsName("roleDao")
-    abstract val roleDao: RoleDao
-
     @JsName("personGroupDao")
     abstract val personGroupDao: PersonGroupDao
 
@@ -223,8 +262,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("groupLearningSessionDao")
     abstract val groupLearningSessionDao: GroupLearningSessionDao
-
-    abstract val syncresultDao: SyncResultDao
 
     abstract val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
     abstract val clazzLogDao: ClazzLogDao
@@ -5248,9 +5285,56 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             listOf("ALTER TABLE ContentJobItem ADD COLUMN cjiUploadSessionUid TEXT")
         }
 
+//        val MIGRATION_89_90 = DoorMigrationStatementList(89, 90) {
+//            listOf("DROP TABLE IF EXISTS PersonCustomFieldValue")
+//        }
+
+        val MIGRATION_89_90 = DoorMigrationStatementList(89, 90) { db ->
+            if(db.dbType() == DoorDbType.SQLITE) {
+                listOf(
+                    "ALTER TABLE ContentJobItem ADD COLUMN cjiContentDeletedOnCancellation INTEGER NOT NULL DEFAULT 0",
+                    "ALTER TABLE ContentJobItem ADD COLUMN cjiContainerProcessed INTEGER NOT NULL DEFAULT 0")
+            }else {
+                listOf(
+                    "ALTER TABLE ContentJobItem ADD COLUMN cjiContentDeletedOnCancellation BOOL NOT NULL DEFAULT false",
+                    "ALTER TABLE ContentJobItem ADD COLUMN cjiContainerProcessed BOOL NOT NULL DEFAULT false"
+                )
+            }
+        }
+
+        val MIGRATION_90_91 = DoorMigrationStatementList(90, 91) { db ->
+            if(db.dbType() == DoorDbType.SQLITE) {
+                DatabaseTriggers.sqliteContentJobItemTriggers.toList()
+            }else {
+                DatabaseTriggers.postgresContentJobItemTriggers.toList()
+            }
+        }
+
+        val MIGRATION_92_93 = DoorMigrationStatementList(92, 93) { db ->
+            if(db.dbType() == DoorDbType.SQLITE) {
+                listOf("ALTER TABLE SyncNode RENAME to SyncNode_OLD",
+                    "CREATE TABLE IF NOT EXISTS SyncNode (  nodeClientId  INTEGER  PRIMARY KEY NOT NULL)",
+                    "INSERT INTO SyncNode (nodeClientId) SELECT nodeClientId FROM SyncNode_OLD",
+                    "DROP TABLE SyncNode_OLD")
+            }else {
+                listOf("ALTER TABLE SyncNode DROP COLUMN master")
+            }
+        }
+
+        val MIGRATION_93_94 = DoorMigrationStatementList(93, 94) { db ->
+            if(db.dbType() == DoorDbType.SQLITE) {
+                listOf(
+                    "CREATE VIEW IF NOT EXISTS ClazzLogAttendanceRecord_ReceiveView AS  SELECT ClazzLogAttendanceRecord.*, ClazzLogAttendanceRecordReplicate.* FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLogAttendanceRecordReplicate ON ClazzLogAttendanceRecordReplicate.clarPk = ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ",
+                    "CREATE TRIGGER clazzlogattendancerecord_remote_insert_ins INSTEAD OF INSERT ON ClazzLogAttendanceRecord_ReceiveView FOR EACH ROW BEGIN REPLACE INTO ClazzLogAttendanceRecord(clazzLogAttendanceRecordUid, clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordPersonUid, attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy, clazzLogAttendanceRecordLastChangedTime) VALUES (NEW.clazzLogAttendanceRecordUid, NEW.clazzLogAttendanceRecordClazzLogUid, NEW.clazzLogAttendanceRecordPersonUid, NEW.attendanceStatus, NEW.clazzLogAttendanceRecordMasterChangeSeqNum, NEW.clazzLogAttendanceRecordLocalChangeSeqNum, NEW.clazzLogAttendanceRecordLastChangedBy, NEW.clazzLogAttendanceRecordLastChangedTime) /*psql ON CONFLICT (clazzLogAttendanceRecordUid) DO UPDATE SET clazzLogAttendanceRecordClazzLogUid = EXCLUDED.clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordPersonUid = EXCLUDED.clazzLogAttendanceRecordPersonUid, attendanceStatus = EXCLUDED.attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum = EXCLUDED.clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum = EXCLUDED.clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy = EXCLUDED.clazzLogAttendanceRecordLastChangedBy, clazzLogAttendanceRecordLastChangedTime = EXCLUDED.clazzLogAttendanceRecordLastChangedTime */; END")
+            }else {
+                listOf("CREATE OR REPLACE FUNCTION clazzlogattendancerecord_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ClazzLogAttendanceRecord(clazzLogAttendanceRecordUid, clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordPersonUid, attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy, clazzLogAttendanceRecordLastChangedTime) VALUES (NEW.clazzLogAttendanceRecordUid, NEW.clazzLogAttendanceRecordClazzLogUid, NEW.clazzLogAttendanceRecordPersonUid, NEW.attendanceStatus, NEW.clazzLogAttendanceRecordMasterChangeSeqNum, NEW.clazzLogAttendanceRecordLocalChangeSeqNum, NEW.clazzLogAttendanceRecordLastChangedBy, NEW.clazzLogAttendanceRecordLastChangedTime) ON CONFLICT (clazzLogAttendanceRecordUid) DO UPDATE SET clazzLogAttendanceRecordClazzLogUid = EXCLUDED.clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordPersonUid = EXCLUDED.clazzLogAttendanceRecordPersonUid, attendanceStatus = EXCLUDED.attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum = EXCLUDED.clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum = EXCLUDED.clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy = EXCLUDED.clazzLogAttendanceRecordLastChangedBy, clazzLogAttendanceRecordLastChangedTime = EXCLUDED.clazzLogAttendanceRecordLastChangedTime ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql",
+                    " CREATE TRIGGER clazzlogattendancerecord_remote_insert_trig INSTEAD OF INSERT ON ClazzLogAttendanceRecord_ReceiveView FOR EACH ROW EXECUTE PROCEDURE clazzlogattendancerecord_remote_insert_fn() ")
+            }
+        }
 
 
-fun migrationList(nodeId: Int) = listOf<DoorMigration>(
+
+fun migrationList(nodeId: Long) = listOf<DoorMigration>(
     MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
     MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
     MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
@@ -5265,15 +5349,16 @@ fun migrationList(nodeId: Int) = listOf<DoorMigration>(
     MIGRATION_76_77, MIGRATION_77_78, MIGRATION_78_79, MIGRATION_78_79,
     MIGRATION_79_80, MIGRATION_80_81, MIGRATION_81_82, MIGRATION_82_83, MIGRATION_83_84,
     MIGRATION_84_85, MIGRATION_85_86, MIGRATION_86_87, MIGRATION_87_88,
-    MIGRATION_88_89
+    MIGRATION_88_89, MIGRATION_89_90, MIGRATION_90_91,
+    UmAppDatabaseReplicationMigration91_92, MIGRATION_92_93, MIGRATION_93_94
 )
 
-internal fun migrate67to68(nodeId: Int)= DoorMigrationSync(67, 68) { database ->
-    if (database.dbType() == DoorDbType.SQLITE) {
-        database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
-    } else {
-        database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  SERIAL  PRIMARY KEY  NOT NULL )")
-    }
+        internal fun migrate67to68(nodeId: Long)= DoorMigrationSync(67, 68) { database ->
+            if (database.dbType() == DoorDbType.SQLITE) {
+                database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            } else {
+                database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  SERIAL  PRIMARY KEY  NOT NULL )")
+            }
 
     database.execSQL(
         """

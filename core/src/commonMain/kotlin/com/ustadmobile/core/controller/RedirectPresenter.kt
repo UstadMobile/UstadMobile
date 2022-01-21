@@ -33,7 +33,7 @@ class RedirectPresenter(context: Any, arguments: Map<String, String>, view: Redi
             }
 
             accountManager.activeSession != null -> {
-                systemImpl.goToViewLink(ContentEntryList2View.VIEW_NAME, context)
+                systemImpl.goToViewLink(ContentEntryList2View.VIEW_NAME_HOME, context)
             }
 
             else -> {

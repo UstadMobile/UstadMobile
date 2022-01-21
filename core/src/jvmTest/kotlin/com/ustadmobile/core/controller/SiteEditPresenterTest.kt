@@ -20,6 +20,8 @@ import kotlinx.coroutines.runBlocking
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.lib.db.entities.Site
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import org.kodein.di.DI
 
 /**
@@ -86,7 +88,7 @@ class SiteEditPresenterTest {
         presenter.handleClickSave(initialEntity)
 
         runBlocking {
-            db.waitUntil(5000, listOf("WorkSpace")) {
+            db.waitUntil(5000, listOf("Site")) {
                 db.siteDao.getSite()?.siteName == "New Spelling Clazz"
             }
         }
