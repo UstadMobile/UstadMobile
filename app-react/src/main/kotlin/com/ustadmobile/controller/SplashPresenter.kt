@@ -59,24 +59,15 @@ class SplashPresenter(private val view: SplashView): DIAware {
 
 
 
-        val dbBuilder =  DatabaseBuilder.databaseBuilder<UmAppDatabase>(builderOptions)
+        val dbBuilder =  DatabaseBuilder.databaseBuilder(builderOptions)
         val umAppDatabase =  dbBuilder.build()
 
         dispatch(ReduxDbState(umAppDatabase))
 
         val accountManager: UstadAccountManager by instance()
         val nodeIdAndAuth:NodeIdAndAuth by di.on(accountManager.activeAccount).instance()
-
         dbBuilder.addCallback(ContentJobItemTriggersCallback())
             .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
-
-/*        val repositoryConfig =  RepositoryConfig.repositoryConfig(
-            this,apiUrl+"UmAppDatabase/",  nodeIdAndAuth.auth, nodeIdAndAuth.nodeId, httpClient,
-            Json { encodeDefaults = true }){}
-        val repository = umAppDatabase.asRepository(repositoryConfig);
-        console.log(repository)*/
-
-
 
         val localeCode = impl.getDisplayedLocale(this)
         val defaultLocale = impl.getAppPref(AppConfig.KEY_DEFAULT_LANGUAGE, this)
