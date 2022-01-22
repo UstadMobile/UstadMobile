@@ -43,7 +43,7 @@ class SplashPresenter(private val view: SplashView): DIAware {
     }
 
     /**
-     * Initialize all resources needed for the app to run
+     * Initialize all resources needed for the app to run, database included
      */
     private fun setUpResources() = GlobalScope.launch {
         val url = window.location.href
@@ -93,7 +93,7 @@ class SplashPresenter(private val view: SplashView): DIAware {
         }
         view.appName = impl.getString(MessageID.app_name,this)
         view.loading = false
-        impl.setAppPref(SplashView.TAG_LOADED,"true", this)
+        impl.setAppPref(SplashView.TAG_LOADED,"false", this)
     }
 
     override val di: DI

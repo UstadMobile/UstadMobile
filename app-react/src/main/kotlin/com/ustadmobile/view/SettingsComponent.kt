@@ -80,7 +80,8 @@ class SettingsComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(pr
                             }
                             createListItemWithLeftIconTitleAndDescription("date_range",
                                 getString(MessageID.holiday_calendars),
-                                getString(MessageID.holiday_calendars_desc)
+                                getString(MessageID.holiday_calendars_desc),
+                                onMainList = true
                             )
                         }
                     }
@@ -96,7 +97,8 @@ class SettingsComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(pr
                             }
                             createListItemWithLeftIconTitleAndDescription("logout",
                                 getString(MessageID.leaving_reason),
-                                getString(MessageID.leaving_reason_manage)
+                                getString(MessageID.leaving_reason_manage),
+                                onMainList = true
                             )
                         }
                     }
@@ -111,7 +113,8 @@ class SettingsComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(pr
                             }
                             createListItemWithLeftIconTitleAndDescription("language",
                                 getString(MessageID.languages),
-                                getString(MessageID.languages_description)
+                                getString(MessageID.languages_description),
+                                onMainList = true
                             )
                         }
                     }

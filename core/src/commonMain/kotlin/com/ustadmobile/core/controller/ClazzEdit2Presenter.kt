@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SCHOOL_UID
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
@@ -72,7 +73,7 @@ class ClazzEdit2Presenter(context: Any,
             entity?.school = school
             entity?.clazzSchoolUid = school.schoolUid
             view.entity = entity
-            UmPlatform.run{
+            UmPlatformUtil.run{
                 requireSavedStateHandle()[SAVEDSTATE_KEY_SCHOOL] = null
             }
         }
@@ -83,7 +84,7 @@ class ClazzEdit2Presenter(context: Any,
             entity?.holidayCalendar = calendar
             entity?.clazzHolidayUMCalendarUid = calendar.umCalendarUid
             view.entity = entity
-            UmPlatform.run {
+            UmPlatformUtil.run {
                 requireSavedStateHandle()[SAVEDSTATE_KEY_HOLIDAYCALENDAR] = null
             }
         }
@@ -94,7 +95,7 @@ class ClazzEdit2Presenter(context: Any,
             val timeZone = it.firstOrNull() ?: return@observeSavedStateResult
             entity?.clazzTimeZone = timeZone
             view.entity = entity
-            UmPlatform.run {
+            UmPlatformUtil.run {
                 requireSavedStateHandle()[RESULT_TIMEZONE_KEY] = null
             }
         }
@@ -104,7 +105,7 @@ class ClazzEdit2Presenter(context: Any,
             val wrapper = it.firstOrNull() ?: return@observeSavedStateResult
             entity?.clazzFeatures = wrapper.longValue
             view.entity = entity
-            UmPlatform.run {
+            UmPlatformUtil.run {
                 requireSavedStateHandle()[SAVEDSTATE_KEY_FEATURES] = null
             }
         }
@@ -133,7 +134,7 @@ class ClazzEdit2Presenter(context: Any,
                 it.scopedGrantDao.findByTableIdAndEntityUid(Clazz.TABLE_ID, clazzUid)
             }
             scopedGrantOneToManyHelper.liveList.setVal(scopedGrants)
-        }else { //TODO: DoorDatabaseRepository check -> Handle if(db is DoorDatabaseRepository) once repo is in place
+        }else if(db is DoorDatabaseRepository){
             /*
             This should be enabled once a field has been added on Clazz for the adminGroupUid
             scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {

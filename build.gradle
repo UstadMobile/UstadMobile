@@ -108,7 +108,7 @@ ext {
     version_npm_html_to_image = "^1.9.0"
     version_npm_date_fns = "2.27.0"
 
-    version_door = "0.0.42"
+    version_door = "0.0.44b"
     version_xmlpullparserkmp = '0.0.20'
 
     version_gradle_buildconfig_plugin = "1.1.7"

@@ -3,7 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ScopedGrantOneToManyHelper
-import com.ustadmobile.core.util.UmPlatform
+import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.createNewSchoolAndGroups
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
@@ -13,6 +13,7 @@ import com.ustadmobile.core.view.SchoolEditView
 import com.ustadmobile.core.view.TimeZoneListView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
@@ -54,7 +55,7 @@ class SchoolEditPresenter(context: Any,
             entity?.holidayCalendar = calendar
             entity?.schoolHolidayCalendarUid = calendar.umCalendarUid
             view.entity = entity
-            UmPlatform.run {
+            UmPlatformUtil.run {
                 requireSavedStateHandle()[SAVEDSTATE_KEY_HOLIDAYCALENDAR] = null
             }
         }
@@ -65,7 +66,7 @@ class SchoolEditPresenter(context: Any,
             val timeZone = it.firstOrNull() ?: return@observeSavedStateResult
             entity?.schoolTimeZone = timeZone
             view.entity = entity
-            UmPlatform.run {
+            UmPlatformUtil.run {
                 requireSavedStateHandle()[TimeZoneListPresenter.RESULT_TIMEZONE_KEY] = null
             }
         }
@@ -84,7 +85,7 @@ class SchoolEditPresenter(context: Any,
             }
 
             scopedGrantOneToManyHelper.liveList.setVal(scopedGrants)
-        } else { //TODO: DoorDatabaseRepository check -> Handle if(db is DoorDatabaseRepository) once repo is in place
+        } else if(db is DoorDatabaseRepository){
             //Add default roles
             scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
                 name = "Teachers"

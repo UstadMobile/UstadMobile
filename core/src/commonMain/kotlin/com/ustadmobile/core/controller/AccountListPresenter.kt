@@ -6,7 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UmPlatform
+import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.putIfNotAlreadySet
 import com.ustadmobile.core.util.ext.toQueryString
@@ -87,7 +87,7 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
             )
             impl.go(Login2View.VIEW_NAME, args, context)
         }else {
-            val canSelectServer = if(UmPlatform.isWeb) false else impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_SERVER_SELECTION, context)
+            val canSelectServer = if(UmPlatformUtil.isWeb) false else impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_SERVER_SELECTION, context)
             val args = arguments.toMutableMap().also {
                 it.putIfNotAlreadySet(ARG_NEXT, nextDest)
             }

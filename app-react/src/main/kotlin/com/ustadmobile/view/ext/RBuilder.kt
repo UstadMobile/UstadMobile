@@ -1,12 +1,14 @@
 package com.ustadmobile.view.ext
 
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.isContentComplete
+import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.ext.toolbarJsCssToPartialCss
@@ -36,10 +38,12 @@ import com.ustadmobile.util.Util
 import com.ustadmobile.util.Util.ASSET_ACCOUNT
 import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.util.ext.*
+import com.ustadmobile.util.getViewNameFromUrl
 import com.ustadmobile.view.ChartOptions
 import com.ustadmobile.view.ChartType
 import com.ustadmobile.view.ContentEntryListComponent
 import com.ustadmobile.view.umChart
+import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
 import mui.material.GridProps
@@ -82,13 +86,13 @@ private fun guardRoute(
     component: KClass<out Component<UmProps, *>>,
     systemImpl: UstadMobileSystemImpl
 ): ReactElement?  = createElement {
-    /*val viewName = getViewNameFromUrl()
-    val activeSession = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
-    if(activeSession == null && viewName != null && viewName != Login2View.VIEW_NAME){
-        window.setTimeout({
-            //window.location.href = "./"
-        }, 0)
-    }*/
+    val viewName = getViewNameFromUrl()
+    val activeSession = systemImpl.getAppPref(UstadAccountManager.ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
+    val logout = activeSession == null && viewName != null
+            && viewName != Login2View.VIEW_NAME
+    if(logout){
+        window.location.href = "./"
+    }
     child(component){}
 }
 

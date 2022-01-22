@@ -2,6 +2,7 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.AccountListView
+import com.ustadmobile.core.view.ReportListView
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.mui.components.*
@@ -172,13 +173,18 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                 val destination = value as UstadDestination
                 systemImpl.go(destination.view, mapOf(),this)
             }}
-            destinationList.filter { it.icon != null && it.view != SettingsView.VIEW_NAME }.forEach { destination ->
+            val extraMenuToShow = mutableListOf(SettingsView.VIEW_NAME)
+            if(!accountManager.activeAccount.admin){
+                extraMenuToShow+=ReportListView.VIEW_NAME
+            }
+
+            destinationList.filter { it.icon != null && extraMenuToShow.indexOf(it.view) == -1 }.forEach { destination ->
                 destination.icon?.let {
                     umBottomNavigationAction(
-                        label = getString(destination.labelId),
-                        it,
+                        label = getString(destination.labelId), it,
                         value = destination,
-                        showLabel = true)
+                        showLabel = true
+                    )
                 }
             }
         }

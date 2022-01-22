@@ -6,6 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.view.RedirectView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -121,12 +122,22 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
     override fun componentDidUpdate(prevProps: P, prevState: S, snapshot: Any) {
         val propsDidChange = props.asDynamic().arguments != js("undefined")
                 && !props.asDynamic().arguments.values.equals(prevProps.asDynamic().arguments.values)
+        val activeSession = systemImpl.getAppPref(UstadAccountManager.ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
+        val redirected = systemImpl.getAppPref(RedirectView.TAG_REDIRECTED, "false",this).toBoolean()
+        val refreshPage = activeSession != null && redirected
 
-        //Handles tabs behaviour when changing from one tab to another, react components
-        //are mounted once and when trying to re-mount it's componentDidUpdate is triggered.
-        //This will check and make sure the component has changed by checking if the props has changed
-        if(propsDidChange){
-            arguments = props.asDynamic().arguments as Map<String, String>
+        /**
+         * Handles tabs behaviour when changing from one tab to another, react components
+         * are mounted once and when trying to re-mount it's componentDidUpdate is triggered.
+         * This will check and make sure the component has changed by checking if the props has changed
+         */
+        if(propsDidChange || refreshPage){
+            if(propsDidChange){
+                arguments = props.asDynamic().arguments as Map<String, String>
+            }
+            if(refreshPage){
+                systemImpl.setAppPref(RedirectView.TAG_REDIRECTED, "false", this)
+            }
             onCreateView()
         }
     }

@@ -116,19 +116,17 @@ class ContentEntryEdit2Presenter(
         view.showCompletionCriteria = isLeaf ?: false
         val metaData = arguments[ARG_IMPORTED_METADATA]
         val uri = arguments[ARG_URI]
-
-        if (db is DoorDatabaseRepository) {} //TODO: DoorDatabaseRepository check -> Handle if(db is DoorDatabaseRepository) and add above two cases once repo is in place
-
-        if (uri != null) {
-            return handleFileSelection(uri)
+        if (db is DoorDatabaseRepository) {
+            if (uri != null) {
+                return handleFileSelection(uri)
+            }
+            if (metaData != null) {
+                val metadataResult = safeParse(di, MetadataResult.serializer(), metaData)
+                view.metadataResult = metadataResult
+                fromUri = metadataResult.entry.sourceUrl
+                return metadataResult.entry
+            }
         }
-        if (metaData != null) {
-            val metadataResult = safeParse(di, MetadataResult.serializer(), metaData)
-            view.metadataResult = metadataResult
-            fromUri = metadataResult.entry.sourceUrl
-            return metadataResult.entry
-        }
-
         return withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.contentEntryDao?.findEntryWithLanguageByEntryIdAsync(entityUid)
         } ?: ContentEntryWithLanguage().apply {
@@ -161,7 +159,7 @@ class ContentEntryEdit2Presenter(
             presenterScope.launch(doorMainDispatcher()){
                 view.entity = handleFileSelection(uri)
             }
-            UmPlatform.run {
+            UmPlatformUtil.run {
                 requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
             }
         }
@@ -180,7 +178,7 @@ class ContentEntryEdit2Presenter(
             }
             view.fileImportErrorVisible = false
             view.loading = false
-            UmPlatform.run {
+            UmPlatformUtil.run {
                 requireSavedStateHandle()[SAVED_STATE_KEY_METADATA] = null
             }
         }
@@ -192,7 +190,7 @@ class ContentEntryEdit2Presenter(
             entity?.language = language
             entity?.primaryLanguageUid = language.langUid
             view.entity = entity
-            UmPlatform.run {
+            UmPlatformUtil.run {
                 requireSavedStateHandle()[SAVEDSTATE_KEY_LANGUAGE] = null
             }
         }

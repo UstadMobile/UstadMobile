@@ -6,7 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.util.UmPlatform
+import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_CLAZZ
@@ -165,7 +165,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         GlobalScope.launch(doorMainDispatcher()) {
             when (option) {
                 SelectionOption.MOVE -> {
-                    UmPlatform.console(selectedEntryIds)
+                    UmPlatformUtil.console(selectedEntryIds)
                     handleClickMove(selectedEntryIds)
                 }
                 SelectionOption.HIDE -> {

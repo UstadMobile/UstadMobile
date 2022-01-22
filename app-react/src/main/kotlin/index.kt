@@ -75,6 +75,10 @@ private val diModule = DI.Module("UstadApp-React"){
     }
 
     bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(EndpointScope.Default).singleton {
+        /***
+         * Database is being built from PlashPresenter due to the fact that it has to be built asynchronously
+         * After building the database, Redux takes care of updating the app's state.
+         */
         getCurrentState().db.instance ?:
         throw IllegalStateException("Database was not built, make sure it is built before proceeding")
     }
