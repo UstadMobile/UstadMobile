@@ -62,6 +62,7 @@ dependencies {
     implementation "io.ktor:ktor-client-json-js:$version_ktor"
     implementation npm("timezones.json","$version_npm_timezones")
     implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
+    implementation "io.github.aakira:napier:$version_napier"
 }
 
 task distro(dependsOn: ['browserDistribution']){

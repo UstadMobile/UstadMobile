@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabaseJsImplementations
+import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.AppConfig.KEY_API_URL
@@ -60,14 +61,15 @@ class SplashPresenter(private val view: SplashView): DIAware {
 
 
         val dbBuilder =  DatabaseBuilder.databaseBuilder(builderOptions)
-        val umAppDatabase =  dbBuilder.build()
-
-        dispatch(ReduxDbState(umAppDatabase))
 
         val accountManager: UstadAccountManager by instance()
         val nodeIdAndAuth:NodeIdAndAuth by di.on(accountManager.activeAccount).instance()
         dbBuilder.addCallback(ContentJobItemTriggersCallback())
+            .addSyncCallback(nodeIdAndAuth)
             .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
+        val umAppDatabase =  dbBuilder.build()
+
+        dispatch(ReduxDbState(umAppDatabase))
 
         val localeCode = impl.getDisplayedLocale(this)
         val defaultLocale = impl.getAppPref(AppConfig.KEY_DEFAULT_LANGUAGE, this)
