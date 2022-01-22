@@ -29,12 +29,11 @@ object ReduxAppStateManager {
         return when (action) {
             is ReduxThemeState -> state.copy(appTheme = action)
             is ReduxDiState -> state.copy(di = action)
-            is ReduxDbState -> state.copy(dbInstances = action)
+            is ReduxDbState -> state.copy(db = action)
             is ReduxToolbarState -> state.copy(appToolbar = action)
             is ReduxNavStackState -> {
                 BrowserTabTracker.navStackState = action
                 state.copy(navStack = action)
-
             }
             is ReduxSnackBarState -> state.copy(appSnackBar = action)
             else -> state

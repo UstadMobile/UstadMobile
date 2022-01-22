@@ -162,6 +162,13 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         }
     }
 
+    val entryDetailRightSection by css {
+        padding(bottom = 3.spacingUnits, top = 8.spacingUnits)
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            padding(bottom = 2.spacingUnits)
+        }
+    }
+
     val switchMargin by css {
         paddingRight = 5.spacingUnits
         media(theme.breakpoints.up(tabletAndHighEnd)) {
@@ -564,8 +571,11 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     }
 
     val contentEntryDetailOverviewComponentOpenBtn by css {
-        margin = "2% 1.5% 0% 1.5%"
+        margin = "2% 1.5% 2% 1.5%"
         width = LinearDimension("98%")
+        media(theme.breakpoints.up(tabletAndHighEnd)){
+            margin = "2% 1.5% 0% 1.5%"
+        }
     }
 
     val detailIconClass by css {
@@ -607,7 +617,11 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         width = LinearDimension("100%")
         minHeight = LinearDimension("100%")
         height = LinearDimension("100%")
+        margin(top = LinearDimension("50%"))
         backgroundColor = Color.transparent
+        media(theme.breakpoints.up(tabletAndHighEnd)){
+            margin(top = 0.px)
+        }
     }
 
     val clazzItemClass by css {

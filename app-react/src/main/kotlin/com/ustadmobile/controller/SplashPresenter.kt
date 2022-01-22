@@ -11,9 +11,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DatabaseBuilderOptions
-import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
@@ -22,12 +20,10 @@ import com.ustadmobile.util.Util.loadAssetsAsText
 import com.ustadmobile.util.Util.loadFileContentAsMap
 import com.ustadmobile.util.urlSearchParamsToMap
 import com.ustadmobile.view.SplashView
-import io.ktor.client.*
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -57,25 +53,30 @@ class SplashPresenter(private val view: SplashView): DIAware {
 
         val dbName = sanitizeDbNameFromUrl(window.location.origin)
 
-        val accountManager: UstadAccountManager by instance()
-        val httpClient: HttpClient by instance()
-        val nodeIdAndAuth:NodeIdAndAuth by di.on(accountManager.activeAccount).instance()
-
         val builderOptions = DatabaseBuilderOptions(
             UmAppDatabase::class,
             UmAppDatabaseJsImplementations, dbName,"./worker.sql-wasm.js")
 
-        val dbBuilder =  DatabaseBuilder.databaseBuilder(builderOptions)
+
+
+        val dbBuilder =  DatabaseBuilder.databaseBuilder<UmAppDatabase>(builderOptions)
         val umAppDatabase =  dbBuilder.build()
+
+        dispatch(ReduxDbState(umAppDatabase))
+
+        val accountManager: UstadAccountManager by instance()
+        val nodeIdAndAuth:NodeIdAndAuth by di.on(accountManager.activeAccount).instance()
 
         dbBuilder.addCallback(ContentJobItemTriggersCallback())
             .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
 
-        val repositoryConfig =  RepositoryConfig.repositoryConfig(
+/*        val repositoryConfig =  RepositoryConfig.repositoryConfig(
             this,apiUrl+"UmAppDatabase/",  nodeIdAndAuth.auth, nodeIdAndAuth.nodeId, httpClient,
             Json { encodeDefaults = true }){}
+        val repository = umAppDatabase.asRepository(repositoryConfig);
+        console.log(repository)*/
 
-        dispatch(ReduxDbState(umAppDatabase, umAppDatabase.asRepository(repositoryConfig)))
+
 
         val localeCode = impl.getDisplayedLocale(this)
         val defaultLocale = impl.getAppPref(AppConfig.KEY_DEFAULT_LANGUAGE, this)

@@ -10,7 +10,9 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.defaultJsonSerializer
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.view.ContainerMounter
+import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.jsExt.container.ContainerMounterJs
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
@@ -73,7 +75,7 @@ private val diModule = DI.Module("UstadApp-React"){
     }
 
     bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(EndpointScope.Default).singleton {
-        getCurrentState().dbInstances.db ?:
+        getCurrentState().db.instance ?:
         throw IllegalStateException("Database was not built, make sure it is built before proceeding")
     }
 
@@ -82,8 +84,13 @@ private val diModule = DI.Module("UstadApp-React"){
     }
 
     bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(EndpointScope.Default).singleton {
-        getCurrentState().dbInstances.repo ?:
-        throw IllegalStateException("Repository was not built, make sure it is built before proceeding")
+        val nodeIdAndAuth: NodeIdAndAuth = instance()
+        val db = instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB)
+        val repositoryConfig =  RepositoryConfig.repositoryConfig(
+            this,context.url+"UmAppDatabase/",  nodeIdAndAuth.auth,
+            nodeIdAndAuth.nodeId, instance(),
+            kotlinx.serialization.json.Json { encodeDefaults = true }){}
+        db.asRepository(repositoryConfig)
     }
 
     constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with false
