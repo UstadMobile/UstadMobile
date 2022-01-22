@@ -88,11 +88,16 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
          WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid""")
     abstract suspend fun findByClazzLogUid(clazzLogUid: Long): List<ClazzLogAttendanceRecordWithPerson>
 
-    @Query("""UPDATE ClazzLogAttendanceRecord
-        SET clazzLogAttendanceRecordClazzLogUid = :newClazzLogUid,
-        clazzLogAttendanceRecordLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL}
+    @Query("""
+        UPDATE ClazzLogAttendanceRecord
+           SET clazzLogAttendanceRecordClazzLogUid = :newClazzLogUid,
+               clazzLogAttendanceRecordLastChangedTime = :changedTime
         WHERE clazzLogAttendanceRecordClazzLogUid = :oldClazzLogUid
     """)
-    abstract fun updateRescheduledClazzLogUids(oldClazzLogUid: Long, newClazzLogUid: Long)
+    abstract fun updateRescheduledClazzLogUids(
+        oldClazzLogUid: Long,
+        newClazzLogUid: Long,
+        changedTime: Long
+    )
 
 }

@@ -6,7 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.util.UmPlatformUtil
+import com.ustadmobile.core.util.UmPlatform
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_CLAZZ
@@ -19,6 +19,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.lib.db.entities.Role
@@ -156,30 +157,31 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     }
 
     override fun handleClickSelectionOption(selectedItem: List<ContentEntry>, option: SelectionOption) {
-        val selectedEntryIds = selectedItem.mapNotNull {
+        val selectedContentEntryUids = selectedItem.map { it.contentEntryUid }
+        val selectedContentEntryParentChildUids = selectedItem.mapNotNull {
             (it as? ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer)?.contentEntryParentChildJoin?.cepcjUid
-        }.joinToString(",")
-
-        val selectedUidList = selectedItem.map { it.contentEntryUid }
+        }
 
         GlobalScope.launch(doorMainDispatcher()) {
             when (option) {
                 SelectionOption.MOVE -> {
-                    UmPlatformUtil.console(selectedEntryIds)
-                    handleClickMove(selectedEntryIds)
+                    handleClickMove(selectedContentEntryParentChildUids)
                 }
                 SelectionOption.HIDE -> {
                     when(contentFilter){
                         ARG_DISPLAY_CONTENT_BY_PARENT ->{
-                            repo.contentEntryDao.toggleVisibilityContentEntryItems(true, selectedUidList)
+                            repo.contentEntryDao.toggleVisibilityContentEntryItems(true,
+                                selectedContentEntryUids, systemTimeInMillis())
                         }
                         ARG_DISPLAY_CONTENT_BY_CLAZZ ->{
-                            repo.clazzContentJoinDao.toggleVisibilityClazzContent(false, selectedUidList)
+                            repo.clazzContentJoinDao.toggleVisibilityClazzContent(false,
+                                selectedContentEntryUids, systemTimeInMillis())
                         }
                     }
                 }
                 SelectionOption.UNHIDE -> {
-                    repo.contentEntryDao.toggleVisibilityContentEntryItems(false, selectedItem.map { it.contentEntryUid })
+                    repo.contentEntryDao.toggleVisibilityContentEntryItems(false,
+                        selectedContentEntryUids, systemTimeInMillis())
                 }
             }
         }
@@ -188,13 +190,14 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     /**
      * Show ContentEntryList in picker mode so the user can select a folder to move entries to.
      *
-     * @param childrenToMove list of child entries selected to move
+     * @param childrenToMove list of content entry parent child join uids that will be
+     * moved
      */
-    private fun handleClickMove(childrenToMove: String){
+    private fun handleClickMove(childrenToMove: List<Long>){
         val args = mutableMapOf(ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
                 ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_PARENT,
                 ARG_SHOW_ONLY_FOLDER_FILTER to true.toString(),
-                KEY_SELECTED_ITEMS to childrenToMove)
+                KEY_SELECTED_ITEMS to childrenToMove.joinToString(","))
 
         navigateForResult(
                 NavigateForResultOptions(this,

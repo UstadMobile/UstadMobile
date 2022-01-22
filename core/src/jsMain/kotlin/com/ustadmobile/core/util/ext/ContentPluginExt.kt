@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.ContentPlugin
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Runnable
@@ -27,7 +28,8 @@ actual suspend fun deleteFilesForContentJob(jobId: Long, di: DI, endpoint: Endpo
             db.containerEntryDao.deleteContainerEntriesCreatedByJobs(jobId)
             val contentJobItem = db.contentJobItemDao.findByJobId(jobId)
             if(contentJobItem?.cjiContentDeletedOnCancellation == true){
-                repo.contentEntryDao.invalidateContentEntryCreatedByJob(jobId, true)
+                repo.contentEntryDao.invalidateContentEntryCreatedByJob(jobId, true,
+                    systemTimeInMillis())
             }
 
 

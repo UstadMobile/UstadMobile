@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerETagDao
 import com.ustadmobile.core.db.dao.ContentCategoryDao
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM
@@ -301,7 +302,8 @@ class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUi
 
             val entry = entries[0]
             val mimeType = Files.probeContentType(File(entry.cePath ?: "").toPath())
-            repo.contentEntryDao.updateContentEntryInActive(contentEntryUid, false)
+            repo.contentEntryDao.updateContentEntryInActive(contentEntryUid, false,
+                systemTimeInMillis())
             repo.containerDao.updateMimeType(mimeType, containerUid)
             if (!eTagValue.isNullOrEmpty()) {
                 val etagContainer = ContainerETag(containerUid, eTagValue!!)

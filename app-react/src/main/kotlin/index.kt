@@ -1,5 +1,6 @@
 
 import com.ustadmobile.core.account.*
+import com.ustadmobile.core.db.RepSubscriptionInitListener
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.nav.UstadNavController
@@ -27,6 +28,8 @@ import com.ustadmobile.util.ThemeManager.createAppTheme
 import com.ustadmobile.view.renderSplashComponent
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.XmlSerializer
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.client.engine.js.*
 import io.ktor.client.features.*
@@ -44,6 +47,7 @@ import react.redux.provider
 fun main() {
     defaultJsonSerializer()
     BrowserTabTracker.init()
+    Napier.base(DebugAntilog())
     window.onload = {
         render(document.getElementById("root")) {
             val diState = ReduxDiState(
@@ -93,7 +97,10 @@ private val diModule = DI.Module("UstadApp-React"){
         val repositoryConfig =  RepositoryConfig.repositoryConfig(
             this,context.url+"UmAppDatabase/",  nodeIdAndAuth.auth,
             nodeIdAndAuth.nodeId, instance(),
-            kotlinx.serialization.json.Json { encodeDefaults = true }){}
+            kotlinx.serialization.json.Json { encodeDefaults = true }
+        ){
+            replicationSubscriptionInitListener = RepSubscriptionInitListener()
+        }
         db.asRepository(repositoryConfig)
     }
 
