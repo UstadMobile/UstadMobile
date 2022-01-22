@@ -3,6 +3,7 @@ package com.ustadmobile.lib.contentscrapers.abztract
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
@@ -54,7 +55,8 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val sqi
     }
 
     fun hideContentEntry(contentEntryUid: Long) {
-        repo.contentEntryDao.updateContentEntryInActive(contentEntryUid, true)
+        repo.contentEntryDao.updateContentEntryInActive(contentEntryUid, true,
+            systemTimeInMillis())
     }
 
     abstract fun indexUrl(sourceUrl: String)
